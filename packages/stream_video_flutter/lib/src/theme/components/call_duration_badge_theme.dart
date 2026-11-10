@@ -87,6 +87,11 @@ class StreamCallDurationBadgeThemeData with _$StreamCallDurationBadgeThemeData {
 }
 
 /// Visual styling properties for a [StreamCallDurationBadge].
+///
+/// When null, [padding], [contentHeight], [spacing], [indicatorSize],
+/// [backgroundColor], [borderRadius] and [textStyle] fall back to the shared
+/// [StreamCallBadgeStyle] on [StreamCallBadgeTheme], so one theme can restyle
+/// every call badge.
 @themeGen
 @immutable
 class StreamCallDurationBadgeStyle with _$StreamCallDurationBadgeStyle {

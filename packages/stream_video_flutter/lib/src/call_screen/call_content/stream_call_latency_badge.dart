@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 import '../../l10n/localization_extension.dart';
+import 'stream_call_badge_style_defaults.dart';
 
 /// The call's latency in milliseconds, behind a dot coloured by how good it
 /// is, as a 32 tall pill.
@@ -156,49 +157,37 @@ class _StreamCallLatencyBadgeStyleDefaults extends StreamCallLatencyBadgeStyle {
   final BuildContext _context;
   final StreamCallLatencyBadgeStyle? _style;
 
-  late final StreamSpacing _spacing = _context.streamSpacing;
+  late final _badge = StreamCallBadgeStyleDefaults(_context);
   late final StreamColorScheme _colorScheme = _context.streamColorScheme;
 
   @override
-  EdgeInsetsGeometry get padding =>
-      _style?.padding ??
-      EdgeInsets.symmetric(
-        horizontal: _spacing.xs,
-        vertical: _spacing.xxs + _spacing.xxxs,
-      );
+  EdgeInsetsGeometry get padding => _style?.padding ?? _badge.padding;
 
   @override
-  double get contentHeight => _style?.contentHeight ?? 20;
+  double get contentHeight => _style?.contentHeight ?? _badge.contentHeight;
 
+  // The dot keeps the same gap on every platform, unless the shared theme
+  // sets one.
   @override
-  double get spacing => _style?.spacing ?? _spacing.xs;
+  double get spacing =>
+      _style?.spacing ?? _badge.themeSpacing ?? _context.streamSpacing.xs;
 
   @override
   double get dotSize => _style?.dotSize ?? 8;
 
   @override
   Color get backgroundColor =>
-      _style?.backgroundColor ?? _colorScheme.backgroundSurface;
+      _style?.backgroundColor ?? _badge.backgroundColor;
 
   @override
   BorderRadiusGeometry get borderRadius =>
-      _style?.borderRadius ?? BorderRadius.all(_context.streamRadius.xxxl);
+      _style?.borderRadius ?? _badge.borderRadius;
 
   @override
-  TextStyle get textStyle {
-    final textTheme = _context.streamTextTheme;
-    final base = isDesktopOrWeb
-        ? textTheme.captionEmphasis
-        : textTheme.bodyEmphasis;
-
-    return base
-        .copyWith(
-          color: _colorScheme.textPrimary,
-          height: 1,
-          fontFeatures: const [FontFeature.tabularFigures()],
-        )
-        .merge(_style?.textStyle);
-  }
+  TextStyle get textStyle => _badge.resolveTextStyle(
+    color: _colorScheme.textPrimary,
+    override: _style?.textStyle,
+  );
 
   @override
   Color get unitTextColor => _style?.unitTextColor ?? _colorScheme.textTertiary;

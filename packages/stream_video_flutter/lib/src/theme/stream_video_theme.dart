@@ -21,6 +21,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     CallControlBarThemeData? callControlBarTheme,
     CallAppBarThemeData? callAppBarTheme,
     StreamCallDurationBadgeThemeData? callDurationBadgeTheme,
+    StreamCallBadgeThemeData? callBadgeTheme,
     StreamCallParticipantsBadgeThemeData? callParticipantsBadgeTheme,
     StreamCallLatencyBadgeThemeData? callLatencyBadgeTheme,
     @Deprecated(
@@ -98,6 +99,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callControlBarTheme: callControlBarTheme,
       callAppBarTheme: callAppBarTheme,
       callDurationBadgeTheme: callDurationBadgeTheme,
+      callBadgeTheme: callBadgeTheme,
       callParticipantsBadgeTheme: callParticipantsBadgeTheme,
       callLatencyBadgeTheme: callLatencyBadgeTheme,
       callParticipantTheme: callParticipantTheme,
@@ -147,6 +149,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     this.callControlBarTheme = const CallControlBarThemeData(),
     this.callAppBarTheme = const CallAppBarThemeData(),
     this.callDurationBadgeTheme = const StreamCallDurationBadgeThemeData(),
+    this.callBadgeTheme = const StreamCallBadgeThemeData(),
     this.callParticipantsBadgeTheme =
         const StreamCallParticipantsBadgeThemeData(),
     this.callLatencyBadgeTheme = const StreamCallLatencyBadgeThemeData(),
@@ -435,6 +438,11 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the pill showing how long a call has been running.
   final StreamCallDurationBadgeThemeData callDurationBadgeTheme;
 
+  /// Theme shared by the call badges: duration, participants and latency.
+  ///
+  /// A field a badge's own theme sets wins over the one here.
+  final StreamCallBadgeThemeData callBadgeTheme;
+
   /// Theme for the pill showing how many people are in a call.
   final StreamCallParticipantsBadgeThemeData callParticipantsBadgeTheme;
 
@@ -548,6 +556,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     CallControlBarThemeData? callControlBarTheme,
     CallAppBarThemeData? callAppBarTheme,
     StreamCallDurationBadgeThemeData? callDurationBadgeTheme,
+    StreamCallBadgeThemeData? callBadgeTheme,
     StreamCallParticipantsBadgeThemeData? callParticipantsBadgeTheme,
     StreamCallLatencyBadgeThemeData? callLatencyBadgeTheme,
     @Deprecated(
@@ -603,6 +612,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     callDurationBadgeTheme: this.callDurationBadgeTheme.merge(
       callDurationBadgeTheme,
     ),
+    callBadgeTheme: this.callBadgeTheme.merge(callBadgeTheme),
     callParticipantsBadgeTheme: this.callParticipantsBadgeTheme.merge(
       callParticipantsBadgeTheme,
     ),
@@ -666,6 +676,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callDurationBadgeTheme: callDurationBadgeTheme.merge(
         other.callDurationBadgeTheme,
       ),
+      callBadgeTheme: callBadgeTheme.merge(other.callBadgeTheme),
       callParticipantsBadgeTheme: callParticipantsBadgeTheme.merge(
         other.callParticipantsBadgeTheme,
       ),
@@ -760,6 +771,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             t,
           ) ??
           callDurationBadgeTheme,
+      callBadgeTheme:
+          StreamCallBadgeThemeData.lerp(
+            callBadgeTheme,
+            other.callBadgeTheme,
+            t,
+          ) ??
+          callBadgeTheme,
       callParticipantsBadgeTheme:
           StreamCallParticipantsBadgeThemeData.lerp(
             callParticipantsBadgeTheme,
