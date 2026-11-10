@@ -36,7 +36,7 @@ void main() {
         'body': <String, Object?>{},
       },
       {
-        'event': Event.actionCallAccept.name,
+        'event': Event.actionCallAccept.wireName,
         'body': {
           'id': 'call-uuid',
           'extra': {'callCid': 'default:ada'},
