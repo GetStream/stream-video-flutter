@@ -1206,6 +1206,45 @@ void main() {
         );
 
         test(
+          'does not wait for the SFU to confirm the audio processing toggle',
+          () async {
+            when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(true);
+            when(
+              () => mockPermissionsManager.hasPermission(
+                CallPermission.enableNoiseCancellation,
+              ),
+            ).thenReturn(true);
+            when(
+              () => mockStreamVideo.setAudioProcessingEnabled(any()),
+            ).thenAnswer((_) async => const Result.success(none));
+            when(
+              callSession.notifyNoiseCancellationStopped,
+            ).thenAnswer((_) => Completer<Result<None>>().future);
+            when(
+              callSession.notifyNoiseCancellationStarted,
+            ).thenAnswer((_) => Completer<Result<None>>().future);
+            when(
+              () => rtcManager.changeDefaultAudioConstraints(any()),
+            ).thenAnswer((_) async => const Result.success(none));
+            final call = await joinedCall();
+
+            final results = await Future.wait([
+              call.setAudioBitrateProfile(
+                SfuAudioBitrateProfile.musicHighQuality,
+              ),
+              call.setAudioBitrateProfile(SfuAudioBitrateProfile.voiceStandard),
+            ]).timeout(const Duration(seconds: 1));
+
+            expect(results.every((r) => r.isSuccess), isTrue);
+            final applied = verify(
+              () => rtcManager.changeDefaultAudioConstraints(captureAny()),
+            ).captured.cast<AudioConstraints>();
+            expect(applied.map((c) => c.channelCount), [2, 1]);
+            expect(call.state.value.isAudioProcessing, isTrue);
+          },
+        );
+
+        test(
           'fails and keeps the new profile when the microphone could not be '
           'captured again',
           () async {

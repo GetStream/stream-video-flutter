@@ -87,10 +87,9 @@ part 'call_actions.dart';
 part 'call_debug.dart';
 part 'connection/call_connection_coordinator.dart';
 
-typedef OnCallPermissionRequest =
-    void Function(
-      StreamCallPermissionRequestEvent,
-    );
+typedef OnCallPermissionRequest = void Function(
+  StreamCallPermissionRequestEvent,
+);
 
 typedef GetCurrentUserId = String? Function();
 
@@ -1411,8 +1410,11 @@ class Call {
     final result = await _host.setAudioProcessingEnabled(true);
 
     if (result.isSuccess) {
-      await _session?.notifyNoiseCancellationStarted();
       _stateManager.setCallAudioProcessing(isAudioProcessing: true);
+      _notifySfu(
+        _session?.notifyNoiseCancellationStarted(),
+        label: 'startAudioProcessing',
+      );
     }
 
     return result;
@@ -1430,11 +1432,27 @@ class Call {
     final result = await _host.setAudioProcessingEnabled(false);
 
     if (result.isSuccess) {
-      await _session?.notifyNoiseCancellationStopped();
       _stateManager.setCallAudioProcessing(isAudioProcessing: false);
+      _notifySfu(
+        _session?.notifyNoiseCancellationStopped(),
+        label: 'stopAudioProcessing',
+      );
     }
 
     return result;
+  }
+
+  /// Sends [notification] to the SFU without waiting for it, and logs a
+  /// failure.
+  void _notifySfu(Future<Result<None>>? notification, {required String label}) {
+    if (notification == null) return;
+    unawaited(
+      notification.then((result) {
+        if (result case Failure(:final error)) {
+          _logger.w(() => '[$label] SFU not notified: $error');
+        }
+      }),
+    );
   }
 
   Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) =>
