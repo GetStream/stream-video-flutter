@@ -101,7 +101,11 @@ class FluentStreamButton extends StatelessWidget {
     return Semantics(
       button: true,
       selected: props.isSelected,
-      child: padToTapTarget(context, button),
+      child: padToTapTarget(
+        context,
+        button,
+        tapTargetSize: props.themeStyle?.tapTargetSize,
+      ),
     );
   }
 }
