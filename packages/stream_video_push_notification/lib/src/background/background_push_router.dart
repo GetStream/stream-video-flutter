@@ -273,37 +273,16 @@ class BackgroundPushRouter {
 
       // Whatever the user does with the notification is what ends this
       // isolate's work.
-      session.resolution = streamVideo.ringing.onRingingEvent<RingingEvent>((
-        event,
-      ) {
-        if (event
-            case ActionCallAccept(:final data) ||
-                ActionCallDecline(:final data) ||
-                ActionCallTimeout(:final data) ||
-                ActionCallEnded(:final data)) {
-          if (session.ledger.resolveRing(data.callCid)) {
-            session.releaseAfter(resolutionGrace);
-          }
-        }
-      });
+      session.resolution = streamVideo.ringing.onRingingEvent<RingingEvent>(
+        (event) => _onUserAnswer(session, event),
+      );
 
       // A ring can also end without the user: the caller cancels, the call
       // ends, or another device answers. The push manager then ends the
       // native call silently, so none of the events above ever arrives.
-      session.ringEnds = streamVideo.events.listen((event) {
-        final callCid = switch (event) {
-          StreamCallRejectedEvent(:final callCid) ||
-          StreamCallEndedEvent(:final callCid) ||
-          StreamCallMissedEvent(:final callCid) ||
-          StreamCallAcceptedEvent(:final callCid) => callCid,
-          _ => null,
-        };
-        if (callCid == null) return;
-
-        if (session.ledger.markEnded(callCid.value)) {
-          session.releaseAfter(resolutionGrace);
-        }
-      });
+      session.ringEnds = streamVideo.events.listen(
+        (event) => _onBackendEvent(session, event),
+      );
 
       _session = session;
       return session;
@@ -315,6 +294,36 @@ class BackgroundPushRouter {
       await onDispose?.call();
 
       rethrow;
+    }
+  }
+
+  /// Releases [session] once the user answered, declined or let the last
+  /// ring it waits on time out.
+  void _onUserAnswer(BackgroundSession session, RingingEvent event) {
+    if (event
+        case ActionCallAccept(:final data) ||
+            ActionCallDecline(:final data) ||
+            ActionCallTimeout(:final data) ||
+            ActionCallEnded(:final data)) {
+      if (session.ledger.resolveRing(data.callCid)) {
+        session.releaseAfter(resolutionGrace);
+      }
+    }
+  }
+
+  /// Notes a backend event that may have ended a ring [session] waits on.
+  void _onBackendEvent(BackgroundSession session, StreamVideoEvent event) {
+    final callCid = switch (event) {
+      StreamCallRejectedEvent(:final callCid) ||
+      StreamCallEndedEvent(:final callCid) ||
+      StreamCallMissedEvent(:final callCid) ||
+      StreamCallAcceptedEvent(:final callCid) => callCid,
+      _ => null,
+    };
+    if (callCid == null) return;
+
+    if (session.ledger.markEnded(callCid.value)) {
+      session.releaseAfter(resolutionGrace);
     }
   }
 }

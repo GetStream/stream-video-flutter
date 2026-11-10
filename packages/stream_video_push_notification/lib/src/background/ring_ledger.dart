@@ -36,6 +36,7 @@ class RingLedger {
   ///
   /// Enough to outlast a slow decline broadcast; a group-call ring that really
   /// stays up costs this many extra checks rather than a leak.
+  @visibleForTesting
   static const maxEndedRingChecks = 5;
 
   /// Whether nothing is left to wait for.
