@@ -5,10 +5,21 @@ extension StreamVideoCallkitManager {
     //MARK: - CXProviderDelegate
     public func providerDidReset(_ provider: CXProvider) {
         store.reset()
-        audio.callsRemoved(store)
+        callsRemoved()
+        restoreRecentsIfNoCallLeft()
     }
 
     public func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
+        if let call = store.reRegistrationPerformed(uuid: action.callUUID) {
+            action.fulfill()
+            reRegistrationStarted(call)
+            return
+        }
+        if store.isReRegistrationUUID(action.callUUID) {
+            // The call ended while CallKit was starting it again.
+            action.fail()
+            return
+        }
         guard let (call, effects) = store.startPerformed(uuid: action.callUUID) else {
             NSLog("startCall: no call data for \(action.callUUID), failing the start action")
             action.fail()
@@ -39,8 +50,9 @@ extension StreamVideoCallkitManager {
     }
 
     public func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
+        suppressRecentsIfRegisteredAgain(store.call(forCallKit: action.callUUID))
         let outcome = store.endPerformed(uuid: action.callUUID)
-        audio.callsRemoved(store)
+        callsRemoved()
         apply(outcome.effects)
         if outcome.fulfills {
             action.fulfill()
@@ -50,13 +62,22 @@ extension StreamVideoCallkitManager {
     }
 
     public func provider(_ provider: CXProvider, perform action: CXSetHeldCallAction) {
-        guard let effects = store.holdPerformed(uuid: action.callUUID, onHold: action.isOnHold)
+        let previousPhase = store.call(forCallKit: action.callUUID)?.phase
+        let origin = action.isOnHold ? holdRecovery.holdOrigin(for: action.callUUID) : .requested
+        guard
+            let effects = store.holdPerformed(
+                uuid: action.callUUID, onHold: action.isOnHold, origin: origin)
         else {
             action.fail()
             return
         }
         apply(effects)
         action.fulfill()
+        if case .held(let heldFor) = previousPhase, let call = store.call(forCallKit: action.callUUID),
+            call.phase == .resumed(activated: false)
+        {
+            holdRecovery.callResumed(call, heldFor: heldFor)
+        }
     }
 
     public func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {
