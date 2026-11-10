@@ -13,6 +13,8 @@ analyzer:
     inference_failure_on_instance_creation: ignore
     inference_failure_on_untyped_parameter: ignore
     strict_raw_type: ignore
+    # Flutter 3.50 deprecates the material and cupertino imports.
+    deprecated_member_use: ignore
   exclude:
     - build/**
     - android/**
