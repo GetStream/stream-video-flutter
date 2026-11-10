@@ -75,7 +75,7 @@ final class RingingEventBroadcaster {
   }
 
   Future<void> _stopListenEvent() async {
-    // Clears the subscription before cancelling it.
+    // Clears the subscription before its cancel completes.
     final cancelled = _eventSubscription?.cancel();
     _eventSubscription = null;
     await cancelled;
