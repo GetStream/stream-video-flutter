@@ -269,7 +269,7 @@ The manager keeps only composition and the `PushNotificationManager` interface. 
 **A-6. Ring-end policy consolidated (change)**
 The manager's `subscribeToEvents` currently re-implements what core does in `RingingFlowCoordinatorImpl._onRingingCancelled`, `CallRingingController._leaveAnsweredElsewhere` and `CallConnectionCoordinator._releaseUnjoined`, with a global 500 ms suppression. This PR makes core the single owner: the sync observer keeps only the parts core cannot do (dismissing the native UI when a call is accepted on this device from the app, the participant-count-zero case if `dropIfAloneInRingingFlow` does not cover it), and suppression becomes per `(type, cid)` instead of global. Needs the Android C-8 "explicit end reasons" to land first, otherwise Android still reports a remote cancel as a DECLINE. R5, R6, R8, R9 re-verified on both platforms. ~-200/+150 lines, tests in core and push.
 
-Optional, after A-6: `PNManagerProvider` takes `StreamVideo` only; drop `removedStoredTokens`, hide `isAcceptedOnThisDevice`, delete the v1 deprecated forwarders in `StreamVideo` and the `fix_data.yaml` entries, delete `CallEvent`/`BackgroundVoipCallHandler`. Each a tiny PR.
+Optional, after A-6: `PNManagerProvider` takes `StreamVideo` only; hide `isAcceptedOnThisDevice`, delete the v1 deprecated forwarders in `StreamVideo` and the `fix_data.yaml` entries, delete `CallEvent`/`BackgroundVoipCallHandler`. Each a tiny PR.
 
 ### Stack B: iOS
 

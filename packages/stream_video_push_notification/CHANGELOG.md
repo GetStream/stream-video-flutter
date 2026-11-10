@@ -3,16 +3,10 @@
 ### ⚠️ Breaking
 
 - `StreamVideoPushNotificationPlatform.activeCalls()` returns `Future<List<CallData>>`.
-
-### 🐞 Fixed
-
-- `registerDevice` right after `connect`, and `unregisterDevice` on web and desktop, no longer throw.
-- A push token read that fails, such as while offline, is logged rather than reported as an uncaught error. The next `registerDevice` subscribes to the tokens again, and a device registration the backend refuses is logged.
-- `unregisterDevice` always stops registering refreshed tokens, still deletes the stored tokens when the current token cannot be read, and a registration still in flight no longer stores its token afterwards.
+- `StreamVideoPushNotificationManager.removedStoredTokens` is removed.
 
 ### 🔄 Changed
 
-- `StreamVideoPushNotificationManager.removedStoredTokens` is removed; it was an implementation detail of device registration.
 - `StreamVideoPushHandler.handleBackgroundMessage` builds a client that sets up no media.
 - [Android] The full-screen incoming call activity follows the redesigned ringing screen: the app surface instead of the blue `#0955fa`, a 104dp avatar, 64dp accept and decline buttons centred 80dp apart above the bottom, and the design system's `#00A46E` and `#D90D10` in place of the Material green and red. An app that sets `IncomingCallNotificationParams` keeps whatever it set.
 - [Android] `IncomingCallNotificationParams.fullScreenTextColor` no longer defaults to white. Left unset, the caller's name, the handle under it and the action labels each take the colour the design gives them rather than all four being painted the same. Setting it still paints all four.
@@ -24,6 +18,14 @@
 ### ✅ Added
 
 - Added `StreamVideoPushHandler.handleBackgroundMessage`, which simplifies the ringing setup by running a Stream ringing push through its whole background lifecycle from your Firebase background handler: it builds the client through the factory you give it, observes the ringing events a background isolate can act on, and disposes the client — along with whatever that factory set up — once the user has answered, declined, or let the call time out, or the ring has ended without them, such as when the caller cancels it. It replaces the setup and teardown each integration had to write by hand.
+
+### 🐞 Fixed
+
+- `registerDevice` right after `connect`, and `unregisterDevice` on web and desktop, no longer throw.
+- A failing push token read is logged instead of reported as an uncaught error.
+- `unregisterDevice` always stops registering refreshed tokens.
+- `unregisterDevice` deletes the registered push token from the backend even when the current token cannot be read.
+- A registration still in flight when `unregisterDevice` runs no longer stores its token.
 
 ## Upcoming (minor)
 

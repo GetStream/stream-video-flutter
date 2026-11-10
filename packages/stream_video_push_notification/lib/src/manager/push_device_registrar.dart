@@ -77,17 +77,33 @@ class PushDeviceRegistrar {
     }
 
     if (_registersApnsToken) {
-      _apnsTokenSource.token().then((token) {
-        if (token != null) {
-          _register(token, pushProvider, isVoIP: false);
-        }
-      });
+      final unregistrations = _unregistrations;
+      _apnsTokenSource.token().then(
+        (token) {
+          if (token != null) {
+            _register(
+              token,
+              pushProvider,
+              isVoIP: false,
+              unregistrations: unregistrations,
+            );
+          }
+        },
+        onError: (Object error) {
+          _logger.e(() => 'Reading the APNs token failed: $error');
+        },
+      );
     }
 
     if (_tokenSubscription != null) return;
     late final StreamSubscription<String> subscription;
     subscription = pushProvider.onTokenRefresh.listen(
-      (token) => _register(token, pushProvider, isVoIP: true),
+      (token) => _register(
+        token,
+        pushProvider,
+        isVoIP: true,
+        unregistrations: _unregistrations,
+      ),
       onError: (Object error) {
         _logger.e(() => 'Reading the push token failed: $error');
       },
@@ -103,14 +119,15 @@ class PushDeviceRegistrar {
   }
 
   /// Registers [token] with [pushProvider] unless it is the token registered
-  /// last, and remembers it on success.
+  /// last, and remembers it on success. Does nothing once the device was
+  /// unregistered after [unregistrations] was read.
   Future<void> _register(
     String token,
     StreamVideoPushProvider pushProvider, {
     required bool isVoIP,
+    required int unregistrations,
   }) async {
     final tokenKey = isVoIP ? userDeviceTokenVoIPKey : userDeviceTokenKey;
-    final unregistrations = _unregistrations;
 
     final preferences = await _preferences;
     final storedToken = preferences.getString(tokenKey);
@@ -142,24 +159,42 @@ class PushDeviceRegistrar {
     } catch (error) {
       _logger.w(() => 'Reading the push token to delete failed: $error');
     }
-    if (token != null) {
-      await _client.deleteDevice(id: token);
-    }
 
     final preferences = await _preferences;
 
-    // Delete the APN token stored on a successful registration, which also
-    // covers tokens registered before `registerApnDeviceToken` was disabled,
-    // plus the current one if APN registration is enabled.
+    // The current provider token and the one stored on a successful
+    // registration, which is all that is left when the current one cannot be
+    // read.
+    final providerTokens = {
+      ?token,
+      ?preferences.getString(userDeviceTokenVoIPKey),
+    };
+    for (final providerToken in providerTokens) {
+      await _client.deleteDevice(id: providerToken);
+    }
+
+    // The APN token stored on a successful registration, which also covers
+    // tokens registered before `registerApnDeviceToken` was disabled, plus
+    // the current one if APN registration is enabled.
     final apnTokens = {
       ?preferences.getString(userDeviceTokenKey),
-      if (_registersApnsToken) ?await _apnsTokenSource.token(),
+      if (_registersApnsToken) ?await _currentApnsToken(),
     };
     for (final apnToken in apnTokens) {
       await _client.deleteDevice(id: apnToken);
     }
 
     await removeStoredTokens();
+  }
+
+  /// The current APNs token, or null when it cannot be read.
+  Future<String?> _currentApnsToken() async {
+    try {
+      return await _apnsTokenSource.token();
+    } catch (error) {
+      _logger.w(() => 'Reading the APNs token to delete failed: $error');
+      return null;
+    }
   }
 
   /// Forgets the tokens registered so far, so the next registration sends
