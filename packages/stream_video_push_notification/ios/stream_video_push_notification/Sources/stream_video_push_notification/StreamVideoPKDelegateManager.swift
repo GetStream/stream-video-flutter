@@ -77,6 +77,30 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
     func handleIncomingCall(
         streamDict: [String: Any]?, state: UIApplication.State, completion: @escaping () -> Void
     ) {
+        let data = Self.callData(
+            fromVoIPPayload: streamDict,
+            configuration: self.resolveConfiguration(),
+            persistedIconName: UserDefaults.standard.string(forKey: "callKit_iconName"))
+
+        // Show call incoming notification.
+        StreamVideoPushNotificationPlugin.showIncomingCall(
+            data: data,
+            fromPushKit: true
+        )
+
+        completion()
+    }
+
+    /// Builds the call to report to CallKit from the `stream` section of a VoIP push.
+    ///
+    /// `configuration` supplies the CallKit options; `persistedIconName` is the icon saved by the
+    /// last `initData`, which wins over the configuration's.
+    static func callData(
+        fromVoIPPayload streamDict: [String: Any]?,
+        configuration: StreamVideoPushConfiguration?,
+        persistedIconName: String?,
+        uuid: String = UUID().uuidString
+    ) -> CallData {
         let defaultCallText = "Unknown Caller"
 
         let callCid = streamDict?["call_cid"] as? String ?? ""
@@ -85,10 +109,6 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
         let createdById = streamDict?["created_by_id"] as? String
         let videoIncluded = streamDict?["video"] as? String
         let videoData = videoIncluded == "false" ? 0 : 1
-
-        var callUUID = UUID().uuidString
-
-        let configuration = self.resolveConfiguration()
 
         let data: CallData
         if let configuration = configuration {
@@ -101,24 +121,16 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
             return str?.isEmpty == false ? str : nil
         }
 
-        data.uuid = callUUID
+        data.uuid = uuid
         data.callerName =
             nonEmptyString(callDisplayName) ?? nonEmptyString(createdByName) ?? defaultCallText
         data.handle = createdById ?? defaultCallText
 
         data.type = videoData
         data.extra = ["callCid": callCid]
-        data.iconName =
-            UserDefaults.standard.string(forKey: "callKit_iconName") ?? configuration?
-            .iconName ?? data.iconName
+        data.iconName = persistedIconName ?? configuration?.iconName ?? data.iconName
 
-        // Show call incoming notification.
-        StreamVideoPushNotificationPlugin.showIncomingCall(
-            data: data,
-            fromPushKit: true
-        )
-
-        completion()
+        return data
     }
 
 }
