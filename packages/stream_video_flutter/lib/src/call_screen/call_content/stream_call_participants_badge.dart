@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 import '../../l10n/localization_extension.dart';
+import 'stream_call_badge_style_defaults.dart';
 
 /// How many people are in a call, as a 32 tall pill.
 ///
@@ -97,51 +98,35 @@ class _StreamCallParticipantsBadgeStyleDefaults
   final BuildContext _context;
   final StreamCallParticipantsBadgeStyle? _style;
 
-  late final StreamSpacing _spacing = _context.streamSpacing;
+  late final _badge = StreamCallBadgeStyleDefaults(_context);
   late final StreamColorScheme _colorScheme = _context.streamColorScheme;
 
   @override
-  EdgeInsetsGeometry get padding =>
-      _style?.padding ??
-      EdgeInsets.symmetric(
-        horizontal: _spacing.xs,
-        vertical: _spacing.xxs + _spacing.xxxs,
-      );
+  EdgeInsetsGeometry get padding => _style?.padding ?? _badge.padding;
 
   @override
-  double get contentHeight => _style?.contentHeight ?? 20;
+  double get contentHeight => _style?.contentHeight ?? _badge.contentHeight;
 
   @override
-  double get spacing =>
-      _style?.spacing ?? (isDesktopOrWeb ? _spacing.xxs : _spacing.xs);
+  double get spacing => _style?.spacing ?? _badge.spacing;
 
   @override
-  double get iconSize => _style?.iconSize ?? (isDesktopOrWeb ? 16 : 20);
+  double get iconSize => _style?.iconSize ?? _badge.iconSize;
 
   @override
   Color get iconColor => _style?.iconColor ?? _colorScheme.textPrimary;
 
   @override
   Color get backgroundColor =>
-      _style?.backgroundColor ?? _colorScheme.backgroundSurface;
+      _style?.backgroundColor ?? _badge.backgroundColor;
 
   @override
   BorderRadiusGeometry get borderRadius =>
-      _style?.borderRadius ?? BorderRadius.all(_context.streamRadius.xxxl);
+      _style?.borderRadius ?? _badge.borderRadius;
 
   @override
-  TextStyle get textStyle {
-    final textTheme = _context.streamTextTheme;
-    final base = isDesktopOrWeb
-        ? textTheme.captionEmphasis
-        : textTheme.bodyEmphasis;
-
-    return base
-        .copyWith(
-          color: _colorScheme.textPrimary,
-          height: 1,
-          fontFeatures: const [FontFeature.tabularFigures()],
-        )
-        .merge(_style?.textStyle);
-  }
+  TextStyle get textStyle => _badge.resolveTextStyle(
+    color: _colorScheme.textPrimary,
+    override: _style?.textStyle,
+  );
 }
