@@ -62,6 +62,8 @@ export 'src/call_screen/call_content/picture_in_picture/stream_picture_in_pictur
 export 'src/call_screen/call_content/picture_in_picture/stream_picture_in_picture_ui_kit_view.dart';
 export 'src/call_screen/call_content/stream_call_connection_banner.dart';
 export 'src/call_screen/call_content/stream_call_duration_badge.dart';
+export 'src/call_screen/call_content/stream_call_latency_badge.dart';
+export 'src/call_screen/call_content/stream_call_participants_badge.dart';
 export 'src/call_screen/common/ringing_call_background.dart';
 export 'src/call_screen/incoming_call/incoming_call_content.dart';
 export 'src/call_screen/lobby_actions.dart';
