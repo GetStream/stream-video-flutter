@@ -158,4 +158,27 @@ void main() {
 
     expect(resolved.style, shared);
   });
+
+  testWidgets('the shared spacing reaches the latency dot', (tester) async {
+    await tester.pumpWidget(
+      TestWrapper(
+        child: StreamCallBadgeTheme(
+          data: const StreamCallBadgeThemeData(
+            style: StreamCallBadgeStyle(spacing: 12),
+          ),
+          child: Center(child: StreamCallLatencyBadge(call: call)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final row = tester.widget<Row>(
+      find.descendant(
+        of: find.byType(StreamCallLatencyBadge),
+        matching: find.byType(Row),
+      ),
+    );
+
+    expect(row.spacing, 12);
+  });
 }
