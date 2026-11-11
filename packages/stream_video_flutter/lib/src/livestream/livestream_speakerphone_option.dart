@@ -33,6 +33,8 @@ class LivestreamSpeakerphoneOption extends StatefulWidget {
     this.disabledSpeakerphoneIconTheme = const IconThemeData(
       color: Colors.white,
     ),
+    this.type = StreamButtonType.ghost,
+    this.size = StreamButtonSize.large,
   });
 
   /// Represents a call.
@@ -43,6 +45,16 @@ class LivestreamSpeakerphoneOption extends StatefulWidget {
 
   /// The theme that is applied while the stream's audio is muted.
   final IconThemeData disabledSpeakerphoneIconTheme;
+
+  /// The variant of the button.
+  ///
+  /// Defaults to [StreamButtonType.ghost].
+  final StreamButtonType type;
+
+  /// The size of the button.
+  ///
+  /// Defaults to [StreamButtonSize.large].
+  final StreamButtonSize size;
 
   @override
   State<LivestreamSpeakerphoneOption> createState() => _ToggleSpeakerState();
@@ -132,8 +144,8 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
     return StreamButton.icon(
       icon: Icon(_muted ? context.streamIcons.mute : context.streamIcons.audio),
       style: StreamButtonStyle.secondary,
-      type: StreamButtonType.ghost,
-      size: StreamButtonSize.large,
+      type: widget.type,
+      size: widget.size,
       themeStyle: StreamButtonThemeStyle.from(
         foregroundColor: iconTheme.color,
       ),
