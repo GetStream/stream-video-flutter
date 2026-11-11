@@ -200,9 +200,22 @@ class _LivestreamContentState extends State<LivestreamContent> {
   /// the whole size (cover).
   VideoFit get videoFit => widget.videoFit;
 
+  /// The participants sharing video, or, while none is, the hosts: their
+  /// tile then shows their avatar.
   LivestreamHostsParticipantsFilter get _defaultStreamingParticipantsFilter =>
-      (allCallParticipants) =>
-          allCallParticipants.where((e) => e.isVideoEnabled).toList();
+      (allCallParticipants) {
+        final streaming = allCallParticipants
+            .where((it) => it.isVideoEnabled)
+            .toList();
+        if (streaming.isNotEmpty) return streaming;
+
+        final createdBy = call.state.value.createdByUserId;
+        return allCallParticipants
+            .where(
+              (it) => it.roles.contains('host') || it.userId == createdBy,
+            )
+            .toList();
+      };
 
   CallParticipantBuilder get _defaultParticipantBuilder =>
       (context, call, participant) => StreamParticipantTile(
@@ -212,6 +225,8 @@ class _LivestreamContentState extends State<LivestreamContent> {
         rendererScopePrefix: 'livecontent',
         call: call,
         participant: participant,
+        // The livestream tile's toolbar is the only chrome over the video.
+        style: const StreamParticipantTileStyle(showMoreButton: false),
         showConnectionQualityIndicator: false,
         showParticipantLabel: false,
         showSpeakerBorder: false,
