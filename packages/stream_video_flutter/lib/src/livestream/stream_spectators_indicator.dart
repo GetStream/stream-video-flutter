@@ -23,6 +23,11 @@ class StreamSpectatorsIndicator extends StatelessWidget {
   /// Overrides the style from [StreamSpectatorsIndicatorTheme].
   final StreamSpectatorsIndicatorStyle? style;
 
+  static int _allViewers(CallState state) =>
+      state.participantCount + state.anonymousParticipantCount;
+
+  static int _namedViewers(CallState state) => state.participantCount;
+
   @override
   Widget build(BuildContext context) {
     final themeStyle = StreamSpectatorsIndicatorTheme.of(context).style;
@@ -49,11 +54,9 @@ class StreamSpectatorsIndicator extends StatelessWidget {
             ),
             PartialCallStateBuilder(
               call: call,
-              selector: (state) =>
-                  state.participantCount +
-                  (includeAnonymousParticipants
-                      ? state.anonymousParticipantCount
-                      : 0),
+              selector: includeAnonymousParticipants
+                  ? _allViewers
+                  : _namedViewers,
               builder: (context, count) => Text(
                 '$count',
                 style: resolved.textStyle,
