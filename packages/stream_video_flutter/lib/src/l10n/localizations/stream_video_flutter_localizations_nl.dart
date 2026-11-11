@@ -113,6 +113,12 @@ class StreamVideoFlutterLocalizationsNl
   String get livestreamEndedStatus => 'De livestream is afgelopen.';
 
   @override
+  String get livestreamEndedTitle => 'Livestream gestopt';
+
+  @override
+  String get livestreamEndedSubtitle => 'De uitzender is offline gegaan';
+
+  @override
   String get livestreamEndedWatchRecordings => 'Bekijk de opnames:';
 
   @override

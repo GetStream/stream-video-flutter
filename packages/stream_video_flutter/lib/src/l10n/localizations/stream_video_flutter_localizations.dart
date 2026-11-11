@@ -287,6 +287,18 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'The livestream has ended.'**
   String get livestreamEndedStatus;
 
+  /// Title shown in the player once the livestream has ended.
+  ///
+  /// In en, this message translates to:
+  /// **'Livestream stopped'**
+  String get livestreamEndedTitle;
+
+  /// Line under the title shown in the player once the livestream has ended.
+  ///
+  /// In en, this message translates to:
+  /// **'The broadcaster has gone off air'**
+  String get livestreamEndedSubtitle;
+
   /// Label shown when the livestream has already ended listing the recordings.
   ///
   /// In en, this message translates to:

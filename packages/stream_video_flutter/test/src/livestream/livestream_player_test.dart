@@ -58,12 +58,13 @@ void main() {
 
   Future<void> tapFullscreen(WidgetTester tester) async {
     await tester.tap(
-      find.descendant(
-        of: find.byType(LivestreamInfo),
-        matching: find.byWidgetPredicate(
-          (widget) => widget is IconButton && widget.icon is AnimatedCrossFade,
-        ),
-      ),
+      // The fullscreen button closes the toolbar's row.
+      find
+          .descendant(
+            of: find.byType(StreamLivestreamTile),
+            matching: find.byType(StreamButton),
+          )
+          .last,
     );
     // The player's double-tap detector holds a single tap until the
     // double-tap timeout passes.
@@ -128,13 +129,13 @@ void main() {
   });
 
   testWidgets(
-    'LivestreamPlayer paints the default controls apart from the video content',
+    'LivestreamPlayer paints the call duration apart from the video content',
     (tester) async {
       await pumpPlayer(tester);
 
       final aroundControls = find
           .ancestor(
-            of: find.byType(LivestreamInfo),
+            of: find.byType(StreamCallDurationBadge),
             matching: find.byType(RepaintBoundary),
           )
           .evaluate()

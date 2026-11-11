@@ -113,6 +113,12 @@ class StreamVideoFlutterLocalizationsEn
   String get livestreamEndedStatus => 'The livestream has ended.';
 
   @override
+  String get livestreamEndedTitle => 'Livestream stopped';
+
+  @override
+  String get livestreamEndedSubtitle => 'The broadcaster has gone off air';
+
+  @override
   String get livestreamEndedWatchRecordings => 'Watch the recordings:';
 
   @override

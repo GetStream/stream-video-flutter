@@ -65,47 +65,52 @@ class StreamLivestreamTile extends StatelessWidget {
           left: 0,
           right: 0,
           bottom: 0,
-          child: Padding(
-            padding: resolved.toolbarPadding,
-            child: Row(
-              spacing: resolved.toolbarSpacing,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: resolved.leadingSpacing,
-                  children: [
-                    if (showLiveIndicator) StreamLiveIndicator(call: call),
-                    if (showSpectatorsIndicator)
-                      StreamSpectatorsIndicator(
-                        call: call,
-                        includeAnonymousParticipants:
-                            includeAnonymousParticipants,
-                      ),
-                  ],
-                ),
-                const Spacer(),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: resolved.trailingSpacing,
-                  children: [
-                    if (showSpeakerphoneToggle)
-                      LivestreamSpeakerphoneOption(
-                        call: call,
-                        enabledSpeakerphoneIconTheme: const IconThemeData(),
-                        disabledSpeakerphoneIconTheme: const IconThemeData(),
-                        type: StreamButtonType.solid,
-                        size: resolved.buttonSize,
-                      ),
-                    if (onFullscreenTapped case final onFullscreenTapped?)
-                      StreamButton.icon(
-                        icon: Icon(context.streamIcons.fullscreenFill),
-                        style: StreamButtonStyle.secondary,
-                        size: resolved.buttonSize,
-                        onPressed: onFullscreenTapped,
-                      ),
-                  ],
-                ),
-              ],
+          // Clear of the home indicator and notches when the tile fills
+          // the screen; inline, the padding is already used up above it.
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: resolved.toolbarPadding,
+              child: Row(
+                spacing: resolved.toolbarSpacing,
+                children: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: resolved.leadingSpacing,
+                    children: [
+                      if (showLiveIndicator) StreamLiveIndicator(call: call),
+                      if (showSpectatorsIndicator)
+                        StreamSpectatorsIndicator(
+                          call: call,
+                          includeAnonymousParticipants:
+                              includeAnonymousParticipants,
+                        ),
+                    ],
+                  ),
+                  const Spacer(),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: resolved.trailingSpacing,
+                    children: [
+                      if (showSpeakerphoneToggle)
+                        LivestreamSpeakerphoneOption(
+                          call: call,
+                          enabledSpeakerphoneIconTheme: const IconThemeData(),
+                          disabledSpeakerphoneIconTheme: const IconThemeData(),
+                          type: StreamButtonType.solid,
+                          size: resolved.buttonSize,
+                        ),
+                      if (onFullscreenTapped case final onFullscreenTapped?)
+                        StreamButton.icon(
+                          icon: Icon(context.streamIcons.fullscreenFill),
+                          style: StreamButtonStyle.secondary,
+                          size: resolved.buttonSize,
+                          onPressed: onFullscreenTapped,
+                        ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
