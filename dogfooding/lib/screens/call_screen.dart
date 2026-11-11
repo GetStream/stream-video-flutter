@@ -22,6 +22,7 @@ import '../utils/consts.dart';
 import '../utils/feedback_dialog.dart';
 import '../widgets/closed_captions_widget.dart';
 import '../widgets/e2ee_key_notification.dart';
+import '../widgets/livestream_go_live_button.dart';
 import '../widgets/settings_menu/developer_options_menu.dart';
 import '../widgets/settings_menu/more_menu.dart';
 import '../widgets/settings_window/settings_tabs.dart';
@@ -600,6 +601,8 @@ class _CallScreenState extends State<CallScreen>
     );
   }
 
+  bool get _isLivestream => widget.call.type == StreamCallType.liveStream();
+
   @override
   Widget build(BuildContext context) {
     if (_closeRequested) {
@@ -706,10 +709,26 @@ class _CallScreenState extends State<CallScreen>
                       Column(
                         children: [
                           Expanded(
-                            child: StreamCallParticipants(
-                              call: call,
-                              layoutMode: _currentLayoutMode,
-                            ),
+                            child: _isLivestream
+                                // The host sees the same tile as the
+                                // viewers.
+                                ? Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: context.streamSpacing.xs,
+                                    ),
+                                    child: StreamLivestreamTile(
+                                      call: call,
+                                      child: StreamCallParticipants(
+                                        call: call,
+                                        layoutMode:
+                                            ParticipantLayoutMode.speakerTop,
+                                      ),
+                                    ),
+                                  )
+                                : StreamCallParticipants(
+                                    call: call,
+                                    layoutMode: _currentLayoutMode,
+                                  ),
                           ),
                           ClosedCaptionsWidget(call: call),
                         ],
@@ -772,10 +791,11 @@ class _CallScreenState extends State<CallScreen>
                   leading: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (isCompact)
+                      if (isCompact && !_isLivestream)
                         _layoutToggle(
                           menuDirection: StreamMenuDirection.down,
                         ),
+                      if (_isLivestream) LivestreamGoLiveButton(call: call),
                       if (StreamFlipCameraButton.isSupported)
                         PartialCallStateBuilder(
                           call: call,

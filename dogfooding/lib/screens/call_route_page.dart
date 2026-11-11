@@ -139,6 +139,16 @@ class _CallRoutePageState extends State<CallRoutePage> {
     }
   }
 
+  /// Whether [call] is a livestream this user only watches: they skip the
+  /// lobby and get the livestream player, like the other SDKs' demo apps.
+  /// Hosts, who can publish video, go through the lobby to the call screen.
+  bool _isLivestreamViewer(Call call) {
+    if (call.type != StreamCallType.liveStream() || !_callExists) return false;
+
+    final capabilities = call.state.value.ownCapabilities;
+    return !capabilities.contains(CallPermission.sendVideo);
+  }
+
   /// Leaves this page once it is on screen, for a call that is already over.
   void _close() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -192,6 +202,17 @@ class _CallRoutePageState extends State<CallRoutePage> {
           child: error != null
               ? _JoinFailed(callId: widget.callId, error: error)
               : const CircularProgressIndicator.adaptive(),
+        ),
+      );
+    }
+
+    if (_isLivestreamViewer(call)) {
+      return LivestreamPlayer(
+        call: call,
+        backButtonBuilder: (context) => StreamToolbarButton.icon(
+          icon: Icon(context.streamIcons.xmark),
+          tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+          onPressed: () => Navigator.maybePop(context),
         ),
       );
     }
