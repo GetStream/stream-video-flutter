@@ -4,6 +4,7 @@ import '../../stream_video_flutter.dart';
 import '../call_participants/screen_share_call_participants_content.dart';
 import '../call_screen/call_diagnostics_content/call_diagnostics_content.dart';
 import '../l10n/localization_extension.dart';
+import 'livestream_status_card.dart';
 
 typedef LivestreamHostsUnavailableBuilder =
     Widget Function(
@@ -211,11 +212,6 @@ class _LivestreamContentState extends State<LivestreamContent> {
         rendererScopePrefix: 'livecontent',
         call: call,
         participant: participant,
-        style: StreamParticipantTileStyle(
-          backgroundColor: StreamVideoTheme.of(
-            context,
-          ).colorTheme.livestreamBackground,
-        ),
         showConnectionQualityIndicator: false,
         showParticipantLabel: false,
         showSpeakerBorder: false,
@@ -243,9 +239,6 @@ class _LivestreamContentState extends State<LivestreamContent> {
               rendererScopePrefix: 'livecontent',
               call: call,
               participant: participant,
-              backgroundColor: StreamVideoTheme.of(
-                context,
-              ).colorTheme.livestreamBackground,
             ),
       );
 
@@ -253,7 +246,6 @@ class _LivestreamContentState extends State<LivestreamContent> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamVideoTheme.of(context);
     final translations = context.translations;
 
     final pipEnabled =
@@ -284,11 +276,8 @@ class _LivestreamContentState extends State<LivestreamContent> {
                       context,
                       LivestreamHostsUnavailableProperties(call),
                     ) ??
-                    Center(
-                      child: Text(
-                        translations.livestreamHostNotAvailable,
-                        style: theme.livestreamTheme.callStateButtonTextStyle,
-                      ),
+                    LivestreamStatusCard(
+                      title: translations.livestreamHostNotAvailable,
                     );
               } else {
                 bodyWidget = Stack(
@@ -327,17 +316,10 @@ class _LivestreamContentState extends State<LivestreamContent> {
                             context,
                             LivestreamFastReconnectingProperties(call),
                           ) ??
-                          const Positioned(
-                            top: 25,
-                            left: 25,
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            ),
+                          Positioned(
+                            top: context.streamSpacing.md,
+                            left: context.streamSpacing.md,
+                            child: StreamLoadingSpinner(),
                           ),
                   ],
                 );
@@ -356,30 +338,22 @@ class _LivestreamContentState extends State<LivestreamContent> {
                       isReconnecting: isReconnecting,
                     ),
                   ) ??
-                  Center(
-                    child: Text(
-                      statusText,
-                      style: theme.livestreamTheme.callStateButtonTextStyle,
-                    ),
-                  );
+                  LivestreamStatusCard(title: statusText);
             }
 
-            return Scaffold(
-              backgroundColor: theme.colorTheme.livestreamBackground,
-              appBar: AppBar(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                automaticallyImplyLeading: false,
-                leading: widget.backButtonBuilder?.call(context),
-              ),
-              extendBodyBehindAppBar: true,
-              body: Stack(
-                children: [
-                  bodyWidget,
-                  if (widget.displayDiagnostics)
-                    CallDiagnosticsContent(call: call),
-                ],
-              ),
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                bodyWidget,
+                if (widget.backButtonBuilder case final backButtonBuilder?)
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    child: SafeArea(child: backButtonBuilder(context)),
+                  ),
+                if (widget.displayDiagnostics)
+                  CallDiagnosticsContent(call: call),
+              ],
             );
           },
         );

@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -7,6 +9,11 @@ import '../l10n/localization_extension.dart';
 
 /// A control bar style widget meant for displaying livestream controls and
 /// actions.
+@Deprecated(
+  'LivestreamPlayer draws its controls with StreamLivestreamTile. Use '
+  'StreamLivestreamTile, StreamLiveIndicator or StreamSpectatorsIndicator '
+  'instead.',
+)
 class LivestreamInfo extends StatelessWidget {
   /// Creates a [LivestreamInfo] widget.
   ///
@@ -21,6 +28,7 @@ class LivestreamInfo extends StatelessWidget {
   /// * [showParticipantCount] defines if the call should show participant count.
   ///
   /// * [includeAnonymousParticipantsCount] defines if the participant count should include anonymous participants.
+  @Deprecated('Use StreamLivestreamTile instead.')
   const LivestreamInfo({
     super.key,
     required this.call,
