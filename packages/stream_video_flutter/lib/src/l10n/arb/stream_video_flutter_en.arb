@@ -123,6 +123,14 @@
   "@livestreamEndedStatus": {
     "description": "Label shown when the livestream has already ended."
   },
+  "livestreamEndedTitle": "Livestream stopped",
+  "@livestreamEndedTitle": {
+    "description": "Title shown in the player once the livestream has ended."
+  },
+  "livestreamEndedSubtitle": "The broadcaster has gone off air",
+  "@livestreamEndedSubtitle": {
+    "description": "Line under the title shown in the player once the livestream has ended."
+  },
   "livestreamEndedWatchRecordings": "Watch the recordings:",
   "@livestreamEndedWatchRecordings": {
     "description": "Label shown when the livestream has already ended listing the recordings."

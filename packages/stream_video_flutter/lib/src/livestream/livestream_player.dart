@@ -457,30 +457,67 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
       call: call,
       selector: _playerData,
       builder: (context, data) {
-        final isBackstage = data.isBackstage;
-        final hasEnded = data.hasEnded;
-
-        if (hasEnded) {
+        if (data.hasEnded) {
           return widget.livestreamEndedWidgetBuilder?.call(context, call) ??
               widget.livestreamEndedBuilder?.call(context, call, _callState) ??
-              LivestreamEndedContent(
-                call: call,
-                showRecordings: widget.showRecordingsWhenEnded,
-                onRecordingTapped: widget.onRecordingTapped,
+              _layout(
+                context,
+                body: LivestreamEndedContent(
+                  call: call,
+                  showRecordings: widget.showRecordingsWhenEnded,
+                  onRecordingTapped: widget.onRecordingTapped,
+                ),
               );
         }
 
-        if (isBackstage) {
+        if (data.isBackstage) {
           return widget.livestreamBackstageWidgetBuilder?.call(context, call) ??
               widget.livestreamBackstageBuilder?.call(
                 context,
                 call,
                 _callState,
               ) ??
-              LivestreamBackstageContent(call: widget.call);
+              _layout(
+                context,
+                body: LivestreamBackstageContent(call: widget.call),
+              );
         }
 
-        return GestureDetector(
+        Widget content = LivestreamContent(
+          call: call,
+          callState: _callState,
+          videoPlaceholderBuilder: widget.videoPlaceholderBuilder,
+          videoRendererBuilder: widget.videoRendererBuilder,
+          livestreamHostsUnavailableBuilder:
+              widget.livestreamHostsUnavailableBuilder,
+          livestreamNotConnectedBuilder: widget.livestreamNotConnectedBuilder,
+          livestreamFastReconnectingOverlayBuilder:
+              widget.livestreamFastReconnectingOverlayBuilder,
+          livestreamHostsParticipantBuilder:
+              widget.livestreamHostsParticipantBuilder,
+          livestreamHostsParticipantsFilter:
+              widget.livestreamHostsParticipantsFilter,
+          displayDiagnostics: _isStatsVisible,
+          videoFit: _fullscreen ? widget.fullscreenVideoFit : widget.videoFit,
+          showMultipleHosts: widget.showMultipleHosts,
+          layoutMode: widget.layoutMode,
+          screenShareMode: widget.screenShareMode,
+          pictureInPictureConfiguration: widget.pictureInPictureConfiguration,
+        );
+
+        if (_fullscreen) {
+          // Edge to edge, so the video's corners are square.
+          final tileTheme = StreamParticipantTileTheme.of(context);
+          content = StreamParticipantTileTheme(
+            data: tileTheme.copyWith(
+              style: (tileTheme.style ?? const StreamParticipantTileStyle())
+                  .copyWith(borderRadius: BorderRadius.zero),
+            ),
+            child: content,
+          );
+        }
+
+        final tile = GestureDetector(
           onDoubleTap: () {
             if (widget.allowDiagnostics) {
               setState(() {
@@ -488,75 +525,80 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
               });
             }
           },
-          child: Scaffold(
-            body: Stack(
-              children: [
-                LivestreamContent(
-                  call: call,
-                  callState: _callState,
-                  backButtonBuilder: widget.backButtonBuilder,
-                  videoPlaceholderBuilder: widget.videoPlaceholderBuilder,
-                  videoRendererBuilder: widget.videoRendererBuilder,
-                  livestreamHostsUnavailableBuilder:
-                      widget.livestreamHostsUnavailableBuilder,
-                  livestreamNotConnectedBuilder:
-                      widget.livestreamNotConnectedBuilder,
-                  livestreamFastReconnectingOverlayBuilder:
-                      widget.livestreamFastReconnectingOverlayBuilder,
-                  livestreamHostsParticipantBuilder:
-                      widget.livestreamHostsParticipantBuilder,
-                  livestreamHostsParticipantsFilter:
-                      widget.livestreamHostsParticipantsFilter,
-                  displayDiagnostics: _isStatsVisible,
-                  videoFit: _fullscreen
-                      ? widget.fullscreenVideoFit
-                      : widget.videoFit,
-                  showMultipleHosts: widget.showMultipleHosts,
-                  layoutMode: widget.layoutMode,
-                  screenShareMode: widget.screenShareMode,
-                  pictureInPictureConfiguration:
-                      widget.pictureInPictureConfiguration,
-                ),
-                widget.livestreamControlsWidgetBuilder?.call(context, call) ??
-                    widget.livestreamControlsBuilder?.call(
-                      context,
-                      call,
-                      _callState,
-                    ) ??
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      // Repaints once a second, so it doesn't repaint the
-                      // video content underneath with it.
-                      child: RepaintBoundary(
-                        child: StreamBuilder<Duration>(
-                          stream: call.callDurationStream,
-                          builder: (context, snapshot) {
-                            final duration = snapshot.data ?? Duration.zero;
-
-                            return LivestreamInfo(
-                              call: call,
-                              fullscreen: _fullscreen,
-                              onFullscreenTapped: () {
-                                if (widget.onFullscreenTapped != null) {
-                                  widget.onFullscreenTapped?.call();
-                                } else {
-                                  setState(() {
-                                    _fullscreen = !_fullscreen;
-                                  });
-                                }
-                              },
-                              duration: duration,
-                              showParticipantCount: widget.showParticipantCount,
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-              ],
-            ),
+          child: StreamLivestreamTile(
+            call: call,
+            showSpectatorsIndicator: widget.showParticipantCount,
+            onFullscreenTapped: () {
+              if (widget.onFullscreenTapped != null) {
+                widget.onFullscreenTapped?.call();
+              } else {
+                setState(() {
+                  _fullscreen = !_fullscreen;
+                });
+              }
+            },
+            child: content,
           ),
         );
+
+        return _layout(
+          context,
+          body: tile,
+          fullscreen: _fullscreen,
+          controls:
+              widget.livestreamControlsWidgetBuilder?.call(context, call) ??
+              widget.livestreamControlsBuilder?.call(
+                context,
+                call,
+                _callState,
+              ),
+        );
       },
+    );
+  }
+
+  /// The screen around [body]: the call duration at the top and [controls]
+  /// under it. In [fullscreen], [body] fills the screen on its own.
+  Widget _layout(
+    BuildContext context, {
+    required Widget body,
+    Widget? controls,
+    bool fullscreen = false,
+  }) {
+    final colorScheme = context.streamColorScheme;
+    final spacing = context.streamSpacing;
+
+    if (fullscreen) {
+      return Scaffold(backgroundColor: colorScheme.backgroundApp, body: body);
+    }
+
+    return Scaffold(
+      backgroundColor: colorScheme.backgroundApp,
+      appBar: CallAppBar(
+        call: call,
+        showBackButton: false,
+        showLeaveCallAction: false,
+        leading: widget.backButtonBuilder?.call(context),
+        // Repaints once a second, so it doesn't repaint the video with it.
+        title: RepaintBoundary(child: StreamCallDurationBadge(call: call)),
+      ),
+      body: SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            spacing.xs,
+            0,
+            spacing.xs,
+            controls == null ? spacing.xs : 0,
+          ),
+          child: Column(
+            children: [
+              Expanded(child: body),
+              ?controls,
+            ],
+          ),
+        ),
+      ),
     );
   }
 
