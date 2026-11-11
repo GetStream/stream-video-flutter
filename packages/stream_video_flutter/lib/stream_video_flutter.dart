@@ -86,6 +86,8 @@ export 'src/livestream/livestream_ended_content.dart';
 export 'src/livestream/livestream_info.dart';
 export 'src/livestream/livestream_player.dart';
 export 'src/livestream/livestream_speakerphone_option.dart';
+export 'src/livestream/stream_live_indicator.dart';
+export 'src/livestream/stream_spectators_indicator.dart';
 export 'src/models/mute_toggle_titles.dart';
 export 'src/models/stream_icon_toggle.dart';
 export 'src/renderer/video_renderer.dart';
