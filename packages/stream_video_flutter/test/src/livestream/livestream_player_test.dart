@@ -113,6 +113,31 @@ void main() {
     });
   });
 
+  testWidgets(
+    'LivestreamPlayer shows the ended screen once the host ends the call',
+    (tester) async {
+      // The host ending the call disconnects the viewer before `endedAt`
+      // reaches them.
+      final ended = liveCall.copyWith(
+        status: CallStatus.disconnected(const DisconnectReason.ended()),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: LivestreamPlayer(
+            call: _FakeCall(ended),
+            joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+            showRecordingsWhenEnded: false,
+            onCallDisconnected: (_) {},
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(LivestreamEndedContent), findsOneWidget);
+    },
+  );
+
   testWidgets('LivestreamPlayer paints inside its own repaint boundary', (
     tester,
   ) async {

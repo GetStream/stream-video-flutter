@@ -438,8 +438,17 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     return RepaintBoundary(child: _buildPlayer(context));
   }
 
-  static ({bool isBackstage, bool hasEnded}) _playerData(CallState state) =>
-      (isBackstage: state.isBackstage, hasEnded: state.endedAt != null);
+  // A host ending the call disconnects the viewers before `endedAt` is
+  // known, so that disconnect counts as ended too.
+  static ({bool isBackstage, bool hasEnded}) _playerData(CallState state) => (
+    isBackstage: state.isBackstage,
+    hasEnded:
+        state.endedAt != null ||
+        switch (state.status) {
+          CallStatusDisconnected(reason: DisconnectReasonEnded()) => true,
+          _ => false,
+        },
+  );
 
   Widget _buildPlayer(BuildContext context) {
     if (_popPending) {
