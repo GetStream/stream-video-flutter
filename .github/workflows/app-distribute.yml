@@ -295,9 +295,15 @@ jobs:
 
       # The prod path holds the beta build in its beta/ folder, so the prod
       # sync leaves that folder alone.
+      #
+      # index.html is also served for every app route (`/join/<id>`), and a
+      # revalidation of such a route comes back as an empty 200. It is uploaded
+      # last and never stored by the browser, so there is nothing to revalidate.
       - name: Deploy
         run: |
           gcloud storage rsync dogfooding/build/web gs://stream-flutter-web/${{ env.WEB_PATH }} \
             --recursive --delete-unmatched-destination-objects \
-            --exclude='^beta/' \
+            --exclude='^beta/|^index\.html$' \
             --cache-control="public, max-age=60"
+          gcloud storage cp dogfooding/build/web/index.html gs://stream-flutter-web/${{ env.WEB_PATH }}/index.html \
+            --cache-control="no-store"
