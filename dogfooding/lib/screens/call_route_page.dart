@@ -209,10 +209,21 @@ class _CallRoutePageState extends State<CallRoutePage> {
     if (_isLivestreamViewer(call)) {
       return LivestreamPlayer(
         call: call,
+        // Stays open when the host ends the livestream, so the viewer sees
+        // that it ended; the close button leaves.
+        onCallDisconnected: (_) {},
         backButtonBuilder: (context) => StreamToolbarButton.icon(
           icon: Icon(context.streamIcons.xmark),
           tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-          onPressed: () => Navigator.maybePop(context),
+          onPressed: () async {
+            // The player only leaves on its own when the call disconnects.
+            await call.leave(
+              reason: const DisconnectReason.left(
+                initiator: LeaveInitiator.user,
+              ),
+            );
+            if (context.mounted) await Navigator.maybePop(context);
+          },
         ),
       );
     }

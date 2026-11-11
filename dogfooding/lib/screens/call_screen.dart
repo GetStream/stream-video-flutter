@@ -718,11 +718,7 @@ class _CallScreenState extends State<CallScreen>
                                     ),
                                     child: StreamLivestreamTile(
                                       call: call,
-                                      child: StreamCallParticipants(
-                                        call: call,
-                                        layoutMode:
-                                            ParticipantLayoutMode.speakerTop,
-                                      ),
+                                      child: LivestreamContent(call: call),
                                     ),
                                   )
                                 : StreamCallParticipants(
@@ -748,7 +744,11 @@ class _CallScreenState extends State<CallScreen>
                         child: PartialCallStateBuilder(
                           call: call,
                           selector: (state) => state.otherParticipants.isEmpty,
-                          builder: (context, isEmpty) => isEmpty
+                          // A livestream's audience joins from its link
+                          // rather than the call screen, and the card would
+                          // cover the tile's toolbar.
+                          builder: (context, isEmpty) =>
+                              isEmpty && !_isLivestream
                               ? ShareCallWelcomeCard(
                                   call: call,
                                   encryptionKey: _encryptionKey,
