@@ -18,6 +18,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
     private var savedAudio: CallKitAudioSessionCoordinator!
     private var session: FakeAudioSession!
     private var gate: FakeAudioEngineGate!
+    private var savedReconfigureDelay: DispatchTimeInterval = .never
     private var received: [[String: Any]] = []
 
     override func setUp() {
@@ -27,6 +28,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         savedEventSink = manager.eventSink
         savedStore = manager.store
         savedAudio = manager.audio
+        savedReconfigureDelay = manager.reconfigureAfterAnswerDelay
 
         manager.eventSink = RingingEventSink()
         // An attached handler Dart does not listen on yet, so events are held.
@@ -35,6 +37,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         session = FakeAudioSession()
         gate = FakeAudioEngineGate()
         manager.audio = CallKitAudioSessionCoordinator(session: session, gate: gate)
+        manager.reconfigureAfterAnswerDelay = .milliseconds(20)
         received = []
     }
 
@@ -44,6 +47,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         manager.eventSink = savedEventSink
         manager.store = savedStore
         manager.audio = savedAudio
+        manager.reconfigureAfterAnswerDelay = savedReconfigureDelay
         super.tearDown()
     }
 
@@ -380,6 +384,35 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
                 .init(available: false, callKitSessionActive: false),
                 .init(available: true, callKitSessionActive: nil),
             ])
+    }
+
+    /// Waits until the reconfiguration scheduled after an answer has had its turn.
+    private func waitPastTheReconfigureAfterAnswer() {
+        let waited = expectation(description: "past the reconfigure")
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) { waited.fulfill() }
+        wait(for: [waited], timeout: 1)
+    }
+
+    func testTheAnsweredCallIsConfiguredAgainShortlyAfterTheAnswer() {
+        let call = track(id: "answered")
+        manager.provider(provider, perform: CXAnswerCallAction(call: call.identity.callKitUUID))
+        let configuredOnAnswer = session.calls
+
+        waitPastTheReconfigureAfterAnswer()
+
+        XCTAssertFalse(configuredOnAnswer.isEmpty)
+        XCTAssertEqual(session.calls, configuredOnAnswer + configuredOnAnswer)
+    }
+
+    func testACallThatEndedBeforeTheReconfigureAfterItsAnswerIsNotConfiguredAgain() {
+        let call = track(id: "answered")
+        manager.provider(provider, perform: CXAnswerCallAction(call: call.identity.callKitUUID))
+        end(call.identity.callKitUUID)
+        let configured = session.calls
+
+        waitPastTheReconfigureAfterAnswer()
+
+        XCTAssertEqual(session.calls, configured)
     }
 
     func testEndingTheLastCallAllowsTheAudioEngine() {
