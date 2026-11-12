@@ -18,7 +18,7 @@ final class VoIPPayloadTests: XCTestCase {
         configuration: StreamVideoPushConfiguration? = nil,
         persistedIconName: String? = nil
     ) -> CallData {
-        StreamVideoPKDelegateManager.callData(
+        VoIPPushRegistryHandler.callData(
             fromVoIPPayload: payload,
             configuration: configuration,
             persistedIconName: persistedIconName,

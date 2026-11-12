@@ -7,17 +7,18 @@
 - `StreamVideoPushNotificationManager.currentActiveCalls` is removed; read `StreamVideo.state.activeCalls`.
 - `isAcceptedOnThisDevice` is no longer exported.
 - [iOS] The public `Call` class is removed. Nothing public returned it, but native code that named the type no longer compiles.
+- [iOS] `StreamVideoCallkitManager` and `EventCallbackHandler` are no longer public. `StreamVideoPushNotificationPlugin.showIncomingCall`, `startOutgoingCall` and `activeCalls` remain the way to reach CallKit from native code.
+- [iOS] `StreamVideoPKDelegateManager` is renamed `VoIPPushRegistryHandler`. The old name is a deprecated alias.
+- `IOSPushConfiguration.audioSessionActive` and `IOSParams.audioSessionActive` are removed, and on iOS `CallData.audioSessionActive` and `StreamVideoPushConfiguration.audioSessionActive`. CallKit activates the audio session.
 
 ### 🐞 Fixed
 
-- [iOS] The plugin no longer activates the audio session itself when it shows, answers or starts a call. The session it activated kept CallKit from activating its own, so WebRTC could run on a session CallKit did not own. CallKit now activates it. `audioSessionActive` has no effect.
+- [iOS] The plugin no longer activates the audio session itself when it shows, answers or starts a call. The session it activated kept CallKit from activating its own, so WebRTC could run on a session CallKit did not own. CallKit now activates it.
 - [iOS] A call put on hold by another app's call, such as a cellular call answered with Hold & Accept, gets its audio back when that call ends. CallKit takes it off hold even when the other side hung up, and if CallKit then gives the call no working audio session, the plugin ends and starts the call again with CallKit under a new uuid. Dart keeps the call's id and is not told, and the restart adds no entry to Recents. A call CallKit refuses to start again after four attempts is ended with `ActionCallEnded`.
 
 ### 🔄 Changed
 
 - `StreamVideoPushHandler.handleBackgroundMessage` builds a client that sets up no media.
-- [iOS] `EventCallbackHandler` no longer holds events of its own. `send` goes through the plugin's one event queue, which delivers to the event channel registered last; events still held when a new event channel registers go to that channel.
-- [iOS] `StreamVideoCallkitManager.showIncomingCall(_:fromPushKit:completion:)` configures the audio session before reporting the call, as the variant without a completion does, and its `completion` is optional.
 - [iOS] `ActionCallAccept` and `ActionCallDecline` carry the call CallKit answered or ended, instead of the options last given to the plugin, which could belong to another call or be empty.
 - [iOS] Only the first activation of a call's audio session applies its audio session options and reports an outgoing call as connecting. A later activation, such as a resume from hold, leaves the session as it is. Every activation now sends `ActionCallToggleAudioSession`, including after the call connected.
 - [iOS] The plugin tells `stream_webrtc_flutter` when CallKit activates or deactivates the audio session, and when no call is left, so WebRTC's audio engine runs only while the app owns the session. It calls `FlutterWebRTCPlugin.audioEngineControl`, which reaches every registration of the WebRTC plugin, one per Flutter engine. The plugin now links `stream_webrtc_flutter` natively and needs `stream_webrtc_flutter` 5.0.0.

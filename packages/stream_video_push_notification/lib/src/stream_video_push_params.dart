@@ -254,7 +254,6 @@ class IOSParams {
     this.maximumCallGroups,
     this.maximumCallsPerCallGroup,
     this.audioSessionMode,
-    this.audioSessionActive,
     this.audioSessionPreferredSampleRate,
     this.audioSessionPreferredIOBufferDuration,
     this.configureAudioSession,
@@ -275,7 +274,6 @@ class IOSParams {
         maximumCallGroups: configuration.maximumCallGroups,
         maximumCallsPerCallGroup: configuration.maximumCallsPerCallGroup,
         audioSessionMode: configuration.audioSessionMode,
-        audioSessionActive: configuration.audioSessionActive,
         audioSessionPreferredSampleRate:
             configuration.audioSessionPreferredSampleRate,
         audioSessionPreferredIOBufferDuration:
@@ -302,7 +300,6 @@ class IOSParams {
   final int? maximumCallGroups;
   final int? maximumCallsPerCallGroup;
   final String? audioSessionMode;
-  final bool? audioSessionActive;
   final double? audioSessionPreferredSampleRate;
   final double? audioSessionPreferredIOBufferDuration;
   final bool? configureAudioSession;
@@ -326,7 +323,6 @@ class IOSParams {
     int? maximumCallGroups,
     int? maximumCallsPerCallGroup,
     String? audioSessionMode,
-    bool? audioSessionActive,
     double? audioSessionPreferredSampleRate,
     double? audioSessionPreferredIOBufferDuration,
     bool? configureAudioSession,
@@ -346,7 +342,6 @@ class IOSParams {
       maximumCallsPerCallGroup:
           maximumCallsPerCallGroup ?? this.maximumCallsPerCallGroup,
       audioSessionMode: audioSessionMode ?? this.audioSessionMode,
-      audioSessionActive: audioSessionActive ?? this.audioSessionActive,
       audioSessionPreferredSampleRate:
           audioSessionPreferredSampleRate ??
           this.audioSessionPreferredSampleRate,
@@ -376,7 +371,6 @@ class IOSParams {
       maximumCallGroups: other.maximumCallGroups,
       maximumCallsPerCallGroup: other.maximumCallsPerCallGroup,
       audioSessionMode: other.audioSessionMode,
-      audioSessionActive: other.audioSessionActive,
       audioSessionPreferredSampleRate: other.audioSessionPreferredSampleRate,
       audioSessionPreferredIOBufferDuration:
           other.audioSessionPreferredIOBufferDuration,

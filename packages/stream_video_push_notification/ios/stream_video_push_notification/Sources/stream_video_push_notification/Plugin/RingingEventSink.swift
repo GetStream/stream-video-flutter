@@ -70,7 +70,7 @@ final class RingingEventSink {
 /// It holds no events of its own: `send` goes through the `RingingEventSink` it belongs to,
 /// which delivers to whichever handler was attached last and drops events while silenced. A
 /// handler that is never attached receives nothing.
-public class EventCallbackHandler: NSObject, FlutterStreamHandler {
+final class EventCallbackHandler: NSObject, FlutterStreamHandler {
 
     private let sink: RingingEventSink
     fileprivate var listener: FlutterEventSink?
@@ -81,15 +81,15 @@ public class EventCallbackHandler: NSObject, FlutterStreamHandler {
     }
 
     /// A handler on the shared manager's sink.
-    public override convenience init() {
+    override convenience init() {
         self.init(sink: StreamVideoCallkitManager.shared.eventSink)
     }
 
-    public func send(_ event: String, _ body: Any) {
+    func send(_ event: String, _ body: Any) {
         sink.send(event, body)
     }
 
-    public func onListen(
+    func onListen(
         withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink
     )
         -> FlutterError?
@@ -99,7 +99,7 @@ public class EventCallbackHandler: NSObject, FlutterStreamHandler {
         return nil
     }
 
-    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+    func onCancel(withArguments arguments: Any?) -> FlutterError? {
         self.listener = nil
         return nil
     }

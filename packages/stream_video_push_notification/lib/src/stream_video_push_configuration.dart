@@ -201,7 +201,6 @@ class IOSPushConfiguration {
     this.maximumCallGroups,
     this.maximumCallsPerCallGroup,
     this.audioSessionMode,
-    this.audioSessionActive,
     this.audioSessionPreferredSampleRate,
     this.audioSessionPreferredIOBufferDuration,
     this.configureAudioSession,
@@ -236,7 +235,6 @@ class IOSPushConfiguration {
   final int? maximumCallGroups;
   final int? maximumCallsPerCallGroup;
   final String? audioSessionMode;
-  final bool? audioSessionActive;
   final double? audioSessionPreferredSampleRate;
   final double? audioSessionPreferredIOBufferDuration;
   final bool? configureAudioSession;
@@ -260,7 +258,6 @@ class IOSPushConfiguration {
     int? maximumCallGroups,
     int? maximumCallsPerCallGroup,
     String? audioSessionMode,
-    bool? audioSessionActive,
     double? audioSessionPreferredSampleRate,
     double? audioSessionPreferredIOBufferDuration,
     bool? configureAudioSession,
@@ -280,7 +277,6 @@ class IOSPushConfiguration {
       maximumCallsPerCallGroup:
           maximumCallsPerCallGroup ?? this.maximumCallsPerCallGroup,
       audioSessionMode: audioSessionMode ?? this.audioSessionMode,
-      audioSessionActive: audioSessionActive ?? this.audioSessionActive,
       audioSessionPreferredSampleRate:
           audioSessionPreferredSampleRate ??
           this.audioSessionPreferredSampleRate,
@@ -310,7 +306,6 @@ class IOSPushConfiguration {
       maximumCallGroups: other.maximumCallGroups,
       maximumCallsPerCallGroup: other.maximumCallsPerCallGroup,
       audioSessionMode: other.audioSessionMode,
-      audioSessionActive: other.audioSessionActive,
       audioSessionPreferredSampleRate: other.audioSessionPreferredSampleRate,
       audioSessionPreferredIOBufferDuration:
           other.audioSessionPreferredIOBufferDuration,

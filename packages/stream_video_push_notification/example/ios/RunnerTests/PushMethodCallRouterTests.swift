@@ -204,15 +204,13 @@ final class PushMethodCallRouterTests: XCTestCase {
         assertIgnored(command("reportCallEnded", ["reason": 3]), reply: true)
     }
 
-    // MARK: - Answered without doing anything
+    // MARK: - Not handled on iOS
 
-    func testTheIOSNoOpMethods() {
-        guard case .showMissCallNotification = command("showMissCallNotification") else {
-            return XCTFail("not showMissCallNotification")
-        }
-        guard case .requestNotificationPermission = command("requestNotificationPermission")
-        else {
-            return XCTFail("not requestNotificationPermission")
+    func testAndroidOnlyMethodsAreNotImplemented() {
+        for method in ["showMissCallNotification", "requestNotificationPermission"] {
+            guard case .notImplemented = command(method) else {
+                return XCTFail("\(method) is handled")
+            }
         }
     }
 

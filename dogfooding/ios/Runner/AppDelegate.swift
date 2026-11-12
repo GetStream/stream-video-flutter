@@ -14,7 +14,7 @@ import stream_webrtc_flutter
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
         // Register for push notifications.
-        StreamVideoPKDelegateManager.shared.registerForPushNotifications()
+        VoIPPushRegistryHandler.shared.registerForPushNotifications()
         UNUserNotificationCenter.current().delegate = self
 
         return super.application(application, didFinishLaunchingWithOptions: launchOptions)

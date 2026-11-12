@@ -128,8 +128,8 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
     // MARK: - Pending events
 
     func testEventsSentBeforeDartListensAreDeliveredInOrder() {
-        manager.sendEventCustom("first", body: ["id": "1"])
-        manager.sendEventCustom("second", body: nil)
+        manager.sendEvent("first", ["id": "1"])
+        manager.sendEvent("second", nil)
         drainMainQueue()
         XCTAssertTrue(received.isEmpty)
 
@@ -143,7 +143,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
     func testEventsSentWhileDartListensGoStraightThrough() {
         listen()
 
-        manager.sendEventCustom("live", body: nil)
+        manager.sendEvent("live", nil)
         drainMainQueue()
 
         XCTAssertEqual(receivedNames, ["live"])
@@ -151,12 +151,12 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
 
     func testSilencedEventsAreDroppedRatherThanHeld() {
         manager.handle(FlutterMethodCall(methodName: "silenceEvents", arguments: true)) { _ in }
-        manager.sendEventCustom("dropped", body: nil)
+        manager.sendEvent("dropped", nil)
         drainMainQueue()
 
         listen()
         manager.handle(FlutterMethodCall(methodName: "silenceEvents", arguments: false)) { _ in }
-        manager.sendEventCustom("kept", body: nil)
+        manager.sendEvent("kept", nil)
         drainMainQueue()
 
         XCTAssertEqual(receivedNames, ["kept"])

@@ -3,7 +3,7 @@ import Foundation
 
 extension StreamVideoCallkitManager {
 
-    public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         handle(PushMethodCallRouter.command(for: call), result: result)
     }
 
@@ -12,8 +12,6 @@ extension StreamVideoCallkitManager {
         case .showIncomingCall(let data):
             store.lastOptions = data
             showIncomingCall(data, fromPushKit: false)
-            result(true)
-        case .showMissCallNotification:
             result(true)
         case .startCall(let data):
             store.lastOptions = data
@@ -58,8 +56,6 @@ extension StreamVideoCallkitManager {
             result(true)
         case .reportCallEnded(let callId, let reason):
             self.saveEndCall(callId, reason)
-            result(true)
-        case .requestNotificationPermission:
             result(true)
         case .ignored(let reply):
             result(reply)

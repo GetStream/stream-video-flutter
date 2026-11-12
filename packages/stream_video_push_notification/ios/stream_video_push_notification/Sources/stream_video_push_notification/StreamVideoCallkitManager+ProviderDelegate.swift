@@ -3,13 +3,13 @@ import CallKit
 extension StreamVideoCallkitManager {
 
     //MARK: - CXProviderDelegate
-    public func providerDidReset(_ provider: CXProvider) {
+    func providerDidReset(_ provider: CXProvider) {
         store.reset()
         callsRemoved()
         restoreRecentsIfNoCallLeft()
     }
 
-    public func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
+    func provider(_ provider: CXProvider, perform action: CXStartCallAction) {
         if let call = store.reRegistrationPerformed(uuid: action.callUUID) {
             action.fulfill()
             reRegistrationStarted(call)
@@ -30,7 +30,7 @@ extension StreamVideoCallkitManager {
         action.fulfill()
     }
 
-    public func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
+    func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
         guard let call = store.call(forCallKit: action.callUUID) else {
             action.fail()
             return
@@ -49,7 +49,7 @@ extension StreamVideoCallkitManager {
         action.fulfill()
     }
 
-    public func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
+    func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
         suppressRecentsIfRegisteredAgain(store.call(forCallKit: action.callUUID))
         let outcome = store.endPerformed(uuid: action.callUUID)
         callsRemoved()
@@ -61,7 +61,7 @@ extension StreamVideoCallkitManager {
         }
     }
 
-    public func provider(_ provider: CXProvider, perform action: CXSetHeldCallAction) {
+    func provider(_ provider: CXProvider, perform action: CXSetHeldCallAction) {
         let previousPhase = store.call(forCallKit: action.callUUID)?.phase
         let origin = action.isOnHold ? holdRecovery.holdOrigin(for: action.callUUID) : .requested
         guard
@@ -80,7 +80,7 @@ extension StreamVideoCallkitManager {
         }
     }
 
-    public func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {
+    func provider(_ provider: CXProvider, perform action: CXSetMutedCallAction) {
         guard let effects = store.mutePerformed(uuid: action.callUUID, muted: action.isMuted) else {
             action.fail()
             return
@@ -89,7 +89,7 @@ extension StreamVideoCallkitManager {
         action.fulfill()
     }
 
-    public func provider(_ provider: CXProvider, perform action: CXSetGroupCallAction) {
+    func provider(_ provider: CXProvider, perform action: CXSetGroupCallAction) {
         guard
             let effects = store.groupPerformed(
                 uuid: action.callUUID, groupWith: action.callUUIDToGroupWith)
@@ -101,7 +101,7 @@ extension StreamVideoCallkitManager {
         action.fulfill()
     }
 
-    public func provider(_ provider: CXProvider, perform action: CXPlayDTMFCallAction) {
+    func provider(_ provider: CXProvider, perform action: CXPlayDTMFCallAction) {
         guard
             let effects = store.dtmfPerformed(
                 uuid: action.callUUID, digits: action.digits, type: action.type.rawValue)
@@ -113,7 +113,7 @@ extension StreamVideoCallkitManager {
         action.fulfill()
     }
 
-    public func provider(_ provider: CXProvider, timedOutPerforming action: CXAction) {
+    func provider(_ provider: CXProvider, timedOutPerforming action: CXAction) {
         // Looked up by the action's own uuid, which never names a call, so this always fails.
         guard store.call(forCallKit: action.uuid) != nil else {
             action.fail()

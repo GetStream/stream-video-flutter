@@ -49,7 +49,6 @@ final class CallDataTests: XCTestCase {
         XCTAssertEqual(data.ringtonePath, "")
         XCTAssertTrue(data.configureAudioSession)
         XCTAssertEqual(data.audioSessionMode, "")
-        XCTAssertTrue(data.audioSessionActive)
         XCTAssertEqual(data.audioSessionPreferredSampleRate, 44100.0)
         XCTAssertEqual(data.audioSessionPreferredIOBufferDuration, 0.005)
     }

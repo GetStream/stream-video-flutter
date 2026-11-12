@@ -29,7 +29,7 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
         sharedInstance = StreamVideoPushNotificationPlugin()
         registrar.addMethodCallDelegate(sharedInstance!, channel: mainChannel)
 
-        StreamVideoPKDelegateManager.shared.initChannel(mainChannel: mainChannel)
+        VoIPPushRegistryHandler.shared.initChannel(mainChannel: mainChannel)
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -45,7 +45,7 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
                 // Kept for the cold-start VoIP push path, where no Dart code has run yet.
                 StreamVideoPushConfiguration(args: arguments).persist()
 
-                StreamVideoPKDelegateManager.shared.initData(data: arguments)
+                VoIPPushRegistryHandler.shared.initData(data: arguments)
                 callKitManager.initCallkitProvider(CallData(args: arguments))
                 result(nil)
             } else {
