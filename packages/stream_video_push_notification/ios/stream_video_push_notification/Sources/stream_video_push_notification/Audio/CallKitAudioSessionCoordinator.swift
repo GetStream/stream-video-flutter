@@ -35,19 +35,22 @@ final class CallKitAudioSessionCoordinator {
 
     /// CallKit activated the audio session.
     ///
-    /// On the first activation of the answered or outgoing call, the call starts connecting and
-    /// the session gets `lastOptions`; a later activation, such as a resume, leaves the session
-    /// as it is. Every activation allows the audio engine and is reported to Dart.
+    /// On the first activation of the answered or outgoing call, that call starts connecting and
+    /// the session gets its options, or `lastOptions` when no call is live; a later activation,
+    /// such as a resume, leaves the session as it is. The session is configured before the audio
+    /// engine is allowed, so WebRTC starts its engine on the configured session. Every activation
+    /// allows the audio engine and is reported to Dart.
     func didActivate(_ store: CallKitCallStore) -> [CallKitEffect] {
         let isFirstActivation = store.isFirstAudioActivation
+        let options = store.callsAwaitingFirstActivation.first?.options ?? store.lastOptions
         var effects: [CallKitEffect] = isFirstActivation ? store.audioActivated() : []
         store.audioSessionActivated()
 
+        if isFirstActivation {
+            configure(options)
+        }
         gate.update(available: true, callKitSessionActive: true)
         effects.append(.postAudioInterruptionEnded)
-        if isFirstActivation {
-            effects.append(.configureAudioSession(store.lastOptions))
-        }
         effects.append(
             .send(
                 event: StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION,
