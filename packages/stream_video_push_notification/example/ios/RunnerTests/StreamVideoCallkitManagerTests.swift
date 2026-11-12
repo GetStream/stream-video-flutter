@@ -520,6 +520,13 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         XCTAssertEqual(receivedId(at: 0), first.uuidString)
     }
 
+    /// Ends the call CallKit knows as `uuid`, without waiting for the main queue: a real
+    /// provider's configuration can be refreshed from CallKit there, so the Recents flag is read
+    /// in the same turn it was set.
+    private func endWithoutWaiting(_ uuid: UUID) {
+        manager.provider(provider, perform: CXEndCallAction(call: uuid))
+    }
+
     /// Ends `call` with CallKit and starts it again as a new uuid, through the manager.
     private func registerAgain(_ call: CallKitCall) -> UUID {
         manager.endForReRegistration(call)
@@ -549,8 +556,9 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         manager.initCallkitProvider(call.options)
         XCTAssertFalse(recents.configuration.includesCallsInRecents, "a refresh keeps it off")
 
-        end(third)
+        endWithoutWaiting(third)
         XCTAssertFalse(recents.configuration.includesCallsInRecents)
+        XCTAssertNotNil(manager.recentsSuppressedFor, "still off while CallKit lists the end")
 
         manager.provider(provider, didDeactivate: AVAudioSession.sharedInstance())
         XCTAssertTrue(recents.configuration.includesCallsInRecents)
@@ -566,9 +574,10 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         let second = registerAgain(call)
         XCTAssertTrue(recents.configuration.includesCallsInRecents)
 
-        end(second)
+        endWithoutWaiting(second)
 
         XCTAssertFalse(recents.configuration.includesCallsInRecents)
+        XCTAssertNotNil(manager.recentsSuppressedFor)
     }
 
     func testANewCallAfterARegistrationAgainTurnsRecentsBackOn() {
@@ -577,7 +586,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         manager.recentsSuppressedFor = nil
         let call = track(id: UUID().uuidString)
         answer(call)
-        end(registerAgain(call))
+        endWithoutWaiting(registerAgain(call))
         XCTAssertFalse(recents.configuration.includesCallsInRecents)
 
         manager.initCallkitProvider(CallData(args: ["id": UUID().uuidString]))
