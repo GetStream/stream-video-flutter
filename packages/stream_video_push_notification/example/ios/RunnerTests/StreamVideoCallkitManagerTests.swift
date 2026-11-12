@@ -97,6 +97,35 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         XCTAssertEqual(manager.store.lastOptions?.uuid, "pushkit")
     }
 
+    func testDecliningARingWhileTheOutgoingCallStillRingsSendsDecline() {
+        listen()
+        _ = startOutgoing(id: "outgoing")
+        let ringing = track(id: "ringing")
+
+        end(ringing.identity.callKitUUID)
+
+        XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_DECLINE])
+        XCTAssertTrue(manager.store.shouldTimeOut(appId: track(id: "next").identity.appId))
+    }
+
+    func testDartEndAndConnectionOfAStartCallKitRefusedLeaveAPushKitRingAlone() {
+        listen()
+        let refused = CallData(args: ["id": UUID().uuidString])
+        let refusedUUID = UUID(uuidString: refused.uuid)!
+        manager.store.registerPendingOutgoing(refused, uuid: refusedUUID)
+        manager.store.startRefused(uuid: refusedUUID, options: refused)
+        let ringing = ringFromPushKit(id: "pushkit")
+
+        manager.handle(.callConnected(["id": refused.uuid])) { _ in }
+        manager.handle(.endCall(["id": refused.uuid])) { _ in }
+        drainMainQueue()
+
+        XCTAssertTrue(receivedNames.isEmpty)
+        XCTAssertEqual(ringing.phase, .ringing)
+        XCTAssertNil(ringing.connectedAt)
+        XCTAssertTrue(manager.store.isFromPushKit)
+    }
+
     func testEndingTheOutgoingCallDuringAPushKitRingLeavesTheRing() {
         listen()
         _ = startOutgoing(id: "outgoing")
@@ -290,9 +319,10 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         XCTAssertNil(manager.store.call(forCallKit: call.identity.callKitUUID))
     }
 
-    func testEndingATrackedCallWhileAnOutgoingCallExistsSendsEndedAndKeepsTheOutgoingCall() {
+    func testEndingATrackedCallWhileAConnectedOutgoingCallExistsSendsEndedAndKeepsIt() {
         listen()
         let outgoing = startOutgoing(id: "outgoing")
+        _ = manager.store.connected(uuid: outgoing.identity.callKitUUID)
         let call = track(id: "other")
 
         end(call.identity.callKitUUID)
@@ -341,9 +371,10 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         XCTAssertNil(manager.store.call(forCallKit: answered.identity.callKitUUID))
     }
 
-    func testEndingAnUntrackedCallWhileAnOutgoingCallExistsSendsEnded() {
+    func testEndingAnUntrackedCallWhileAConnectedOutgoingCallExistsSendsEnded() {
         listen()
-        _ = startOutgoing(id: "outgoing")
+        let outgoing = startOutgoing(id: "outgoing")
+        _ = manager.store.connected(uuid: outgoing.identity.callKitUUID)
 
         end(UUID())
 

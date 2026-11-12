@@ -30,6 +30,8 @@ final class CallKitCallStore {
 
     /// The options of outgoing calls whose start action CallKit has not performed yet.
     private var pendingOutgoingOptions: [UUID: CallData] = [:]
+    /// The app ids of outgoing calls CallKit refused to start, lowercased.
+    private var refusedOutgoingIds: Set<String> = []
 
     /// Every uuid a call was asked to be registered again as.
     private var reRegistrationUUIDs: Set<UUID> = []
@@ -55,6 +57,12 @@ final class CallKitCallStore {
     /// after it is sent as declined, and an audio activation after it does not start it again.
     var outgoingCall: CallKitCall? {
         calls.last { $0.direction == .outgoing && !$0.phase.isEnded }
+    }
+
+    /// The outgoing call, once it has connected. An outgoing call still ringing does not keep
+    /// another call's ring from timing out, or a decline of it from being sent as declined.
+    private var connectedOutgoingCall: CallKitCall? {
+        outgoingCall.flatMap { $0.connectedAt != nil ? $0 : nil }
     }
 
     // MARK: - Lookups
@@ -113,6 +121,7 @@ final class CallKitCallStore {
     /// VoIP push rings.
     func actsOnPushKitCall(forAppId id: String?) -> Bool {
         guard isFromPushKit else { return false }
+        if let id = id, refusedOutgoingIds.contains(id.lowercased()) { return false }
         guard let id = id, let named = call(forAppId: id) else { return true }
         guard let pushKitId = lastOptions?.uuid else { return false }
         return named === call(forAppId: pushKitId)
@@ -177,6 +186,18 @@ final class CallKitCallStore {
         }
     }
 
+    /// CallKit refused to start `options` as `uuid`. Dart's later `endCall` and `callConnected`
+    /// for the call act on nothing, rather than on a call PushKit showed meanwhile.
+    func startRefused(uuid: UUID, options: CallData) {
+        dropPendingOutgoing(uuid: uuid, ifStill: options)
+        refusedOutgoingIds.insert(options.uuid.lowercased())
+    }
+
+    /// Whether CallKit refused to start the outgoing call `appId` names.
+    func wasRefusedToStart(appId: String) -> Bool {
+        refusedOutgoingIds.contains(appId.lowercased())
+    }
+
     // MARK: - Transitions
 
     /// CallKit accepted the incoming call `options` describes, as `uuid`.
@@ -194,7 +215,7 @@ final class CallKitCallStore {
     /// ended, and no call is answered or outgoing.
     func shouldTimeOut(appId: String) -> Bool {
         guard let call = call(forAppId: appId), !call.phase.isEnded else { return false }
-        return answeredCall == nil && outgoingCall == nil
+        return answeredCall == nil && connectedOutgoingCall == nil
     }
 
     /// The ring of `options` timed out and was reported to CallKit as unanswered.
@@ -236,7 +257,7 @@ final class CallKitCallStore {
 
     /// CallKit performed the end action for `uuid`.
     func endPerformed(uuid: UUID) -> CallKitEndOutcome {
-        let noActiveCall = answeredCall == nil && outgoingCall == nil
+        let noActiveCall = answeredCall == nil && connectedOutgoingCall == nil
         guard let call = call(forCallKit: uuid) else {
             let event =
                 noActiveCall
@@ -247,7 +268,7 @@ final class CallKitCallStore {
         }
         call.move(to: .ended(nil))
         remove(call)
-        if noActiveCall {
+        if noActiveCall && call.direction == .incoming {
             return CallKitEndOutcome(
                 fulfills: true,
                 effects: [.send(event: StreamVideoIncomingCallConstants.ACTION_CALL_DECLINE, body: call.options.toJSON())])
@@ -393,6 +414,7 @@ final class CallKitCallStore {
         calls.forEach { $0.move(to: .ended(nil)) }
         calls.removeAll()
         pendingOutgoingOptions.removeAll()
+        refusedOutgoingIds.removeAll()
     }
 
     func remove(_ call: CallKitCall) {

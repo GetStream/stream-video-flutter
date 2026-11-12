@@ -441,6 +441,57 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertEqual(names(outcome.effects), [StreamVideoIncomingCallConstants.ACTION_CALL_DECLINE])
     }
 
+    func testARingDuringARingingOutgoingCallTimesOutAndIsDeclined() {
+        let uuid = UUID()
+        store.registerPendingOutgoing(options("outgoing"), uuid: uuid)
+        _ = store.startPerformed(uuid: uuid)
+
+        let ringing = ring("ringing")
+
+        XCTAssertTrue(store.shouldTimeOut(appId: "ringing"))
+        let outcome = store.endPerformed(uuid: ringing.identity.callKitUUID)
+        XCTAssertEqual(names(outcome.effects), [StreamVideoIncomingCallConstants.ACTION_CALL_DECLINE])
+        XCTAssertNotNil(store.outgoingCall)
+    }
+
+    func testARingDuringAConnectedOutgoingCallDoesNotTimeOutAndIsEnded() {
+        let uuid = UUID()
+        store.registerPendingOutgoing(options("outgoing"), uuid: uuid)
+        _ = store.startPerformed(uuid: uuid)
+        _ = store.connected(uuid: uuid)
+
+        let ringing = ring("ringing")
+
+        XCTAssertFalse(store.shouldTimeOut(appId: "ringing"))
+        let outcome = store.endPerformed(uuid: ringing.identity.callKitUUID)
+        XCTAssertEqual(names(outcome.effects), [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
+    }
+
+    func testEndingAnOutgoingCallThatNeverConnectedIsSentAsEnded() {
+        let uuid = UUID()
+        store.registerPendingOutgoing(options("outgoing"), uuid: uuid)
+        _ = store.startPerformed(uuid: uuid)
+
+        let outcome = store.endPerformed(uuid: uuid)
+
+        XCTAssertEqual(names(outcome.effects), [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
+    }
+
+    func testAStartCallKitRefusedIsNotTakenForThePushKitCall() {
+        let refused = options(UUID().uuidString)
+        let uuid = UUID(uuidString: refused.uuid)!
+        store.registerPendingOutgoing(refused, uuid: uuid)
+        store.startRefused(uuid: uuid, options: refused)
+        store.showRequested(options("pushkit"), fromPushKit: true)
+        _ = ring("pushkit")
+
+        XCTAssertTrue(store.wasRefusedToStart(appId: refused.uuid.uppercased()))
+        XCTAssertFalse(store.actsOnPushKitCall(forAppId: refused.uuid))
+
+        store.reset()
+        XCTAssertFalse(store.wasRefusedToStart(appId: refused.uuid))
+    }
+
     func testAResetForgetsTheOutgoingCall() {
         let uuid = UUID()
         store.registerPendingOutgoing(options("outgoing"), uuid: uuid)

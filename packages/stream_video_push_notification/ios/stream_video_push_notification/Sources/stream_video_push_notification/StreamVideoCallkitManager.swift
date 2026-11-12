@@ -125,7 +125,10 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
         transactions.start(uuid: uuid, handle: handle, isVideo: data.type > 0) { started in
             guard started else {
-                self.store.dropPendingOutgoing(uuid: uuid, ifStill: data)
+                NSLog(
+                    "[StreamCallKit] CallKit refused to start the outgoing call \(data.uuid); "
+                        + "Dart's end and connection of it are ignored")
+                self.store.startRefused(uuid: uuid, options: data)
                 return
             }
 
