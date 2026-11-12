@@ -10,6 +10,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../../open_api/video/coordinator/api.dart' hide User;
+import '../../audio/platform_audio_controller.dart';
 import '../../call_state.dart';
 import '../../errors/stream_video_exception.dart';
 import '../../internal/_background_mute_policy.dart';
@@ -27,7 +28,6 @@ import '../../webrtc/model/rtc_video_parameters.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_media_device/device_enumeration_trigger.dart';
 import '../../webrtc/rtc_media_device/rtc_media_device.dart';
-import '../../audio/platform_audio_controller.dart';
 import '../../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../../webrtc/rtc_track/rtc_track.dart';
 import '../call_connect_options.dart';
