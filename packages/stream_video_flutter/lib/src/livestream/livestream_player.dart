@@ -116,7 +116,7 @@ class LivestreamPlayer extends StatefulWidget {
     this.showMultipleHosts = false,
     this.layoutMode = ParticipantLayoutMode.grid,
     this.screenShareMode = LivestreamScreenShareMode.spotlight,
-    this.videoFit = VideoFit.contain,
+    this.videoFit = VideoFit.adaptive,
     this.fullscreenVideoFit = VideoFit.adaptive,
     this.pictureInPictureConfiguration = const PictureInPictureConfiguration(),
   });
@@ -231,10 +231,11 @@ class LivestreamPlayer extends StatefulWidget {
   /// The screen share mode used to display the screen share host.
   final LivestreamScreenShareMode screenShareMode;
 
-  /// Denotes if the video fits the width (contain) or expands to
-  /// the whole size (cover) while the player is not in fullscreen mode.
+  /// How the video is fitted while the player is not in fullscreen mode.
   ///
-  /// Defaults to [VideoFit.contain].
+  /// Defaults to [VideoFit.adaptive]: the video fills the tile when it shares
+  /// the tile's orientation, and is letterboxed when it does not.
+  /// Pass [VideoFit.contain] to always show the whole video.
   final VideoFit videoFit;
 
   /// How the video is fitted while the player is in fullscreen mode.
@@ -536,6 +537,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
           },
           child: StreamLivestreamTile(
             call: call,
+            style: _fullscreen ? _fullscreenTileStyle(context) : null,
             showSpectatorsIndicator: widget.showParticipantCount,
             onFullscreenTapped: () {
               if (widget.onFullscreenTapped != null) {
@@ -563,6 +565,22 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
               ),
         );
       },
+    );
+  }
+
+  /// Insets the toolbar by `md` on both sides when the tile fills the
+  /// screen, unless the theme sets its own padding. The end inset is `xs`
+  /// because the fullscreen button's tap target adds the other 8.
+  StreamLivestreamTileStyle? _fullscreenTileStyle(BuildContext context) {
+    final themed = StreamLivestreamTileTheme.of(context).style?.toolbarPadding;
+    if (themed != null) return null;
+
+    final spacing = context.streamSpacing;
+    return StreamLivestreamTileStyle(
+      toolbarPadding: EdgeInsetsDirectional.only(
+        start: spacing.md,
+        end: spacing.md - spacing.xs,
+      ),
     );
   }
 
