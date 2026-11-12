@@ -1,3 +1,6 @@
+// The event is deprecated, but still decoded.
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_push_notification/src/stream_video_call_event.dart';

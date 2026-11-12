@@ -35,11 +35,16 @@ final class StreamVideoPushConfigurationTests: XCTestCase {
     func testReadsTheIOSSubMapAndTheHeaders() {
         let configuration = StreamVideoPushConfiguration(args: [
             "headers": ["Authorization": "token"],
-            "ios": ["iconName": "CallIcon", "supportsHolding": false, "ringtonePath": "ring.caf"],
+            "ios": [
+                "iconName": "CallIcon", "supportsHolding": true, "supportsDTMF": true,
+                "maximumCallGroups": 2, "ringtonePath": "ring.caf",
+            ],
         ])
 
         XCTAssertEqual(configuration.iconName, "CallIcon")
-        XCTAssertFalse(configuration.supportsHolding)
+        XCTAssertTrue(configuration.supportsHolding)
+        XCTAssertTrue(configuration.supportsDTMF)
+        XCTAssertEqual(configuration.maximumCallGroups, 2)
         XCTAssertEqual(configuration.ringtonePath, "ring.caf")
         XCTAssertEqual(configuration.headers["Authorization"] as? String, "token")
     }
@@ -58,18 +63,39 @@ final class StreamVideoPushConfigurationTests: XCTestCase {
     func testPersistAndLoadRoundTripTheIOSOptionsAndDropTheHeaders() {
         StreamVideoPushConfiguration(args: [
             "headers": ["Authorization": "token"],
-            "ios": ["iconName": "CallIcon", "supportsHolding": false, "includesCallsInRecents": false],
+            "ios": [
+                "iconName": "CallIcon", "supportsHolding": true, "supportsDTMF": true,
+                "maximumCallGroups": 2, "includesCallsInRecents": false,
+            ],
         ]).persist()
 
         let loaded = StreamVideoPushConfiguration.loadPersisted()
 
         XCTAssertEqual(loaded?.iconName, "CallIcon")
-        XCTAssertEqual(loaded?.supportsHolding, false)
+        XCTAssertEqual(loaded?.supportsHolding, true)
+        XCTAssertEqual(loaded?.supportsDTMF, true)
+        XCTAssertEqual(loaded?.maximumCallGroups, 2)
         XCTAssertEqual(loaded?.includesCallsInRecents, false)
         // Headers are not persisted: nothing on iOS reads them and they may hold values
         // UserDefaults refuses.
         XCTAssertEqual(loaded?.headers.count, 0)
         XCTAssertNil((UserDefaults.standard.dictionary(forKey: persistedKey) ?? [:])["headers"])
+    }
+
+    func testCallKitOptionsOtherThanTheDefaultsReachACallAVoIPPushReports() throws {
+        // A VoIP push that wakes a killed app builds its call from the persisted configuration.
+        StreamVideoPushConfiguration(args: [
+            "ios": ["supportsHolding": true, "supportsDTMF": true, "maximumCallGroups": 2]
+        ]).persist()
+        let loaded = try XCTUnwrap(StreamVideoPushConfiguration.loadPersisted())
+
+        let data = VoIPPushRegistryHandler.callData(
+            fromVoIPPayload: ["call_cid": "default:call"], configuration: loaded,
+            persistedIconName: nil, uuid: "call-uuid")
+
+        XCTAssertTrue(data.supportsHolding)
+        XCTAssertTrue(data.supportsDTMF)
+        XCTAssertEqual(data.maximumCallGroups, 2)
     }
 
     func testAConfigurationStoredWithAKeyNoLongerReadStillLoads() {

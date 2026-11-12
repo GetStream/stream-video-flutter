@@ -52,7 +52,8 @@ import Foundation
         set {}
     }
 
-    /// A call with the default CallKit options, the same as Dart's `IOSPushConfiguration`.
+    /// A call with the default CallKit options: no holding, no keypad and one call group, as the
+    /// SDK sends from Dart.
     @objc public convenience init(id: String, callerName: String, handle: String, type: Int) {
         let args: [String: Any?] = [
             "id": id, "callerName": callerName, "handle": handle, "type": type,

@@ -55,7 +55,7 @@
 - [iOS] An outgoing call started with `startOutgoingCall` no longer affects the calls after it once it ended. An incoming ring shown later times out again, declining it sends `ActionCallDecline` instead of `ActionCallEnded`, and the next audio session activation no longer reports the ended call to CallKit as connecting.
 - [iOS] While a VoIP push rings, `endCall` and `setCallConnected` for another call the plugin tracks, such as an outgoing call, act on that call. They used to act on the ringing call: connecting the outgoing call answered the ring, and ending it declined the ring and left the outgoing call on screen.
 - [iOS] CallKit no longer offers to merge calls, and a merge it asks for is refused. A merge used to be accepted although the calls stayed apart, so CallKit showed a conference that did not exist.
-- [iOS] A call reported with only some CallKit options, from a VoIP push before Dart first sent its configuration or from native code, no longer offers Hold & Accept or a keypad. A missing option takes the same default as in `IOSPushConfiguration`: no holding, no DTMF, one call group.
+- [iOS] A call reported with only some CallKit options, from a VoIP push before Dart first sent its configuration or from native code, no longer offers Hold & Accept or a keypad. A missing option takes the default the SDK sends from Dart: no holding, no DTMF, one call group.
 - A mute from the CallKit screen applies to the call it was made on.
 - [iOS] Taking a call off hold no longer marks it unmuted, so muting or unmuting from the app afterwards reaches the CallKit screen.
 - [iOS] Answering one of two ringing calls from CallKit no longer reports the other one as accepted in `activeCalls`.

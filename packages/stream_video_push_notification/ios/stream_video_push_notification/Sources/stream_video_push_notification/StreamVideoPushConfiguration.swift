@@ -20,7 +20,8 @@ final class StreamVideoPushConfiguration: NSObject {
     var ringtonePath: String
     var includesCallsInRecents: Bool
 
-    /// The default CallKit options, the same as Dart's `IOSPushConfiguration`.
+    /// The default CallKit options: no holding, no keypad and one call group, as the SDK sends
+    /// from Dart.
     convenience init(headers: NSDictionary) {
         let args: [String: Any?] = ["headers": headers]
         self.init(args: args)

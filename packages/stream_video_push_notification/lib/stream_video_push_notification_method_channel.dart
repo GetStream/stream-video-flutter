@@ -268,6 +268,8 @@ class MethodChannelStreamVideoPushNotification
           uuid: body['id'] as String,
           digits: body['digits'] as String,
         ),
+        // Kept for a native side that still sends it.
+        // ignore: deprecated_member_use
         Event.actionCallToggleGroup => ActionCallToggleGroup(
           uuid: body['id'] as String,
           callUUIDToGroupWith: body['callUUIDToGroupWith'] as String?,

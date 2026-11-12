@@ -98,26 +98,27 @@ final class CallDataTests: XCTestCase {
     func testReadsTheIOSOptionsFromTheTopLevelWithoutASubMap() {
         var args = base
         args["iconName"] = "FlatIcon"
-        args["supportsHolding"] = false
+        args["supportsHolding"] = true
         args["audioSessionMode"] = "videoChat"
 
         let data = CallData(args: args)
 
         XCTAssertEqual(data.iconName, "FlatIcon")
-        XCTAssertFalse(data.supportsHolding)
+        XCTAssertTrue(data.supportsHolding)
         XCTAssertEqual(data.audioSessionMode, "videoChat")
     }
 
     func testTheIOSSubMapWinsOverTopLevelKeys() {
         var args = base
         args["iconName"] = "FlatIcon"
-        args["ios"] = ["supportsHolding": false]
+        args["supportsHolding"] = false
+        args["ios"] = ["supportsHolding": true]
 
         let data = CallData(args: args)
 
         // With a sub-map present the top level is not read at all.
         XCTAssertEqual(data.iconName, "AppLogo")
-        XCTAssertFalse(data.supportsHolding)
+        XCTAssertTrue(data.supportsHolding)
     }
 
     func testToJSONCarriesTheIdTwiceAndTheIOSSection() {
@@ -138,7 +139,10 @@ final class CallDataTests: XCTestCase {
 
     func testToJSONRoundTripsThroughInit() {
         var args = base
-        args["ios"] = ["iconName": "CallIcon", "supportsHolding": false, "ringtonePath": "ring.caf"]
+        args["ios"] = [
+            "iconName": "CallIcon", "supportsHolding": true, "supportsDTMF": true,
+            "maximumCallGroups": 2, "ringtonePath": "ring.caf",
+        ]
         let original = CallData(args: args)
 
         let restored = CallData(args: original.toJSON())
@@ -146,7 +150,9 @@ final class CallDataTests: XCTestCase {
         XCTAssertEqual(restored.uuid, original.uuid)
         XCTAssertEqual(restored.callerName, original.callerName)
         XCTAssertEqual(restored.iconName, "CallIcon")
-        XCTAssertFalse(restored.supportsHolding)
+        XCTAssertTrue(restored.supportsHolding)
+        XCTAssertTrue(restored.supportsDTMF)
+        XCTAssertEqual(restored.maximumCallGroups, 2)
         XCTAssertEqual(restored.ringtonePath, "ring.caf")
         XCTAssertEqual(restored.extra["callCid"] as? String, "default:ada")
     }
@@ -161,7 +167,7 @@ final class CallDataTests: XCTestCase {
             JSONSerialization.jsonObject(with: Data(contentsOf: fixtureURL)) as? NSDictionary)
         var args = base
         args["isAccepted"] = false
-        args["ios"] = ["iconName": "CallIcon", "supportsHolding": false, "ringtonePath": "ring.caf"]
+        args["ios"] = ["iconName": "CallIcon", "supportsHolding": true, "ringtonePath": "ring.caf"]
 
         let json = CallData(args: args).toJSON() as NSDictionary
 

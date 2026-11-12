@@ -16,7 +16,7 @@
     "supportsVideo": true,
     "maximumCallGroups": 1,
     "supportsDTMF": false,
-    "supportsHolding": false,
+    "supportsHolding": true,
     "includesCallsInRecents": true,
     "ringtonePath": "ring.caf",
     "configureAudioSession": true,
