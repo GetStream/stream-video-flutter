@@ -38,14 +38,19 @@ void main() {
   Future<void> pumpPlayer(
     WidgetTester tester, {
     bool startInFullscreenMode = false,
+    VideoFit videoFit = VideoFit.adaptive,
     VideoFit fullscreenVideoFit = VideoFit.adaptive,
+    TextDirection textDirection = TextDirection.ltr,
   }) async {
     await tester.pumpWidget(
       MaterialApp(
+        builder: (context, child) =>
+            Directionality(textDirection: textDirection, child: child!),
         home: LivestreamPlayer(
           call: _FakeCall(liveCall),
           joinBehaviour: LivestreamJoinBehaviour.manualJoin,
           startInFullscreenMode: startInFullscreenMode,
+          videoFit: videoFit,
           fullscreenVideoFit: fullscreenVideoFit,
         ),
       ),
@@ -72,25 +77,28 @@ void main() {
   }
 
   group('fullscreen video fit', () {
-    testWidgets('inline the video is letterboxed', (tester) async {
+    testWidgets('inline the video fits by orientation', (tester) async {
       await pumpPlayer(tester);
+
+      expect(contentFit(tester), VideoFit.adaptive);
+    });
+
+    testWidgets('switches between the inline and fullscreen fits', (
+      tester,
+    ) async {
+      await pumpPlayer(
+        tester,
+        videoFit: VideoFit.contain,
+        fullscreenVideoFit: VideoFit.cover,
+      );
+      await tapFullscreen(tester);
+
+      expect(contentFit(tester), VideoFit.cover);
+
+      await tapFullscreen(tester);
 
       expect(contentFit(tester), VideoFit.contain);
     });
-
-    testWidgets(
-      'fullscreen fills only when the feed matches the player orientation',
-      (tester) async {
-        await pumpPlayer(tester);
-        await tapFullscreen(tester);
-
-        expect(contentFit(tester), VideoFit.adaptive);
-
-        await tapFullscreen(tester);
-
-        expect(contentFit(tester), VideoFit.contain);
-      },
-    );
 
     testWidgets('startInFullscreenMode uses the fullscreen fit', (
       tester,
@@ -110,6 +118,51 @@ void main() {
       );
 
       expect(contentFit(tester), VideoFit.cover);
+    });
+  });
+
+  group('fullscreen toolbar', () {
+    // The fullscreen button's 48 tap target pads its 32 visual by 8.
+    const tapPadding = 8.0;
+
+    testWidgets('is inset by md on both sides', (tester) async {
+      final spacing = const StreamSpacing().md;
+      await pumpPlayer(tester, startInFullscreenMode: true);
+
+      final screen = tester.getRect(find.byType(Scaffold));
+      final indicator = tester.getRect(find.byType(StreamLiveIndicator));
+      final button = tester.getRect(
+        find
+            .descendant(
+              of: find.byType(StreamLivestreamTile),
+              matching: find.byType(StreamButton),
+            )
+            .last,
+      );
+      expect(indicator.left - screen.left, spacing);
+      expect(screen.right - (button.right - tapPadding), spacing);
+    });
+
+    testWidgets('mirrors right to left', (tester) async {
+      final spacing = const StreamSpacing().md;
+      await pumpPlayer(
+        tester,
+        startInFullscreenMode: true,
+        textDirection: TextDirection.rtl,
+      );
+
+      final screen = tester.getRect(find.byType(Scaffold));
+      final indicator = tester.getRect(find.byType(StreamLiveIndicator));
+      final button = tester.getRect(
+        find
+            .descendant(
+              of: find.byType(StreamLivestreamTile),
+              matching: find.byType(StreamButton),
+            )
+            .last,
+      );
+      expect(screen.right - indicator.right, spacing);
+      expect(button.left + tapPadding - screen.left, spacing);
     });
   });
 
