@@ -243,7 +243,7 @@ final class CallKitCallStore {
     /// CallKit performed the hold action for `uuid`. Nil for a call the store does not track.
     ///
     /// Holding moves the call to `.held(origin)`; taking a held call off hold moves it to
-    /// `.resumed(activated: false)`. Either way the call is muted while on hold.
+    /// `.resumed(activated: false)`. The call's mute is left as the user set it.
     func holdPerformed(
         uuid: UUID, onHold: Bool, origin: CallKitHoldOrigin = .requested
     ) -> [CallKitEffect]? {
@@ -254,7 +254,6 @@ final class CallKitCallStore {
         } else if call.isOnHold {
             call.move(to: .resumed(activated: false))
         }
-        call.isMuted = onHold
         return [holdEvent(call, onHold)]
     }
 

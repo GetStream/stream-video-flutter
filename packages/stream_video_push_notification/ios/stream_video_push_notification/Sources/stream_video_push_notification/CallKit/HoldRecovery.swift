@@ -39,6 +39,8 @@ protocol HoldRecoveryActions: AnyObject {
         _ call: CallKitCall, as uuid: UUID, completion: @escaping (Bool) -> Void)
     /// CallKit refused every attempt to start `call` again.
     func reRegistrationAbandoned(_ call: CallKitCall)
+    /// Asks CallKit to mute the call it knows as `uuid`.
+    func requestMute(_ uuid: UUID)
 }
 
 /// Brings a call's audio back after another app's call held it.
@@ -74,8 +76,8 @@ final class HoldRecovery {
     private var requestedUnholds: Set<UUID> = []
     /// The calls the app asked CallKit to hold, by CallKit uuid.
     private var appRequestedHolds: Set<UUID> = []
-    /// Whether the live call is registered again once the app becomes active.
-    private var isReRegistrationPending = false
+    /// The call registered again once the app becomes active, if it is still the live call.
+    private weak var pendingReRegistration: CallKitCall?
 
     init(
         store: @escaping () -> CallKitCallStore,
@@ -110,6 +112,11 @@ final class HoldRecovery {
         appRequestedHolds.insert(uuid)
     }
 
+    /// CallKit refused the hold the app asked for the call it knows as `uuid`.
+    func holdRefused(_ uuid: UUID) {
+        appRequestedHolds.remove(uuid)
+    }
+
     /// Why CallKit is holding the call it knows as `uuid` now: as the app asked, else for
     /// another app's call when one is on the device.
     func holdOrigin(for uuid: UUID) -> CallKitHoldOrigin {
@@ -129,8 +136,12 @@ final class HoldRecovery {
         }
     }
 
-    /// CallKit started `call` again under its new uuid. Waits for an activation.
+    /// CallKit started `call` again under its new uuid. Waits for an activation, and mutes the
+    /// new registration when the user had muted the call, since CallKit starts it unmuted.
     func reRegistrationStarted(_ call: CallKitCall) {
+        if call.isMuted {
+            actions?.requestMute(call.identity.callKitUUID)
+        }
         awaitActivation(of: call)
     }
 
@@ -160,9 +171,9 @@ final class HoldRecovery {
     }
 
     private func appBecameActive() {
-        if isReRegistrationPending {
-            isReRegistrationPending = false
-            if let call = store().liveCall {
+        if let call = pendingReRegistration {
+            pendingReRegistration = nil
+            if store().liveCall === call {
                 reRegister(call)
             }
         }
@@ -217,7 +228,7 @@ final class HoldRecovery {
             return
         }
         guard isAppActive() else {
-            isReRegistrationPending = true
+            pendingReRegistration = call
             return
         }
         let uuid = UUID()

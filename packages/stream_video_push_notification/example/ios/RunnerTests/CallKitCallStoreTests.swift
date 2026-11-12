@@ -247,12 +247,16 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertNil(store.holdPerformed(uuid: UUID(), onHold: true))
     }
 
-    func testHoldingAlsoMutesAndResumingUnmutes() {
+    func testHoldingLeavesTheMuteAsTheUserSetIt() {
         let call = ring("a")
+        _ = store.mutePerformed(uuid: call.identity.callKitUUID, muted: true)
 
         _ = store.holdPerformed(uuid: call.identity.callKitUUID, onHold: true)
-        XCTAssertTrue(call.isMuted)
         _ = store.holdPerformed(uuid: call.identity.callKitUUID, onHold: false)
+        XCTAssertTrue(call.isMuted)
+
+        _ = store.mutePerformed(uuid: call.identity.callKitUUID, muted: false)
+        _ = store.holdPerformed(uuid: call.identity.callKitUUID, onHold: true)
         XCTAssertFalse(call.isMuted)
     }
 

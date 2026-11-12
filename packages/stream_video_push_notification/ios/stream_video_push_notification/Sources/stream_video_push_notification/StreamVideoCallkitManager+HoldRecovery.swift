@@ -25,6 +25,10 @@ extension StreamVideoCallkitManager: HoldRecoveryActions {
         endReRegisteringCall(call, reason: .failed, notifyDart: true)
     }
 
+    func requestMute(_ uuid: UUID) {
+        transactions.mute(uuid: uuid, isMuted: true)
+    }
+
     /// Ends `call`, which CallKit already took as ended, before it is registered again. A start
     /// CallKit performs for it later is failed.
     func endReRegisteringCall(_ call: CallKitCall, reason: CXCallEndedReason?, notifyDart: Bool) {

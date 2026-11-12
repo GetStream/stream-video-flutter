@@ -166,10 +166,15 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         if call.isOnHold == onHold {
             apply([store.holdEvent(call, onHold)])
         } else {
+            let uuid = call.identity.callKitUUID
             if onHold {
-                holdRecovery.holdRequested(call.identity.callKitUUID)
+                holdRecovery.holdRequested(uuid)
             }
-            transactions.hold(uuid: call.identity.callKitUUID, onHold: onHold)
+            transactions.hold(uuid: uuid, onHold: onHold) { [weak self] accepted in
+                if onHold && !accepted {
+                    self?.holdRecovery.holdRefused(uuid)
+                }
+            }
         }
     }
 

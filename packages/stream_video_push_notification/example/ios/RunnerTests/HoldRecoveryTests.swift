@@ -65,6 +65,7 @@ final class FakeHoldRecoveryActions: HoldRecoveryActions {
     private(set) var starts: [UUID] = []
     private(set) var startCompletions: [(Bool) -> Void] = []
     private(set) var abandoned: [CallKitCall] = []
+    private(set) var mutes: [UUID] = []
 
     func requestUnhold(_ uuid: UUID, completion: @escaping (Bool) -> Void) {
         unholds.append(uuid)
@@ -84,6 +85,10 @@ final class FakeHoldRecoveryActions: HoldRecoveryActions {
 
     func reRegistrationAbandoned(_ call: CallKitCall) {
         abandoned.append(call)
+    }
+
+    func requestMute(_ uuid: UUID) {
+        mutes.append(uuid)
     }
 }
 
@@ -339,6 +344,68 @@ final class HoldRecoveryTests: XCTestCase {
 
         appBecomesActive()
         XCTAssertEqual(actions.starts.count, 1)
+    }
+
+    func testAPendingReRegistrationIsDroppedWhenItsCallEnds() {
+        // A comes off hold in the background with no activation, then ends from the lock screen.
+        holdForOtherCall()
+        isAppActive = false
+        resume()
+        scheduler.advance(by: HoldRecovery.activationWait)
+        XCTAssertEqual(actions.starts, [])
+        _ = store.endPerformed(uuid: call.identity.callKitUUID)
+        observer.end(call.identity.callKitUUID)
+        observer.end(otherCall)
+
+        // B is held and resumed with working audio.
+        let uuid = UUID()
+        _ = store.incomingReported(
+            CallData(args: ["id": uuid.uuidString]), uuid: uuid, source: .pushKit)
+        _ = store.answerPerformed(uuid: uuid)
+        call = store.call(forCallKit: uuid)
+        observer.add(uuid)
+        _ = store.audioActivated()
+        activate()
+        holdForOtherCall()
+        observer.end(otherCall)
+        resume()
+        activate()
+
+        appBecomesActive()
+
+        XCTAssertEqual(actions.starts, [])
+    }
+
+    func testAMutedCallIsMutedAgainOnceRegisteredAgain() {
+        _ = store.mutePerformed(uuid: call.identity.callKitUUID, muted: true)
+        holdForOtherCall()
+        resume()
+        scheduler.advance(by: HoldRecovery.activationWait)
+        performLastStart()
+
+        recovery.reRegistrationStarted(call)
+
+        XCTAssertEqual(actions.mutes, [call.identity.callKitUUID])
+    }
+
+    func testAnUnmutedCallIsNotMutedOnceRegisteredAgain() {
+        holdForOtherCall()
+        resume()
+        scheduler.advance(by: HoldRecovery.activationWait)
+        performLastStart()
+
+        recovery.reRegistrationStarted(call)
+
+        XCTAssertEqual(actions.mutes, [])
+    }
+
+    func testAHoldCallKitRefusedDoesNotCountAsRequested() {
+        let uuid = call.identity.callKitUUID
+        recovery.holdRequested(uuid)
+        recovery.holdRefused(uuid)
+        observer.add(otherCall)
+
+        XCTAssertEqual(recovery.holdOrigin(for: uuid), .otherCall)
     }
 
     func testAnEngineFailureOnACallNeverHeldDoesNothing() {

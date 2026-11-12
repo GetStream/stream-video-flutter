@@ -35,6 +35,7 @@
 ### 🐞 Fixed
 
 - A mute from the CallKit screen applies to the call it was made on.
+- [iOS] Taking a call off hold no longer marks it unmuted, so muting or unmuting from the app afterwards reaches the CallKit screen.
 - [iOS] Answering one of two ringing calls from CallKit no longer reports the other one as accepted in `activeCalls`.
 - [iOS] A ring that was already ended, for example because the caller cancelled it, no longer times out later and reports a second, unanswered end.
 - `registerDevice` right after `connect`, and `unregisterDevice` on web and desktop, no longer throw.
