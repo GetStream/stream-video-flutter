@@ -19,6 +19,7 @@
 
 - [iOS] `StreamVideoPKDelegateManager` is renamed `VoIPPushRegistryHandler`. The old name still works as a deprecated alias with the same members, so an `AppDelegate` that calls `StreamVideoPKDelegateManager.shared.registerForPushNotifications()` compiles and rings unchanged, with a deprecation warning.
 - `IOSPushConfiguration.audioSessionActive` and `IOSParams.audioSessionActive`, and on iOS `CallData.audioSessionActive` and `StreamVideoPushConfiguration.audioSessionActive`, have no effect: CallKit activates the audio session. `dart fix --apply` removes the Dart arguments.
+- `supportsGrouping`, `supportsUngrouping` and `maximumCallsPerCallGroup` on `IOSPushConfiguration` and `IOSParams`, and on iOS on `CallData` and `StreamVideoPushConfiguration`, have no effect: CallKit is never offered a merge of calls. `dart fix --apply` removes them.
 
 ### 🐞 Fixed
 
@@ -27,10 +28,14 @@
 - [iOS] A call ended from the CallKit screen while the app is in the background or behind the lock screen reaches the backend straight away. The plugin keeps the app running for up to 10 seconds after CallKit ends a call, so Dart can leave the call or cancel its ring before iOS suspends the app. Until now the other side kept ringing until the app was opened again.
 - [iOS] While a VoIP push rings, `endCall` and `setCallConnected` for another call the plugin tracks, such as an outgoing call, act on that call. They used to act on the ringing call: connecting the outgoing call answered the ring, and ending it declined the ring and left the outgoing call on screen.
 - [iOS] An outgoing call started with `startOutgoingCall` no longer affects the calls after it once it ended. An incoming ring shown later times out again, declining it sends `ActionCallDecline` instead of `ActionCallEnded`, and the next audio session activation no longer reports the ended call to CallKit as connecting.
+- [iOS] CallKit no longer offers to merge calls, and a merge it asks for is refused. A merge used to be accepted although the calls stayed apart, so CallKit showed a conference that did not exist.
+- [iOS] A call reported with only some CallKit options, from a VoIP push before Dart first sent its configuration or from native code, no longer offers Hold & Accept or a keypad. A missing option takes the same default as in `IOSPushConfiguration`: no holding, no DTMF, one call group.
 
 ### 🔄 Changed
 
 - `StreamVideoPushHandler.handleBackgroundMessage` builds a client that sets up no media.
+- `IOSPushConfiguration.supportsDTMF` is off by default. The SDK sends no DTMF tones, so CallKit's keypad did nothing. An app that sends the digits itself from `ActionCallToggleDtmf` turns it on.
+- [iOS] `ActionCallToggleGroup` is no longer sent.
 - [iOS] `ActionCallAccept` and `ActionCallDecline` carry the call CallKit answered or ended, instead of the options last given to the plugin, which could belong to another call or be empty.
 - [iOS] Only the first activation of a call's audio session applies its audio session options and reports an outgoing call as connecting. A later activation, such as a resume from hold, leaves the session as it is. Every activation now sends `ActionCallToggleAudioSession`, including after the call connected.
 - [iOS] The plugin tells `stream_webrtc_flutter` when CallKit activates or deactivates the audio session, and when no call is left, so WebRTC's audio engine runs only while the app owns the session. It calls `FlutterWebRTCPlugin.audioEngineControl`, which reaches every registration of the WebRTC plugin, one per Flutter engine. The plugin now links `stream_webrtc_flutter` natively and needs `stream_webrtc_flutter` 5.0.0.

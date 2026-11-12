@@ -92,16 +92,10 @@ extension StreamVideoCallkitManager {
         action.fulfill()
     }
 
+    /// Refused: calls are never offered for merging, and a merged CallKit call would not be one
+    /// Stream call.
     func provider(_ provider: CXProvider, perform action: CXSetGroupCallAction) {
-        guard
-            let effects = store.groupPerformed(
-                uuid: action.callUUID, groupWith: action.callUUIDToGroupWith)
-        else {
-            action.fail()
-            return
-        }
-        apply(effects)
-        action.fulfill()
+        action.fail()
     }
 
     func provider(_ provider: CXProvider, perform action: CXPlayDTMFCallAction) {

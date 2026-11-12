@@ -9,7 +9,6 @@ import Foundation
     @objc public var useComplexHandle: Bool
     @objc public var supportsVideo: Bool
     @objc public var maximumCallGroups: Int
-    @objc public var maximumCallsPerCallGroup: Int
     @objc public var audioSessionMode: String
     @objc public var audioSessionPreferredSampleRate: Double
     @objc public var audioSessionPreferredIOBufferDuration: Double
@@ -23,31 +22,34 @@ import Foundation
     }
     @objc public var supportsDTMF: Bool
     @objc public var supportsHolding: Bool
-    @objc public var supportsGrouping: Bool
-    @objc public var supportsUngrouping: Bool
     @objc public var ringtonePath: String
     @objc public var includesCallsInRecents: Bool
 
-    @objc public init(headers: NSDictionary) {
-        self.headers = headers
+    /// Always 1: CallKit is never offered a merge of calls.
+    @available(*, deprecated, message: "Has no effect. Calls cannot be merged in CallKit.")
+    @objc public var maximumCallsPerCallGroup: Int {
+        get { 1 }
+        set {}
+    }
 
-        // Default iOS values
-        self.iconName = "CallKitLogo"
-        self.handleType = ""
-        self.useComplexHandle = false
-        self.supportsVideo = true
-        self.maximumCallGroups = 2
-        self.maximumCallsPerCallGroup = 1
-        self.audioSessionMode = ""
-        self.audioSessionPreferredSampleRate = 44100.0
-        self.audioSessionPreferredIOBufferDuration = 0.005
-        self.configureAudioSession = true
-        self.supportsDTMF = true
-        self.supportsHolding = true
-        self.supportsGrouping = true
-        self.supportsUngrouping = true
-        self.ringtonePath = ""
-        self.includesCallsInRecents = true
+    /// Always false: CallKit is never offered a merge of calls.
+    @available(*, deprecated, message: "Has no effect. Calls cannot be merged in CallKit.")
+    @objc public var supportsGrouping: Bool {
+        get { false }
+        set {}
+    }
+
+    /// Always false: CallKit is never offered a merge of calls.
+    @available(*, deprecated, message: "Has no effect. Calls cannot be merged in CallKit.")
+    @objc public var supportsUngrouping: Bool {
+        get { false }
+        set {}
+    }
+
+    /// The default CallKit options, the same as Dart's `IOSPushConfiguration`.
+    @objc public convenience init(headers: NSDictionary) {
+        let args: [String: Any?] = ["headers": headers]
+        self.init(args: args)
     }
 
     @objc public convenience init(args: NSDictionary) {
@@ -70,11 +72,8 @@ import Foundation
         self.useComplexHandle = options.useComplexHandle
         self.supportsVideo = options.supportsVideo
         self.maximumCallGroups = options.maximumCallGroups
-        self.maximumCallsPerCallGroup = options.maximumCallsPerCallGroup
         self.supportsDTMF = options.supportsDTMF
         self.supportsHolding = options.supportsHolding
-        self.supportsGrouping = options.supportsGrouping
-        self.supportsUngrouping = options.supportsUngrouping
         self.includesCallsInRecents = options.includesCallsInRecents
         self.ringtonePath = options.ringtonePath
         self.configureAudioSession = options.configureAudioSession
@@ -127,15 +126,12 @@ import Foundation
             "useComplexHandle": useComplexHandle,
             "supportsVideo": supportsVideo,
             "maximumCallGroups": maximumCallGroups,
-            "maximumCallsPerCallGroup": maximumCallsPerCallGroup,
             "audioSessionMode": audioSessionMode,
             "audioSessionPreferredSampleRate": audioSessionPreferredSampleRate,
             "audioSessionPreferredIOBufferDuration": audioSessionPreferredIOBufferDuration,
             "configureAudioSession": configureAudioSession,
             "supportsDTMF": supportsDTMF,
             "supportsHolding": supportsHolding,
-            "supportsGrouping": supportsGrouping,
-            "supportsUngrouping": supportsUngrouping,
             "ringtonePath": ringtonePath,
             "includesCallsInRecents": includesCallsInRecents,
         ]

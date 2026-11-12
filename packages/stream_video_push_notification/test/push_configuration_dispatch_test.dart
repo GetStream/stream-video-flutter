@@ -116,4 +116,37 @@ void main() {
       expect(merged.android?.telecom?.schema, 'base');
     });
   });
+
+  group('iOS CallKit options reaching the platform', () {
+    Map<String, dynamic> iosOf(Map<String, dynamic> configuration) =>
+        configuration['ios'] as Map<String, dynamic>;
+
+    test('by default offer no hold, no keypad and one call group', () {
+      final ios = iosOf(_dispatch(platform, null));
+
+      expect(ios['supportsHolding'], isFalse);
+      expect(ios['supportsDTMF'], isFalse);
+      expect(ios['maximumCallGroups'], 1);
+      expect(ios['supportsVideo'], isTrue);
+      expect(ios['supportsGrouping'], isNull);
+      expect(ios['supportsUngrouping'], isNull);
+    });
+
+    test('keep the hold and keypad an app turns on', () {
+      final ios = iosOf(
+        _dispatch(
+          platform,
+          const StreamVideoPushConfiguration(
+            ios: IOSPushConfiguration(
+              supportsHolding: true,
+              supportsDTMF: true,
+            ),
+          ),
+        ),
+      );
+
+      expect(ios['supportsHolding'], isTrue);
+      expect(ios['supportsDTMF'], isTrue);
+    });
+  });
 }

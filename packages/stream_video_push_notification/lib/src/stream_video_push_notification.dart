@@ -282,10 +282,8 @@ const _defaultPushConfiguration = StreamVideoPushConfiguration(
     audioSessionMode: 'default',
     audioSessionPreferredSampleRate: 44100,
     audioSessionPreferredIOBufferDuration: 0.005,
-    supportsDTMF: true,
+    supportsDTMF: false,
     supportsHolding: false,
-    supportsGrouping: false,
-    supportsUngrouping: false,
     ringtonePath: 'system_ringtone_default',
   ),
 );

@@ -876,6 +876,70 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
 
         XCTAssertNil(manager.store.call(forCallKit: call.identity.callKitUUID))
     }
+
+    // MARK: - CallKit options
+
+    func testCallKitIsNeverOfferedAMergeWhateverTheOptionsSay() {
+        let data = CallData(args: [
+            "ios": [
+                "supportsGrouping": true, "supportsUngrouping": true, "maximumCallsPerCallGroup": 3,
+            ]
+        ])
+
+        let update = manager.callUpdate(data)
+        let configuration = manager.createConfiguration(data)
+
+        XCTAssertFalse(update.supportsGrouping)
+        XCTAssertFalse(update.supportsUngrouping)
+        XCTAssertEqual(configuration.maximumCallsPerCallGroup, 1)
+    }
+
+    func testCallKitIsOfferedTheHoldDTMFAndCallGroupsTheOptionsAskFor() {
+        let data = CallData(args: [
+            "ios": ["supportsHolding": true, "supportsDTMF": true, "maximumCallGroups": 2]
+        ])
+
+        let update = manager.callUpdate(data)
+        let configuration = manager.createConfiguration(data)
+
+        XCTAssertTrue(update.supportsHolding)
+        XCTAssertTrue(update.supportsDTMF)
+        XCTAssertEqual(configuration.maximumCallGroups, 2)
+    }
+
+    func testWithoutOptionsCallKitIsOfferedNoHoldNoKeypadAndOneCallGroup() {
+        let data = CallData(args: ["id": "sparse"])
+
+        let update = manager.callUpdate(data)
+        let configuration = manager.createConfiguration(data)
+
+        XCTAssertFalse(update.supportsHolding)
+        XCTAssertFalse(update.supportsDTMF)
+        XCTAssertEqual(configuration.maximumCallGroups, 1)
+    }
+
+    func testAMergeCallKitAsksForIsRefusedAndDartIsNotTold() {
+        listen()
+        let call = track(id: "ringing")
+        let action = RecordingSetGroupCallAction(
+            call: call.identity.callKitUUID, callUUIDToGroupWith: UUID())
+
+        manager.provider(provider, perform: action)
+        drainMainQueue()
+
+        XCTAssertTrue(action.failed)
+        XCTAssertFalse(action.fulfilled)
+        XCTAssertEqual(receivedNames, [])
+    }
+}
+
+/// Records how the manager completed the action instead of handing it to CallKit.
+private final class RecordingSetGroupCallAction: CXSetGroupCallAction {
+    private(set) var failed = false
+    private(set) var fulfilled = false
+
+    override func fail() { failed = true }
+    override func fulfill() { fulfilled = true }
 }
 
 final class FakeBackgroundTasks: BackgroundTasks {

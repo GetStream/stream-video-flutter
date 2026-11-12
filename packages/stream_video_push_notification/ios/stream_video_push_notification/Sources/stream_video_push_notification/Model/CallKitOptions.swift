@@ -2,17 +2,18 @@ import Foundation
 
 /// The CallKit and audio session options `CallData` and `StreamVideoPushConfiguration` both
 /// carry, read from the `ios` sub-map Dart sends or, when there is none, from the top level.
+///
+/// A missing key takes the same default as Dart's `IOSPushConfiguration`, so a call reported
+/// before Dart sent its configuration, or from native code with only some keys, offers what a
+/// call reported from Dart does.
 struct CallKitOptions {
     var iconName: String
     var handleType: String
     var useComplexHandle: Bool
     var supportsVideo: Bool
     var maximumCallGroups: Int
-    var maximumCallsPerCallGroup: Int
     var supportsDTMF: Bool
     var supportsHolding: Bool
-    var supportsGrouping: Bool
-    var supportsUngrouping: Bool
     var includesCallsInRecents: Bool
     var ringtonePath: String
     var configureAudioSession: Bool
@@ -33,12 +34,9 @@ struct CallKitOptions {
         self.handleType = source["handleType"] as? String ?? ""
         self.useComplexHandle = source["useComplexHandle"] as? Bool ?? false
         self.supportsVideo = source["supportsVideo"] as? Bool ?? true
-        self.maximumCallGroups = source["maximumCallGroups"] as? Int ?? 2
-        self.maximumCallsPerCallGroup = source["maximumCallsPerCallGroup"] as? Int ?? 1
-        self.supportsDTMF = source["supportsDTMF"] as? Bool ?? true
-        self.supportsHolding = source["supportsHolding"] as? Bool ?? true
-        self.supportsGrouping = source["supportsGrouping"] as? Bool ?? true
-        self.supportsUngrouping = source["supportsUngrouping"] as? Bool ?? true
+        self.maximumCallGroups = source["maximumCallGroups"] as? Int ?? 1
+        self.supportsDTMF = source["supportsDTMF"] as? Bool ?? false
+        self.supportsHolding = source["supportsHolding"] as? Bool ?? false
         self.includesCallsInRecents = source["includesCallsInRecents"] as? Bool ?? true
         self.ringtonePath = source["ringtonePath"] as? String ?? ""
         self.configureAudioSession = source["configureAudioSession"] as? Bool ?? true

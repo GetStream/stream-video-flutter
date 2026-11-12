@@ -23,9 +23,9 @@ final class StreamVideoPushConfigurationTests: XCTestCase {
 
         XCTAssertEqual(configuration.iconName, "CallKitLogo")
         XCTAssertTrue(configuration.supportsVideo)
-        XCTAssertEqual(configuration.maximumCallGroups, 2)
-        XCTAssertEqual(configuration.maximumCallsPerCallGroup, 1)
-        XCTAssertTrue(configuration.supportsHolding)
+        XCTAssertEqual(configuration.maximumCallGroups, 1)
+        XCTAssertFalse(configuration.supportsHolding)
+        XCTAssertFalse(configuration.supportsDTMF)
         XCTAssertTrue(configuration.includesCallsInRecents)
         XCTAssertEqual(configuration.ringtonePath, "")
         XCTAssertTrue(configuration.configureAudioSession)
@@ -45,10 +45,10 @@ final class StreamVideoPushConfigurationTests: XCTestCase {
     }
 
     func testReadsTopLevelKeysWithoutASubMap() {
-        let configuration = StreamVideoPushConfiguration(args: ["iconName": "FlatIcon", "supportsDTMF": false])
+        let configuration = StreamVideoPushConfiguration(args: ["iconName": "FlatIcon", "supportsDTMF": true])
 
         XCTAssertEqual(configuration.iconName, "FlatIcon")
-        XCTAssertFalse(configuration.supportsDTMF)
+        XCTAssertTrue(configuration.supportsDTMF)
     }
 
     func testLoadPersistedIsNilWhenNothingWasStored() {
