@@ -13,8 +13,7 @@ protocol WebRTCAudioEngineGate: AnyObject {
     var onEngineStartFailed: (() -> Void)? { get set }
 }
 
-/// Talks to `stream_webrtc_flutter` through NotificationCenter, which its plugin observes in
-/// every registration.
+/// Talks to `stream_webrtc_flutter` through NotificationCenter, for code that does not link it.
 final class NotificationCenterAudioEngineGate: WebRTCAudioEngineGate {
 
     /// Posted to allow or stop the audio engine; matches
@@ -58,38 +57,23 @@ final class NotificationCenterAudioEngineGate: WebRTCAudioEngineGate {
     }
 }
 
-/// Calls the latest registered `stream_webrtc_flutter` plugin directly, and posts the
-/// notifications while none is registered.
+/// Calls `stream_webrtc_flutter`'s process-wide audio engine control, which reaches every
+/// registration of its plugin, including registrations made later.
 final class WebRTCPluginAudioEngineGate: WebRTCAudioEngineGate {
 
     var onEngineStartFailed: (() -> Void)?
 
-    private let fallback: NotificationCenterAudioEngineGate
-    private let resolveControl: () -> FlutterWebRTCAudioEngineControl?
-    /// The plugin the handler was last registered on.
-    private weak var control: FlutterWebRTCAudioEngineControl?
+    let control: FlutterWebRTCAudioEngineControl
 
-    /// `resolveControl` is asked for the plugin on each update.
-    init(
-        fallback: NotificationCenterAudioEngineGate = NotificationCenterAudioEngineGate(),
-        resolveControl: @escaping () -> FlutterWebRTCAudioEngineControl? = {
-            FlutterWebRTCPlugin.sharedSingleton()
-        }
-    ) {
-        self.fallback = fallback
-        self.resolveControl = resolveControl
-        // The start-failed notification is forwarded only while no plugin has been found.
-        fallback.onEngineStartFailed = { [weak self] in
-            guard let self = self, self.control == nil else { return }
-            self.onEngineStartFailed?()
+    /// Sets the control's start-failure handler, which forwards to `onEngineStartFailed`.
+    init(control: FlutterWebRTCAudioEngineControl = FlutterWebRTCPlugin.audioEngineControl()) {
+        self.control = control
+        control.audioEngineStartFailedHandler = { [weak self] in
+            self?.onEngineStartFailed?()
         }
     }
 
     func update(available: Bool, callKitSessionActive: Bool?) {
-        guard let control = resolvedControl() else {
-            fallback.update(available: available, callKitSessionActive: callKitSessionActive)
-            return
-        }
         if callKitSessionActive == true {
             control.setCallKitAudioSessionActive(true)
         }
@@ -97,17 +81,5 @@ final class WebRTCPluginAudioEngineGate: WebRTCAudioEngineGate {
         if callKitSessionActive == false {
             control.setCallKitAudioSessionActive(false)
         }
-    }
-
-    /// The plugin registered last, with the start-failure handler set on it.
-    private func resolvedControl() -> FlutterWebRTCAudioEngineControl? {
-        guard let resolved = resolveControl() else { return control }
-        if resolved !== control {
-            resolved.audioEngineStartFailedHandler = { [weak self] in
-                self?.onEngineStartFailed?()
-            }
-            control = resolved
-        }
-        return resolved
     }
 }

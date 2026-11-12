@@ -69,6 +69,7 @@
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		784666492D4C4C64000A1A5F /* FlutterFramework */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterFramework; path = Flutter/ephemeral/Packages/.packages/FlutterFramework; sourceTree = "<group>"; };
+		78F3C2A12F1B4D5E00C0FFEE /* stream_webrtc_flutter */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = stream_webrtc_flutter; path = Flutter/ephemeral/Packages/.packages/stream_webrtc_flutter; sourceTree = "<group>"; };
 		78DABEA22ED26510000E7860 /* stream_video_push_notification */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = stream_video_push_notification; path = ../../ios/stream_video_push_notification; sourceTree = "<group>"; };
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = Flutter/ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
@@ -144,6 +145,7 @@
 			children = (
 				78DABEA22ED26510000E7860 /* stream_video_push_notification */,
 				784666492D4C4C64000A1A5F /* FlutterFramework */,
+				78F3C2A12F1B4D5E00C0FFEE /* stream_webrtc_flutter */,
 				78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */,
 				3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */,
 				9740EEB21CF90195004384FC /* Debug.xcconfig */,
