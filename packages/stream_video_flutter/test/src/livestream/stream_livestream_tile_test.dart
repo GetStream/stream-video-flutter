@@ -83,6 +83,60 @@ void main() {
     expect(taps, 1);
   });
 
+  group('toolbar layout', () {
+    // Each button's 48 tap target pads its 32 visual by 8 on every side.
+    const tapPadding = 8.0;
+
+    Future<void> pumpDirected(
+      WidgetTester tester,
+      TextDirection direction,
+    ) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          child: Directionality(
+            textDirection: direction,
+            child: SizedBox(
+              width: 280,
+              height: 482,
+              child: StreamLivestreamTile(
+                call: call,
+                showSpeakerphoneToggle: false,
+                onFullscreenTapped: () {},
+                child: const SizedBox(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('holds the indicators and button 8 from the edges', (
+      tester,
+    ) async {
+      final spacing = const StreamSpacing().xs;
+      await pumpDirected(tester, TextDirection.ltr);
+
+      final tile = tester.getRect(find.byType(StreamLivestreamTile));
+      final indicator = tester.getRect(find.byType(StreamLiveIndicator));
+      final button = tester.getRect(find.byType(StreamButton));
+      expect(indicator.left - tile.left, spacing);
+      expect(tile.right - (button.right - tapPadding), spacing);
+      expect(tile.bottom - (button.bottom - tapPadding), spacing);
+    });
+
+    testWidgets('mirrors right to left', (tester) async {
+      final spacing = const StreamSpacing().xs;
+      await pumpDirected(tester, TextDirection.rtl);
+
+      final tile = tester.getRect(find.byType(StreamLivestreamTile));
+      final indicator = tester.getRect(find.byType(StreamLiveIndicator));
+      final button = tester.getRect(find.byType(StreamButton));
+      expect(tile.right - indicator.right, spacing);
+      expect(button.left + tapPadding - tile.left, spacing);
+    });
+  });
+
   testWidgets('hides the indicators when asked', (tester) async {
     await pump(
       tester,
