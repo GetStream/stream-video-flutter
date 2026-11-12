@@ -1,46 +1,42 @@
-part of 'stream_video_push_notification.dart';
+import 'package:stream_video/stream_video.dart';
+
+import 'manager/push_token_source.dart';
 
 /// Signature for a function that creates a [Stream] of push tokens.
 typedef TokenStreamProvider = Stream<String> Function();
 
+/// A push provider configured in the Stream dashboard, and the device tokens
+/// to register with it.
 final class StreamVideoPushProvider {
   /// Creates a new push provider.
   const StreamVideoPushProvider({
     required this.name,
     required this.type,
     required this.isVoIP,
-    required TokenStreamProvider tokenStreamProvider,
-  }) : _tokenStreamProvider = tokenStreamProvider;
+    required this._tokenStreamProvider,
+  });
 
   /// Creates a new push provider for APN.
+  ///
+  /// Registers the device's PushKit VoIP token by default.
   const StreamVideoPushProvider.apn({
     required this.name,
-    TokenStreamProvider tokenStreamProvider = _voIPTokenStreamProvider,
+    this._tokenStreamProvider = _voIPTokens,
   }) : isVoIP = true,
-       _tokenStreamProvider = tokenStreamProvider,
        type = PushProvider.apn;
 
   /// Creates a new push provider for Firebase.
+  ///
+  /// Registers the device's Firebase Cloud Messaging token by default.
   const StreamVideoPushProvider.firebase({
     required this.name,
-    TokenStreamProvider tokenStreamProvider = _firebaseTokenStreamProvider,
+    this._tokenStreamProvider = _fcmTokens,
   }) : isVoIP = false,
-       _tokenStreamProvider = tokenStreamProvider,
        type = PushProvider.firebase;
 
-  static Stream<String> _firebaseTokenStreamProvider() async* {
-    final initialToken = await StreamTokenProvider.getFirebaseToken();
-    if (initialToken != null) yield initialToken;
+  static Stream<String> _voIPTokens() => const VoIPTokenSource().tokens;
 
-    yield* StreamTokenProvider.onFirebaseTokenRefresh;
-  }
-
-  static Stream<String> _voIPTokenStreamProvider() async* {
-    final initialToken = await StreamTokenProvider.getVoIPToken();
-    if (initialToken != null) yield initialToken;
-
-    yield* StreamTokenProvider.onVoIPTokenRefresh;
-  }
+  static Stream<String> _fcmTokens() => const FcmTokenSource().tokens;
 
   /// The name of the push provider.
   final String name;
@@ -56,50 +52,4 @@ final class StreamVideoPushProvider {
   Stream<String> get onTokenRefresh => _tokenStreamProvider();
 
   final TokenStreamProvider _tokenStreamProvider;
-}
-
-/// Provides push tokens for the device.
-final class StreamTokenProvider {
-  StreamTokenProvider._();
-
-  /// Gets the current push token for the device.
-  static Future<String?> getVoIPToken() async {
-    if (!CurrentPlatform.isIos) return null;
-
-    final token = await StreamVideoPushNotificationPlatform.instance
-        .getDevicePushTokenVoIP();
-
-    if (token.isEmpty) return null;
-    return token;
-  }
-
-  /// Emits a new push token whenever the token is refreshed.
-  static Stream<String> get onVoIPTokenRefresh {
-    if (!CurrentPlatform.isIos) return const Stream.empty();
-
-    return RingingEventBroadcaster.shared.onEvent
-        .whereType<ActionDidUpdateDevicePushTokenVoip>()
-        .map((event) => event.token);
-  }
-
-  static Future<String?> getAPNToken() async {
-    if (!CurrentPlatform.isIos) return null;
-
-    final token = await FirebaseMessaging.instance.getAPNSToken();
-    if (token is! String || token.isEmpty) return null;
-
-    return token;
-  }
-
-  /// Gets the current push token for the device.
-  static Future<String?> getFirebaseToken() async {
-    final token = await FirebaseMessaging.instance.getToken();
-    if (token == null || token.isEmpty) return null;
-
-    return token;
-  }
-
-  /// Emits a new push token whenever the token is refreshed.
-  static Stream<String> get onFirebaseTokenRefresh =>
-      FirebaseMessaging.instance.onTokenRefresh;
 }

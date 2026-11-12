@@ -3,18 +3,15 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_video/stream_video.dart';
 import '../stream_video_push_notification.dart';
 import '../stream_video_push_notification_platform_interface.dart';
+import 'manager/push_device_registrar.dart';
+import 'manager/push_token_source.dart';
 import 'manager/ringing_event_broadcaster.dart';
 
-part 'stream_video_push_provider.dart';
-
-const _idToken = 1;
 const _idRinging = 2;
 const _idCallEnded = 3;
 const _idCallAccepted = 4;
@@ -78,10 +75,16 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     required this.androidPushProvider,
     required this.pushConfiguration,
     this.registerApnDeviceToken = false,
-  }) : _client = client {
-    if (!CurrentPlatform.isMobile) return;
+  }) {
+    _registrar = PushDeviceRegistrar(
+      client: client,
+      iosPushProvider: iosPushProvider,
+      androidPushProvider: androidPushProvider,
+      registerApnDeviceToken: registerApnDeviceToken,
+      currentDeviceToken: getDevicePushTokenVoIP,
+    );
 
-    SharedPreferences.getInstance().then((prefs) => _sharedPreferences = prefs);
+    if (!CurrentPlatform.isMobile) return;
 
     _subscriptions.add(
       _idActiveCall,
@@ -253,8 +256,13 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       }),
     );
   }
-  static const userDeviceTokenKey = 'io.getstream.userDeviceToken';
-  static const userDeviceTokenVoIPKey = 'io.getstream.userDeviceTokenVoIP';
+
+  /// Preferences key of the last APNs token registered.
+  static const userDeviceTokenKey = PushDeviceRegistrar.userDeviceTokenKey;
+
+  /// Preferences key of the last provider token registered.
+  static const userDeviceTokenVoIPKey =
+      PushDeviceRegistrar.userDeviceTokenVoIPKey;
 
   /// Factory for creating a new instance of [StreamVideoPushNotificationManager].
   static StreamVideoPushNotificationManager Function(
@@ -283,12 +291,13 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     };
   }
 
-  final CoordinatorClient _client;
   final StreamVideoPushProvider iosPushProvider;
   final StreamVideoPushProvider androidPushProvider;
   final StreamVideoPushConfiguration pushConfiguration;
   final bool registerApnDeviceToken;
-  late SharedPreferences _sharedPreferences;
+
+  /// Registers and unregisters this device's push tokens.
+  late final PushDeviceRegistrar _registrar;
 
   /// The one broadcaster of this process's ringing events; see
   /// [RingingEventBroadcaster.shared].
@@ -301,81 +310,10 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   List<Call> currentActiveCalls = [];
 
   @override
-  void registerDevice() {
-    final pushProvider = switch (CurrentPlatform.type) {
-      PlatformType.ios => iosPushProvider,
-      PlatformType.android => androidPushProvider,
-      _ => null,
-    };
-
-    if (pushProvider == null) {
-      _logger.w(() => 'Cannot register device: unsupported platform');
-      return;
-    }
-
-    Future<void> registerDevice(String token, bool isVoIP) async {
-      final tokenKey = isVoIP ? userDeviceTokenVoIPKey : userDeviceTokenKey;
-
-      final storedToken = _sharedPreferences.getString(tokenKey);
-      if (storedToken == token) return;
-
-      await _client
-          .createDevice(
-            id: token,
-            voipToken: isVoIP,
-            pushProvider: pushProvider.type,
-            pushProviderName: pushProvider.name,
-          )
-          .then((result) {
-            if (result is Success) {
-              _sharedPreferences.setString(tokenKey, token);
-            }
-          });
-    }
-
-    if (CurrentPlatform.isIos && registerApnDeviceToken) {
-      StreamTokenProvider.getAPNToken().then((token) {
-        if (token != null) {
-          registerDevice(token, false);
-        }
-      });
-    }
-
-    _subscriptions.addIfAbsent(
-      _idToken,
-      () => pushProvider.onTokenRefresh.listen(
-        (token) => registerDevice(token, true),
-      ),
-    );
-  }
-
-  Future<void> removedStoredTokens() async {
-    await _sharedPreferences.remove(userDeviceTokenKey);
-    await _sharedPreferences.remove(userDeviceTokenVoIPKey);
-  }
+  void registerDevice() => _registrar.registerDevice();
 
   @override
-  Future<void> unregisterDevice() async {
-    final token = await getDevicePushTokenVoIP();
-    if (token != null) {
-      await _client.deleteDevice(id: token);
-      _subscriptions.cancel(_idToken);
-    }
-
-    // Delete the APN token stored on a successful registration, which also
-    // covers tokens registered before `registerApnDeviceToken` was disabled,
-    // plus the current one if APN registration is enabled.
-    final apnTokens = {
-      ?_sharedPreferences.getString(userDeviceTokenKey),
-      if (CurrentPlatform.isIos && registerApnDeviceToken)
-        ?await StreamTokenProvider.getAPNToken(),
-    };
-    for (final apnToken in apnTokens) {
-      await _client.deleteDevice(id: apnToken);
-    }
-
-    await removedStoredTokens();
-  }
+  Future<void> unregisterDevice() => _registrar.unregisterDevice();
 
   @override
   Stream<RingingEvent> get onCallEvent {
@@ -527,9 +465,9 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   @override
   Future<String?> getDevicePushTokenVoIP() async {
     if (CurrentPlatform.isIos) {
-      return StreamTokenProvider.getVoIPToken();
+      return const VoIPTokenSource().token();
     } else if (CurrentPlatform.isAndroid) {
-      return StreamTokenProvider.getFirebaseToken();
+      return const FcmTokenSource().token();
     }
 
     return null;
@@ -574,6 +512,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   @override
   Future<void> dispose() async {
     _subscriptions.cancelAll();
+    await _registrar.dispose();
   }
 
   static Future<void> ensureFullScreenIntentPermission() {
