@@ -1,3 +1,5 @@
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+
 import '../../../stream_video.dart';
 
 /// Options used when creating an AudioTrack.
@@ -42,9 +44,9 @@ class AudioConstraints extends MediaConstraints {
   Map<String, dynamic> toMap() {
     final constraints = <String, dynamic>{};
 
-    /// in web platform it's not possible to provide optional and mandatory parameters.
-    /// deviceId is a mandatory parameter
-    if (!CurrentPlatform.isWeb || (CurrentPlatform.isWeb && deviceId == null)) {
+    // An exact deviceId cannot be combined with optional parameters.
+    final exactDeviceId = rtc.webRtcCapabilities.usesExactDeviceIdConstraints;
+    if (!exactDeviceId || deviceId == null) {
       constraints['optional'] = <Map<String, dynamic>>[
         {'echoCancellation': echoCancellation},
         {'googDAEchoCancellation': echoCancellation},
@@ -62,7 +64,7 @@ class AudioConstraints extends MediaConstraints {
     }
 
     if (deviceId != null) {
-      if (CurrentPlatform.isWeb) {
+      if (exactDeviceId) {
         constraints['deviceId'] = {'exact': deviceId};
       } else {
         (constraints['optional'] as List).cast<Map<String, dynamic>>().add(

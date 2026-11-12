@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_visible_for_testing_member
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -5,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../test_utils/test_wrapper.dart';
 
@@ -43,6 +46,7 @@ void main() {
 
   setUp(() {
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+    rtc.debugWebRtcCapabilitiesOverride = _capabilities(pauseSupported: true);
     webrtcCalls.clear();
     nativeCalls.clear();
     pauseGate = null;
@@ -63,6 +67,7 @@ void main() {
 
   tearDown(() async {
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+    rtc.debugWebRtcCapabilitiesOverride = _capabilities(pauseSupported: true);
     pauseGate = null;
     pauseError = null;
     if (notifier.isAudioPlayoutPaused) await notifier.resumeAudioPlayout();
@@ -70,6 +75,7 @@ void main() {
       ..nativePauseAudioPlayout = originalNativePause
       ..nativeResumeAudioPlayout = originalNativeResume;
     CurrentPlatform.debugCurrentPlatformOverride = null;
+    rtc.debugWebRtcCapabilitiesOverride = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_webrtcChannel, null);
   });
@@ -242,9 +248,12 @@ void main() {
   });
 
   group('where pausing playout is not supported', () {
-    setUp(
-      () => CurrentPlatform.debugCurrentPlatformOverride = PlatformType.linux,
-    );
+    setUp(() {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.linux;
+      rtc.debugWebRtcCapabilitiesOverride = _capabilities(
+        pauseSupported: false,
+      );
+    });
 
     testWidgets('the button is not shown', (tester) async {
       await pumpOption(tester);
@@ -258,4 +267,21 @@ void main() {
       expect(notifier.isAudioPlayoutPaused, isFalse);
     });
   });
+}
+
+/// Native capabilities, with audio playout pause as given.
+rtc.WebRtcCapabilities _capabilities({required bool pauseSupported}) {
+  return rtc.WebRtcCapabilities(
+    supportsPerCallFactory: false,
+    supportsAudioPlayoutPause: pauseSupported,
+    supportsAudioOutputSelection: true,
+    supportsCameraSwitch: true,
+    switchesAudioInputInPlace: true,
+    selectsAudioOutputPerElement: false,
+    supportsBroadcastExtension: false,
+    supportsScreenShareSourceSelection: false,
+    hasUnlistedEarpiece: false,
+    usesExactDeviceIdConstraints: false,
+    reusesScreenShareCapture: true,
+  );
 }

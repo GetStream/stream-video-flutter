@@ -40,11 +40,6 @@ Future<void> reattachRemoteAudio({required String reason}) async {
   // audio themselves; there is no audio element to re-attach.
 }
 
-bool checkIfAudioOutputChangeSupported() {
-  // On native platforms, we assume audio output change is supported.
-  return true;
-}
-
 void setAudioPlayoutPaused({required bool paused}) {
   // We don't need to do anything here, because native platforms pause playout
   // in the WebRTC plugin itself (`Helper.pauseAudioPlayout`).

@@ -27,3 +27,4 @@ export 'src/third_party/webrtc_interface/rtc_session_description.dart';
 export 'src/third_party/webrtc_interface/rtc_stats_report.dart';
 export 'src/third_party/webrtc_interface/rtc_track_event.dart';
 export 'src/third_party/webrtc_interface/rtc_video_renderer.dart';
+export 'src/webrtc_capabilities.dart';

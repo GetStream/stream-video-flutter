@@ -7,6 +7,7 @@
 * The Android and Apple audio configuration types moved to `stream_webrtc_interface`; this package still exports them.
 * **Breaking:** depends on `stream_dart_webrtc` and `stream_webrtc_interface` instead of `dart_webrtc` and `webrtc_interface`. The re-exported types now come from `stream_webrtc_interface`, so they no longer match `package:webrtc_interface` types.
 * Licensed under the Stream licence; the code from upstream keeps its MIT licence (see `LICENSE`).
+* Added `webRtcCapabilities`, the capabilities of the platform the app runs on.
 
 [4.0.1] - 2026.10.22
 

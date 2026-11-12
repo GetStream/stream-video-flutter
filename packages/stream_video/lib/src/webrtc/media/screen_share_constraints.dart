@@ -1,4 +1,4 @@
-import 'package:stream_core/stream_core.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import '../model/rtc_video_parameters.dart';
 import 'video_constraints.dart';
 
@@ -37,10 +37,11 @@ class ScreenShareConstraints extends VideoConstraints {
   @override
   Map<String, dynamic> toMap() {
     final constraints = <String, dynamic>{...super.toMap()};
-    if (useiOSBroadcastExtension && CurrentPlatform.isIos) {
+    final capabilities = rtc.webRtcCapabilities;
+    if (useiOSBroadcastExtension && capabilities.supportsBroadcastExtension) {
       constraints['deviceId'] = 'broadcast';
     }
-    if (CurrentPlatform.isDesktop) {
+    if (capabilities.supportsScreenShareSourceSelection) {
       if (deviceId != null) {
         constraints['deviceId'] = {'exact': deviceId};
       }

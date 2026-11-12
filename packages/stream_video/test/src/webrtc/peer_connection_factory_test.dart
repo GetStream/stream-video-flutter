@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/stream_video.dart';
+import '../../fixtures/webrtc_capabilities.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,7 @@ void main() {
       return null;
     });
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
+    overrideWebRtcCapabilities(platform: PlatformType.ios);
   });
 
   tearDown(() {

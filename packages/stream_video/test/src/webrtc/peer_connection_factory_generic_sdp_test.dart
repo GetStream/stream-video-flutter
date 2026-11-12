@@ -4,6 +4,7 @@ import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
+import '../../fixtures/webrtc_capabilities.dart';
 import '../call/fixtures/data.dart';
 import 'fixtures/rtc_manager_fakes.dart';
 
@@ -16,6 +17,7 @@ void main() {
     // A platform without per-call factories, so the global entrypoints run
     // through the fake channel.
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.linux;
+    overrideWebRtcCapabilities(platform: PlatformType.linux);
     platform = FakeWebRtcPlatform()..install();
   });
 
