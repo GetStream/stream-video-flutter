@@ -2,7 +2,8 @@
 
 ### ⚠️ Breaking
 
-- `RtcMediaDeviceNotifier.handleCallInterruptionCallbacks` no longer takes the deprecated `androidAudioAttributesUsageType` and `androidAudioAttributesContentType`.
+- The app-wide audio members of `RtcMediaDeviceNotifier` moved to the new `PlatformAudioController`: `handleCallInterruptionCallbacks`, `nativeWebRtcEventsStream`, `speechActivityStream`, `triggeriOSAudioRouteSelectionUI`, `isAudioPlayoutPauseSupported`, `isAudioPlayoutPaused`, `audioPlayoutPausedChanges`, `pauseAudioPlayout`, `resumeAudioPlayout`, `resumeWebAudioPlayback`, `regainAndroidAudioFocus` and `reinitializeAudioConfiguration`; use `PlatformAudioController.instance`.
+- `PlatformAudioController.handleCallInterruptionCallbacks` no longer takes the deprecated `androidAudioAttributesUsageType` and `androidAudioAttributesContentType`.
 - `ScreenSharingStoppedEvent` carries a `trackId` instead of a `data` map, and `ScreenSharingStartedEvent` has no `data`.
 - Test mocks that implement `StreamVideo` get a `subtype_of_sealed_class` warning, because `StreamVideo` implements the `@sealed` `CallHost`; add `// ignore: subtype_of_sealed_class` to them.
 - The deprecated `observeCoreCallKitEvents`, `observeCall*CallKitEvent` and `handleVoipPushNotification` methods are removed; use `observeCoreRingingEvents`, `observeCall*RingingEvent` and `handleRingingFlowNotifications` on `StreamVideo.ringing`.

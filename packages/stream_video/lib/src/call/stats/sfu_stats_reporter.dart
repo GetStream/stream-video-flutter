@@ -211,12 +211,15 @@ class SfuStatsReporter {
           final sessionTrace = callSession.getTrace();
           final mediaDeviceNotifierTrace = RtcMediaDeviceNotifier.instance
               .getTrace();
+          final platformAudioTrace = PlatformAudioController.instance
+              .getTrace();
 
           traces.addAll([
             if (subscriberTrace != null) subscriberTrace,
             if (publisherTrace != null) publisherTrace,
             ...sessionTrace,
             mediaDeviceNotifierTrace,
+            platformAudioTrace,
             _deviceTracer.take(),
           ]);
         }

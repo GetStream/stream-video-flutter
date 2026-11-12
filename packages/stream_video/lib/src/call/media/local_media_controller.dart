@@ -10,6 +10,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../../open_api/video/coordinator/api.dart' hide User;
+import '../../audio/platform_audio_controller.dart';
 import '../../call_state.dart';
 import '../../errors/stream_video_exception.dart';
 import '../../internal/_background_mute_policy.dart';
@@ -587,7 +588,7 @@ class LocalMediaController {
 
   /// Follows the screen share and audio route changes the platform reports.
   StreamSubscription<NativeWebRtcEvent> observeNativeWebRtcEvents() {
-    return RtcMediaDeviceNotifier.instance.nativeWebRtcEventsStream().listen((
+    return PlatformAudioController.instance.nativeWebRtcEventsStream().listen((
       event,
     ) {
       _logger.d(

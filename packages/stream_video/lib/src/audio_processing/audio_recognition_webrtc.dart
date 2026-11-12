@@ -4,7 +4,7 @@ import '../../stream_video.dart';
 
 /// [AudioRecognition] implementation backed by speech-activity events
 /// from the per-call audio device module (delivered through
-/// [RtcMediaDeviceNotifier.speechActivityStream]).
+/// [PlatformAudioController.speechActivityStream]).
 ///
 /// Events originate in the native fork:
 /// - iOS: `RTCAudioDeviceModuleDelegate.audioDeviceModule:didReceiveSpeechActivityEvent:`
@@ -23,7 +23,7 @@ class AudioRecognitionWebRTC implements AudioRecognition {
 
   Stream<SpeechActivityEvent> get _events =>
       _speechActivityStream ??
-      RtcMediaDeviceNotifier.instance.speechActivityStream;
+      PlatformAudioController.instance.speechActivityStream;
 
   StreamSubscription<SpeechActivityEvent>? _subscription;
   Timer? _silenceTimer;
