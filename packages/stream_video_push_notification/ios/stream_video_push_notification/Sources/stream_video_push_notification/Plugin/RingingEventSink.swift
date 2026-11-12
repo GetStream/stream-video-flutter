@@ -8,7 +8,7 @@ import Foundation
 /// events are dropped rather than held; events already held are still delivered.
 final class RingingEventSink {
 
-    /// While true, events are dropped instead of being delivered or held.
+    /// While true, events are dropped instead of being delivered or held. Set on the main thread.
     var isSilenced = false
 
     /// The handler events go to.
@@ -23,17 +23,18 @@ final class RingingEventSink {
         }
     }
 
+    /// Delivers or holds `event` on the main thread. Whether events are silenced is read there
+    /// too, so an event sent from any thread just before `isSilenced` is set is dropped.
     func send(_ event: String, _ body: Any) {
-        if isSilenced {
-            print(event, " silenced")
-            return
-        }
-
         let payload: [String: Any] = [
             "event": event,
             "body": body,
         ]
         DispatchQueue.main.async {
+            if self.isSilenced {
+                print(event, " silenced")
+                return
+            }
             if let listener = self.handler?.listener {
                 listener(payload)
             } else {

@@ -77,7 +77,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             return
         }
 
-        self.configureAudioSession()
+        self.configureAudioSession(data)
         provider.reportNewIncomingCall(with: uuid, update: callUpdate) { error in
             if let error = error {
                 self.sendIncomingCallFailedEvent(data, error)
@@ -85,7 +85,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
                 return
             }
 
-            self.configureAudioSession()
+            self.configureAudioSession(data)
             let call = Call(uuid: uuid, data: data)
             call.handle = data.handle
             self.callController.addCall(call)

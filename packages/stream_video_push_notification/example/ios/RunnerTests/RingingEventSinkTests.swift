@@ -151,6 +151,19 @@ final class RingingEventSinkTests: XCTestCase {
         XCTAssertEqual(receivedNames, ["kept"])
     }
 
+    func testAnEventSentJustBeforeSilencingIsDropped() {
+        let handler = handler()
+        sink.attach(handler)
+        listen(on: handler)
+        drainMainQueue()
+
+        sink.send("sent before silencing", [:])
+        sink.isSilenced = true
+        drainMainQueue()
+
+        XCTAssertTrue(received.isEmpty)
+    }
+
     func testSilencingKeepsEventsThatAreAlreadyHeld() {
         let handler = handler()
         sink.attach(handler)
