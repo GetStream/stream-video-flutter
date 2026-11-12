@@ -29,6 +29,9 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     /// left. Nil while Recents follows the options.
     var recentsSuppressedFor: CallData?
 
+    /// Keeps the app running while Dart acts on a call CallKit ended.
+    var callEndGracePeriod = CallEndGracePeriod()
+
     var sharedProvider: CXProvider? = nil
 
     private override init() {

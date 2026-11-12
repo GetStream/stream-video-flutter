@@ -22,6 +22,8 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
     private var gate: FakeAudioEngineGate!
     private var savedSilenced = false
     private var savedReconfigureDelay: DispatchTimeInterval = .never
+    private var savedGracePeriod: CallEndGracePeriod!
+    private var backgroundTasks: FakeBackgroundTasks!
     private var received: [[String: Any]] = []
 
     override func setUp() {
@@ -34,7 +36,11 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         savedRecentsSuppressedFor = manager.recentsSuppressedFor
         savedSilenced = manager.eventSink.isSilenced
         savedReconfigureDelay = manager.reconfigureAfterAnswerDelay
+        savedGracePeriod = manager.callEndGracePeriod
 
+        backgroundTasks = FakeBackgroundTasks()
+        manager.callEndGracePeriod = CallEndGracePeriod(
+            tasks: backgroundTasks, scheduler: FakeHoldRecoveryScheduler())
         discardHeldEvents()
         // An attached handler Dart does not listen on yet, so events are held.
         manager.setEventHandler(EventCallbackHandler(sink: manager.eventSink))
@@ -64,7 +70,24 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         manager.recentsSuppressedFor = savedRecentsSuppressedFor
         manager.eventSink.isSilenced = savedSilenced
         manager.reconfigureAfterAnswerDelay = savedReconfigureDelay
+        manager.callEndGracePeriod = savedGracePeriod
         super.tearDown()
+    }
+
+    // MARK: - Time for Dart after a CallKit end
+
+    func testACallKitEndKeepsTheAppRunningForDartBeforeTheEventIsSent() {
+        listen()
+        let outgoing = startOutgoing(id: "outgoing")
+
+        manager.provider(provider, perform: CXEndCallAction(call: outgoing.identity.callKitUUID))
+
+        XCTAssertEqual(backgroundTasks.begun, 1)
+        XCTAssertTrue(manager.callEndGracePeriod.isRunning)
+        // The event is sent on the main queue, after the task began.
+        XCTAssertTrue(received.isEmpty)
+        drainMainQueue()
+        XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
     }
 
     /// Hands whatever the sink holds to a listener that drops it.
@@ -231,16 +254,17 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         XCTAssertTrue(manager.store.outgoingCall === outgoing)
     }
 
-    func testTheOutgoingCallIsKeptAfterItEnds() {
-        // Current behaviour, pinned: so every later end is sent as ENDED and no ring times out.
+    func testTheOutgoingCallIsForgottenOnceItEnds() {
         listen()
         let outgoing = startOutgoing(id: "outgoing")
 
         end(outgoing.identity.callKitUUID)
 
-        XCTAssertTrue(manager.store.outgoingCall === outgoing)
+        XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
+        XCTAssertEqual(receivedId(at: 0), "outgoing")
+        XCTAssertNil(manager.store.outgoingCall)
         let ringing = track(id: "ringing")
-        XCTAssertFalse(manager.store.shouldTimeOut(appId: ringing.identity.appId))
+        XCTAssertTrue(manager.store.shouldTimeOut(appId: ringing.identity.appId))
     }
 
     /// Current behaviour, pinned: declining a second ringing call during an answered one is sent
@@ -773,5 +797,81 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         manager.transactions.onEndRefused?(call.identity.callKitUUID)
 
         XCTAssertNil(manager.store.call(forCallKit: call.identity.callKitUUID))
+    }
+}
+
+final class FakeBackgroundTasks: BackgroundTasks {
+    private(set) var begun = 0
+    private(set) var ended: [UIBackgroundTaskIdentifier] = []
+    private(set) var expiration: (() -> Void)?
+
+    func begin(name: String, expiration: @escaping () -> Void) -> UIBackgroundTaskIdentifier {
+        begun += 1
+        self.expiration = expiration
+        return UIBackgroundTaskIdentifier(rawValue: begun)
+    }
+
+    func end(_ task: UIBackgroundTaskIdentifier) {
+        ended.append(task)
+    }
+}
+
+/// Pins how long the app is kept running after CallKit ends a call.
+final class CallEndGracePeriodTests: XCTestCase {
+
+    private var tasks: FakeBackgroundTasks!
+    private var scheduler: FakeHoldRecoveryScheduler!
+    private var grace: CallEndGracePeriod!
+
+    override func setUp() {
+        super.setUp()
+        tasks = FakeBackgroundTasks()
+        scheduler = FakeHoldRecoveryScheduler()
+        grace = CallEndGracePeriod(duration: 10, tasks: tasks, scheduler: scheduler)
+    }
+
+    func testTheTaskEndsWhenTheGracePeriodRunsOut() {
+        grace.callEnded()
+        XCTAssertEqual(tasks.begun, 1)
+
+        scheduler.advance(by: 9.9)
+        XCTAssertTrue(tasks.ended.isEmpty)
+
+        scheduler.advance(by: 0.1)
+        XCTAssertEqual(tasks.ended, [UIBackgroundTaskIdentifier(rawValue: 1)])
+        XCTAssertFalse(grace.isRunning)
+    }
+
+    func testAnotherEndRestartsTheGracePeriodInTheSameTask() {
+        grace.callEnded()
+        scheduler.advance(by: 6)
+
+        grace.callEnded()
+        scheduler.advance(by: 6)
+
+        XCTAssertEqual(tasks.begun, 1)
+        XCTAssertTrue(tasks.ended.isEmpty)
+        scheduler.advance(by: 4)
+        XCTAssertEqual(tasks.ended.count, 1)
+    }
+
+    func testTheTaskEndsOnceWhenIOSExpiresIt() {
+        grace.callEnded()
+
+        tasks.expiration?()
+        scheduler.advance(by: 10)
+
+        XCTAssertEqual(tasks.ended.count, 1)
+        XCTAssertFalse(grace.isRunning)
+    }
+
+    func testAnEndAfterTheTaskEndedBeginsANewOne() {
+        grace.callEnded()
+        scheduler.advance(by: 10)
+
+        grace.callEnded()
+
+        XCTAssertEqual(tasks.begun, 2)
+        XCTAssertTrue(grace.isRunning)
     }
 }

@@ -48,8 +48,16 @@ final class CallKitCallStore {
     /// `outgoingCall` is set.
     private(set) var answeredCall: CallKitCall?
 
-    /// The call CallKit last started. Never cleared.
-    private(set) var outgoingCall: CallKitCall?
+    /// The call CallKit last started, until it ends.
+    ///
+    /// An ended outgoing call no longer counts: a ring shown after it times out, a ring declined
+    /// after it is sent as declined, and an audio activation after it does not start it again.
+    var outgoingCall: CallKitCall? {
+        guard let call = startedCall, !call.phase.isEnded else { return nil }
+        return call
+    }
+
+    private var startedCall: CallKitCall?
 
     // MARK: - Lookups
 
@@ -196,7 +204,7 @@ final class CallKitCallStore {
             direction: .outgoing, source: isFromPushKit ? .pushKit : .app, options: options,
             phase: .starting)
         call.reportsConnection = true
-        outgoingCall = call
+        startedCall = call
         calls.append(call)
         return (call, [.send(event: StreamVideoIncomingCallConstants.ACTION_CALL_START, body: options.toJSON())])
     }

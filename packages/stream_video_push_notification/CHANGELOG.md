@@ -24,6 +24,8 @@
 
 - [iOS] The plugin no longer activates the audio session itself when it shows, answers or starts a call. The session it activated kept CallKit from activating its own, so WebRTC could run on a session CallKit did not own. CallKit now activates it.
 - [iOS] A call put on hold by another app's call, such as a cellular call answered with Hold & Accept, gets its audio back when that call ends. CallKit takes it off hold even when the other side hung up, and if CallKit then gives the call no working audio session, the plugin ends and starts the call again with CallKit under a new uuid. Dart keeps the call's id and is not told, and the restart adds no entry to Recents. A call CallKit refuses to start again after four attempts is ended with `ActionCallEnded`.
+- [iOS] A call ended from the CallKit screen while the app is in the background or behind the lock screen reaches the backend straight away. The plugin keeps the app running for up to 10 seconds after CallKit ends a call, so Dart can leave the call or cancel its ring before iOS suspends the app. Until now the other side kept ringing until the app was opened again.
+- [iOS] An outgoing call started with `startOutgoingCall` no longer affects the calls after it once it ended. An incoming ring shown later times out again, declining it sends `ActionCallDecline` instead of `ActionCallEnded`, and the next audio session activation no longer reports the ended call to CallKit as connecting.
 
 ### 🔄 Changed
 
@@ -42,6 +44,7 @@
 
 - [iOS] `StreamVideoPushNotificationPlugin.showIncomingCall(data:fromPushKit:completion:)` runs `completion` once CallKit accepted or refused the call, for an app with its own PushKit delegate that calls PushKit's completion from it.
 - Added `StreamVideoPushHandler.handleBackgroundMessage`, which simplifies the ringing setup by running a Stream ringing push through its whole background lifecycle from your Firebase background handler: it builds the client through the factory you give it, observes the ringing events a background isolate can act on, and disposes the client — along with whatever that factory set up — once the user has answered, declined, or let the call time out, or the ring has ended without them, such as when the caller cancels it. It replaces the setup and teardown each integration had to write by hand.
+- [iOS] Added `IOSPushConfiguration.reportOutgoingCalls`, off by default. When on, a ringing call the current user starts is reported to CallKit as an outgoing call, which gives the caller the green call indicator, the proximity sensor and the call on the lock screen. The CallKit call is marked connected when the call connects and ends with it; ending it from CallKit while it still rings cancels the ring. Leave it off if your app already calls `startOutgoingCall` itself.
 
 ### 🐞 Fixed
 

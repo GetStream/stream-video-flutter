@@ -303,7 +303,8 @@ Podspec and SPM dependency on `stream_webrtc_flutter`; `WebRTCAudioEngineGate` d
 **B-8. Public facade cleanup (change)**
 Delete `StreamVideoCallkitManager.shared`, rename `StreamVideoPKDelegateManager` to `VoIPPushRegistryHandler` with a deprecated typealias, remove `sendEventCustom`, `showMissCallNotification` no-op case, `requestNotificationPermission` no-op case from the iOS router. Changelog (Breaking). ~-100 lines.
 
-Optional B-9 (FLU-1194, not in this plan's scope): with `direction == .outgoing` and `.starting` already modelled, registering outgoing ringing calls out of the box is a `RingingSyncObserver` change plus `setCallConnected` on `CallStatusConnected`, behind an option.
+**B-9. Outgoing ringing calls reported to CallKit (FLU-1194, change, on B-8)**
+`IOSPushConfiguration.reportOutgoingCalls`, off by default. `OutgoingCallReporter` (its own file, so it does not collide with A-3's split of the manager) follows `ClientState.outgoingCall`: `startOutgoingCall` once the call is `CallStatusOutgoing`, `setCallConnected` on the first `CallStatusConnected`, `endCall` on disconnect; a CallKit end while the call still rings, unjoined, leaves it, which cancels the ring. Native: the store forgets the outgoing call once it ended, which it never did, so later rings time out and are declined again. A-3 can move the reporter next to `RingingSyncObserver`; A-5 has to keep `uuid`, which the reporter uses.
 
 ### Stack C: Android
 

@@ -103,6 +103,7 @@ IOSPushConfiguration _$IOSPushConfigurationFromJson(
   supportsUngrouping: json['supportsUngrouping'] as bool?,
   ringtonePath: json['ringtonePath'] as String?,
   includesCallsInRecents: json['includesCallsInRecents'] as bool?,
+  reportOutgoingCalls: json['reportOutgoingCalls'] as bool?,
 );
 
 Map<String, dynamic> _$IOSPushConfigurationToJson(
@@ -126,4 +127,5 @@ Map<String, dynamic> _$IOSPushConfigurationToJson(
   'supportsUngrouping': instance.supportsUngrouping,
   'ringtonePath': instance.ringtonePath,
   'includesCallsInRecents': instance.includesCallsInRecents,
+  'reportOutgoingCalls': instance.reportOutgoingCalls,
 };
