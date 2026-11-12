@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/call/media/local_media_controller.dart';
@@ -20,6 +22,7 @@ void main() {
   const receiver = RtcMediaDevice(
     id: 'Receiver',
     label: 'Receiver',
+    groupId: 'Receiver',
     kind: RtcMediaDeviceKind.audioOutput,
   );
   const headset = RtcMediaDevice(
@@ -33,7 +36,7 @@ void main() {
     session = MockCallSession();
     when(
       () => session.applyCurrentAudioOutputDevice(),
-    ).thenAnswer((_) async {});
+    ).thenAnswer((_) async => const Result.success(none));
     stateManager = CallStateNotifier(createTestCallState());
     controller = LocalMediaController(
       stateManager: stateManager,
@@ -105,6 +108,82 @@ void main() {
       expect(stateManager.callState.audioOutputDevice, receiver);
       expect(stateManager.audioOutputSelectedByUser, isFalse);
       expect(controller.connectOptions.audioOutputDevice, receiver);
+    });
+
+    test('from the system to another device is followed, even after the user '
+        'chose the speaker', () {
+      // A pick from the system's route picker can arrive as a re-routing.
+      userChose(speaker);
+
+      controller.onAudioRouteChanged(
+        routeChange(headset, AudioRouteChangeReason.routeConfigurationChange),
+      );
+
+      verifyNever(() => session.applyCurrentAudioOutputDevice());
+      expect(stateManager.callState.audioOutputDevice, headset);
+      expect(stateManager.audioOutputSelectedByUser, isFalse);
+    });
+
+    test('from the system away from another device the user chose is '
+        'followed', () {
+      userChose(headset);
+
+      controller.onAudioRouteChanged(
+        routeChange(receiver, AudioRouteChangeReason.categoryChange),
+      );
+
+      verifyNever(() => session.applyCurrentAudioOutputDevice());
+      expect(stateManager.callState.audioOutputDevice, receiver);
+    });
+
+    test('is followed when the chosen output cannot be put back', () async {
+      when(() => session.applyCurrentAudioOutputDevice()).thenAnswer(
+        (_) async => failureWithError('session inactive'),
+      );
+      userChose(speaker);
+
+      controller.onAudioRouteChanged(
+        routeChange(receiver, AudioRouteChangeReason.routeConfigurationChange),
+      );
+      await pumpEventQueue();
+
+      verify(() => session.applyCurrentAudioOutputDevice()).called(1);
+      expect(stateManager.callState.audioOutputDevice, receiver);
+      expect(stateManager.audioOutputSelectedByUser, isFalse);
+      expect(controller.connectOptions.audioOutputDevice, receiver);
+    });
+
+    test('from the system while an output is being set is ignored', () async {
+      userChose(speaker);
+      final selecting = Completer<Result<None>>();
+      when(
+        () => session.setAudioOutputDevice(receiver),
+      ).thenAnswer((_) => selecting.future);
+
+      final selection = controller.setAudioOutputDevice(receiver);
+      // The category changes the selection itself causes.
+      controller.onAudioRouteChanged(
+        routeChange(receiver, AudioRouteChangeReason.categoryChange),
+      );
+      controller.onAudioRouteChanged(
+        routeChange(speaker, AudioRouteChangeReason.categoryChange),
+      );
+      selecting.complete(const Result.success(none));
+      await selection;
+
+      verifyNever(() => session.applyCurrentAudioOutputDevice());
+      expect(stateManager.callState.audioOutputDevice, receiver);
+      expect(stateManager.audioOutputSelectedByUser, isTrue);
+    });
+
+    test('without a reason, from an older plugin, is followed', () {
+      userChose(speaker);
+
+      controller.onAudioRouteChanged(AudioRouteChangedEvent(device: receiver));
+
+      verifyNever(() => session.applyCurrentAudioOutputDevice());
+      expect(stateManager.callState.audioOutputDevice, receiver);
+      expect(stateManager.audioOutputSelectedByUser, isFalse);
     });
 
     test('to the output already in use changes nothing', () {
