@@ -56,7 +56,10 @@ void main() {
           (c) => c.supportsScreenShareSourceSelection,
           {_Platform.macos, _Platform.windows, _Platform.linux},
         ),
-        'hasUnlistedEarpiece': ((c) => c.hasUnlistedEarpiece, {_Platform.ios}),
+        'omitsEarpieceFromEnumeration': (
+          (c) => c.omitsEarpieceFromEnumeration,
+          {_Platform.ios},
+        ),
         'usesExactDeviceIdConstraints': (
           (c) => c.usesExactDeviceIdConstraints,
           {_Platform.web},
@@ -102,6 +105,49 @@ void main() {
 
     test('is the host platform without an override', () {
       expect(webRtcCapabilities, same(nativeWebRtcCapabilities));
+    });
+  });
+
+  group('value', () {
+    final base = _capabilitiesOf(_Platform.android);
+    final flips = <String, WebRtcCapabilities Function(bool)>{
+      'supportsPerCallFactory': (v) => base.copyWith(supportsPerCallFactory: v),
+      'supportsAudioPlayoutPause': (v) =>
+          base.copyWith(supportsAudioPlayoutPause: v),
+      'supportsAudioOutputSelection': (v) =>
+          base.copyWith(supportsAudioOutputSelection: v),
+      'supportsCameraSwitch': (v) => base.copyWith(supportsCameraSwitch: v),
+      'switchesAudioInputInPlace': (v) =>
+          base.copyWith(switchesAudioInputInPlace: v),
+      'selectsAudioOutputPerElement': (v) =>
+          base.copyWith(selectsAudioOutputPerElement: v),
+      'supportsBroadcastExtension': (v) =>
+          base.copyWith(supportsBroadcastExtension: v),
+      'supportsScreenShareSourceSelection': (v) =>
+          base.copyWith(supportsScreenShareSourceSelection: v),
+      'omitsEarpieceFromEnumeration': (v) =>
+          base.copyWith(omitsEarpieceFromEnumeration: v),
+      'usesExactDeviceIdConstraints': (v) =>
+          base.copyWith(usesExactDeviceIdConstraints: v),
+      'reusesScreenShareCapture': (v) =>
+          base.copyWith(reusesScreenShareCapture: v),
+    };
+
+    for (final MapEntry(key: name, value: flip) in flips.entries) {
+      test('$name takes part in equality and toString', () {
+        final on = flip(true);
+        final off = flip(false);
+
+        expect(on, isNot(off));
+        expect(on.hashCode, isNot(off.hashCode));
+        expect(on.toString(), contains(name));
+        expect(off.toString(), isNot(contains(name)));
+      });
+    }
+
+    test('copyWith without arguments is equal', () {
+      expect(base.copyWith(), base);
+      expect(base.copyWith().hashCode, base.hashCode);
     });
   });
 }

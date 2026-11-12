@@ -280,7 +280,7 @@ rtc.WebRtcCapabilities _capabilities({required bool pauseSupported}) {
     selectsAudioOutputPerElement: false,
     supportsBroadcastExtension: false,
     supportsScreenShareSourceSelection: false,
-    hasUnlistedEarpiece: false,
+    omitsEarpieceFromEnumeration: false,
     usesExactDeviceIdConstraints: false,
     reusesScreenShareCapture: true,
   );

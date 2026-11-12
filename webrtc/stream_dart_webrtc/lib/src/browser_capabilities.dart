@@ -14,7 +14,7 @@ WebRtcCapabilities webRtcCapabilitiesFor({
     selectsAudioOutputPerElement: true,
     supportsBroadcastExtension: false,
     supportsScreenShareSourceSelection: false,
-    hasUnlistedEarpiece: false,
+    omitsEarpieceFromEnumeration: false,
     usesExactDeviceIdConstraints: true,
     reusesScreenShareCapture: false,
   );

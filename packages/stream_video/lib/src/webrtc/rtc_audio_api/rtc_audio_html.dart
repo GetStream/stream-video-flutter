@@ -57,8 +57,8 @@ bool? _isWebKitOverride;
 
 bool get _isWebKit => _isWebKitOverride ?? _isWebKitUserAgent;
 
-/// Makes this page count as WebKit, or not, whatever its user agent says.
-/// Null goes back to the user agent.
+/// Makes this page count as WebKit, or not, for re-attaching remote audio,
+/// whatever its user agent says. Null goes back to the user agent.
 ///
 /// The WebKit-only paths are otherwise unreachable from a test, which runs in
 /// Chrome.

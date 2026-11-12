@@ -188,6 +188,50 @@ void main() {
     expect(getSourcesCalls, 2);
   });
 
+  group('the iOS earpiece', () {
+    bool hasEarpiece(List<RtcMediaDevice> devices) => devices.any(
+      (device) =>
+          device.id == AudioDefaultDevice.earpiece &&
+          device.kind == RtcMediaDeviceKind.audioOutput,
+    );
+
+    test('is added where enumeration leaves it out', () async {
+      overrideWebRtcCapabilities(platform: PlatformType.ios);
+
+      final devices = await notifier.enumerateDevices();
+
+      expect(hasEarpiece(devices.getDataOrNull()!), isTrue);
+    });
+
+    test('is not added twice when enumeration lists it', () async {
+      overrideWebRtcCapabilities(platform: PlatformType.ios);
+      sources = [
+        ..._sources,
+        {
+          'deviceId': AudioDefaultDevice.earpiece,
+          'groupId': 'Receiver',
+          'kind': 'audiooutput',
+          'label': 'Receiver',
+        },
+      ];
+
+      final devices = (await notifier.enumerateDevices()).getDataOrNull()!;
+
+      expect(
+        devices.where((d) => d.id == AudioDefaultDevice.earpiece),
+        hasLength(1),
+      );
+    });
+
+    test('is not added elsewhere', () async {
+      overrideWebRtcCapabilities(platform: PlatformType.android);
+
+      final devices = await notifier.enumerateDevices();
+
+      expect(hasEarpiece(devices.getDataOrNull()!), isFalse);
+    });
+  });
+
   group('errors', () {
     test('an empty device list fails with a message for each call', () async {
       sources = [];

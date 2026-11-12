@@ -31,7 +31,7 @@ WebRtcCapabilities nativeWebRtcCapabilitiesFor({
     selectsAudioOutputPerElement: false,
     supportsBroadcastExtension: isIOS,
     supportsScreenShareSourceSelection: isWindows || isMacOS || isLinux,
-    hasUnlistedEarpiece: isIOS,
+    omitsEarpieceFromEnumeration: isIOS,
     usesExactDeviceIdConstraints: false,
     reusesScreenShareCapture: true,
   );
