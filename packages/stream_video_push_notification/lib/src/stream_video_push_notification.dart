@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stream_video/stream_video.dart';
 import '../stream_video_push_notification.dart';
 import '../stream_video_push_notification_platform_interface.dart';
+import 'manager/ringing_event_broadcaster.dart';
 
 part 'stream_video_push_provider.dart';
 
@@ -111,7 +112,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
           _logger.d(
             () => '[subscribeToEvents] Call ended event: ${event.callCid}',
           );
-          RingingEventBroadcaster().suppressEvent();
+          _broadcaster.suppressEvent();
           endCallByCid(event.callCid.toString());
         }),
       );
@@ -137,7 +138,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
                   '[subscribeToEvents] No participants left, ending call: ${event.callCid}',
             );
 
-            RingingEventBroadcaster().suppressEvent();
+            _broadcaster.suppressEvent();
             await endCallByCid(event.callCid.toString());
           }
         }),
@@ -157,7 +158,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
                   '[subscribeToEvents] Call rejected by the current user or call owner, ending call: ${event.callCid}',
             );
 
-            RingingEventBroadcaster().suppressEvent();
+            _broadcaster.suppressEvent();
             await endCallByCid(event.callCid.toString());
           }
         }),
@@ -200,7 +201,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
             );
 
             // The call is live on this device from here on, so only the ringing UI goes away.
-            RingingEventBroadcaster().suppressEvent();
+            _broadcaster.suppressEvent();
             await dismissRingingCallByCid(event.callCid.toString());
           }
         }),
@@ -208,8 +209,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     }
 
     //if there are active calls (for iOS) when connecting, subscribe to events as if the call was incoming
-    StreamVideoPushNotificationPlatform.instance.activeCalls().then((value) {
-      if (value is List && value.isNotEmpty) {
+    StreamVideoPushNotificationPlatform.instance.activeCalls().then((calls) {
+      if (calls.isNotEmpty) {
         subscribeToEvents();
       }
     });
@@ -288,6 +289,10 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   final StreamVideoPushConfiguration pushConfiguration;
   final bool registerApnDeviceToken;
   late SharedPreferences _sharedPreferences;
+
+  /// The one broadcaster of this process's ringing events; see
+  /// [RingingEventBroadcaster.shared].
+  final _broadcaster = RingingEventBroadcaster.shared;
 
   final _logger = taggedLogger(tag: 'SV:PNManager');
 
@@ -374,7 +379,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
   @override
   Stream<RingingEvent> get onCallEvent {
-    return RingingEventBroadcaster().onEvent
+    return _broadcaster.onEvent
         .doOnData((event) => _logger.v(() => '[onCallEvent] event: $event'))
         .share();
   }
@@ -388,17 +393,14 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     String? callerName,
     bool hasVideo = true,
   }) {
-    final paramsFromConfig = StreamVideoPushParams.fromPushConfiguration(
+    final params = StreamVideoPushParams.forCall(
       pushConfiguration,
-    );
-
-    final params = paramsFromConfig.copyWith(
-      id: uuid,
+      uuid: uuid,
+      callCid: callCid,
+      avatar: avatar,
       handle: handle,
       callerName: callerName,
-      type: hasVideo ? 1 : 0,
-      extra: {'callCid': callCid},
-      android: paramsFromConfig.android?.copyWith(avatar: avatar),
+      hasVideo: hasVideo,
     );
 
     return StreamVideoPushNotificationPlatform.instance.showIncomingCall(
@@ -415,17 +417,14 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     String? callerName,
     bool hasVideo = true,
   }) {
-    final paramsFromConfig = StreamVideoPushParams.fromPushConfiguration(
+    final params = StreamVideoPushParams.forCall(
       pushConfiguration,
-    );
-
-    final params = paramsFromConfig.copyWith(
-      id: uuid,
+      uuid: uuid,
+      callCid: callCid,
+      avatar: avatar,
       handle: handle,
       callerName: callerName,
-      type: hasVideo ? 1 : 0,
-      extra: {'callCid': callCid},
-      android: paramsFromConfig.android?.copyWith(avatar: avatar),
+      hasVideo: hasVideo,
     );
 
     return StreamVideoPushNotificationPlatform.instance
@@ -441,17 +440,14 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     String? callerName,
     bool hasVideo = true,
   }) {
-    final paramsFromConfig = StreamVideoPushParams.fromPushConfiguration(
+    final params = StreamVideoPushParams.forCall(
       pushConfiguration,
-    );
-
-    final params = paramsFromConfig.copyWith(
-      id: uuid,
+      uuid: uuid,
+      callCid: callCid,
+      avatar: avatar,
       handle: handle,
       callerName: callerName,
-      type: hasVideo ? 1 : 0,
-      extra: {'callCid': callCid},
-      android: paramsFromConfig.android?.copyWith(avatar: avatar),
+      hasVideo: hasVideo,
     );
 
     return StreamVideoPushNotificationPlatform.instance.startCall(params);
@@ -461,21 +457,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   Future<List<CallData>> activeCalls() async {
     if (!CurrentPlatform.isMobile) return [];
 
-    final activeCalls = await StreamVideoPushNotificationPlatform.instance
-        .activeCalls();
-    if (activeCalls is! List) return [];
-
-    final calls = <CallData>[];
-    for (final call in activeCalls) {
-      try {
-        final callJson = call.cast<String, dynamic>();
-        calls.add(_callDataFromJson(callJson));
-      } catch (_) {
-        continue;
-      }
-    }
-
-    return calls;
+    return StreamVideoPushNotificationPlatform.instance.activeCalls();
   }
 
   @override
@@ -505,13 +487,13 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     final decision = resolveCallsToEnd(await activeCalls(), cid);
 
     if (decision.endAll) {
-      if (silent) RingingEventBroadcaster().suppressEvent();
+      if (silent) _broadcaster.suppressEvent();
       await endAllCalls();
       return;
     }
 
     for (final call in decision.calls) {
-      if (silent) RingingEventBroadcaster().suppressEvent();
+      if (silent) _broadcaster.suppressEvent();
       await endCall(call.uuid!);
     }
   }
@@ -530,7 +512,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
     for (final call in calls) {
       // Suppress CallKit event to avoid loop
-      RingingEventBroadcaster().suppressEvent(
+      _broadcaster.suppressEvent(
         eventType: ActionCallToggleMute,
         valueKey: isMuted.toString(),
       );
@@ -631,117 +613,3 @@ const _defaultPushConfiguration = StreamVideoPushConfiguration(
     ringtonePath: 'system_ringtone_default',
   ),
 );
-
-CallData _callDataFromJson(Map<String, dynamic> json) {
-  final extraData = json['extra']?.cast<String, dynamic>();
-  return CallData(
-    uuid: json['id'] as String?,
-    callCid: extraData?['callCid'] as String?,
-    handle: json['handle'] as String?,
-    callerName: json['callerName'] as String?,
-    hasVideo: json['type'] == 1,
-    extraData: extraData,
-    isAccepted: json['isAccepted'] as bool? ?? false,
-  );
-}
-
-class _RingingEventSuppression {
-  const _RingingEventSuppression({
-    required this.eventType,
-    required this.valueKey,
-    required this.timestamp,
-    required this.window,
-  });
-
-  final Type? eventType;
-  final String? valueKey;
-  final DateTime timestamp;
-  final Duration window;
-
-  bool isValid() {
-    return DateTime.now().difference(timestamp) <= window;
-  }
-}
-
-/// Wrapper class to support multiple subscriptions to the
-/// [StreamVideoPushNotificationPlatform.onEvent] stream.
-final class RingingEventBroadcaster {
-  factory RingingEventBroadcaster() =>
-      _singleton ??= RingingEventBroadcaster._();
-
-  RingingEventBroadcaster._();
-
-  static const _ringingEventSuppressionWindow = Duration(milliseconds: 500);
-  static RingingEventBroadcaster? _singleton;
-
-  StreamController<RingingEvent>? _controller;
-  final List<_RingingEventSuppression> _suppressions = [];
-
-  /// Returns a Stream of [RingingEvent].
-  Stream<RingingEvent> get onEvent {
-    _controller ??= StreamController<RingingEvent>.broadcast(
-      onListen: _startListenEvent,
-      onCancel: _stopListenEvent,
-    );
-    return _controller!.stream;
-  }
-
-  /// Suppresses upcoming Ringing events.
-  ///
-  /// - If [eventType] is null, all events are suppressed.
-  /// - If [valueKey] is provided, it must match the event value to suppress.
-  void suppressEvent({
-    Type? eventType,
-    String? valueKey,
-    Duration window = _ringingEventSuppressionWindow,
-  }) {
-    _suppressions.add(
-      _RingingEventSuppression(
-        eventType: eventType,
-        valueKey: valueKey,
-        timestamp: DateTime.now(),
-        window: window,
-      ),
-    );
-  }
-
-  StreamSubscription<RingingEvent?>? _eventSubscription;
-
-  Future<void> _startListenEvent() async {
-    _eventSubscription ??= StreamVideoPushNotificationPlatform.instance.onEvent
-        .distinct()
-        .listen((event) {
-          if (event == null) return;
-          if (_shouldSuppressEvent(event)) return;
-          _controller?.add(event);
-        });
-  }
-
-  Future<void> _stopListenEvent() async {
-    await _eventSubscription?.cancel();
-    _eventSubscription = null;
-  }
-
-  bool _shouldSuppressEvent(RingingEvent event) {
-    _suppressions.removeWhere((suppression) => !suppression.isValid());
-    if (_suppressions.isEmpty) {
-      return false;
-    }
-
-    final valueKey = _eventValueKey(event);
-    return _suppressions.any(
-      (suppression) =>
-          suppression.eventType == null ||
-          (event.runtimeType == suppression.eventType &&
-              suppression.valueKey == valueKey),
-    );
-  }
-
-  String? _eventValueKey(RingingEvent event) {
-    return switch (event) {
-      ActionCallToggleMute(:final isMuted) => isMuted.toString(),
-      ActionCallToggleHold(:final isOnHold) => isOnHold.toString(),
-      _ => null,
-    };
-  }
-}

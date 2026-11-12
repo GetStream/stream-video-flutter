@@ -77,7 +77,7 @@ final class StreamTokenProvider {
   static Stream<String> get onVoIPTokenRefresh {
     if (!CurrentPlatform.isIos) return const Stream.empty();
 
-    return RingingEventBroadcaster().onEvent
+    return RingingEventBroadcaster.shared.onEvent
         .whereType<ActionDidUpdateDevicePushTokenVoip>()
         .map((event) => event.token);
   }

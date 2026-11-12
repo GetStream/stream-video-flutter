@@ -18,7 +18,7 @@ class _FakePushPlatform extends StreamVideoPushNotificationPlatform {
   Future<void> init(Map<String, dynamic> pushConfiguration) async {}
 
   @override
-  Future<dynamic> activeCalls() async => <dynamic>[];
+  Future<List<CallData>> activeCalls() async => const [];
 
   @override
   Stream<RingingEvent?> get onEvent => const Stream.empty();

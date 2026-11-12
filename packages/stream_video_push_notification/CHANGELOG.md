@@ -1,5 +1,9 @@
 ## Upcoming (major)
 
+### ⚠️ Breaking
+
+- `StreamVideoPushNotificationPlatform.activeCalls()` returns `Future<List<CallData>>`.
+
 ### 🔄 Changed
 
 - `StreamVideoPushHandler.handleBackgroundMessage` builds a client that sets up no media.

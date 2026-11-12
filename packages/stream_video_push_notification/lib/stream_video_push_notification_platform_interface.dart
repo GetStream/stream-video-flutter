@@ -118,10 +118,11 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
     throw UnimplementedError('dismissRingingCall() has not been implemented.');
   }
 
-  /// Get active calls.
-  /// On iOS: return active calls from Callkit.
-  /// On Android: only return last call
-  Future<dynamic> activeCalls() {
+  /// The calls the native side currently shows or tracks.
+  ///
+  /// On iOS: the calls CallKit knows about. On Android: the plugin's own
+  /// active-calls list. Implementations leave out entries they cannot read.
+  Future<List<CallData>> activeCalls() {
     throw UnimplementedError('activeCalls() has not been implemented.');
   }
 

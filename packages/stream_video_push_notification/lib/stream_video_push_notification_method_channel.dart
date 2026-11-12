@@ -139,12 +139,23 @@ class MethodChannelStreamVideoPushNotification
     await methodChannel.invokeMethod('dismissRingingCall', {'id': cid});
   }
 
-  /// Get active calls.
-  /// On iOS: return active calls from Callkit.
-  /// On Android: only return last call
   @override
-  Future<dynamic> activeCalls() async {
-    return methodChannel.invokeMethod('activeCalls');
+  Future<List<CallData>> activeCalls() async {
+    final result = await methodChannel.invokeMethod<List<dynamic>>(
+      'activeCalls',
+    );
+    if (result == null) return const [];
+
+    final calls = <CallData>[];
+    for (final call in result) {
+      try {
+        calls.add(CallData.fromJson(call.cast<String, dynamic>()));
+      } catch (error) {
+        // Entries that cannot be read are skipped.
+        _logger.w(() => 'Skipping an active call it cannot read: $error');
+      }
+    }
+    return calls;
   }
 
   /// Get device push token VoIP.
@@ -213,20 +224,6 @@ class MethodChannelStreamVideoPushNotification
     });
   }
 
-  CallData _callDataFromJson(Map<String, dynamic> json) {
-    final extraData = json['extra']?.cast<String, dynamic>();
-    return CallData(
-      uuid: json['id'] as String?,
-      callCid: extraData?['callCid'] as String?,
-      handle: json['handle'] as String?,
-      callerName: json['callerName'] as String?,
-      hasVideo: json['type'] == 1,
-      extraData: extraData,
-      isAccepted: json['isAccepted'] as bool? ?? false,
-      endedBySystem: json['endedBySystem'] as bool? ?? false,
-    );
-  }
-
   RingingEvent? _receiveRingingEvent(dynamic data) {
     if (data is Map) {
       final name = data['event'];
@@ -237,7 +234,7 @@ class MethodChannelStreamVideoPushNotification
         return null;
       }
       final body = Map<String, dynamic>.from(data['body']);
-      final callData = _callDataFromJson(body);
+      final callData = CallData.fromJson(body);
 
       return switch (event) {
         Event.actionCallIncoming => ActionCallIncoming(data: callData),

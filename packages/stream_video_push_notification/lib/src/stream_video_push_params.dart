@@ -35,6 +35,32 @@ class StreamVideoPushParams {
   factory StreamVideoPushParams.fromJson(Map<String, dynamic> json) =>
       _$StreamVideoPushParamsFromJson(json);
 
+  /// The params for one call: [configuration]'s defaults with the call's own
+  /// fields on top. The avatar goes into the Android params; without them it
+  /// is dropped.
+  @internal
+  factory StreamVideoPushParams.forCall(
+    StreamVideoPushConfiguration configuration, {
+    required String uuid,
+    required String callCid,
+    String? avatar,
+    String? handle,
+    String? callerName,
+    bool hasVideo = true,
+  }) {
+    final fromConfiguration = StreamVideoPushParams.fromPushConfiguration(
+      configuration,
+    );
+    return fromConfiguration.copyWith(
+      id: uuid,
+      handle: handle,
+      callerName: callerName,
+      type: hasVideo ? 1 : 0,
+      extra: {'callCid': callCid},
+      android: fromConfiguration.android?.copyWith(avatar: avatar),
+    );
+  }
+
   const StreamVideoPushParams._internal({
     this.id,
     this.callerName,
