@@ -90,7 +90,8 @@ final class VoIPPayloadTests: XCTestCase {
         let data = callData(payload)
 
         XCTAssertEqual(data.iconName, "AppLogo")
-        XCTAssertTrue(data.supportsHolding)
+        XCTAssertFalse(data.supportsHolding)
+        XCTAssertEqual(data.maximumCallGroups, 1)
     }
 
     func testThePersistedIconNameWinsOverTheConfiguration() {

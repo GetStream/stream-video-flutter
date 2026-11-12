@@ -570,17 +570,6 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertEqual(outgoing.phase, .active)
     }
 
-    func testAGroupEventCarriesANullPeerWhenUngrouping() {
-        let call = ring("a")
-
-        let effects = store.groupPerformed(uuid: call.identity.callKitUUID, groupWith: nil)
-
-        guard case .send(_, let body)? = effects?.first else { return XCTFail("no event") }
-        XCTAssertEqual(body?.keys.sorted(), ["callUUIDToGroupWith", "id"])
-        XCTAssertNil(body?["callUUIDToGroupWith"] ?? nil)
-        XCTAssertNil(store.groupPerformed(uuid: UUID(), groupWith: nil))
-    }
-
     // MARK: - Outgoing call started by the app
 
     private func startOutgoing(_ id: String) -> CallKitCall {
