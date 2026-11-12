@@ -591,21 +591,20 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
         // Repaints once a second, so it doesn't repaint the video with it.
         title: RepaintBoundary(child: StreamCallDurationBadge(call: call)),
       ),
+      // The larger of the safe area and the spacing, not both.
       body: SafeArea(
         top: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(
-            spacing.xs,
-            0,
-            spacing.xs,
-            controls == null ? spacing.xs : 0,
-          ),
-          child: Column(
-            children: [
-              Expanded(child: body),
-              ?controls,
-            ],
-          ),
+        minimum: EdgeInsets.fromLTRB(
+          spacing.xs,
+          0,
+          spacing.xs,
+          controls == null ? spacing.xs : 0,
+        ),
+        child: Column(
+          children: [
+            Expanded(child: body),
+            ?controls,
+          ],
         ),
       ),
     );
