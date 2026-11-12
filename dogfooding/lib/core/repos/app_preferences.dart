@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../app/app_accent_color.dart';
 import '../../app/app_design.dart';
+import '../../utils/consts.dart';
 import '../model/environment.dart';
 import '../model/user_credentials.dart';
 
@@ -24,15 +25,17 @@ class AppPreferences {
   static const String _kAccentColorPref = 'accent_color';
   static const String _kDesignPref = 'design';
 
-  /// On web, every origin path shares one browser storage (`/video`,
-  /// `/video/beta`, `/chat`), so the keys carry a `video_` prefix.
-  static String _key(String name) => kIsWeb ? 'video_$name' : name;
+  /// On web, every path of the origin shares one browser storage (`/video`,
+  /// `/video/beta`, `/chat`), so each build keeps its keys under its own
+  /// prefix.
+  static String get _webPrefix => kIsProd ? 'video' : 'video_beta';
+
+  static String _key(String name) => kIsWeb ? '${_webPrefix}_$name' : name;
 
   /// The login belongs to an environment, so on web it is stored per
-  /// environment (`video_pronto_api_key`) and the prod and beta builds, which
-  /// use different environments, never read each other's.
+  /// environment too (`video_pronto_api_key`).
   String _authKey(String name) =>
-      kIsWeb ? 'video_${environment.name}_$name' : name;
+      kIsWeb ? '${_webPrefix}_${environment.name}_$name' : name;
 
   UserCredentials? get userCredentials {
     final jsonString = _prefs.getString(_authKey(_kUserCredentialsPref));
