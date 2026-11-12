@@ -23,6 +23,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamCallDurationBadgeThemeData? callDurationBadgeTheme,
     StreamLiveIndicatorThemeData? liveIndicatorTheme,
     StreamSpectatorsIndicatorThemeData? spectatorsIndicatorTheme,
+    StreamLivestreamTileThemeData? livestreamTileTheme,
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -100,6 +101,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callDurationBadgeTheme: callDurationBadgeTheme,
       liveIndicatorTheme: liveIndicatorTheme,
       spectatorsIndicatorTheme: spectatorsIndicatorTheme,
+      livestreamTileTheme: livestreamTileTheme,
       callParticipantTheme: callParticipantTheme,
       localVideoTheme: localVideoTheme,
       incomingCallTheme: incomingCallTheme,
@@ -149,6 +151,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     this.callDurationBadgeTheme = const StreamCallDurationBadgeThemeData(),
     this.liveIndicatorTheme = const StreamLiveIndicatorThemeData(),
     this.spectatorsIndicatorTheme = const StreamSpectatorsIndicatorThemeData(),
+    this.livestreamTileTheme = const StreamLivestreamTileThemeData(),
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -440,6 +443,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the pill showing how many people watch a livestream.
   final StreamSpectatorsIndicatorThemeData spectatorsIndicatorTheme;
 
+  /// Theme for the livestream's video and its toolbar.
+  final StreamLivestreamTileThemeData livestreamTileTheme;
+
   /// Theme for the call participant widget.
   ///
   /// `null` unless an app sets one: the participant tile takes its defaults
@@ -549,6 +555,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     StreamCallDurationBadgeThemeData? callDurationBadgeTheme,
     StreamLiveIndicatorThemeData? liveIndicatorTheme,
     StreamSpectatorsIndicatorThemeData? spectatorsIndicatorTheme,
+    StreamLivestreamTileThemeData? livestreamTileTheme,
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -606,6 +613,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     spectatorsIndicatorTheme: this.spectatorsIndicatorTheme.merge(
       spectatorsIndicatorTheme,
     ),
+    livestreamTileTheme: this.livestreamTileTheme.merge(livestreamTileTheme),
     callParticipantTheme:
         this.callParticipantTheme?.merge(callParticipantTheme) ??
         callParticipantTheme,
@@ -667,6 +675,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       spectatorsIndicatorTheme: spectatorsIndicatorTheme.merge(
         other.spectatorsIndicatorTheme,
       ),
+      livestreamTileTheme: livestreamTileTheme.merge(other.livestreamTileTheme),
       callParticipantTheme:
           callParticipantTheme?.merge(other.callParticipantTheme) ??
           other.callParticipantTheme,
@@ -769,6 +778,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             t,
           ) ??
           spectatorsIndicatorTheme,
+      livestreamTileTheme:
+          StreamLivestreamTileThemeData.lerp(
+            livestreamTileTheme,
+            other.livestreamTileTheme,
+            t,
+          ) ??
+          livestreamTileTheme,
       callParticipantTheme:
           callParticipantTheme != null && other.callParticipantTheme != null
           ? callParticipantTheme!.lerp(other.callParticipantTheme!, t)
