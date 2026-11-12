@@ -51,6 +51,12 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         manager.eventSink = savedEventSink
         manager.store = savedStore
         manager.audio = savedAudio
+        if let installed = manager.sharedProvider, installed !== savedProvider {
+            // A provider a test installed has the manager as its delegate. Released, CallKit
+            // resets it later, which would reset whatever store a later test is using.
+            installed.setDelegate(nil, queue: nil)
+            installed.invalidate()
+        }
         manager.sharedProvider = savedProvider
         manager.recentsSuppressedFor = savedRecentsSuppressedFor
         manager.reconfigureAfterAnswerDelay = savedReconfigureDelay

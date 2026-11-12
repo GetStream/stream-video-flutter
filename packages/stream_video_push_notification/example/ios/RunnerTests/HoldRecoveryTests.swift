@@ -363,7 +363,6 @@ final class HoldRecoveryTests: XCTestCase {
         _ = store.answerPerformed(uuid: uuid)
         call = store.call(forCallKit: uuid)
         observer.add(uuid)
-        _ = store.audioActivated()
         activate()
         holdForOtherCall()
         observer.end(otherCall)
