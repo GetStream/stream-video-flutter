@@ -213,6 +213,13 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertFalse(store.shouldTimeOut(appId: ringing.identity.callKitUUID.uuidString))
     }
 
+    func testARingThatEndedDoesNotTimeOut() {
+        let call = ring("ended")
+        store.endReported(uuid: call.identity.callKitUUID, reason: .remoteEnded)
+
+        XCTAssertFalse(store.shouldTimeOut(appId: "ended"))
+    }
+
     // MARK: - Two calls at once
 
     func testEachTransitionCarriesItsOwnCallsOptions() {
@@ -222,9 +229,7 @@ final class CallKitCallStoreTests: XCTestCase {
 
         XCTAssertEqual(sentIds(store.answerPerformed(uuid: first.identity.callKitUUID)), ["first"])
         XCTAssertTrue(first.options.isAccepted)
-        // Current behaviour, pinned: the last options are marked accepted too, whichever call
-        // they belong to.
-        XCTAssertTrue(second.options.isAccepted)
+        XCTAssertFalse(second.options.isAccepted, "the last options belong to another call")
         XCTAssertEqual(
             sentIds(store.endPerformed(uuid: first.identity.callKitUUID).effects), ["first"])
     }
@@ -260,14 +265,33 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertTrue(store.hasHeldCall)
     }
 
-    func testAnsweringAlsoMarksTheLastOptionsAccepted() {
+    func testAnsweringMarksTheLastOptionsAcceptedOnlyWhenTheyNameTheAnsweredCall() {
         let call = ring("a")
-        let last = options("last")
-        store.lastOptions = last
+        let sameCall = options("A")
+        store.lastOptions = sameCall
 
         _ = store.answerPerformed(uuid: call.identity.callKitUUID)
 
-        XCTAssertTrue(last.isAccepted)
+        XCTAssertTrue(sameCall.isAccepted)
+
+        let other = ring("b")
+        let otherLast = options("c")
+        store.lastOptions = otherLast
+        _ = store.answerPerformed(uuid: other.identity.callKitUUID)
+
+        XCTAssertFalse(otherLast.isAccepted)
+    }
+
+    func testAnsweringOneOfTwoRingsReportsOnlyThatOneAsAccepted() {
+        let answered = ring("answered")
+        let ringing = ring("ringing")
+        store.lastOptions = ringing.options
+
+        _ = store.answerPerformed(uuid: answered.identity.callKitUUID)
+
+        let active = store.activeCalls(
+            systemCallUUIDs: [ringing.identity.callKitUUID, answered.identity.callKitUUID])
+        XCTAssertEqual(active.filter { $0["isAccepted"] as? Bool == true }.map { $0["id"] as? String }, ["answered"])
     }
 
     func testAnEndedCallStaysEnded() {

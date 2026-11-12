@@ -132,10 +132,11 @@ final class CallKitCallStore {
         return [.send(event: StreamVideoIncomingCallConstants.ACTION_CALL_INCOMING, body: options.toJSON())]
     }
 
-    /// Whether the ring of the call `appId` names times out now: it is still tracked and no
-    /// call is answered or outgoing.
+    /// Whether the ring of the call `appId` names times out now: it is still tracked, has not
+    /// ended, and no call is answered or outgoing.
     func shouldTimeOut(appId: String) -> Bool {
-        call(forAppId: appId) != nil && answeredCall == nil && outgoingCall == nil
+        guard let call = call(forAppId: appId), !call.phase.isEnded else { return false }
+        return answeredCall == nil && outgoingCall == nil
     }
 
     /// The ring of `options` timed out and was reported to CallKit as unanswered.
@@ -163,11 +164,13 @@ final class CallKitCallStore {
 
     /// CallKit performed the answer action for `uuid`. Nil for a call the store does not track.
     ///
-    /// Marks both the call's options and the last options accepted.
+    /// Marks the call's options accepted, and the last options too when they name this call.
     func answerPerformed(uuid: UUID) -> [CallKitEffect]? {
         guard let call = call(forCallKit: uuid) else { return nil }
         call.reportsConnection = true
-        lastOptions?.isAccepted = true
+        if let last = lastOptions, last.uuid.lowercased() == call.identity.appId.lowercased() {
+            last.isAccepted = true
+        }
         call.options.isAccepted = true
         call.move(to: .answering)
         answeredCall = call

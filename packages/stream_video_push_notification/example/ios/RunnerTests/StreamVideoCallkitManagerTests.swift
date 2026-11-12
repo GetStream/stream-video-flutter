@@ -360,6 +360,65 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         XCTAssertFalse(manager.store.isFromPushKit)
     }
 
+    func testDartEndCallWithNoArgumentsWhileThePushKitFlagIsSetEndsThePushKitCall() {
+        listen()
+        let pushed = CallData(args: ["id": UUID().uuidString])
+        manager.store.showRequested(pushed, fromPushKit: true)
+
+        manager.handle(.endCall(nil)) { _ in }
+        drainMainQueue()
+
+        XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
+        XCTAssertEqual(receivedId(at: 0), pushed.uuid)
+        XCTAssertFalse(manager.store.isFromPushKit)
+    }
+
+    func testDartCallConnectedWithNoArgumentsWhileThePushKitFlagIsSetConnectsThePushKitCall() {
+        let uuid = UUID()
+        let pushed = CallData(args: ["id": uuid.uuidString])
+        manager.store.showRequested(pushed, fromPushKit: true)
+        _ = manager.store.incomingReported(pushed, uuid: uuid, source: .pushKit)
+
+        manager.handle(.callConnected(nil)) { _ in }
+
+        XCTAssertNotNil(manager.store.call(forCallKit: uuid)?.connectedAt)
+        XCTAssertFalse(manager.store.isFromPushKit)
+    }
+
+    func testDartEndCallWithoutPushKitUsesTheTrackedCallsOptions() {
+        let uuid = UUID()
+        _ = manager.store.incomingReported(
+            CallData(args: ["id": uuid.uuidString, "callerName": "Tracked"]), uuid: uuid,
+            source: .app)
+        let call = manager.store.call(forCallKit: uuid)!
+
+        manager.handle(.endCall(["id": uuid.uuidString])) { _ in }
+
+        XCTAssertTrue(manager.store.lastOptions === call.options)
+        XCTAssertEqual(manager.store.lastOptions?.callerName, "Tracked")
+    }
+
+    func testDartCallConnectedWithoutPushKitConnectsTheTrackedCall() {
+        let uuid = UUID()
+        _ = manager.store.incomingReported(
+            CallData(args: ["id": uuid.uuidString]), uuid: uuid, source: .app)
+        let call = manager.store.call(forCallKit: uuid)!
+
+        manager.handle(.callConnected(["id": uuid.uuidString.lowercased()])) { _ in }
+
+        XCTAssertTrue(manager.store.lastOptions === call.options)
+        XCTAssertNotNil(call.connectedAt)
+    }
+
+    func testARingTheAppEndedDoesNotTimeOutLater() {
+        let uuid = UUID()
+        let shown = CallData(args: ["id": uuid.uuidString])
+        _ = manager.store.incomingReported(shown, uuid: uuid, source: .app)
+
+        manager.saveEndCall(uuid.uuidString, 2)
+        XCTAssertFalse(manager.store.shouldTimeOut(appId: shown.uuid))
+    }
+
     func testDartMuteOrHoldThatMatchesTheCallSendsTheEvent() {
         listen()
         let uuid = UUID()
