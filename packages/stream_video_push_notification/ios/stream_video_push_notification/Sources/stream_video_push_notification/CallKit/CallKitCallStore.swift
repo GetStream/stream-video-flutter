@@ -51,7 +51,8 @@ final class CallKitCallStore {
 
     /// Whether the call last shown or started came from PushKit, with no request from Dart to
     /// end or connect a call since and no native end of all calls. While true, Dart's requests
-    /// to end or connect a call act on `lastOptions`, whatever id they name.
+    /// to end or connect a call act on `lastOptions`, unless the id they name is another tracked
+    /// call: see `actsOnPushKitCall(forAppId:)`.
     var isFromPushKit = false
 
     /// The call CallKit last answered, until it ends.
@@ -65,16 +66,13 @@ final class CallKitCallStore {
 
     private var lastAnsweredCall: CallKitCall?
 
-    /// The call CallKit last started, until it ends.
+    /// The outgoing call CallKit last started of those that have not ended.
     ///
     /// An ended outgoing call no longer counts: a ring shown after it times out, a ring declined
     /// after it is sent as declined, and an audio activation after it does not start it again.
     var outgoingCall: CallKitCall? {
-        guard let call = startedCall, !call.phase.isEnded else { return nil }
-        return call
+        calls.last { $0.direction == .outgoing && !$0.phase.isEnded }
     }
-
-    private var startedCall: CallKitCall?
 
     // MARK: - Lookups
 
@@ -122,6 +120,19 @@ final class CallKitCallStore {
     /// track.
     func reportedId(for uuid: UUID) -> String {
         call(forCallKit: uuid)?.identity.reportedId ?? uuid.uuidString.lowercased()
+    }
+
+    /// Whether Dart's `endCall` or `callConnected` for the call `id` names acts on the call
+    /// PushKit showed, `lastOptions`.
+    ///
+    /// True while `isFromPushKit` is, unless `id` names a tracked call other than the PushKit
+    /// one: a call the app started or showed itself keeps its own end and connection while a
+    /// VoIP push rings.
+    func actsOnPushKitCall(forAppId id: String?) -> Bool {
+        guard isFromPushKit else { return false }
+        guard let id = id, let named = call(forAppId: id) else { return true }
+        guard let pushKitId = lastOptions?.uuid else { return false }
+        return named === call(forAppId: pushKitId)
     }
 
     /// The options of the call `args` names: the last options when they name it, else the
@@ -221,7 +232,6 @@ final class CallKitCallStore {
             identity: CallKitCallIdentity(appId: options.uuid, callKitUUID: uuid),
             direction: .outgoing, options: options, phase: .starting)
         call.reportsConnection = true
-        startedCall = call
         calls.append(call)
         return (call, [.send(event: StreamVideoIncomingCallConstants.ACTION_CALL_START, body: options.toJSON())])
     }

@@ -263,7 +263,9 @@ class IOSPushConfiguration {
   /// Reporting it gives the caller what a phone call gets: the green call indicator instead of
   /// the orange microphone one, the proximity sensor turning the screen off at the ear, and the
   /// call on the lock screen, where ending it cancels the ring. The CallKit call is marked
-  /// connected once the call connects, and ends with the call however it ends.
+  /// connected once the call connects, and ends with the call however it ends. Ending a joined
+  /// call from CallKit leaves it through the core ringing events, which the app observes for
+  /// ringing anyway.
   ///
   /// Off when omitted. Leave it off if the app already calls
   /// [StreamVideoPushNotificationManager.startOutgoingCall] itself, or CallKit shows two calls.

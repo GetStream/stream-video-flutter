@@ -14,9 +14,10 @@ import 'package:uuid/uuid.dart';
 ///   only does after a callee accepted.
 /// - It ends when the call disconnects, when its state stream closes, or when the call stops
 ///   being the outgoing one without having been joined.
-/// - Ending it from the CallKit UI while the call still rings leaves the call, which cancels the
-///   ring. Once the call is joined, the ringing flow coordinator leaves it, as it does for any
-///   call CallKit ends.
+/// - Ending it from the CallKit UI while the call is not joined leaves the call, which cancels
+///   the ring. A joined call is left by the ringing flow coordinator, as any call CallKit ends,
+///   so the app has to observe the core ringing events, as the ringing setup already requires.
+///   Leaving it here too would race that leave and cancel the ring twice.
 @internal
 class OutgoingCallReporter {
   OutgoingCallReporter({
@@ -42,8 +43,9 @@ class OutgoingCallReporter {
   static CallStatus _status(CallState state) => state.status;
 
   void _onOutgoingCall(Call? call) {
-    // A call that is no longer the outgoing one and was never joined has nothing left to show.
-    // A joined one is still followed through its status.
+    // A call that is no longer the outgoing one and was never joined loses its CallKit call;
+    // leaving it, and so cancelling its ring, is the app's. A joined one is still followed
+    // through its status.
     for (final reported in _calls.toList()) {
       if (!identical(reported.call, call) && !_isActive(reported.call)) {
         _end(reported);
@@ -155,15 +157,24 @@ class OutgoingCallReporter {
     );
   }
 
+  /// Stops following calls. The CallKit calls already reported are left as they are.
   Future<void> dispose() async {
-    for (final subscription in _subscriptions) {
+    // Taken out first: a status that arrives while a cancel is awaited must not change the
+    // lists being iterated, nor end a call.
+    final subscriptions = [..._subscriptions];
+    final calls = [..._calls];
+    _subscriptions.clear();
+    _calls.clear();
+    for (final reported in calls) {
+      reported.ended = true;
+    }
+
+    for (final subscription in subscriptions) {
       await subscription.cancel();
     }
-    _subscriptions.clear();
-    for (final reported in _calls) {
+    for (final reported in calls) {
       await reported.statusSubscription?.cancel();
     }
-    _calls.clear();
   }
 }
 

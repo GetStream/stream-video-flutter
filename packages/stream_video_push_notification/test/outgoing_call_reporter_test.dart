@@ -27,7 +27,8 @@ class _FakeCall {
     String id = 'call-id',
     List<CallMemberState>? members,
     bool video = true,
-  }) {
+    Future<void> Function()? onCancel,
+  }) : status = StreamController<CallStatus>(sync: true, onCancel: onCancel) {
     final cid = StreamCallCid.from(type: StreamCallType.defaultType(), id: id);
     final emitter = _MockCallStateEmitter();
     when(() => emitter.value).thenReturn(
@@ -56,7 +57,7 @@ class _FakeCall {
 
   // Left open unless a test closes it: an open state stream is a call that goes on.
   // ignore: close_sinks
-  final status = StreamController<CallStatus>(sync: true);
+  final StreamController<CallStatus> status;
 }
 
 class _Harness {
@@ -362,6 +363,23 @@ void main() {
     call.status.add(CallStatus.disconnected(const DisconnectReason.ended()));
     harness.outgoing.add(null);
     await _settle();
+
+    verifyNever(() => harness.manager.endCall(any()));
+  });
+
+  test('a status that arrives while disposing changes nothing', () async {
+    final cancelling = Completer<void>();
+    final first = harness.ring(_FakeCall(onCancel: () => cancelling.future));
+    harness.active.add(first.call);
+    final second = harness.ring();
+    harness.active.add(second.call);
+
+    final disposed = harness.reporter.dispose();
+    second.status.add(
+      CallStatus.disconnected(const DisconnectReason.ended()),
+    );
+    cancelling.complete();
+    await disposed;
 
     verifyNever(() => harness.manager.endCall(any()));
   });
