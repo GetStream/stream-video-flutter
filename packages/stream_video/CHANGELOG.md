@@ -202,6 +202,7 @@
 - On iOS, a broadcast screen share cancelled before it starts no longer keeps its track running.
 - On iOS, a later start of a broadcast screen share no longer publishes its track again.
 - A join or fast reconnect fails when the device makes no generic SDP offer, instead of joining with an empty one.
+- An incoming call reports the microphone and camera its call settings turn on in `connectOptions` before it is joined. They used to read as off until the join, which then turned them on.
 
 ## Upcoming (minor)
 
