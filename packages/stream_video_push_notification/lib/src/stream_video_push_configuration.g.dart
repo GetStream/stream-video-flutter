@@ -91,7 +91,6 @@ IOSPushConfiguration _$IOSPushConfigurationFromJson(
   maximumCallGroups: (json['maximumCallGroups'] as num?)?.toInt(),
   maximumCallsPerCallGroup: (json['maximumCallsPerCallGroup'] as num?)?.toInt(),
   audioSessionMode: json['audioSessionMode'] as String?,
-  audioSessionActive: json['audioSessionActive'] as bool?,
   audioSessionPreferredSampleRate:
       (json['audioSessionPreferredSampleRate'] as num?)?.toDouble(),
   audioSessionPreferredIOBufferDuration:
@@ -115,7 +114,6 @@ Map<String, dynamic> _$IOSPushConfigurationToJson(
   'maximumCallGroups': instance.maximumCallGroups,
   'maximumCallsPerCallGroup': instance.maximumCallsPerCallGroup,
   'audioSessionMode': instance.audioSessionMode,
-  'audioSessionActive': instance.audioSessionActive,
   'audioSessionPreferredSampleRate': instance.audioSessionPreferredSampleRate,
   'audioSessionPreferredIOBufferDuration':
       instance.audioSessionPreferredIOBufferDuration,

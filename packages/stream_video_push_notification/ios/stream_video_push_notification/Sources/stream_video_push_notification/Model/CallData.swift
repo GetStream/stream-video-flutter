@@ -24,8 +24,6 @@ import Foundation
     @objc public var ringtonePath: String
     @objc public var configureAudioSession: Bool
     @objc public var audioSessionMode: String
-    /// Has no effect: CallKit activates the audio session when it needs it.
-    @objc public var audioSessionActive: Bool
     @objc public var audioSessionPreferredSampleRate: Double
     @objc public var audioSessionPreferredIOBufferDuration: Double
 
@@ -51,7 +49,6 @@ import Foundation
         self.ringtonePath = ""
         self.configureAudioSession = true
         self.audioSessionMode = ""
-        self.audioSessionActive = true
         self.audioSessionPreferredSampleRate = 44100.0
         self.audioSessionPreferredIOBufferDuration = 0.005
     }
@@ -89,7 +86,6 @@ import Foundation
         self.ringtonePath = options.ringtonePath
         self.configureAudioSession = options.configureAudioSession
         self.audioSessionMode = options.audioSessionMode
-        self.audioSessionActive = options.audioSessionActive
         self.audioSessionPreferredSampleRate = options.audioSessionPreferredSampleRate
         self.audioSessionPreferredIOBufferDuration = options.audioSessionPreferredIOBufferDuration
     }
@@ -110,7 +106,6 @@ import Foundation
             "ringtonePath": ringtonePath,
             "configureAudioSession": configureAudioSession,
             "audioSessionMode": audioSessionMode,
-            "audioSessionActive": audioSessionActive,
             "audioSessionPreferredSampleRate": audioSessionPreferredSampleRate,
             "audioSessionPreferredIOBufferDuration": audioSessionPreferredIOBufferDuration,
         ]

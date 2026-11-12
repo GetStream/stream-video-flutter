@@ -3,10 +3,9 @@ import CallKit
 import Flutter
 import UIKit
 
-@available(iOS 10.0, *)
-public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
+final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
-    @objc public static let shared = StreamVideoCallkitManager()
+    static let shared = StreamVideoCallkitManager()
 
     /// Every event bound for Dart goes through here. Tests replace it with a sink of their own.
     var eventSink = RingingEventSink()
@@ -52,7 +51,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
     }
 
-    @objc public func getAcceptedCall() -> CallData? {
+    func getAcceptedCall() -> CallData? {
         let data = store.lastOptions
         let answeredId = store.answeredCall?.identity.appId
         NSLog("Call data ids \(String(describing: data?.uuid)) \(String(describing: answeredId))")
@@ -62,7 +61,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         return nil
     }
 
-    @objc public func showIncomingCall(_ data: CallData, fromPushKit: Bool) {
+    func showIncomingCall(_ data: CallData, fromPushKit: Bool) {
         showIncomingCall(data, fromPushKit: fromPushKit, completion: nil)
     }
 
@@ -70,7 +69,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     ///
     /// `completion` runs once CallKit has accepted or refused the call, or straight away when the
     /// call could not be reported at all.
-    @objc public func showIncomingCall(
+    func showIncomingCall(
         _ data: CallData, fromPushKit: Bool, completion: (() -> Void)?
     ) {
         store.showRequested(data, fromPushKit: fromPushKit)
@@ -105,7 +104,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
     }
 
-    @objc public func startCall(_ data: CallData, fromPushKit: Bool) {
+    func startCall(_ data: CallData, fromPushKit: Bool) {
         store.startRequested(data, fromPushKit: fromPushKit)
         initCallkitProvider(data)
         requestStart(data)
@@ -150,7 +149,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         return callUpdate
     }
 
-    @objc public func muteCall(_ callId: String, isMuted: Bool) {
+    func muteCall(_ callId: String, isMuted: Bool) {
         guard let call = store.call(forAppId: callId) else {
             return
         }
@@ -161,7 +160,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
     }
 
-    @objc public func holdCall(_ callId: String, onHold: Bool) {
+    func holdCall(_ callId: String, onHold: Bool) {
         guard let call = store.call(forAppId: callId) else {
             return
         }
@@ -180,7 +179,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
     }
 
-    @objc public func endCall(_ data: CallData) {
+    func endCall(_ data: CallData) {
         let uuid: UUID
         let sentEnded = store.isFromPushKit
         if store.isFromPushKit {
@@ -198,7 +197,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         transactions.end(uuid: uuid)
     }
 
-    @objc public func connectedCall(_ data: CallData) {
+    func connectedCall(_ data: CallData) {
         let uuid: UUID
         if store.isFromPushKit {
             uuid = store.callKitUUID(forAppId: store.lastOptions!.uuid)!
@@ -215,11 +214,11 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
     }
 
-    @objc public func activeCalls() -> [[String: Any]] {
+    func activeCalls() -> [[String: Any]] {
         return store.activeCalls(systemCallUUIDs: transactions.systemCallUUIDs)
     }
 
-    @objc public func endAllCalls() {
+    func endAllCalls() {
         store.allCallsEndRequested()
         transactions.endAll()
     }
@@ -242,7 +241,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     ///
     /// `reason` matches the raw values of `CXCallEndedReason`: 1 failed, 2 remoteEnded,
     /// 3 unanswered, 4 answeredElsewhere, 5 declinedElsewhere.
-    public func saveEndCall(_ uuid: String, _ reason: Int) {
+    func saveEndCall(_ uuid: String, _ reason: Int) {
         guard let callUUID = store.callKitUUID(forAppId: uuid) else {
             NSLog("saveEndCall: invalid UUID \(uuid)")
             return
@@ -289,7 +288,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         return typeDefault
     }
 
-    @objc public func initCallkitProvider(_ data: CallData) {
+    func initCallkitProvider(_ data: CallData) {
         if !store.hasOngoingCall {
             // No registered-again call is left to keep out of Recents.
             recentsSuppressedFor = nil

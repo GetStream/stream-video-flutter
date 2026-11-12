@@ -2,10 +2,14 @@ import Flutter
 import Foundation
 import PushKit
 
-public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
+/// Receives VoIP pushes through PushKit and shows each as an incoming CallKit call.
+///
+/// Call `VoIPPushRegistryHandler.shared.registerForPushNotifications()` from the app delegate's
+/// `application(_:didFinishLaunchingWithOptions:)`.
+public class VoIPPushRegistryHandler: NSObject, PKPushRegistryDelegate,
     UNUserNotificationCenterDelegate
 {
-    public static let shared = StreamVideoPKDelegateManager()
+    public static let shared = VoIPPushRegistryHandler()
 
     private var pushRegistry: PKPushRegistry?
     private var defaultConfiguration: StreamVideoPushConfiguration?
@@ -134,3 +138,6 @@ public class StreamVideoPKDelegateManager: NSObject, PKPushRegistryDelegate,
     }
 
 }
+
+@available(*, deprecated, renamed: "VoIPPushRegistryHandler")
+public typealias StreamVideoPKDelegateManager = VoIPPushRegistryHandler

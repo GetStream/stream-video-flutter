@@ -263,7 +263,6 @@ const _defaultPushConfiguration = StreamVideoPushConfiguration(
     supportsVideo: true,
     maximumCallGroups: 1,
     audioSessionMode: 'default',
-    audioSessionActive: true,
     audioSessionPreferredSampleRate: 44100,
     audioSessionPreferredIOBufferDuration: 0.005,
     supportsDTMF: true,

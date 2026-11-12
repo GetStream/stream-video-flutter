@@ -7,7 +7,6 @@ enum PushCommand {
     case initData([String: Any]?)
     case getDevicePushTokenVoIP
     case showIncomingCall(CallData)
-    case showMissCallNotification
     case startCall(CallData)
     /// `nil` when arguments were sent but are not a map.
     case endCall([String: Any]?)
@@ -20,7 +19,6 @@ enum PushCommand {
     case endAllCalls
     case silenceEvents(Bool)
     case reportCallEnded(id: String, reason: Int)
-    case requestNotificationPermission
     /// The arguments the method needs are missing or not of the expected type; the call is
     /// answered with `reply` and nothing else happens.
     case ignored(reply: Any?)
@@ -45,8 +43,6 @@ extension PushCommand {
                 return .ignored(reply: true)
             }
             return .showIncomingCall(CallData(args: args))
-        case "showMissCallNotification":
-            return .showMissCallNotification
         case "startCall":
             guard let args = call.arguments as? [String: Any] else {
                 return .ignored(reply: true)
@@ -102,8 +98,6 @@ extension PushCommand {
                 return .ignored(reply: true)
             }
             return .reportCallEnded(id: callId, reason: reason)
-        case "requestNotificationPermission":
-            return .requestNotificationPermission
         default:
             return .notImplemented
         }

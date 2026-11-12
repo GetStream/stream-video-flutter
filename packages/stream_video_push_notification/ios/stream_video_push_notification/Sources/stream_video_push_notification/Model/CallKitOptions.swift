@@ -17,7 +17,6 @@ struct CallKitOptions {
     var ringtonePath: String
     var configureAudioSession: Bool
     var audioSessionMode: String
-    var audioSessionActive: Bool
     var audioSessionPreferredSampleRate: Double
     var audioSessionPreferredIOBufferDuration: Double
 
@@ -44,7 +43,6 @@ struct CallKitOptions {
         self.ringtonePath = source["ringtonePath"] as? String ?? ""
         self.configureAudioSession = source["configureAudioSession"] as? Bool ?? true
         self.audioSessionMode = source["audioSessionMode"] as? String ?? ""
-        self.audioSessionActive = source["audioSessionActive"] as? Bool ?? true
         self.audioSessionPreferredSampleRate =
             source["audioSessionPreferredSampleRate"] as? Double ?? 44100.0
         self.audioSessionPreferredIOBufferDuration =

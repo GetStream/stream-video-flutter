@@ -24,7 +24,6 @@
     "ringtonePath": "ring.caf",
     "configureAudioSession": true,
     "audioSessionMode": "",
-    "audioSessionActive": true,
     "audioSessionPreferredSampleRate": 44100.0,
     "audioSessionPreferredIOBufferDuration": 0.005
   }
