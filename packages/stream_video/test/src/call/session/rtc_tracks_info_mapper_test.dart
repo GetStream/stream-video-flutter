@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_video/src/sfu/data/models/sfu_model_mapper_extensions.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_codec.dart';
+import 'package:stream_video/src/sfu/data/models/sfu_model_mapper_extensions.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
 import 'package:stream_video/src/webrtc/model/rtc_tracks_info.dart';
 

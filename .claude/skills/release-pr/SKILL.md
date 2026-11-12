@@ -29,16 +29,16 @@ The repo releases two kinds of product, each under its own tag:
 |---|---|---|---|
 | `stream-video` | the six `packages/stream_video*` packages | one shared `X.Y.Z` | `stream-video-vX.Y.Z` |
 | `webrtc-flutter` | `webrtc/stream_webrtc_flutter` | its own | `webrtc-flutter-vX.Y.Z` |
-| `dart-webrtc` | `webrtc/dart_webrtc` (to become `stream_dart_webrtc`) | its own | `dart-webrtc-vX.Y.Z` |
-| `webrtc-interface` | `webrtc/webrtc_interface` (to become `stream_webrtc_interface`) | its own | `webrtc-interface-vX.Y.Z` |
+| `dart-webrtc` | `webrtc/stream_dart_webrtc` | its own | `dart-webrtc-vX.Y.Z` |
+| `webrtc-interface` | `webrtc/stream_webrtc_interface` | its own | `webrtc-interface-vX.Y.Z` |
 
 Only `stream-video` keeps `stream` in its tag. A webrtc tag is the package name without its `stream_` prefix, in
 kebab case; `release_publish.yml` adds the prefix back to find the package.
 
 A webrtc package's version is not aligned with the others or with stream-video, and it can take a major bump on its
-own. `dart_webrtc` and `webrtc_interface` are not published by us yet (`lint:pub`, `release:pub` and
-`release_tag.yml` skip them): they are renamed to `stream_dart_webrtc` and `stream_webrtc_interface` before their
-first release. Until then, refuse a release of either and tell the user.
+own. `stream_dart_webrtc` and `stream_webrtc_interface` are new on pub.dev and not published yet (`lint:pub`,
+`release:pub` and `release_tag.yml` skip them): their first version is published by hand. Until then, refuse a
+release of either, of `stream_webrtc_flutter` and of `stream-video`, which all depend on them, and tell the user.
 
 `<tag>` below is `<product>-v<version>`, e.g. `stream-video-v2.0.0`.
 
