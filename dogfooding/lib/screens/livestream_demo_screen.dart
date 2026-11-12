@@ -86,29 +86,16 @@ class _LivestreamDemoScreenState extends State<LivestreamDemoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final streamVideoTheme = StreamVideoTheme.of(context);
-    final textTheme = streamVideoTheme.textTheme;
-
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        titleSpacing: 4,
-        centerTitle: false,
-        title: Text('Livestream Demo', style: textTheme.body),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close, color: Colors.white),
-            onPressed: () {
-              Navigator.maybePop(context);
-            },
-          ),
-        ],
+    return switch (_call) {
+      null => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      final Call call => LivestreamPlayer(
+        call: call,
+        backButtonBuilder: (context) => StreamToolbarButton.icon(
+          icon: Icon(context.streamIcons.xmark),
+          tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+          onPressed: () => Navigator.maybePop(context),
+        ),
       ),
-      body: switch (_call) {
-        null => const Center(child: CircularProgressIndicator()),
-        final Call call => LivestreamPlayer(call: call),
-      },
-    );
+    };
   }
 }
