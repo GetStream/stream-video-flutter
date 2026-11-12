@@ -125,6 +125,28 @@ void main() {
       expect(tile.bottom - (button.bottom - tapPadding), spacing);
     });
 
+    testWidgets('spaces the indicators like the buttons', (tester) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          child: SizedBox(
+            width: 280,
+            height: 482,
+            child: StreamLivestreamTile(
+              call: call,
+              showSpeakerphoneToggle: false,
+              onFullscreenTapped: () {},
+              child: const SizedBox(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final live = tester.getRect(find.byType(StreamLiveIndicator));
+      final viewers = tester.getRect(find.byType(StreamSpectatorsIndicator));
+      expect(viewers.left - live.right, 2 * tapPadding);
+    });
+
     testWidgets('mirrors right to left', (tester) async {
       final spacing = const StreamSpacing().xs;
       await pumpDirected(tester, TextDirection.rtl);
