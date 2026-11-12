@@ -508,6 +508,40 @@ final class CallKitCallStoreTests: XCTestCase {
 
     // MARK: - Outgoing call started by the app
 
+    private func startOutgoing(_ id: String) -> CallKitCall {
+        let uuid = UUID()
+        store.registerPendingOutgoing(options(id), uuid: uuid)
+        return store.startPerformed(uuid: uuid)!.call
+    }
+
+    func testAnEarlierOutgoingCallStillCountsOnceALaterOneEnded() {
+        let first = startOutgoing("first")
+        let second = startOutgoing("second")
+        XCTAssertTrue(store.outgoingCall === second)
+
+        _ = store.endPerformed(uuid: second.identity.callKitUUID)
+
+        XCTAssertTrue(store.outgoingCall === first)
+        let outcome = store.endPerformed(uuid: first.identity.callKitUUID)
+        XCTAssertEqual(names(outcome.effects), [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
+        XCTAssertNil(store.outgoingCall)
+    }
+
+    func testDuringAPushKitRingOnlyAnotherTrackedCallKeepsItsOwnEndAndConnection() {
+        let outgoing = startOutgoing("outgoing")
+        store.showRequested(options("pushkit"), fromPushKit: true)
+        _ = ring("pushkit")
+
+        XCTAssertFalse(store.actsOnPushKitCall(forAppId: "outgoing"))
+        XCTAssertFalse(store.actsOnPushKitCall(forAppId: outgoing.identity.callKitUUID.uuidString))
+        XCTAssertTrue(store.actsOnPushKitCall(forAppId: "pushkit"))
+        XCTAssertTrue(store.actsOnPushKitCall(forAppId: "unknown"))
+        XCTAssertTrue(store.actsOnPushKitCall(forAppId: nil))
+
+        store.isFromPushKit = false
+        XCTAssertFalse(store.actsOnPushKitCall(forAppId: "pushkit"))
+    }
+
     func testOutgoingCall() {
         let uuid = UUID()
         let started = options(uuid.uuidString)

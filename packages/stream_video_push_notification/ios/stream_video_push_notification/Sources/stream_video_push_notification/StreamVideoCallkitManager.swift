@@ -182,8 +182,8 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
     func endCall(_ data: CallData) {
         let uuid: UUID
-        let sentEnded = store.isFromPushKit
-        if store.isFromPushKit {
+        let sentEnded = store.actsOnPushKitCall(forAppId: data.uuid)
+        if sentEnded {
             uuid = store.callKitUUID(forAppId: store.lastOptions!.uuid)!
             store.isFromPushKit = false
             self.sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_ENDED, data.toJSON())
@@ -200,7 +200,7 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
     func connectedCall(_ data: CallData) {
         let uuid: UUID
-        if store.isFromPushKit {
+        if store.actsOnPushKitCall(forAppId: data.uuid) {
             uuid = store.callKitUUID(forAppId: store.lastOptions!.uuid)!
             store.isFromPushKit = false
         } else {

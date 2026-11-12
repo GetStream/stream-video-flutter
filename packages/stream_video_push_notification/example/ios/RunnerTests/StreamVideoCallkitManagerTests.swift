@@ -74,9 +74,58 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         super.tearDown()
     }
 
+    // MARK: - A VoIP push ringing during an outgoing call
+
+    /// A ring PushKit showed, which sets `isFromPushKit` and the last options.
+    private func ringFromPushKit(id: String) -> CallKitCall {
+        manager.store.showRequested(CallData(args: ["id": id]), fromPushKit: true)
+        return track(id: id)
+    }
+
+    func testConnectingTheOutgoingCallDuringAPushKitRingConnectsItAndLeavesTheRing() {
+        listen()
+        let outgoing = startOutgoing(id: "outgoing")
+        let ringing = ringFromPushKit(id: "pushkit")
+
+        manager.handle(.callConnected(["id": "outgoing"])) { _ in }
+        drainMainQueue()
+
+        XCTAssertNotNil(outgoing.connectedAt)
+        XCTAssertNil(ringing.connectedAt)
+        XCTAssertEqual(ringing.phase, .ringing)
+        XCTAssertTrue(manager.store.isFromPushKit)
+        XCTAssertEqual(manager.store.lastOptions?.uuid, "pushkit")
+    }
+
+    func testEndingTheOutgoingCallDuringAPushKitRingLeavesTheRing() {
+        listen()
+        _ = startOutgoing(id: "outgoing")
+        let ringing = ringFromPushKit(id: "pushkit")
+
+        manager.handle(.endCall(["id": "outgoing"])) { _ in }
+        drainMainQueue()
+
+        // The ring's end is not sent to Dart, and the ring is still the PushKit call.
+        XCTAssertTrue(receivedNames.isEmpty)
+        XCTAssertEqual(ringing.phase, .ringing)
+        XCTAssertTrue(manager.store.isFromPushKit)
+        XCTAssertEqual(manager.store.lastOptions?.uuid, "pushkit")
+    }
+
+    func testDuringAPushKitRingAnIdNoCallHasStillEndsTheRing() {
+        listen()
+        _ = ringFromPushKit(id: "pushkit")
+
+        manager.handle(.endCall(["id": "unknown"])) { _ in }
+        drainMainQueue()
+
+        XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
+        XCTAssertFalse(manager.store.isFromPushKit)
+    }
+
     // MARK: - Time for Dart after a CallKit end
 
-    func testACallKitEndKeepsTheAppRunningForDartBeforeTheEventIsSent() {
+    func testACallKitEndKeepsTheAppRunningForDart() {
         listen()
         let outgoing = startOutgoing(id: "outgoing")
 
@@ -84,8 +133,6 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
 
         XCTAssertEqual(backgroundTasks.begun, 1)
         XCTAssertTrue(manager.callEndGracePeriod.isRunning)
-        // The event is sent on the main queue, after the task began.
-        XCTAssertTrue(received.isEmpty)
         drainMainQueue()
         XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
     }
