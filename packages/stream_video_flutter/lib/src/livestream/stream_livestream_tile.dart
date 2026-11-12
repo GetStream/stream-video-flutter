@@ -124,11 +124,12 @@ class _StreamLivestreamTileStyleDefaults extends StreamLivestreamTileStyle {
 
   late final StreamSpacing _spacing = _context.streamSpacing;
 
-  // No bottom inset: the buttons' 48 tap target already holds the 32 tall
-  // toolbar 8 above the tile's edge.
+  // No bottom or end inset: each button's 48 tap target already pads its 32
+  // visual by 8, which holds it 8 from the tile's bottom and end edges.
   @override
   EdgeInsetsGeometry get toolbarPadding =>
-      _style?.toolbarPadding ?? EdgeInsets.symmetric(horizontal: _spacing.xs);
+      _style?.toolbarPadding ??
+      EdgeInsetsDirectional.only(start: _spacing.xs);
 
   @override
   double get toolbarSpacing => _style?.toolbarSpacing ?? _spacing.xxs;
@@ -136,8 +137,9 @@ class _StreamLivestreamTileStyleDefaults extends StreamLivestreamTileStyle {
   @override
   double get leadingSpacing => _style?.leadingSpacing ?? _spacing.xs;
 
+  // The tap targets' own padding already leaves 16 between the buttons.
   @override
-  double get trailingSpacing => _style?.trailingSpacing ?? _spacing.xs;
+  double get trailingSpacing => _style?.trailingSpacing ?? 0;
 
   @override
   StreamButtonSize get buttonSize =>
