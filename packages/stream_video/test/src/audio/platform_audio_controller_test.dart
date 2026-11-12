@@ -97,6 +97,14 @@ void main() {
       expect(nativeCalls, ['pause', 'pause', 'resume', 'resume']);
     });
 
+    test('traces each pause and resume', () async {
+      await controller.pauseAudioPlayout();
+      await controller.resumeAudioPlayout();
+
+      final tags = controller.getTrace().snapshot.map((record) => record.tag);
+      expect(tags, [TraceTag.pauseAudioPlayout, TraceTag.resumeAudioPlayout]);
+    });
+
     for (final platform in [PlatformType.windows, PlatformType.linux]) {
       test('does nothing on ${platform.name}', () async {
         rtc.debugWebRtcCapabilitiesOverride = webRtcCapabilitiesOf(platform);
@@ -308,6 +316,14 @@ void main() {
         'androidAudioConfiguration': policy.getAndroidConfiguration().toMap(),
       });
     });
+  });
+
+  // The host running the tests is not Android, where the plugin refuses it.
+  test('regaining Android audio focus is traced', () async {
+    await expectLater(controller.regainAndroidAudioFocus(), throwsException);
+
+    final tags = controller.getTrace().snapshot.map((record) => record.tag);
+    expect(tags, contains(TraceTag.regainAndroidAudioFocus));
   });
 }
 

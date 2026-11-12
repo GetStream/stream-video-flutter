@@ -98,6 +98,8 @@ class PlatformAudioController {
 
   /// The events the WebRTC plugin reports. Replaceable in tests, because the
   /// plugin reports interruptions only on Android and iOS hosts.
+  /// A replacement does not reach the audio processing trace, which listens
+  /// from construction.
   @visibleForTesting
   rtc.WebRtcPlatformEvents platformEvents = rtc.platformEvents;
 
@@ -273,18 +275,15 @@ class PlatformAudioController {
   /// tap) for the browser to allow it.
   ///
   /// Observe [CallState.isWebAudioPlaybackBlocked] to know when it is needed.
-  /// Within a call, prefer `Call.resumeWebAudioPlayback()`, which forwards
-  /// here; this entry point exists for code that has no `Call` at hand.
-  ///
   /// Web only; a no-op on other platforms. Unrelated to [resumeAudioPlayout],
   /// which unmutes playout paused via [pauseAudioPlayout].
   Future<void> resumeWebAudioPlayback() => rtc_audio.resumeAudioPlayback();
 
   /// Regains Android audio focus if it was lost.
   ///
-  /// Note: On Android, audio focus may not be restored automatically.
-  /// To ensure you receive `onInterruptionEnd`, explicitly call
-  /// [resumeAudioPlayout] (e.g., when the app resumes from background).
+  /// On Android, audio focus may not come back on its own; call this (e.g.
+  /// when the app returns from the background) to receive
+  /// `onInterruptionEnd`.
   Future<void> regainAndroidAudioFocus() {
     _tracer.trace(TraceTag.regainAndroidAudioFocus, null);
     return rtc.Helper.regainAndroidAudioFocus();
