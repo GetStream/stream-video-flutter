@@ -101,8 +101,7 @@ class LivestreamContent extends StatefulWidget {
   /// * [displayDiagnostics] displays call diagnostics when the widget is
   /// double-tapped.
   ///
-  /// * [videoFit] denotes if the video fits the width (contain) or expands to
-  /// the whole size (cover).
+  /// * [videoFit] is how the video is fitted, by orientation by default.
   const LivestreamContent({
     super.key,
     required this.call,
@@ -116,7 +115,7 @@ class LivestreamContent extends StatefulWidget {
     this.livestreamHostsParticipantBuilder,
     this.livestreamHostsParticipantsFilter,
     this.displayDiagnostics = false,
-    this.videoFit = VideoFit.contain,
+    this.videoFit = VideoFit.adaptive,
     this.showMultipleHosts = false,
     this.layoutMode = ParticipantLayoutMode.grid,
     this.screenShareMode = LivestreamScreenShareMode.spotlight,
@@ -166,8 +165,10 @@ class LivestreamContent extends StatefulWidget {
   /// Defaults to false.
   final bool displayDiagnostics;
 
-  /// Denotes if the video fits the width (contain) or expands to
-  /// the whole size (cover).
+  /// How the video is fitted.
+  ///
+  /// Defaults to [VideoFit.adaptive]: the video fills the widget when it
+  /// shares the widget's orientation, and is letterboxed when it does not.
   final VideoFit videoFit;
 
   /// Configuration for picture-in-picture mode.
