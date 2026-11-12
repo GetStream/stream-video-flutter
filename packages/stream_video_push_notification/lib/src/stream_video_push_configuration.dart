@@ -201,6 +201,8 @@ class IOSPushConfiguration {
     this.maximumCallGroups,
     this.maximumCallsPerCallGroup,
     this.audioSessionMode,
+    @Deprecated('Has no effect. CallKit activates the audio session.')
+    this.audioSessionActive,
     this.audioSessionPreferredSampleRate,
     this.audioSessionPreferredIOBufferDuration,
     this.configureAudioSession,
@@ -235,6 +237,11 @@ class IOSPushConfiguration {
   final int? maximumCallGroups;
   final int? maximumCallsPerCallGroup;
   final String? audioSessionMode;
+
+  /// Has no effect: CallKit activates the audio session when it needs it.
+  @Deprecated('Has no effect. CallKit activates the audio session.')
+  final bool? audioSessionActive;
+
   final double? audioSessionPreferredSampleRate;
   final double? audioSessionPreferredIOBufferDuration;
   final bool? configureAudioSession;
@@ -258,6 +265,8 @@ class IOSPushConfiguration {
     int? maximumCallGroups,
     int? maximumCallsPerCallGroup,
     String? audioSessionMode,
+    @Deprecated('Has no effect. CallKit activates the audio session.')
+    bool? audioSessionActive,
     double? audioSessionPreferredSampleRate,
     double? audioSessionPreferredIOBufferDuration,
     bool? configureAudioSession,
@@ -277,6 +286,7 @@ class IOSPushConfiguration {
       maximumCallsPerCallGroup:
           maximumCallsPerCallGroup ?? this.maximumCallsPerCallGroup,
       audioSessionMode: audioSessionMode ?? this.audioSessionMode,
+      audioSessionActive: audioSessionActive ?? this.audioSessionActive,
       audioSessionPreferredSampleRate:
           audioSessionPreferredSampleRate ??
           this.audioSessionPreferredSampleRate,
@@ -306,6 +316,7 @@ class IOSPushConfiguration {
       maximumCallGroups: other.maximumCallGroups,
       maximumCallsPerCallGroup: other.maximumCallsPerCallGroup,
       audioSessionMode: other.audioSessionMode,
+      audioSessionActive: other.audioSessionActive,
       audioSessionPreferredSampleRate: other.audioSessionPreferredSampleRate,
       audioSessionPreferredIOBufferDuration:
           other.audioSessionPreferredIOBufferDuration,

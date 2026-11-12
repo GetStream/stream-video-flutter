@@ -254,6 +254,8 @@ class IOSParams {
     this.maximumCallGroups,
     this.maximumCallsPerCallGroup,
     this.audioSessionMode,
+    @Deprecated('Has no effect. CallKit activates the audio session.')
+    this.audioSessionActive,
     this.audioSessionPreferredSampleRate,
     this.audioSessionPreferredIOBufferDuration,
     this.configureAudioSession,
@@ -300,6 +302,11 @@ class IOSParams {
   final int? maximumCallGroups;
   final int? maximumCallsPerCallGroup;
   final String? audioSessionMode;
+
+  /// Has no effect: CallKit activates the audio session when it needs it.
+  @Deprecated('Has no effect. CallKit activates the audio session.')
+  final bool? audioSessionActive;
+
   final double? audioSessionPreferredSampleRate;
   final double? audioSessionPreferredIOBufferDuration;
   final bool? configureAudioSession;
@@ -323,6 +330,8 @@ class IOSParams {
     int? maximumCallGroups,
     int? maximumCallsPerCallGroup,
     String? audioSessionMode,
+    @Deprecated('Has no effect. CallKit activates the audio session.')
+    bool? audioSessionActive,
     double? audioSessionPreferredSampleRate,
     double? audioSessionPreferredIOBufferDuration,
     bool? configureAudioSession,
@@ -342,6 +351,7 @@ class IOSParams {
       maximumCallsPerCallGroup:
           maximumCallsPerCallGroup ?? this.maximumCallsPerCallGroup,
       audioSessionMode: audioSessionMode ?? this.audioSessionMode,
+      audioSessionActive: audioSessionActive ?? this.audioSessionActive,
       audioSessionPreferredSampleRate:
           audioSessionPreferredSampleRate ??
           this.audioSessionPreferredSampleRate,
@@ -371,6 +381,7 @@ class IOSParams {
       maximumCallGroups: other.maximumCallGroups,
       maximumCallsPerCallGroup: other.maximumCallsPerCallGroup,
       audioSessionMode: other.audioSessionMode,
+      audioSessionActive: other.audioSessionActive,
       audioSessionPreferredSampleRate: other.audioSessionPreferredSampleRate,
       audioSessionPreferredIOBufferDuration:
           other.audioSessionPreferredIOBufferDuration,

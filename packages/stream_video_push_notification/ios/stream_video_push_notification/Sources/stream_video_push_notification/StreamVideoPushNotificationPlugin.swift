@@ -79,6 +79,18 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
             data, fromPushKit: fromPushKit)
     }
 
+    /// Reports an incoming call to CallKit, and runs `completion` once CallKit accepted or
+    /// refused it, or straight away when it could not be reported. An app with its own PushKit
+    /// delegate can call PushKit's completion from it.
+    @objc public static func showIncomingCall(
+        data: CallData,
+        fromPushKit: Bool,
+        completion: @escaping () -> Void
+    ) {
+        StreamVideoCallkitManager.shared.showIncomingCall(
+            data, fromPushKit: fromPushKit, completion: completion)
+    }
+
     @objc public static func activeCalls() -> [[String: Any]]? {
         return StreamVideoCallkitManager.shared.activeCalls()
     }

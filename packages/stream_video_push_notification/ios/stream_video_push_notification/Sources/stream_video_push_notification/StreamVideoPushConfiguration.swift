@@ -14,6 +14,13 @@ import Foundation
     @objc public var audioSessionPreferredSampleRate: Double
     @objc public var audioSessionPreferredIOBufferDuration: Double
     @objc public var configureAudioSession: Bool
+
+    /// Always true: CallKit activates the audio session when it needs it.
+    @available(*, deprecated, message: "Has no effect. CallKit activates the audio session.")
+    @objc public var audioSessionActive: Bool {
+        get { true }
+        set {}
+    }
     @objc public var supportsDTMF: Bool
     @objc public var supportsHolding: Bool
     @objc public var supportsGrouping: Bool

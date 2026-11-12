@@ -27,6 +27,13 @@ import Foundation
     @objc public var audioSessionPreferredSampleRate: Double
     @objc public var audioSessionPreferredIOBufferDuration: Double
 
+    /// Always true: CallKit activates the audio session when it needs it.
+    @available(*, deprecated, message: "Has no effect. CallKit activates the audio session.")
+    @objc public var audioSessionActive: Bool {
+        get { true }
+        set {}
+    }
+
     @objc public init(id: String, callerName: String, handle: String, type: Int) {
         self.uuid = id
         self.callerName = callerName

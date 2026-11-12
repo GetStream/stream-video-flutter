@@ -753,6 +753,20 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         XCTAssertEqual(manager.store.call(forCallKit: uuid)?.phase, .ended(.unanswered))
     }
 
+    func testThePluginRunsTheCompletionOfACallItCannotReport() {
+        listen()
+        let completed = expectation(description: "completion")
+
+        StreamVideoPushNotificationPlugin.showIncomingCall(
+            data: CallData(args: ["id": "not-a-uuid"]), fromPushKit: false
+        ) { completed.fulfill() }
+
+        wait(for: [completed], timeout: 1)
+        drainMainQueue()
+        XCTAssertFalse(
+            receivedNames.contains(StreamVideoIncomingCallConstants.ACTION_CALL_INCOMING))
+    }
+
     func testARefusedEndDropsTheCall() {
         let call = track(id: "ringing")
 

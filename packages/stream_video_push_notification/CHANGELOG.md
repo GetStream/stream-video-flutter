@@ -7,9 +7,18 @@
 - `StreamVideoPushNotificationManager.currentActiveCalls` is removed; read `StreamVideo.state.activeCalls`.
 - `isAcceptedOnThisDevice` is no longer exported.
 - [iOS] The public `Call` class is removed. Nothing public returned it, but native code that named the type no longer compiles.
-- [iOS] `StreamVideoCallkitManager` and `EventCallbackHandler` are no longer public. `StreamVideoPushNotificationPlugin.showIncomingCall`, `startOutgoingCall` and `activeCalls` remain the way to reach CallKit from native code.
+- [iOS] `StreamVideoCallkitManager` and `EventCallbackHandler` are no longer public. `StreamVideoPushNotificationPlugin.showIncomingCall`, `startOutgoingCall` and `activeCalls` remain the way to reach CallKit from native code. For the manager's other public members, use instead:
+  - `showIncomingCall(_:fromPushKit:completion:)`: `StreamVideoPushNotificationPlugin.showIncomingCall(data:fromPushKit:completion:)`.
+  - `startCall` and `activeCalls`: the plugin's `startOutgoingCall` and `activeCalls`.
+  - `getAcceptedCall()`: the plugin's `activeCalls()`, where the accepted call has `accepted: true`.
+  - `endCall`, `endAllCalls`, `connectedCall`, `muteCall`, `holdCall` and `saveEndCall`: from Dart, `StreamVideoPushNotificationManager`'s `endCall` or `endCallByCid`, `endAllCalls`, `setCallConnected`, `muteCall` or `setCallMutedByCid`, `holdCall` and `reportCallEnded`. Natively, a `CXEndCallAction`, `CXSetMutedCallAction` or `CXSetHeldCallAction` through your own `CXCallController` reaches the plugin's provider as well.
+  - `sendEventCustom`: none; use your app's own platform channel.
+  - `initCallkitProvider`: none needed; the plugin sets up its provider when it registers.
 - [iOS] `StreamVideoPKDelegateManager` is renamed `VoIPPushRegistryHandler`. The old name is a deprecated alias.
-- `IOSPushConfiguration.audioSessionActive` and `IOSParams.audioSessionActive` are removed, and on iOS `CallData.audioSessionActive` and `StreamVideoPushConfiguration.audioSessionActive`. CallKit activates the audio session.
+
+### ⚠️ Deprecated
+
+- `IOSPushConfiguration.audioSessionActive` and `IOSParams.audioSessionActive`, and on iOS `CallData.audioSessionActive` and `StreamVideoPushConfiguration.audioSessionActive`, have no effect: CallKit activates the audio session. `dart fix --apply` removes the Dart arguments.
 
 ### 🐞 Fixed
 
@@ -31,6 +40,7 @@
 
 ### ✅ Added
 
+- [iOS] `StreamVideoPushNotificationPlugin.showIncomingCall(data:fromPushKit:completion:)` runs `completion` once CallKit accepted or refused the call, for an app with its own PushKit delegate that calls PushKit's completion from it.
 - Added `StreamVideoPushHandler.handleBackgroundMessage`, which simplifies the ringing setup by running a Stream ringing push through its whole background lifecycle from your Firebase background handler: it builds the client through the factory you give it, observes the ringing events a background isolate can act on, and disposes the client — along with whatever that factory set up — once the user has answered, declined, or let the call time out, or the ring has ended without them, such as when the caller cancels it. It replaces the setup and teardown each integration had to write by hand.
 
 ### 🐞 Fixed
