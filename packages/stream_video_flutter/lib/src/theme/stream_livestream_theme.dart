@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -10,59 +12,77 @@ import '../../stream_video_flutter.dart';
 class StreamLivestreamThemeData with Diagnosticable {
   /// Creates a new instance of [StreamLivestreamThemeData].
   const StreamLivestreamThemeData({
+    @Deprecated('No longer read by LivestreamPlayer.')
     this.playIconTheme = const IconThemeData(
       color: Colors.white,
     ),
+    @Deprecated('No longer read by LivestreamPlayer.')
     this.pauseIconTheme = const IconThemeData(
       color: Colors.white,
     ),
+    @Deprecated('No longer read by LivestreamPlayer.')
     this.playPauseIconSize = 64.0,
+    @Deprecated('No longer read by LivestreamPlayer.')
     this.liveButtonColor = const Color(0xff0066f5),
+    @Deprecated('No longer read by LivestreamPlayer.')
     this.backstageButtonColor = Colors.red,
+    @Deprecated('No longer read by LivestreamPlayer.')
     this.callStateButtonTextStyle = const TextStyle(
       color: Colors.white,
     ),
+    @Deprecated('No longer read by LivestreamPlayer.')
     this.participantCountTextStyle = const TextStyle(
       color: Colors.white,
     ),
+    @Deprecated('No longer read by LivestreamPlayer.')
     this.durationTextStyle = const TextStyle(
       color: Colors.white,
     ),
+    @Deprecated('No longer read by LivestreamPlayer.')
     this.backstageTextStyle = const TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.w500,
       color: Colors.white,
     ),
+    @Deprecated('No longer read by LivestreamPlayer.')
     this.backstageCounterTextStyle = const TextStyle(
       fontSize: 28,
       fontWeight: FontWeight.w500,
       color: Colors.white,
     ),
+    @Deprecated('No longer read by LivestreamPlayer.')
     this.backstageParticipantsTextStyle = const TextStyle(
       fontSize: 16,
       color: Colors.white54,
     ),
+    @Deprecated('No longer read by LivestreamPlayer.')
     this.liveEndedTextStyle = const TextStyle(
       fontSize: 18,
       fontWeight: FontWeight.w500,
       color: Colors.white,
     ),
+    @Deprecated('No longer read by LivestreamPlayer.')
     this.liveEndedRecordingsTextStyle = const TextStyle(
       fontSize: 16,
       color: Colors.white54,
     ),
+    @Deprecated('No longer read by LivestreamPlayer.')
     this.participantIconTheme = const IconThemeData(
       color: Colors.white,
     ),
+    @Deprecated('No longer read by LivestreamPlayer.')
     this.speakerEnabledIconTheme = const IconThemeData(
       color: Colors.white,
     ),
+    @Deprecated('No longer read by LivestreamPlayer.')
     this.speakerDisabledIconTheme = const IconThemeData(
       color: Colors.white,
     ),
+    @Deprecated('No longer read by LivestreamPlayer.')
     this.expandIconTheme = const IconThemeData(
       color: Colors.white,
     ),
+    @Deprecated('No longer read by LivestreamPlayer.')
     this.contractIconTheme = const IconThemeData(
       color: Colors.white,
     ),
@@ -72,59 +92,140 @@ class StreamLivestreamThemeData with Diagnosticable {
   });
 
   /// The icon theme for the play icon for playing the livestream
+  @Deprecated(
+    'No longer read: LivestreamPlayer takes its colours and text styles '
+    'from the StreamTheme tokens.',
+  )
   final IconThemeData playIconTheme;
 
   /// The icon theme for the pause icon for pausing the livestream
+  @Deprecated(
+    'No longer read: LivestreamPlayer takes its colours and text styles '
+    'from the StreamTheme tokens.',
+  )
   final IconThemeData pauseIconTheme;
 
   /// The size of the play/pause icon
+  @Deprecated(
+    'No longer read: LivestreamPlayer takes its colours and text styles '
+    'from the StreamTheme tokens.',
+  )
   final double playPauseIconSize;
 
   /// The color of the "live" button on the control bar
+  @Deprecated(
+    'Only read by the deprecated LivestreamInfo. Style LivestreamPlayer with '
+    'StreamLivestreamTileThemeData, StreamLiveIndicatorThemeData and '
+    'StreamSpectatorsIndicatorThemeData instead.',
+  )
   final Color liveButtonColor;
 
   /// The color of the "backstage" button on the control bar
+  @Deprecated(
+    'No longer read: LivestreamPlayer takes its colours and text styles '
+    'from the StreamTheme tokens.',
+  )
   final Color backstageButtonColor;
 
   /// The [TextStyle] for the live/backstage button
+  @Deprecated(
+    'Only read by the deprecated LivestreamInfo. Style LivestreamPlayer with '
+    'StreamLivestreamTileThemeData, StreamLiveIndicatorThemeData and '
+    'StreamSpectatorsIndicatorThemeData instead.',
+  )
   final TextStyle callStateButtonTextStyle;
 
   /// The [TextStyle] for the participant count
+  @Deprecated(
+    'Only read by the deprecated LivestreamInfo. Style LivestreamPlayer with '
+    'StreamLivestreamTileThemeData, StreamLiveIndicatorThemeData and '
+    'StreamSpectatorsIndicatorThemeData instead.',
+  )
   final TextStyle participantCountTextStyle;
 
   /// The [TextStyle] for the backstage text
+  @Deprecated(
+    'No longer read: LivestreamPlayer takes its colours and text styles '
+    'from the StreamTheme tokens.',
+  )
   final TextStyle backstageTextStyle;
 
   /// The [TextStyle] for the backstage counter
+  @Deprecated(
+    'No longer read: LivestreamPlayer takes its colours and text styles '
+    'from the StreamTheme tokens.',
+  )
   final TextStyle backstageCounterTextStyle;
 
   /// The [TextStyle] for the backstage participants text
+  @Deprecated(
+    'No longer read: LivestreamPlayer takes its colours and text styles '
+    'from the StreamTheme tokens.',
+  )
   final TextStyle backstageParticipantsTextStyle;
 
   /// The [TextStyle] for the live ended text
+  @Deprecated(
+    'No longer read: LivestreamPlayer takes its colours and text styles '
+    'from the StreamTheme tokens.',
+  )
   final TextStyle liveEndedTextStyle;
 
   /// The [TextStyle] for the live ended recordings text
+  @Deprecated(
+    'No longer read: LivestreamPlayer takes its colours and text styles '
+    'from the StreamTheme tokens.',
+  )
   final TextStyle liveEndedRecordingsTextStyle;
 
   /// The [TextStyle] for the duration count
+  @Deprecated(
+    'Only read by the deprecated LivestreamInfo. Style LivestreamPlayer with '
+    'StreamLivestreamTileThemeData, StreamLiveIndicatorThemeData and '
+    'StreamSpectatorsIndicatorThemeData instead.',
+  )
   final TextStyle durationTextStyle;
 
   /// The icon theme for the participant icon
+  @Deprecated(
+    'Only read by the deprecated LivestreamInfo. Style LivestreamPlayer with '
+    'StreamLivestreamTileThemeData, StreamLiveIndicatorThemeData and '
+    'StreamSpectatorsIndicatorThemeData instead.',
+  )
   final IconThemeData participantIconTheme;
 
   /// The icon theme for the speaker icon on the control bar while the
   /// stream's audio is playing.
+  @Deprecated(
+    'Only read by the deprecated LivestreamInfo. Style LivestreamPlayer with '
+    'StreamLivestreamTileThemeData, StreamLiveIndicatorThemeData and '
+    'StreamSpectatorsIndicatorThemeData instead.',
+  )
   final IconThemeData speakerEnabledIconTheme;
 
   /// The icon theme for the speaker icon on the control bar while the
   /// stream's audio is muted.
+  @Deprecated(
+    'Only read by the deprecated LivestreamInfo. Style LivestreamPlayer with '
+    'StreamLivestreamTileThemeData, StreamLiveIndicatorThemeData and '
+    'StreamSpectatorsIndicatorThemeData instead.',
+  )
   final IconThemeData speakerDisabledIconTheme;
 
   /// The icon theme for the expand icon on the control bar
+  @Deprecated(
+    'Only read by the deprecated LivestreamInfo. Style LivestreamPlayer with '
+    'StreamLivestreamTileThemeData, StreamLiveIndicatorThemeData and '
+    'StreamSpectatorsIndicatorThemeData instead.',
+  )
   final IconThemeData expandIconTheme;
 
   /// The icon theme for the contract icon on the control bar
+  @Deprecated(
+    'Only read by the deprecated LivestreamInfo. Style LivestreamPlayer with '
+    'StreamLivestreamTileThemeData, StreamLiveIndicatorThemeData and '
+    'StreamSpectatorsIndicatorThemeData instead.',
+  )
   final IconThemeData contractIconTheme;
 
   /// The padding between the hosts in the grid layout.

@@ -116,7 +116,7 @@ class LivestreamPlayer extends StatefulWidget {
     this.showMultipleHosts = false,
     this.layoutMode = ParticipantLayoutMode.grid,
     this.screenShareMode = LivestreamScreenShareMode.spotlight,
-    this.videoFit = VideoFit.contain,
+    this.videoFit = VideoFit.adaptive,
     this.fullscreenVideoFit = VideoFit.adaptive,
     this.pictureInPictureConfiguration = const PictureInPictureConfiguration(),
   });
@@ -231,10 +231,11 @@ class LivestreamPlayer extends StatefulWidget {
   /// The screen share mode used to display the screen share host.
   final LivestreamScreenShareMode screenShareMode;
 
-  /// Denotes if the video fits the width (contain) or expands to
-  /// the whole size (cover) while the player is not in fullscreen mode.
+  /// How the video is fitted while the player is not in fullscreen mode.
   ///
-  /// Defaults to [VideoFit.contain].
+  /// Defaults to [VideoFit.adaptive]: the video fills the tile when it shares
+  /// the tile's orientation, and is letterboxed when it does not.
+  /// Pass [VideoFit.contain] to always show the whole video.
   final VideoFit videoFit;
 
   /// How the video is fitted while the player is in fullscreen mode.
@@ -438,8 +439,17 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     return RepaintBoundary(child: _buildPlayer(context));
   }
 
-  static ({bool isBackstage, bool hasEnded}) _playerData(CallState state) =>
-      (isBackstage: state.isBackstage, hasEnded: state.endedAt != null);
+  // A host ending the call disconnects the viewers before `endedAt` is
+  // known, so that disconnect counts as ended too.
+  static ({bool isBackstage, bool hasEnded}) _playerData(CallState state) => (
+    isBackstage: state.isBackstage,
+    hasEnded:
+        state.endedAt != null ||
+        switch (state.status) {
+          CallStatusDisconnected(reason: DisconnectReasonEnded()) => true,
+          _ => false,
+        },
+  );
 
   Widget _buildPlayer(BuildContext context) {
     if (_popPending) {
@@ -457,30 +467,67 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
       call: call,
       selector: _playerData,
       builder: (context, data) {
-        final isBackstage = data.isBackstage;
-        final hasEnded = data.hasEnded;
-
-        if (hasEnded) {
+        if (data.hasEnded) {
           return widget.livestreamEndedWidgetBuilder?.call(context, call) ??
               widget.livestreamEndedBuilder?.call(context, call, _callState) ??
-              LivestreamEndedContent(
-                call: call,
-                showRecordings: widget.showRecordingsWhenEnded,
-                onRecordingTapped: widget.onRecordingTapped,
+              _layout(
+                context,
+                body: LivestreamEndedContent(
+                  call: call,
+                  showRecordings: widget.showRecordingsWhenEnded,
+                  onRecordingTapped: widget.onRecordingTapped,
+                ),
               );
         }
 
-        if (isBackstage) {
+        if (data.isBackstage) {
           return widget.livestreamBackstageWidgetBuilder?.call(context, call) ??
               widget.livestreamBackstageBuilder?.call(
                 context,
                 call,
                 _callState,
               ) ??
-              LivestreamBackstageContent(call: widget.call);
+              _layout(
+                context,
+                body: LivestreamBackstageContent(call: widget.call),
+              );
         }
 
-        return GestureDetector(
+        Widget content = LivestreamContent(
+          call: call,
+          callState: _callState,
+          videoPlaceholderBuilder: widget.videoPlaceholderBuilder,
+          videoRendererBuilder: widget.videoRendererBuilder,
+          livestreamHostsUnavailableBuilder:
+              widget.livestreamHostsUnavailableBuilder,
+          livestreamNotConnectedBuilder: widget.livestreamNotConnectedBuilder,
+          livestreamFastReconnectingOverlayBuilder:
+              widget.livestreamFastReconnectingOverlayBuilder,
+          livestreamHostsParticipantBuilder:
+              widget.livestreamHostsParticipantBuilder,
+          livestreamHostsParticipantsFilter:
+              widget.livestreamHostsParticipantsFilter,
+          displayDiagnostics: _isStatsVisible,
+          videoFit: _fullscreen ? widget.fullscreenVideoFit : widget.videoFit,
+          showMultipleHosts: widget.showMultipleHosts,
+          layoutMode: widget.layoutMode,
+          screenShareMode: widget.screenShareMode,
+          pictureInPictureConfiguration: widget.pictureInPictureConfiguration,
+        );
+
+        if (_fullscreen) {
+          // Edge to edge, so the video's corners are square.
+          final tileTheme = StreamParticipantTileTheme.of(context);
+          content = StreamParticipantTileTheme(
+            data: tileTheme.copyWith(
+              style: (tileTheme.style ?? const StreamParticipantTileStyle())
+                  .copyWith(borderRadius: BorderRadius.zero),
+            ),
+            child: content,
+          );
+        }
+
+        final tile = GestureDetector(
           onDoubleTap: () {
             if (widget.allowDiagnostics) {
               setState(() {
@@ -488,75 +535,91 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
               });
             }
           },
-          child: Scaffold(
-            body: Stack(
-              children: [
-                LivestreamContent(
-                  call: call,
-                  callState: _callState,
-                  backButtonBuilder: widget.backButtonBuilder,
-                  videoPlaceholderBuilder: widget.videoPlaceholderBuilder,
-                  videoRendererBuilder: widget.videoRendererBuilder,
-                  livestreamHostsUnavailableBuilder:
-                      widget.livestreamHostsUnavailableBuilder,
-                  livestreamNotConnectedBuilder:
-                      widget.livestreamNotConnectedBuilder,
-                  livestreamFastReconnectingOverlayBuilder:
-                      widget.livestreamFastReconnectingOverlayBuilder,
-                  livestreamHostsParticipantBuilder:
-                      widget.livestreamHostsParticipantBuilder,
-                  livestreamHostsParticipantsFilter:
-                      widget.livestreamHostsParticipantsFilter,
-                  displayDiagnostics: _isStatsVisible,
-                  videoFit: _fullscreen
-                      ? widget.fullscreenVideoFit
-                      : widget.videoFit,
-                  showMultipleHosts: widget.showMultipleHosts,
-                  layoutMode: widget.layoutMode,
-                  screenShareMode: widget.screenShareMode,
-                  pictureInPictureConfiguration:
-                      widget.pictureInPictureConfiguration,
-                ),
-                widget.livestreamControlsWidgetBuilder?.call(context, call) ??
-                    widget.livestreamControlsBuilder?.call(
-                      context,
-                      call,
-                      _callState,
-                    ) ??
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      // Repaints once a second, so it doesn't repaint the
-                      // video content underneath with it.
-                      child: RepaintBoundary(
-                        child: StreamBuilder<Duration>(
-                          stream: call.callDurationStream,
-                          builder: (context, snapshot) {
-                            final duration = snapshot.data ?? Duration.zero;
-
-                            return LivestreamInfo(
-                              call: call,
-                              fullscreen: _fullscreen,
-                              onFullscreenTapped: () {
-                                if (widget.onFullscreenTapped != null) {
-                                  widget.onFullscreenTapped?.call();
-                                } else {
-                                  setState(() {
-                                    _fullscreen = !_fullscreen;
-                                  });
-                                }
-                              },
-                              duration: duration,
-                              showParticipantCount: widget.showParticipantCount,
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-              ],
-            ),
+          child: StreamLivestreamTile(
+            call: call,
+            style: _fullscreen ? _fullscreenTileStyle(context) : null,
+            showSpectatorsIndicator: widget.showParticipantCount,
+            onFullscreenTapped: () {
+              if (widget.onFullscreenTapped != null) {
+                widget.onFullscreenTapped?.call();
+              } else {
+                setState(() {
+                  _fullscreen = !_fullscreen;
+                });
+              }
+            },
+            child: content,
           ),
         );
+
+        return _layout(
+          context,
+          body: tile,
+          fullscreen: _fullscreen,
+          controls:
+              widget.livestreamControlsWidgetBuilder?.call(context, call) ??
+              widget.livestreamControlsBuilder?.call(
+                context,
+                call,
+                _callState,
+              ),
+        );
       },
+    );
+  }
+
+  /// Insets the toolbar by `md` on both sides when the tile fills the
+  /// screen, unless the theme sets its own padding. The end inset is `xs`
+  /// because the fullscreen button's tap target adds the other 8.
+  StreamLivestreamTileStyle? _fullscreenTileStyle(BuildContext context) {
+    final themed = StreamLivestreamTileTheme.of(context).style?.toolbarPadding;
+    if (themed != null) return null;
+
+    final spacing = context.streamSpacing;
+    return StreamLivestreamTileStyle(
+      toolbarPadding: EdgeInsetsDirectional.only(
+        start: spacing.md,
+        end: spacing.md - spacing.xs,
+      ),
+    );
+  }
+
+  /// The screen around [body]: the call duration at the top and [controls]
+  /// under it. In [fullscreen], [body] fills the screen on its own.
+  Widget _layout(
+    BuildContext context, {
+    required Widget body,
+    Widget? controls,
+    bool fullscreen = false,
+  }) {
+    final colorScheme = context.streamColorScheme;
+    final spacing = context.streamSpacing;
+
+    if (fullscreen) {
+      return Scaffold(backgroundColor: colorScheme.backgroundApp, body: body);
+    }
+
+    return Scaffold(
+      backgroundColor: colorScheme.backgroundApp,
+      appBar: CallAppBar(
+        call: call,
+        showBackButton: false,
+        showLeaveCallAction: false,
+        leading: widget.backButtonBuilder?.call(context),
+        // Repaints once a second, so it doesn't repaint the video with it.
+        title: RepaintBoundary(child: StreamCallDurationBadge(call: call)),
+      ),
+      // The larger of the safe area and the side spacing, not both.
+      body: SafeArea(
+        top: false,
+        minimum: EdgeInsets.symmetric(horizontal: spacing.xs),
+        child: Column(
+          children: [
+            Expanded(child: body),
+            ?controls,
+          ],
+        ),
+      ),
     );
   }
 
