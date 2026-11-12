@@ -24,7 +24,8 @@ typedef void (^CapturerStopHandler)(CompletionHandler _Nonnull handler);
 
 /**
  * Posted to gate the audio engine of every peer-connection factory, from
- * code that cannot link this plugin at build time (the CallKit plugin). The
+ * code that does not link this plugin. It does what the matching calls on
+ * +audioEngineControl do. The
  * userInfo carries FlutterWebRTCAudioEngineAvailableKey as an NSNumber BOOL.
  * It may also carry FlutterWebRTCAudioSessionActiveKey as an NSNumber BOOL,
  * meaning CallKit activated (YES) or deactivated (NO) the audio session; see
@@ -36,20 +37,31 @@ FOUNDATION_EXPORT NSString* _Nonnull const FlutterWebRTCAudioSessionActiveKey;
 
 /**
  * Posted, on the main thread, when a factory's audio engine could not be
- * started after it became available. The CallKit plugin registers the call
- * with CallKit again on it, for a fresh activation of the audio session.
+ * started after it became available. A CallKit integration can register the
+ * call with CallKit again on it, for a fresh activation of the audio session.
  */
 FOUNDATION_EXPORT NSNotificationName _Nonnull const FlutterWebRTCAudioEngineStartFailedNotification;
 
 /**
  * The audio engine controls for code that links this plugin, such as the
- * CallKit plugin. They do what the notifications above do.
+ * CallKit plugin. They do what the notifications above do. Get them from
+ * +[FlutterWebRTCPlugin audioEngineControl].
  */
 @protocol FlutterWebRTCAudioEngineControl <NSObject>
 
+/**
+ * Allows or stops the audio engine of every factory of every registration of
+ * this plugin. A factory or a registration created later takes the value set
+ * last. Stopping an engine that is already stopped does nothing. May be called
+ * from any thread.
+ */
 - (void)setAudioEngineAvailable:(BOOL)available;
 
-/** iOS only; no effect on macOS. */
+/**
+ * Tells WebRTC that CallKit activated (YES) or deactivated (NO) the app's
+ * audio session, once for the process however many registrations there are.
+ * A repeated value does nothing. iOS only; no effect on macOS.
+ */
 - (void)setCallKitAudioSessionActive:(BOOL)active;
 
 /**
@@ -63,7 +75,6 @@ FOUNDATION_EXPORT NSNotificationName _Nonnull const FlutterWebRTCAudioEngineStar
 @end
 
 @interface FlutterWebRTCPlugin : NSObject <FlutterPlugin,
-                                           FlutterWebRTCAudioEngineControl,
                                            RTCPeerConnectionDelegate,
                                            RTCAudioDeviceModuleDelegate,
 #if TARGET_OS_OSX
@@ -71,6 +82,13 @@ FOUNDATION_EXPORT NSNotificationName _Nonnull const FlutterWebRTCAudioEngineStar
                                            RTCDesktopCapturerDelegate,
 #endif
                                            FlutterStreamHandler>
+
+/**
+ * The process-wide audio engine control. CallKit and the audio session belong
+ * to the process, so one control serves every registration of this plugin,
+ * one per Flutter engine, including registrations made later. Never nil.
+ */
++ (id<FlutterWebRTCAudioEngineControl> _Nonnull)audioEngineControl;
 
 /**
  * Per-call factory registry, keyed by factoryId.
