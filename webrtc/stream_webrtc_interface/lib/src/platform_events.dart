@@ -11,14 +11,14 @@ class AudioRoute {
     this.groupId,
   });
 
-  /// The output's identifier. Empty when the platform reported none.
+  /// The output's identifier. Never empty: a change without one is not
+  /// reported.
   final String deviceId;
 
-  /// The output's name, as the platform reports it. The [deviceId] when the
-  /// platform reports no name.
+  /// The output's name, as the platform reports it.
   final String label;
 
-  /// The kind of output (the port type on iOS and macOS).
+  /// The kind of output (the port type on iOS).
   final String? groupId;
 
   @override
@@ -41,7 +41,7 @@ class AudioRoute {
 /// device module while the microphone is muted.
 enum SpeechActivity { started, ended }
 
-/// Whether another audio session took the audio from the app, or gave it
+/// Whether the app lost its audio to another app or a phone call, or got it
 /// back.
 enum AudioInterruption { started, ended }
 
@@ -112,10 +112,13 @@ class ScreenSharingStopped {
 /// connection, a track or a renderer.
 ///
 /// Every stream is a broadcast stream. A platform that never reports an event
-/// returns a stream that never emits.
+/// returns a stream that never emits, and [enableInterruptionEvents] throws
+/// where interruptions are not reported.
+///
+/// Implemented by the WebRTC packages only.
+@sealed
 abstract class WebRtcPlatformEvents {
-  /// The audio output route changed outside the app's control, for example
-  /// from the system route picker. iOS and macOS.
+  /// The active audio output route changed. iOS.
   Stream<AudioRoute> get onAudioRouteChanged;
 
   /// The local user started or stopped speaking while the microphone is
@@ -125,7 +128,8 @@ abstract class WebRtcPlatformEvents {
   /// The audio device module changed its audio processing. iOS and macOS.
   Stream<AudioProcessingState> get onAudioProcessingStateChanged;
 
-  /// The iOS broadcast extension started a screen share.
+  /// The iOS broadcast extension started a screen share. Posted by
+  /// `stream_video_flutter`'s iOS plugin.
   Stream<void> get onScreenSharingStarted;
 
   /// A screen share stopped outside the app's control. Android, iOS and

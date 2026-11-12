@@ -86,6 +86,18 @@ void main() {
       expect(route.label, 'speaker-uid');
       expect(route.groupId, isNull);
     });
+
+    test('drops a route without a device id', () async {
+      final routes = <AudioRoute>[];
+      final subscription = events.onAudioRouteChanged.listen(routes.add);
+
+      await emit('onAudioRouteChange', {'deviceId': '', 'label': 'Speaker'});
+      await emit('onAudioRouteChange', {'label': 'Speaker'});
+      await pumpEventQueue();
+      await subscription.cancel();
+
+      expect(routes, isEmpty);
+    });
   });
 
   group('onSpeechActivity', () {

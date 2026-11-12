@@ -1,7 +1,10 @@
+import 'package:meta/meta.dart';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
+// ignore: subtype_of_sealed_class, the plugin implements its own contract
 /// The browser reports none of the [WebRtcPlatformEvents]: every stream is
 /// empty.
+@internal
 class DartWebRtcPlatformEvents implements WebRtcPlatformEvents {
   DartWebRtcPlatformEvents._();
 

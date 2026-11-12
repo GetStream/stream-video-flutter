@@ -62,9 +62,9 @@ class StreamPeerConnectionFactory {
   Future<rtc.NativePeerConnectionFactory?> _buildNativeFactory() async {
     try {
       final policy = resolvedAudioConfigurationPolicy;
-      // The Apple configuration is applied when the factory is built and again
-      // when its audio resumes. On iOS, `Call.resumeAudio` then re-applies the
-      // configuration and output applied since.
+      // On iOS, the Apple configuration is applied when the factory is built
+      // and again when its audio resumes; `Call.resumeAudio` then re-applies
+      // the configuration and output applied since.
       _nativeFactory = await rtc.NativePeerConnectionFactory.create(
         options: policy.toFactoryOptions(),
       );

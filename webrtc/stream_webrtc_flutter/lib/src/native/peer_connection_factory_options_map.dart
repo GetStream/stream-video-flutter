@@ -1,20 +1,17 @@
 import 'package:meta/meta.dart';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
-/// The method channel form of [options], with only the audio configuration
-/// of the platform the app runs on.
+/// The method channel form of [options]. Each platform reads only its own
+/// audio configuration from it.
 @internal
 Map<String, dynamic> peerConnectionFactoryOptionsMap(
-  PeerConnectionFactoryOptions options, {
-  required bool isAndroid,
-  required bool isApple,
-}) {
-  final android = options.androidAudioConfiguration;
-  final apple = options.appleAudioConfiguration;
+  PeerConnectionFactoryOptions options,
+) {
   return <String, dynamic>{
     'bypassVoiceProcessing': options.bypassVoiceProcessing,
-    if (isAndroid && android != null)
+    if (options.androidAudioConfiguration case final android?)
       'androidAudioConfiguration': android.toMap(),
-    if (isApple && apple != null) 'appleAudioConfiguration': apple.toMap(),
+    if (options.appleAudioConfiguration case final apple?)
+      'appleAudioConfiguration': apple.toMap(),
   };
 }

@@ -65,7 +65,7 @@ class WebRTC {
   ///                          If not specified, uses audioSampleRate or native default.
   ///
   /// [factoryOptions] sets the audio settings of the implicit factory, on top
-  /// of [options].
+  /// of [options]. Its Apple configuration is not applied here.
   static Future<void> initialize({
     Map<String, dynamic>? options,
     PeerConnectionFactoryOptions? factoryOptions,
@@ -78,11 +78,7 @@ class WebRTC {
       'options': <String, dynamic>{
         ...?options,
         if (factoryOptions != null)
-          ...peerConnectionFactoryOptionsMap(
-            factoryOptions,
-            isAndroid: platformIsAndroid,
-            isApple: platformIsIOS || platformIsMacOS,
-          ),
+          ...peerConnectionFactoryOptionsMap(factoryOptions),
       },
     });
     initialized = true;

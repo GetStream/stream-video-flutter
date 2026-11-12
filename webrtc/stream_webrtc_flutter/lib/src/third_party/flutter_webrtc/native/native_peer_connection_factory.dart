@@ -30,11 +30,7 @@ class NativePeerConnectionFactory {
     final response = await WebRTC.invokeMethod(
       'createPeerConnectionFactory',
       <String, dynamic>{
-        'options': peerConnectionFactoryOptionsMap(
-          options,
-          isAndroid: WebRTC.platformIsAndroid,
-          isApple: WebRTC.platformIsIOS || WebRTC.platformIsMacOS,
-        ),
+        'options': peerConnectionFactoryOptionsMap(options),
       },
     );
 

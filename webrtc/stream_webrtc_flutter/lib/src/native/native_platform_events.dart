@@ -7,6 +7,7 @@ import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 import '../third_party/flutter_webrtc/native/event_channel.dart';
 import '../third_party/flutter_webrtc/native/utils.dart';
 
+// ignore: subtype_of_sealed_class, the plugin implements its own contract
 /// The [WebRtcPlatformEvents] read from the plugin's `FlutterWebRTC.Event`
 /// channel.
 @internal
@@ -32,14 +33,19 @@ class NativeWebRtcPlatformEvents implements WebRtcPlatformEvents {
 
   @override
   late final Stream<AudioRoute> onAudioRouteChanged =
-      _payloads('onAudioRouteChange').map((payload) {
-        final deviceId = payload['deviceId'] as String? ?? '';
-        return AudioRoute(
-          deviceId: deviceId,
-          label: payload['label'] as String? ?? deviceId,
-          groupId: payload['groupId'] as String?,
-        );
-      });
+      _payloads('onAudioRouteChange')
+          .where((payload) {
+            final deviceId = payload['deviceId'] as String?;
+            return deviceId != null && deviceId.isNotEmpty;
+          })
+          .map((payload) {
+            final deviceId = payload['deviceId'] as String;
+            return AudioRoute(
+              deviceId: deviceId,
+              label: payload['label'] as String? ?? deviceId,
+              groupId: payload['groupId'] as String?,
+            );
+          });
 
   @override
   late final Stream<SpeechActivity> onSpeechActivity =
