@@ -73,7 +73,7 @@ These are the scenarios every native PR gets checked against on a device. They a
 2. **Freeze the channel contract until a PR explicitly changes it.** Method names, event names and payload keys between Dart, Swift and Kotlin stay as they are. A Dart test asserts that the Swift and Kotlin constants are exactly the Dart `Event` names each platform is expected to emit, plus Android's documented internal intent actions (the existing `incoming_call_failure_reason_test.dart` already parses Swift source this way). Contract changes are their own small PRs.
 3. **Pure core, thin shell.** On every platform the state machine, identity mapping, payload parsing and policies are plain classes with no `Flutter`, `CallKit`, `android.*` dependency reachable without a protocol/interface, so they get unit tests. The shell (plugin class, `CXProviderDelegate`, `BroadcastReceiver`) is as thin as possible.
 4. **One owner per piece of state.** Call state lives in one store per platform. Identity (app id vs CallKit uuid vs notification id) is mapped in that store, nowhere else.
-5. **Hold behaviour stays off by default** (`supportsHolding: false`) until R13–R17 pass on device. Nothing in the refactor PRs turns it on.
+5. **Hold behaviour stays off by default** (`supportsHolding: false`) until R13–R17 pass on device. Nothing in the refactor PRs turns it on in the SDK. Dogfooding turns it on from B-6 (FLU-1213), so those checks can be run on a device.
 
 ### 2.2 iOS target layout
 
