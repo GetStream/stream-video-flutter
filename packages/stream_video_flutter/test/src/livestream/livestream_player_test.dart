@@ -141,18 +141,11 @@ void main() {
       return screenHeight - tileBottom;
     }
 
-    testWidgets('is the spacing when the safe area is smaller', (
-      tester,
-    ) async {
-      expect(
-        await gapUnderTile(tester, bottomInset: 0),
-        const StreamSpacing().xs,
-      );
+    testWidgets('is nothing without a safe area', (tester) async {
+      expect(await gapUnderTile(tester, bottomInset: 0), 0);
     });
 
-    testWidgets('is the safe area, without the spacing on top', (
-      tester,
-    ) async {
+    testWidgets('is the safe area', (tester) async {
       expect(await gapUnderTile(tester, bottomInset: 34), 34);
     });
   });
