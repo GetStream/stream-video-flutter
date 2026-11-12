@@ -3,9 +3,10 @@ import Foundation
 /// The CallKit and audio session options `CallData` and `StreamVideoPushConfiguration` both
 /// carry, read from the `ios` sub-map Dart sends or, when there is none, from the top level.
 ///
-/// A missing key takes the same default as Dart's `IOSPushConfiguration`, so a call reported
-/// before Dart sent its configuration, or from native code with only some keys, offers what a
-/// call reported from Dart does.
+/// A missing `supportsHolding`, `supportsDTMF` or `maximumCallGroups` takes the default the SDK
+/// sends from Dart (no holding, no keypad, one call group), so a call reported before Dart sent
+/// its configuration, or from native code with only some keys, offers the same CallKit controls
+/// as a call reported from Dart.
 struct CallKitOptions {
     var iconName: String
     var handleType: String

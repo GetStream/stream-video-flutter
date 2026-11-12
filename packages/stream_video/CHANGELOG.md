@@ -71,6 +71,7 @@
 
 ### ⚠️ Deprecated
 
+- `ActionCallToggleGroup` is deprecated: it is never sent, since CallKit is never offered a merge of calls and refuses a merge it attempts anyway.
 - The ringing methods on `StreamVideo` are deprecated; call them on `StreamVideo.ringing`, which has the same method names.
 - The `Call.connectOptions` setter is deprecated in favour of `Call.setConnectOptions`, which reports whether the options were applied; there is no `dart fix` for it, since a setter can't be rewritten into a method call.
 - `CoordinatorEvent` is renamed to `StreamVideoEvent`, `CoordinatorCallEvent` to `StreamCallEvent`, and every `CoordinatorCall*Event` / `CoordinatorIngress*Event` to its matching `StreamCall*Event` (for example `CoordinatorCallEndedEvent` → `StreamCallEndedEvent`, and `CoordinatorCallClosedCaptionEvent` → `StreamCallClosedCaptionsEvent`). The old names remain as deprecated typedefs; `dart fix --apply` renames them wherever a type is named, but not the arguments of a constructor call — `callCid` is now positional, and the other constructor changes are listed under Breaking — so code that builds one of these events has to be updated by hand. The connection events — `CoordinatorConnectedEvent`, `CoordinatorDisconnectedEvent`, `CoordinatorReconnectedEvent` and `CoordinatorHealthCheckEvent` — keep their names.

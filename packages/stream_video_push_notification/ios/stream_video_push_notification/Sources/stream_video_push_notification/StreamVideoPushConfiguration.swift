@@ -46,7 +46,8 @@ import Foundation
         set {}
     }
 
-    /// The default CallKit options, the same as Dart's `IOSPushConfiguration`.
+    /// The default CallKit options: no holding, no keypad and one call group, as the SDK sends
+    /// from Dart.
     @objc public convenience init(headers: NSDictionary) {
         let args: [String: Any?] = ["headers": headers]
         self.init(args: args)
