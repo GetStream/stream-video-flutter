@@ -12,7 +12,7 @@ library stream_video_push_notification;
 
 export 'src/background_push_handler.dart';
 export 'src/stream_video_push_configuration.dart';
-export 'src/stream_video_push_notification.dart' hide resolveCallsToEnd;
+export 'src/stream_video_push_notification.dart';
 export 'src/stream_video_push_params.dart';
 export 'src/stream_video_push_provider.dart';
 export 'stream_video_push_notification_platform_interface.dart'
