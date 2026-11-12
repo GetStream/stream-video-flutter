@@ -154,12 +154,14 @@ class SessionTrackController {
   }
 
   /// Re-applies the audio output the user selected, if any.
-  Future<void> applyCurrentAudioOutputDevice() async {
+  ///
+  /// Succeeds when there is nothing to re-apply.
+  Future<Result<None>> applyCurrentAudioOutputDevice() async {
     // Only re-apply an output the user explicitly selected.
-    if (!_audioOutputSelectedByUser()) return;
+    if (!_audioOutputSelectedByUser()) return const Result.success(none);
 
     final audioOutputDevice = _audioOutputDevice();
-    if (audioOutputDevice == null) return;
+    if (audioOutputDevice == null) return const Result.success(none);
 
     final result = await _setAudioOutputDevice(audioOutputDevice);
     if (result is Failure) {
@@ -169,6 +171,7 @@ class SessionTrackController {
             'applied: ${result.videoError.message}',
       );
     }
+    return result;
   }
 
   /// Resumes audio tracks that were suspended or arrived during suspension.
