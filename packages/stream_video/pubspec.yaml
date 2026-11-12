@@ -44,7 +44,7 @@ dependencies:
       path: packages/stream_core
       ref: b11ffa97e6285fe7c15c77ad322142fabe0cdee5
   stream_dart_webrtc: ^1.0.0
-  stream_webrtc_flutter: ^4.0.1
+  stream_webrtc_flutter: ^5.0.0
   stream_webrtc_interface: ^1.0.0
   synchronized: ^3.1.0
   system_info2: ^4.0.0
