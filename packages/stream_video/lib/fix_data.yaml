@@ -842,11 +842,11 @@ transforms:
     element:
       uris:
         [
-          "package:stream_video/src/webrtc/rtc_media_device/rtc_media_device_notifier.dart",
+          "package:stream_video/src/audio/platform_audio_controller.dart",
           "package:stream_video/stream_video.dart",
         ]
       method: "handleCallInterruptionCallbacks"
-      inClass: "RtcMediaDeviceNotifier"
+      inClass: "PlatformAudioController"
     changes:
       - kind: "removeParameter"
         name: "androidAudioAttributesUsageType"
