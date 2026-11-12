@@ -67,6 +67,27 @@ the active Bluetooth device is surfaced and its name falls back to a generic def
 
 Outgoing calls are registered when you call `startOutgoingCall`; the SDK does not call it for you.
 
+### iOS outgoing calls
+
+By default only incoming calls go through CallKit. To report the ringing calls the current user
+starts as outgoing CallKit calls too, turn on `reportOutgoingCalls`:
+
+```dart
+StreamVideoPushNotificationManager.create(
+  // ...
+  pushConfiguration: const StreamVideoPushConfiguration(
+    ios: IOSPushConfiguration(reportOutgoingCalls: true),
+  ),
+);
+```
+
+The caller then gets what a phone call gets: the green call indicator instead of the orange
+microphone one, the proximity sensor turning the screen off at the ear, and the call on the lock
+screen. The CallKit call is marked connected when the call connects and ends with it; ending it
+from CallKit while it still rings cancels the ring.
+
+Leave it off if your app already calls `startOutgoingCall` itself, or CallKit shows two calls.
+
 ### iOS call history
 
 CallKit lists every call it displayed in the system Recents. Report how a call ended to control how

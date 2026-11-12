@@ -212,6 +212,7 @@ class IOSPushConfiguration {
     this.supportsUngrouping,
     this.ringtonePath,
     this.includesCallsInRecents,
+    this.reportOutgoingCalls,
   });
 
   factory IOSPushConfiguration.fromJson(Map<String, dynamic> json) =>
@@ -257,6 +258,17 @@ class IOSPushConfiguration {
   /// Defaults to true. Set to false to prevent calls from appearing in Recents.
   final bool? includesCallsInRecents;
 
+  /// Whether a ringing call the current user starts is reported to CallKit as an outgoing call.
+  ///
+  /// Reporting it gives the caller what a phone call gets: the green call indicator instead of
+  /// the orange microphone one, the proximity sensor turning the screen off at the ear, and the
+  /// call on the lock screen, where ending it cancels the ring. The CallKit call is marked
+  /// connected once the call connects, and ends with the call however it ends.
+  ///
+  /// Off when omitted. Leave it off if the app already calls
+  /// [StreamVideoPushNotificationManager.startOutgoingCall] itself, or CallKit shows two calls.
+  final bool? reportOutgoingCalls;
+
   IOSPushConfiguration copyWith({
     String? iconName,
     String? handleType,
@@ -276,6 +288,7 @@ class IOSPushConfiguration {
     bool? supportsUngrouping,
     String? ringtonePath,
     bool? includesCallsInRecents,
+    bool? reportOutgoingCalls,
   }) {
     return IOSPushConfiguration(
       iconName: iconName ?? this.iconName,
@@ -302,6 +315,7 @@ class IOSPushConfiguration {
       ringtonePath: ringtonePath ?? this.ringtonePath,
       includesCallsInRecents:
           includesCallsInRecents ?? this.includesCallsInRecents,
+      reportOutgoingCalls: reportOutgoingCalls ?? this.reportOutgoingCalls,
     );
   }
 
@@ -327,6 +341,7 @@ class IOSPushConfiguration {
       supportsUngrouping: other.supportsUngrouping,
       ringtonePath: other.ringtonePath,
       includesCallsInRecents: other.includesCallsInRecents,
+      reportOutgoingCalls: other.reportOutgoingCalls,
     );
   }
 

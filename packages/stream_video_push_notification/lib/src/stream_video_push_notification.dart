@@ -7,6 +7,7 @@ import 'manager/push_device_registrar.dart';
 import 'manager/push_token_source.dart';
 import 'manager/ringing_event_broadcaster.dart';
 import 'manager/ringing_sync_observer.dart';
+import 'outgoing_call_reporter.dart';
 
 /// Implementation of [PushNotificationManager] for Stream Video.
 ///
@@ -44,6 +45,17 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       broadcaster: _broadcaster,
       ringingEvents: onCallEvent,
     )..start();
+
+    if (CurrentPlatform.isIos &&
+        (pushConfiguration.ios?.reportOutgoingCalls ?? false)) {
+      _outgoingCallReporter = OutgoingCallReporter(
+        manager: this,
+        outgoingCalls: streamVideo.state.outgoingCall,
+        isActive: (call) => streamVideo.state.activeCalls.value.any(
+          (active) => identical(active, call),
+        ),
+      );
+    }
   }
 
   /// Preferences key of the last APNs token registered.
@@ -94,6 +106,9 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   /// Keeps the native call UI in step with the backend and the app. Only on
   /// mobile, where there is a native call UI.
   RingingSyncObserver? _observer;
+
+  /// Set when [IOSPushConfiguration.reportOutgoingCalls] is on, on iOS.
+  OutgoingCallReporter? _outgoingCallReporter;
 
   /// The one broadcaster of this process's ringing events; see
   /// [RingingEventBroadcaster.shared].
@@ -234,6 +249,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   Future<void> dispose() async {
     _observer?.dispose();
     await _registrar.dispose();
+    await _outgoingCallReporter?.dispose();
+    _outgoingCallReporter = null;
   }
 
   static Future<void> ensureFullScreenIntentPermission() {
