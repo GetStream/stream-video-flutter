@@ -92,7 +92,7 @@ class RtcMediaDeviceNotifier {
   /// browsers without `setSinkId`: audio plays on the system default output,
   /// and an output picker should be hidden. True on native platforms.
   static bool get isAudioOutputSelectionSupported =>
-      rtc_audio.checkIfAudioOutputChangeSupported();
+      rtc.webRtcCapabilities.supportsAudioOutputSelection;
 
   Stream<List<RtcMediaDevice>> get onDeviceChange => _devicesController.stream;
   final _devicesController = BehaviorSubject<List<RtcMediaDevice>>();
@@ -302,7 +302,7 @@ class RtcMediaDeviceNotifier {
           );
         }),
 
-        if (CurrentPlatform.isIos &&
+        if (rtc.webRtcCapabilities.omitsEarpieceFromEnumeration &&
             devices.none(
               (d) => d.deviceId.equalsIgnoreCase(
                 AudioDefaultDevice.earpiece,
@@ -350,10 +350,7 @@ class RtcMediaDeviceNotifier {
   /// playout is not implemented, so [pauseAudioPlayout] and
   /// [resumeAudioPlayout] do nothing and [isAudioPlayoutPaused] stays `false`.
   bool get isAudioPlayoutPauseSupported =>
-      CurrentPlatform.isAndroid ||
-      CurrentPlatform.isIos ||
-      CurrentPlatform.isMacOS ||
-      CurrentPlatform.isWeb;
+      rtc.webRtcCapabilities.supportsAudioPlayoutPause;
 
   /// Whether remote audio playout is currently paused via
   /// [pauseAudioPlayout].

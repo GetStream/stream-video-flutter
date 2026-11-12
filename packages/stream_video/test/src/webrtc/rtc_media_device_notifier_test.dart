@@ -7,6 +7,7 @@ import 'package:stream_video/src/call/stats/trace_tag.dart';
 import 'package:stream_video/src/webrtc/rtc_media_device/device_enumeration_trigger.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import '../../fixtures/webrtc_capabilities.dart';
 
 const _camera = {
   'deviceId': '0',
@@ -187,6 +188,50 @@ void main() {
     expect(getSourcesCalls, 2);
   });
 
+  group('the iOS earpiece', () {
+    bool hasEarpiece(List<RtcMediaDevice> devices) => devices.any(
+      (device) =>
+          device.id == AudioDefaultDevice.earpiece &&
+          device.kind == RtcMediaDeviceKind.audioOutput,
+    );
+
+    test('is added where enumeration leaves it out', () async {
+      overrideWebRtcCapabilities(platform: PlatformType.ios);
+
+      final devices = await notifier.enumerateDevices();
+
+      expect(hasEarpiece(devices.getDataOrNull()!), isTrue);
+    });
+
+    test('is not added twice when enumeration lists it', () async {
+      overrideWebRtcCapabilities(platform: PlatformType.ios);
+      sources = [
+        ..._sources,
+        {
+          'deviceId': AudioDefaultDevice.earpiece,
+          'groupId': 'Receiver',
+          'kind': 'audiooutput',
+          'label': 'Receiver',
+        },
+      ];
+
+      final devices = (await notifier.enumerateDevices()).getDataOrNull()!;
+
+      expect(
+        devices.where((d) => d.id == AudioDefaultDevice.earpiece),
+        hasLength(1),
+      );
+    });
+
+    test('is not added elsewhere', () async {
+      overrideWebRtcCapabilities(platform: PlatformType.android);
+
+      final devices = await notifier.enumerateDevices();
+
+      expect(hasEarpiece(devices.getDataOrNull()!), isFalse);
+    });
+  });
+
   group('errors', () {
     test('an empty device list fails with a message for each call', () async {
       sources = [];
@@ -275,7 +320,9 @@ void main() {
     Exception? pauseError;
 
     setUp(() {
-      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      rtc.debugWebRtcCapabilitiesOverride = webRtcCapabilitiesOf(
+        PlatformType.android,
+      );
       nativeCalls.clear();
       pauseError = null;
       originalPause = notifier.nativePauseAudioPlayout;
@@ -289,13 +336,15 @@ void main() {
     });
 
     tearDown(() async {
-      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      rtc.debugWebRtcCapabilitiesOverride = webRtcCapabilitiesOf(
+        PlatformType.android,
+      );
       pauseError = null;
       if (notifier.isAudioPlayoutPaused) await notifier.resumeAudioPlayout();
       notifier
         ..nativePauseAudioPlayout = originalPause
         ..nativeResumeAudioPlayout = originalResume;
-      CurrentPlatform.debugCurrentPlatformOverride = null;
+      rtc.debugWebRtcCapabilitiesOverride = null;
     });
 
     test('starts unpaused and emits only when the state changes', () async {
@@ -321,7 +370,7 @@ void main() {
 
     for (final platform in [PlatformType.windows, PlatformType.linux]) {
       test('does nothing on ${platform.name}', () async {
-        CurrentPlatform.debugCurrentPlatformOverride = platform;
+        rtc.debugWebRtcCapabilitiesOverride = webRtcCapabilitiesOf(platform);
 
         expect(notifier.isAudioPlayoutPauseSupported, isFalse);
         await notifier.pauseAudioPlayout();

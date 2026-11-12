@@ -2,9 +2,9 @@ part of 'rtc_manager.dart';
 
 extension RtcManagerTrackHelper on RtcManager {
   Future<Result<RtcLocalCameraTrack>> flipCamera() async {
-    if (CurrentPlatform.isWeb) {
-      _logger.e(() => '[switchCamera] rejected (not supported on web)');
-      return failureWithError('Not supported on web');
+    if (!rtc.webRtcCapabilities.supportsCameraSwitch) {
+      _logger.e(() => '[switchCamera] rejected (not supported)');
+      return failureWithError('Not supported on this platform');
     }
 
     final track = getPublisherTrackByType(SfuTrackType.video);
@@ -70,9 +70,9 @@ extension RtcManagerTrackHelper on RtcManager {
 
     final Result<RtcLocalTrack> switched;
     try {
-      // On web the input is a property of the capture, so it is captured
-      // again; elsewhere the platform switches the input of the capture.
-      switched = CurrentPlatform.isWeb
+      // Where the input is a property of the capture, it is captured again;
+      // elsewhere the platform switches the input of the capture.
+      switched = !rtc.webRtcCapabilities.switchesAudioInputInPlace
           ? await _publisher.recapture(
               track.trackId,
               tag: '[setAudioInputDevice]',
@@ -100,7 +100,7 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<Result<None>> setAudioOutputDevice({
     required RtcMediaDevice device,
   }) async {
-    if (CurrentPlatform.isWeb) {
+    if (rtc.webRtcCapabilities.selectsAudioOutputPerElement) {
       return _subscriber.setAudioSink(device);
     }
 
@@ -168,7 +168,7 @@ extension RtcManagerTrackHelper on RtcManager {
     bool enabled = true,
     ScreenShareConstraints? constraints,
   }) async {
-    if (CurrentPlatform.isIos &&
+    if (rtc.webRtcCapabilities.supportsBroadcastExtension &&
         enabled &&
         constraints is ScreenShareConstraints &&
         constraints.useiOSBroadcastExtension) {

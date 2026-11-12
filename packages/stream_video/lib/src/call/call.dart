@@ -49,7 +49,6 @@ import '../webrtc/model/rtc_video_dimension.dart';
 import '../webrtc/peer_connection.dart';
 import '../webrtc/peer_connection_factory.dart';
 import '../webrtc/peer_type.dart';
-import '../webrtc/rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 import '../webrtc/rtc_media_device/rtc_media_device.dart';
 import '../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../webrtc/rtc_track/rtc_track.dart';
@@ -1545,7 +1544,7 @@ class Call {
   /// Whether [setAudioOutputDevice] can route audio on this platform. See
   /// [RtcMediaDeviceNotifier.isAudioOutputSelectionSupported].
   bool checkIfAudioOutputChangeSupported() {
-    return rtc_audio.checkIfAudioOutputChangeSupported();
+    return rtc.webRtcCapabilities.supportsAudioOutputSelection;
   }
 
   /// Sets the mirror state for a remote participant's video track.

@@ -2,10 +2,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_core/stream_core.dart';
 import 'package:stream_video/src/webrtc/media/screen_share_constraints.dart';
 
+import '../../../fixtures/webrtc_capabilities.dart';
+
 void main() {
-  group('ScreenShareConstraints.toMap', () {
-    // The desktop branch is the only one that builds `mandatory`, and the test
-    // host is a desktop, so these run where it matters.
+  group('ScreenShareConstraints.toMap where the source is picked by id', () {
+    setUp(() => overrideWebRtcCapabilities(platform: PlatformType.linux));
+
     test('leaves out the frame rate cap when there is none to ask for', () {
       const subject = ScreenShareConstraints(sourceId: '1');
 
@@ -41,5 +43,35 @@ void main() {
 
       expect(video['deviceId'], {'exact': 'screen-2'});
     });
-  }, skip: CurrentPlatform.isDesktop ? null : 'desktop-only constraints');
+  });
+
+  group('ScreenShareConstraints.toMap elsewhere', () {
+    test('leaves out the source id and the frame rate cap', () {
+      overrideWebRtcCapabilities(platform: PlatformType.android);
+      const subject = ScreenShareConstraints(sourceId: '1', maxFrameRate: 15);
+
+      final video = subject.toMap()['video'] as Map<String, dynamic>;
+
+      expect(video.containsKey('deviceId'), isFalse);
+      expect(video.containsKey('mandatory'), isFalse);
+    });
+
+    test('asks iOS for the broadcast extension', () {
+      overrideWebRtcCapabilities(platform: PlatformType.ios);
+      const subject = ScreenShareConstraints(useiOSBroadcastExtension: true);
+
+      final video = subject.toMap()['video'] as Map<String, dynamic>;
+
+      expect(video['deviceId'], 'broadcast');
+    });
+
+    test('does not ask for the broadcast extension where there is none', () {
+      overrideWebRtcCapabilities(platform: PlatformType.android);
+      const subject = ScreenShareConstraints(useiOSBroadcastExtension: true);
+
+      final video = subject.toMap()['video'] as Map<String, dynamic>;
+
+      expect(video.containsKey('deviceId'), isFalse);
+    });
+  });
 }
