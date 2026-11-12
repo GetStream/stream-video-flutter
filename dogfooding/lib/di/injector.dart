@@ -46,7 +46,11 @@ class AppInjector {
     final appPrefs = AppPreferences(prefs: prefs);
 
     if (forceEnvironment != null) {
-      await appPrefs.setEnvironment(forceEnvironment);
+      if (kIsWeb && kIsProd) {
+        appPrefs.pinEnvironment(forceEnvironment);
+      } else {
+        await appPrefs.setEnvironment(forceEnvironment);
+      }
     }
 
     locator.registerSingleton<AppPreferences>(appPrefs);

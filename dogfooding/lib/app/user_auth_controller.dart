@@ -48,8 +48,8 @@ class UserAuthController extends ChangeNotifier {
 
     final effectiveUser = _withTokenUserId(user, tokenResponse.token);
 
-    await _prefs.setApiKey(tokenResponse.apiKey);
     await _prefs.setEnvironment(environment);
+    await _prefs.setApiKey(tokenResponse.apiKey);
 
     _authRepo ??= locator.get<UserAuthRepository>(
       param1: effectiveUser,
