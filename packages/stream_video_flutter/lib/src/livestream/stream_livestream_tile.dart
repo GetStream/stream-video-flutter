@@ -128,14 +128,14 @@ class _StreamLivestreamTileStyleDefaults extends StreamLivestreamTileStyle {
   // visual by 8, which holds it 8 from the tile's bottom and end edges.
   @override
   EdgeInsetsGeometry get toolbarPadding =>
-      _style?.toolbarPadding ??
-      EdgeInsetsDirectional.only(start: _spacing.xs);
+      _style?.toolbarPadding ?? EdgeInsetsDirectional.only(start: _spacing.xs);
 
   @override
   double get toolbarSpacing => _style?.toolbarSpacing ?? _spacing.xxs;
 
+  // Matches the 16 the tap targets leave between the trailing buttons.
   @override
-  double get leadingSpacing => _style?.leadingSpacing ?? _spacing.xs;
+  double get leadingSpacing => _style?.leadingSpacing ?? _spacing.md;
 
   // The tap targets' own padding already leaves 16 between the buttons.
   @override
