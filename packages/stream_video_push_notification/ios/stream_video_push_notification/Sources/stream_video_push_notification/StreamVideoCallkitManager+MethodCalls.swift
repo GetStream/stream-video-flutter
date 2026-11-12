@@ -18,7 +18,9 @@ extension StreamVideoCallkitManager {
             self.startCall(data, fromPushKit: false)
             result(true)
         case .endCall(let args):
-            if store.actsOnPushKitCall(forAppId: args?["id"] as? String) {
+            if let id = args?["id"] as? String, store.wasRefusedToStart(appId: id) {
+                NSLog("[StreamCallKit] endCall for \(id), which CallKit refused to start, ignored")
+            } else if store.actsOnPushKitCall(forAppId: args?["id"] as? String) {
                 self.endCall(store.lastOptions!)
             } else if let args = args {
                 self.endCall(optionsKeepingThePushKitCall(for: args))
@@ -37,7 +39,9 @@ extension StreamVideoCallkitManager {
             self.holdCall(callId, onHold: onHold)
             result(true)
         case .callConnected(let args):
-            if store.actsOnPushKitCall(forAppId: args?["id"] as? String) {
+            if let id = args?["id"] as? String, store.wasRefusedToStart(appId: id) {
+                NSLog("[StreamCallKit] callConnected for \(id), which CallKit refused to start, ignored")
+            } else if store.actsOnPushKitCall(forAppId: args?["id"] as? String) {
                 self.connectedCall(store.lastOptions!)
             } else if let args = args {
                 self.connectedCall(optionsKeepingThePushKitCall(for: args))
