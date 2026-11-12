@@ -143,6 +143,20 @@ sealed class AudioConfigurationPolicy {
   /// through the call preferences afterwards does not move the call to
   /// another service.
   AndroidCallServiceKind get androidCallServiceKind;
+
+  /// The settings a peer connection factory is built with under this policy.
+  ///
+  /// The Apple configuration starts on the loudspeaker when
+  /// [defaultsToSpeaker] is true.
+  rtc.PeerConnectionFactoryOptions toFactoryOptions() {
+    return rtc.PeerConnectionFactoryOptions(
+      bypassVoiceProcessing: bypassVoiceProcessing,
+      androidAudioConfiguration: getAndroidConfiguration(),
+      appleAudioConfiguration: getAppleConfiguration(
+        defaultToSpeaker: defaultsToSpeaker,
+      ),
+    );
+  }
 }
 
 /// Audio policy optimized for active participation in calls.

@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
+import '../../../native/peer_connection_factory_options_map.dart';
 import '../native_logs_listener.dart';
 
 class WebRTC {
@@ -55,25 +57,33 @@ class WebRTC {
   ///
   /// "forceSWCodecList": a list of strings of software codecs that should use software.
   ///
-  /// "androidAudioConfiguration": an AndroidAudioConfiguration object mapped with toMap()
-  ///
-  /// "bypassVoiceProcessing": a boolean that bypasses the audio processing for the audio device.
-  ///
   /// "audioSampleRate": (Android only) Sets both input and output sample rate in Hz (e.g., 48000).
   ///                    If not specified, uses the native device's default sample rate.
   ///
   /// "audioOutputSampleRate": (Android only) Sets only output sample rate in Hz (e.g., 48000).
   ///                          Takes precedence over audioSampleRate for output.
   ///                          If not specified, uses audioSampleRate or native default.
+  ///
+  /// [factoryOptions] sets the audio settings of the implicit factory, on top
+  /// of [options].
   static Future<void> initialize({
     Map<String, dynamic>? options,
+    PeerConnectionFactoryOptions? factoryOptions,
     bool refresh = false,
   }) async {
     if (initialized && !refresh) {
       return;
     }
     await _channel.invokeMethod<void>('initialize', <String, dynamic>{
-      'options': options ?? <String, dynamic>{},
+      'options': <String, dynamic>{
+        ...?options,
+        if (factoryOptions != null)
+          ...peerConnectionFactoryOptionsMap(
+            factoryOptions,
+            isAndroid: platformIsAndroid,
+            isApple: platformIsIOS || platformIsMacOS,
+          ),
+      },
     });
     initialized = true;
   }

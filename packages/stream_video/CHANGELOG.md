@@ -2,6 +2,8 @@
 
 ### ⚠️ Breaking
 
+- `RtcMediaDeviceNotifier.handleCallInterruptionCallbacks` no longer takes the deprecated `androidAudioAttributesUsageType` and `androidAudioAttributesContentType`.
+- `ScreenSharingStoppedEvent` carries a `trackId` instead of a `data` map, and `ScreenSharingStartedEvent` has no `data`.
 - Test mocks that implement `StreamVideo` get a `subtype_of_sealed_class` warning, because `StreamVideo` implements the `@sealed` `CallHost`; add `// ignore: subtype_of_sealed_class` to them.
 - The deprecated `observeCoreCallKitEvents`, `observeCall*CallKitEvent` and `handleVoipPushNotification` methods are removed; use `observeCoreRingingEvents`, `observeCall*RingingEvent` and `handleRingingFlowNotifications` on `StreamVideo.ringing`.
 - `StreamVideo.create` no longer sets up logging; call `StreamVideo.configureLogging` for such a client.
@@ -84,6 +86,7 @@
 
 ### ✅ Added
 
+- `AudioConfigurationPolicy.toFactoryOptions` returns the settings a peer connection factory is built with under the policy.
 - `CallData.fromJson`, which builds the call data of a ringing event or an active native call from the map the push plugins send.
 - `VideoLifecycleState`, the type of `ClientState.appLifecycleState`, is exported.
 - `StreamVideo.ready` completes once the client has started up: audio configured, environment collected and, with `autoConnect`, the connect attempted.
