@@ -15,6 +15,7 @@ import 'package:synchronized/synchronized.dart';
 import '../../globals.dart';
 import '../../open_api/video/coordinator/api.dart' hide RecordingType, User;
 import '../../protobuf/video/sfu/event/events.pb.dart' show ReconnectDetails;
+import '../audio/platform_audio_controller.dart';
 import '../call_state.dart';
 import '../coordinator/coordinator_client.dart';
 import '../coordinator/models/coordinator_models.dart';
@@ -713,12 +714,14 @@ class Call {
   /// Mirrors the browser's autoplay-policy blocking, reported by the web audio
   /// layer, into [CallState] — so the app can show a "tap to enable sound"
   /// affordance and call
-  /// `RtcMediaDeviceNotifier.instance.resumeWebAudioPlayback()` from the
+  /// `PlatformAudioController.instance.resumeWebAudioPlayback()` from the
   /// gesture.
   void _observeWebAudioPlaybackBlocked() {
     _subscriptions.add(
       _idAudioPlayback,
-      _rtcMediaDeviceNotifier.webAudioPlaybackBlockedChanges.listen((blocked) {
+      PlatformAudioController.instance.webAudioPlaybackBlockedChanges.listen((
+        blocked,
+      ) {
         _stateManager.rtcSetWebAudioPlaybackBlocked(isBlocked: blocked);
       }),
     );

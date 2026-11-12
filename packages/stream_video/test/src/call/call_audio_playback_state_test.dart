@@ -7,10 +7,10 @@ import 'package:stream_video/stream_video.dart';
 import '../../test_helpers.dart';
 import 'fixtures/call_test_helpers.dart';
 
-/// Notifier whose autoplay-blocked signal is driven by the test, standing in
+/// Controller whose autoplay-blocked signal is driven by the test, standing in
 /// for the web audio layer's page-global tracking. Seeded like the real one, so
 /// a subscriber gets the current value on join.
-class _PlaybackNotifier extends MockRtcMediaDeviceNotifier {
+class _PlaybackController extends MockPlatformAudioController {
   // Closed by the test's tearDown, which the lint can't see from here.
   // ignore: close_sinks
   final blocked = BehaviorSubject<bool>.seeded(false);
@@ -27,13 +27,16 @@ void main() {
 
   group('Call web audio playback blocked state', () {
     late BehaviorSubject<InternetStatus> internetStatusController;
-    late _PlaybackNotifier deviceNotifier;
+    late _PlaybackController audioController;
+    late MockRtcMediaDeviceNotifier deviceNotifier;
 
     setUp(() {
       internetStatusController = BehaviorSubject<InternetStatus>.seeded(
         InternetStatus.connected,
       );
-      deviceNotifier = _PlaybackNotifier();
+      audioController = _PlaybackController();
+      PlatformAudioController.instance = audioController;
+      deviceNotifier = MockRtcMediaDeviceNotifier();
       // `Call.join` enumerates devices while applying the call settings.
       when(
         () => deviceNotifier.enumerateDevicesFor(any()),
@@ -42,7 +45,8 @@ void main() {
 
     tearDown(() async {
       await internetStatusController.close();
-      await deviceNotifier.blocked.close();
+      PlatformAudioController.instance = null;
+      await audioController.blocked.close();
     });
 
     Future<Call> joinTestCall() async {
@@ -71,7 +75,7 @@ void main() {
     });
 
     test('picks up playback already blocked when the call joins', () async {
-      deviceNotifier.blocked.add(true);
+      audioController.blocked.add(true);
 
       final call = await joinTestCall();
 
@@ -81,7 +85,7 @@ void main() {
     test('updates the call state when playback becomes blocked', () async {
       final call = await joinTestCall();
 
-      deviceNotifier.blocked.add(true);
+      audioController.blocked.add(true);
 
       await expectBlocked(call, isBlocked: true);
     });
@@ -89,10 +93,10 @@ void main() {
     test('updates the call state when playback is unblocked', () async {
       final call = await joinTestCall();
 
-      deviceNotifier.blocked.add(true);
+      audioController.blocked.add(true);
       await expectBlocked(call, isBlocked: true);
 
-      deviceNotifier.blocked.add(false);
+      audioController.blocked.add(false);
       await expectBlocked(call, isBlocked: false);
     });
   });

@@ -9,6 +9,7 @@ import 'package:stream_core/stream_core.dart';
 
 import '../globals.dart';
 import '../open_api/video/coordinator/api.dart' hide User;
+import 'audio/platform_audio_controller.dart';
 import 'audio_processing/audio_processor.dart';
 import 'call/call.dart';
 import 'call/call_host.dart';
@@ -60,7 +61,6 @@ import 'token/token_source.dart';
 import 'utils/none.dart';
 import 'utils/result.dart';
 import 'utils/subscriptions.dart';
-import 'webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
 
 const _tag = 'SV:Client';
@@ -382,7 +382,7 @@ class StreamVideo extends Disposable implements CallHost {
   Future<void> _configureAudio() async {
     try {
       if (setsUpMedia && (CurrentPlatform.isAndroid || CurrentPlatform.isIos)) {
-        await RtcMediaDeviceNotifier.instance.reinitializeAudioConfiguration(
+        await PlatformAudioController.instance.reinitializeAudioConfiguration(
           _options.audioConfigurationPolicy,
         );
       }
@@ -1109,6 +1109,6 @@ class StreamVideoOptions {
   ///
   /// Defaults to [BroadcasterAudioPolicy].
   /// Once set it will be applied for all calls.
-  /// To change the audio configuration policy after initial setup, use [RtcMediaDeviceNotifier.reinitializeAudioConfiguration].
+  /// To change the audio configuration policy after initial setup, use [PlatformAudioController.reinitializeAudioConfiguration].
   final AudioConfigurationPolicy audioConfigurationPolicy;
 }

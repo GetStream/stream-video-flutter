@@ -27,6 +27,7 @@ import '../../webrtc/model/rtc_video_parameters.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_media_device/device_enumeration_trigger.dart';
 import '../../webrtc/rtc_media_device/rtc_media_device.dart';
+import '../../audio/platform_audio_controller.dart';
 import '../../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../../webrtc/rtc_track/rtc_track.dart';
 import '../call_connect_options.dart';
@@ -587,7 +588,7 @@ class LocalMediaController {
 
   /// Follows the screen share and audio route changes the platform reports.
   StreamSubscription<NativeWebRtcEvent> observeNativeWebRtcEvents() {
-    return RtcMediaDeviceNotifier.instance.nativeWebRtcEventsStream().listen((
+    return PlatformAudioController.instance.nativeWebRtcEventsStream().listen((
       event,
     ) {
       _logger.d(

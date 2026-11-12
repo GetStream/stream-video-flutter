@@ -114,7 +114,7 @@ class _StreamDogFoodingAppContentState
   void _handleMobileAudioInterruptions() {
     if (!CurrentPlatform.isMobile) return;
 
-    RtcMediaDeviceNotifier.instance.handleCallInterruptionCallbacks(
+    PlatformAudioController.instance.handleCallInterruptionCallbacks(
       onInterruptionStart: () {
         final call = StreamVideo.instance.activeCall;
         _microphoneEnabledBeforeInterruption =
