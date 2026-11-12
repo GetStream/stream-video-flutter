@@ -7,6 +7,7 @@ import 'package:stream_video/src/call/stats/trace_tag.dart';
 import 'package:stream_video/src/webrtc/rtc_media_device/device_enumeration_trigger.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import '../../fixtures/webrtc_capabilities.dart';
 
 const _camera = {
   'deviceId': '0',
@@ -275,7 +276,9 @@ void main() {
     Exception? pauseError;
 
     setUp(() {
-      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      rtc.debugWebRtcCapabilitiesOverride = webRtcCapabilitiesOf(
+        PlatformType.android,
+      );
       nativeCalls.clear();
       pauseError = null;
       originalPause = notifier.nativePauseAudioPlayout;
@@ -289,13 +292,15 @@ void main() {
     });
 
     tearDown(() async {
-      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      rtc.debugWebRtcCapabilitiesOverride = webRtcCapabilitiesOf(
+        PlatformType.android,
+      );
       pauseError = null;
       if (notifier.isAudioPlayoutPaused) await notifier.resumeAudioPlayout();
       notifier
         ..nativePauseAudioPlayout = originalPause
         ..nativeResumeAudioPlayout = originalResume;
-      CurrentPlatform.debugCurrentPlatformOverride = null;
+      rtc.debugWebRtcCapabilitiesOverride = null;
     });
 
     test('starts unpaused and emits only when the state changes', () async {
@@ -321,7 +326,7 @@ void main() {
 
     for (final platform in [PlatformType.windows, PlatformType.linux]) {
       test('does nothing on ${platform.name}', () async {
-        CurrentPlatform.debugCurrentPlatformOverride = platform;
+        rtc.debugWebRtcCapabilitiesOverride = webRtcCapabilitiesOf(platform);
 
         expect(notifier.isAudioPlayoutPauseSupported, isFalse);
         await notifier.pauseAudioPlayout();

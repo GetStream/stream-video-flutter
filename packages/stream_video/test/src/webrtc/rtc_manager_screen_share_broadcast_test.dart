@@ -5,6 +5,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../../fixtures/webrtc_capabilities.dart';
 import '../call/fixtures/call_test_helpers.dart';
 import 'fixtures/rtc_manager_fakes.dart';
 
@@ -23,6 +24,7 @@ void main() {
 
   setUp(() {
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
+    overrideWebRtcCapabilities(platform: PlatformType.ios);
     platform = FakeWebRtcPlatform()..install();
     fixture = RtcManagerFixture(publishOptions: [_screenShareOption]);
   });
