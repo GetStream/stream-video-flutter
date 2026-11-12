@@ -113,6 +113,50 @@ void main() {
     });
   });
 
+  group('space under the tile', () {
+    Future<double> gapUnderTile(
+      WidgetTester tester, {
+      required double bottomInset,
+    }) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              padding: EdgeInsets.only(bottom: bottomInset),
+            ),
+            child: child!,
+          ),
+          home: LivestreamPlayer(
+            call: _FakeCall(liveCall),
+            joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final screenHeight = tester.getSize(find.byType(Scaffold)).height;
+      final tileBottom = tester
+          .getBottomLeft(find.byType(StreamLivestreamTile))
+          .dy;
+      return screenHeight - tileBottom;
+    }
+
+    testWidgets('is the spacing when the safe area is smaller', (
+      tester,
+    ) async {
+      expect(
+        await gapUnderTile(tester, bottomInset: 0),
+        const StreamSpacing().xs,
+      );
+    });
+
+    testWidgets('is the safe area, without the spacing on top', (
+      tester,
+    ) async {
+      expect(await gapUnderTile(tester, bottomInset: 34), 34);
+    });
+  });
+
   testWidgets(
     'LivestreamPlayer shows the ended screen once the host ends the call',
     (tester) async {
