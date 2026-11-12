@@ -5,8 +5,8 @@ import 'third_party/flutter_webrtc/apple_audio_configuration.dart';
 
 /// The audio settings a peer connection factory is built with.
 ///
-/// Each platform reads only its own configuration: Android reads
-/// [androidAudioConfiguration], iOS and macOS read [appleAudioConfiguration].
+/// Android applies [androidAudioConfiguration], iOS applies
+/// [appleAudioConfiguration].
 @immutable
 class PeerConnectionFactoryOptions {
   const PeerConnectionFactoryOptions({

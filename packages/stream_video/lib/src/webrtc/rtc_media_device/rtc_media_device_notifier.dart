@@ -165,7 +165,7 @@ class RtcMediaDeviceNotifier {
   /// Whether the local user started or stopped speaking while the microphone
   /// is muted.
   Stream<SpeechActivityEvent> get speechActivityStream =>
-      rtc.platformEvents.onSpeechActivity.map(
+      platformEvents.onSpeechActivity.map(
         (activity) => switch (activity) {
           rtc.SpeechActivity.started => const SpeechActivityStarted(),
           rtc.SpeechActivity.ended => const SpeechActivityEnded(),
@@ -173,6 +173,11 @@ class RtcMediaDeviceNotifier {
       );
 
   final _tracer = Tracer(null);
+
+  /// The events the WebRTC plugin reports. Replaceable in tests, because the
+  /// plugin reports interruptions only on Android and iOS hosts.
+  @visibleForTesting
+  rtc.WebRtcPlatformEvents platformEvents = rtc.platformEvents;
 
   /// How long device-change events are collected before the devices are
   /// enumerated once for all of them.
@@ -220,12 +225,12 @@ class RtcMediaDeviceNotifier {
     rtc.AndroidInterruptionSource androidInterruptionSource =
         rtc.AndroidInterruptionSource.audioFocusAndTelephony,
   }) async {
-    await rtc.platformEvents.enableInterruptionEvents(
+    await platformEvents.enableInterruptionEvents(
       androidInterruptionSource: androidInterruptionSource,
     );
 
-    await _interruptionSubscription?.cancel();
-    _interruptionSubscription = rtc.platformEvents.onInterruption.listen((
+    final cancelPrevious = _interruptionSubscription?.cancel();
+    _interruptionSubscription = platformEvents.onInterruption.listen((
       interruption,
     ) {
       switch (interruption) {
@@ -235,21 +240,21 @@ class RtcMediaDeviceNotifier {
           onInterruptionEnd?.call();
       }
     });
+    await cancelPrevious;
   }
 
   StreamSubscription<rtc.AudioInterruption>? _interruptionSubscription;
 
   /// The screen share and audio route changes the platform reports.
   Stream<NativeWebRtcEvent> nativeWebRtcEventsStream() {
-    final events = rtc.platformEvents;
-    return Rx.merge<NativeWebRtcEvent?>([
+    final events = platformEvents;
+    return Rx.merge<NativeWebRtcEvent>([
       events.onScreenSharingStopped.map(
         (stopped) => ScreenSharingStoppedEvent(trackId: stopped.trackId),
       ),
       events.onScreenSharingStarted.map((_) => ScreenSharingStartedEvent()),
-      events.onAudioRouteChanged.map((route) {
-        if (route.deviceId.isEmpty) return null;
-        return AudioRouteChangedEvent(
+      events.onAudioRouteChanged.map(
+        (route) => AudioRouteChangedEvent(
           device: RtcMediaDevice(
             id: route.deviceId,
             label: route.label,
@@ -257,13 +262,13 @@ class RtcMediaDeviceNotifier {
             kind: RtcMediaDeviceKind.audioOutput,
           ),
           reason: AudioRouteChangeReason.fromCode(route.reasonCode),
-        );
-      }),
-    ]).whereNotNull().asBroadcastStream();
+        ),
+      ),
+    ]).asBroadcastStream();
   }
 
   void _listenForAudioProcessingStateChanges() {
-    rtc.platformEvents.onAudioProcessingStateChanged.listen((state) {
+    platformEvents.onAudioProcessingStateChanged.listen((state) {
       _tracer.trace(
         TraceTag.audioProcessingStateChanged,
         {
@@ -515,8 +520,8 @@ class RtcMediaDeviceNotifier {
   Future<void> reinitializeAudioConfiguration(
     AudioConfigurationPolicy policy,
   ) async {
-    // The implicit factory keeps its Apple configuration; iOS gets the
-    // stereo playout preference below instead.
+    // Leaves the Apple audio session as it is; iOS gets the stereo playout
+    // preference below.
     final options = policy.toFactoryOptions();
     await rtc.WebRTC.initialize(
       refresh: true,
