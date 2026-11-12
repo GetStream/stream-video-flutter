@@ -43,9 +43,9 @@ class StreamPeerConnectionFactory {
   bool get _isPerCallFactorySupported =>
       rtc.webRtcCapabilities.supportsPerCallFactory;
 
-  /// The per-call native factory, lazily built on first use. Returns null on
-  /// web (no per-call factory concept) so callers can fall back to the
-  /// global webrtc entrypoints.
+  /// The per-call native factory, lazily built on first use. Returns null where
+  /// the platform has no per-call factory, so callers fall back to the global
+  /// webrtc entrypoints.
   Future<rtc.NativePeerConnectionFactory?> ensureNativeFactory() {
     if (!_isPerCallFactorySupported) {
       return Future.value();

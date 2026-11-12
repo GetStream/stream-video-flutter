@@ -15,7 +15,7 @@ class WebRtcCapabilities {
     required this.selectsAudioOutputPerElement,
     required this.supportsBroadcastExtension,
     required this.supportsScreenShareSourceSelection,
-    required this.hasUnlistedEarpiece,
+    required this.omitsEarpieceFromEnumeration,
     required this.usesExactDeviceIdConstraints,
     required this.reusesScreenShareCapture,
   });
@@ -28,17 +28,16 @@ class WebRtcCapabilities {
   /// macOS and web.
   final bool supportsAudioPlayoutPause;
 
-  /// Whether remote audio can be routed to an output the app picks. True on
-  /// native platforms; on web, true where the browser has `setSinkId` and is
-  /// not WebKit.
+  /// Whether remote audio can be routed to an output the app picks, reliably.
+  /// True on native platforms; on web, true where the browser has `setSinkId`
+  /// and is not WebKit, whose `setSinkId` exists but is not dependable.
   final bool supportsAudioOutputSelection;
 
   /// Whether the camera can be switched between front and back on a running
   /// capture. Not on web.
   final bool supportsCameraSwitch;
 
-  /// Whether the microphone can be changed on a running capture. On web the
-  /// input is part of the capture, so a new one is needed.
+  /// Whether the microphone can be changed on a running capture. Not on web.
   final bool switchesAudioInputInPlace;
 
   /// Whether the audio output is set on each remote audio element rather than
@@ -52,17 +51,17 @@ class WebRtcCapabilities {
   /// Windows, macOS and Linux.
   final bool supportsScreenShareSourceSelection;
 
-  /// Whether the device has a built-in earpiece that device enumeration
-  /// leaves out. iOS.
-  final bool hasUnlistedEarpiece;
+  /// Whether device enumeration leaves out the built-in earpiece, which is
+  /// then the default route rather than a listed output. iOS.
+  final bool omitsEarpieceFromEnumeration;
 
   /// Whether a device is picked with an exact `deviceId` constraint, which
   /// cannot be combined with the optional constraints. Web.
   final bool usesExactDeviceIdConstraints;
 
-  /// Whether a running screen share can be kept when it is asked for again
-  /// with the same source. Not on web, where every request opens a new
-  /// capture.
+  /// Whether a screen share request names its source, so a running share of
+  /// the same source can be kept. Not on web, where every request opens the
+  /// browser's picker.
   final bool reusesScreenShareCapture;
 
   WebRtcCapabilities copyWith({
@@ -74,7 +73,7 @@ class WebRtcCapabilities {
     bool? selectsAudioOutputPerElement,
     bool? supportsBroadcastExtension,
     bool? supportsScreenShareSourceSelection,
-    bool? hasUnlistedEarpiece,
+    bool? omitsEarpieceFromEnumeration,
     bool? usesExactDeviceIdConstraints,
     bool? reusesScreenShareCapture,
   }) {
@@ -95,12 +94,35 @@ class WebRtcCapabilities {
       supportsScreenShareSourceSelection:
           supportsScreenShareSourceSelection ??
           this.supportsScreenShareSourceSelection,
-      hasUnlistedEarpiece: hasUnlistedEarpiece ?? this.hasUnlistedEarpiece,
+      omitsEarpieceFromEnumeration:
+          omitsEarpieceFromEnumeration ?? this.omitsEarpieceFromEnumeration,
       usesExactDeviceIdConstraints:
           usesExactDeviceIdConstraints ?? this.usesExactDeviceIdConstraints,
       reusesScreenShareCapture:
           reusesScreenShareCapture ?? this.reusesScreenShareCapture,
     );
+  }
+
+  @override
+  String toString() {
+    final flags = <String, bool>{
+      'supportsPerCallFactory': supportsPerCallFactory,
+      'supportsAudioPlayoutPause': supportsAudioPlayoutPause,
+      'supportsAudioOutputSelection': supportsAudioOutputSelection,
+      'supportsCameraSwitch': supportsCameraSwitch,
+      'switchesAudioInputInPlace': switchesAudioInputInPlace,
+      'selectsAudioOutputPerElement': selectsAudioOutputPerElement,
+      'supportsBroadcastExtension': supportsBroadcastExtension,
+      'supportsScreenShareSourceSelection': supportsScreenShareSourceSelection,
+      'omitsEarpieceFromEnumeration': omitsEarpieceFromEnumeration,
+      'usesExactDeviceIdConstraints': usesExactDeviceIdConstraints,
+      'reusesScreenShareCapture': reusesScreenShareCapture,
+    };
+    final enabled = [
+      for (final MapEntry(:key, :value) in flags.entries)
+        if (value) key,
+    ];
+    return 'WebRtcCapabilities(${enabled.join(', ')})';
   }
 
   @override
@@ -116,7 +138,7 @@ class WebRtcCapabilities {
           other.supportsBroadcastExtension == supportsBroadcastExtension &&
           other.supportsScreenShareSourceSelection ==
               supportsScreenShareSourceSelection &&
-          other.hasUnlistedEarpiece == hasUnlistedEarpiece &&
+          other.omitsEarpieceFromEnumeration == omitsEarpieceFromEnumeration &&
           other.usesExactDeviceIdConstraints == usesExactDeviceIdConstraints &&
           other.reusesScreenShareCapture == reusesScreenShareCapture;
 
@@ -130,13 +152,13 @@ class WebRtcCapabilities {
     selectsAudioOutputPerElement,
     supportsBroadcastExtension,
     supportsScreenShareSourceSelection,
-    hasUnlistedEarpiece,
+    omitsEarpieceFromEnumeration,
     usesExactDeviceIdConstraints,
     reusesScreenShareCapture,
   );
 }
 
 /// Replaces the platform's [WebRtcCapabilities] while set, for tests. Null
-/// goes back to the platform's own.
+/// goes back to the platform's own. Read only in debug builds.
 @visibleForTesting
 WebRtcCapabilities? debugWebRtcCapabilitiesOverride;

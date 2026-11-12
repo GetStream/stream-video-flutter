@@ -9,9 +9,15 @@ import 'browser_capabilities.dart';
 import 'user_agent.dart';
 
 /// The capabilities of the browser the app runs in.
-WebRtcCapabilities get webRtcCapabilities =>
+WebRtcCapabilities get webRtcCapabilities {
+  WebRtcCapabilities? override;
+  assert(() {
     // ignore: invalid_use_of_visible_for_testing_member, the override's reader
-    debugWebRtcCapabilitiesOverride ?? _browserCapabilities;
+    override = debugWebRtcCapabilitiesOverride;
+    return true;
+  }());
+  return override ?? _browserCapabilities;
+}
 
 final WebRtcCapabilities _browserCapabilities = webRtcCapabilitiesFor(
   supportsAudioOutputSelection: supportsAudioOutputSelectionFor(
@@ -19,16 +25,13 @@ final WebRtcCapabilities _browserCapabilities = webRtcCapabilitiesFor(
   ),
 );
 
-/// Whether remote audio can be routed to a chosen output with `setSinkId`, in
-/// a browser with [userAgent].
+/// Whether remote audio can be routed to a chosen output with `setSinkId`:
+/// false for a WebKit [userAgent], otherwise whether this browser's audio
+/// elements have `setSinkId`.
 ///
-/// False on WebKit even where the method exists. Safari rejects `setSinkId`
-/// without a user gesture, so applying it to each new track fails. Where it
-/// succeeds, the output it creates keeps the sample rate the device had at
-/// that moment, and a Bluetooth headset changes rate as its mic turns on and
-/// off, so voices come out pitched up or down. And when the chosen device
-/// disconnects, that output is rebuilt on the missing device and goes silent.
-/// The system default output has none of these problems.
+/// Safari rejects `setSinkId` without a user gesture, and the output it builds
+/// breaks when a Bluetooth headset changes sample rate or the device
+/// disconnects.
 @visibleForTesting
 bool supportsAudioOutputSelectionFor(String userAgent) {
   if (isWebKitUserAgent(userAgent)) return false;

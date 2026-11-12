@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../../fixtures/webrtc_capabilities.dart';
 import 'fixtures/rtc_manager_fakes.dart';
 
 final _vp8Option = publishOption(1, SfuTrackType.video);
@@ -389,6 +390,17 @@ void main() {
       final notCamera = await fixture.manager.flipCamera();
       expect(notCamera.isFailure, isTrue);
       expect(platform.callsOf('mediaStreamTrackSwitchCamera'), isEmpty);
+    });
+
+    test('fails where the camera cannot be switched', () async {
+      final camera = await publishCamera();
+      overrideWebRtcCapabilities(platform: PlatformType.web);
+
+      final result = await fixture.manager.flipCamera();
+
+      expect(result.isFailure, isTrue);
+      expect(platform.callsOf('mediaStreamTrackSwitchCamera'), isEmpty);
+      expect(stored(camera.trackId).mediaTrack, same(camera.mediaTrack));
     });
   });
 }

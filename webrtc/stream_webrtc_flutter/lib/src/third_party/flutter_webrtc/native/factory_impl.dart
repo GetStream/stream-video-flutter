@@ -160,6 +160,12 @@ DataPacketCryptorFactory get dataPacketCryptorFactory =>
     DataPacketCryptorFactoryImpl.instance;
 
 /// What the WebRTC implementation on this platform can do.
-WebRtcCapabilities get webRtcCapabilities =>
+WebRtcCapabilities get webRtcCapabilities {
+  WebRtcCapabilities? override;
+  assert(() {
     // ignore: invalid_use_of_visible_for_testing_member, the override's reader
-    debugWebRtcCapabilitiesOverride ?? nativeWebRtcCapabilities;
+    override = debugWebRtcCapabilitiesOverride;
+    return true;
+  }());
+  return override ?? nativeWebRtcCapabilities;
+}

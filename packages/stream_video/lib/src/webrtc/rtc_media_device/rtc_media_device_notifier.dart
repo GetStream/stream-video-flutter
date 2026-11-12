@@ -302,7 +302,7 @@ class RtcMediaDeviceNotifier {
           );
         }),
 
-        if (rtc.webRtcCapabilities.hasUnlistedEarpiece &&
+        if (rtc.webRtcCapabilities.omitsEarpieceFromEnumeration &&
             devices.none(
               (d) => d.deviceId.equalsIgnoreCase(
                 AudioDefaultDevice.earpiece,

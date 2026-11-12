@@ -44,6 +44,18 @@ void main() {
     await Future<void>.delayed(Duration.zero);
   }
 
+  test('without a broadcast extension, the screen is captured and published '
+      'at once', () async {
+    overrideWebRtcCapabilities(platform: PlatformType.android);
+
+    final result = await fixture.manager.setScreenShareEnabled(
+      constraints: _broadcast,
+    );
+
+    expect(result.isSuccess, isTrue);
+    expect(fixture.transceivers, hasLength(1));
+  });
+
   group('setScreenShareEnabled with the iOS broadcast extension', () {
     test(
       'creates the track at once but publishes it only when the broadcast '

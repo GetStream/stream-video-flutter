@@ -484,7 +484,7 @@ extension RtcLocalScreenShareTrackExt on RtcLocalScreenShareTrack {
       return true;
     }
 
-    // Without reuse every request is a new capture, and deviceId is `null`.
+    // Every request opens a new capture, so it never matches the running one.
     if (!rtc.webRtcCapabilities.reusesScreenShareCapture) {
       return false;
     }
