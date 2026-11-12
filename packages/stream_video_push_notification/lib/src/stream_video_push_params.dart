@@ -302,7 +302,6 @@ class IOSParams {
   final int? maximumCallGroups;
   final int? maximumCallsPerCallGroup;
   final String? audioSessionMode;
-  /// Has no effect: CallKit activates the audio session when it needs it.
   final bool? audioSessionActive;
   final double? audioSessionPreferredSampleRate;
   final double? audioSessionPreferredIOBufferDuration;

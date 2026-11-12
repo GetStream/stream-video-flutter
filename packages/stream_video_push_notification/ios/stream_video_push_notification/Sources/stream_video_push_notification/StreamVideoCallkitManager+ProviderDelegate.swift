@@ -20,14 +20,19 @@ extension StreamVideoCallkitManager {
     }
 
     public func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
-        guard store.call(forCallKit: action.callUUID) != nil else {
+        guard let call = store.call(forCallKit: action.callUUID) else {
             action.fail()
             return
         }
-        self.configureAudioSession()
-        // Applies the options again 1.2 s after answering.
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(1200)) {
-            self.configureAudioSession()
+        configureAudioSession(call.options)
+        // Applies the call's options again shortly after answering, unless by then it has ended
+        // or another call was answered.
+        DispatchQueue.main.asyncAfter(deadline: .now() + reconfigureAfterAnswerDelay) {
+            [weak self] in
+            guard let self = self, self.store.answeredCall === call, !call.phase.isEnded else {
+                return
+            }
+            self.configureAudioSession(call.options)
         }
         apply(store.answerPerformed(uuid: action.callUUID) ?? [])
         action.fulfill()
