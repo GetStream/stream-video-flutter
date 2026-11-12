@@ -3,6 +3,8 @@
 --------------------------------------------
 [Unreleased]
 
+* Added `WebRtcPlatformEvents` and its event types, and `PeerConnectionFactoryOptions`.
+* Added the Android and Apple audio configuration types, moved from `stream_webrtc_flutter`.
 * First version as `stream_webrtc_interface`, Stream's fork of `webrtc_interface` 1.5.1.
 * Licensed under the Stream licence; the code from upstream keeps its MIT licence (see `LICENSE`).
 

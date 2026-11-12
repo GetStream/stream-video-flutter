@@ -1,10 +1,9 @@
 import 'dart:async';
-import 'dart:io';
-
+import 'package:meta/meta.dart';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
+import '../../../native/native_platform_events.dart';
 import '../desktop_capturer.dart';
-import 'android/audio_configuration.dart';
 import 'data_packet_cryptor_impl.dart';
 import 'desktop_capturer_impl.dart';
 import 'media_recorder_impl.dart';
@@ -25,39 +24,6 @@ class RTCFactoryNative extends RTCFactory {
       'trackId': trackId,
       'names': names,
     });
-  }
-
-  Future<void> handleCallInterruptionCallbacks(
-    void Function()? onInterruptionStart,
-    void Function()? onInterruptionEnd, {
-    AndroidInterruptionSource androidInterruptionSource =
-        AndroidInterruptionSource.audioFocusAndTelephony,
-    @Deprecated(
-      'Audio focus is now handled in a way that does not require this parameter. It will be removed in the next major version.',
-    )
-    AndroidAudioAttributesUsageType? androidAudioAttributesUsageType,
-    @Deprecated(
-      'Audio focus is now handled in a way that does not require this parameter. It will be removed in the next major version.',
-    )
-    AndroidAudioAttributesContentType? androidAudioAttributesContentType,
-  }) async {
-    if (!Platform.isAndroid && !Platform.isIOS) {
-      throw UnimplementedError(
-        'handleCallInterruptionCallbacks is only supported on Android and iOS',
-      );
-    }
-
-    await WebRTC.invokeMethod(
-      'handleCallInterruptionCallbacks',
-      <String, dynamic>{
-        if (Platform.isAndroid)
-          'androidInterruptionSource': androidInterruptionSource.name,
-      },
-    );
-
-    final mediaDeviceNative = mediaDevices as MediaDeviceNative;
-    mediaDeviceNative.onInterruptionStart = onInterruptionStart;
-    mediaDeviceNative.onInterruptionEnd = onInterruptionEnd;
   }
 
   @override
@@ -143,30 +109,6 @@ Future<void> setVideoEffects(
   );
 }
 
-Future<void> handleCallInterruptionCallbacks(
-  void Function()? onInterruptionStart,
-  void Function()? onInterruptionEnd, {
-  AndroidInterruptionSource androidInterruptionSource =
-      AndroidInterruptionSource.audioFocusAndTelephony,
-  @Deprecated(
-    'Audio focus is now handled in a way that does not require this parameter. It will be removed in the next major version.',
-  )
-  AndroidAudioAttributesUsageType? androidAudioAttributesUsageType,
-  @Deprecated(
-    'Audio focus is now handled in a way that does not require this parameter. It will be removed in the next major version.',
-  )
-  AndroidAudioAttributesContentType? androidAudioAttributesContentType,
-}) {
-  return (RTCFactoryNative.instance as RTCFactoryNative)
-      .handleCallInterruptionCallbacks(
-        onInterruptionStart,
-        onInterruptionEnd,
-        androidInterruptionSource: androidInterruptionSource,
-        androidAudioAttributesUsageType: androidAudioAttributesUsageType,
-        androidAudioAttributesContentType: androidAudioAttributesContentType,
-      );
-}
-
 Future<RTCPeerConnection> createPeerConnection(
   Map<String, dynamic> configuration, [
   Map<String, dynamic> constraints = const {},
@@ -203,8 +145,15 @@ DesktopCapturer get desktopCapturer => DesktopCapturerNative.instance;
 
 MediaDevices get mediaDevices => MediaDeviceNative.instance;
 
+/// The raw events of the plugin's event channel, each a single-entry map from
+/// the event name to the native payload. Read [platformEvents] instead.
+@internal
 Stream<Map<String, dynamic>> get eventStream =>
     MediaDeviceNative.instance.eventStream;
+
+/// The events the platform reports outside of a peer connection, a track or a
+/// renderer.
+WebRtcPlatformEvents get platformEvents => NativeWebRtcPlatformEvents.instance;
 
 DataPacketCryptorFactory get dataPacketCryptorFactory =>
     DataPacketCryptorFactoryImpl.instance;

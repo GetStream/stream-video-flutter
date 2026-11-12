@@ -336,6 +336,136 @@ void main() {
     });
   });
 
+  group('plugin events', () {
+    /// Sends [event] with [payload] the way the native side posts it.
+    Future<void> emit(
+      String event, [
+      Map<String, Object?> payload = const {},
+    ]) async {
+      await messenger.handlePlatformMessage(
+        'FlutterWebRTC.Event',
+        const StandardMethodCodec().encodeSuccessEnvelope({
+          'event': event,
+          ...payload,
+        }),
+        (_) {},
+      );
+      await pumpEventQueue();
+    }
+
+    test('screen sharing and audio route changes reach the native '
+        'events', () async {
+      final events = <NativeWebRtcEvent>[];
+      final subscription = notifier.nativeWebRtcEventsStream().listen(
+        events.add,
+      );
+
+      await emit('screenSharingStarted');
+      await emit('screenSharingStopped', {'trackId': 'track-1'});
+      await emit('onAudioRouteChange', {
+        'deviceId': 'speaker-uid',
+        'label': 'Speaker',
+        'groupId': 'Speaker',
+      });
+      await subscription.cancel();
+
+      expect(events, [
+        isA<ScreenSharingStartedEvent>(),
+        isA<ScreenSharingStoppedEvent>().having(
+          (e) => e.trackId,
+          'trackId',
+          'track-1',
+        ),
+        isA<AudioRouteChangedEvent>().having(
+          (e) => e.device,
+          'device',
+          const RtcMediaDevice(
+            id: 'speaker-uid',
+            label: 'Speaker',
+            groupId: 'Speaker',
+            kind: RtcMediaDeviceKind.audioOutput,
+          ),
+        ),
+      ]);
+    });
+
+    test('an audio route change carries its reason', () async {
+      final events = <NativeWebRtcEvent>[];
+      final subscription = notifier.nativeWebRtcEventsStream().listen(
+        events.add,
+      );
+
+      await emit('onAudioRouteChange', {
+        'deviceId': 'Speaker',
+        'label': 'Speaker',
+        'reason': 8,
+      });
+      await emit('onAudioRouteChange', {'deviceId': 'Receiver'});
+      await subscription.cancel();
+
+      expect(events.cast<AudioRouteChangedEvent>().map((e) => e.reason), [
+        AudioRouteChangeReason.routeConfigurationChange,
+        AudioRouteChangeReason.unknown,
+      ]);
+    });
+
+    test('an audio route without a device id is dropped', () async {
+      final events = <NativeWebRtcEvent>[];
+      final subscription = notifier.nativeWebRtcEventsStream().listen(
+        events.add,
+      );
+
+      await emit('onAudioRouteChange', {'deviceId': '', 'label': 'Speaker'});
+      await subscription.cancel();
+
+      expect(events, isEmpty);
+    });
+
+    test('speech activity reaches the speech activity stream', () async {
+      final events = <SpeechActivityEvent>[];
+      final subscription = notifier.speechActivityStream.listen(events.add);
+
+      await emit('onSpeechActivityChanged', {'type': 'started'});
+      await emit('onSpeechActivityChanged', {'type': 'ended'});
+      await subscription.cancel();
+
+      expect(events, [
+        isA<SpeechActivityStarted>(),
+        isA<SpeechActivityEnded>(),
+      ]);
+    });
+
+    test('an audio processing change is traced', () async {
+      await emit('onAudioProcessingStateChanged', {
+        'stereoPlayoutEnabled': true,
+        'voiceProcessingEnabled': false,
+        'voiceProcessingBypassed': true,
+        'voiceProcessingAGCEnabled': false,
+      });
+
+      final traces = notifier.getTrace().snapshot.where(
+        (record) => record.tag == TraceTag.audioProcessingStateChanged,
+      );
+      expect(traces.map((record) => record.data), [
+        {
+          'stereoPlayoutEnabled': true,
+          'voiceProcessingEnabled': false,
+          'voiceProcessingBypassed': true,
+          'voiceProcessingAGCEnabled': false,
+        },
+      ]);
+    });
+
+    // The host running the tests is neither Android nor iOS.
+    test('interruption callbacks are refused where the platform reports '
+        'none', () async {
+      await expectLater(
+        notifier.handleCallInterruptionCallbacks(),
+        throwsA(isA<UnimplementedError>()),
+      );
+    });
+  });
+
   group('AudioRouteChangeReason', () {
     test('has the AVAudioSessionRouteChangeReason codes', () {
       expect(
@@ -384,46 +514,5 @@ void main() {
         );
       },
     );
-  });
-
-  group('the onAudioRouteChange message from the WebRTC plugin', () {
-    test('carries the device and the reason', () {
-      final event = RtcMediaDeviceNotifier.nativeWebRtcEventFrom({
-        'onAudioRouteChange': {
-          'deviceId': 'Speaker',
-          'label': 'Speaker',
-          'reason': 8,
-        },
-      });
-
-      expect(event, isA<AudioRouteChangedEvent>());
-      final routeChange = event! as AudioRouteChangedEvent;
-      expect(routeChange.device.id, 'Speaker');
-      expect(routeChange.device.kind, RtcMediaDeviceKind.audioOutput);
-      expect(
-        routeChange.reason,
-        AudioRouteChangeReason.routeConfigurationChange,
-      );
-    });
-
-    test('without a reason has an unknown one', () {
-      final event = RtcMediaDeviceNotifier.nativeWebRtcEventFrom({
-        'onAudioRouteChange': {'deviceId': 'Receiver'},
-      });
-
-      expect(
-        (event! as AudioRouteChangedEvent).reason,
-        AudioRouteChangeReason.unknown,
-      );
-    });
-
-    test('without a device is dropped', () {
-      expect(
-        RtcMediaDeviceNotifier.nativeWebRtcEventFrom({
-          'onAudioRouteChange': {'reason': 8},
-        }),
-        isNull,
-      );
-    });
   });
 }
