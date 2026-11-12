@@ -11,8 +11,6 @@ enum CallKitEffect {
     case reportConnected(UUID, Date)
     /// Post an ended audio interruption that asks audio code to resume.
     case postAudioInterruptionEnded
-    /// Apply these options to the audio session; nil applies the defaults.
-    case configureAudioSession(CallData?)
 }
 
 /// What CallKit's end action resolves to.
@@ -262,9 +260,16 @@ final class CallKitCallStore {
         [answeredCall, outgoingCall].compactMap { $0 }.filter { !$0.phase.isEnded }
     }
 
-    /// Whether neither the answered nor the outgoing call has had the audio session activated.
+    /// The answered and the outgoing call, when CallKit has not activated the audio session for
+    /// them yet.
+    var callsAwaitingFirstActivation: [CallKitCall] {
+        callsUsingAudio.filter { !$0.hasActivatedAudioSession }
+    }
+
+    /// Whether an activation now is the first for a call: the answered or the outgoing call has
+    /// not had the audio session activated, or neither is live.
     var isFirstAudioActivation: Bool {
-        !callsUsingAudio.contains { $0.hasActivatedAudioSession }
+        callsUsingAudio.isEmpty || !callsAwaitingFirstActivation.isEmpty
     }
 
     /// CallKit activated the audio session for the answered and the outgoing call.
@@ -272,18 +277,17 @@ final class CallKitCallStore {
         callsUsingAudio.forEach { $0.hasActivatedAudioSession = true }
     }
 
-    /// The answered and the outgoing call start connecting, on the first audio session
-    /// activation.
+    /// The answered and the outgoing call start connecting on their first audio session
+    /// activation. A call whose session was activated before, such as a held one, is left as it
+    /// is.
     func audioActivated(at date: Date = Date()) -> [CallKitEffect] {
         var effects: [CallKitEffect] = []
-        if let outgoing = outgoingCall {
-            outgoing.startedConnectingAt = date
-            outgoing.move(to: .active)
-            effects.append(.reportStartedConnecting(outgoing.identity.callKitUUID, date))
-        }
-        if let answered = answeredCall {
-            answered.startedConnectingAt = date
-            answered.move(to: .active)
+        for call in callsAwaitingFirstActivation {
+            call.startedConnectingAt = date
+            call.move(to: .active)
+            if call.direction == .outgoing {
+                effects.append(.reportStartedConnecting(call.identity.callKitUUID, date))
+            }
         }
         return effects
     }

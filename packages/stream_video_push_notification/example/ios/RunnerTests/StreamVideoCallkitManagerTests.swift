@@ -334,6 +334,38 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         XCTAssertEqual(session.calls, configured)
     }
 
+    func testACallConnectedInTheAppBeforeItsAnswerBecomesActiveOnItsFirstActivation() {
+        // Accepting in the app reports the call connected before the answer transaction runs.
+        let call = track(id: "answered")
+        _ = manager.store.connected(uuid: call.identity.callKitUUID)
+        manager.provider(provider, perform: CXAnswerCallAction(call: call.identity.callKitUUID))
+
+        manager.provider(provider, didActivate: AVAudioSession.sharedInstance())
+
+        XCTAssertEqual(call.phase, .active)
+        XCTAssertNotNil(call.startedConnectingAt)
+        XCTAssertEqual(gate.updates.last, .init(available: true, callKitSessionActive: true))
+    }
+
+    func testEndingTheActiveCallWhileAnotherRingsStopsTheEngineUntilTheRingEnds() {
+        let active = track(id: "active")
+        answer(active)
+        let ringing = track(id: "ringing")
+        manager.provider(provider, didActivate: AVAudioSession.sharedInstance())
+
+        end(active.identity.callKitUUID)
+        manager.provider(provider, didDeactivate: AVAudioSession.sharedInstance())
+        end(ringing.identity.callKitUUID)
+
+        XCTAssertEqual(
+            gate.updates,
+            [
+                .init(available: true, callKitSessionActive: true),
+                .init(available: false, callKitSessionActive: false),
+                .init(available: true, callKitSessionActive: nil),
+            ])
+    }
+
     func testEndingTheLastCallAllowsTheAudioEngine() {
         let call = track(id: "ringing")
 

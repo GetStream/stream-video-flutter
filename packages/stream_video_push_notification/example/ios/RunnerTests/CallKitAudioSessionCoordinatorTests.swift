@@ -39,9 +39,12 @@ final class FakeAudioEngineGate: WebRTCAudioEngineGate {
 
     private(set) var updates: [Update] = []
     var onEngineStartFailed: (() -> Void)?
+    /// Called on every update, after it is recorded.
+    var onUpdate: (() -> Void)?
 
     func update(available: Bool, callKitSessionActive: Bool?) {
         updates.append(Update(available: available, callKitSessionActive: callKitSessionActive))
+        onUpdate?()
     }
 }
 
@@ -62,9 +65,10 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
     }
 
     @discardableResult
-    private func answeredCall() -> CallKitCall {
+    private func answeredCall(_ args: [String: Any] = [:]) -> CallKitCall {
         let uuid = UUID()
-        _ = store.incomingReported(CallData(args: ["id": "answered"]), uuid: uuid, source: .app)
+        _ = store.incomingReported(
+            CallData(args: args.merging(["id": "answered"]) { $1 }), uuid: uuid, source: .app)
         _ = store.answerPerformed(uuid: uuid)
         return store.call(forCallKit: uuid)!
     }
@@ -83,9 +87,15 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
             case .reportStartedConnecting: return "reportStartedConnecting"
             case .reportConnected: return "reportConnected"
             case .postAudioInterruptionEnded: return "postAudioInterruptionEnded"
-            case .configureAudioSession: return "configureAudioSession"
             }
         }
+    }
+
+    /// Activates the audio session and says whether that configured it.
+    private func activationConfigures() -> Bool {
+        let before = session.calls.count
+        _ = coordinator.didActivate(store)
+        return session.calls.count > before
     }
 
     private let audioEvent = StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION
@@ -94,15 +104,18 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
 
     func testTheFirstActivationStartsTheCallConfiguresTheSessionAndAllowsTheEngine() {
         let call = outgoingCall()
+        var configuredWhenTheEngineWasAllowed: [String] = []
+        gate.onUpdate = { [session] in configuredWhenTheEngineWasAllowed = session!.calls }
 
         let effects = coordinator.didActivate(store)
 
         XCTAssertEqual(
             kinds(effects),
-            [
-                "reportStartedConnecting", "postAudioInterruptionEnded", "configureAudioSession",
-                "send \(audioEvent) true",
-            ])
+            ["reportStartedConnecting", "postAudioInterruptionEnded", "send \(audioEvent) true"])
+        XCTAssertFalse(session.calls.isEmpty)
+        XCTAssertEqual(
+            configuredWhenTheEngineWasAllowed, session.calls,
+            "the session is configured before WebRTC may start its engine")
         XCTAssertEqual(gate.updates, [.init(available: true, callKitSessionActive: true)])
         XCTAssertTrue(call.hasActivatedAudioSession)
         XCTAssertEqual(call.phase, .active)
@@ -113,10 +126,12 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
         _ = coordinator.didActivate(store)
         let startedConnectingAt = call.startedConnectingAt
 
+        let configuredBefore = session.calls.count
         let effects = coordinator.didActivate(store)
 
         XCTAssertEqual(
             kinds(effects), ["postAudioInterruptionEnded", "send \(audioEvent) true"])
+        XCTAssertEqual(session.calls.count, configuredBefore)
         XCTAssertEqual(gate.updates.last, .init(available: true, callKitSessionActive: true))
         XCTAssertEqual(call.startedConnectingAt, startedConnectingAt)
     }
@@ -126,7 +141,7 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
         _ = store.connected(uuid: call.identity.callKitUUID)
         _ = coordinator.didActivate(store)
 
-        XCTAssertFalse(kinds(coordinator.didActivate(store)).contains("configureAudioSession"))
+        XCTAssertFalse(activationConfigures())
     }
 
     func testANewCallAfterAnEndedAnsweredOneGetsAFirstActivation() {
@@ -136,7 +151,7 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
 
         answeredCall()
 
-        XCTAssertTrue(kinds(coordinator.didActivate(store)).contains("configureAudioSession"))
+        XCTAssertTrue(activationConfigures())
     }
 
     func testANewCallAfterAnEndedOutgoingOneGetsAFirstActivation() {
@@ -148,7 +163,7 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
 
         let call = answeredCall()
 
-        XCTAssertTrue(kinds(coordinator.didActivate(store)).contains("configureAudioSession"))
+        XCTAssertTrue(activationConfigures())
         XCTAssertTrue(call.hasActivatedAudioSession)
     }
 
@@ -159,24 +174,59 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
 
         let second = answeredCall()
 
-        XCTAssertTrue(kinds(coordinator.didActivate(store)).contains("configureAudioSession"))
+        XCTAssertTrue(activationConfigures())
         XCTAssertTrue(second.hasActivatedAudioSession)
         XCTAssertTrue(first.hasActivatedAudioSession)
     }
 
-    func testTheFirstActivationConfiguresWithTheLastOptions() {
-        answeredCall()
-        let last = CallData(args: ["id": "last"])
-        store.lastOptions = last
+    func testTheFirstActivationConfiguresWithTheActivatedCallsOptions() {
+        answeredCall(["audioSessionMode": "videoChat"])
+        store.lastOptions = CallData(args: ["id": "last", "audioSessionMode": "voiceChat"])
+
+        _ = coordinator.didActivate(store)
+
+        XCTAssertTrue(session.calls.contains("mode \(AVAudioSession.Mode.videoChat.rawValue)"))
+        XCTAssertFalse(session.calls.contains("mode \(AVAudioSession.Mode.voiceChat.rawValue)"))
+    }
+
+    func testAnActivationWithNoLiveCallConfiguresWithTheLastOptions() {
+        store.lastOptions = CallData(args: ["id": "last", "audioSessionMode": "voiceChat"])
+
+        _ = coordinator.didActivate(store)
+
+        XCTAssertTrue(session.calls.contains("mode \(AVAudioSession.Mode.voiceChat.rawValue)"))
+    }
+
+    func testANewOutgoingCallDuringAHeldAnsweredCallGetsAFirstActivationOfItsOwn() {
+        let held = answeredCall()
+        _ = coordinator.didActivate(store)
+        _ = store.holdPerformed(uuid: held.identity.callKitUUID, onHold: true)
+        _ = coordinator.didDeactivate(store)
+        let outgoing = outgoingCall()
 
         let effects = coordinator.didActivate(store)
 
-        let configured = effects.compactMap { effect -> CallData?? in
-            if case .configureAudioSession(let options) = effect { return .some(options) }
-            return nil
-        }
-        XCTAssertEqual(configured.count, 1)
-        XCTAssertTrue(configured[0] === last)
+        XCTAssertEqual(
+            kinds(effects),
+            ["reportStartedConnecting", "postAudioInterruptionEnded", "send \(audioEvent) true"])
+        XCTAssertEqual(outgoing.phase, .active)
+        XCTAssertNotNil(outgoing.startedConnectingAt)
+        XCTAssertTrue(outgoing.hasActivatedAudioSession)
+    }
+
+    func testAnActivationAfterTheOnlyCallEndedStartsNothing() {
+        let outgoing = outgoingCall()
+        _ = store.endPerformed(uuid: outgoing.identity.callKitUUID)
+
+        let effects = coordinator.didActivate(store)
+
+        XCTAssertEqual(
+            kinds(effects), ["postAudioInterruptionEnded", "send \(audioEvent) true"],
+            "an ended call is not reported as connecting")
+        XCTAssertEqual(outgoing.phase, .ended(nil))
+        XCTAssertNil(outgoing.startedConnectingAt)
+        XCTAssertFalse(session.calls.isEmpty, "the session gets the last options or the defaults")
+        XCTAssertEqual(gate.updates, [.init(available: true, callKitSessionActive: true)])
     }
 
     // MARK: - Deactivation

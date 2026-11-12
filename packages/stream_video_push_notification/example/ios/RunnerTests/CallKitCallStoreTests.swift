@@ -337,19 +337,34 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertTrue(store.isFirstAudioActivation)
     }
 
-    func testAnActivationAfterAnUnconnectedOutgoingCallEndedStillReportsIt() {
+    func testAnActivationAfterAnOutgoingCallEndedDoesNotReportIt() {
         let uuid = UUID()
         store.registerPendingOutgoing(options("outgoing"), uuid: uuid)
         let call = store.startPerformed(uuid: uuid)!.call
         _ = store.endPerformed(uuid: uuid)
 
-        let effects = store.audioActivated()
+        XCTAssertTrue(store.audioActivated().isEmpty)
+        XCTAssertEqual(call.phase, .ended(nil))
+    }
 
-        guard case .reportStartedConnecting(let reported, _)? = effects.first else {
-            return XCTFail("the ended call is not reported")
+    func testOnlyACallWithoutAnActivationYetStartsConnecting() {
+        let answered = ring("answered")
+        _ = store.answerPerformed(uuid: answered.identity.callKitUUID)
+        _ = store.audioActivated()
+        store.audioSessionActivated()
+        let firstStart = answered.startedConnectingAt
+        let uuid = UUID()
+        store.registerPendingOutgoing(options("outgoing"), uuid: uuid)
+        let outgoing = store.startPerformed(uuid: uuid)!.call
+
+        XCTAssertTrue(store.isFirstAudioActivation)
+        XCTAssertEqual(store.callsAwaitingFirstActivation.map { $0 === outgoing }, [true])
+        guard case .reportStartedConnecting(let reported, _)? = store.audioActivated().first else {
+            return XCTFail("the new outgoing call is not reported")
         }
         XCTAssertEqual(reported, uuid)
-        XCTAssertEqual(call.phase, .ended(nil))
+        XCTAssertEqual(outgoing.phase, .active)
+        XCTAssertEqual(answered.startedConnectingAt, firstStart)
     }
 
     func testAGroupEventCarriesANullPeerWhenUngrouping() {
