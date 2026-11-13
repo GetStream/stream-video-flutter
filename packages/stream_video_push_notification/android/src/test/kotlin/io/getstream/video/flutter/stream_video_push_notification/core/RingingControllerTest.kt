@@ -10,6 +10,7 @@ import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNot
 import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.After
@@ -269,7 +270,7 @@ class RingingControllerTest {
     fun `dismissing for another reason disconnects Telecom with that reason's cause`() {
         val reasons = listOf(
             DismissReason.REMOTE_CANCELLED to DisconnectCause.REMOTE,
-            DismissReason.ANSWERED_ELSEWHERE to DisconnectCause.ANSWERED_ELSEWHERE,
+            DismissReason.ANSWERED_ELSEWHERE to DisconnectCause.REMOTE,
             DismissReason.MISSED to DisconnectCause.MISSED,
         )
         reasons.forEach { (reason, cause) ->
@@ -336,6 +337,35 @@ class RingingControllerTest {
     }
 
     @Test
+    fun `the timeout broadcast for a call still ringing ends it as missed`() {
+        store.add(call)
+
+        controller.handle(IncomingCallConstants.ACTION_CALL_TIMEOUT, bundle)
+
+        assertEquals(listOf(IncomingCallConstants.ACTION_CALL_TIMEOUT), eventNames())
+        verify { telecom.disconnect(CALL_ID, DisconnectCause.MISSED) }
+        assertNull(store.byId(CALL_ID))
+    }
+
+    @Test
+    fun `a ring timeout with an unreadable store is logged, not thrown`() {
+        val failingStore = mockk<CallStore> {
+            every { byId(any()) } throws IllegalStateException("corrupt")
+        }
+        val withFailingStore = RingingController(
+            context,
+            failingStore,
+            notifications,
+            telecom,
+            ringTimer,
+        ) { event, body -> events += event to body }
+
+        withFailingStore.onRingTimedOut(CALL_ID)
+
+        assertEquals(emptyList<String>(), eventNames())
+    }
+
+    @Test
     fun `a ring timeout for a call accepted or no longer stored does nothing`() {
         store.add(call.copy(isAccepted = true))
 
@@ -346,6 +376,32 @@ class RingingControllerTest {
         assertEquals(emptyList<String>(), eventNames())
         verify(exactly = 0) { telecom.disconnect(any(), any()) }
         assertEquals(true, store.byId(CALL_ID)?.isAccepted)
+    }
+
+    @Test
+    fun `showMissedCall ends the ringing call with the same cid, whatever the missed call's id`() {
+        val ringing = RingingCall(id = "ring-id", extra = mapOf("callCid" to "default:abc"))
+        val accepted = RingingCall(
+            id = "accepted-id",
+            extra = mapOf("callCid" to "default:abc"),
+            isAccepted = true,
+        )
+        store.add(ringing)
+        store.add(accepted)
+        val missed = CallPayloadMapper.toBundle(
+            RingingCall(id = "push-id", extra = mapOf("callCid" to "default:abc")),
+        )
+
+        controller.showMissedCall(missed)
+
+        val cleared = slot<Bundle>()
+        verify { notifications.clearIncomingNotification(capture(cleared), false) }
+        assertEquals("ring-id", cleared.captured.getString(IncomingCallConstants.EXTRA_CALL_ID))
+        verify { ringTimer.cancel("ring-id") }
+        verify { telecom.disconnect("ring-id", DisconnectCause.MISSED) }
+        verify(exactly = 0) { telecom.disconnect("accepted-id", any()) }
+        verify { notifications.showMissCallNotification(missed) }
+        assertEquals(listOf("accepted-id"), store.all().map { it.id })
     }
 
     @Test

@@ -102,8 +102,8 @@ class ActionCallEnded extends RingingEvent {
   List<Object?> get props => [data];
 }
 
-/// Why the ring of a call ended without the user answering or declining it on
-/// this device. See [ActionCallDismissed].
+/// Why the SDK dismissed the ring of a call: accepted in the app, or ended
+/// elsewhere than on this device's ringing UI. See [ActionCallDismissed].
 enum CallDismissReason {
   /// The user accepted the call on this device, outside the native ringing
   /// UI, so only the ring ends.
@@ -119,12 +119,7 @@ enum CallDismissReason {
   missed;
 
   /// The reason named [name], or null for a missing or unknown one.
-  static CallDismissReason? fromName(String? name) {
-    for (final reason in values) {
-      if (reason.name == name) return reason;
-    }
-    return null;
-  }
+  static CallDismissReason? fromName(String? name) => values.asNameMap()[name];
 }
 
 /// Represents the end of a call's ring that the SDK asked for, with its

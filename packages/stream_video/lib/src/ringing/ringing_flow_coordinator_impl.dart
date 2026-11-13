@@ -727,13 +727,12 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
     }
   }
 
-  /// ActionCallEnded event is sent by native side of stream_video_push_notification package when the call is ended.
-  /// On iOS this is connected to CallKit and should end active call or reject incoming call.
-  /// On Android this is connected to push notification being dismissed.
-  /// When app is terminated it can be send even when accepting the call. That's why we only handle
-  /// it on iOS, unless the event carries [CallData.endedBySystem]: a hang-up reported by the
-  /// Android Telecom stack (paired watch, headset, car head unit) is unambiguous and has to be
-  /// applied, otherwise the call keeps running after the system has already ended it.
+  /// Handles the [ActionCallEnded] the native side sends when a call ends.
+  ///
+  /// On iOS it ends the active call or rejects the incoming one. On Android it
+  /// is handled only with [CallData.endedBySystem], a hang-up the Telecom stack
+  /// reported from a paired watch, headset or car head unit; the other Android
+  /// ends follow a step the SDK itself asked for.
   Future<void> _onCallEnded(ActionCallEnded event) async {
     if (CurrentPlatform.isAndroid && !event.data.endedBySystem) return;
 

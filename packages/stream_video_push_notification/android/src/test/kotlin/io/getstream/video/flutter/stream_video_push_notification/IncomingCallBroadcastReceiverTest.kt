@@ -1,5 +1,6 @@
 package io.getstream.video.flutter.stream_video_push_notification
 
+import android.app.AlarmManager
 import android.app.Application
 import android.app.Notification
 import android.app.NotificationManager
@@ -202,6 +203,8 @@ class IncomingCallBroadcastReceiverTest {
 
         assertEquals(IncomingCallConstants.ACTION_CALL_ACCEPT, eventNames().last())
         assertEquals(true, activeCalls().single()["isAccepted"])
+        val alarms = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        assertNull(shadowOf(alarms).nextScheduledAlarm)
     }
 
     @Test

@@ -128,16 +128,14 @@ class NativeCallController {
 
   Future<void> endCall(String uuid) => _resolvedPlatform.endCall(uuid);
 
-  /// Dismisses the ringing UI of a call that the user accepted and is now in.
+  /// Ends the ring of the calls with [cid] for [reason], by default because
+  /// the user accepted the call and is now in it.
   ///
-  /// This is deliberately not [endCallByCid]. On Android the two differ: ending disconnects the
-  /// call from the Telecom stack, while dismissing leaves it registered so in-call controls on a
-  /// watch, headset or car head unit keep working. Only the caller knows which one it means —
-  /// natively an accept and an accept that failed to join look identical.
-  ///
-  /// On Android, [reason] says why the ring ends; see
-  /// [StreamVideoPushNotificationPlatform.dismissRingingCall]. On iOS this ends
-  /// the call, since CallKit has nothing else to dismiss.
+  /// Not [endCallByCid]. On Android, dismissing as accepted leaves the call
+  /// registered with the Telecom stack so in-call controls on a watch, headset
+  /// or car head unit keep working, and every reason is reported with the
+  /// dismissal; see [StreamVideoPushNotificationPlatform.dismissRingingCall].
+  /// On iOS this ends the call, since CallKit has nothing else to dismiss.
   Future<void> dismissRingingCallByCid(
     String cid, {
     CallDismissReason reason = CallDismissReason.accepted,

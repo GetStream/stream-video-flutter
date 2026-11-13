@@ -22,7 +22,10 @@ object IncomingCallConstants {
         "io.getstream.video.ACTION_CALL_CUSTOM"
     const val ACTION_CALL_CONNECTED = "io.getstream.video.ACTION_CALL_CONNECTED"
 
-    /** The ring of a call ended for a reason other than the user's answer on this device. */
+    /**
+     * The ring of a call ended because the SDK dismissed it, with a reason: accepted in the app,
+     * cancelled by the caller, answered on another device, or missed.
+     */
     const val ACTION_CALL_DISMISSED = "io.getstream.video.ACTION_CALL_DISMISSED"
 
     /** Internal action that runs [IncomingCallNotificationService] as a foreground service while ringing. */
@@ -79,7 +82,6 @@ object IncomingCallConstants {
      * authoritative and the call has to be left.
      */
     const val EXTRA_CALL_ENDED_BY_SYSTEM = "EXTRA_CALL_ENDED_BY_SYSTEM"
-
 
     const val EXTRA_CALL_IS_SHOW_FULL_LOCKED_SCREEN = "EXTRA_CALL_IS_SHOW_FULL_LOCKED_SCREEN"
     const val EXTRA_CALL_IS_IMPORTANT = "EXTRA_CALL_IS_IMPORTANT"

@@ -119,7 +119,7 @@ internal class PushMethodCallHandler(
                 result.success(true)
             }
 
-            // Ends the ring of a call the user did not answer or decline here; see DismissReason.
+            // Ends the ring of the cid's calls for the reason Dart gives; see DismissReason.
             "dismissRingingCall" -> {
                 val reason = (call.arguments as? Map<*, *>)?.get("reason") as? String
                 controller.dismissRingingCall(idArgument(call), DismissReason.fromWireName(reason))

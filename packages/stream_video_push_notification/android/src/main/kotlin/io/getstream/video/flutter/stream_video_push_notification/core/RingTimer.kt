@@ -23,8 +23,10 @@ internal interface RingTimer {
 /**
  * A [RingTimer] that calls [onTimeout] on the main thread when a ring's duration has passed.
  *
- * Also sets an inexact alarm for the same time, which sends the timeout broadcast to the receiver
- * if the process died meanwhile; it can arrive late on a device in Doze.
+ * Also sets an inexact alarm for the same time, which sends the timeout broadcast to the receiver.
+ * It ends the ring when the main-thread timer cannot, for example after the process died or while
+ * the device slept; it can arrive late in Doze. The controller ignores a timeout for a call that
+ * is no longer ringing.
  */
 internal class HandlerRingTimer(
     private val context: Context,
@@ -47,11 +49,17 @@ internal class HandlerRingTimer(
         handler.postDelayed(runnable, call.duration)
 
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager
-        alarmManager?.set(
-            AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            SystemClock.elapsedRealtime() + call.duration,
-            alarmIntent(call.id, CallPayloadMapper.toBundle(call)),
-        )
+        val triggerAt = SystemClock.elapsedRealtime() + call.duration
+        val operation = alarmIntent(call.id, CallPayloadMapper.toBundle(call))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager?.setAndAllowWhileIdle(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                triggerAt,
+                operation,
+            )
+        } else {
+            alarmManager?.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAt, operation)
+        }
     }
 
     override fun cancel(callId: String) {

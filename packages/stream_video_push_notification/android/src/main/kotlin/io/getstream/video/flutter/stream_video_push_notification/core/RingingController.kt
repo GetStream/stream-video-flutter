@@ -113,9 +113,9 @@ internal class RingingController(
      * Runs the timeout step for the stored call with [callId] if it is still ringing: stored and
      * not accepted. Otherwise does nothing.
      */
-    fun onRingTimedOut(callId: String) {
-        val call = store.byId(callId) ?: return
-        if (call.isAccepted) return
+    fun onRingTimedOut(callId: String) = step {
+        val call = store.byId(callId) ?: return@step
+        if (call.isAccepted) return@step
         onTimeout(CallPayloadMapper.toBundle(call))
     }
 
@@ -185,8 +185,8 @@ internal class RingingController(
      * null, for [reason]: clears it, reports it as dismissed with the reason and forgets the call.
      *
      * For [DismissReason.ACCEPTED] the call stays in Telecom, answered whatever `isAccepted` says.
-     * For the other reasons Telecom disconnects it, as remote for a cancel, as answered elsewhere,
-     * or as missed.
+     * For the other reasons Telecom disconnects it: as remote for a cancel and for an answer on
+     * another device, as missed for a missed call.
      */
     fun dismissRingingCall(callCid: String?, reason: DismissReason) {
         val calls = callCid?.let { store.byCallCid(it) } ?: store.all()
@@ -206,23 +206,32 @@ internal class RingingController(
         when (reason) {
             DismissReason.ACCEPTED -> Unit
             DismissReason.REMOTE_CANCELLED -> telecom.disconnect(call.id, DisconnectCause.REMOTE)
-            DismissReason.ANSWERED_ELSEWHERE ->
-                telecom.disconnect(call.id, DisconnectCause.ANSWERED_ELSEWHERE)
+            DismissReason.ANSWERED_ELSEWHERE -> telecom.disconnect(call.id, DisconnectCause.REMOTE)
             DismissReason.MISSED -> telecom.disconnect(call.id, DisconnectCause.MISSED)
         }
     }
 
     /**
-     * Replaces the ring of the call in [data] with its missed-call notification, forgets the call
-     * and disconnects it in Telecom as missed. Nothing is reported.
+     * Shows the missed-call notification of the call in [data] and ends the rings of the stored
+     * calls with its call cid that were not accepted: clears each, forgets it and disconnects it
+     * in Telecom as missed. Without such a stored call, clears the ring of the id in [data].
+     * Nothing is reported.
      */
     fun showMissedCall(data: Bundle) = step {
-        val call = CallPayloadMapper.fromBundle(data)
-        ringTimer.cancel(call.id)
-        notifications.clearIncomingNotification(data, false)
+        val missed = CallPayloadMapper.fromBundle(data)
+        val ringing = missed.callCid
+            ?.let { store.byCallCid(it) }
+            .orEmpty()
+            .filter { !it.isAccepted }
+            .ifEmpty { listOf(missed) }
+
+        ringing.forEach { call ->
+            ringTimer.cancel(call.id)
+            notifications.clearIncomingNotification(CallPayloadMapper.toBundle(call), false)
+            store.remove(call.id)
+            telecom.disconnect(call.id, DisconnectCause.MISSED)
+        }
         notifications.showMissCallNotification(data)
-        store.remove(call.id)
-        telecom.disconnect(call.id, DisconnectCause.MISSED)
     }
 
     /**

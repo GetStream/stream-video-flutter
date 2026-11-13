@@ -915,7 +915,6 @@ class StreamVideo extends Disposable implements CallHost {
     return ringing.onRingingEvent((event) {
       if (event is ActionCallAccept ||
           event is ActionCallDecline ||
-          event is ActionCallTimeout ||
           event is ActionCallEnded ||
           event is ActionCallDismissed) {
         // Delay the callback to ensure the call is fully resolved.

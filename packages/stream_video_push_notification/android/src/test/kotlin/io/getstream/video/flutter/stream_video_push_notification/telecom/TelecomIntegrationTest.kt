@@ -373,6 +373,24 @@ class TelecomIntegrationTest {
     }
 
     @Test
+    fun `a disconnect cause Telecom's call control does not take is sent as local`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        repository.completeRegistration(CALL_ID)
+
+        telecom.disconnect(CALL_ID, DisconnectCause.ANSWERED_ELSEWHERE)
+        telecom.disconnect(CALL_ID, DisconnectCause.REMOTE)
+
+        assertEquals(
+            listOf(
+                TelecomCallAction.Disconnect(DisconnectCause(DisconnectCause.LOCAL)),
+                TelecomCallAction.Disconnect(DisconnectCause(DisconnectCause.REMOTE)),
+            ),
+            repository.actions(CALL_ID),
+        )
+    }
+
+    @Test
     fun `disconnectAll disconnects registered and still registering calls`() {
         val telecom = integration().apply { init(enabled()) }
         telecom.registerIncomingCall(call)

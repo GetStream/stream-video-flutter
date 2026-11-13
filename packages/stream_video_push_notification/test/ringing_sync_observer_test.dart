@@ -267,6 +267,13 @@ void main() {
       ('decline', () => ActionCallDecline(data: CallData(callCid: _cid.value))),
       ('timeout', () => ActionCallTimeout(data: CallData(callCid: _cid.value))),
       ('ended', () => ActionCallEnded(data: CallData(callCid: _cid.value))),
+      (
+        'dismissed',
+        () => ActionCallDismissed(
+          data: CallData(callCid: _cid.value),
+          reason: CallDismissReason.remoteCancelled,
+        ),
+      ),
     ]) {
       test("stop with the user's answer: $name", () async {
         await start();

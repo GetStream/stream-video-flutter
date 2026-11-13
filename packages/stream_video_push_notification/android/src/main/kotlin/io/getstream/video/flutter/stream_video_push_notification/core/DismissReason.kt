@@ -1,8 +1,11 @@
 package io.getstream.video.flutter.stream_video_push_notification.core
 
-/** Why the ring of a call ends without the user answering or declining it on this device. */
+/**
+ * Why the SDK dismissed the ring of a call: accepted in the app, or ended elsewhere than on this
+ * device's ringing UI.
+ */
 internal enum class DismissReason(val wireName: String) {
-    /** The user accepted the call, in the app or on another surface of this device. */
+    /** The user accepted the call in the app, outside the ringing UI. */
     ACCEPTED("accepted"),
 
     /** The caller cancelled the call. */
