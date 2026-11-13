@@ -28,8 +28,7 @@ internal interface TelecomCallListener {
     /**
      * A hold or unhold this app requested was refused by Telecom, so no transition will arrive.
      *
-     * @param requestedOnHold the value that was asked for, so an implementor can tell a refused
-     * hold apart from a refused unhold instead of clearing whatever it happens to be tracking.
+     * @param requestedOnHold the value that was asked for: true for a hold, false for an unhold.
      */
     fun onHoldChangeFailed(callId: String, requestedOnHold: Boolean) {}
     fun onCallAudioEndpointsChanged(

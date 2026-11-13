@@ -85,9 +85,11 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
     throw UnimplementedError('isMuted() has not been implemented.');
   }
 
-  /// Hold an Ongoing call.
-  /// On iOS, using Callkit(update the ongoing call ui).
-  /// On Android, Nothing(only callback event listener).
+  /// Holds or resumes an ongoing call.
+  ///
+  /// On iOS through CallKit. On Android through Telecom, while the Telecom
+  /// integration holds the call; an [ActionCallToggleHold] follows once
+  /// Telecom has done it. Without the integration it does nothing on Android.
   Future<void> holdCall(String id, {bool isOnHold = true}) {
     throw UnimplementedError('holdCall() has not been implemented.');
   }

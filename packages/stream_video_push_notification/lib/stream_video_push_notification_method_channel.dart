@@ -102,9 +102,11 @@ class MethodChannelStreamVideoPushNotification
         false;
   }
 
-  /// Hold an Ongoing call.
-  /// On iOS, using Callkit(update the ongoing call ui).
-  /// On Android, Nothing(only callback event listener).
+  /// Holds or resumes an ongoing call.
+  ///
+  /// On iOS through CallKit. On Android through Telecom, while the Telecom
+  /// integration holds the call; an [ActionCallToggleHold] follows once
+  /// Telecom has done it. Without the integration it does nothing on Android.
   @override
   Future<void> holdCall(String id, {bool isOnHold = true}) async {
     await methodChannel.invokeMethod('holdCall', {
