@@ -18,6 +18,9 @@ class _MockRtcManager extends Mock implements RtcManager {
   Future<void> dispose() async {}
 }
 
+class _MockPushNotificationManager extends Mock
+    implements PushNotificationManager {}
+
 class _FakeMediaStreamTrack extends Fake implements rtc.MediaStreamTrack {
   @override
   bool enabled = true;
@@ -76,8 +79,12 @@ void main() {
       startInvokesRtcManagerCreated();
     });
 
-    Future<Call> joinWith(CallConnectOptions connectOptions) async {
+    Future<Call> joinWith(
+      CallConnectOptions connectOptions, {
+      CallHost? streamVideo,
+    }) async {
       final call = createTestCall(
+        streamVideo: streamVideo,
         permissionManager: permissionManager,
         sessionFactory: setupMockSessionFactory(callSession: callSession),
       );
@@ -216,6 +223,92 @@ void main() {
         ),
         () => callSession.setAudioOutputDevice(speaker),
       ]);
+    });
+
+    group('mirrors the audio output to the push manager', () {
+      const speaker = RtcMediaDevice(
+        id: 'speaker',
+        label: 'Speaker',
+        kind: RtcMediaDeviceKind.audioOutput,
+      );
+
+      late _MockPushNotificationManager pushManager;
+      late MockCallHost streamVideo;
+
+      setUp(() {
+        CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+        final messenger =
+            TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+        for (final channel in ['thermal', 'thermal/events']) {
+          messenger.setMockMethodCallHandler(
+            MethodChannel(channel),
+            (_) async => null,
+          );
+        }
+        addTearDown(() {
+          CurrentPlatform.debugCurrentPlatformOverride = null;
+          for (final channel in ['thermal', 'thermal/events']) {
+            messenger.setMockMethodCallHandler(MethodChannel(channel), null);
+          }
+        });
+
+        pushManager = _MockPushNotificationManager();
+        when(
+          () => pushManager.setCallAudioOutputDeviceByCid(any(), any()),
+        ).thenAnswer((_) async {});
+        streamVideo = setupMockCallHost();
+        when(() => streamVideo.pushNotificationManager).thenReturn(pushManager);
+      });
+
+      test('once the call uses it, by the call cid', () async {
+        when(
+          () => callSession.setAudioOutputDevice(any()),
+        ).thenAnswer((_) async => const Result.success(none));
+
+        final call = await joinWith(
+          const CallConnectOptions(audioOutputDevice: speaker),
+          streamVideo: streamVideo,
+        );
+
+        verify(
+          () => pushManager.setCallAudioOutputDeviceByCid(
+            call.callCid.value,
+            speaker,
+          ),
+        ).called(1);
+      });
+
+      test('not when the call could not use it', () async {
+        when(
+          () => callSession.setAudioOutputDevice(any()),
+        ).thenAnswer((_) async => failureWithError('no such device'));
+
+        await joinWith(
+          const CallConnectOptions(audioOutputDevice: speaker),
+          streamVideo: streamVideo,
+        );
+
+        verifyNever(
+          () => pushManager.setCallAudioOutputDeviceByCid(any(), any()),
+        );
+      });
+
+      test('without letting a failure reach the caller', () async {
+        when(
+          () => callSession.setAudioOutputDevice(any()),
+        ).thenAnswer((_) async => const Result.success(none));
+        when(
+          () => pushManager.setCallAudioOutputDeviceByCid(any(), any()),
+        ).thenThrow(StateError('Telecom is gone'));
+
+        final call = await joinWith(
+          const CallConnectOptions(audioOutputDevice: speaker),
+          streamVideo: streamVideo,
+        );
+        final result = await call.setAudioOutputDevice(speaker);
+
+        expect(result.isSuccess, isTrue);
+      });
     });
   });
 

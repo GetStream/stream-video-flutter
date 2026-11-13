@@ -29,11 +29,13 @@
 
 ### ✅ Added
 
+- `StreamVideoPushNotificationPlatform.requestAudioEndpoint` and `TelecomAudioEndpoint`: on Android, asks Telecom to route the audio of a call it holds to the earpiece, the speaker, a wired headset or a Bluetooth headset, and answers whether it did. Always `false` on iOS.
 - `StreamVideoPushNotificationManager.dismissRingingCallByCid` takes a `CallDismissReason`. On Android, for a reason other than `accepted` the call is disconnected from Telecom, as remote for a cancel or an answer on another device and as missed for a missed call; `accepted`, the default, keeps the call registered as before.
 - Added `StreamVideoPushHandler.handleBackgroundMessage`, which simplifies the ringing setup by running a Stream ringing push through its whole background lifecycle from your Firebase background handler: it builds the client through the factory you give it, observes the ringing events a background isolate can act on, and disposes the client — along with whatever that factory set up — once the user has answered, declined, or let the call time out, or the ring has ended without them, such as when the caller cancels it. It replaces the setup and teardown each integration had to write by hand.
 
 ### 🐞 Fixed
 
+- [Android] While the Telecom integration holds a call, `Call.setAudioOutputDevice` also asks Telecom for the matching endpoint. Telecom owns the audio route of a call it holds, and from Android 17, where the integration is on by default, it kept its own route: picking the speaker left the audio on the earpiece. An endpoint Telecom does not offer yet is waited for up to two seconds, a newer pick replaces one still waiting, and an output Telecom has no endpoint for is left to WebRTC alone.
 - [Android] An unanswered ring ends natively once its duration has passed: the notification, the ringtone and the stored call are cleared, Telecom disconnects the call as missed, and an `ActionCallTimeout` is reported. The notification used to disappear after the duration while the ringtone, the ringing service and the Telecom call stayed until Dart ended them. After the app was killed, an alarm clears the stored call and the notification instead; Doze can delay it.
 - [Android] `showMissCallNotification` also ends the ring of the call with the same call cid that is still ringing: its notification and ringtone stop, it is forgotten and Telecom disconnects it as missed. It used to leave the ring going.
 - A mute from the CallKit screen applies to the call it was made on.

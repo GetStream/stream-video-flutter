@@ -67,6 +67,10 @@ the active Bluetooth device is surfaced and its name falls back to a generic def
 
 Outgoing calls are registered when you call `startOutgoingCall`; the SDK does not call it for you.
 
+Telecom owns the audio route of a call it holds. `Call.setAudioOutputDevice` asks Telecom for the
+matching endpoint (earpiece, speaker, wired headset or Bluetooth) as well as switching WebRTC to the
+device, so the output picker works the same way with the integration on.
+
 ### iOS call history
 
 CallKit lists every call it displayed in the system Recents. Report how a call ended to control how

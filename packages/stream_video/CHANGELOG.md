@@ -2,6 +2,7 @@
 
 ### ⚠️ Breaking
 
+- `PushNotificationManager` has a new method, `setCallAudioOutputDeviceByCid`. A class that `implements` it has to add it; one that `extends` it inherits a no-op.
 - `RingingEvent` has a new subtype, `ActionCallDismissed`, so an exhaustive `switch` over ringing events needs a case for it. `disposeAfterResolvingRinging` no longer disposes on `ActionCallTimeout`, which Android now sends when a ring times out natively, so the client's own ring timeout can still reject the call.
 - Test mocks that implement `StreamVideo` get a `subtype_of_sealed_class` warning, because `StreamVideo` implements the `@sealed` `CallHost`; add `// ignore: subtype_of_sealed_class` to them.
 - The deprecated `observeCoreCallKitEvents`, `observeCall*CallKitEvent` and `handleVoipPushNotification` methods are removed; use `observeCoreRingingEvents`, `observeCall*RingingEvent` and `handleRingingFlowNotifications` on `StreamVideo.ringing`.
@@ -85,6 +86,7 @@
 
 ### ✅ Added
 
+- `PushNotificationManager.setCallAudioOutputDeviceByCid`, which `Call.setAudioOutputDevice` calls once WebRTC uses the device, so a push manager can route the system call's audio there too.
 - `ActionCallDismissed` and `CallDismissReason`: the end of a call's ring that the SDK asked for, with why it ended (accepted in the app, cancelled by the caller, answered on another device, missed). Android only. `disposeAfterResolvingRinging` releases on it like on the other ring-ending events.
 - `CallData.fromJson`, which builds the call data of a ringing event or an active native call from the map the push plugins send.
 - `VideoLifecycleState`, the type of `ClientState.appLifecycleState`, is exported.

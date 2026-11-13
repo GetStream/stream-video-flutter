@@ -57,4 +57,45 @@ class AudioEndpointUtilsTest {
         assertNull(snapshot["currentEndpoint"])
         assertEquals(emptyList<Map<String, Any?>>(), snapshot["endpoints"])
     }
+
+    @Test
+    fun `every wire name reads back as its endpoint type, anything else as none`() {
+        listOf(
+            CallEndpointCompat.TYPE_EARPIECE,
+            CallEndpointCompat.TYPE_SPEAKER,
+            CallEndpointCompat.TYPE_WIRED_HEADSET,
+            CallEndpointCompat.TYPE_BLUETOOTH,
+        ).forEach { type ->
+            assertEquals(
+                type,
+                AudioEndpointUtils.endpointTypeFromString(AudioEndpointUtils.endpointTypeToString(type)),
+            )
+        }
+        assertNull(AudioEndpointUtils.endpointTypeFromString("unknown"))
+        assertNull(AudioEndpointUtils.endpointTypeFromString("wired-headset"))
+        assertNull(AudioEndpointUtils.endpointTypeFromString(null))
+    }
+
+    @Test
+    fun `an endpoint of the type is requested, unless the call already uses one or none is offered`() {
+        val speaker = endpoint("Speaker", CallEndpointCompat.TYPE_SPEAKER, speakerId)
+        val headset = endpoint("Headset", CallEndpointCompat.TYPE_WIRED_HEADSET, headsetId)
+
+        assertEquals(
+            AudioEndpointUtils.EndpointChoice.Request(speaker),
+            AudioEndpointUtils.chooseEndpoint(CallEndpointCompat.TYPE_SPEAKER, headset, listOf(headset, speaker)),
+        )
+        assertEquals(
+            AudioEndpointUtils.EndpointChoice.AlreadyCurrent,
+            AudioEndpointUtils.chooseEndpoint(CallEndpointCompat.TYPE_SPEAKER, speaker, listOf(headset, speaker)),
+        )
+        assertEquals(
+            AudioEndpointUtils.EndpointChoice.Unavailable,
+            AudioEndpointUtils.chooseEndpoint(CallEndpointCompat.TYPE_BLUETOOTH, speaker, listOf(headset, speaker)),
+        )
+        assertEquals(
+            AudioEndpointUtils.EndpointChoice.Unavailable,
+            AudioEndpointUtils.chooseEndpoint(CallEndpointCompat.TYPE_SPEAKER, null, emptyList()),
+        )
+    }
 }

@@ -202,6 +202,12 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       _controller.setCallMutedByCid(cid, isMuted);
 
   @override
+  Future<void> setCallAudioOutputDeviceByCid(
+    String cid,
+    RtcMediaDevice device,
+  ) => _controller.setCallAudioOutputDeviceByCid(cid, device);
+
+  @override
   Future<String?> getDevicePushTokenVoIP() async {
     if (CurrentPlatform.isIos) {
       return const VoIPTokenSource().token();

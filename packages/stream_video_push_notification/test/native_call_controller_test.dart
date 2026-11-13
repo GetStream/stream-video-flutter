@@ -75,6 +75,17 @@ class _RecordingPlatform extends StreamVideoPushNotificationPlatform {
   @override
   Future<void> reportCallEnded(String uuid, CallEndedReason reason) async =>
       calls.add('reportCallEnded:$uuid:${reason.name}');
+
+  bool routed = true;
+
+  @override
+  Future<bool> requestAudioEndpoint(
+    String cid,
+    TelecomAudioEndpoint endpoint,
+  ) async {
+    calls.add('requestAudioEndpoint:$cid:${endpoint.name}');
+    return routed;
+  }
 }
 
 const _configuration = StreamVideoPushConfiguration(
@@ -264,6 +275,55 @@ void main() {
       platform.active = const [CallData(uuid: 'u1', callCid: 'default:c1')];
 
       await controller.setCallMutedByCid('default:c1', true);
+
+      expect(platform.calls, isEmpty);
+    });
+  });
+
+  group('setCallAudioOutputDeviceByCid', () {
+    const speaker = RtcMediaDevice(
+      id: 'speaker',
+      label: 'Speaker',
+      kind: RtcMediaDeviceKind.audioOutput,
+    );
+
+    test('asks Telecom for the endpoint of the device on Android', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+
+      await controller.setCallAudioOutputDeviceByCid('default:c1', speaker);
+
+      expect(platform.calls, ['requestAudioEndpoint:default:c1:speaker']);
+    });
+
+    test('goes on when Telecom does not route the call', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      platform.routed = false;
+
+      await controller.setCallAudioOutputDeviceByCid('default:c1', speaker);
+
+      expect(platform.calls, ['requestAudioEndpoint:default:c1:speaker']);
+    });
+
+    test('asks nothing for a device Telecom has no endpoint for', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+
+      await controller.setCallAudioOutputDeviceByCid(
+        'default:c1',
+        const RtcMediaDevice(
+          id: '7',
+          label: 'USB',
+          groupId: '22',
+          kind: RtcMediaDeviceKind.audioOutput,
+        ),
+      );
+
+      expect(platform.calls, isEmpty);
+    });
+
+    test('does nothing off Android', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
+
+      await controller.setCallAudioOutputDeviceByCid('default:c1', speaker);
 
       expect(platform.calls, isEmpty);
     });

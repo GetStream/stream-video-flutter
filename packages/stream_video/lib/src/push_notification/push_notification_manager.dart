@@ -6,6 +6,7 @@ import 'package:rxdart/rxdart.dart';
 import '../coordinator/coordinator_client.dart';
 import '../coordinator/open_api/event/event_type.dart';
 import '../stream_video.dart';
+import '../webrtc/rtc_media_device/rtc_media_device.dart';
 
 part 'call_kit_events.dart';
 part 'push_payload.dart';
@@ -115,6 +116,17 @@ abstract class PushNotificationManager {
 
   /// Sets call as muted/unmuted (iOS only).
   Future<void> setCallMutedByCid(String cid, bool isMuted);
+
+  /// Routes the audio of the system call with [cid] to [device], where the
+  /// system owns the call's audio route: on Android, while the Telecom
+  /// integration holds the call.
+  ///
+  /// `Call.setAudioOutputDevice` calls it once WebRTC uses [device]. Does
+  /// nothing by default.
+  Future<void> setCallAudioOutputDeviceByCid(
+    String cid,
+    RtcMediaDevice device,
+  ) async {}
 
   /// Retrieves a list of active calls.
   Future<List<CallData>> activeCalls();

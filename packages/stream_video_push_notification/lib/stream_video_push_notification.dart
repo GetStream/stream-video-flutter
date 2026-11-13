@@ -16,4 +16,4 @@ export 'src/stream_video_push_notification.dart';
 export 'src/stream_video_push_params.dart';
 export 'src/stream_video_push_provider.dart';
 export 'stream_video_push_notification_platform_interface.dart'
-    show CallEndedReason;
+    show CallEndedReason, TelecomAudioEndpoint;

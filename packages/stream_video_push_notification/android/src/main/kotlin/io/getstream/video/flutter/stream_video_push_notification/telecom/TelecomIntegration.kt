@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 
@@ -275,6 +276,39 @@ internal class TelecomIntegration(
     }
 
     /**
+     * Asks Telecom to route the audio of the calls with [callCid] to an endpoint of
+     * [endpointType], a `CallEndpointCompat.TYPE_*`, and calls [onResult] on the main thread with
+     * whether Telecom routed them there.
+     *
+     * A call still registering gets the request once registered; a newer request for it replaces
+     * one still queued. False without Telecom, for a cid Telecom holds no call for, and when the
+     * answer takes longer than [ENDPOINT_REQUEST_TIMEOUT_MS].
+     */
+    fun requestEndpoint(callCid: String, endpointType: Int, onResult: (Boolean) -> Unit) {
+        val callIds = if (isEnabled()) {
+            trackedCalls.filterValues { it.callCid == callCid }.keys
+        } else {
+            emptySet()
+        }
+        if (callIds.isEmpty()) {
+            Log.d(TAG, "[requestEndpoint] telecom holds no call for $callCid")
+            mainThread { onResult(false) }
+            return
+        }
+
+        val requests = callIds.map { callId ->
+            TelecomCallAction.RequestEndpoint(endpointType).also { processAction(callId, it) }
+        }
+        scope.launch {
+            val routed = requests.all { request ->
+                withTimeoutOrNull(ENDPOINT_REQUEST_TIMEOUT_MS) { request.result.await() } ?: false
+            }
+            Log.d(TAG, "[requestEndpoint] $callCid to type $endpointType: routed=$routed")
+            mainThread { onResult(routed) }
+        }
+    }
+
+    /**
      * The mute state Telecom last reported for a call, or false when Telecom holds no call with
      * this id.
      */
@@ -282,35 +316,50 @@ internal class TelecomIntegration(
 
     /**
      * Sends [action] to the call's Telecom scope, or queues it while the call is still
-     * registering. Ignored for a call Telecom does not know.
+     * registering or its queue has not been replayed yet, so it never overtakes an action queued
+     * before it. Ignored for a call Telecom does not know. An endpoint request that is not sent
+     * or queued, or that a newer one replaces in the queue, is answered as false.
      */
     private fun processAction(
         callId: String,
         action: TelecomCallAction,
         createRepository: Boolean = false,
     ) {
-        val repository = (if (createRepository) requireRepository() else repository) ?: return
+        val repository = (if (createRepository) requireRepository() else repository)
+            ?: return action.drop()
 
         synchronized(actionLock) {
             val call = repository.getCall(callId)
             when {
-                call != null && !call.isPending -> {
+                // The scope is up before onCallRegistered replays the queue.
+                call != null && !call.isPending && !pendingActions.containsKey(callId) -> {
                     if (!call.processAction(action)) {
                         Log.w(
                             TAG,
                             "[processAction] $callId dropped ${action::class.simpleName}: " +
                                 "the telecom call scope has ended",
                         )
+                        action.drop()
                     }
                 }
 
                 call != null || registeringCallIds.contains(callId) -> {
-                    pendingActions
+                    val queue = pendingActions
                         .getOrPut(callId) { Collections.synchronizedList(mutableListOf()) }
-                        .add(action)
+                    synchronized(queue) {
+                        if (action is TelecomCallAction.RequestEndpoint) {
+                            queue.filterIsInstance<TelecomCallAction.RequestEndpoint>()
+                                .forEach { it.drop() }
+                            queue.removeAll { it is TelecomCallAction.RequestEndpoint }
+                        }
+                        queue.add(action)
+                    }
                 }
 
-                else -> Log.d(TAG, "[processAction] $callId is not known to telecom, ignoring")
+                else -> {
+                    Log.d(TAG, "[processAction] $callId is not known to telecom, ignoring")
+                    action.drop()
+                }
             }
         }
     }
@@ -332,6 +381,7 @@ internal class TelecomIntegration(
                 if (!call.processAction(disconnect)) {
                     Log.w(TAG, "[drainPendingActions] $callId lost its queued disconnect")
                 }
+                snapshot.forEach { it.drop() }
                 return
             }
             snapshot.forEach {
@@ -340,6 +390,7 @@ internal class TelecomIntegration(
                         TAG,
                         "[drainPendingActions] $callId lost queued ${it::class.simpleName}",
                     )
+                    it.drop()
                 }
             }
         }
@@ -347,7 +398,7 @@ internal class TelecomIntegration(
 
     private fun cleanUp(callId: String) {
         registeringCallIds.remove(callId)
-        pendingActions.remove(callId)
+        pendingActions.remove(callId)?.dropAll()
         connectedCallIds.remove(callId)
         outgoingCallIds.remove(callId)
         heldCallIds.remove(callId)
@@ -369,11 +420,16 @@ internal class TelecomIntegration(
         repository = null
         isConfigResolved = false
         registeringCallIds.clear()
+        pendingActions.values.forEach { it.dropAll() }
         pendingActions.clear()
         connectedCallIds.clear()
         outgoingCallIds.clear()
         heldCallIds.clear()
         trackedCalls.clear()
+    }
+
+    private fun MutableList<TelecomCallAction>.dropAll() {
+        synchronized(this) { forEach { it.drop() } }
     }
 
     // endregion
@@ -476,6 +532,12 @@ internal class TelecomIntegration(
 
         /** Payload type of the [IncomingCallConstants.ACTION_CALL_CUSTOM] audio-endpoint event. */
         const val CUSTOM_EVENT_AUDIO_ENDPOINTS = "telecomAudioEndpointsChanged"
+
+        /**
+         * How long [requestEndpoint] waits for Telecom's answer: longer than the repository waits
+         * for the endpoint to be offered, plus the change itself.
+         */
+        const val ENDPOINT_REQUEST_TIMEOUT_MS = 5_000L
 
         /** The disconnect causes `CallControlScope.disconnect` accepts. */
         val CALL_CONTROL_CAUSES = setOf(

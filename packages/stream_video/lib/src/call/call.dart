@@ -320,6 +320,8 @@ class Call {
     muteAudioWhenInBackground: () => _host.options.muteAudioWhenInBackground,
     onMicrophoneMuted: (muted) async =>
         _host.pushNotificationManager?.setCallMutedByCid(callCid.value, muted),
+    onAudioOutputDeviceSet: (device) async => _host.pushNotificationManager
+        ?.setCallAudioOutputDeviceByCid(callCid.value, device),
     logger: _logger,
   );
 

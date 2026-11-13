@@ -48,6 +48,7 @@ class LocalMediaController {
     required this._muteVideoWhenInBackground,
     required this._muteAudioWhenInBackground,
     required this._onMicrophoneMuted,
+    required this._onAudioOutputDeviceSet,
     required this._logger,
   });
 
@@ -60,6 +61,10 @@ class LocalMediaController {
   final bool Function() _muteVideoWhenInBackground;
   final bool Function() _muteAudioWhenInBackground;
   final Future<void> Function(bool muted) _onMicrophoneMuted;
+
+  /// Mirrors an output WebRTC now uses into the system call, whose route can
+  /// win over WebRTC's. Not awaited.
+  final Future<void> Function(RtcMediaDevice device) _onAudioOutputDeviceSet;
   final TaggedLogger _logger;
 
   final _multitaskingCameraLock = Lock();
@@ -1108,6 +1113,14 @@ class LocalMediaController {
 
       _stateManager.participantSetAudioOutputDevice(device: device);
       _stateManager.audioOutputSelectedByUser = true;
+
+      // Not awaited: the system can wait seconds for the output to appear,
+      // and this also runs while joining.
+      unawaited(
+        _onAudioOutputDeviceSet(device).catchError((Object e, StackTrace stk) {
+          _logger.w(() => '[setAudioOutputDevice] system route failed: $e');
+        }),
+      );
     }
 
     return result;
