@@ -34,6 +34,7 @@
 
 ### 🐞 Fixed
 
+- [Android] While the Telecom integration is on, a call that Telecom fails to answer on Android 14 and later is disconnected in Telecom. It used to be logged as a failed registration and was not disconnected.
 - [Android] An unanswered ring ends natively once its duration has passed: the notification, the ringtone and the stored call are cleared, Telecom disconnects the call as missed, and an `ActionCallTimeout` is reported. The notification used to disappear after the duration while the ringtone, the ringing service and the Telecom call stayed until Dart ended them. After the app was killed, an alarm clears the stored call and the notification instead; Doze can delay it.
 - [Android] `showMissCallNotification` also ends the ring of the call with the same call cid that is still ringing: its notification and ringtone stop, it is forgotten and Telecom disconnects it as missed. It used to leave the ring going.
 - A mute from the CallKit screen applies to the call it was made on.

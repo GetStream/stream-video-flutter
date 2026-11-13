@@ -335,8 +335,9 @@ internal class CoreTelecomCallRepository(
                 Log.e(TAG, "[doAnswer] answer failed: ${result.errorCode}")
                 flags.isSelfAnswered.set(false)
 
-                // Call disconnect to ensure Telecom call teardown before removing locally.
-                val cause = DisconnectCause(DisconnectCause.BUSY)
+                // Disconnects in Telecom before removing the call locally. Telecom's call control
+                // takes only LOCAL, REMOTE, MISSED and REJECTED.
+                val cause = DisconnectCause(DisconnectCause.LOCAL)
                 flags.isSelfDisconnected.set(true)
                 disconnect(cause)
                 onIsCallDisconnected(callId, flags)(cause)
