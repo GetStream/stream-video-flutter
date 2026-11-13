@@ -11,6 +11,8 @@ import android.telecom.DisconnectCause
 import androidx.test.core.app.ApplicationProvider
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
 import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
@@ -65,7 +67,7 @@ class IncomingCallBroadcastReceiverTest {
         resetPlugin()
     }
 
-    private fun data(vararg extraTopLevel: Pair<String, Any?>) = Data(
+    private fun data(vararg extraTopLevel: Pair<String, Any?>) = CallPayloadMapper.fromArgs(
         mapOf(
             "id" to CALL_ID,
             "callerName" to "Ada",
@@ -84,6 +86,8 @@ class IncomingCallBroadcastReceiverTest {
             *extraTopLevel,
         ),
     )
+
+    private fun RingingCall.toBundle() = CallPayloadMapper.toBundle(this)
 
     /** Delivers [intent] to a receiver created now, as the system creates one per broadcast. */
     private fun receive(intent: Intent) {
@@ -296,22 +300,25 @@ class IncomingCallBroadcastReceiverTest {
     }
 
     @Test
-    fun `a bundle without the keys reaches Dart with the receiver's own defaults`() {
-        // Current behaviour, pinned: here `isImportant` defaults to true and `duration` to 0,
-        // while Data defaults them to false and 30000.
+    fun `a bundle without the keys reaches Dart with the call defaults, not separate receiver ones`() {
+        // Before one mapper built every body, the receiver had defaults of its own here:
+        // duration 0, isImportant true, showNotification and showCallbackButton false, count 0.
         receive(IncomingCallBroadcastReceiver.getIntentDecline(context, Bundle()))
 
         val body = lastEventBody()
         assertEquals("", body["id"])
         assertEquals(0, body["type"])
-        assertEquals(0L, body["duration"])
+        assertEquals(30000L, body["duration"])
+        assertEquals(emptyMap<String, Any?>(), body["extra"])
         @Suppress("UNCHECKED_CAST")
         val android = body["android"] as Map<String, Any?>
-        assertEquals(true, android["isImportant"])
+        assertEquals(false, android["isImportant"])
         @Suppress("UNCHECKED_CAST")
         val missed = android["missedCallNotification"] as Map<String, Any?>
         assertEquals(0, missed["id"])
-        assertEquals(false, missed["showNotification"])
+        assertEquals(true, missed["showNotification"])
+        assertEquals(true, missed["showCallbackButton"])
+        assertEquals(1, missed["count"])
     }
 
     private fun fullScreenActivityWasToldToClose() = shadowOf(context).broadcastIntents.any {

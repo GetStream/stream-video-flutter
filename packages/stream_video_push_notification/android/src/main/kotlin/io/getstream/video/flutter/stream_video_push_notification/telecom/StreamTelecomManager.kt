@@ -6,7 +6,8 @@ import android.net.Uri
 import android.os.Build
 import android.telecom.DisconnectCause
 import android.util.Log
-import io.getstream.video.flutter.stream_video_push_notification.Data
+import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallBroadcastReceiver
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationService
@@ -81,8 +82,8 @@ internal object StreamTelecomManager {
      */
     private val selfRequestedHold = ConcurrentHashMap<String, Boolean>()
 
-    /** Data of tracked calls, needed to rebuild broadcast intents for system-originated events. */
-    private val trackedCallData = ConcurrentHashMap<String, Data>()
+    /** The calls tracked with Telecom, needed to rebuild broadcast intents for system-originated events. */
+    private val trackedCallData = ConcurrentHashMap<String, RingingCall>()
 
     private val actionLock = Any()
 
@@ -150,10 +151,10 @@ internal object StreamTelecomManager {
     // region registration
 
     /** Registers a ringing incoming call with Telecom. */
-    fun registerIncomingCall(context: Context, data: Data) = register(context, data, incoming = true)
+    fun registerIncomingCall(context: Context, data: RingingCall) = register(context, data, incoming = true)
 
     /** Registers an outgoing call with Telecom and immediately makes it active. */
-    fun registerOutgoingCall(context: Context, data: Data) =
+    fun registerOutgoingCall(context: Context, data: RingingCall) =
         register(context, data, incoming = false)
 
     private fun describeAvailability(context: Context): String = when {
@@ -167,7 +168,7 @@ internal object StreamTelecomManager {
     }
 
     @SuppressLint("NewApi", "MissingPermission")
-    private fun register(context: Context, data: Data, incoming: Boolean) {
+    private fun register(context: Context, data: RingingCall, incoming: Boolean) {
         if (!isEnabled(context)) {
             Log.d(TAG, "[register] skipped: ${describeAvailability(context)}")
             return
@@ -211,12 +212,12 @@ internal object StreamTelecomManager {
         }
     }
 
-    private fun displayNameOf(data: Data): String = data.callerName
+    private fun displayNameOf(data: RingingCall): String = data.callerName
         .takeIf { it.isNotBlank() }
         ?: data.handle.takeIf { it.isNotBlank() }
         ?: "Unknown Caller"
 
-    private fun addressOf(data: Data): Uri {
+    private fun addressOf(data: RingingCall): Uri {
         val identifier = (data.extra["callCid"] as? String)?.takeIf { it.isNotBlank() } ?: data.id
         return Uri.parse("${config.schema}:$identifier")
     }
@@ -416,7 +417,7 @@ internal object StreamTelecomManager {
             val context = appContext ?: return
             val data = trackedCallData[callId] ?: return
             context.sendBroadcast(
-                IncomingCallBroadcastReceiver.getIntentAccept(context, data.toBundle()),
+                IncomingCallBroadcastReceiver.getIntentAccept(context, CallPayloadMapper.toBundle(data)),
             )
         }
 
@@ -441,7 +442,7 @@ internal object StreamTelecomManager {
             val context = appContext ?: return
             if (data == null) return
 
-            val bundle = data.toBundle()
+            val bundle = CallPayloadMapper.toBundle(data)
             val intent = if (endsRatherThanDeclines) {
                 // Marked as coming from the platform call UI. A plain ended event is ambiguous on
                 // Android, where it also means the notification was dismissed, so the Dart side

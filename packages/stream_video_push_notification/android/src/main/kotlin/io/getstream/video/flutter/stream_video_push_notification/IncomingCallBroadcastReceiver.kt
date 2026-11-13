@@ -9,6 +9,9 @@ import android.os.Build
 import android.os.Bundle
 import android.telecom.DisconnectCause
 import android.util.Log
+import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
+import io.getstream.video.flutter.stream_video_push_notification.core.CallStore
+import io.getstream.video.flutter.stream_video_push_notification.core.PrefsCallStore
 import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
 
 class IncomingCallBroadcastReceiver : BroadcastReceiver() {
@@ -91,7 +94,7 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
         when (action) {
             "${context.packageName}.${IncomingCallConstants.ACTION_CALL_INCOMING}" -> {
                 try {
-                    val callData = Data.fromBundle(data)
+                    val callData = CallPayloadMapper.fromBundle(data)
                     // Registered before the notification so the ringing foreground service is
                     // promoted with the call already in the Telecom stack; if this loses the race,
                     // StreamTelecomManager re-promotes once registration completes.
@@ -102,7 +105,7 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
                     }
                     incomingCallNotificationManager?.showIncomingNotification(data)
                     sendEventFlutter(IncomingCallConstants.ACTION_CALL_INCOMING, data)
-                    addCall(context, callData)
+                    callStore(context).add(callData)
                 } catch (error: Exception) {
                     Log.e(TAG, null, error)
                 }
@@ -117,8 +120,8 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
                         data
                     )
                     sendEventFlutter(IncomingCallConstants.ACTION_CALL_START, data)
-                    val callData = Data.fromBundle(data)
-                    addCall(context, callData, true)
+                    val callData = CallPayloadMapper.fromBundle(data)
+                    callStore(context).add(callData.copy(isAccepted = true))
                     StreamTelecomManager.registerOutgoingCall(context, callData)
                 } catch (error: Exception) {
                     Log.e(TAG, null, error)
@@ -134,8 +137,8 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
                         data
                     )
                     sendEventFlutter(IncomingCallConstants.ACTION_CALL_ACCEPT, data)
-                    val callData = Data.fromBundle(data)
-                    addCall(context, callData, true)
+                    val callData = CallPayloadMapper.fromBundle(data)
+                    callStore(context).add(callData.copy(isAccepted = true))
                     StreamTelecomManager.answer(context, callData.id)
                 } catch (error: Exception) {
                     Log.e(TAG, null, error)
@@ -147,8 +150,8 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
                     // clear notification
                     incomingCallNotificationManager?.clearIncomingNotification(data, false)
                     sendEventFlutter(IncomingCallConstants.ACTION_CALL_DECLINE, data)
-                    val callData = Data.fromBundle(data)
-                    removeCall(context, callData)
+                    val callData = CallPayloadMapper.fromBundle(data)
+                    callStore(context).remove(callData.id)
                     StreamTelecomManager.disconnect(
                         context,
                         callData.id,
@@ -164,8 +167,8 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
                     // clear notification and stop service
                     incomingCallNotificationManager?.clearIncomingNotification(data, false)
                     sendEventFlutter(IncomingCallConstants.ACTION_CALL_ENDED, data)
-                    val callData = Data.fromBundle(data)
-                    removeCall(context, callData)
+                    val callData = CallPayloadMapper.fromBundle(data)
+                    callStore(context).remove(callData.id)
 
                     // An ENDED right after an accept means "the ring is over", not "the call is
                     // over". Disconnecting Telecom here would end the registration seconds into a
@@ -190,8 +193,8 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
                 try {
                     incomingCallNotificationManager?.clearIncomingNotification(data, false)
                     sendEventFlutter(IncomingCallConstants.ACTION_CALL_TIMEOUT, data)
-                    val callData = Data.fromBundle(data)
-                    removeCall(context, callData)
+                    val callData = CallPayloadMapper.fromBundle(data)
+                    callStore(context).remove(callData.id)
                     StreamTelecomManager.disconnect(
                         context,
                         callData.id,
@@ -205,7 +208,7 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
             "${context.packageName}.${IncomingCallConstants.ACTION_CALL_CONNECTED}" -> {
                 try {
                     sendEventFlutter(IncomingCallConstants.ACTION_CALL_CONNECTED, data)
-                    StreamTelecomManager.activate(context, Data.fromBundle(data).id)
+                    StreamTelecomManager.activate(context, CallPayloadMapper.fromBundle(data).id)
                 } catch (error: Exception) {
                     Log.e(TAG, null, error)
                 }
@@ -226,60 +229,15 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
         }
     }
 
+    private fun callStore(context: Context): CallStore = PrefsCallStore(context)
+
     private fun sendEventFlutter(event: String, data: Bundle) {
         if (silenceEvents) return
 
-        val missedCallNotification = mapOf(
-            "id" to data.getInt(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_ID),
-            "showNotification" to data.getBoolean(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_SHOW),
-            "count" to data.getInt(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_COUNT),
-            "subtitle" to data.getString(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_SUBTITLE),
-            "callbackText" to data.getString(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_TEXT),
-            "showCallbackButton" to data.getBoolean(IncomingCallConstants.EXTRA_CALL_MISSED_CALL_CALLBACK_SHOW),
+        val body = CallPayloadMapper.toEventBody(
+            CallPayloadMapper.fromBundle(data),
+            endedBySystem = data.getBoolean(IncomingCallConstants.EXTRA_CALL_ENDED_BY_SYSTEM, false),
         )
-
-        val incomingCallNotification = mapOf(
-            "fullScreenShowLogo" to data.getBoolean(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_SHOW_LOGO, false),
-            "fullScreenLogoUrl" to data.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_LOGO_URL, ""),
-            "fullScreenBackgroundColor" to data.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_COLOR, ""),
-            "fullScreenBackgroundUrl" to data.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_URL, ""),
-            "fullScreenTextColor" to data.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_TEXT_COLOR, ""),
-            "textAccept" to data.getString(IncomingCallConstants.EXTRA_CALL_TEXT_ACCEPT, ""),
-            "textDecline" to data.getString(IncomingCallConstants.EXTRA_CALL_TEXT_DECLINE, ""),
-        )
-
-        val android = mapOf(
-            "ringtonePath" to data.getString(IncomingCallConstants.EXTRA_CALL_RINGTONE_PATH, ""),
-            "defaultAvatar" to data.getString(IncomingCallConstants.EXTRA_CALL_DEFAULT_AVATAR, ""),
-            "missedCallNotification" to missedCallNotification,
-            "incomingCallNotification" to incomingCallNotification,
-            "incomingCallNotificationChannelName" to data.getString(
-                IncomingCallConstants.EXTRA_CALL_INCOMING_CALL_NOTIFICATION_CHANNEL_NAME,
-                ""
-            ),
-            "missedCallNotificationChannelName" to data.getString(
-                IncomingCallConstants.EXTRA_CALL_MISSED_CALL_NOTIFICATION_CHANNEL_NAME,
-                ""
-            ),
-            "isImportant" to data.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_IMPORTANT, true),
-            "isBot" to data.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_BOT, false),
-        )
-
-        val forwardData = mapOf(
-            "id" to data.getString(IncomingCallConstants.EXTRA_CALL_ID, ""),
-            "callerName" to data.getString(IncomingCallConstants.EXTRA_CALL_NAME_CALLER, ""),
-            "avatar" to data.getString(IncomingCallConstants.EXTRA_CALL_AVATAR, ""),
-            "number" to data.getString(IncomingCallConstants.EXTRA_CALL_HANDLE, ""),
-            "type" to data.getInt(IncomingCallConstants.EXTRA_CALL_TYPE, 0),
-            "duration" to data.getLong(IncomingCallConstants.EXTRA_CALL_DURATION, 0L),
-            "endedBySystem" to data.getBoolean(
-                IncomingCallConstants.EXTRA_CALL_ENDED_BY_SYSTEM,
-                false,
-            ),
-            "extra" to data.getSerializable(IncomingCallConstants.EXTRA_CALL_EXTRA),
-            "android" to android
-        )
-        
-        StreamVideoPushNotificationPlugin.sendEvent(event, forwardData)
+        StreamVideoPushNotificationPlugin.sendEvent(event, body)
     }
 }
