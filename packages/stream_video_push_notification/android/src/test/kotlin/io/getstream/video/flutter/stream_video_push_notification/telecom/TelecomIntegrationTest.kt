@@ -167,47 +167,62 @@ class TelecomIntegrationTest {
 
     // Hold.
 
+    private fun hold(isOnHold: Boolean) =
+        IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD to
+            mapOf("id" to CALL_ID, "isOnHold" to isOnHold)
+
     @Test
-    fun `a hold the app asked for is not reported back, one from the system is`() {
+    fun `a hold the app asked for is reported once Telecom has done it, and only then`() {
         val telecom = integration().apply { init(enabled()) }
         telecom.registerIncomingCall(call)
         repository.completeRegistration(CALL_ID)
 
         telecom.setOnHold(CALL_ID, true)
-        repository.inactive(CALL_ID)
+        assertEquals(listOf(TelecomCallAction.Hold), repository.actions(CALL_ID))
         assertEquals(emptyList<Any>(), events)
 
-        repository.active(CALL_ID)
         repository.inactive(CALL_ID)
+        telecom.setOnHold(CALL_ID, false)
+        repository.active(CALL_ID)
 
-        assertEquals(
-            listOf(
-                IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD to
-                    mapOf("id" to CALL_ID, "isOnHold" to false),
-                IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD to
-                    mapOf("id" to CALL_ID, "isOnHold" to true),
-            ),
-            events,
-        )
+        assertEquals(listOf(hold(true), hold(false)), events)
     }
 
     @Test
-    fun `a refused hold does not hide the next hold from the system`() {
+    fun `a hold and a resume from the system are reported`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        repository.completeRegistration(CALL_ID)
+
+        repository.inactive(CALL_ID)
+        repository.active(CALL_ID)
+
+        assertEquals(listOf(hold(true), hold(false)), events)
+    }
+
+    @Test
+    fun `a hold is reported once per transition, and an active call that was not held is not`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        repository.completeRegistration(CALL_ID)
+
+        repository.active(CALL_ID)
+        repository.inactive(CALL_ID)
+        repository.inactive(CALL_ID)
+
+        assertEquals(listOf(hold(true)), events)
+    }
+
+    @Test
+    fun `a hold Telecom refused is not reported`() {
         val telecom = integration().apply { init(enabled()) }
         telecom.registerIncomingCall(call)
         repository.completeRegistration(CALL_ID)
 
         telecom.setOnHold(CALL_ID, true)
         repository.holdChangeFailed(CALL_ID, requestedOnHold = true)
-        repository.inactive(CALL_ID)
 
-        assertEquals(
-            listOf(
-                IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD to
-                    mapOf("id" to CALL_ID, "isOnHold" to true),
-            ),
-            events,
-        )
+        assertEquals(emptyList<Any>(), events)
     }
 
     @Test

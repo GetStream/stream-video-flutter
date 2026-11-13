@@ -136,7 +136,7 @@ class PushMethodCallHandlerTest {
     }
 
     @Test
-    fun `muteCall and holdCall report the arguments, and holdCall holds in Telecom`() {
+    fun `muteCall reports the arguments, holdCall only asks Telecom for the hold`() {
         call("muteCall", mapOf("id" to "call-1", "isMuted" to true))
         call("holdCall", mapOf("id" to "call-1", "isOnHold" to false))
 
@@ -146,12 +146,7 @@ class PushMethodCallHandlerTest {
                 mapOf("id" to "call-1", "isMuted" to true),
             )
         }
-        verify {
-            events.send(
-                IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD,
-                mapOf("id" to "call-1", "isOnHold" to false),
-            )
-        }
+        verify(exactly = 0) { events.send(IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD, any()) }
         verify { telecom.setOnHold("call-1", false) }
     }
 

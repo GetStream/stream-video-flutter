@@ -28,8 +28,9 @@ bool isAcceptedOnThisDevice({
 /// Keeps the native call UI in step with what the SDK knows about a ringing
 /// call: ends or dismisses it when the backend says the call ended, was
 /// rejected, lost its last participant or was accepted on another device,
-/// ends it when the app leaves the call, and mirrors a CallKit mute onto the
-/// call's microphone.
+/// ends it when the app leaves the call, mirrors a native mute onto the
+/// call's microphone, and on Android mirrors a Telecom hold onto the call's
+/// microphone and the app's audio playout.
 ///
 /// The backend subscriptions live only while a call rings: they start with
 /// the incoming event (or at start-up when the native side still shows a
@@ -43,6 +44,7 @@ class RingingSyncObserver {
     required this._controller,
     required this._broadcaster,
     required this._ringingEvents,
+    this._deviceNotifier,
   });
 
   final StreamVideo _streamVideo;
@@ -50,6 +52,13 @@ class RingingSyncObserver {
   final NativeCallController _controller;
   final RingingEventBroadcaster _broadcaster;
   final Stream<RingingEvent> _ringingEvents;
+  final RtcMediaDeviceNotifier? _deviceNotifier;
+
+  RtcMediaDeviceNotifier get _devices =>
+      _deviceNotifier ?? RtcMediaDeviceNotifier.instance;
+
+  /// What a Telecom hold changed, by call cid, to restore on resume.
+  final Map<String, ({bool micEnabled, bool playoutPaused})> _heldCalls = {};
 
   final _logger = taggedLogger(tag: 'SV:PNSync');
 
@@ -91,6 +100,10 @@ class RingingSyncObserver {
 
     for (final previousCall in _currentActiveCalls) {
       if (calls.any((c) => c.callCid == previousCall.callCid)) continue;
+      final held = _heldCalls.remove(previousCall.callCid.value);
+      if (held != null && !held.playoutPaused) {
+        await _devices.resumeAudioPlayout();
+      }
       _logger.d(
         () => '[activeCall] Stopping previous call: ${previousCall.callCid}',
       );
@@ -102,10 +115,12 @@ class RingingSyncObserver {
   }
 
   /// Starts the backend subscriptions on a ring and stops them with the
-  /// user's answer; mirrors a CallKit mute.
+  /// user's answer; mirrors a native mute, and a Telecom hold on Android.
   void _onRingingEvent(RingingEvent event) {
     if (event is ActionCallToggleMute) {
       _onToggleMute(event);
+    } else if (event is ActionCallToggleHold) {
+      if (CurrentPlatform.isAndroid) _onToggleHold(event);
     } else if (event is ActionCallIncoming) {
       if (!_client.isConnected) {
         _client.openConnection();
@@ -122,17 +137,55 @@ class RingingSyncObserver {
     }
   }
 
-  /// Applies a CallKit mute to the call it names, found through the cid the
-  /// native side holds for the event's uuid. When the native side does not
-  /// know the uuid or its cid, or cannot be asked, the mute goes to the call
-  /// in the ringing flow. When the uuid names a call the app is not in, the
-  /// mute is dropped.
+  /// Applies a native mute to the call it names, found by [_callFor].
   Future<void> _onToggleMute(ActionCallToggleMute event) async {
     _logger.d(
       () =>
           '[onCallEvent] ActionCallToggleMute received: uuid=${event.uuid}, isMuted=${event.isMuted}',
     );
 
+    final call = await _callFor(event.uuid, 'Mute');
+    if (_disposed || call == null) return;
+    await call.setMicrophoneEnabled(enabled: !event.isMuted);
+  }
+
+  /// Applies a Telecom hold to the call it names, found by [_callFor]: on
+  /// hold, mutes the microphone and pauses the app's audio playout; on
+  /// resume, restores both to what they were before the hold. A resume
+  /// without a hold seen first, or a second hold, changes nothing.
+  Future<void> _onToggleHold(ActionCallToggleHold event) async {
+    _logger.d(
+      () =>
+          '[onCallEvent] ActionCallToggleHold received: uuid=${event.uuid}, isOnHold=${event.isOnHold}',
+    );
+
+    final call = await _callFor(event.uuid, 'Hold');
+    if (_disposed || call == null) return;
+    final cid = call.callCid.value;
+
+    if (event.isOnHold) {
+      if (_heldCalls.containsKey(cid)) return;
+      final playoutPaused = _devices.isAudioPlayoutPaused;
+      _heldCalls[cid] = (
+        micEnabled: call.state.value.localParticipant?.isAudioEnabled ?? false,
+        playoutPaused: playoutPaused,
+      );
+      await call.setMicrophoneEnabled(enabled: false);
+      if (!playoutPaused) await _devices.pauseAudioPlayout();
+    } else {
+      final held = _heldCalls.remove(cid);
+      if (held == null) return;
+      if (held.micEnabled) await call.setMicrophoneEnabled(enabled: true);
+      if (!held.playoutPaused) await _devices.resumeAudioPlayout();
+    }
+  }
+
+  /// The call a native event's [uuid] belongs to, found through the cid the
+  /// native side holds for it. When the native side does not know the uuid
+  /// or its cid, or cannot be asked, the call in the ringing flow. Null, with
+  /// a warning naming [action], when the uuid names a call the app is not in
+  /// or there is no call.
+  Future<Call?> _callFor(String uuid, String action) async {
     var nativeCalls = const <CallData>[];
     try {
       nativeCalls = await _controller.activeCalls();
@@ -141,10 +194,10 @@ class RingingSyncObserver {
         () => '[onCallEvent] Could not read the native calls: $e\n$stk',
       );
     }
-    if (_disposed) return;
+    if (_disposed) return null;
 
     final nativeCall = nativeCalls.firstWhereOrNull(
-      (call) => call.uuid?.toLowerCase() == event.uuid.toLowerCase(),
+      (call) => call.uuid?.toLowerCase() == uuid.toLowerCase(),
     );
     final cid = nativeCall?.callCid;
     final activeCalls = _streamVideo.state.activeCalls.value;
@@ -152,15 +205,14 @@ class RingingSyncObserver {
         ? activeCalls.firstWhereOrNull((c) => c.state.value.isRingingFlow)
         : activeCalls.firstWhereOrNull((c) => c.callCid.value == cid);
 
-    if (call != null) {
-      await call.setMicrophoneEnabled(enabled: !event.isMuted);
-    } else if (cid != null) {
+    if (call == null && cid != null) {
       _logger.w(
-        () => '[onCallEvent] Mute dropped: the app is not in call $cid',
+        () => '[onCallEvent] $action dropped: the app is not in call $cid',
       );
-    } else {
-      _logger.w(() => '[onCallEvent] Cannot toggle mute: no active call');
+    } else if (call == null) {
+      _logger.w(() => '[onCallEvent] $action dropped: no active call');
     }
+    return call;
   }
 
   void _subscribeToEvents() {

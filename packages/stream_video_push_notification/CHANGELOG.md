@@ -14,6 +14,8 @@
 
 ### 🔄 Changed
 
+- [Android] When Telecom holds a call, for example for a phone call, from a watch or in a car, the Stream call's microphone is muted and the app's audio playout paused; resuming restores both to what they were before the hold, and leaving the call while held resumes playout.
+- [Android] `holdCall` no longer reports `ActionCallToggleHold` itself. The event comes once Telecom has held or resumed the call, the same as for a hold from the system, so a hold Telecom refuses is not reported, and nothing is reported while the Telecom integration is off.
 - [Android] `endCall`, `setCallConnected`, `endAllCalls` and `dismissRingingCallByCid` finish their work on the call before they return, so `activeCalls` right after them no longer lists the call.
 - [Android] `requestNotificationPermission` and `ensureFullScreenIntentPermission` show their UI from the activity of the Flutter engine that calls them, and do nothing from an engine without one. They used to use the activity of whichever engine attached last.
 - `StreamVideoPushHandler.handleBackgroundMessage` builds a client that sets up no media.

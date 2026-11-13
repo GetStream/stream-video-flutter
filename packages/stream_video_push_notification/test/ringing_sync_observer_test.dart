@@ -45,6 +45,10 @@ class _MockCall extends Mock implements Call {}
 
 class _MockCallState extends Mock implements CallState {}
 
+class _MockParticipant extends Mock implements CallParticipantState {}
+
+class _MockDevices extends Mock implements RtcMediaDeviceNotifier {}
+
 class _MockEndedEvent extends Mock implements StreamCallEndedEvent {}
 
 class _MockCountEvent extends Mock
@@ -78,6 +82,7 @@ void main() {
   late RingingEventBroadcaster broadcaster;
   late List<RingingEvent> received;
   late RingingSyncObserver observer;
+  late _MockDevices devices;
 
   setUpAll(() {
     registerFallbackValue(StreamCallCid(cid: 'default:fallback'));
@@ -118,12 +123,18 @@ void main() {
     final subscription = broadcaster.onEvent.listen(received.add);
     addTearDown(subscription.cancel);
 
+    devices = _MockDevices();
+    when(() => devices.isAudioPlayoutPaused).thenReturn(false);
+    when(devices.pauseAudioPlayout).thenAnswer((_) async {});
+    when(devices.resumeAudioPlayout).thenAnswer((_) async {});
+
     observer = RingingSyncObserver(
       streamVideo: streamVideo,
       client: client,
       controller: controller,
       broadcaster: broadcaster,
       ringingEvents: broadcaster.onEvent,
+      deviceNotifier: devices,
     );
     addTearDown(observer.dispose);
   });
@@ -178,10 +189,14 @@ void main() {
     required String cid,
     bool isRingingFlow = false,
     CallStatus? status,
+    bool micEnabled = true,
   }) {
+    final participant = _MockParticipant();
+    when(() => participant.isAudioEnabled).thenReturn(micEnabled);
     final callState = _MockCallState();
     when(() => callState.isRingingFlow).thenReturn(isRingingFlow);
     when(() => callState.status).thenReturn(status ?? CallStatusIdle());
+    when(() => callState.localParticipant).thenReturn(participant);
     final call = _MockCall();
     when(() => call.callCid).thenReturn(StreamCallCid(cid: cid));
     when(() => call.state).thenAnswer((_) => MutableStateEmitter(callState));
@@ -618,5 +633,105 @@ void main() {
     verifyNever(
       () => controller.endCallByCid(any(), silent: any(named: 'silent')),
     );
+  });
+
+  group('a Telecom hold on Android', () {
+    setUp(
+      () => CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android,
+    );
+    tearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+
+    Future<_MockCall> joined({bool micEnabled = true}) async {
+      await start();
+      final target = call(cid: _cid.value, micEnabled: micEnabled);
+      activeCalls.value = [target];
+      await pumpEventQueue();
+      when(() => controller.activeCalls()).thenAnswer(
+        (_) async => [CallData(uuid: 'u1', callCid: _cid.value)],
+      );
+      return target;
+    }
+
+    Future<void> hold({required bool isOnHold}) async {
+      platform.emit(ActionCallToggleHold(uuid: 'u1', isOnHold: isOnHold));
+      await pumpEventQueue();
+    }
+
+    test(
+      'mutes the call and pauses playout, and a resume restores both',
+      () async {
+        final target = await joined();
+
+        await hold(isOnHold: true);
+        verify(() => target.setMicrophoneEnabled(enabled: false)).called(1);
+        verify(devices.pauseAudioPlayout).called(1);
+
+        await hold(isOnHold: false);
+        verify(() => target.setMicrophoneEnabled(enabled: true)).called(1);
+        verify(devices.resumeAudioPlayout).called(1);
+      },
+    );
+
+    test(
+      'a resume keeps a mic muted and playout paused before the hold',
+      () async {
+        final target = await joined(micEnabled: false);
+        when(() => devices.isAudioPlayoutPaused).thenReturn(true);
+
+        await hold(isOnHold: true);
+        await hold(isOnHold: false);
+
+        verify(() => target.setMicrophoneEnabled(enabled: false)).called(1);
+        verifyNever(() => target.setMicrophoneEnabled(enabled: true));
+        verifyNever(devices.pauseAudioPlayout);
+        verifyNever(devices.resumeAudioPlayout);
+      },
+    );
+
+    test('a second hold keeps what the first one saved', () async {
+      final target = await joined();
+
+      await hold(isOnHold: true);
+      // The first hold muted the mic and paused playout.
+      when(() => devices.isAudioPlayoutPaused).thenReturn(true);
+      await hold(isOnHold: true);
+      await hold(isOnHold: false);
+
+      verify(() => target.setMicrophoneEnabled(enabled: true)).called(1);
+      verify(devices.resumeAudioPlayout).called(1);
+    });
+
+    test('a resume without a hold changes nothing', () async {
+      final target = await joined();
+
+      await hold(isOnHold: false);
+
+      verifyNever(
+        () => target.setMicrophoneEnabled(enabled: any(named: 'enabled')),
+      );
+      verifyNever(devices.resumeAudioPlayout);
+    });
+
+    test('leaving a held call resumes playout', () async {
+      await joined();
+      await hold(isOnHold: true);
+
+      activeCalls.value = [];
+      await pumpEventQueue();
+
+      verify(devices.resumeAudioPlayout).called(1);
+    });
+
+    test('is ignored on iOS', () async {
+      final target = await joined();
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
+
+      await hold(isOnHold: true);
+
+      verifyNever(
+        () => target.setMicrophoneEnabled(enabled: any(named: 'enabled')),
+      );
+      verifyNever(devices.pauseAudioPlayout);
+    });
   });
 }
