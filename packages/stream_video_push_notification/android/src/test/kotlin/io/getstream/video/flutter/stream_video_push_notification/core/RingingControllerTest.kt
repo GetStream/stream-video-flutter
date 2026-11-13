@@ -253,7 +253,11 @@ class RingingControllerTest {
             eventNames(),
         )
         assertEquals(emptyList<RingingCall>(), store.all())
-        verify { StreamTelecomManager.disconnectAll(any(), DisconnectCause.LOCAL) }
+        // Telecom sees the local sweep before the declined call's own disconnect.
+        verifyOrder {
+            StreamTelecomManager.disconnectAll(any(), DisconnectCause.LOCAL)
+            StreamTelecomManager.disconnect(any(), "other", DisconnectCause.REJECTED)
+        }
     }
 
     @Test
@@ -267,6 +271,18 @@ class RingingControllerTest {
         verify(exactly = 0) { StreamTelecomManager.answer(any(), "b") }
         verify(exactly = 0) { StreamTelecomManager.disconnect(any(), any(), any()) }
         assertEquals(listOf("b"), store.all().map { it.id })
+    }
+
+    @Test
+    fun `dismissRingingCall without a cid dismisses every stored call`() {
+        store.add(RingingCall(id = "a"))
+        store.add(RingingCall(id = "b"))
+
+        controller.dismissRingingCall(null)
+
+        verify { StreamTelecomManager.answer(any(), "a") }
+        verify { StreamTelecomManager.answer(any(), "b") }
+        assertEquals(emptyList<RingingCall>(), store.all())
     }
 
     @Test

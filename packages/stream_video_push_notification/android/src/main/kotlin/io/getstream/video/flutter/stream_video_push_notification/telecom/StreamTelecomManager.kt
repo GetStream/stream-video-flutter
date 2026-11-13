@@ -504,7 +504,10 @@ internal object StreamTelecomManager {
             // silence for Telecom-originated events too.
             if (IncomingCallBroadcastReceiver.silenceEvents) return
 
-            val context = appContext ?: return
+            val context = appContext ?: run {
+                Log.w(TAG, "[sendEvent] no context yet; dropping $event for $callId")
+                return
+            }
             RingingComponents.get(context).events.send(
                 event,
                 mapOf("id" to callId) + values.toMap(),

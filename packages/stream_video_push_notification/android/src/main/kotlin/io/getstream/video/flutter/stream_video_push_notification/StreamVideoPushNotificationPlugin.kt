@@ -51,10 +51,7 @@ class StreamVideoPushNotificationPlugin : FlutterPlugin, ActivityAware {
         }
     }
 
-    /**
-     * Releases this engine's channels and event sink. The ringing components stay: the
-     * manifest-declared receiver and service, and other engines, keep using them.
-     */
+    /** Releases this engine's channels and event sink; the ringing components stay. */
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         methodChannel?.setMethodCallHandler(null)
         methodChannel = null

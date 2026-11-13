@@ -1,6 +1,7 @@
 package io.getstream.video.flutter.stream_video_push_notification.channel
 
 import android.app.Activity
+import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import androidx.test.core.app.ApplicationProvider
@@ -30,6 +31,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 
 /** Pins how each method's arguments reach the controller, the store and the other parts. */
 @RunWith(RobolectricTestRunner::class)
@@ -82,6 +84,48 @@ class PushMethodCallHandlerTest {
         verify { controller.callConnected("call-2") }
         verify { controller.endAllCalls() }
         verify(exactly = 3) { result.success(true) }
+    }
+
+    @Test
+    fun `showIncomingCall and startCall broadcast the call to the receiver`() {
+        call("showIncomingCall", mapOf("id" to "call-1", "callerName" to "Ada"))
+        call("startCall", mapOf("id" to "call-2"))
+
+        val broadcasts = shadowOf(context as Application).broadcastIntents
+        val incoming = broadcasts.single {
+            it.action == "${context.packageName}.${IncomingCallConstants.ACTION_CALL_INCOMING}"
+        }.getBundleExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)!!
+        assertEquals("call-1", incoming.getString(IncomingCallConstants.EXTRA_CALL_ID))
+        assertEquals("Ada", incoming.getString(IncomingCallConstants.EXTRA_CALL_NAME_CALLER))
+        assertEquals(
+            "notification",
+            incoming.getString(IncomingCallConstants.EXTRA_CALL_ACTION_FROM),
+        )
+        val start = broadcasts.single {
+            it.action == "${context.packageName}.${IncomingCallConstants.ACTION_CALL_START}"
+        }.getBundleExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)!!
+        assertEquals("call-2", start.getString(IncomingCallConstants.EXTRA_CALL_ID))
+    }
+
+    @Test
+    fun `initData configures Telecom and getDevicePushTokenVoIP answers an empty token`() {
+        val configuration = mapOf("android" to mapOf("telecom" to mapOf("enabled" to true)))
+
+        call("initData", configuration)
+        call("getDevicePushTokenVoIP")
+
+        verify { StreamTelecomManager.init(any(), configuration) }
+        verify { result.success(null) }
+        verify { result.success("") }
+    }
+
+    @Test
+    fun `call parameters that are not a map answer an error`() {
+        call("showIncomingCall", "call-1")
+        call("endCall", listOf("call-1"))
+
+        verify(exactly = 2) { result.error("error", any(), "") }
+        verify(exactly = 0) { controller.endCall(any()) }
     }
 
     @Test
@@ -165,7 +209,7 @@ class PushMethodCallHandlerTest {
         handler.activity = activity
         every { fullScreenIntent.canUse() } returns false
 
-        call("requestNotificationPermission", mapOf("title" to "Notifications"))
+        call("requestNotificationPermission", mapOf("title" to "Notifications", "other" to null))
         call("ensureFullScreenIntentPermission")
         call("canUseFullScreenIntent")
 

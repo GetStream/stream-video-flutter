@@ -16,9 +16,9 @@ import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamT
  * Runs each step of a ringing call: shows or clears the notification and ringtone, reports the
  * step to Dart, keeps the call store current and mirrors the step into Telecom.
  *
- * Every entry point (the broadcast receiver, the notification trampoline, the full-screen
- * activity) calls it, with the call as the Bundle [CallPayloadMapper.toBundle] writes. A step
- * that fails is logged and the rest of it skipped.
+ * The broadcast receiver, the notification trampoline and the full-screen activity call its steps
+ * with the call as the Bundle [CallPayloadMapper.toBundle] writes; the method channel also calls
+ * it by call id or cid. A step that fails is logged and the rest of it skipped.
  */
 internal class RingingController(
     private val context: Context,
@@ -151,16 +151,17 @@ internal class RingingController(
     }
 
     /**
-     * Ends every stored call as [endCall] does, forgets them all, and disconnects every call
-     * Telecom still holds, stored or not.
+     * Forgets every stored call, disconnects every call Telecom holds as ended locally, then runs
+     * the end or decline step of each call that was stored, as [endCall] picks it.
      */
     fun endAllCalls() {
-        store.all().forEach { call ->
+        val calls = store.all()
+        store.removeAll()
+        step { StreamTelecomManager.disconnectAll(context, DisconnectCause.LOCAL) }
+        calls.forEach { call ->
             val data = CallPayloadMapper.toBundle(call)
             if (call.isAccepted) onEnded(data, keepSystemCall = false) else onDecline(data)
         }
-        store.removeAll()
-        step { StreamTelecomManager.disconnectAll(context, DisconnectCause.LOCAL) }
     }
 
     /**
@@ -174,8 +175,7 @@ internal class RingingController(
             ?: store.all()
 
         calls.forEach { call ->
-            // Answered whatever `isAccepted` says: an accept from the Flutter UI never sets it.
-            // Answering a call Telecom already answered does nothing.
+            // Answered whatever `isAccepted` says; answering an answered call does nothing.
             step { StreamTelecomManager.answer(context, call.id) }
             onEnded(CallPayloadMapper.toBundle(call), keepSystemCall = true)
         }

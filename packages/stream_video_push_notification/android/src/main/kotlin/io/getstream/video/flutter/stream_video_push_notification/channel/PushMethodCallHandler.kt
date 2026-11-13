@@ -10,6 +10,7 @@ import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNot
 import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
 import io.getstream.video.flutter.stream_video_push_notification.core.CallStore
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingController
 import io.getstream.video.flutter.stream_video_push_notification.notification.RingtonePlayer
 import io.getstream.video.flutter.stream_video_push_notification.permissions.FullScreenIntentPermission
@@ -172,8 +173,12 @@ internal class PushMethodCallHandler(
         return true
     }
 
-    private fun callArgument(call: MethodCall) =
-        CallPayloadMapper.fromArgs(call.arguments as? Map<String, Any?> ?: emptyMap())
+    /** The call the arguments describe; the default call without arguments. */
+    private fun callArgument(call: MethodCall): RingingCall {
+        val arguments = call.arguments ?: return CallPayloadMapper.fromArgs(emptyMap())
+        require(arguments is Map<*, *>) { "${call.method} expects a map of call parameters" }
+        return CallPayloadMapper.fromArgs(arguments as Map<String, Any?>)
+    }
 
     /** The arguments as a map with String keys; empty when they are not a map. */
     private fun mapArgument(call: MethodCall): Map<String, Any?> = buildMap {

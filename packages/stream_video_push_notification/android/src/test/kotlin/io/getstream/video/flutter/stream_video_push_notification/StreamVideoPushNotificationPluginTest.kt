@@ -7,6 +7,7 @@ import io.getstream.video.flutter.stream_video_push_notification.telecom.Telecom
 import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomCallRepository
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.PluginRegistry
+import io.getstream.video.flutter.stream_video_push_notification.channel.PushMethodCallHandler
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import io.mockk.every
 import io.mockk.mockk
@@ -97,6 +98,7 @@ class StreamVideoPushNotificationPluginTest {
         }
 
         dart.plugin.onAttachedToActivity(activityBinding)
+        assertEquals(activityBinding.activity, handlerActivity())
         assertEquals(
             false,
             listener.captured.onRequestPermissionsResult(1234, arrayOf(), intArrayOf()),
@@ -106,10 +108,19 @@ class StreamVideoPushNotificationPluginTest {
         dart.plugin.onReattachedToActivityForConfigChanges(activityBinding)
         dart.plugin.onDetachedFromActivity()
 
+        assertEquals(null, handlerActivity())
         verify(exactly = 2) { activityBinding.addRequestPermissionsResultListener(any()) }
         verify(exactly = 2) {
             activityBinding.removeRequestPermissionsResultListener(listener.captured)
         }
+    }
+
+    /** The activity the plugin handed to its method channel handler. */
+    private fun handlerActivity(): Any? {
+        val handler = StreamVideoPushNotificationPlugin::class.java.getDeclaredField("handler")
+            .apply { isAccessible = true }
+            .get(dart.plugin) as PushMethodCallHandler
+        return handler.activity
     }
 
     /** Replaces the repository [StreamTelecomManager] reads, which it otherwise builds itself. */
