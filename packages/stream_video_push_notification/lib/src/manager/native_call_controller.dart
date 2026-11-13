@@ -135,10 +135,15 @@ class NativeCallController {
   /// watch, headset or car head unit keep working. Only the caller knows which one it means —
   /// natively an accept and an accept that failed to join look identical.
   ///
-  /// On iOS this ends the call, since CallKit has nothing else to dismiss.
-  Future<void> dismissRingingCallByCid(String cid) {
+  /// On Android, [reason] says why the ring ends; see
+  /// [StreamVideoPushNotificationPlatform.dismissRingingCall]. On iOS this ends
+  /// the call, since CallKit has nothing else to dismiss.
+  Future<void> dismissRingingCallByCid(
+    String cid, {
+    CallDismissReason reason = CallDismissReason.accepted,
+  }) {
     if (CurrentPlatform.isIos) return endCallByCid(cid);
-    return _resolvedPlatform.dismissRingingCall(cid);
+    return _resolvedPlatform.dismissRingingCall(cid, reason: reason);
   }
 
   /// Ends the native calls of [cid], see [resolveCallsToEnd]. With [silent],

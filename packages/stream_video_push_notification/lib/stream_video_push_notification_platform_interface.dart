@@ -113,12 +113,18 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
     throw UnimplementedError('endAllCalls() has not been implemented.');
   }
 
-  /// Dismiss the ringing UI of a call the user just accepted and is now in.
+  /// Ends the ring of the calls with [cid] for [reason], and reports it as an
+  /// [ActionCallDismissed] carrying the reason. Android only.
   ///
-  /// Unlike [endAllCalls] this does not end the call: on Android the incoming notification and
-  /// ringtone stop, but the call stays registered with the Telecom stack, so hanging up or
-  /// holding from a watch, headset or car head unit keeps working for the rest of the call.
-  Future<void> dismissRingingCall(String cid) {
+  /// For [CallDismissReason.accepted], the default, the call itself goes on:
+  /// the incoming notification and ringtone stop, but the call stays
+  /// registered with the Telecom stack, so hanging up or holding from a watch,
+  /// headset or car head unit keeps working. For the other reasons the call
+  /// is disconnected from Telecom with the matching cause.
+  Future<void> dismissRingingCall(
+    String cid, {
+    CallDismissReason reason = CallDismissReason.accepted,
+  }) {
     throw UnimplementedError('dismissRingingCall() has not been implemented.');
   }
 

@@ -22,6 +22,9 @@ object IncomingCallConstants {
         "io.getstream.video.ACTION_CALL_CUSTOM"
     const val ACTION_CALL_CONNECTED = "io.getstream.video.ACTION_CALL_CONNECTED"
 
+    /** The ring of a call ended for a reason other than the user's answer on this device. */
+    const val ACTION_CALL_DISMISSED = "io.getstream.video.ACTION_CALL_DISMISSED"
+
     /** Internal action that runs [IncomingCallNotificationService] as a foreground service while ringing. */
     const val ACTION_CALL_RINGING = "io.getstream.video.ACTION_CALL_RINGING"
 
@@ -77,11 +80,6 @@ object IncomingCallConstants {
      */
     const val EXTRA_CALL_ENDED_BY_SYSTEM = "EXTRA_CALL_ENDED_BY_SYSTEM"
 
-    /**
-     * Set on an ENDED intent that only dismisses the ringing UI of a call that is now live, so the
-     * Telecom registration is kept and in-call system controls survive the accept.
-     */
-    const val EXTRA_KEEP_SYSTEM_CALL = "EXTRA_KEEP_SYSTEM_CALL"
 
     const val EXTRA_CALL_IS_SHOW_FULL_LOCKED_SCREEN = "EXTRA_CALL_IS_SHOW_FULL_LOCKED_SCREEN"
     const val EXTRA_CALL_IS_IMPORTANT = "EXTRA_CALL_IS_IMPORTANT"

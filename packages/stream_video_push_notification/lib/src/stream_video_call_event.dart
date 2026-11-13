@@ -18,6 +18,7 @@ enum Event {
   actionCallDecline,
   actionCallEnded,
   actionCallTimeout,
+  actionCallDismissed,
   actionCallConnected,
   actionCallCallback,
   actionCallToggleHold,
@@ -61,6 +62,8 @@ extension EventX on Event {
         return 'io.getstream.video.ACTION_CALL_ENDED';
       case Event.actionCallTimeout:
         return 'io.getstream.video.ACTION_CALL_TIMEOUT';
+      case Event.actionCallDismissed:
+        return 'io.getstream.video.ACTION_CALL_DISMISSED';
       case Event.actionCallConnected:
         return 'io.getstream.video.ACTION_CALL_CONNECTED';
       case Event.actionCallCallback:

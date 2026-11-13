@@ -9,6 +9,7 @@ import io.getstream.video.flutter.stream_video_push_notification.IncomingCallCon
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationManager
 import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
 import io.getstream.video.flutter.stream_video_push_notification.core.CallStore
+import io.getstream.video.flutter.stream_video_push_notification.core.DismissReason
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingController
@@ -65,10 +66,9 @@ internal class PushMethodCallHandler(
             }
 
             "showMissCallNotification" -> {
-                val data =
-                    CallPayloadMapper.toBundle(callArgument(call).copy(from = "notification"))
-                notifications.clearIncomingNotification(data, false)
-                notifications.showMissCallNotification(data)
+                controller.showMissedCall(
+                    CallPayloadMapper.toBundle(callArgument(call).copy(from = "notification")),
+                )
                 result.success(true)
             }
 
@@ -119,10 +119,10 @@ internal class PushMethodCallHandler(
                 result.success(true)
             }
 
-            // Ends the ring, not the call: the notification and ringtone go, the Telecom
-            // registration stays.
+            // Ends the ring of a call the user did not answer or decline here; see DismissReason.
             "dismissRingingCall" -> {
-                controller.dismissRingingCall(idArgument(call))
+                val reason = (call.arguments as? Map<*, *>)?.get("reason") as? String
+                controller.dismissRingingCall(idArgument(call), DismissReason.fromWireName(reason))
                 result.success(true)
             }
 

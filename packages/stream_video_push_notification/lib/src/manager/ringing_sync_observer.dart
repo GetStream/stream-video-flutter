@@ -121,7 +121,8 @@ class RingingSyncObserver {
     } else if (event is ActionCallAccept ||
         event is ActionCallDecline ||
         event is ActionCallTimeout ||
-        event is ActionCallEnded) {
+        event is ActionCallEnded ||
+        event is ActionCallDismissed) {
       _subscriptions.cancel(_idCallAccepted);
       _subscriptions.cancel(_idCallEnded);
       _subscriptions.cancel(_idCallRejected);

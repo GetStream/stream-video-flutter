@@ -304,7 +304,8 @@ class BackgroundPushRouter {
         case ActionCallAccept(:final data) ||
             ActionCallDecline(:final data) ||
             ActionCallTimeout(:final data) ||
-            ActionCallEnded(:final data)) {
+            ActionCallEnded(:final data) ||
+            ActionCallDismissed(:final data)) {
       if (session.ledger.resolveRing(data.callCid)) {
         session.releaseAfter(resolutionGrace);
       }

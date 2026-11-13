@@ -2,6 +2,7 @@
 
 ### ⚠️ Breaking
 
+- [Android] `dismissRingingCall` reports its end of the ring as an `ActionCallDismissed` with the reason, where it used to report an `ActionCallEnded`. It no longer dismisses every call when no stored call has the cid. `StreamVideoPushNotificationPlatform.dismissRingingCall` takes a `reason`, so a custom platform implementation has to add it. `IncomingCallBroadcastReceiver.getIntentEnded` no longer takes `keepSystemCall`, and `IncomingCallConstants.EXTRA_KEEP_SYSTEM_CALL` is removed.
 - [Android] `holdCall` no longer reports `ActionCallToggleHold` itself. The event comes once Telecom has held or resumed the call, the same as for a hold from the system, so a hold Telecom refuses is not reported. While the Telecom integration is off, the default below Android 17, `holdCall` does nothing and nothing is reported.
 - `StreamVideoPushNotificationPlatform.activeCalls()` returns `Future<List<CallData>>`.
 - `StreamVideoPushNotificationManager.removedStoredTokens` is removed.
@@ -28,10 +29,13 @@
 
 ### ✅ Added
 
+- `StreamVideoPushNotificationManager.dismissRingingCallByCid` takes a `CallDismissReason`. On Android, for a reason other than `accepted` the call is disconnected from Telecom with the matching cause (remote, answered elsewhere, missed); `accepted`, the default, keeps the call registered as before.
 - Added `StreamVideoPushHandler.handleBackgroundMessage`, which simplifies the ringing setup by running a Stream ringing push through its whole background lifecycle from your Firebase background handler: it builds the client through the factory you give it, observes the ringing events a background isolate can act on, and disposes the client — along with whatever that factory set up — once the user has answered, declined, or let the call time out, or the ring has ended without them, such as when the caller cancels it. It replaces the setup and teardown each integration had to write by hand.
 
 ### 🐞 Fixed
 
+- [Android] An unanswered ring ends natively once its duration has passed, also when the app was killed: the notification, the ringtone and the stored call are cleared, Telecom disconnects the call as missed, and an `ActionCallTimeout` is reported. The notification used to disappear after the duration while the ringtone, the ringing service and the Telecom call stayed until Dart ended them.
+- [Android] `showMissCallNotification` also forgets the call and disconnects it from Telecom as missed. It used to leave both.
 - A mute from the CallKit screen applies to the call it was made on.
 - [Android] A decline or accept from the incoming call notification or the full-screen screen in a process no Flutter engine has attached to, such as after the app was killed, now cancels the incoming notification and closes the full-screen screen. An incoming call is also shown in such a process. The decline still does not reach the backend there, since no Dart code runs to send it.
 - [Android] Accepting or starting a call no longer starts a background service, which Android 8 and later refuse for an app in the background and which then skipped the rest of the accept.
