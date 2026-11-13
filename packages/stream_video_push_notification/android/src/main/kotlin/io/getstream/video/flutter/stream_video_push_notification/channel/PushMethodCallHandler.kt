@@ -16,6 +16,7 @@ import io.getstream.video.flutter.stream_video_push_notification.core.RingingCon
 import io.getstream.video.flutter.stream_video_push_notification.notification.RingtonePlayer
 import io.getstream.video.flutter.stream_video_push_notification.permissions.FullScreenIntentPermission
 import io.getstream.video.flutter.stream_video_push_notification.permissions.NotificationPermissionFlow
+import io.getstream.video.flutter.stream_video_push_notification.telecom.AudioEndpointUtils
 import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
 
 /**
@@ -97,6 +98,19 @@ internal class PushMethodCallHandler(
                     )
                 }
                 result.success(true)
+            }
+
+            // Answers whether Telecom routed the cid's calls to the endpoint; false without
+            // Telecom or for an endpoint type it does not name.
+            "requestAudioEndpoint" -> {
+                val args = mapArgument(call)
+                val callCid = args["cid"] as? String
+                val type = AudioEndpointUtils.endpointTypeFromString(args["type"] as? String)
+                if (callCid == null || type == null) {
+                    result.success(false)
+                } else {
+                    telecom.requestEndpoint(callCid, type) { routed -> result.success(routed) }
+                }
             }
 
             "isMuted" -> {

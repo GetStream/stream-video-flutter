@@ -51,6 +51,8 @@ class NativeCallController {
   final RingingEventBroadcaster _broadcaster;
   final StreamVideoPushNotificationPlatform? _platform;
 
+  final _logger = taggedLogger(tag: 'SV:NativeCallController');
+
   StreamVideoPushNotificationPlatform get _resolvedPlatform =>
       _platform ?? StreamVideoPushNotificationPlatform.instance;
 
@@ -181,6 +183,36 @@ class NativeCallController {
       );
 
       await _resolvedPlatform.muteCall(call.uuid!, isMuted: isMuted);
+    }
+  }
+
+  /// Routes the audio of the calls with [cid] to [device] in Telecom, which
+  /// owns the audio route of a call it holds. Android only.
+  ///
+  /// Does nothing for a device Telecom has no endpoint for. When Telecom does
+  /// not route the call there, that is logged; the SDK has picked the device
+  /// for WebRTC either way.
+  Future<void> setCallAudioOutputDeviceByCid(
+    String cid,
+    RtcMediaDevice device,
+  ) async {
+    if (!CurrentPlatform.isAndroid) return;
+
+    final endpoint = TelecomAudioEndpoint.fromAudioOutput(device);
+    if (endpoint == null) {
+      _logger.d(
+        () => '[setCallAudioOutputDeviceByCid] no endpoint for $device',
+      );
+      return;
+    }
+
+    final routed = await _resolvedPlatform.requestAudioEndpoint(cid, endpoint);
+    if (!routed) {
+      _logger.d(
+        () =>
+            '[setCallAudioOutputDeviceByCid] Telecom did not route $cid to '
+            '${endpoint.name}; fine when the integration does not hold it',
+      );
     }
   }
 

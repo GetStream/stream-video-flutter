@@ -21,12 +21,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeoutOrNull
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -42,6 +45,9 @@ internal class CoreTelecomCallRepository(
 
     companion object {
         private const val TAG = "StreamTelecomRepo"
+
+        /** How long an endpoint request waits for Telecom to offer the endpoint. */
+        const val ENDPOINT_WAIT_MS = 2_000L
     }
 
     /** Per-call flags telling whether an action was started by us or by the system. */
@@ -289,6 +295,28 @@ internal class CoreTelecomCallRepository(
         flags: CallActionFlags,
         actionSource: ReceiveChannel<TelecomCallAction>,
     ) {
+        // The endpoint request in progress. It runs beside the loop, since it may wait for its
+        // endpoint, and a newer request cancels it.
+        var endpointRequest: Job? = null
+        try {
+            consumeActions(callId, flags, actionSource) { action ->
+                endpointRequest?.cancel()
+                endpointRequest = launch { action.result.complete(switchEndpoint(callId, action)) }
+                    .apply { invokeOnCompletion { action.result.complete(false) } }
+            }
+        } finally {
+            endpointRequest?.cancel()
+            // A request still queued behind a disconnect is never received.
+            while (true) (actionSource.tryReceive().getOrNull() ?: break).drop()
+        }
+    }
+
+    private suspend fun CallControlScope.consumeActions(
+        callId: String,
+        flags: CallActionFlags,
+        actionSource: ReceiveChannel<TelecomCallAction>,
+        requestEndpoint: (TelecomCallAction.RequestEndpoint) -> Unit,
+    ) {
         for (action in actionSource) {
             when (action) {
                 is TelecomCallAction.Answer -> doAnswer(callId, flags)
@@ -301,6 +329,8 @@ internal class CoreTelecomCallRepository(
                     // queued behind the disconnect.
                     return
                 }
+
+                is TelecomCallAction.RequestEndpoint -> requestEndpoint(action)
 
                 is TelecomCallAction.Hold -> when (val result = setInactive()) {
                     is CallControlResult.Success -> onIsCallInactive(callId)()
@@ -321,6 +351,49 @@ internal class CoreTelecomCallRepository(
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Routes the call to an endpoint of the request's type, waiting up to [ENDPOINT_WAIT_MS] for
+     * Telecom to offer one. Returns whether the call is routed there.
+     */
+    private suspend fun CallControlScope.switchEndpoint(
+        callId: String,
+        request: TelecomCallAction.RequestEndpoint,
+    ): Boolean {
+        val type = request.endpointType
+        // Telecom lists the endpoints shortly after the call scope starts, and a headset only
+        // once it has connected, so the endpoint may not be offered yet.
+        val call = withTimeoutOrNull(ENDPOINT_WAIT_MS) {
+            calls.map { it[callId] }.first { call ->
+                call == null || call.availableCallEndpoints.any { it.type == type }
+            }
+        } ?: _calls.value[callId] ?: return false
+
+        val name = AudioEndpointUtils.endpointTypeToString(type)
+        return when (
+            val choice = AudioEndpointUtils.chooseEndpoint(
+                type,
+                call.currentCallEndpoint,
+                call.availableCallEndpoints,
+            )
+        ) {
+            AudioEndpointUtils.EndpointChoice.AlreadyCurrent -> true
+
+            AudioEndpointUtils.EndpointChoice.Unavailable -> {
+                Log.w(TAG, "[switchEndpoint] $callId has no $name endpoint")
+                false
+            }
+
+            is AudioEndpointUtils.EndpointChoice.Request ->
+                when (val result = requestEndpointChange(choice.endpoint)) {
+                    is CallControlResult.Success -> true
+                    is CallControlResult.Error -> {
+                        Log.e(TAG, "[switchEndpoint] $callId to $name failed: ${result.errorCode}")
+                        false
+                    }
+                }
         }
     }
 

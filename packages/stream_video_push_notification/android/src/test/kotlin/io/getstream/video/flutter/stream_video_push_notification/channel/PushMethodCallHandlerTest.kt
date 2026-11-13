@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
+import androidx.core.telecom.CallEndpointCompat
 import androidx.test.core.app.ApplicationProvider
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -155,6 +156,27 @@ class PushMethodCallHandlerTest {
         }
         verify(exactly = 0) { events.send(IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD, any()) }
         verify { telecom.setOnHold("call-1", false) }
+    }
+
+    @Test
+    fun `requestAudioEndpoint asks Telecom for the cid's endpoint and answers what it did`() {
+        val onResult = slot<(Boolean) -> Unit>()
+        every {
+            telecom.requestEndpoint("default:abc", CallEndpointCompat.TYPE_SPEAKER, capture(onResult))
+        } answers { onResult.captured(true) }
+
+        call("requestAudioEndpoint", mapOf("cid" to "default:abc", "type" to "speaker"))
+
+        verify { result.success(true) }
+    }
+
+    @Test
+    fun `requestAudioEndpoint answers false for an unknown endpoint or no cid`() {
+        call("requestAudioEndpoint", mapOf("cid" to "default:abc", "type" to "car"))
+        call("requestAudioEndpoint", mapOf("type" to "speaker"))
+
+        verify(exactly = 2) { result.success(false) }
+        verify(exactly = 0) { telecom.requestEndpoint(any(), any(), any()) }
     }
 
     @Test

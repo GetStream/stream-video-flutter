@@ -3,6 +3,7 @@ package io.getstream.video.flutter.stream_video_push_notification.telecom
 import android.content.Context
 import android.net.Uri
 import android.telecom.DisconnectCause
+import androidx.core.telecom.CallEndpointCompat
 import androidx.test.core.app.ApplicationProvider
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallBroadcastReceiver
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
@@ -435,6 +436,101 @@ class TelecomIntegrationTest {
         integration().registerIncomingCall(call)
 
         assertEquals(emptyList<Any>(), repository.registrations)
+    }
+
+    // Audio endpoint requests.
+
+    private val routed = mutableListOf<Boolean>()
+
+    private fun TelecomIntegration.requestSpeaker(callCid: String = "default:abc") =
+        requestEndpoint(callCid, CallEndpointCompat.TYPE_SPEAKER) { routed += it }
+
+    private fun endpointRequests(callId: String = CALL_ID) =
+        repository.actions(callId).filterIsInstance<TelecomCallAction.RequestEndpoint>()
+
+    @Test
+    fun `an endpoint request goes to the call with the cid and answers what Telecom did`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        repository.completeRegistration(CALL_ID)
+
+        telecom.requestSpeaker()
+        val request = endpointRequests().single()
+        assertEquals(CallEndpointCompat.TYPE_SPEAKER, request.endpointType)
+        assertEquals(emptyList<Boolean>(), routed)
+
+        request.result.complete(true)
+
+        assertEquals(listOf(true), routed)
+    }
+
+    @Test
+    fun `an endpoint request Telecom does not carry out answers false`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        repository.completeRegistration(CALL_ID)
+
+        telecom.requestSpeaker()
+        endpointRequests().single().result.complete(false)
+
+        assertEquals(listOf(false), routed)
+    }
+
+    @Test
+    fun `an endpoint request answers false without Telecom or a call with the cid`() {
+        integration(canUseTelecom = false).apply { init(enabled()) }.requestSpeaker()
+        val telecom = integration().apply { init(enabled()) }
+        telecom.requestSpeaker()
+        telecom.registerIncomingCall(call)
+        repository.completeRegistration(CALL_ID)
+        telecom.requestSpeaker(callCid = "default:other")
+
+        assertEquals(listOf(false, false, false), routed)
+        assertEquals(emptyList<TelecomCallAction>(), repository.actions(CALL_ID))
+    }
+
+    @Test
+    fun `an endpoint request while registering is sent once registered, the newest replacing older`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+
+        telecom.requestSpeaker()
+        telecom.requestEndpoint("default:abc", CallEndpointCompat.TYPE_EARPIECE) { routed += it }
+        assertEquals(listOf(false), routed)
+
+        repository.completeRegistration(CALL_ID)
+
+        val request = endpointRequests().single()
+        assertEquals(CallEndpointCompat.TYPE_EARPIECE, request.endpointType)
+        request.result.complete(true)
+        assertEquals(listOf(false, true), routed)
+    }
+
+    @Test
+    fun `an endpoint request queued behind a disconnect answers false and is not sent`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+
+        telecom.requestSpeaker()
+        telecom.disconnect(CALL_ID, DisconnectCause.LOCAL)
+        repository.completeRegistration(CALL_ID)
+
+        assertEquals(
+            listOf(TelecomCallAction.Disconnect(DisconnectCause(DisconnectCause.LOCAL))),
+            repository.actions(CALL_ID),
+        )
+        assertEquals(listOf(false), routed)
+    }
+
+    @Test
+    fun `an endpoint request still queued when Telecom is released answers false`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        telecom.requestSpeaker()
+
+        telecom.release()
+
+        assertEquals(listOf(false), routed)
     }
 
     private companion object {
