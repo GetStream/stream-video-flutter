@@ -386,7 +386,8 @@ internal class CoreTelecomCallRepository(
                 false
             }
 
-            is AudioEndpointUtils.EndpointChoice.Request ->
+            // A throw would fail the call scope and end a live call, so it is only logged.
+            is AudioEndpointUtils.EndpointChoice.Request -> try {
                 when (val result = requestEndpointChange(choice.endpoint)) {
                     is CallControlResult.Success -> true
                     is CallControlResult.Error -> {
@@ -394,6 +395,12 @@ internal class CoreTelecomCallRepository(
                         false
                     }
                 }
+            } catch (error: CancellationException) {
+                throw error
+            } catch (error: Exception) {
+                Log.e(TAG, "[switchEndpoint] $callId to $name threw", error)
+                false
+            }
         }
     }
 

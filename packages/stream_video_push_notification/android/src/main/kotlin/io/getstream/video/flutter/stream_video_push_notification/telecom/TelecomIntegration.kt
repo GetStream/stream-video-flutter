@@ -316,7 +316,8 @@ internal class TelecomIntegration(
 
     /**
      * Sends [action] to the call's Telecom scope, or queues it while the call is still
-     * registering. Ignored for a call Telecom does not know. An endpoint request that is not sent
+     * registering or its queue has not been replayed yet, so it never overtakes an action queued
+     * before it. Ignored for a call Telecom does not know. An endpoint request that is not sent
      * or queued, or that a newer one replaces in the queue, is answered as false.
      */
     private fun processAction(
@@ -330,7 +331,8 @@ internal class TelecomIntegration(
         synchronized(actionLock) {
             val call = repository.getCall(callId)
             when {
-                call != null && !call.isPending -> {
+                // The scope is up before onCallRegistered replays the queue.
+                call != null && !call.isPending && !pendingActions.containsKey(callId) -> {
                     if (!call.processAction(action)) {
                         Log.w(
                             TAG,

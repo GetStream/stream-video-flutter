@@ -523,6 +523,50 @@ class TelecomIntegrationTest {
     }
 
     @Test
+    fun `an endpoint request made after the scope is up but before the queue is replayed wins`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        telecom.requestEndpoint("default:abc", CallEndpointCompat.TYPE_EARPIECE) { routed += it }
+
+        repository.startScope(CALL_ID)
+        telecom.requestSpeaker()
+        assertEquals(emptyList<TelecomCallAction>(), repository.actions(CALL_ID))
+
+        repository.reportRegistered(CALL_ID)
+
+        assertEquals(CallEndpointCompat.TYPE_SPEAKER, endpointRequests().single().endpointType)
+        assertEquals(listOf(false), routed)
+    }
+
+    @Test
+    fun `an action made before the queue is replayed does not overtake it`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        telecom.answer(CALL_ID)
+
+        repository.startScope(CALL_ID)
+        telecom.setOnHold(CALL_ID, true)
+        repository.reportRegistered(CALL_ID)
+
+        assertEquals(
+            listOf(TelecomCallAction.Answer, TelecomCallAction.Hold),
+            repository.actions(CALL_ID),
+        )
+    }
+
+    @Test
+    fun `an endpoint request to a call whose scope stopped taking actions answers false`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        repository.completeRegistration(CALL_ID)
+        repository.endScope(CALL_ID)
+
+        telecom.requestSpeaker()
+
+        assertEquals(listOf(false), routed)
+    }
+
+    @Test
     fun `an endpoint request still queued when Telecom is released answers false`() {
         val telecom = integration().apply { init(enabled()) }
         telecom.registerIncomingCall(call)
