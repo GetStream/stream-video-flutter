@@ -91,12 +91,14 @@ class PrefsCallStoreTest {
 
     @Test
     fun `two writers adding at the same time lose no call`() {
+        // One store per writer, as each broadcast and each plugin call builds its own.
         val pool = Executors.newFixedThreadPool(2)
         val start = CountDownLatch(1)
         repeat(2) { writer ->
             pool.execute {
+                val writerStore = PrefsCallStore(context)
                 start.await()
-                repeat(50) { store.add(call("w$writer-$it")) }
+                repeat(50) { writerStore.add(call("w$writer-$it")) }
             }
         }
         start.countDown()
@@ -132,15 +134,41 @@ class PrefsCallStoreTest {
     }
 
     @Test
+    fun `reads an entry with the hold, route and mute keys of the released Data class`() {
+        prefs.edit().putString(
+            PrefsCallStore.KEY,
+            """[{"args":{},"accepted":true,"onHold":false,"muted":false,"id":"call-1",""" +
+                """"uuid":"","callerName":"Ada","extra":{"callCid":"default:call-1"},""" +
+                """"fullScreenBackgroundColor":"#0955fa","fullScreenTextColor":"#FFFFFF",""" +
+                """"isAccepted":true,"isOnHold":false,"audioRoute":1,"isMuted":false}]""",
+        ).commit()
+
+        assertEquals(
+            listOf(
+                RingingCall(
+                    id = "call-1",
+                    callerName = "Ada",
+                    extra = mapOf("callCid" to "default:call-1"),
+                    fullScreenBackgroundColor = "#0955fa",
+                    fullScreenTextColor = "#FFFFFF",
+                    isAccepted = true,
+                ),
+            ),
+            store.all(),
+        )
+    }
+
+    @Test
     fun `writes the keys and values the Data class stored, without its duplicate keys`() {
         store.add(FULL_CALL)
 
         val mapper = ObjectMapper()
         val written = mapper.readTree(prefs.getString(PrefsCallStore.KEY, null)).single()
         val legacy = mapper.readTree(legacyJson()).first() as ObjectNode
-        // Jackson wrote the is-prefixed Booleans a second time under their bean names, plus the
-        // Data constructor's argument map and an id copy no code read.
-        legacy.remove(listOf("args", "uuid", "accepted", "important", "bot", "showMissedCallNotification"))
+        // The fixture's keys that the store does not write.
+        legacy.remove(
+            listOf("args", "uuid", "accepted", "important", "bot", "showMissedCallNotification"),
+        )
 
         assertEquals(legacy as JsonNode, written)
     }

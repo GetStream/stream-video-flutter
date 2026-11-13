@@ -7,7 +7,7 @@
 - `StreamVideoPushNotificationManager.currentActiveCalls` is removed; read `StreamVideo.state.activeCalls`.
 - `isAcceptedOnThisDevice` is no longer exported.
 - [Android] Unused Kotlin API of the plugin is removed: `StreamVideoPushNotificationPlugin.showIncomingNotification`, `showMissCallNotification`, `startCall`, `endCall`, `endAllCalls` and `sendEventCustom`; `IncomingCallBroadcastReceiver.getIntentHeldByCell` and `getIntentUnHeldByCell`; `Utils.backToForeground`, `pxToDp` and `getScreenHeight`; `Data.isOnHold`, `audioRoute` and `isMuted`; and the `ACTION_CALL_AUDIO_STATE_CHANGE`, `ACTION_CALL_HELD`, `ACTION_CALL_UNHELD`, `EXTRA_CALL_APP_NAME` and `EXTRA_CALL_ONGOING_CALL_NOTIFICATION_CHANNEL_NAME` constants. The method channel no longer handles `showIncomingCallSilently`, which did nothing.
-- [Android] The plugin's call model and the helpers that stored it are no longer public: the `Data` class, and the top-level `addCall`, `removeCall`, `removeAllCalls`, `getDataActiveCalls`, `getDataActiveCallsForFlutter`, `putString`, `putStrings`, `getString` and `remove`. Active calls stored by an earlier version are still read.
+- [Android] The plugin's call model and the helpers that stored it are removed: the `Data` class and the top-level `addCall`, `removeCall`, `removeAllCalls`, `getDataActiveCalls`, `getDataActiveCallsForFlutter`, `putString` and `remove`. `putStrings` and `getString` are internal. Active calls stored by an earlier version are still read.
 
 ### 🔄 Changed
 

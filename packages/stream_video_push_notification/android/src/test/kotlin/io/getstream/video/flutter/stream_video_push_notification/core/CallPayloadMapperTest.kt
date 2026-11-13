@@ -4,6 +4,7 @@ import android.os.Bundle
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -48,6 +49,79 @@ class CallPayloadMapperTest {
     @Test
     fun `an empty map gives the call defaults`() {
         assertEquals(RingingCall(), CallPayloadMapper.fromArgs(emptyMap()))
+    }
+
+    @Test
+    fun `the call defaults`() {
+        val call = RingingCall()
+
+        assertEquals("", call.id)
+        assertEquals(0, call.type)
+        assertEquals(30000L, call.duration)
+        assertEquals(emptyMap<String, Any?>(), call.extra)
+        assertEquals("", call.ringtonePath)
+        assertEquals("", call.textAccept)
+        assertEquals("", call.fullScreenBackgroundColor)
+        assertEquals("", call.fullScreenTextColor)
+        assertEquals(false, call.fullScreenShowLogo)
+        assertEquals(false, call.showCallHandle)
+        assertEquals(true, call.showFullScreenOnLockScreen)
+        assertNull(call.incomingCallNotificationChannelName)
+        assertNull(call.missedNotificationId)
+        assertEquals(true, call.showMissedCallNotification)
+        assertEquals(1, call.missedNotificationCount)
+        assertNull(call.missedNotificationSubtitle)
+        assertEquals(true, call.showCallbackButton)
+        assertEquals(false, call.isImportant)
+        assertEquals(false, call.isBot)
+        assertEquals(false, call.isAccepted)
+    }
+
+    @Test
+    fun `reads every field of the map Dart sends`() {
+        val args = mapOf(
+            "id" to "call-1",
+            "callerName" to "Ada",
+            "handle" to "ada",
+            "type" to 1,
+            "duration" to 45000,
+            "extra" to hashMapOf<String, Any?>("callCid" to "default:call-1", "n" to 3),
+            "headers" to hashMapOf<String, Any?>("Authorization" to "token"),
+            "android" to hashMapOf<String, Any?>(
+                "avatar" to "ada.png",
+                "defaultAvatar" to "default.png",
+                "ringtonePath" to "ring.mp3",
+                "incomingCallNotificationChannelName" to "Incoming",
+                "missedCallNotificationChannelName" to "Missed",
+                "showFullScreenOnLockScreen" to false,
+                "isImportant" to true,
+                "isBot" to true,
+                "missedCallNotification" to hashMapOf<String, Any?>(
+                    "id" to 7,
+                    "showNotification" to false,
+                    "subtitle" to "You missed it",
+                    "callbackText" to "Call back",
+                    "showCallbackButton" to false,
+                    "count" to 2,
+                ),
+                "incomingCallNotification" to hashMapOf<String, Any?>(
+                    "fullScreenShowLogo" to true,
+                    "fullScreenLogoUrl" to "logo.png",
+                    "fullScreenBackgroundColor" to "#000000",
+                    "fullScreenBackgroundUrl" to "bg.png",
+                    "fullScreenTextColor" to "#ffffff",
+                    "textAccept" to "Pick up",
+                    "textDecline" to "Hang up",
+                    "showCallHandle" to true,
+                ),
+            ),
+        )
+
+        // `from` and `isAccepted` are set by the plugin and the store, not sent by Dart.
+        assertEquals(
+            FULL_CALL.copy(from = "", isAccepted = false),
+            CallPayloadMapper.fromArgs(args),
+        )
     }
 
     @Test
@@ -102,9 +176,10 @@ class CallPayloadMapperTest {
         assertEquals("No", withSection.textDecline)
 
         val withoutSection = CallPayloadMapper.fromArgs(
-            args(top = arrayOf("textAccept" to "Top accept")),
+            args(top = arrayOf("textAccept" to "Top accept", "textDecline" to "Top decline")),
         )
         assertEquals("Top accept", withoutSection.textAccept)
+        assertEquals("Top decline", withoutSection.textDecline)
     }
 
     // Bundle.
@@ -125,9 +200,7 @@ class CallPayloadMapperTest {
     }
 
     @Test
-    fun `an empty Bundle gives the call defaults, where it used to give its own or throw`() {
-        // Reading a Bundle without the keys used to give showCallbackButton false, a missed-call
-        // id of 0 and empty missed-call texts, and threw without the extra map.
+    fun `an empty Bundle gives the call defaults, not separate Bundle ones, and does not throw`() {
         assertEquals(RingingCall(), CallPayloadMapper.fromBundle(Bundle()))
     }
 
@@ -198,7 +271,10 @@ class CallPayloadMapperTest {
     fun `every field survives the stored entry round trip`() {
         val accepted = FULL_CALL.copy(isAccepted = true)
 
-        assertEquals(accepted, CallPayloadMapper.fromStoredMap(CallPayloadMapper.toStoredMap(accepted)))
+        assertEquals(
+            accepted,
+            CallPayloadMapper.fromStoredMap(CallPayloadMapper.toStoredMap(accepted)),
+        )
         assertEquals(
             RingingCall(),
             CallPayloadMapper.fromStoredMap(CallPayloadMapper.toStoredMap(RingingCall())),

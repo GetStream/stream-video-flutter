@@ -82,7 +82,7 @@ internal object StreamTelecomManager {
      */
     private val selfRequestedHold = ConcurrentHashMap<String, Boolean>()
 
-    /** The calls tracked with Telecom, needed to rebuild broadcast intents for system-originated events. */
+    /** The calls tracked with Telecom, from which system-originated events rebuild their intents. */
     private val trackedCallData = ConcurrentHashMap<String, RingingCall>()
 
     private val actionLock = Any()
@@ -151,7 +151,8 @@ internal object StreamTelecomManager {
     // region registration
 
     /** Registers a ringing incoming call with Telecom. */
-    fun registerIncomingCall(context: Context, data: RingingCall) = register(context, data, incoming = true)
+    fun registerIncomingCall(context: Context, data: RingingCall) =
+        register(context, data, incoming = true)
 
     /** Registers an outgoing call with Telecom and immediately makes it active. */
     fun registerOutgoingCall(context: Context, data: RingingCall) =
@@ -218,7 +219,7 @@ internal object StreamTelecomManager {
         ?: "Unknown Caller"
 
     private fun addressOf(data: RingingCall): Uri {
-        val identifier = (data.extra["callCid"] as? String)?.takeIf { it.isNotBlank() } ?: data.id
+        val identifier = data.callCid?.takeIf { it.isNotBlank() } ?: data.id
         return Uri.parse("${config.schema}:$identifier")
     }
 
@@ -417,7 +418,10 @@ internal object StreamTelecomManager {
             val context = appContext ?: return
             val data = trackedCallData[callId] ?: return
             context.sendBroadcast(
-                IncomingCallBroadcastReceiver.getIntentAccept(context, CallPayloadMapper.toBundle(data)),
+                IncomingCallBroadcastReceiver.getIntentAccept(
+                    context,
+                    CallPayloadMapper.toBundle(data),
+                ),
             )
         }
 

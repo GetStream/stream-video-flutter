@@ -301,8 +301,6 @@ class IncomingCallBroadcastReceiverTest {
 
     @Test
     fun `a bundle without the keys reaches Dart with the call defaults, not separate receiver ones`() {
-        // Before one mapper built every body, the receiver had defaults of its own here:
-        // duration 0, isImportant true, showNotification and showCallbackButton false, count 0.
         receive(IncomingCallBroadcastReceiver.getIntentDecline(context, Bundle()))
 
         val body = lastEventBody()

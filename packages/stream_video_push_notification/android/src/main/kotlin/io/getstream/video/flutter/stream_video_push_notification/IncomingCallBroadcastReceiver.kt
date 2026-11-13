@@ -236,7 +236,10 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
 
         val body = CallPayloadMapper.toEventBody(
             CallPayloadMapper.fromBundle(data),
-            endedBySystem = data.getBoolean(IncomingCallConstants.EXTRA_CALL_ENDED_BY_SYSTEM, false),
+            endedBySystem = data.getBoolean(
+                IncomingCallConstants.EXTRA_CALL_ENDED_BY_SYSTEM,
+                false,
+            ),
         )
         StreamVideoPushNotificationPlugin.sendEvent(event, body)
     }
