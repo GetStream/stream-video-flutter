@@ -1,3 +1,4 @@
+import Flutter
 import XCTest
 
 @testable import stream_video_push_notification
@@ -99,5 +100,25 @@ final class VoIPPayloadTests: XCTestCase {
             callData(payload, configuration: configuration, persistedIconName: "SavedIcon").iconName,
             "SavedIcon")
         XCTAssertEqual(callData(payload, persistedIconName: "SavedIcon").iconName, "SavedIcon")
+    }
+}
+
+/// Pins that an `AppDelegate` written against the old name still compiles and reaches the same
+/// handler. Its use of the deprecated name is the point, so the warnings here are expected.
+final class StreamVideoPKDelegateManagerAliasTests: XCTestCase {
+
+    func testTheOldNameIsTheSameHandler() {
+        XCTAssertTrue(StreamVideoPKDelegateManager.shared === VoIPPushRegistryHandler.shared)
+    }
+
+    func testTheOldNameKeepsTheMembersAnAppDelegateCalls() {
+        let handler = StreamVideoPKDelegateManager.shared
+        let register: () -> Void = handler.registerForPushNotifications
+        let initChannel: (FlutterMethodChannel) -> Void = handler.initChannel(mainChannel:)
+        let initData: ([String: Any]) -> Void = handler.initData(data:)
+
+        XCTAssertNotNil(register as Any)
+        XCTAssertNotNil(initChannel as Any)
+        XCTAssertNotNil(initData as Any)
     }
 }
