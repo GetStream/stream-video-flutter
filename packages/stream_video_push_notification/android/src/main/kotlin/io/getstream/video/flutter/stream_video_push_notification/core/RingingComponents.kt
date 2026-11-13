@@ -8,10 +8,12 @@ import io.getstream.video.flutter.stream_video_push_notification.channel.Ringing
 import io.getstream.video.flutter.stream_video_push_notification.notification.RingtonePlayer
 import io.getstream.video.flutter.stream_video_push_notification.permissions.FullScreenIntentPermission
 import io.getstream.video.flutter.stream_video_push_notification.permissions.NotificationPermissionFlow
+import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
 
 /**
  * The ringing state the plugin shares across the process: the call store, the ringtone, the
- * notifications, the permission flows, the event dispatcher and the controller that drives them.
+ * notifications, the permission flows, the event dispatcher, the Telecom integration and the
+ * controller that drives them.
  *
  * One instance per process, built from the application context on first use, whether or not a
  * Flutter engine has attached. The plugin, the broadcast receiver, the service and the activities
@@ -31,12 +33,15 @@ internal class RingingComponents private constructor(context: Context) {
 
     val events = RingingEventDispatcher()
 
+    val telecom: TelecomIntegration = telecomFactory(context)
+
     val controller = RingingController(
         context = context,
         store = callStore,
         notifications = notifications,
+        telecom = telecom,
         sendEvent = events::send,
-    )
+    ).also { telecom.listener = it }
 
     companion object {
         @SuppressLint("StaticFieldLeak") // Holds the application context only.
@@ -48,10 +53,20 @@ internal class RingingComponents private constructor(context: Context) {
                 instance ?: RingingComponents(context.applicationContext).also { instance = it }
             }
 
-        /** Forgets the instance, so the next [get] builds one for a new application context. */
+        /** Builds the Telecom integration of the next instance. */
+        @VisibleForTesting
+        var telecomFactory: (Context) -> TelecomIntegration = ::TelecomIntegration
+
+        /**
+         * Forgets the instance, so the next [get] builds one for a new application context, and
+         * restores the default [telecomFactory].
+         */
         @VisibleForTesting
         fun reset() {
-            synchronized(this) { instance = null }
+            synchronized(this) {
+                instance = null
+                telecomFactory = ::TelecomIntegration
+            }
         }
     }
 }

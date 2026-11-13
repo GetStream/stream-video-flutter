@@ -13,10 +13,9 @@ import android.widget.ImageView
 import androidx.test.core.app.ApplicationProvider
 import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
 import io.getstream.video.flutter.stream_video_push_notification.core.PrefsCallStore
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
-import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
+import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
 import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -46,10 +45,12 @@ class RingingActivitiesTest {
 
     private fun shownNotificationIds() = notifications.activeNotifications.map { it.id }
 
+    private lateinit var telecom: TelecomIntegration
+
     @Before
     fun ringThenNewProcess() {
-        resetPlugin()
-        mockkObject(StreamTelecomManager)
+        RingingComponents.reset()
+        telecom = mockTelecom()
         PrefsCallStore(context).removeAll()
         FakeDartSide(context)
         IncomingCallBroadcastReceiver().onReceive(
@@ -75,9 +76,8 @@ class RingingActivitiesTest {
 
     @After
     fun releaseTelecom() {
-        unmockkObject(StreamTelecomManager)
         PrefsCallStore(context).removeAll()
-        resetPlugin()
+        RingingComponents.reset()
     }
 
     private fun fullScreen() = Robolectric.buildActivity(
@@ -97,7 +97,7 @@ class RingingActivitiesTest {
         // The ring is cleared at once; the accept itself waits for the trampoline.
         assertEquals(emptyList<Int>(), shownNotificationIds())
         assertEquals(listOf(call), PrefsCallStore(context).all())
-        verify(exactly = 0) { StreamTelecomManager.answer(any(), any()) }
+        verify(exactly = 0) { telecom.answer(any()) }
         val next = shadowOf(context).nextStartedActivity
         assertEquals(TransparentActivity::class.java.name, next.component?.className)
         assertEquals(IncomingCallConstants.ACTION_CALL_ACCEPT, next.action)
@@ -113,7 +113,7 @@ class RingingActivitiesTest {
 
         assertEquals(emptyList<Int>(), shownNotificationIds())
         assertEquals(emptyList<RingingCall>(), PrefsCallStore(context).all())
-        verify { StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.REJECTED) }
+        verify { telecom.disconnect(CALL_ID, DisconnectCause.REJECTED) }
     }
 
     @Test
@@ -129,7 +129,7 @@ class RingingActivitiesTest {
 
         assertEquals(emptyList<Int>(), shownNotificationIds())
         assertEquals(listOf(call.copy(isAccepted = true)), PrefsCallStore(context).all())
-        verify { StreamTelecomManager.answer(any(), CALL_ID) }
+        verify { telecom.answer(CALL_ID) }
         val next = shadowOf(activity).nextStartedActivity
         assertEquals(IncomingCallConstants.ACTION_CALL_ACCEPT, next.action)
         assertEquals(context.packageName, next.component?.packageName)
