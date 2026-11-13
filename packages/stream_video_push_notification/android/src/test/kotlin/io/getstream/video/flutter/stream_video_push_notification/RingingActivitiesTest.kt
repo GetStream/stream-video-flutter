@@ -21,6 +21,7 @@ import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -131,6 +132,17 @@ class RingingActivitiesTest {
         val next = shadowOf(activity).nextStartedActivity
         assertEquals(IncomingCallConstants.ACTION_CALL_ACCEPT, next.action)
         assertEquals(context.packageName, next.component?.packageName)
+    }
+
+    @Test
+    fun `the full-screen activity without call data finishes and is destroyed cleanly`() {
+        val controller = Robolectric.buildActivity(
+            IncomingCallActivity::class.java,
+            Intent(context, IncomingCallActivity::class.java),
+        ).setup()
+
+        assertTrue(controller.get().isFinishing)
+        controller.destroy()
     }
 
     private companion object {

@@ -12,39 +12,26 @@ import coil.request.ImageRequest
 import coil.target.Target
 import okhttp3.OkHttpClient
 
-object ImageLoaderProvider {
+internal object ImageLoaderProvider {
     @SuppressLint("StaticFieldLeak")
     private var instance: ImageLoader? = null
 
-    fun get(context: Context, headers: HashMap<String, Any?>?): ImageLoader {
+    /** One loader for the process. Headers are added per request, not by the loader. */
+    fun get(context: Context): ImageLoader {
         if (instance == null) {
-            val imageLoader = ImageLoader.Builder(context)
             val client = OkHttpClient.Builder()
                 .followRedirects(true)
                 .followSslRedirects(true)
-                .addNetworkInterceptor { chain ->
-                    val newRequestBuilder: okhttp3.Request.Builder = chain.request().newBuilder()
-                    if (headers != null) {
-                        for ((key, value) in headers) {
-                            newRequestBuilder.addHeader(key, value.toString())
-                        }
-                    }
-                    chain.proceed(newRequestBuilder.build())
-                }
                 .build()
-            instance = imageLoader.okHttpClient(client).build()
+            instance = ImageLoader.Builder(context.applicationContext).okHttpClient(client).build()
         }
         return instance!!
     }
 
-    fun loadImage(context: Context, url: String, headers: HashMap<String, Any?>?, target: Target?) {
-        val imageLoader = get(context, headers)
+    fun loadImage(context: Context, url: String, headers: Map<String, String>, target: Target?) {
+        val imageLoader = get(context)
         val requestBuilder = ImageRequest.Builder(context)
-        headers?.forEach { (key, value) ->
-            value?.toString()?.let {
-                requestBuilder.addHeader(key, it)
-            }
-        }
+        headers.forEach { (key, value) -> requestBuilder.addHeader(key, value) }
         requestBuilder.data(url)
         requestBuilder.allowHardware(false)
         requestBuilder.transformations(CircleTransform())
@@ -53,14 +40,16 @@ object ImageLoaderProvider {
         imageLoader.enqueue(requestBuilder.build())
     }
 
-    fun loadImage(context: Context, url: String, headers: HashMap<String, Any?>?, placeholder: Int, target: ImageView) {
-        val imageLoader = get(context, headers)
+    fun loadImage(
+        context: Context,
+        url: String,
+        headers: Map<String, String>,
+        placeholder: Int,
+        target: ImageView,
+    ) {
+        val imageLoader = get(context)
         val requestBuilder = ImageRequest.Builder(context)
-        headers?.forEach { (key, value) ->
-            value?.toString()?.let {
-                requestBuilder.addHeader(key, it)
-            }
-        }
+        headers.forEach { (key, value) -> requestBuilder.addHeader(key, value) }
         requestBuilder.data(url)
         requestBuilder.allowHardware(false)
         requestBuilder.placeholder(placeholder)
@@ -74,7 +63,7 @@ object ImageLoaderProvider {
 }
 
 
-open class SafeTarget(
+internal open class SafeTarget(
     private val notificationId: Int,
     private val onLoaded: (Bitmap) -> Unit
 ) : Target {
