@@ -145,7 +145,14 @@ class IncomingCallNotificationService : Service() {
             if (!inForeground) stopSelf()
             return START_NOT_STICKY
         }
+        // Any other start has nothing to run; the service only stays up while it rings.
+        stopSelfUnlessRinging()
         return START_NOT_STICKY
+    }
+
+    private fun stopSelfUnlessRinging() {
+        val isRinging = synchronized(foregroundLock) { isRingingForeground }
+        if (!isRinging) stopSelf()
     }
 
     /**

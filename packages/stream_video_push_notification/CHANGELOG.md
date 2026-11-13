@@ -27,7 +27,7 @@
 ### 🐞 Fixed
 
 - A mute from the CallKit screen applies to the call it was made on.
-- [Android] A decline or accept from the incoming call notification or the full-screen screen in a process no Flutter engine has attached to, such as after the app was killed, now clears the notification, the ringtone and the stored call and updates the Telecom call. It used to do none of that.
+- [Android] A decline or accept from the incoming call notification or the full-screen screen in a process no Flutter engine has attached to, such as after the app was killed, now cancels the incoming notification and closes the full-screen screen. An incoming call is also shown in such a process. The decline still does not reach the backend there, since no Dart code runs to send it.
 - [Android] Accepting or starting a call no longer starts a background service, which Android 8 and later refuse for an app in the background and which then skipped the rest of the accept.
 - [Android] `StreamVideoPushNotificationPlatform.isMuted` answers the mute state Telecom reports for the call instead of always `true`. It answers `false` when the Telecom integration does not hold the call, which includes every call while the integration is off (the default below Android 17), and `muteCall` does not change it.
 - `registerDevice` right after `connect`, and `unregisterDevice` on web and desktop, no longer throw.

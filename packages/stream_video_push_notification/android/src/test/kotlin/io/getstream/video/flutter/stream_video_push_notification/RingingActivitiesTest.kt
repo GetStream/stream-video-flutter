@@ -2,6 +2,8 @@ package io.getstream.video.flutter.stream_video_push_notification
 
 import android.app.Application
 import android.app.KeyguardManager
+import android.app.NotificationManager
+import android.content.Context
 import android.content.ComponentName
 import android.content.Intent
 import android.content.IntentFilter
@@ -28,7 +30,8 @@ import org.robolectric.Shadows.shadowOf
 
 /**
  * Pins what the full-screen incoming call activity and the notification trampoline do with an
- * accept or a decline, in a process with no Flutter engine attached.
+ * accept or a decline. Each test shows the ring in a process with a Flutter engine, then acts in a
+ * new process with none, as after the app was killed.
  */
 @RunWith(RobolectricTestRunner::class)
 class RingingActivitiesTest {
@@ -36,11 +39,27 @@ class RingingActivitiesTest {
     private val context: Application get() = ApplicationProvider.getApplicationContext()
     private val call = RingingCall(id = CALL_ID, callerName = "Ada")
 
+    private val notifications: NotificationManager
+        get() = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+    private fun shownNotificationIds() = notifications.activeNotifications.map { it.id }
+
     @Before
-    fun freshProcess() {
+    fun ringThenNewProcess() {
         resetPlugin()
         mockkObject(StreamTelecomManager)
         PrefsCallStore(context).removeAll()
+        FakeDartSide(context)
+        IncomingCallBroadcastReceiver().onReceive(
+            context,
+            IncomingCallBroadcastReceiver.getIntentIncoming(
+                context,
+                CallPayloadMapper.toBundle(call),
+            ),
+        )
+        shadowOf(Looper.getMainLooper()).idle()
+        assertEquals(listOf(CALL_ID.hashCode()), shownNotificationIds())
+        resetPlugin()
         // The trampoline brings the app forward through its launch intent.
         val launcher = ComponentName(context.packageName, "LauncherActivity")
         shadowOf(context.packageManager).apply {
@@ -66,13 +85,17 @@ class RingingActivitiesTest {
     ).setup()
 
     @Test
-    fun `accepting on the full-screen activity only opens the trampoline`() {
+    fun `accepting on the full-screen activity clears the ring and opens the trampoline only`() {
         // On the lock screen, where the accept also asks to dismiss the keyguard.
         shadowOf(context.getSystemService(KeyguardManager::class.java)).setKeyguardLocked(true)
         val activity = fullScreen().get()
 
         activity.findViewById<ImageView>(R.id.ivAcceptCall).performClick()
 
+        // The ring is cleared at once; the accept itself waits for the trampoline.
+        assertEquals(emptyList<Int>(), shownNotificationIds())
+        assertEquals(listOf(call), PrefsCallStore(context).all())
+        verify(exactly = 0) { StreamTelecomManager.answer(any(), any()) }
         val next = shadowOf(context).nextStartedActivity
         assertEquals(TransparentActivity::class.java.name, next.component?.className)
         assertEquals(IncomingCallConstants.ACTION_CALL_ACCEPT, next.action)
@@ -80,19 +103,19 @@ class RingingActivitiesTest {
     }
 
     @Test
-    fun `declining on the full-screen activity runs the decline`() {
-        PrefsCallStore(context).add(call)
+    fun `declining on the full-screen activity clears the ring and runs the decline`() {
         val activity = fullScreen().get()
 
         activity.findViewById<ImageView>(R.id.ivDeclineCall).performClick()
         shadowOf(Looper.getMainLooper()).idle()
 
+        assertEquals(emptyList<Int>(), shownNotificationIds())
         assertEquals(emptyList<RingingCall>(), PrefsCallStore(context).all())
         verify { StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.REJECTED) }
     }
 
     @Test
-    fun `the trampoline runs the accept and opens the app`() {
+    fun `the trampoline clears the ring, runs the accept and opens the app`() {
         val activity = Robolectric.buildActivity(
             TransparentActivity::class.java,
             TransparentActivity.getIntent(
@@ -102,6 +125,7 @@ class RingingActivitiesTest {
             ),
         ).setup().get()
 
+        assertEquals(emptyList<Int>(), shownNotificationIds())
         assertEquals(listOf(call.copy(isAccepted = true)), PrefsCallStore(context).all())
         verify { StreamTelecomManager.answer(any(), CALL_ID) }
         val next = shadowOf(activity).nextStartedActivity

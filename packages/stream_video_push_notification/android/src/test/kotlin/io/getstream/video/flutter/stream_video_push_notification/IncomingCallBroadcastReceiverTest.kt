@@ -301,21 +301,27 @@ class IncomingCallBroadcastReceiverTest {
     }
 
     @Test
-    fun `with no Flutter engine attached, a ring is shown and a decline clears all of it`() {
-        // A fresh process started for a notification action: no engine, no plugin instance.
-        resetPlugin()
-        val store = PrefsCallStore(context)
-
+    fun `a decline in a new process with no Flutter engine clears the ring shown before`() {
         incoming()
         assertEquals(listOf(CALL_ID.hashCode()), shownNotificationIds())
-        assertEquals(listOf(CALL_ID), store.all().map { it.id })
+        // The process dies; the notification stays. A new one starts for the decline action.
+        resetPlugin()
 
         receive(IncomingCallBroadcastReceiver.getIntentDecline(context, data().toBundle()))
 
         assertEquals(emptyList<Int>(), shownNotificationIds())
         assertTrue(fullScreenActivityWasToldToClose())
-        assertEquals(emptyList<RingingCall>(), store.all())
-        verify { StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.REJECTED) }
+        assertEquals(emptyList<RingingCall>(), PrefsCallStore(context).all())
+    }
+
+    @Test
+    fun `an incoming call is shown in a process with no Flutter engine`() {
+        resetPlugin()
+
+        incoming()
+
+        assertEquals(listOf(CALL_ID.hashCode()), shownNotificationIds())
+        assertEquals(listOf(CALL_ID), PrefsCallStore(context).all().map { it.id })
     }
 
     @Test

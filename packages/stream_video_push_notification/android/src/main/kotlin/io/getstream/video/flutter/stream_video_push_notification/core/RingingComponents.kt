@@ -11,9 +11,9 @@ import io.getstream.video.flutter.stream_video_push_notification.StreamVideoPush
  * The ringing state the plugin shares across the process: the call store, the ringtone, the
  * notifications and the controller that drives them.
  *
- * Built from the application context on first use, so the broadcast receiver, the service and the
- * activities have it in a process no Flutter engine has attached to. The plugin uses the same
- * instance.
+ * One instance per process, built from the application context on first use, whether or not a
+ * Flutter engine has attached. The plugin, the broadcast receiver, the service and the activities
+ * all use it.
  */
 internal class RingingComponents private constructor(context: Context) {
 

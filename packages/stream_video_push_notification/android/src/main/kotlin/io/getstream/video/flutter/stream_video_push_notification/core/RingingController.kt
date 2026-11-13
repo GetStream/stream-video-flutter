@@ -45,9 +45,8 @@ internal class RingingController(
     }
 
     /**
-     * Registers the call with Telecom, shows the incoming notification, reports it and stores it.
-     * Telecom comes first, so the ringing foreground service is promoted with the call already in
-     * the Telecom stack; when the registration finishes later, the service is promoted again.
+     * Registers the call with Telecom, then shows the incoming notification, reports it and stores
+     * it. A registration that throws is logged and the ring goes on without Telecom.
      */
     @SuppressLint("MissingPermission")
     fun onIncoming(data: Bundle) = step {
