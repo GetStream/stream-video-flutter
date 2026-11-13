@@ -4,7 +4,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 
+/**
+ * The invisible activity a notification action opens: it runs the action on the controller and
+ * brings the app forward.
+ */
 class TransparentActivity : Activity() {
 
     companion object {
@@ -41,9 +46,9 @@ class TransparentActivity : Activity() {
             return
         }
 
-        val broadcastIntent = IncomingCallBroadcastReceiver.getIntent(this, action, data)
-        broadcastIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-        sendBroadcast(broadcastIntent)
+        if (data != null) {
+            RingingComponents.get(this).controller.handle(action, data)
+        }
 
         val activityIntent = AppUtils.getAppIntent(this, action, data)
         startActivity(activityIntent)

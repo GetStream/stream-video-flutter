@@ -8,6 +8,7 @@
 - `isAcceptedOnThisDevice` is no longer exported.
 - [Android] Unused Kotlin API of the plugin is removed: `StreamVideoPushNotificationPlugin.showIncomingNotification`, `showMissCallNotification`, `startCall`, `endCall`, `endAllCalls` and `sendEventCustom`; `IncomingCallBroadcastReceiver.getIntentHeldByCell` and `getIntentUnHeldByCell`; `Utils.backToForeground`, `pxToDp` and `getScreenHeight`; `Data.isOnHold`, `audioRoute` and `isMuted`; and the `ACTION_CALL_AUDIO_STATE_CHANGE`, `ACTION_CALL_HELD`, `ACTION_CALL_UNHELD`, `EXTRA_CALL_APP_NAME` and `EXTRA_CALL_ONGOING_CALL_NOTIFICATION_CHANNEL_NAME` constants. The method channel no longer handles `showIncomingCallSilently`, which did nothing.
 - [Android] The plugin's call model and the helpers that stored it are removed: the `Data` class and the top-level `addCall`, `removeCall`, `removeAllCalls`, `getDataActiveCalls`, `getDataActiveCallsForFlutter`, `putString` and `remove`. `putStrings` and `getString` are internal. Active calls stored by an earlier version are still read.
+- [Android] `IncomingCallNotificationService.startServiceWithAction` and `IncomingCallBroadcastReceiver.getIntent` are removed.
 
 ### 🔄 Changed
 
@@ -26,6 +27,8 @@
 ### 🐞 Fixed
 
 - A mute from the CallKit screen applies to the call it was made on.
+- [Android] A decline or accept from the incoming call notification or the full-screen screen in a process no Flutter engine has attached to, such as after the app was killed, now clears the notification, the ringtone and the stored call and updates the Telecom call. It used to do none of that.
+- [Android] Accepting or starting a call no longer starts a background service, which Android 8 and later refuse for an app in the background and which then skipped the rest of the accept.
 - [Android] `StreamVideoPushNotificationPlatform.isMuted` answers the mute state Telecom reports for the call instead of always `true`. It answers `false` when the Telecom integration does not hold the call, which includes every call while the integration is off (the default below Android 17), and `muteCall` does not change it.
 - `registerDevice` right after `connect`, and `unregisterDevice` on web and desktop, no longer throw.
 - A failing push token read is logged instead of reported as an uncaught error.

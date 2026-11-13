@@ -12,6 +12,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
+import io.getstream.video.flutter.stream_video_push_notification.core.PrefsCallStore
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
 import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
 import io.mockk.mockkObject
@@ -21,6 +22,7 @@ import java.io.File
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -137,14 +139,14 @@ class IncomingCallBroadcastReceiverTest {
     }
 
     @Test
-    fun `accepting starts the ringing service, reports it and marks the call accepted`() {
+    fun `accepting clears the ring, reports it and marks the call accepted, starting no service`() {
         incoming()
 
         receive(IncomingCallBroadcastReceiver.getIntentAccept(context, data().toBundle()))
 
-        val started = shadowOf(context).nextStartedService
-        assertEquals(IncomingCallNotificationService::class.java.name, started.component?.className)
-        assertEquals(IncomingCallConstants.ACTION_CALL_ACCEPT, started.action)
+        assertNull(shadowOf(context).nextStartedService)
+        assertEquals(emptyList<Int>(), shownNotificationIds())
+        assertTrue(fullScreenActivityWasToldToClose())
         assertEquals(IncomingCallConstants.ACTION_CALL_ACCEPT, eventNames().last())
         assertEquals(true, activeCalls().single()["isAccepted"])
         verify { StreamTelecomManager.answer(any(), CALL_ID) }
@@ -265,11 +267,10 @@ class IncomingCallBroadcastReceiverTest {
     }
 
     @Test
-    fun `starting an outgoing call starts the service, reports it and stores it accepted`() {
+    fun `starting an outgoing call reports it and stores it accepted, starting no service`() {
         receive(IncomingCallBroadcastReceiver.getIntentStart(context, data().toBundle()))
 
-        val started = shadowOf(context).nextStartedService
-        assertEquals(IncomingCallConstants.ACTION_CALL_START, started.action)
+        assertNull(shadowOf(context).nextStartedService)
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_START), eventNames())
         assertEquals(true, activeCalls().single()["isAccepted"])
         verify { StreamTelecomManager.registerOutgoingCall(any(), match { it.id == CALL_ID }) }
@@ -297,6 +298,24 @@ class IncomingCallBroadcastReceiverTest {
         assertEquals(emptyList<Any?>(), eventNames())
         assertEquals(listOf(CALL_ID.hashCode()), shownNotificationIds())
         assertEquals(listOf(CALL_ID), activeCalls().map { it["id"] })
+    }
+
+    @Test
+    fun `with no Flutter engine attached, a ring is shown and a decline clears all of it`() {
+        // A fresh process started for a notification action: no engine, no plugin instance.
+        resetPlugin()
+        val store = PrefsCallStore(context)
+
+        incoming()
+        assertEquals(listOf(CALL_ID.hashCode()), shownNotificationIds())
+        assertEquals(listOf(CALL_ID), store.all().map { it.id })
+
+        receive(IncomingCallBroadcastReceiver.getIntentDecline(context, data().toBundle()))
+
+        assertEquals(emptyList<Int>(), shownNotificationIds())
+        assertTrue(fullScreenActivityWasToldToClose())
+        assertEquals(emptyList<RingingCall>(), store.all())
+        verify { StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.REJECTED) }
     }
 
     @Test

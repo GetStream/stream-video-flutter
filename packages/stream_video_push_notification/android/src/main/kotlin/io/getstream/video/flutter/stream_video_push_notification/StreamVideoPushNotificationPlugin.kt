@@ -18,7 +18,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.getstream.video.flutter.stream_video_push_notification.Utils.Companion.reapCollection
 import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
 import io.getstream.video.flutter.stream_video_push_notification.core.CallStore
-import io.getstream.video.flutter.stream_video_push_notification.core.PrefsCallStore
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
 
 class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegistry.RequestPermissionsResultListener {
@@ -59,8 +59,6 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
         fun initSharedInstance(context: Context, binaryMessenger: BinaryMessenger) {
             if (!::instance.isInitialized) {
                 instance = StreamVideoPushNotificationPlugin()
-                instance.incomingCallSoundPlayerManager = IncomingCallSoundPlayerManager(context)
-                instance.incomingCallNotificationManager = IncomingCallNotificationManager(context, instance.incomingCallSoundPlayerManager)
                 instance.context = context
             }
 
@@ -82,22 +80,20 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
   private var activity: Activity? = null
   private var context: Context? = null
 
-      private var incomingCallNotificationManager: IncomingCallNotificationManager? = null
-    private var incomingCallSoundPlayerManager: IncomingCallSoundPlayerManager? = null
+    private val components: RingingComponents?
+        get() = context?.let { RingingComponents.get(it) }
 
-    fun getIncomingCallNotificationManager(): IncomingCallNotificationManager? {
-        return incomingCallNotificationManager
-    }
+    fun getIncomingCallNotificationManager(): IncomingCallNotificationManager? =
+        components?.notifications
 
-    fun getIncomingCallSoundPlayerManager(): IncomingCallSoundPlayerManager? {
-        return incomingCallSoundPlayerManager
-    }
+    fun getIncomingCallSoundPlayerManager(): IncomingCallSoundPlayerManager? =
+        components?.soundPlayer
 
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     sharePluginWithRegister(flutterPluginBinding)
   }
 
-  private fun callStore(): CallStore? = context?.let { PrefsCallStore(it) }
+  private fun callStore(): CallStore? = components?.callStore
 
   override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
      try {
@@ -120,8 +116,8 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                     val data = CallPayloadMapper.fromArgs(call.arguments() ?: emptyMap())
                         .copy(from = "notification")
                     
-                    incomingCallNotificationManager?.clearIncomingNotification(CallPayloadMapper.toBundle(data), false)
-                    incomingCallNotificationManager?.showMissCallNotification(CallPayloadMapper.toBundle(data))
+                    getIncomingCallNotificationManager()?.clearIncomingNotification(CallPayloadMapper.toBundle(data), false)
+                    getIncomingCallNotificationManager()?.showMissCallNotification(CallPayloadMapper.toBundle(data))
                     result.success(true)
                 }
 
@@ -309,19 +305,19 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                             putAll(args as Map<String, Any>)
                         }
                     }
-                    incomingCallNotificationManager?.requestNotificationPermission(activity, map)
+                    getIncomingCallNotificationManager()?.requestNotificationPermission(activity, map)
                     result.success(true)
                 }
 
                 "canUseFullScreenIntent" -> {
-                    result.success(incomingCallNotificationManager?.canUseFullScreenIntent() ?: true)
+                    result.success(getIncomingCallNotificationManager()?.canUseFullScreenIntent() ?: true)
                 }
 
                 // EDIT - clear the incoming notification/ring (after accept/decline/timeout)
                 "hideIncomingCall" -> {
                     val data = CallPayloadMapper.fromArgs(call.arguments() ?: emptyMap())
-                    incomingCallSoundPlayerManager?.stop()
-                    incomingCallNotificationManager?.clearIncomingNotification(CallPayloadMapper.toBundle(data), false)
+                    getIncomingCallSoundPlayerManager()?.stop()
+                    getIncomingCallNotificationManager()?.clearIncomingNotification(CallPayloadMapper.toBundle(data), false)
                     result.success(true)
                 }
 
@@ -329,7 +325,7 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                     val notificationManager = context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
                     if (Build.VERSION.SDK_INT >= 34) {
                         if (!notificationManager.canUseFullScreenIntent()) {
-                            incomingCallNotificationManager?.requestFullIntentPermission(activity)
+                            getIncomingCallNotificationManager()?.requestFullIntentPermission(activity)
                         }
                     }
                     result.success(true)
@@ -397,7 +393,7 @@ override fun onDetachedFromActivityForConfigChanges() {
         permissions: Array<out String>,
         grantResults: IntArray
     ): Boolean {
-        instance.incomingCallNotificationManager?.onRequestPermissionsResult(
+        instance.getIncomingCallNotificationManager()?.onRequestPermissionsResult(
             instance.activity,
             requestCode,
             grantResults
