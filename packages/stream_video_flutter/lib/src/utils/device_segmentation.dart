@@ -10,3 +10,8 @@ bool get isDesktopDevice =>
     defaultTargetPlatform == TargetPlatform.macOS ||
     defaultTargetPlatform == TargetPlatform.windows ||
     defaultTargetPlatform == TargetPlatform.linux;
+
+/// Returns true if the app is running on a desktop or in a browser — the
+/// platforms the design system's web components are drawn for.
+@internal
+bool get isDesktopOrWeb => kIsWeb || isDesktopDevice;
