@@ -10,6 +10,7 @@
 - [Android] The plugin's call model and the helpers that stored it are removed: the `Data` class and the top-level `addCall`, `removeCall`, `removeAllCalls`, `getDataActiveCalls`, `getDataActiveCallsForFlutter`, `putString` and `remove`. `putStrings` and `getString` are internal. Active calls stored by an earlier version are still read.
 - [Android] `IncomingCallNotificationService.startServiceWithAction` and `IncomingCallBroadcastReceiver.getIntent` are removed.
 - [Android] The notification classes are internal: `IncomingCallNotificationManager`, `IncomingCallSoundPlayerManager` (now `RingtonePlayer`), `ImageLoaderProvider`, `SafeTarget` and `IncomingCallNotification`, along with `IncomingCallNotificationManager`'s constants (`NOTIFICATION_CHANNEL_ID_INCOMING`, `NOTIFICATION_CHANNEL_ID_MISSED`, `MISSED_GROUP_KEY`, `EXTRA_TIME_START_CALL`, `PERMISSION_NOTIFICATION_REQUEST_CODE`). The channel ids are unchanged. `StreamVideoPushNotificationPlugin.getIncomingCallNotificationManager` and `getIncomingCallSoundPlayerManager` are removed.
+- [Android] `StreamVideoPushNotificationPlugin` is created per Flutter engine and only implements `FlutterPlugin` and `ActivityAware`. Its static `getInstance`, `hasInstance`, `sendEvent`, `sharePluginWithRegister` and `initSharedInstance`, its `onMethodCall` and `onRequestPermissionsResult`, the nested `EventCallbackHandler` and `Utils.reapCollection` are removed.
 
 ### 🔄 Changed
 

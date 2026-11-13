@@ -132,6 +132,55 @@ internal class RingingController(
         }
     }
 
+    /**
+     * Ends the stored call with [id]: as ended when it was accepted, as declined otherwise. Does
+     * nothing for a call that is not stored.
+     */
+    fun endCall(id: String) {
+        val call = store.byId(id) ?: return
+        val data = CallPayloadMapper.toBundle(call)
+        if (call.isAccepted) onEnded(data, keepSystemCall = false) else onDecline(data)
+    }
+
+    /**
+     * Reports the stored call with [id] as connected. Does nothing for a call that is not stored.
+     */
+    fun callConnected(id: String) {
+        val call = store.byId(id) ?: return
+        onConnected(CallPayloadMapper.toBundle(call))
+    }
+
+    /**
+     * Ends every stored call as [endCall] does, forgets them all, and disconnects every call
+     * Telecom still holds, stored or not.
+     */
+    fun endAllCalls() {
+        store.all().forEach { call ->
+            val data = CallPayloadMapper.toBundle(call)
+            if (call.isAccepted) onEnded(data, keepSystemCall = false) else onDecline(data)
+        }
+        store.removeAll()
+        step { StreamTelecomManager.disconnectAll(context, DisconnectCause.LOCAL) }
+    }
+
+    /**
+     * Ends the ring of the stored calls with [callCid], or of every stored call when [callCid] is
+     * null or matches none, and keeps them in Telecom as answered calls.
+     */
+    fun dismissRingingCall(callCid: String?) {
+        val calls = callCid
+            ?.let { store.byCallCid(it) }
+            ?.takeIf { it.isNotEmpty() }
+            ?: store.all()
+
+        calls.forEach { call ->
+            // Answered whatever `isAccepted` says: an accept from the Flutter UI never sets it.
+            // Answering a call Telecom already answered does nothing.
+            step { StreamTelecomManager.answer(context, call.id) }
+            onEnded(CallPayloadMapper.toBundle(call), keepSystemCall = true)
+        }
+    }
+
     private fun report(event: String, data: Bundle) {
         if (IncomingCallBroadcastReceiver.silenceEvents) return
         val body = CallPayloadMapper.toEventBody(

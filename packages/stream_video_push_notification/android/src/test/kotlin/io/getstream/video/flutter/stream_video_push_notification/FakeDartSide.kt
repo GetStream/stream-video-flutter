@@ -2,22 +2,21 @@ package io.getstream.video.flutter.stream_video_push_notification
 
 import android.content.Context
 import android.os.Looper
+import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.StandardMethodCodec
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
+import io.mockk.every
+import io.mockk.mockk
 import java.nio.ByteBuffer
 import org.robolectric.Shadows.shadowOf
 
 /**
- * Forgets the plugin's and the ringing components' process-wide instances, so each test starts
- * with its own context, as a fresh process would.
+ * Forgets the process-wide ringing components, so each test starts with its own context and no
+ * engine attached, as a fresh process would.
  */
 internal fun resetPlugin() {
-    StreamVideoPushNotificationPlugin::class.java.getDeclaredField("instance").apply {
-        isAccessible = true
-        set(null, null)
-    }
     RingingComponents.reset()
 }
 
@@ -30,10 +29,19 @@ internal class FakeDartSide(context: Context) : BinaryMessenger {
     private val handlers = mutableMapOf<String, BinaryMessenger.BinaryMessageHandler>()
     private val events = mutableListOf<Map<String, Any?>>()
 
+    val plugin = StreamVideoPushNotificationPlugin()
+    val binding: FlutterPlugin.FlutterPluginBinding = mockk {
+        every { applicationContext } returns context.applicationContext
+        every { binaryMessenger } returns this@FakeDartSide
+    }
+
     init {
-        StreamVideoPushNotificationPlugin.initSharedInstance(context, this)
+        plugin.onAttachedToEngine(binding)
         handlers.getValue(EVENTS).onMessage(encode(MethodCall("listen", null))) {}
     }
+
+    /** Detaches the plugin from this engine, as the engine's destruction does. */
+    fun detach() = plugin.onDetachedFromEngine(binding)
 
     override fun send(channel: String, message: ByteBuffer?) = send(channel, message, null)
 

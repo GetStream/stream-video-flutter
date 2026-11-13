@@ -124,7 +124,9 @@ class RingingControllerTest {
 
         verify { notifications.clearIncomingNotification(any(), false) }
         assertNull(store.byId(CALL_ID))
-        verify(exactly = 1) { StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.LOCAL) }
+        verify(exactly = 1) {
+            StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.LOCAL)
+        }
 
         store.add(call)
         controller.handle(IncomingCallConstants.ACTION_CALL_ENDED, bundle, keepSystemCall = true)
@@ -132,7 +134,10 @@ class RingingControllerTest {
         assertNull(store.byId(CALL_ID))
         verify(exactly = 1) { StreamTelecomManager.disconnect(any(), any(), any()) }
         assertEquals(
-            listOf(IncomingCallConstants.ACTION_CALL_ENDED, IncomingCallConstants.ACTION_CALL_ENDED),
+            listOf(
+                IncomingCallConstants.ACTION_CALL_ENDED,
+                IncomingCallConstants.ACTION_CALL_ENDED,
+            ),
             eventNames(),
         )
     }
@@ -199,6 +204,81 @@ class RingingControllerTest {
 
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_CONNECTED), eventNames())
         assertEquals(listOf(call), store.all())
+    }
+
+    @Test
+    fun `endCall ends an accepted call and declines one that was not accepted`() {
+        store.add(call.copy(isAccepted = true))
+        store.add(RingingCall(id = "other"))
+
+        controller.endCall(CALL_ID)
+        controller.endCall("other")
+        controller.endCall("unknown")
+
+        assertEquals(
+            listOf(
+                IncomingCallConstants.ACTION_CALL_ENDED,
+                IncomingCallConstants.ACTION_CALL_DECLINE,
+            ),
+            eventNames(),
+        )
+        verify { StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.LOCAL) }
+        verify { StreamTelecomManager.disconnect(any(), "other", DisconnectCause.REJECTED) }
+        assertEquals(emptyList<RingingCall>(), store.all())
+    }
+
+    @Test
+    fun `callConnected reports a stored call and ignores an unknown one`() {
+        store.add(call)
+
+        controller.callConnected(CALL_ID)
+        controller.callConnected("unknown")
+
+        assertEquals(listOf(IncomingCallConstants.ACTION_CALL_CONNECTED), eventNames())
+        verify(exactly = 1) { StreamTelecomManager.activate(any(), any()) }
+    }
+
+    @Test
+    fun `endAllCalls ends every stored call, forgets them and sweeps Telecom`() {
+        store.add(call.copy(isAccepted = true))
+        store.add(RingingCall(id = "other"))
+
+        controller.endAllCalls()
+
+        assertEquals(
+            listOf(
+                IncomingCallConstants.ACTION_CALL_ENDED,
+                IncomingCallConstants.ACTION_CALL_DECLINE,
+            ),
+            eventNames(),
+        )
+        assertEquals(emptyList<RingingCall>(), store.all())
+        verify { StreamTelecomManager.disconnectAll(any(), DisconnectCause.LOCAL) }
+    }
+
+    @Test
+    fun `dismissRingingCall answers and ends the ring of the cid's calls, keeping Telecom`() {
+        store.add(RingingCall(id = "a", extra = mapOf("callCid" to "default:a")))
+        store.add(RingingCall(id = "b", extra = mapOf("callCid" to "default:b")))
+
+        controller.dismissRingingCall("default:a")
+
+        verify { StreamTelecomManager.answer(any(), "a") }
+        verify(exactly = 0) { StreamTelecomManager.answer(any(), "b") }
+        verify(exactly = 0) { StreamTelecomManager.disconnect(any(), any(), any()) }
+        assertEquals(listOf("b"), store.all().map { it.id })
+    }
+
+    @Test
+    fun `dismissRingingCall with no matching cid dismisses every stored call`() {
+        store.add(RingingCall(id = "a", extra = mapOf("callCid" to "default:a")))
+        store.add(RingingCall(id = "b", extra = mapOf("callCid" to "default:b")))
+
+        controller.dismissRingingCall("default:none")
+
+        verify { StreamTelecomManager.answer(any(), "a") }
+        verify { StreamTelecomManager.answer(any(), "b") }
+        assertEquals(emptyList<RingingCall>(), store.all())
     }
 
     @Test
