@@ -366,7 +366,7 @@ class IncomingCallBroadcastReceiverTest {
  * Stands in for one Flutter engine on the other end of the plugin's channels: it attaches the
  * plugin, listens on the event channel the way the Dart side does, and decodes what arrives.
  */
-private class FakeDartSide(context: Context) : BinaryMessenger {
+internal class FakeDartSide(context: Context) : BinaryMessenger {
 
     private val handlers = mutableMapOf<String, BinaryMessenger.BinaryMessageHandler>()
     private val events = mutableListOf<Map<String, Any?>>()

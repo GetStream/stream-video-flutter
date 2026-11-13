@@ -6,6 +6,7 @@
 - `StreamVideoPushNotificationManager.removedStoredTokens` is removed.
 - `StreamVideoPushNotificationManager.currentActiveCalls` is removed; read `StreamVideo.state.activeCalls`.
 - `isAcceptedOnThisDevice` is no longer exported.
+- [Android] Unused Kotlin API of the plugin is removed: `StreamVideoPushNotificationPlugin.showIncomingNotification`, `showMissCallNotification`, `startCall`, `endCall`, `endAllCalls` and `sendEventCustom`; `IncomingCallBroadcastReceiver.getIntentHeldByCell` and `getIntentUnHeldByCell`; `Utils.backToForeground`, `pxToDp` and `getScreenHeight`; `Data.isOnHold`, `audioRoute` and `isMuted`; and the `ACTION_CALL_AUDIO_STATE_CHANGE`, `ACTION_CALL_HELD`, `ACTION_CALL_UNHELD`, `EXTRA_CALL_APP_NAME` and `EXTRA_CALL_ONGOING_CALL_NOTIFICATION_CHANNEL_NAME` constants. The Dart API covers what they did. The method channel no longer handles `showIncomingCallSilently`, which did nothing.
 
 ### 🔄 Changed
 
@@ -24,6 +25,7 @@
 ### 🐞 Fixed
 
 - A mute from the CallKit screen applies to the call it was made on.
+- [Android] `StreamVideoPushNotificationPlatform.isMuted` answers the mute state Telecom reports for the call instead of always `true`, and `false` for a call Telecom does not hold.
 - `registerDevice` right after `connect`, and `unregisterDevice` on web and desktop, no longer throw.
 - A failing push token read is logged instead of reported as an uncaught error.
 - `unregisterDevice` always stops registering refreshed tokens.

@@ -1,6 +1,5 @@
 package io.getstream.video.flutter.stream_video_push_notification.telecom
 
-import android.telecom.DisconnectCause
 import androidx.core.telecom.CallAttributesCompat
 import androidx.core.telecom.CallEndpointCompat
 import kotlinx.coroutines.channels.Channel
@@ -9,9 +8,6 @@ import kotlinx.coroutines.channels.Channel
  * Local representation of a call known to the Android Telecom stack.
  */
 internal sealed class TelecomCall {
-
-    /** No call is currently tracked. */
-    object None : TelecomCall()
 
     /** A call that was handed to Telecom via `CallsManager.addCall`. */
     data class Registered(
@@ -53,11 +49,4 @@ internal sealed class TelecomCall {
             actionSource.close()
         }
     }
-
-    /** A previously registered call that Telecom has disconnected. */
-    data class Unregistered(
-        val id: String,
-        val callAttributes: CallAttributesCompat,
-        val disconnectCause: DisconnectCause,
-    ) : TelecomCall()
 }

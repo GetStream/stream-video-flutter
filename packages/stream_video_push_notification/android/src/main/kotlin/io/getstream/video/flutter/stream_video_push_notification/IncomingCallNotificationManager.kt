@@ -582,11 +582,6 @@ class IncomingCallNotificationManager(
         return PendingIntent.getBroadcast(context, id, declineIntent, getFlagPendingIntent())
     }
 
-    private fun getTimeOutPendingIntent(id: Int, data: Bundle): PendingIntent {
-        val timeOutIntent = IncomingCallBroadcastReceiver.getIntentTimeout(context, data)
-        return PendingIntent.getBroadcast(context, id, timeOutIntent, getFlagPendingIntent())
-    }
-
     private fun getCallbackPendingIntent(id: Int, data: Bundle): PendingIntent {
         val intentTransparent = TransparentActivity.getIntent(
             context, IncomingCallConstants.ACTION_CALL_CALLBACK, data
@@ -604,13 +599,6 @@ class IncomingCallNotificationManager(
         return PendingIntent.getActivity(context, id, intent, getFlagPendingIntent())
     }
 
-
-    private fun getHangupPendingIntent(notificationId: Int, data: Bundle): PendingIntent {
-        val endedIntent = IncomingCallBroadcastReceiver.getIntentEnded(context, data)
-        return PendingIntent.getBroadcast(
-            context, notificationId, endedIntent, getFlagPendingIntent()
-        )
-    }
 
     private fun getFlagPendingIntent(): Int {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {

@@ -267,6 +267,12 @@ internal object StreamTelecomManager {
         registeringCallIds.toList().forEach { disconnect(context, it, cause) }
     }
 
+    /**
+     * The mute state Telecom last reported for a call, or false when Telecom holds no call with
+     * this id.
+     */
+    fun isMuted(callId: String): Boolean = repository?.getCall(callId)?.isMuted ?: false
+
     @SuppressLint("NewApi")
     private fun processAction(context: Context, callId: String, action: TelecomCallAction) {
         requireRepository(context) ?: return

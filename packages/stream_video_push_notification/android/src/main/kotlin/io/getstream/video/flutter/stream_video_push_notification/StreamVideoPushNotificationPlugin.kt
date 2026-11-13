@@ -50,13 +50,6 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
             }
         }
 
-        public fun sendEventCustom(event: String, body: Map<String, Any>) {
-            eventHandlers.reapCollection().forEach {
-                it.get()?.send(event, body)
-            }
-        }
-
-
         fun sharePluginWithRegister(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
             initSharedInstance(
                 flutterPluginBinding.applicationContext,
@@ -105,61 +98,6 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
     sharePluginWithRegister(flutterPluginBinding)
   }
 
-  public fun showIncomingNotification(data: Data) {
-        data.from = "notification"
-        //send BroadcastReceiver
-        context?.sendBroadcast(
-            IncomingCallBroadcastReceiver.getIntentIncoming(
-                requireNotNull(context),
-                data.toBundle()
-            )
-        )
-    }
-
-    public fun showMissCallNotification(data: Data) {
-        incomingCallNotificationManager?.showMissCallNotification(data.toBundle())
-    }
-
-    public fun startCall(data: Data) {
-        context?.sendBroadcast(
-            IncomingCallBroadcastReceiver.getIntentStart(
-                requireNotNull(context),
-                data.toBundle()
-            )
-        )
-    }
-
-    public fun endCall(data: Data) {
-        context?.sendBroadcast(
-            IncomingCallBroadcastReceiver.getIntentEnded(
-                requireNotNull(context),
-                data.toBundle()
-            )
-        )
-    }
-
-    public fun endAllCalls() {
-        val calls = getDataActiveCalls(context)
-        calls.forEach {
-            context?.sendBroadcast(
-                IncomingCallBroadcastReceiver.getIntentEnded(
-                    requireNotNull(context),
-                    it.toBundle()
-                )
-            )
-        }
-        removeAllCalls(context)
-        context?.let { StreamTelecomManager.disconnectAll(it, DisconnectCause.LOCAL) }
-    }
-
-    public fun sendEventCustom(body: Map<String, Any>) {
-        eventHandlers.reapCollection().forEach {
-            it.get()?.send(IncomingCallConstants.ACTION_CALL_CUSTOM, body)
-        }
-    }
-
-
-
   override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
      try {
             when (call.method) {
@@ -173,13 +111,6 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                             data.toBundle()
                         )
                     )
-
-                    result.success(true)
-                }
-
-                "showIncomingCallSilently" -> {
-                    val data = Data(call.arguments() ?: HashMap())
-                    data.from = "notification"
 
                     result.success(true)
                 }
@@ -247,7 +178,8 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                 }
 
                 "isMuted" -> {
-                    result.success(true)
+                    val callId = (call.arguments as? Map<*, *>)?.get("id") as? String
+                    result.success(callId?.let { StreamTelecomManager.isMuted(it) } ?: false)
                 }
 
                 "endCall" -> {
