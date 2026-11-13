@@ -9,7 +9,7 @@
 - [Android] Unused Kotlin API of the plugin is removed: `StreamVideoPushNotificationPlugin.showIncomingNotification`, `showMissCallNotification`, `startCall`, `endCall`, `endAllCalls` and `sendEventCustom`; `IncomingCallBroadcastReceiver.getIntentHeldByCell` and `getIntentUnHeldByCell`; `Utils.backToForeground`, `pxToDp` and `getScreenHeight`; `Data.isOnHold`, `audioRoute` and `isMuted`; and the `ACTION_CALL_AUDIO_STATE_CHANGE`, `ACTION_CALL_HELD`, `ACTION_CALL_UNHELD`, `EXTRA_CALL_APP_NAME` and `EXTRA_CALL_ONGOING_CALL_NOTIFICATION_CHANNEL_NAME` constants. The method channel no longer handles `showIncomingCallSilently`, which did nothing.
 - [Android] The plugin's call model and the helpers that stored it are removed: the `Data` class and the top-level `addCall`, `removeCall`, `removeAllCalls`, `getDataActiveCalls`, `getDataActiveCallsForFlutter`, `putString` and `remove`. `putStrings` and `getString` are internal. Active calls stored by an earlier version are still read.
 - [Android] `IncomingCallNotificationService.startServiceWithAction` and `IncomingCallBroadcastReceiver.getIntent` are removed.
-- [Android] The notification classes are internal: `IncomingCallNotificationManager`, `IncomingCallSoundPlayerManager` (now `RingtonePlayer`), `ImageLoaderProvider`, `SafeTarget` and `IncomingCallNotification`. `StreamVideoPushNotificationPlugin.getIncomingCallNotificationManager` and `getIncomingCallSoundPlayerManager` are removed.
+- [Android] The notification classes are internal: `IncomingCallNotificationManager`, `IncomingCallSoundPlayerManager` (now `RingtonePlayer`), `ImageLoaderProvider`, `SafeTarget` and `IncomingCallNotification`, along with `IncomingCallNotificationManager`'s constants (`NOTIFICATION_CHANNEL_ID_INCOMING`, `NOTIFICATION_CHANNEL_ID_MISSED`, `MISSED_GROUP_KEY`, `EXTRA_TIME_START_CALL`, `PERMISSION_NOTIFICATION_REQUEST_CODE`). The channel ids are unchanged. `StreamVideoPushNotificationPlugin.getIncomingCallNotificationManager` and `getIncomingCallSoundPlayerManager` are removed.
 
 ### 🔄 Changed
 
@@ -30,9 +30,8 @@
 - A mute from the CallKit screen applies to the call it was made on.
 - [Android] A decline or accept from the incoming call notification or the full-screen screen in a process no Flutter engine has attached to, such as after the app was killed, now cancels the incoming notification and closes the full-screen screen. An incoming call is also shown in such a process. The decline still does not reach the backend there, since no Dart code runs to send it.
 - [Android] Accepting or starting a call no longer starts a background service, which Android 8 and later refuse for an app in the background and which then skipped the rest of the accept.
-- [Android] Two calls ringing at once each keep their own notification and caller avatar. The second call's avatar used to be posted under the first call's notification.
+- [Android] Two calls ringing at once each keep their own notification and caller avatar. When the first call's avatar loaded, its notification used to be replaced by the second call's, actions included, and the second call's avatar was posted under the first call's notification.
 - [Android] Avatar, logo and background requests carry only their own call's headers. The first call's headers used to be added to every later request.
-- [Android] The ringtone registers its screen-off receiver once per ring.
 - [Android] `StreamVideoPushNotificationPlatform.isMuted` answers the mute state Telecom reports for the call instead of always `true`. It answers `false` when the Telecom integration does not hold the call, which includes every call while the integration is off (the default below Android 17), and `muteCall` does not change it.
 - `registerDevice` right after `connect`, and `unregisterDevice` on web and desktop, no longer throw.
 - A failing push token read is logged instead of reported as an uncaught error.

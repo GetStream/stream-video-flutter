@@ -6,7 +6,6 @@ import android.graphics.Bitmap
 import android.media.RingtoneManager
 import android.os.Build
 import android.os.Bundle
-import android.text.TextUtils
 import android.text.format.DateFormat
 import android.view.View
 import android.widget.RemoteViews
@@ -93,7 +92,7 @@ internal class MissedCallNotificationBuilder(private val context: Context) {
     }
 
     private fun textOr(text: String?, fallback: Int): String =
-        if (TextUtils.isEmpty(text)) context.getString(fallback) else text!!
+        if (text.isNullOrEmpty()) context.getString(fallback) else text
 
     companion object {
         const val MISSED_GROUP_KEY = "io.getstream.video.flutter.missed_calls"

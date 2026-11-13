@@ -28,6 +28,7 @@ import org.junit.runner.RunWith
 import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.shadows.ShadowPowerManager
 
 /**
  * Pins what the full-screen incoming call activity and the notification trampoline do with an
@@ -135,13 +136,21 @@ class RingingActivitiesTest {
     }
 
     @Test
-    fun `the full-screen activity without call data finishes and is destroyed cleanly`() {
+    fun `the full-screen activity without call data finishes before setting anything up`() {
         val controller = Robolectric.buildActivity(
             IncomingCallActivity::class.java,
             Intent(context, IncomingCallActivity::class.java),
         ).setup()
 
         assertTrue(controller.get().isFinishing)
+        assertNull(ShadowPowerManager.getLatestWakeLock())
+        assertTrue(
+            shadowOf(context).registeredReceivers.none {
+                it.intentFilter.actionsIterator().asSequence().any { action ->
+                    action.endsWith("ACTION_ENDED_CALL_INCOMING")
+                }
+            },
+        )
         controller.destroy()
     }
 

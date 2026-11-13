@@ -5,7 +5,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
-import android.util.Log
 import android.widget.ImageView
 import coil.ImageLoader
 import coil.request.ImageRequest
@@ -16,7 +15,7 @@ internal object ImageLoaderProvider {
     @SuppressLint("StaticFieldLeak")
     private var instance: ImageLoader? = null
 
-    /** One loader for the process. Headers are added per request, not by the loader. */
+    /** One loader for the process; each request carries its own headers. */
     fun get(context: Context): ImageLoader {
         if (instance == null) {
             val client = OkHttpClient.Builder()
@@ -63,30 +62,27 @@ internal object ImageLoaderProvider {
 }
 
 
+/**
+ * Hands a loaded bitmap to [onLoaded] unless [isCancelled], and calls [onFinished] once the load
+ * succeeds or fails.
+ */
 internal open class SafeTarget(
-    private val notificationId: Int,
-    private val onLoaded: (Bitmap) -> Unit
+    private val onLoaded: (Bitmap) -> Unit,
+    private val onFinished: () -> Unit = {},
 ) : Target {
 
     var isCancelled = false
 
     override fun onSuccess(result: Drawable) {
         super.onSuccess(result)
-        Log.d("onSuccess", "-")
         if (!isCancelled) {
             onLoaded((result as BitmapDrawable).bitmap)
         }
-    }
-
-    override fun onStart(placeholder: Drawable?) {
-        super.onStart(placeholder)
-        Log.d("onStart", "-")
+        onFinished()
     }
 
     override fun onError(error: Drawable?) {
         super.onError(error)
-        Log.d("onError", "-")
+        onFinished()
     }
-
-
 }

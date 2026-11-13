@@ -7,6 +7,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import androidx.test.core.app.ApplicationProvider
 import coil.target.Target
+import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationManager
 import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
@@ -17,6 +18,7 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 
 /**
  * Pins that two calls ringing at once keep their own notifications and avatars, with the avatar
@@ -50,6 +52,14 @@ class IncomingCallNotificationManagerTest {
     private fun posted(id: String) =
         notifications.activeNotifications.single { it.id == id.hashCode() }.notification
 
+    /** The call id the posted notification's full-screen intent carries. */
+    private fun callIdOf(id: String) = shadowOf(posted(id).fullScreenIntent).savedIntent
+        .getBundleExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
+        ?.getString(IncomingCallConstants.EXTRA_CALL_ID)
+
+    private fun loadAvatar(id: String) =
+        loads.getValue("https://x.io/$id.png").onSuccess(BitmapDrawable(context.resources, bitmap))
+
     private val bitmap: Bitmap = Bitmap.createBitmap(4, 4, Bitmap.Config.ARGB_8888)
 
     @Test
@@ -63,10 +73,19 @@ class IncomingCallNotificationManagerTest {
         )
         assertEquals("b".hashCode(), manager.currentIncomingNotification?.id)
 
-        loads.getValue("https://x.io/a.png").onSuccess(BitmapDrawable(context.resources, bitmap))
+        loadAvatar("a")
 
         assertNotNull(posted("a").getLargeIcon())
+        assertEquals("a", callIdOf("a"))
         assertNull(posted("b").getLargeIcon())
+
+        loadAvatar("b")
+
+        assertNotNull(posted("b").getLargeIcon())
+        assertEquals("b", callIdOf("b"))
+        assertEquals("a", callIdOf("a"))
+        // The ringing service adopts the current notification, which now shows the avatar.
+        assertNotNull(manager.currentIncomingNotification?.notification?.getLargeIcon())
     }
 
     @Test
@@ -75,9 +94,14 @@ class IncomingCallNotificationManagerTest {
         manager.showIncomingNotification(CallPayloadMapper.toBundle(call("b")))
 
         manager.clearIncomingNotification(CallPayloadMapper.toBundle(call("a")), false)
-        loads.getValue("https://x.io/a.png").onSuccess(BitmapDrawable(context.resources, bitmap))
+        loadAvatar("a")
 
         assertEquals(listOf("b".hashCode()), notifications.activeNotifications.map { it.id })
         assertEquals("b".hashCode(), manager.currentIncomingNotification?.id)
+
+        // Clearing the first call leaves the second call's avatar load running.
+        loadAvatar("b")
+        assertNotNull(posted("b").getLargeIcon())
+        assertEquals("b", callIdOf("b"))
     }
 }

@@ -17,7 +17,8 @@ import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloa
  * Builds the incoming call notification of one call: `CallStyle` from Android 14, custom
  * `RemoteViews` below. Keeps no state between calls.
  *
- * @param sdkInt the API level to build for.
+ * @param sdkInt the API level that decides between `CallStyle` and custom views, and between the
+ * Samsung and the standard small layout.
  */
 internal class IncomingCallNotificationBuilder(
     private val context: Context,
@@ -73,7 +74,13 @@ internal class IncomingCallNotificationBuilder(
             )
             if (call.showCallHandle) builder.setContentText(call.handle)
 
-            return IncomingNotificationContent(id, avatarUrl, builder, emptyList(), callStyle = true)
+            return IncomingNotificationContent(
+                id,
+                avatarUrl,
+                builder,
+                emptyList(),
+                callStyle = true,
+            )
         }
 
         val bigViews = RemoteViews(context.packageName, R.layout.layout_custom_notification)

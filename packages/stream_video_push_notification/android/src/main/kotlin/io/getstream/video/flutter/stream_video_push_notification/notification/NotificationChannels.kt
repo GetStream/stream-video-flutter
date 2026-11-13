@@ -18,9 +18,9 @@ internal object NotificationChannels {
     const val DEFAULT_MISSED_NAME = "Missed Call"
 
     /**
-     * Creates both channels on Android 8 and later, with the given names for channels that do not
-     * exist yet. An existing incoming channel keeps its name but loses its sound and is set to
-     * public on the lock screen and high importance again.
+     * Creates both channels on Android 8 and later, with the given names, high importance, no
+     * sound on the incoming channel and public lock-screen visibility for it. A channel that
+     * already exists keeps its settings; the system only takes a new name or description for it.
      */
     fun ensureCreated(context: Context, incomingName: String?, missedName: String?) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return

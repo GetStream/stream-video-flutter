@@ -81,7 +81,6 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
     private val components: RingingComponents?
         get() = context?.let { RingingComponents.get(it) }
 
-
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     sharePluginWithRegister(flutterPluginBinding)
   }

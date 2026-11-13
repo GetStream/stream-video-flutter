@@ -16,15 +16,15 @@ import io.getstream.video.flutter.stream_video_push_notification.notification.Ri
 
 /**
  * Posts and clears the incoming and missed-call notifications and owns the ringtone of the call
- * that currently rings. Each call's notification is built separately and keeps its own avatar
- * load, so two calls at once do not share either.
+ * that currently rings. Each call has its own notification content and its own avatar load.
  */
 internal class IncomingCallNotificationManager(
     private val context: Context,
     private val ringtone: RingtonePlayer,
     private val incomingBuilder: IncomingCallNotificationBuilder =
         IncomingCallNotificationBuilder(context),
-    private val missedBuilder: MissedCallNotificationBuilder = MissedCallNotificationBuilder(context),
+    private val missedBuilder: MissedCallNotificationBuilder =
+        MissedCallNotificationBuilder(context),
     private val loadCircleImage: (Context, String, Map<String, String>, Target) -> Unit =
         AvatarLoader::loadCircle,
 ) {
@@ -37,7 +37,7 @@ internal class IncomingCallNotificationManager(
     internal var currentIncomingNotification: IncomingCallNotification? = null
         private set
 
-    /** Pending avatar loads, by notification id. */
+    /** Avatar loads still running, by notification id. */
     private val incomingAvatarTargets = mutableMapOf<Int, SafeTarget>()
     private val missedAvatarTargets = mutableMapOf<Int, SafeTarget>()
 
@@ -57,7 +57,11 @@ internal class IncomingCallNotificationManager(
 
         content.avatarUrl?.let { url ->
             loadAvatar(incomingAvatarTargets, content.id, url, data) { bitmap ->
-                notificationManager.notify(content.id, content.withAvatar(bitmap))
+                val withAvatar = content.withAvatar(bitmap)
+                if (currentIncomingNotification?.id == content.id) {
+                    currentIncomingNotification = IncomingCallNotification(content.id, withAvatar)
+                }
+                notificationManager.notify(content.id, withAvatar)
             }
         }
 
@@ -125,10 +129,14 @@ internal class IncomingCallNotificationManager(
      */
     internal fun stopIncomingCallRinging() {
         ringtone.stop()
+        currentIncomingNotification?.let { incomingAvatarTargets.remove(it.id)?.isCancelled = true }
         currentIncomingNotification = null
     }
 
-    /** Loads [url] for notification [id], replacing a load still pending for that id. */
+    /**
+     * Loads [url] for notification [id], cancelling a load still running for that id. The load is
+     * forgotten once it finishes.
+     */
     private fun loadAvatar(
         targets: MutableMap<Int, SafeTarget>,
         id: Int,
@@ -137,7 +145,8 @@ internal class IncomingCallNotificationManager(
         onLoaded: (Bitmap) -> Unit,
     ) {
         targets.remove(id)?.isCancelled = true
-        val target = SafeTarget(id, onLoaded)
+        lateinit var target: SafeTarget
+        target = SafeTarget(onLoaded, onFinished = { targets.remove(id, target) })
         targets[id] = target
         loadCircleImage(context, url, AvatarLoader.headers(data), target)
     }

@@ -19,6 +19,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.shadows.ShadowBuild
 
 /**
  * Pins the incoming call notification for API 34 and later (`CallStyle`) and for API 33 and
@@ -75,7 +76,7 @@ class IncomingCallNotificationBuilderTest {
     }
 
     @Test
-    fun `on API 33 it uses the custom views, with the actions in them`() {
+    fun `on API 33 it uses the custom views and no notification actions`() {
         val content = build(Build.VERSION_CODES.TIRAMISU)
         val notification = content.notification
 
@@ -84,6 +85,19 @@ class IncomingCallNotificationBuilderTest {
         assertEquals(R.layout.layout_custom_small_notification, notification.contentView.layoutId)
         assertEquals(0, notification.actions?.size ?: 0)
         assertNotNull(notification.fullScreenIntent)
+    }
+
+    @Test
+    fun `on API 33 a Samsung device gets the Samsung small layout`() {
+        ShadowBuild.setManufacturer("samsung")
+
+        val notification = build(Build.VERSION_CODES.TIRAMISU).notification
+
+        assertEquals(
+            R.layout.layout_custom_small_ex_notification,
+            notification.contentView.layoutId,
+        )
+        assertEquals(R.layout.layout_custom_notification, notification.bigContentView.layoutId)
     }
 
     @Test
