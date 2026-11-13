@@ -14,10 +14,10 @@
   - `endCall`, `endAllCalls`, `connectedCall`, `muteCall`, `holdCall` and `saveEndCall`: from Dart, `StreamVideoPushNotificationManager`'s `endCall` or `endCallByCid`, `endAllCalls`, `setCallConnected`, `muteCall` or `setCallMutedByCid`, `holdCall` and `reportCallEnded`. Natively, a `CXEndCallAction`, `CXSetMutedCallAction` or `CXSetHeldCallAction` through your own `CXCallController` reaches the plugin's provider as well.
   - `sendEventCustom`: none; use your app's own platform channel.
   - `initCallkitProvider`: none needed; the plugin sets up its provider when it registers.
-- [iOS] `StreamVideoPKDelegateManager` is renamed `VoIPPushRegistryHandler`. The old name is a deprecated alias.
 
 ### ⚠️ Deprecated
 
+- [iOS] `StreamVideoPKDelegateManager` is renamed `VoIPPushRegistryHandler`. The old name still works as a deprecated alias with the same members, so an `AppDelegate` that calls `StreamVideoPKDelegateManager.shared.registerForPushNotifications()` compiles and rings unchanged, with a deprecation warning.
 - `IOSPushConfiguration.audioSessionActive` and `IOSParams.audioSessionActive`, and on iOS `CallData.audioSessionActive` and `StreamVideoPushConfiguration.audioSessionActive`, have no effect: CallKit activates the audio session. `dart fix --apply` removes the Dart arguments.
 
 ### 🐞 Fixed
