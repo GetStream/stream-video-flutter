@@ -4,8 +4,7 @@ import android.os.Bundle
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
-// Reading the stored active calls skips keys this class no longer declares, such as the
-// isOnHold, audioRoute and isMuted written by earlier versions.
+// Keys in the stored JSON that this class does not declare are ignored.
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Suppress("UNCHECKED_CAST")
 data class Data(val args: Map<String, Any?>) {

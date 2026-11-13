@@ -76,9 +76,11 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
     throw UnimplementedError('muteCall() has not been implemented.');
   }
 
-  /// Get Callkit Mic Status (muted/unmuted).
-  /// On iOS, using Callkit(update call ui).
-  /// On Android, Nothing(only callback event listener).
+  /// Whether the system call UI has the call muted.
+  ///
+  /// On iOS this is CallKit's mute state, which [muteCall] sets. On Android it
+  /// is the mute state Telecom reports while the Telecom integration holds the
+  /// call, and `false` otherwise; [muteCall] does not change it there.
   Future<bool> isMuted(String id) {
     throw UnimplementedError('isMuted() has not been implemented.');
   }

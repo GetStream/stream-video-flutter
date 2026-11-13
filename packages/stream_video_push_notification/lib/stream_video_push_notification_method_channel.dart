@@ -91,9 +91,11 @@ class MethodChannelStreamVideoPushNotification
     });
   }
 
-  /// Get Callkit Mic Status (muted/unmuted).
-  /// On iOS, using Callkit(update call ui).
-  /// On Android, Nothing(only callback event listener).
+  /// Whether the system call UI has the call muted.
+  ///
+  /// On iOS this is CallKit's mute state, which [muteCall] sets. On Android it
+  /// is the mute state Telecom reports while the Telecom integration holds the
+  /// call, and `false` otherwise; [muteCall] does not change it there.
   @override
   Future<bool> isMuted(String id) async {
     return (await methodChannel.invokeMethod('isMuted', {'id': id})) as bool? ??

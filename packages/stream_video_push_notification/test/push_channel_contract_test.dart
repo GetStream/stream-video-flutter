@@ -108,8 +108,8 @@ const _androidOnlyEvents = {
 };
 
 /// `ACTION_*` constants the Android plugin declares for its own intents, which
-/// never reach the event channel: the ringing one starts the foreground
-/// service.
+/// never reach the event channel: `ACTION_CALL_RINGING` starts the ringing
+/// foreground service.
 const _androidInternalActions = {
   'io.getstream.video.ACTION_CALL_RINGING',
 };

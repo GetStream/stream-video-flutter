@@ -3,9 +3,10 @@ package io.getstream.video.flutter.stream_video_push_notification
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
+import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomCall
+import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomCallRepository
 import io.mockk.every
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
+import io.mockk.mockk
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -28,27 +29,37 @@ class StreamVideoPushNotificationPluginTest {
     fun attachPlugin() {
         resetPlugin()
         dart = FakeDartSide(context)
-        mockkObject(StreamTelecomManager)
     }
 
     @After
     fun detachPlugin() {
-        unmockkObject(StreamTelecomManager)
+        setTelecomRepository(null)
         resetPlugin()
     }
 
     @Test
-    fun `isMuted answers the mute state Telecom reported for the call`() {
-        every { StreamTelecomManager.isMuted(CALL_ID) } returns true
+    fun `isMuted answers the mute state of the call Telecom holds`() {
+        val call = mockk<TelecomCall.Registered>()
+        setTelecomRepository(mockk { every { getCall(CALL_ID) } returns call })
+
+        every { call.isMuted } returns true
         assertEquals(true, dart.invoke("isMuted", mapOf("id" to CALL_ID)))
 
-        every { StreamTelecomManager.isMuted(CALL_ID) } returns false
+        every { call.isMuted } returns false
         assertEquals(false, dart.invoke("isMuted", mapOf("id" to CALL_ID)))
     }
 
     @Test
     fun `isMuted answers false for a call Telecom does not hold`() {
-        // The real lookup: nothing registered this id with Telecom.
+        setTelecomRepository(mockk { every { getCall(CALL_ID) } returns null })
+
+        assertEquals(false, dart.invoke("isMuted", mapOf("id" to CALL_ID)))
+    }
+
+    @Test
+    fun `isMuted answers false while the Telecom integration has no repository`() {
+        setTelecomRepository(null)
+
         assertEquals(false, dart.invoke("isMuted", mapOf("id" to CALL_ID)))
     }
 
@@ -58,11 +69,11 @@ class StreamVideoPushNotificationPluginTest {
         assertEquals(false, dart.invoke("isMuted"))
     }
 
-    /** Forgets the plugin's process-wide instance, so each test attaches with its own context. */
-    private fun resetPlugin() {
-        StreamVideoPushNotificationPlugin::class.java.getDeclaredField("instance").apply {
+    /** Replaces the repository [StreamTelecomManager] reads, which it otherwise builds itself. */
+    private fun setTelecomRepository(repository: TelecomCallRepository?) {
+        StreamTelecomManager::class.java.getDeclaredField("repository").apply {
             isAccessible = true
-            set(null, null)
+            set(null, repository)
         }
     }
 

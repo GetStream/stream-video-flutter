@@ -234,13 +234,13 @@ class DataTest {
     }
 
     @Test
-    fun `an active call stored with keys Data no longer declares still reads`() {
-        // isOnHold, audioRoute and isMuted, as earlier versions wrote them.
+    fun `an active call stored with keys Data does not declare still reads`() {
         putString(
             context,
             "ACTIVE_CALLS",
             """[{"id":"call-uuid","callerName":"Ada","extra":{"callCid":"default:ada"},""" +
-                """"isAccepted":true,"isOnHold":false,"audioRoute":1,"isMuted":false}]""",
+                """"isAccepted":true,"onHold":false,"isOnHold":false,"audioRoute":1,""" +
+                """"muted":false,"isMuted":false}]""",
         )
 
         val restored = getDataActiveCalls(context)

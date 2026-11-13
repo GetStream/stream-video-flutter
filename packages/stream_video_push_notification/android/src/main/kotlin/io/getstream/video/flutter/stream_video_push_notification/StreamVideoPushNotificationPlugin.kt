@@ -2,12 +2,9 @@ package io.getstream.video.flutter.stream_video_push_notification
 
 import android.annotation.SuppressLint
 import android.telecom.DisconnectCause
-import androidx.annotation.NonNull
 import android.app.Activity
 import android.app.NotificationManager
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -18,7 +15,6 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
-import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationManager
 import io.getstream.video.flutter.stream_video_push_notification.Utils.Companion.reapCollection
 import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
 
