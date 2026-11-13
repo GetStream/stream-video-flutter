@@ -14,7 +14,8 @@ export 'src/third_party/flutter_webrtc/native/android/audio_configuration.dart';
 export 'src/third_party/flutter_webrtc/native/audio_management.dart';
 export 'src/third_party/flutter_webrtc/native/camera_utils.dart';
 export 'src/third_party/flutter_webrtc/native/factory_impl.dart'
-    if (dart.library.js_interop) 'src/third_party/flutter_webrtc/web/factory_impl.dart';
+    if (dart.library.js_interop) 'src/third_party/flutter_webrtc/web/factory_impl.dart'
+    hide eventStream;
 export 'src/third_party/flutter_webrtc/native/ios/audio_configuration.dart';
 export 'src/third_party/flutter_webrtc/native/ios/audio_management.dart';
 export 'src/third_party/flutter_webrtc/native/native_peer_connection_factory.dart'

@@ -22,15 +22,16 @@ class InterruptionEndEvent extends InterruptionEvent {}
 
 abstract class NativeWebRtcEvent {}
 
+/// A screen share stopped outside the app's control.
 class ScreenSharingStoppedEvent extends NativeWebRtcEvent {
-  ScreenSharingStoppedEvent({this.data});
-  final Map<dynamic, dynamic>? data;
+  ScreenSharingStoppedEvent({this.trackId});
+
+  /// The track whose capture stopped. Null for the iOS broadcast extension.
+  final String? trackId;
 }
 
-class ScreenSharingStartedEvent extends NativeWebRtcEvent {
-  ScreenSharingStartedEvent({this.data});
-  final Map<dynamic, dynamic>? data;
-}
+/// The iOS broadcast extension started a screen share.
+class ScreenSharingStartedEvent extends NativeWebRtcEvent {}
 
 /// Emitted (iOS) when the active audio output route changes outside of an
 /// explicit [Call.setAudioOutputDevice] call, e.g. when the user picks a
@@ -63,7 +64,6 @@ class RtcMediaDeviceNotifier {
     rtc_audio.setAudioTraceHandler(_tracer.trace);
 
     _listenForAudioProcessingStateChanges();
-    _listenForSpeechActivityChanges();
   }
 
   static RtcMediaDeviceNotifier? _instance;
@@ -97,12 +97,22 @@ class RtcMediaDeviceNotifier {
   Stream<List<RtcMediaDevice>> get onDeviceChange => _devicesController.stream;
   final _devicesController = BehaviorSubject<List<RtcMediaDevice>>();
 
+  /// Whether the local user started or stopped speaking while the microphone
+  /// is muted.
   Stream<SpeechActivityEvent> get speechActivityStream =>
-      _speechActivityController.stream;
-  final _speechActivityController =
-      StreamController<SpeechActivityEvent>.broadcast();
+      platformEvents.onSpeechActivity.map(
+        (activity) => switch (activity) {
+          rtc.SpeechActivity.started => const SpeechActivityStarted(),
+          rtc.SpeechActivity.ended => const SpeechActivityEnded(),
+        },
+      );
 
   final _tracer = Tracer(null);
+
+  /// The events the WebRTC plugin reports. Replaceable in tests, because the
+  /// plugin reports interruptions only on Android and iOS hosts.
+  @visibleForTesting
+  rtc.WebRtcPlatformEvents platformEvents = rtc.platformEvents;
 
   /// How long device-change events are collected before the devices are
   /// enumerated once for all of them.
@@ -149,103 +159,59 @@ class RtcMediaDeviceNotifier {
     void Function()? onInterruptionEnd,
     rtc.AndroidInterruptionSource androidInterruptionSource =
         rtc.AndroidInterruptionSource.audioFocusAndTelephony,
-    @Deprecated(
-      'Audio focus is now handled in a way that does not require this parameter. It will be removed in the next major version.',
-    )
-    rtc.AndroidAudioAttributesUsageType? androidAudioAttributesUsageType,
-    @Deprecated(
-      'Audio focus is now handled in a way that does not require this parameter. It will be removed in the next major version.',
-    )
-    rtc.AndroidAudioAttributesContentType? androidAudioAttributesContentType,
-  }) {
-    return rtc.handleCallInterruptionCallbacks(
-      onInterruptionStart,
-      onInterruptionEnd,
+  }) async {
+    await platformEvents.enableInterruptionEvents(
       androidInterruptionSource: androidInterruptionSource,
     );
+
+    final cancelPrevious = _interruptionSubscription?.cancel();
+    _interruptionSubscription = platformEvents.onInterruption.listen((
+      interruption,
+    ) {
+      switch (interruption) {
+        case rtc.AudioInterruption.started:
+          onInterruptionStart?.call();
+        case rtc.AudioInterruption.ended:
+          onInterruptionEnd?.call();
+      }
+    });
+    await cancelPrevious;
   }
 
+  StreamSubscription<rtc.AudioInterruption>? _interruptionSubscription;
+
+  /// The screen share and audio route changes the platform reports.
   Stream<NativeWebRtcEvent> nativeWebRtcEventsStream() {
-    return rtc.eventStream
-        .map<NativeWebRtcEvent?>((data) {
-          if (data.isEmpty) return null;
-
-          final event = data.keys.first;
-          final values = data.values.first;
-
-          if (values is! Map<dynamic, dynamic>?) return null;
-
-          switch (event) {
-            case 'screenSharingStopped':
-              return ScreenSharingStoppedEvent(data: values);
-            case 'screenSharingStarted':
-              return ScreenSharingStartedEvent(data: values);
-            case 'onAudioRouteChange':
-              final deviceId = values?['deviceId'] as String?;
-              if (deviceId == null || deviceId.isEmpty) return null;
-              return AudioRouteChangedEvent(
-                device: RtcMediaDevice(
-                  id: deviceId,
-                  label: values?['label'] as String? ?? deviceId,
-                  groupId: values?['groupId'] as String?,
-                  kind: RtcMediaDeviceKind.audioOutput,
-                ),
-              );
-            default:
-              return null;
-          }
-        })
-        .whereNotNull()
-        .asBroadcastStream();
+    final events = platformEvents;
+    return Rx.merge<NativeWebRtcEvent>([
+      events.onScreenSharingStopped.map(
+        (stopped) => ScreenSharingStoppedEvent(trackId: stopped.trackId),
+      ),
+      events.onScreenSharingStarted.map((_) => ScreenSharingStartedEvent()),
+      events.onAudioRouteChanged.map(
+        (route) => AudioRouteChangedEvent(
+          device: RtcMediaDevice(
+            id: route.deviceId,
+            label: route.label,
+            groupId: route.groupId,
+            kind: RtcMediaDeviceKind.audioOutput,
+          ),
+        ),
+      ),
+    ]).asBroadcastStream();
   }
 
   void _listenForAudioProcessingStateChanges() {
-    rtc.eventStream.listen((data) {
-      if (data.isEmpty) return;
-
-      final event = data.keys.first;
-      if (event != 'onAudioProcessingStateChanged') return;
-
-      final values = data.values.first;
-      if (values is! Map<dynamic, dynamic>) return;
-
-      final stereoPlayoutEnabled =
-          values['stereoPlayoutEnabled'] as bool? ?? false;
-      final voiceProcessingEnabled =
-          values['voiceProcessingEnabled'] as bool? ?? false;
-      final voiceProcessingBypassed =
-          values['voiceProcessingBypassed'] as bool? ?? false;
-      final voiceProcessingAGCEnabled =
-          values['voiceProcessingAGCEnabled'] as bool? ?? false;
-
+    platformEvents.onAudioProcessingStateChanged.listen((state) {
       _tracer.trace(
         TraceTag.audioProcessingStateChanged,
         {
-          'stereoPlayoutEnabled': stereoPlayoutEnabled,
-          'voiceProcessingEnabled': voiceProcessingEnabled,
-          'voiceProcessingBypassed': voiceProcessingBypassed,
-          'voiceProcessingAGCEnabled': voiceProcessingAGCEnabled,
+          'stereoPlayoutEnabled': state.stereoPlayoutEnabled,
+          'voiceProcessingEnabled': state.voiceProcessingEnabled,
+          'voiceProcessingBypassed': state.voiceProcessingBypassed,
+          'voiceProcessingAGCEnabled': state.voiceProcessingAGCEnabled,
         },
       );
-    });
-  }
-
-  void _listenForSpeechActivityChanges() {
-    rtc.eventStream.listen((data) {
-      if (data.isEmpty) return;
-
-      final event = data.keys.first;
-      if (event != 'onSpeechActivityChanged') return;
-
-      final values = data.values.first;
-      if (values is! Map<dynamic, dynamic>) return;
-
-      switch (values['type']) {
-        case 'started':
-          _speechActivityController.add(const SpeechActivityStarted());
-        case 'ended':
-          _speechActivityController.add(const SpeechActivityEnded());
-      }
     });
   }
 
@@ -488,13 +454,15 @@ class RtcMediaDeviceNotifier {
   Future<void> reinitializeAudioConfiguration(
     AudioConfigurationPolicy policy,
   ) async {
+    // Leaves the Apple audio session as it is; iOS gets the stereo playout
+    // preference below.
+    final options = policy.toFactoryOptions();
     await rtc.WebRTC.initialize(
       refresh: true,
-      options: {
-        'bypassVoiceProcessing': policy.bypassVoiceProcessing,
-        if (CurrentPlatform.isAndroid)
-          'androidAudioConfiguration': policy.getAndroidConfiguration().toMap(),
-      },
+      factoryOptions: rtc.PeerConnectionFactoryOptions(
+        bypassVoiceProcessing: options.bypassVoiceProcessing,
+        androidAudioConfiguration: options.androidAudioConfiguration,
+      ),
     );
 
     // On iOS, configure stereo playout preference based on the policy.

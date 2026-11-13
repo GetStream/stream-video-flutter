@@ -1,3 +1,5 @@
+import 'package:meta/meta.dart';
+
 import '../desktop_capturer.dart';
 
 export 'package:stream_dart_webrtc/stream_dart_webrtc.dart'
@@ -12,16 +14,6 @@ Future<void> setVideoEffects(
   throw UnimplementedError('setVideoEffects() is not supported on web');
 }
 
-Future<void> handleCallInterruptionCallbacks(
-  void Function()? onInterruptionStart,
-  void Function()? onInterruptionEnd, {
-  Object? androidInterruptionSource,
-  Object? androidAudioAttributesUsageType,
-  Object? androidAudioAttributesContentType,
-}) {
-  throw UnimplementedError(
-    'handleCallInterruptionCallbacks() is not supported on web',
-  );
-}
-
+/// The raw events of the plugin's event channel. Empty on web.
+@internal
 Stream<Map<String, dynamic>> get eventStream => const Stream.empty();

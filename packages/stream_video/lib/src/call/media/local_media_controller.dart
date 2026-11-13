@@ -600,7 +600,7 @@ class LocalMediaController {
             // On iOS only one broadcast extension can be active at a time
             setScreenShareEnabled(enabled: false);
           } else {
-            final trackId = event.data?['trackId'] as String?;
+            final trackId = event.trackId;
             final localParticipant = _state.localParticipant;
             if (trackId != null && localParticipant != null) {
               final track = _session()?.getTrack(
