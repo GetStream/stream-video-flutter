@@ -33,6 +33,10 @@ class TelecomIntegrationTest {
     private val events = mutableListOf<Pair<String, Map<String, Any?>>>()
 
     private val listener = object : TelecomIntegration.Listener {
+        override fun onIncomingCallRegistered() {
+            reported += "incoming registered"
+        }
+
         override fun onAnsweredBySystem(call: RingingCall) {
             reported += "answered ${call.id}"
         }
@@ -229,7 +233,7 @@ class TelecomIntegrationTest {
         repository.answer(CALL_ID, TelecomEventSource.APP)
         repository.answer(CALL_ID, TelecomEventSource.SYS)
 
-        assertEquals(listOf("answered $CALL_ID"), reported)
+        assertEquals(listOf("incoming registered", "answered $CALL_ID"), reported)
     }
 
     @Test
@@ -254,7 +258,7 @@ class TelecomIntegrationTest {
                 "disconnected connected connected=true",
                 "disconnected outgoing connected=true",
             ),
-            reported,
+            reported.filter { it.startsWith("disconnected") },
         )
     }
 
@@ -265,10 +269,35 @@ class TelecomIntegrationTest {
         repository.completeRegistration(CALL_ID)
 
         repository.disconnect(CALL_ID, TelecomEventSource.APP)
+        telecom.releaseIfIdle()
+
+        assertEquals(listOf("incoming registered"), reported)
+        assertTrue(repository.released)
+    }
+
+    @Test
+    fun `the accept that follows an answer from the system asks Telecom for nothing more`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        repository.completeRegistration(CALL_ID)
+
+        repository.answer(CALL_ID, TelecomEventSource.SYS)
         telecom.answer(CALL_ID)
 
+        assertEquals(emptyList<TelecomCallAction>(), repository.actions(CALL_ID))
+    }
+
+    @Test
+    fun `an incoming call is reported once it is registered, an outgoing one is not`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        telecom.registerOutgoingCall(call.copy(id = "outgoing"))
         assertEquals(emptyList<String>(), reported)
-        assertFalse(repository.hasAnyCalls())
+
+        repository.completeRegistration(CALL_ID)
+        repository.completeRegistration("outgoing")
+
+        assertEquals(listOf("incoming registered"), reported)
     }
 
     // Queries and teardown.

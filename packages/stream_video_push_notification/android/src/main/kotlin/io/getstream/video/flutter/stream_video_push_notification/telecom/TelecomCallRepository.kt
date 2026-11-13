@@ -5,7 +5,7 @@ import android.net.Uri
 /** The calls this app has registered with the Android Telecom stack. */
 internal interface TelecomCallRepository {
 
-    /** Registers the app with Telecom now, so the first call does not pay for it. */
+    /** Registers the app with Telecom now rather than on the first call. */
     fun warmUp()
 
     /** Sets who hears about the calls' Telecom transitions. */

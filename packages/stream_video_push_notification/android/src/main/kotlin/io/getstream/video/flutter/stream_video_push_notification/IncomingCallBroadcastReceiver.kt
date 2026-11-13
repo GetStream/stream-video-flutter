@@ -8,8 +8,8 @@ import android.os.Bundle
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 
 /**
- * Receives the call actions sent as broadcasts, from the plugin, the notifications and Telecom, and
- * hands them to the [RingingComponents] controller.
+ * Receives the call actions sent as broadcasts, from the plugin and the notifications, and hands
+ * them to the [RingingComponents] controller.
  */
 class IncomingCallBroadcastReceiver : BroadcastReceiver() {
     companion object {

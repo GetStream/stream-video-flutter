@@ -74,6 +74,7 @@ internal class CoreTelecomCallRepository(
         callsManagerFactory(context.applicationContext)
     }
 
+    /** Creates the manager, which registers the app with Telecom. */
     override fun warmUp() {
         callsManager
     }

@@ -10,7 +10,6 @@ import android.telecom.DisconnectCause
 import android.util.Log
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallBroadcastReceiver
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
-import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationService
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -38,8 +37,11 @@ internal class TelecomIntegration(
     private val mainThread: (Runnable) -> Unit = { Handler(Looper.getMainLooper()).post(it) },
 ) {
 
-    /** What the system did to a call outside the app, and the events it reports. */
+    /** What happened to a call in Telecom, and the events it reports. */
     interface Listener {
+        /** An incoming call is now in the Telecom stack. */
+        fun onIncomingCallRegistered()
+
         /** The user answered [call] somewhere else, such as on a watch or in a car. */
         fun onAnsweredBySystem(call: RingingCall)
 
@@ -95,10 +97,7 @@ internal class TelecomIntegration(
      */
     private val selfRequestedHold = ConcurrentHashMap<String, Boolean>()
 
-    /**
-     * The calls registered with Telecom, from register until Telecom drops them. The call store
-     * forgets a call when its ring ends, which for an accepted call is before Telecom does.
-     */
+    /** The calls registered with Telecom, from register until Telecom drops them. */
     private val trackedCalls = ConcurrentHashMap<String, RingingCall>()
 
     private val actionLock = Any()
@@ -359,12 +358,7 @@ internal class TelecomIntegration(
         trackedCalls.remove(callId)
     }
 
-    /**
-     * Releases the Telecom registration, but only when no call is tracked or registered.
-     *
-     * A Flutter app's background isolate attaches and detaches routinely, including while a call
-     * is ringing or connected, so engine detach calls this rather than [release].
-     */
+    /** Releases the Telecom registration, but only when no call is tracked or registered. */
     fun releaseIfIdle() {
         if (trackedCalls.isNotEmpty() || repository?.hasAnyCalls() == true) {
             Log.d(TAG, "[releaseIfIdle] calls still in flight; keeping the telecom registration")
@@ -400,9 +394,7 @@ internal class TelecomIntegration(
             Log.d(TAG, "[onCallRegistered] $callId registered with telecom, incoming=$incoming")
 
             if (incoming) {
-                // The ringing foreground service is promoted again now that the call exists in
-                // the Telecom stack, where the platform can grant it while-in-use capabilities.
-                IncomingCallNotificationService.repromoteRingingForeground()
+                mainThread { listener?.onIncomingCallRegistered() }
             } else {
                 // An outgoing call stays dialing until it is activated, here once its scope is up.
                 processAction(callId, TelecomCallAction.Activate)
@@ -417,7 +409,6 @@ internal class TelecomIntegration(
         override fun onIsCallAnswered(callId: String, source: TelecomEventSource) {
             Log.d(TAG, "[onIsCallAnswered] $callId answered, source=$source")
             connectedCallIds.add(callId)
-            // An answer the app asked for has already gone through the ringing flow.
             if (source != TelecomEventSource.SYS) return
 
             val call = trackedCalls[callId] ?: return

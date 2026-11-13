@@ -10,6 +10,7 @@ import android.util.Log
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallBroadcastReceiver
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationManager
+import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationService
 import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
 
 /**
@@ -18,7 +19,8 @@ import io.getstream.video.flutter.stream_video_push_notification.telecom.Telecom
  *
  * The broadcast receiver, the notification trampoline and the full-screen activity call its steps
  * with the call as the Bundle [CallPayloadMapper.toBundle] writes; the method channel also calls
- * it by call id or cid. A step that fails is logged and the rest of it skipped.
+ * it by call id or cid, and the Telecom integration with what the system did to a call. A step
+ * that fails is logged and the rest of it skipped.
  */
 internal class RingingController(
     private val context: Context,
@@ -180,6 +182,14 @@ internal class RingingController(
             step { telecom.answer(call.id) }
             onEnded(CallPayloadMapper.toBundle(call), keepSystemCall = true)
         }
+    }
+
+    /**
+     * Promotes the ringing foreground service again, so it is promoted with the call in the
+     * Telecom stack.
+     */
+    override fun onIncomingCallRegistered() {
+        IncomingCallNotificationService.repromoteRingingForeground()
     }
 
     /** Runs the accept step for a call the user answered outside the app. */
