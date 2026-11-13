@@ -713,7 +713,35 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
 
     _cancelIncomingAutoRejectTimerByCid(cid);
 
-    final call = await consumeIncomingCall(uuid: uuid, cid: cid);
+    // With no call for the cid here any more, the decline can be the native
+    // echo of a ring this device already answered: rejecting in the app
+    // leaves the call, which ends its native call. Reject only a ring that is
+    // still open, so that echo does not reject it again through a new call.
+    CallMetadata? metadata;
+    if (_cachedRingingCall(cid) == null) {
+      final callResult = await _client.getCall(
+        callCid: StreamCallCid(cid: cid),
+      );
+      if (callResult is! Success<CallReceivedData>) {
+        _logger.d(() => '[onCallDecline] failed to get call: $callResult');
+        return;
+      }
+
+      metadata = callResult.data.metadata;
+      final ringingState = metadata.ringingStateFor(_state.currentUser.id);
+      if (!ringingState.isRinging) {
+        _logger.d(
+          () => '[onCallDecline] skipped, no longer ringing ($ringingState)',
+        );
+        return;
+      }
+    }
+
+    final call = await consumeIncomingCall(
+      uuid: uuid,
+      cid: cid,
+      metadata: metadata,
+    );
     final callToReject = call.getDataOrNull();
     if (callToReject == null) return;
 
@@ -911,6 +939,13 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
     );
   }
 
+  /// The call this client already holds for the ring of [cid], made by
+  /// consuming a ringing event; `null` when there is none.
+  Call? _cachedRingingCall(String cid) {
+    final call = _state.ringingCalls[cid] ?? _state.incomingCall.value;
+    return call?.callCid.value == cid ? call : null;
+  }
+
   @override
   Future<Result<Call>> consumeIncomingCall({
     required String uuid,
@@ -929,13 +964,12 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
     }
 
     // If call was already created by consuming ringing event, use the same instance.
-    final existingCall = _state.ringingCalls[cid] ?? _state.incomingCall.value;
-    if (existingCall?.callCid.value == cid) {
-      final call = existingCall!;
+    final existingCall = _cachedRingingCall(cid);
+    if (existingCall != null) {
       if (preferences != null) {
-        call.updateCallPreferences(preferences);
+        existingCall.updateCallPreferences(preferences);
       }
-      return Result.success(call);
+      return Result.success(existingCall);
     }
 
     final callCid = StreamCallCid(cid: cid);
@@ -951,12 +985,12 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
 
       // Re-check: a concurrent consume for the same cid may have populated the
       // cache while the fetch above was in flight.
-      final cached = _state.ringingCalls[cid] ?? _state.incomingCall.value;
-      if (cached?.callCid.value == cid) {
+      final cached = _cachedRingingCall(cid);
+      if (cached != null) {
         if (preferences != null) {
-          cached!.updateCallPreferences(preferences);
+          cached.updateCallPreferences(preferences);
         }
-        return Result.success(cached!);
+        return Result.success(cached);
       }
     }
 

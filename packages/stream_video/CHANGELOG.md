@@ -202,6 +202,8 @@
 - On iOS, a broadcast screen share cancelled before it starts no longer keeps its track running.
 - On iOS, a later start of a broadcast screen share no longer publishes its track again.
 - A join or fast reconnect fails when the device makes no generic SDP offer, instead of joining with an empty one.
+- An incoming ring joined before the user accepts it, by a call screen opened as it rings say, no longer replaces the call the user is in or cancels their own outgoing ring when `allowMultipleActiveCalls` is false. The call becomes the active call once accepted, and accepting is what replaces the other one.
+- Declining a ring in the app no longer rejects it a second time when the native call screen reports its end as a decline.
 
 ## Upcoming (minor)
 
