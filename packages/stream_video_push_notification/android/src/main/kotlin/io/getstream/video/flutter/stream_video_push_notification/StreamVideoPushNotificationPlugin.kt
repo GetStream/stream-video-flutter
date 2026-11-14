@@ -16,6 +16,9 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.getstream.video.flutter.stream_video_push_notification.Utils.Companion.reapCollection
+import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
+import io.getstream.video.flutter.stream_video_push_notification.core.CallStore
+import io.getstream.video.flutter.stream_video_push_notification.core.PrefsCallStore
 import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
 
 class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, ActivityAware, PluginRegistry.RequestPermissionsResultListener {
@@ -94,17 +97,19 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
     sharePluginWithRegister(flutterPluginBinding)
   }
 
+  private fun callStore(): CallStore? = context?.let { PrefsCallStore(it) }
+
   override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
      try {
             when (call.method) {
                 "showIncomingCall" -> {
-                    val data = Data(call.arguments() ?: HashMap())
-                    data.from = "notification"
+                    val data = CallPayloadMapper.fromArgs(call.arguments() ?: emptyMap())
+                        .copy(from = "notification")
                     //send BroadcastReceiver
                     context?.sendBroadcast(
                         IncomingCallBroadcastReceiver.getIntentIncoming(
                             requireNotNull(context),
-                            data.toBundle()
+                            CallPayloadMapper.toBundle(data)
                         )
                     )
 
@@ -112,20 +117,20 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                 }
 
                 "showMissCallNotification" -> {
-                    val data = Data(call.arguments() ?: HashMap())
-                    data.from = "notification"
+                    val data = CallPayloadMapper.fromArgs(call.arguments() ?: emptyMap())
+                        .copy(from = "notification")
                     
-                    incomingCallNotificationManager?.clearIncomingNotification(data.toBundle(), false)
-                    incomingCallNotificationManager?.showMissCallNotification(data.toBundle())
+                    incomingCallNotificationManager?.clearIncomingNotification(CallPayloadMapper.toBundle(data), false)
+                    incomingCallNotificationManager?.showMissCallNotification(CallPayloadMapper.toBundle(data))
                     result.success(true)
                 }
 
                 "startCall" -> {
-                    val data = Data(call.arguments() ?: HashMap())
+                    val data = CallPayloadMapper.fromArgs(call.arguments() ?: emptyMap())
                     context?.sendBroadcast(
                         IncomingCallBroadcastReceiver.getIntentStart(
                             requireNotNull(context),
-                            data.toBundle()
+                            CallPayloadMapper.toBundle(data)
                         )
                     )
 
@@ -179,22 +184,21 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                 }
 
                 "endCall" -> {
-                    val calls = getDataActiveCalls(context)
-                    val data = Data(call.arguments() ?: HashMap())
-                    val currentCall = calls.firstOrNull { it.id == data.id }
+                    val data = CallPayloadMapper.fromArgs(call.arguments() ?: emptyMap())
+                    val currentCall = callStore()?.byId(data.id)
                     if (currentCall != null && context != null) {
                         if(currentCall.isAccepted) {
                             context?.sendBroadcast(
                                 IncomingCallBroadcastReceiver.getIntentEnded(
                                     requireNotNull(context),
-                                    currentCall.toBundle()
+                                    CallPayloadMapper.toBundle(currentCall)
                                 )
                             )
                         }else {
                             context?.sendBroadcast(
                                 IncomingCallBroadcastReceiver.getIntentDecline(
                                     requireNotNull(context),
-                                    currentCall.toBundle()
+                                    CallPayloadMapper.toBundle(currentCall)
                                 )
                             )
                         }
@@ -203,14 +207,13 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                 }
 
                 "callConnected" -> {
-                    val calls = getDataActiveCalls(context)
-                    val data = Data(call.arguments() ?: HashMap())
-                    val currentCall = calls.firstOrNull { it.id == data.id }
+                    val data = CallPayloadMapper.fromArgs(call.arguments() ?: emptyMap())
+                    val currentCall = callStore()?.byId(data.id)
                     if (currentCall != null && context != null) {
                         context?.sendBroadcast(
                             IncomingCallBroadcastReceiver.getIntentConnected(
                                 requireNotNull(context),
-                                currentCall.toBundle()
+                                CallPayloadMapper.toBundle(currentCall)
                             )
                         )
                     }
@@ -218,25 +221,25 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                 }
 
                 "endAllCalls" -> {
-                    val calls = getDataActiveCalls(context)
+                    val calls = callStore()?.all().orEmpty()
                     calls.forEach {
                         if (it.isAccepted) {
                             context?.sendBroadcast(
                                 IncomingCallBroadcastReceiver.getIntentEnded(
                                     requireNotNull(context),
-                                    it.toBundle()
+                                    CallPayloadMapper.toBundle(it)
                                 )
                             )
                         } else {
                             context?.sendBroadcast(
                                 IncomingCallBroadcastReceiver.getIntentDecline(
                                     requireNotNull(context),
-                                    it.toBundle()
+                                    CallPayloadMapper.toBundle(it)
                                 )
                             )
                         }
                     }
-                    removeAllCalls(context)
+                    callStore()?.removeAll()
 
                     // Also sweep Telecom directly. The loop above only covers entries still in
                     // ACTIVE_CALLS, so a call that fell out of that list while remaining live in
@@ -253,11 +256,11 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                 // "endAllCalls" because an ENDED broadcast alone cannot say which of the two it is.
                 "dismissRingingCall" -> {
                     val requestedCid = (call.arguments as? Map<*, *>)?.get("id") as? String
-                    val activeCalls = getDataActiveCalls(context)
+                    val store = callStore()
                     val calls = requestedCid
-                        ?.let { cid -> activeCalls.filter { it.extra["callCid"] == cid } }
+                        ?.let { cid -> store?.byCallCid(cid) }
                         ?.takeIf { it.isNotEmpty() }
-                        ?: activeCalls
+                        ?: store?.all().orEmpty()
 
                     calls.forEach { callData ->
                         context?.let { ctx ->
@@ -274,7 +277,7 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                             ctx.sendBroadcast(
                                 IncomingCallBroadcastReceiver.getIntentEnded(
                                     ctx,
-                                    callData.toBundle(),
+                                    CallPayloadMapper.toBundle(callData),
                                     keepSystemCall = true
                                 )
                             )
@@ -284,7 +287,9 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                 }
 
                 "activeCalls" -> {
-                    result.success(getDataActiveCallsForFlutter(context))
+                    result.success(
+                        callStore()?.all().orEmpty().map(CallPayloadMapper::toStoredMap),
+                    )
                 }
 
                 "getDevicePushTokenVoIP" -> {
@@ -314,9 +319,9 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
 
                 // EDIT - clear the incoming notification/ring (after accept/decline/timeout)
                 "hideIncomingCall" -> {
-                    val data = Data(call.arguments() ?: HashMap())
+                    val data = CallPayloadMapper.fromArgs(call.arguments() ?: emptyMap())
                     incomingCallSoundPlayerManager?.stop()
-                    incomingCallNotificationManager?.clearIncomingNotification(data.toBundle(), false)
+                    incomingCallNotificationManager?.clearIncomingNotification(CallPayloadMapper.toBundle(data), false)
                     result.success(true)
                 }
 
