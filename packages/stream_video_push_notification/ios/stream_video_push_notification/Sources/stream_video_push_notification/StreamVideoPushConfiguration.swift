@@ -11,11 +11,16 @@ import Foundation
     @objc public var maximumCallGroups: Int
     @objc public var maximumCallsPerCallGroup: Int
     @objc public var audioSessionMode: String
-    /// Has no effect: CallKit activates the audio session when it needs it.
-    @objc public var audioSessionActive: Bool
     @objc public var audioSessionPreferredSampleRate: Double
     @objc public var audioSessionPreferredIOBufferDuration: Double
     @objc public var configureAudioSession: Bool
+
+    /// Always true: CallKit activates the audio session when it needs it.
+    @available(*, deprecated, message: "Has no effect. CallKit activates the audio session.")
+    @objc public var audioSessionActive: Bool {
+        get { true }
+        set {}
+    }
     @objc public var supportsDTMF: Bool
     @objc public var supportsHolding: Bool
     @objc public var supportsGrouping: Bool
@@ -34,7 +39,6 @@ import Foundation
         self.maximumCallGroups = 2
         self.maximumCallsPerCallGroup = 1
         self.audioSessionMode = ""
-        self.audioSessionActive = true
         self.audioSessionPreferredSampleRate = 44100.0
         self.audioSessionPreferredIOBufferDuration = 0.005
         self.configureAudioSession = true
@@ -75,7 +79,6 @@ import Foundation
         self.ringtonePath = options.ringtonePath
         self.configureAudioSession = options.configureAudioSession
         self.audioSessionMode = options.audioSessionMode
-        self.audioSessionActive = options.audioSessionActive
         self.audioSessionPreferredSampleRate = options.audioSessionPreferredSampleRate
         self.audioSessionPreferredIOBufferDuration = options.audioSessionPreferredIOBufferDuration
     }
@@ -126,7 +129,6 @@ import Foundation
             "maximumCallGroups": maximumCallGroups,
             "maximumCallsPerCallGroup": maximumCallsPerCallGroup,
             "audioSessionMode": audioSessionMode,
-            "audioSessionActive": audioSessionActive,
             "audioSessionPreferredSampleRate": audioSessionPreferredSampleRate,
             "audioSessionPreferredIOBufferDuration": audioSessionPreferredIOBufferDuration,
             "configureAudioSession": configureAudioSession,

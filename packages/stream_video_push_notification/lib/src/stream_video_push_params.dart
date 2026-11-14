@@ -254,6 +254,7 @@ class IOSParams {
     this.maximumCallGroups,
     this.maximumCallsPerCallGroup,
     this.audioSessionMode,
+    @Deprecated('Has no effect. CallKit activates the audio session.')
     this.audioSessionActive,
     this.audioSessionPreferredSampleRate,
     this.audioSessionPreferredIOBufferDuration,
@@ -275,7 +276,6 @@ class IOSParams {
         maximumCallGroups: configuration.maximumCallGroups,
         maximumCallsPerCallGroup: configuration.maximumCallsPerCallGroup,
         audioSessionMode: configuration.audioSessionMode,
-        audioSessionActive: configuration.audioSessionActive,
         audioSessionPreferredSampleRate:
             configuration.audioSessionPreferredSampleRate,
         audioSessionPreferredIOBufferDuration:
@@ -302,7 +302,11 @@ class IOSParams {
   final int? maximumCallGroups;
   final int? maximumCallsPerCallGroup;
   final String? audioSessionMode;
+
+  /// Has no effect: CallKit activates the audio session when it needs it.
+  @Deprecated('Has no effect. CallKit activates the audio session.')
   final bool? audioSessionActive;
+
   final double? audioSessionPreferredSampleRate;
   final double? audioSessionPreferredIOBufferDuration;
   final bool? configureAudioSession;
@@ -326,6 +330,7 @@ class IOSParams {
     int? maximumCallGroups,
     int? maximumCallsPerCallGroup,
     String? audioSessionMode,
+    @Deprecated('Has no effect. CallKit activates the audio session.')
     bool? audioSessionActive,
     double? audioSessionPreferredSampleRate,
     double? audioSessionPreferredIOBufferDuration,

@@ -29,7 +29,7 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
         sharedInstance = StreamVideoPushNotificationPlugin()
         registrar.addMethodCallDelegate(sharedInstance!, channel: mainChannel)
 
-        StreamVideoPKDelegateManager.shared.initChannel(mainChannel: mainChannel)
+        VoIPPushRegistryHandler.shared.initChannel(mainChannel: mainChannel)
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -45,7 +45,7 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
                 // Kept for the cold-start VoIP push path, where no Dart code has run yet.
                 StreamVideoPushConfiguration(args: arguments).persist()
 
-                StreamVideoPKDelegateManager.shared.initData(data: arguments)
+                VoIPPushRegistryHandler.shared.initData(data: arguments)
                 callKitManager.initCallkitProvider(CallData(args: arguments))
                 result(nil)
             } else {
@@ -77,6 +77,18 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
     ) {
         StreamVideoCallkitManager.shared.showIncomingCall(
             data, fromPushKit: fromPushKit)
+    }
+
+    /// Reports an incoming call to CallKit, and runs `completion` once CallKit accepted or
+    /// refused it, or straight away when it could not be reported. An app with its own PushKit
+    /// delegate can call PushKit's completion from it.
+    @objc public static func showIncomingCall(
+        data: CallData,
+        fromPushKit: Bool,
+        completion: @escaping () -> Void
+    ) {
+        StreamVideoCallkitManager.shared.showIncomingCall(
+            data, fromPushKit: fromPushKit, completion: completion)
     }
 
     @objc public static func activeCalls() -> [[String: Any]]? {

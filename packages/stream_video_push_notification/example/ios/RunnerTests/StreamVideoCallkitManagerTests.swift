@@ -128,8 +128,8 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
     // MARK: - Pending events
 
     func testEventsSentBeforeDartListensAreDeliveredInOrder() {
-        manager.sendEventCustom("first", body: ["id": "1"])
-        manager.sendEventCustom("second", body: nil)
+        manager.sendEvent("first", ["id": "1"])
+        manager.sendEvent("second", nil)
         drainMainQueue()
         XCTAssertTrue(received.isEmpty)
 
@@ -143,7 +143,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
     func testEventsSentWhileDartListensGoStraightThrough() {
         listen()
 
-        manager.sendEventCustom("live", body: nil)
+        manager.sendEvent("live", nil)
         drainMainQueue()
 
         XCTAssertEqual(receivedNames, ["live"])
@@ -151,12 +151,12 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
 
     func testSilencedEventsAreDroppedRatherThanHeld() {
         manager.handle(FlutterMethodCall(methodName: "silenceEvents", arguments: true)) { _ in }
-        manager.sendEventCustom("dropped", body: nil)
+        manager.sendEvent("dropped", nil)
         drainMainQueue()
 
         listen()
         manager.handle(FlutterMethodCall(methodName: "silenceEvents", arguments: false)) { _ in }
-        manager.sendEventCustom("kept", body: nil)
+        manager.sendEvent("kept", nil)
         drainMainQueue()
 
         XCTAssertEqual(receivedNames, ["kept"])
@@ -751,6 +751,20 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
 
         XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_TIMEOUT])
         XCTAssertEqual(manager.store.call(forCallKit: uuid)?.phase, .ended(.unanswered))
+    }
+
+    func testThePluginRunsTheCompletionOfACallItCannotReport() {
+        listen()
+        let completed = expectation(description: "completion")
+
+        StreamVideoPushNotificationPlugin.showIncomingCall(
+            data: CallData(args: ["id": "not-a-uuid"]), fromPushKit: false
+        ) { completed.fulfill() }
+
+        wait(for: [completed], timeout: 1)
+        drainMainQueue()
+        XCTAssertFalse(
+            receivedNames.contains(StreamVideoIncomingCallConstants.ACTION_CALL_INCOMING))
     }
 
     func testARefusedEndDropsTheCall() {
