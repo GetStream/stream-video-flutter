@@ -29,6 +29,9 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     /// left. Nil while Recents follows the options.
     var recentsSuppressedFor: CallData?
 
+    /// Keeps the app running while Dart acts on a call CallKit ended.
+    var callEndGracePeriod = CallEndGracePeriod()
+
     var sharedProvider: CXProvider? = nil
 
     private override init() {
@@ -122,7 +125,10 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
         transactions.start(uuid: uuid, handle: handle, isVideo: data.type > 0) { started in
             guard started else {
-                self.store.dropPendingOutgoing(uuid: uuid, ifStill: data)
+                NSLog(
+                    "[StreamCallKit] CallKit refused to start the outgoing call \(data.uuid); "
+                        + "Dart's end and connection of it are ignored")
+                self.store.startRefused(uuid: uuid, options: data)
                 return
             }
 
@@ -179,8 +185,8 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
     func endCall(_ data: CallData) {
         let uuid: UUID
-        let sentEnded = store.isFromPushKit
-        if store.isFromPushKit {
+        let sentEnded = store.actsOnPushKitCall(forAppId: data.uuid)
+        if sentEnded {
             uuid = store.callKitUUID(forAppId: store.lastOptions!.uuid)!
             store.isFromPushKit = false
             self.sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_ENDED, data.toJSON())
@@ -197,7 +203,7 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
     func connectedCall(_ data: CallData) {
         let uuid: UUID
-        if store.isFromPushKit {
+        if store.actsOnPushKitCall(forAppId: data.uuid) {
             uuid = store.callKitUUID(forAppId: store.lastOptions!.uuid)!
             store.isFromPushKit = false
         } else {

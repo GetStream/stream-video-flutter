@@ -151,11 +151,10 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
     }
 
     func testANewCallAfterAnEndedOutgoingOneGetsAFirstActivation() {
-        // The outgoing call stays in the store after it ends.
         let outgoing = outgoingCall()
         _ = coordinator.didActivate(store)
         _ = store.endPerformed(uuid: outgoing.identity.callKitUUID)
-        XCTAssertTrue(store.outgoingCall === outgoing)
+        XCTAssertNil(store.outgoingCall)
 
         let call = answeredCall()
 

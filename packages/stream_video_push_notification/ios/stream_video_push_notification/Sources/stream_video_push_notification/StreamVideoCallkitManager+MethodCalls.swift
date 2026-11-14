@@ -18,11 +18,12 @@ extension StreamVideoCallkitManager {
             self.startCall(data, fromPushKit: false)
             result(true)
         case .endCall(let args):
-            if store.isFromPushKit {
+            if let id = args?["id"] as? String, store.wasRefusedToStart(appId: id) {
+                NSLog("[StreamCallKit] endCall for \(id), which CallKit refused to start, ignored")
+            } else if store.actsOnPushKitCall(forAppId: args?["id"] as? String) {
                 self.endCall(store.lastOptions!)
             } else if let args = args {
-                store.lastOptions = store.options(for: args)
-                self.endCall(store.lastOptions!)
+                self.endCall(optionsKeepingThePushKitCall(for: args))
             }
             result(true)
         case .muteCall(let callId, let isMuted):
@@ -38,11 +39,12 @@ extension StreamVideoCallkitManager {
             self.holdCall(callId, onHold: onHold)
             result(true)
         case .callConnected(let args):
-            if store.isFromPushKit {
+            if let id = args?["id"] as? String, store.wasRefusedToStart(appId: id) {
+                NSLog("[StreamCallKit] callConnected for \(id), which CallKit refused to start, ignored")
+            } else if store.actsOnPushKitCall(forAppId: args?["id"] as? String) {
                 self.connectedCall(store.lastOptions!)
             } else if let args = args {
-                store.lastOptions = store.options(for: args)
-                self.connectedCall(store.lastOptions!)
+                self.connectedCall(optionsKeepingThePushKitCall(for: args))
             }
             result(true)
         case .activeCalls:
@@ -63,5 +65,15 @@ extension StreamVideoCallkitManager {
             // The plugin answers the first two before the manager sees a call.
             result(FlutterMethodNotImplemented)
         }
+    }
+
+    /// The options of the call `args` names. They become the last options, unless those are
+    /// the call PushKit showed, which Dart may still end or connect by another id.
+    private func optionsKeepingThePushKitCall(for args: [String: Any]) -> CallData {
+        let options = store.options(for: args)
+        if !store.isFromPushKit {
+            store.lastOptions = options
+        }
+        return options
     }
 }

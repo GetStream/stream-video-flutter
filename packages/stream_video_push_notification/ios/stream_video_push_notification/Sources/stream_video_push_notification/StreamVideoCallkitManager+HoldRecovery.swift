@@ -22,6 +22,7 @@ extension StreamVideoCallkitManager: HoldRecoveryActions {
     }
 
     func reRegistrationAbandoned(_ call: CallKitCall) {
+        callEndGracePeriod.callEnded()
         endReRegisteringCall(call, reason: .failed, notifyDart: true)
     }
 
