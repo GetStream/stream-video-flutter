@@ -12,31 +12,13 @@ import android.os.Looper
 import android.util.Log
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 
 class IncomingCallNotificationService : Service() {
 
     companion object {
 
         private const val TAG = "IncomingCallService"
-
-        private val ActionForeground = listOf(
-            IncomingCallConstants.ACTION_CALL_START,
-            IncomingCallConstants.ACTION_CALL_ACCEPT
-        )
-
-        fun startServiceWithAction(context: Context, action: String, data: Bundle?) {
-            val intent = Intent(context, IncomingCallNotificationService::class.java).apply {
-                this.action = action
-                putExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA, data)
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && intent.action in ActionForeground) {
-                data?.let {
-                    context.startService(intent)
-                }
-            } else {
-                context.startService(intent)
-            }
-        }
 
         /**
          * Runs this service in the foreground for the incoming call ringing window, and rings from
@@ -132,8 +114,8 @@ class IncomingCallNotificationService : Service() {
 
     }
 
-    private val incomingCallNotificationManager: IncomingCallNotificationManager? =
-        StreamVideoPushNotificationPlugin.getInstance()?.getIncomingCallNotificationManager()
+    private val incomingCallNotificationManager: IncomingCallNotificationManager
+        get() = RingingComponents.get(applicationContext).notifications
 
 
     override fun onCreate() {
@@ -151,7 +133,7 @@ class IncomingCallNotificationService : Service() {
             // This start is delivered asynchronously, so the call may already have been
             // accepted, declined or cancelled by now. Ringing then would start a ringtone with no
             // notification and no service left to stop it.
-            if (incomingCallNotificationManager?.currentIncomingNotification == null) {
+            if (incomingCallNotificationManager.currentIncomingNotification == null) {
                 Log.w(TAG, "Incoming call notification is already gone, not ringing")
                 stopSelf()
                 return START_NOT_STICKY
@@ -159,34 +141,18 @@ class IncomingCallNotificationService : Service() {
             // Ring either way: when the foreground service could not be started the playback may
             // still be muted by the system, but that is no worse than not attempting it at all.
             val inForeground = startRingingForeground()
-            incomingCallNotificationManager?.playIncomingCallSound(data)
+            incomingCallNotificationManager.playIncomingCallSound(data)
             if (!inForeground) stopSelf()
             return START_NOT_STICKY
         }
-        if (intent?.action == IncomingCallConstants.ACTION_CALL_START) {
-            intent.getBundleExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
-                ?.let {
-                    stopSelfUnlessRinging()
-                }
-        }
-        if (intent?.action == IncomingCallConstants.ACTION_CALL_ACCEPT) {
-            intent.getBundleExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
-                ?.let {
-                    incomingCallNotificationManager?.clearIncomingNotification(it, true)
-                    stopSelfUnlessRinging()
-                }
-        }
+        // Any other start has nothing to run; the service only stays up while it rings.
+        stopSelfUnlessRinging()
         return START_NOT_STICKY
     }
 
-    /**
-     * Stops the service unless it is currently ringing for a call.
-     *
-     */
     private fun stopSelfUnlessRinging() {
         val isRinging = synchronized(foregroundLock) { isRingingForeground }
-        if (isRinging) return
-        stopSelf()
+        if (!isRinging) stopSelf()
     }
 
     /**
@@ -202,7 +168,7 @@ class IncomingCallNotificationService : Service() {
      * interaction. Covering that case needs Telecom system delegation (`CallsManager.addCall`).
      */
     internal fun startRingingForeground(): Boolean {
-        val notification = incomingCallNotificationManager?.currentIncomingNotification
+        val notification = incomingCallNotificationManager.currentIncomingNotification
         if (notification == null) {
             Log.w(TAG, "No incoming call notification to run the ringing service with")
             return false
@@ -253,7 +219,7 @@ class IncomingCallNotificationService : Service() {
 
     override fun onTaskRemoved(rootIntent: Intent?) {
         super.onTaskRemoved(rootIntent)
-        incomingCallNotificationManager?.stopIncomingCallRinging()
+        incomingCallNotificationManager.stopIncomingCallRinging()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             stopForeground(STOP_FOREGROUND_REMOVE)
         }else {

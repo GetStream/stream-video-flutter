@@ -27,6 +27,7 @@ import android.os.PowerManager
 import android.text.TextUtils
 import android.util.Log
 import androidx.core.content.ContextCompat
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 
 class IncomingCallActivity : Activity() {
 
@@ -328,12 +329,11 @@ class IncomingCallActivity : Activity() {
     private fun onAcceptClick() {
         val data = intent.extras?.getBundle(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
 
-        IncomingCallNotificationService.startServiceWithAction(
-            this@IncomingCallActivity,
-            IncomingCallConstants.ACTION_CALL_ACCEPT,
-            data
-        )
-
+        // The ring stops here. On the lock screen the trampoline, which runs the accept and brings
+        // the app forward, may only start once the keyguard is dismissed.
+        if (data != null) {
+            RingingComponents.get(this).notifications.clearIncomingNotification(data, true)
+        }
         val acceptIntent =
             TransparentActivity.getIntent(this, IncomingCallConstants.ACTION_CALL_ACCEPT, data)
         startActivity(acceptIntent)
@@ -351,10 +351,9 @@ class IncomingCallActivity : Activity() {
 
     private fun onDeclineClick() {
         val data = intent.extras?.getBundle(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
-
-        val intent =
-            IncomingCallBroadcastReceiver.getIntentDecline(this@IncomingCallActivity, data)
-        sendBroadcast(intent)
+        if (data != null) {
+            RingingComponents.get(this).controller.onDecline(data)
+        }
         finishTask()
     }
 
