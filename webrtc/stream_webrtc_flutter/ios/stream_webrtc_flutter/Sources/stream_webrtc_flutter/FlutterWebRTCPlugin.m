@@ -115,6 +115,137 @@ void postEvent(FlutterEventSink _Nullable sink, id _Nullable event) {
 @implementation RTCInitializeSnapshot
 @end
 
+NSNotificationName const FlutterWebRTCAudioEngineAvailabilityNotification =
+    @"io.getstream.webrtc.audioEngineAvailability";
+NSString* const FlutterWebRTCAudioEngineAvailableKey = @"available";
+NSString* const FlutterWebRTCAudioSessionActiveKey = @"audioSessionActive";
+NSNotificationName const FlutterWebRTCAudioEngineStartFailedNotification =
+    @"io.getstream.webrtc.audioEngineStartFailed";
+
+@interface FlutterWebRTCPlugin ()
+/** Gates or allows this registration's factories; called by the control. */
+- (void)gateAudioEngine:(BOOL)available;
+/** Records whether CallKit owns the audio session; called by the control. */
+- (void)recordCallKitAudioSessionActive:(BOOL)active;
+@end
+
+/**
+ * The one FlutterWebRTCAudioEngineControl of the process. It keeps the last
+ * values, applies them to every live registration of the plugin and to each
+ * new one, and observes FlutterWebRTCAudioEngineAvailabilityNotification once
+ * for all of them.
+ */
+@interface FlutterWebRTCAudioEngineHub : NSObject <FlutterWebRTCAudioEngineControl>
++ (instancetype)shared;
+- (void)addPlugin:(FlutterWebRTCPlugin*)plugin;
+@end
+
+@implementation FlutterWebRTCAudioEngineHub {
+  /** Registrations, held weakly. Read and written under @synchronized(self). */
+  NSHashTable<FlutterWebRTCPlugin*>* _plugins;
+  BOOL _audioEngineAvailable;
+  BOOL _callKitAudioSessionActive;
+}
+
+@synthesize audioEngineStartFailedHandler = _audioEngineStartFailedHandler;
+
++ (instancetype)shared {
+  static FlutterWebRTCAudioEngineHub* shared;
+  static dispatch_once_t once;
+  dispatch_once(&once, ^{
+    shared = [[FlutterWebRTCAudioEngineHub alloc] init];
+  });
+  return shared;
+}
+
+- (instancetype)init {
+  self = [super init];
+  if (self) {
+    _plugins = [NSHashTable weakObjectsHashTable];
+    _audioEngineAvailable = YES;
+    _callKitAudioSessionActive = NO;
+    [[NSNotificationCenter defaultCenter]
+        addObserver:self
+           selector:@selector(handleAudioEngineAvailabilityNotification:)
+               name:FlutterWebRTCAudioEngineAvailabilityNotification
+             object:nil];
+  }
+  return self;
+}
+
+- (void)addPlugin:(FlutterWebRTCPlugin*)plugin {
+  @synchronized(self) {
+    [_plugins addObject:plugin];
+    [plugin recordCallKitAudioSessionActive:_callKitAudioSessionActive];
+    if (!_audioEngineAvailable) {
+      [plugin gateAudioEngine:NO];
+    }
+  }
+}
+
+- (void)handleAudioEngineAvailabilityNotification:(NSNotification*)notification {
+  id available = notification.userInfo[FlutterWebRTCAudioEngineAvailableKey];
+  if (![available isKindOfClass:[NSNumber class]]) {
+    NSLog(@"[setAudioEngineAvailable] notification without a %@ value, ignored",
+          FlutterWebRTCAudioEngineAvailableKey);
+    return;
+  }
+  id sessionActive = notification.userInfo[FlutterWebRTCAudioSessionActiveKey];
+  BOOL hasSessionState = [sessionActive isKindOfClass:[NSNumber class]];
+  BOOL isAvailable = ((NSNumber*)available).boolValue;
+  // WebRTC learns about the activation before the engine may start on it, and
+  // about the deactivation after the engine has been told to stop.
+  if (hasSessionState && ((NSNumber*)sessionActive).boolValue) {
+    [self setCallKitAudioSessionActive:YES];
+  }
+  [self setAudioEngineAvailable:isAvailable];
+  if (hasSessionState && !((NSNumber*)sessionActive).boolValue) {
+    [self setCallKitAudioSessionActive:NO];
+  }
+}
+
+- (void)setAudioEngineAvailable:(BOOL)available {
+  // Under the lock, so registrations see the updates in the order they were
+  // made, whichever thread made them.
+  @synchronized(self) {
+    if (!available && !_audioEngineAvailable) {
+      // CallKit can deactivate more than once. Stopping again would record
+      // voice processing as already off and never turn it back on.
+      NSLog(@"[setAudioEngineAvailable] already unavailable, ignored");
+      return;
+    }
+    _audioEngineAvailable = available;
+    for (FlutterWebRTCPlugin* plugin in _plugins.allObjects) {
+      [plugin gateAudioEngine:available];
+    }
+  }
+}
+
+- (void)setCallKitAudioSessionActive:(BOOL)active {
+#if TARGET_OS_IPHONE
+  @synchronized(self) {
+    if (_callKitAudioSessionActive == active) {
+      return;
+    }
+    _callKitAudioSessionActive = active;
+    for (FlutterWebRTCPlugin* plugin in _plugins.allObjects) {
+      [plugin recordCallKitAudioSessionActive:active];
+    }
+  }
+  RTCAudioSession* session = [RTCAudioSession sharedInstance];
+  AVAudioSession* avSession = [AVAudioSession sharedInstance];
+  NSLog(@"[setCallKitAudioSessionActive] %@, WebRTC session active before: %d",
+        active ? @"activated" : @"deactivated", session.isActive);
+  if (active) {
+    [session audioSessionDidActivate:avSession];
+  } else {
+    [session audioSessionDidDeactivate:avSession];
+  }
+#endif
+}
+
+@end
+
 @implementation FlutterWebRTCPlugin {
 #pragma clang diagnostic pop
   FlutterMethodChannel* _methodChannel;
@@ -130,6 +261,14 @@ void postEvent(FlutterEventSink _Nullable sink, id _Nullable event) {
 #endif
   AudioManager* _audioManager;
   BOOL _stereoPlayoutPreferred;
+  /**
+   * Whether the audio engine of every factory may run, as the process-wide
+   * control last set it; see -gateAudioEngine:. Read and written under
+   * @synchronized(self) together with _factories, so a factory built while
+   * the engine is gated off is gated as well.
+   */
+  BOOL _audioEngineAvailable;
+  BOOL _callKitAudioSessionActive;
 #if TARGET_OS_IPHONE
   FLutterRTCVideoPlatformViewFactory* _platformViewFactory;
   dispatch_block_t _stereoRefreshDebounceBlock;
@@ -194,6 +333,10 @@ static FlutterWebRTCPlugin* sharedSingleton;
   }
 }
 
++ (id<FlutterWebRTCAudioEngineControl>)audioEngineControl {
+  return [FlutterWebRTCAudioEngineHub shared];
+}
+
 @synthesize messenger = _messenger;
 @synthesize eventSink = _eventSink;
 #if TARGET_OS_IPHONE
@@ -243,6 +386,7 @@ static FlutterWebRTCPlugin* sharedSingleton;
     _speakerOnButPreferBluetooth = NO;
     _eventChannel = eventChannel;
     _audioManager = AudioManager.sharedInstance;
+    _audioEngineAvailable = YES;
     _peerConnectionCloseQueue = dispatch_queue_create(
         "io.getstream.webrtc.flutter.peerConnectionClose",
         dispatch_queue_attr_make_with_qos_class(DISPATCH_QUEUE_SERIAL, QOS_CLASS_USER_INITIATED, 0));
@@ -293,6 +437,7 @@ static FlutterWebRTCPlugin* sharedSingleton;
                                              object:session];
 #endif
 
+  [[FlutterWebRTCAudioEngineHub shared] addPlugin:self];
   return self;
 }
 
@@ -336,12 +481,19 @@ static FlutterWebRTCPlugin* sharedSingleton;
   NSDictionary* interuptionDict = notification.userInfo;
   NSInteger routeChangeReason =
       [[interuptionDict valueForKey:AVAudioSessionRouteChangeReasonKey] integerValue];
-  if (self.eventSink && (routeChangeReason == AVAudioSessionRouteChangeReasonNewDeviceAvailable ||
-                         routeChangeReason == AVAudioSessionRouteChangeReasonOldDeviceUnavailable ||
-                         routeChangeReason == AVAudioSessionRouteChangeReasonCategoryChange ||
-                         routeChangeReason == AVAudioSessionRouteChangeReasonOverride)) {
+  BOOL deviceChanged = routeChangeReason == AVAudioSessionRouteChangeReasonNewDeviceAvailable ||
+                       routeChangeReason == AVAudioSessionRouteChangeReasonOldDeviceUnavailable ||
+                       routeChangeReason == AVAudioSessionRouteChangeReasonCategoryChange ||
+                       routeChangeReason == AVAudioSessionRouteChangeReasonOverride;
+  // A route configuration change is the system re-routing on its own, as when
+  // the audio unit restarts after a CallKit hold and the speaker override set
+  // earlier is gone. Reported so the SDK can put the chosen output back.
+  BOOL routeReconfigured =
+      routeChangeReason == AVAudioSessionRouteChangeReasonRouteConfigurationChange;
+  if (self.eventSink && deviceChanged) {
     postEvent(self.eventSink, @{@"event" : @"onDeviceChange"});
-
+  }
+  if (self.eventSink && (deviceChanged || routeReconfigured)) {
     // Report the newly-active audio output
     AVAudioSessionPortDescription* output =
         [RTCAudioSession sharedInstance].currentRoute.outputs.firstObject;
@@ -351,6 +503,7 @@ static FlutterWebRTCPlugin* sharedSingleton;
         @"deviceId" : output.UID ?: @"",
         @"label" : output.portName ?: @"",
         @"groupId" : output.portType ?: @"",
+        @"reason" : @(routeChangeReason),
       });
     }
   }
@@ -500,6 +653,13 @@ static FlutterWebRTCPlugin* sharedSingleton;
                                                    admObserver:self];
     @synchronized(self) {
       _factories[factoryId] = nf;
+      if (!_audioEngineAvailable) {
+        // CallKit took the audio session away before this factory existed:
+        // gate its engine like the others until provider:didActivate: lifts
+        // the gate. Inside the lock so it is ordered with a concurrent
+        // -setAudioEngineAvailable: on the factory's ADM queue.
+        [self applyAudioEngineAvailability:NO toFactory:nf];
+      }
     }
     NSLog(@"[createPeerConnectionFactory] built id: %@", factoryId);
 #if TARGET_OS_IPHONE
@@ -2825,7 +2985,15 @@ static FlutterWebRTCPlugin* sharedSingleton;
   dispatch_async(_audioSessionQueue, ^{
     __block BOOL shouldDeactivate = NO;
     dispatch_sync(dispatch_get_main_queue(), ^{
-      shouldDeactivate = ![self hasLocalAudioTrack] && self.peerConnections.count == 0 &&
+      // A session CallKit activated is CallKit's to deactivate. Trying anyway
+      // fails (-12988), and WebRTC's session still records the attempt as a
+      // deactivation, after which it no longer knows the session is active.
+      BOOL callKitOwnsSession;
+      @synchronized(self) {
+        callKitOwnsSession = self->_callKitAudioSessionActive;
+      }
+      shouldDeactivate = !callKitOwnsSession && ![self hasLocalAudioTrack] &&
+                         self.peerConnections.count == 0 &&
                          self->_closingPeerConnections.count == 0;
     });
     if (shouldDeactivate) {
@@ -3794,6 +3962,141 @@ static FlutterWebRTCPlugin* sharedSingleton;
   }
 
   postEvent(self.eventSink, eventData);
+}
+
+#pragma mark - Audio engine availability
+
+- (void)recordCallKitAudioSessionActive:(BOOL)active {
+  @synchronized(self) {
+    _callKitAudioSessionActive = active;
+  }
+}
+
+- (void)gateAudioEngine:(BOOL)available {
+  // The flag and the factories change together under the lock, and the ADM
+  // work is queued inside it too, so a factory built concurrently ends up
+  // with the value set last, whichever thread set it.
+  @synchronized(self) {
+    _audioEngineAvailable = available;
+    NSLog(@"[setAudioEngineAvailable] %@ for %lu factories",
+          available ? @"available" : @"unavailable", (unsigned long)_factories.count);
+    for (NativePeerConnectionFactory* nf in _factories.allValues) {
+      [self applyAudioEngineAvailability:available toFactory:nf];
+    }
+  }
+}
+
+- (void)applyAudioEngineAvailability:(BOOL)available
+                           toFactory:(NativePeerConnectionFactory*)factory {
+  RTCAudioDeviceModule* adm = factory.audioDeviceModule;
+  if (adm == nil) {
+    return;
+  }
+  RTCAudioEngineAvailability availability = {
+      .isInputAvailable = available,
+      .isOutputAvailable = available,
+  };
+  RTCAudioEngineAvailability none = {
+      .isInputAvailable = NO,
+      .isOutputAvailable = NO,
+  };
+  NSString* factoryId = factory.factoryId;
+  // Run on the factory's serial ADM queue like every other ADM mutation.
+  dispatch_async(factory.admQueue, ^{
+    if (factory.isDisposed) {
+      return;
+    }
+    NSInteger code = 0;
+    if (available) {
+      if (adm.isManualRenderingMode) {
+        // Back to the hardware: stop the manual-rendering engine started
+        // below, switch the rendering mode, then start the device engine
+        // once, with input and output.
+        [adm setEngineAvailability:none];
+        NSInteger modeCode = [adm setManualRenderingMode:NO];
+        if (modeCode != 0) {
+          NSLog(@"[setAudioEngineAvailable] leaving manual rendering returned %ld for factoryId %@",
+                (long)modeCode, factoryId);
+        }
+        if (factory.voiceProcessingBeforeManualRendering) {
+          [adm setVoiceProcessingEnabled:YES];
+        }
+      }
+      code = [adm setEngineAvailability:availability];
+      if (!adm.isEngineRunning && (adm.isPlaying || adm.isRecording)) {
+        // The device module gives up on starting the engine after a second
+        // of retries, reports success anyway, and never tries again; nor do
+        // later starts on the same session succeed. Only a fresh session
+        // helps, which the CallKit plugin gets by registering the call again.
+        NSLog(@"[setAudioEngineAvailable] engine not running for factoryId %@", factoryId);
+        dispatch_async(dispatch_get_main_queue(), ^{
+          [[NSNotificationCenter defaultCenter]
+              postNotificationName:FlutterWebRTCAudioEngineStartFailedNotification
+                            object:self];
+          void (^handler)(void) =
+              [FlutterWebRTCAudioEngineHub shared].audioEngineStartFailedHandler;
+          if (handler) {
+            handler();
+          }
+        });
+      }
+    } else {
+      if (adm.isManualRenderingMode) {
+        // Already gated, with received audio draining.
+        return;
+      }
+      // Read before the engine goes down: whether WebRTC asked for playout,
+      // which the gate leaves alone.
+      BOOL playing = adm.isPlaying;
+      code = [adm setEngineAvailability:availability];
+      // With the hardware engine down nothing pulls received audio out of
+      // WebRTC's jitter buffer. It keeps the newest few seconds, which the
+      // engine plays back time-compressed the moment it is back: what the
+      // others said while this side was held. The device module's manual
+      // rendering mode, an AVAudioEngine without hardware, keeps pulling
+      // playout every 10 ms into a buffer nobody reads, so the engine resumes
+      // on live audio.
+      //
+      // Input and output both: the module only connects the manual engine's
+      // graph when input is enabled, and an empty graph crashes its render
+      // thread. That input is the rendered graph, not a microphone, so a
+      // microphone the app left on sends silence while held. Voice processing
+      // is off for the manual engine, which does not support it, and put back
+      // with the hardware engine.
+      if (code == 0 && playing) {
+        factory.voiceProcessingBeforeManualRendering = adm.isVoiceProcessingEnabled;
+        if (factory.voiceProcessingBeforeManualRendering) {
+          [adm setVoiceProcessingEnabled:NO];
+        }
+        NSInteger modeCode = [adm setManualRenderingMode:YES];
+        if (modeCode != 0) {
+          NSLog(@"[setAudioEngineAvailable] entering manual rendering returned %ld for factoryId %@",
+                (long)modeCode, factoryId);
+          if (factory.voiceProcessingBeforeManualRendering) {
+            [adm setVoiceProcessingEnabled:YES];
+          }
+        } else {
+          RTCAudioEngineAvailability all = {
+              .isInputAvailable = YES,
+              .isOutputAvailable = YES,
+          };
+          NSInteger drainCode = [adm setEngineAvailability:all];
+          if (drainCode != 0) {
+            NSLog(@"[setAudioEngineAvailable] manual rendering returned %ld for factoryId %@",
+                  (long)drainCode, factoryId);
+          }
+        }
+      }
+    }
+    if (code != 0) {
+      NSLog(@"[setAudioEngineAvailable] audio device module returned %ld for factoryId %@",
+            (long)code, factoryId);
+    }
+    NSLog(@"[setAudioEngineAvailable] factoryId %@ available %d -> engine running %d, manual "
+          @"rendering %d, playing %d, recording %d",
+          factoryId, available, adm.isEngineRunning, adm.isManualRenderingMode, adm.isPlaying,
+          adm.isRecording);
+  });
 }
 
 #pragma mark - RTCAudioDeviceModuleDelegate methods
