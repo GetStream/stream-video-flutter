@@ -237,4 +237,4 @@ jobs:
           prerelease: ${{ steps.parse.outputs.prerelease }}
           make_latest: ${{ steps.parse.outputs.make_latest }}
           # Bot PAT, so the published release starts app-distribute.yml.
-          token: ${{ secrets.BOT_GITHUB_API_TOKEN }}
+          token: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
