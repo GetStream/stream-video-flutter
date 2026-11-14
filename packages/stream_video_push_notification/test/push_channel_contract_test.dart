@@ -37,8 +37,7 @@ const _swiftMethodHandlers = [
 const _kotlinSources =
     'android/src/main/kotlin/io/getstream/video/flutter/stream_video_push_notification';
 const _kotlinConstants = '$_kotlinSources/IncomingCallConstants.kt';
-const _kotlinMethodHandler =
-    '$_kotlinSources/StreamVideoPushNotificationPlugin.kt';
+const _kotlinMethodHandler = '$_kotlinSources/channel/PushMethodCallHandler.kt';
 
 // The contract.
 
@@ -144,13 +143,21 @@ Set<String> _swiftHandledMethods(String path) {
       .toSet();
 }
 
-/// The `"name" ->` branches of the `when (call.method)` in the Kotlin plugin.
+/// The `"name" ->` branches of the `when (call.method)` in the Kotlin method handler.
 Set<String> _kotlinHandledMethods() {
   final source = _read(_kotlinMethodHandler);
   final start = source.indexOf('when (call.method)');
-  expect(start, isNot(-1), reason: 'no `when (call.method)` in the plugin');
+  expect(
+    start,
+    isNot(-1),
+    reason: 'no `when (call.method)` in $_kotlinMethodHandler',
+  );
   final end = source.indexOf('else ->', start);
-  expect(end, isNot(-1), reason: 'no `else ->` after the when in the plugin');
+  expect(
+    end,
+    isNot(-1),
+    reason: 'no `else ->` after the when in $_kotlinMethodHandler',
+  );
   return RegExp(r'"([A-Za-z]+)"\s*->')
       .allMatches(source.substring(start, end))
       .map((match) => match.group(1)!)

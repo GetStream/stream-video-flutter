@@ -16,9 +16,9 @@ import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamT
  * Runs each step of a ringing call: shows or clears the notification and ringtone, reports the
  * step to Dart, keeps the call store current and mirrors the step into Telecom.
  *
- * Every entry point (the broadcast receiver, the notification trampoline, the full-screen
- * activity) calls it, with the call as the Bundle [CallPayloadMapper.toBundle] writes. A step
- * that fails is logged and the rest of it skipped.
+ * The broadcast receiver, the notification trampoline and the full-screen activity call its steps
+ * with the call as the Bundle [CallPayloadMapper.toBundle] writes; the method channel also calls
+ * it by call id or cid. A step that fails is logged and the rest of it skipped.
  */
 internal class RingingController(
     private val context: Context,
@@ -129,6 +129,55 @@ internal class RingingController(
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             @Suppress("DEPRECATION")
             context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
+        }
+    }
+
+    /**
+     * Ends the stored call with [id]: as ended when it was accepted, as declined otherwise. Does
+     * nothing for a call that is not stored.
+     */
+    fun endCall(id: String) {
+        val call = store.byId(id) ?: return
+        val data = CallPayloadMapper.toBundle(call)
+        if (call.isAccepted) onEnded(data, keepSystemCall = false) else onDecline(data)
+    }
+
+    /**
+     * Reports the stored call with [id] as connected. Does nothing for a call that is not stored.
+     */
+    fun callConnected(id: String) {
+        val call = store.byId(id) ?: return
+        onConnected(CallPayloadMapper.toBundle(call))
+    }
+
+    /**
+     * Forgets every stored call, disconnects every call Telecom holds as ended locally, then runs
+     * the end or decline step of each call that was stored, as [endCall] picks it.
+     */
+    fun endAllCalls() {
+        val calls = store.all()
+        store.removeAll()
+        step { StreamTelecomManager.disconnectAll(context, DisconnectCause.LOCAL) }
+        calls.forEach { call ->
+            val data = CallPayloadMapper.toBundle(call)
+            if (call.isAccepted) onEnded(data, keepSystemCall = false) else onDecline(data)
+        }
+    }
+
+    /**
+     * Ends the ring of the stored calls with [callCid], or of every stored call when [callCid] is
+     * null or matches none, and keeps them in Telecom as answered calls.
+     */
+    fun dismissRingingCall(callCid: String?) {
+        val calls = callCid
+            ?.let { store.byCallCid(it) }
+            ?.takeIf { it.isNotEmpty() }
+            ?: store.all()
+
+        calls.forEach { call ->
+            // Answered whatever `isAccepted` says; answering an answered call does nothing.
+            step { StreamTelecomManager.answer(context, call.id) }
+            onEnded(CallPayloadMapper.toBundle(call), keepSystemCall = true)
         }
     }
 

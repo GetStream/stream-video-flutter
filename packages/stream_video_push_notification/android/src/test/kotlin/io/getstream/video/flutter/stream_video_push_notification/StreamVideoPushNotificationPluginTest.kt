@@ -5,8 +5,14 @@ import androidx.test.core.app.ApplicationProvider
 import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
 import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomCall
 import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomCallRepository
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
+import io.flutter.plugin.common.PluginRegistry
+import io.getstream.video.flutter.stream_video_push_notification.channel.PushMethodCallHandler
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -67,6 +73,54 @@ class StreamVideoPushNotificationPluginTest {
     fun `isMuted answers false without a call id`() {
         assertEquals(false, dart.invoke("isMuted", emptyMap<String, Any?>()))
         assertEquals(false, dart.invoke("isMuted"))
+    }
+
+    @Test
+    fun `two engines both get an event, and a detached engine no longer does`() {
+        val second = FakeDartSide(context)
+
+        RingingComponents.get(context).events.send("event", mapOf("id" to CALL_ID))
+        assertEquals(1, dart.receivedEvents().size)
+        assertEquals(1, second.receivedEvents().size)
+
+        second.detach()
+        RingingComponents.get(context).events.send("event", mapOf("id" to CALL_ID))
+        assertEquals(2, dart.receivedEvents().size)
+        assertEquals(1, second.receivedEvents().size)
+    }
+
+    @Test
+    fun `the permission listener is removed with the activity and answers only its own code`() {
+        val listener = slot<PluginRegistry.RequestPermissionsResultListener>()
+        val activityBinding = mockk<ActivityPluginBinding>(relaxed = true) {
+            every { activity } returns mockk(relaxed = true)
+            every { addRequestPermissionsResultListener(capture(listener)) } returns Unit
+        }
+
+        dart.plugin.onAttachedToActivity(activityBinding)
+        assertEquals(activityBinding.activity, handlerActivity())
+        assertEquals(
+            false,
+            listener.captured.onRequestPermissionsResult(1234, arrayOf(), intArrayOf()),
+        )
+
+        dart.plugin.onDetachedFromActivityForConfigChanges()
+        dart.plugin.onReattachedToActivityForConfigChanges(activityBinding)
+        dart.plugin.onDetachedFromActivity()
+
+        assertEquals(null, handlerActivity())
+        verify(exactly = 2) { activityBinding.addRequestPermissionsResultListener(any()) }
+        verify(exactly = 2) {
+            activityBinding.removeRequestPermissionsResultListener(listener.captured)
+        }
+    }
+
+    /** The activity the plugin handed to its method channel handler. */
+    private fun handlerActivity(): Any? {
+        val handler = StreamVideoPushNotificationPlugin::class.java.getDeclaredField("handler")
+            .apply { isAccessible = true }
+            .get(dart.plugin) as PushMethodCallHandler
+        return handler.activity
     }
 
     /** Replaces the repository [StreamTelecomManager] reads, which it otherwise builds itself. */
