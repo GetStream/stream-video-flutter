@@ -87,10 +87,9 @@ const _iosExtraHandledMethods = {
 };
 
 /// Cases the Android switch has beyond what Dart invokes there.
-/// `showIncomingCallSilently` has no Dart caller; `getDevicePushTokenVoIP`
-/// answers an empty string and Dart short-circuits before asking.
+/// `getDevicePushTokenVoIP` answers an empty string and Dart short-circuits
+/// before asking.
 const _androidExtraHandledMethods = {
-  'showIncomingCallSilently',
   'getDevicePushTokenVoIP',
 };
 
@@ -109,13 +108,9 @@ const _androidOnlyEvents = {
 };
 
 /// `ACTION_*` constants the Android plugin declares for its own intents, which
-/// never reach the event channel: the two hold-by-cell intents have no sender,
-/// the audio-state one is unused, and the ringing one starts the foreground
-/// service.
+/// never reach the event channel: `ACTION_CALL_RINGING` starts the ringing
+/// foreground service.
 const _androidInternalActions = {
-  'io.getstream.video.ACTION_CALL_AUDIO_STATE_CHANGE',
-  'io.getstream.video.ACTION_CALL_HELD',
-  'io.getstream.video.ACTION_CALL_UNHELD',
   'io.getstream.video.ACTION_CALL_RINGING',
 };
 

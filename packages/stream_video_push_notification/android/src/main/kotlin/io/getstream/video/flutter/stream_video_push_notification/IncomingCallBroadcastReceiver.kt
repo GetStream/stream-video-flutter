@@ -74,18 +74,6 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
                 putExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA, data)
             }
 
-        fun getIntentHeldByCell(context: Context, data: Bundle?) =
-            Intent(context, IncomingCallBroadcastReceiver::class.java).apply {
-                action = "${context.packageName}.${IncomingCallConstants.ACTION_CALL_HELD}"
-                putExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA, data)
-            }
-
-        fun getIntentUnHeldByCell(context: Context, data: Bundle?) =
-            Intent(context, IncomingCallBroadcastReceiver::class.java).apply {
-                action = "${context.packageName}.${IncomingCallConstants.ACTION_CALL_UNHELD}"
-                putExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA, data)
-            }
-
         fun getIntentConnected(context: Context, data: Bundle?) =
             Intent(context, IncomingCallBroadcastReceiver::class.java).apply {
                 action = "${context.packageName}.${IncomingCallConstants.ACTION_CALL_CONNECTED}"
