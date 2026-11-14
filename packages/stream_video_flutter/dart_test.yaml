@@ -1,6 +1,0 @@
-# The existence of this file prevents warnings about unrecognized tags when
-# running Alchemist tests, which tag every golden test with `golden`.
-
-tags:
-  golden:
-    timeout: 15s
