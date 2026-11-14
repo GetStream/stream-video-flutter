@@ -247,12 +247,16 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertNil(store.holdPerformed(uuid: UUID(), onHold: true))
     }
 
-    func testHoldingAlsoMutesAndResumingUnmutes() {
+    func testHoldingLeavesTheMuteAsTheUserSetIt() {
         let call = ring("a")
+        _ = store.mutePerformed(uuid: call.identity.callKitUUID, muted: true)
 
         _ = store.holdPerformed(uuid: call.identity.callKitUUID, onHold: true)
-        XCTAssertTrue(call.isMuted)
         _ = store.holdPerformed(uuid: call.identity.callKitUUID, onHold: false)
+        XCTAssertTrue(call.isMuted)
+
+        _ = store.mutePerformed(uuid: call.identity.callKitUUID, muted: false)
+        _ = store.holdPerformed(uuid: call.identity.callKitUUID, onHold: true)
         XCTAssertFalse(call.isMuted)
     }
 
@@ -263,6 +267,105 @@ final class CallKitCallStoreTests: XCTestCase {
         _ = store.holdPerformed(uuid: call.identity.callKitUUID, onHold: true)
 
         XCTAssertTrue(store.hasHeldCall)
+    }
+
+    func testHoldingAndResumingMoveTheAnsweredCallThroughItsHoldPhases() {
+        let call = ring("a")
+        let uuid = call.identity.callKitUUID
+        _ = store.answerPerformed(uuid: uuid)
+        _ = store.audioActivated()
+
+        _ = store.holdPerformed(uuid: uuid, onHold: true, origin: .otherCall)
+        XCTAssertEqual(call.phase, .held(.otherCall))
+        XCTAssertTrue(call.isOnHold)
+
+        _ = store.holdPerformed(uuid: uuid, onHold: false)
+        XCTAssertEqual(call.phase, .resumed(activated: false))
+        XCTAssertFalse(call.isOnHold)
+
+        store.audioSessionActivated()
+        XCTAssertEqual(call.phase, .resumed(activated: true))
+
+        _ = store.holdPerformed(uuid: uuid, onHold: false)
+        XCTAssertEqual(call.phase, .resumed(activated: true), "a call not on hold stays as it is")
+    }
+
+    func testACallRegisteredAgainKeepsItsAppIdAndAllItsUUIDs() {
+        let first = UUID()
+        _ = store.incomingReported(options(first.uuidString), uuid: first, source: .pushKit)
+        _ = store.answerPerformed(uuid: first)
+        let call = store.call(forCallKit: first)!
+        _ = store.holdPerformed(uuid: first, onHold: true, origin: .otherCall)
+        _ = store.holdPerformed(uuid: first, onHold: false)
+        let second = UUID()
+
+        store.reRegistrationRequested(call, as: second)
+        XCTAssertTrue(store.call(reRegisteringAs: second) === call)
+        XCTAssertTrue(store.isTracked(callKitUUID: second))
+        XCTAssertNil(store.reRegistrationPerformed(uuid: UUID()))
+
+        XCTAssertTrue(store.reRegistrationPerformed(uuid: second) === call)
+        XCTAssertEqual(call.phase, .resumed(activated: false))
+        XCTAssertEqual(call.reRegistrationsSinceHold, 1)
+        XCTAssertTrue(store.call(forAppId: first.uuidString.lowercased()) === call)
+        XCTAssertEqual(store.callKitUUID(forAppId: first.uuidString), second)
+        XCTAssertEqual(call.identity.reportedId, first.uuidString)
+        XCTAssertEqual(
+            sentIds(store.holdPerformed(uuid: second, onHold: true)), [first.uuidString])
+        XCTAssertTrue(store.isTracked(callKitUUID: first))
+        XCTAssertFalse(store.isTracked(callKitUUID: UUID()))
+        XCTAssertEqual(call.reRegistrationsSinceHold, 0, "a hold starts the count again")
+    }
+
+    func testACallKnownByAnotherUUIDKeepsReportingItsFirstUUID() {
+        let call = ring("not-a-uuid")
+        let first = call.identity.callKitUUID
+
+        call.rebind(to: UUID())
+
+        XCTAssertEqual(call.identity.reportedId, first.uuidString.lowercased())
+    }
+
+    func testActiveCallsLeaveOutTheOtherUUIDsOfACall() {
+        let first = UUID()
+        _ = store.incomingReported(options(first.uuidString), uuid: first, source: .pushKit)
+        let call = store.call(forCallKit: first)!
+        let second = UUID()
+        let third = UUID()
+        store.reRegistrationRequested(call, as: second)
+        _ = store.reRegistrationPerformed(uuid: second)
+        store.reRegistrationRequested(call, as: third)
+        let unrelated = UUID()
+
+        let ids = store.activeCalls(systemCallUUIDs: [first, second, third, unrelated])
+            .map { $0["id"] as? String }
+
+        XCTAssertEqual(ids, [first.uuidString, unrelated.uuidString.lowercased()])
+    }
+
+    func testARefusedReRegistrationCountsItsAttempts() {
+        let call = ring("a")
+        let uuid = UUID()
+        store.reRegistrationRequested(call, as: uuid)
+
+        store.reRegistrationRefused(uuid: uuid)
+        store.reRegistrationRefused(uuid: uuid)
+
+        XCTAssertEqual(call.phase, .reRegistering(as: uuid, attempt: 2))
+    }
+
+    func testAnAbandonedReRegistrationEndsTheCallAndTellsDart() {
+        let call = ring("a")
+        _ = store.answerPerformed(uuid: call.identity.callKitUUID)
+        store.reRegistrationRequested(call, as: UUID())
+
+        let effects = store.reRegisteringCallEnded(call, reason: .failed)
+
+        XCTAssertEqual(names(effects), [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
+        XCTAssertEqual(call.phase, .ended(.failed))
+        XCTAssertTrue(store.calls.isEmpty)
+        XCTAssertNil(store.answeredCall)
+        XCTAssertFalse(store.hasOngoingCall)
     }
 
     func testAnsweringMarksTheLastOptionsAcceptedOnlyWhenTheyNameTheAnsweredCall() {

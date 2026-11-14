@@ -11,6 +11,7 @@
 ### 🐞 Fixed
 
 - [iOS] The plugin no longer activates the audio session itself when it shows, answers or starts a call. The session it activated kept CallKit from activating its own, so WebRTC could run on a session CallKit did not own. CallKit now activates it. `audioSessionActive` has no effect.
+- [iOS] A call put on hold by another app's call, such as a cellular call answered with Hold & Accept, gets its audio back when that call ends. CallKit takes it off hold even when the other side hung up, and if CallKit then gives the call no working audio session, the plugin ends and starts the call again with CallKit under a new uuid. Dart keeps the call's id and is not told, and the restart adds no entry to Recents. A call CallKit refuses to start again after four attempts is ended with `ActionCallEnded`.
 
 ### 🔄 Changed
 
@@ -34,6 +35,7 @@
 ### 🐞 Fixed
 
 - A mute from the CallKit screen applies to the call it was made on.
+- [iOS] Taking a call off hold no longer marks it unmuted, so muting or unmuting from the app afterwards reaches the CallKit screen.
 - [iOS] Answering one of two ringing calls from CallKit no longer reports the other one as accepted in `activeCalls`.
 - [iOS] A ring that was already ended, for example because the caller cancelled it, no longer times out later and reports a second, unanswered end.
 - `registerDevice` right after `connect`, and `unregisterDevice` on web and desktop, no longer throw.

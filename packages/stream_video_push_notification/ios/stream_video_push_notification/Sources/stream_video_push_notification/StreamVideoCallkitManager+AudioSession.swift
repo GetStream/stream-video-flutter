@@ -14,9 +14,11 @@ extension StreamVideoCallkitManager {
 
     public func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
         apply(audio.didActivate(store))
+        holdRecovery.audioActivated()
     }
 
     public func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {
         apply(audio.didDeactivate(store))
+        restoreRecentsIfNoCallLeft()
     }
 }

@@ -16,6 +16,8 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
     private var savedEventHandler: EventCallbackHandler?
     private var savedStore: CallKitCallStore!
     private var savedAudio: CallKitAudioSessionCoordinator!
+    private var savedProvider: CXProvider?
+    private var savedRecentsSuppressedFor: CallData?
     private var session: FakeAudioSession!
     private var gate: FakeAudioEngineGate!
     private var savedSilenced = false
@@ -28,6 +30,8 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         savedEventHandler = manager.eventSink.handler
         savedStore = manager.store
         savedAudio = manager.audio
+        savedProvider = manager.sharedProvider
+        savedRecentsSuppressedFor = manager.recentsSuppressedFor
         savedSilenced = manager.eventSink.isSilenced
         savedReconfigureDelay = manager.reconfigureAfterAnswerDelay
 
@@ -50,6 +54,14 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         }
         manager.store = savedStore
         manager.audio = savedAudio
+        if let installed = manager.sharedProvider, installed !== savedProvider {
+            // A provider a test installed has the manager as its delegate. Released, CallKit
+            // resets it later, which would reset whatever store a later test is using.
+            installed.setDelegate(nil, queue: nil)
+            installed.invalidate()
+        }
+        manager.sharedProvider = savedProvider
+        manager.recentsSuppressedFor = savedRecentsSuppressedFor
         manager.eventSink.isSilenced = savedSilenced
         manager.reconfigureAfterAnswerDelay = savedReconfigureDelay
         super.tearDown()
@@ -490,6 +502,137 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
                 .init(available: false, callKitSessionActive: false),
                 .init(available: false, callKitSessionActive: false),
             ])
+    }
+
+    func testTheStartOfACallBeingRegisteredAgainIsNotANewCall() {
+        listen()
+        let first = UUID()
+        let call = track(id: first.uuidString)
+        answer(call)
+        let second = UUID()
+        manager.store.reRegistrationRequested(call, as: second)
+
+        manager.provider(
+            provider,
+            perform: CXStartCallAction(call: second, handle: CXHandle(type: .generic, value: "x")))
+        drainMainQueue()
+
+        XCTAssertEqual(received.count, 0, "Dart is not told about the new uuid")
+        XCTAssertEqual(manager.store.calls.count, 1)
+        XCTAssertEqual(call.identity.callKitUUID, second)
+
+        end(second)
+        XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
+        XCTAssertEqual(receivedId(at: 0), first.uuidString)
+    }
+
+    /// Ends the call CallKit knows as `uuid`, without waiting for the main queue: a real
+    /// provider's configuration can be refreshed from CallKit there, so the Recents flag is read
+    /// in the same turn it was set.
+    private func endWithoutWaiting(_ uuid: UUID) {
+        manager.provider(provider, perform: CXEndCallAction(call: uuid))
+    }
+
+    /// Ends `call` with CallKit and starts it again as a new uuid, through the manager.
+    private func registerAgain(_ call: CallKitCall) -> UUID {
+        manager.endForReRegistration(call)
+        let uuid = UUID()
+        manager.store.reRegistrationRequested(call, as: uuid)
+        manager.provider(
+            provider,
+            perform: CXStartCallAction(call: uuid, handle: CXHandle(type: .generic, value: "x")))
+        return uuid
+    }
+
+    func testRecentsListsTheFirstEndOfACallAndNotTheEndsOfItsRegistrationsAgain() {
+        let recents = CXProvider(configuration: CXProviderConfiguration())
+        manager.sharedProvider = recents
+        manager.recentsSuppressedFor = nil
+        let call = track(id: UUID().uuidString)
+        answer(call)
+
+        _ = registerAgain(call)
+        XCTAssertTrue(
+            recents.configuration.includesCallsInRecents, "the call as first reported is listed")
+
+        let third = registerAgain(call)
+        XCTAssertFalse(
+            recents.configuration.includesCallsInRecents, "a registration again is not listed")
+
+        manager.initCallkitProvider(call.options)
+        XCTAssertFalse(recents.configuration.includesCallsInRecents, "a refresh keeps it off")
+
+        endWithoutWaiting(third)
+        XCTAssertFalse(recents.configuration.includesCallsInRecents)
+        XCTAssertNotNil(manager.recentsSuppressedFor, "still off while CallKit lists the end")
+
+        manager.provider(provider, didDeactivate: AVAudioSession.sharedInstance())
+        XCTAssertTrue(recents.configuration.includesCallsInRecents)
+        XCTAssertNil(manager.recentsSuppressedFor)
+    }
+
+    func testTheEndOfARegistrationAgainIsNotListed() {
+        let recents = CXProvider(configuration: CXProviderConfiguration())
+        manager.sharedProvider = recents
+        manager.recentsSuppressedFor = nil
+        let call = track(id: UUID().uuidString)
+        answer(call)
+        let second = registerAgain(call)
+        XCTAssertTrue(recents.configuration.includesCallsInRecents)
+
+        endWithoutWaiting(second)
+
+        XCTAssertFalse(recents.configuration.includesCallsInRecents)
+        XCTAssertNotNil(manager.recentsSuppressedFor)
+    }
+
+    func testANewCallAfterARegistrationAgainTurnsRecentsBackOn() {
+        let recents = CXProvider(configuration: CXProviderConfiguration())
+        manager.sharedProvider = recents
+        manager.recentsSuppressedFor = nil
+        let call = track(id: UUID().uuidString)
+        answer(call)
+        endWithoutWaiting(registerAgain(call))
+        XCTAssertFalse(recents.configuration.includesCallsInRecents)
+
+        manager.initCallkitProvider(CallData(args: ["id": UUID().uuidString]))
+
+        XCTAssertTrue(recents.configuration.includesCallsInRecents)
+    }
+
+    func testEndingACallBeingRegisteredAgainEndsItAndFailsItsStart() {
+        listen()
+        let first = UUID()
+        let call = track(id: first.uuidString)
+        answer(call)
+        let second = UUID()
+        manager.store.reRegistrationRequested(call, as: second)
+
+        manager.endCall(CallData(args: ["id": first.uuidString]))
+        drainMainQueue()
+        XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
+        XCTAssertEqual(receivedId(at: 0), first.uuidString)
+        XCTAssertTrue(manager.store.calls.isEmpty)
+        XCTAssertEqual(gate.updates.last, .init(available: true, callKitSessionActive: nil))
+
+        manager.provider(
+            provider,
+            perform: CXStartCallAction(call: second, handle: CXHandle(type: .generic, value: "x")))
+        drainMainQueue()
+        XCTAssertEqual(received.count, 1, "the late start is not a new call")
+        XCTAssertTrue(manager.store.calls.isEmpty)
+    }
+
+    func testTheAcceptedCallIsFoundAfterItIsRegisteredAgain() {
+        let first = UUID()
+        let call = track(id: first.uuidString)
+        answer(call)
+        manager.store.lastOptions = call.options
+        let second = UUID()
+        manager.store.reRegistrationRequested(call, as: second)
+        _ = manager.store.reRegistrationPerformed(uuid: second)
+
+        XCTAssertTrue(manager.getAcceptedCall() === call.options)
     }
 
     // MARK: - Calls from Dart

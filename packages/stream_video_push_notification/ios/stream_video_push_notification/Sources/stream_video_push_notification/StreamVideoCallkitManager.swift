@@ -17,9 +17,18 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     let transactions = CallKitTransactionRequester()
 
     /// Configures the audio session and tells WebRTC when it may use it.
-    var audio = CallKitAudioSessionCoordinator()
+    var audio = CallKitAudioSessionCoordinator() {
+        didSet { observeEngineStartFailures() }
+    }
     /// How long after answering the answered call's audio session options are applied again.
     var reconfigureAfterAnswerDelay: DispatchTimeInterval = .milliseconds(1200)
+
+    /// Brings a call's audio back after another app's call held it.
+    var holdRecovery: HoldRecovery!
+
+    /// The options Recents was turned off for, while a call registered again with CallKit is
+    /// left. Nil while Recents follows the options.
+    var recentsSuppressedFor: CallData?
 
     var sharedProvider: CXProvider? = nil
 
@@ -28,15 +37,22 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         transactions.onEndRefused = { [weak self] uuid in
             self?.clearCallAfterRefusedEnd(uuid)
         }
+        holdRecovery = HoldRecovery(store: { [unowned self] in self.store })
+        holdRecovery.actions = self
+        observeEngineStartFailures()
+    }
+
+    private func observeEngineStartFailures() {
+        audio.onEngineStartFailed = { [weak self] in
+            self?.holdRecovery.audioEngineStartFailed()
+        }
     }
 
     @objc public func getAcceptedCall() -> CallData? {
         let data = store.lastOptions
-        let answeredUUID = store.answeredCall?.identity.callKitUUID
-        NSLog(
-            "Call data ids \(String(describing: data?.uuid)) \(String(describing: answeredUUID?.uuidString))"
-        )
-        if data?.uuid.lowercased() == answeredUUID?.uuidString.lowercased() {
+        let answeredId = store.answeredCall?.identity.appId
+        NSLog("Call data ids \(String(describing: data?.uuid)) \(String(describing: answeredId))")
+        if data?.uuid.lowercased() == answeredId?.lowercased() {
             return data
         }
         return nil
@@ -55,17 +71,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     ) {
         store.showRequested(data, fromPushKit: fromPushKit)
 
-        var handle: CXHandle?
-        handle = CXHandle(type: self.getHandleType(data.handleType), value: data.getEncryptHandle())
-
-        let callUpdate = CXCallUpdate()
-        callUpdate.remoteHandle = handle
-        callUpdate.supportsDTMF = data.supportsDTMF
-        callUpdate.supportsHolding = data.supportsHolding
-        callUpdate.supportsGrouping = data.supportsGrouping
-        callUpdate.supportsUngrouping = data.supportsUngrouping
-        callUpdate.hasVideo = data.type > 0 ? true : false
-        callUpdate.localizedCallerName = data.callerName
+        let callUpdate = self.callUpdate(data)
 
         initCallkitProvider(data)
 
@@ -106,8 +112,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     /// Asks CallKit to start `data` as an outgoing call, and gives CallKit the call's details
     /// once it has.
     private func requestStart(_ data: CallData) {
-        let handle = CXHandle(
-            type: self.getHandleType(data.handleType), value: data.getEncryptHandle())
+        let handle = self.handle(data)
 
         guard let uuid = UUID(uuidString: data.uuid) else {
             print("Error: Invalid UUID string: \(data.uuid)")
@@ -122,16 +127,25 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
                 return
             }
 
-            let callUpdate = CXCallUpdate()
-            callUpdate.remoteHandle = handle
-            callUpdate.supportsDTMF = data.supportsDTMF
-            callUpdate.supportsHolding = data.supportsHolding
-            callUpdate.supportsGrouping = data.supportsGrouping
-            callUpdate.supportsUngrouping = data.supportsUngrouping
-            callUpdate.hasVideo = data.type > 0 ? true : false
-            callUpdate.localizedCallerName = data.callerName
-            self.sharedProvider?.reportCall(with: uuid, updated: callUpdate)
+            self.sharedProvider?.reportCall(with: uuid, updated: self.callUpdate(data))
         }
+    }
+
+    func handle(_ data: CallData) -> CXHandle {
+        CXHandle(type: getHandleType(data.handleType), value: data.getEncryptHandle())
+    }
+
+    /// What CallKit shows and allows for `data`.
+    func callUpdate(_ data: CallData) -> CXCallUpdate {
+        let callUpdate = CXCallUpdate()
+        callUpdate.remoteHandle = handle(data)
+        callUpdate.supportsDTMF = data.supportsDTMF
+        callUpdate.supportsHolding = data.supportsHolding
+        callUpdate.supportsGrouping = data.supportsGrouping
+        callUpdate.supportsUngrouping = data.supportsUngrouping
+        callUpdate.hasVideo = data.type > 0
+        callUpdate.localizedCallerName = data.callerName
+        return callUpdate
     }
 
     @objc public func muteCall(_ callId: String, isMuted: Bool) {
@@ -152,18 +166,32 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         if call.isOnHold == onHold {
             apply([store.holdEvent(call, onHold)])
         } else {
-            transactions.hold(uuid: call.identity.callKitUUID, onHold: onHold)
+            let uuid = call.identity.callKitUUID
+            if onHold {
+                holdRecovery.holdRequested(uuid)
+            }
+            transactions.hold(uuid: uuid, onHold: onHold) { [weak self] accepted in
+                if onHold && !accepted {
+                    self?.holdRecovery.holdRefused(uuid)
+                }
+            }
         }
     }
 
     @objc public func endCall(_ data: CallData) {
         let uuid: UUID
+        let sentEnded = store.isFromPushKit
         if store.isFromPushKit {
-            uuid = UUID(uuidString: store.lastOptions!.uuid)!
+            uuid = store.callKitUUID(forAppId: store.lastOptions!.uuid)!
             store.isFromPushKit = false
             self.sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_ENDED, data.toJSON())
         } else {
-            uuid = UUID(uuidString: data.uuid)!
+            uuid = store.callKitUUID(forAppId: data.uuid)!
+        }
+        if let call = store.call(forCallKit: uuid), case .reRegistering = call.phase {
+            // CallKit already took the call as ended, so an end action would be refused.
+            endReRegisteringCall(call, reason: nil, notifyDart: !sentEnded)
+            return
         }
         transactions.end(uuid: uuid)
     }
@@ -171,10 +199,10 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     @objc public func connectedCall(_ data: CallData) {
         let uuid: UUID
         if store.isFromPushKit {
-            uuid = UUID(uuidString: store.lastOptions!.uuid)!
+            uuid = store.callKitUUID(forAppId: store.lastOptions!.uuid)!
             store.isFromPushKit = false
         } else {
-            uuid = UUID(uuidString: data.uuid)!
+            uuid = store.callKitUUID(forAppId: data.uuid)!
         }
         guard let (call, effects) = store.connected(uuid: uuid) else {
             return
@@ -200,11 +228,12 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     /// it clears the UI when the controller will not take the transaction. Only the provider that
     /// reported a call can end it this way, so this covers calls this process knows about.
     private func clearCallAfterRefusedEnd(_ uuid: UUID) {
+        suppressRecentsIfRegisteredAgain(store.call(forCallKit: uuid))
         sharedProvider?.reportCall(with: uuid, endedAt: Date(), reason: .remoteEnded)
         // Reporting the end does not run the `CXEndCallAction` delegate, which is what normally
         // removes the call.
         store.endRefused(uuid: uuid)
-        audio.callsRemoved(store)
+        callsRemoved()
     }
 
     /// Reports to CallKit how a call ended, which is what decides how it is listed in Recents.
@@ -212,7 +241,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     /// `reason` matches the raw values of `CXCallEndedReason`: 1 failed, 2 remoteEnded,
     /// 3 unanswered, 4 answeredElsewhere, 5 declinedElsewhere.
     public func saveEndCall(_ uuid: String, _ reason: Int) {
-        guard let callUUID = UUID(uuidString: uuid) else {
+        guard let callUUID = store.callKitUUID(forAppId: uuid) else {
             NSLog("saveEndCall: invalid UUID \(uuid)")
             return
         }
@@ -221,9 +250,14 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             return
         }
 
+        if let call = store.call(forCallKit: callUUID), case .reRegistering = call.phase {
+            endReRegisteringCall(call, reason: endedReason, notifyDart: false)
+            return
+        }
+        suppressRecentsIfRegisteredAgain(store.call(forCallKit: callUUID))
         self.sharedProvider?.reportCall(with: callUUID, endedAt: Date(), reason: endedReason)
         store.endReported(uuid: callUUID, reason: endedReason)
-        audio.callsRemoved(store)
+        callsRemoved()
     }
 
     func endCallNotExist(_ data: CallData) {
@@ -254,10 +288,15 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     }
 
     @objc public func initCallkitProvider(_ data: CallData) {
+        if !store.hasOngoingCall {
+            // No registered-again call is left to keep out of Recents.
+            recentsSuppressedFor = nil
+        }
         if let sharedProvider = self.sharedProvider {
             // The provider outlives individual calls, so refreshing its configuration is the only
             // way a ringtone, icon or Recents setting delivered after the first call takes effect.
-            sharedProvider.configuration = createConfiguration(data)
+            sharedProvider.configuration = createConfiguration(
+                data, includesCallsInRecents: recentsSuppressedFor == nil ? nil : false)
             // Re-assert the delegate: Apple requires it to be set before `reportNewIncomingCall`,
             // and it can be dropped when the provider is carried across a plugin re-registration.
             sharedProvider.setDelegate(self, queue: nil)
@@ -325,7 +364,9 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         self.sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_INCOMING_FAILED, body)
     }
 
-    func createConfiguration(_ data: CallData) -> CXProviderConfiguration {
+    func createConfiguration(
+        _ data: CallData, includesCallsInRecents: Bool? = nil
+    ) -> CXProviderConfiguration {
         let configuration = CXProviderConfiguration()
         configuration.supportsVideo = data.supportsVideo
         configuration.maximumCallGroups = data.maximumCallGroups
@@ -337,7 +378,8 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             CXHandle.HandleType.phoneNumber,
         ]
         if #available(iOS 11.0, *) {
-            configuration.includesCallsInRecents = data.includesCallsInRecents
+            configuration.includesCallsInRecents =
+                includesCallsInRecents ?? data.includesCallsInRecents
         }
         if !data.iconName.isEmpty {
             if let image = UIImage(named: data.iconName) {

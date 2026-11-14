@@ -21,12 +21,26 @@ struct CallKitCallIdentity {
         callKitUUID = uuid
     }
 
-    /// The id events report the call by: the app id when it names the CallKit uuid, otherwise
-    /// the lowercased uuid.
+    /// The id events report the call by: the app id when it names the CallKit uuid the call was
+    /// first known by, otherwise that uuid, lowercased.
     var reportedId: String {
-        let lowercasedUUID = callKitUUID.uuidString.lowercased()
-        return appId.lowercased() == lowercasedUUID ? appId : lowercasedUUID
+        let firstUUID = (previousCallKitUUIDs.first ?? callKitUUID).uuidString.lowercased()
+        return appId.lowercased() == firstUUID ? appId : firstUUID
     }
+
+    /// Whether CallKit knows or knew the call as `uuid`.
+    func isKnown(as uuid: UUID) -> Bool {
+        callKitUUID == uuid || previousCallKitUUIDs.contains(uuid)
+    }
+}
+
+/// Why a call is on hold.
+enum CallKitHoldOrigin: Equatable {
+    /// CallKit held the call while another app's call was there, such as a cellular call
+    /// answered with Hold & Accept.
+    case otherCall
+    /// The app or the user held the call.
+    case requested
 }
 
 /// Where a call is in its CallKit lifecycle.
@@ -39,6 +53,14 @@ enum CallKitCallPhase: Equatable {
     case answering
     /// An audio session was activated since the call was started or answered.
     case active
+    /// On hold.
+    case held(CallKitHoldOrigin)
+    /// Off hold again, or registered again; `activated` once CallKit activated the audio session
+    /// since.
+    case resumed(activated: Bool)
+    /// Reported to CallKit as ended and being started again as `uuid`, so CallKit gives it a new
+    /// audio session. `attempt` counts the start requests CallKit refused.
+    case reRegistering(as: UUID, attempt: Int)
     /// Ended, with the reason reported to CallKit, or nil when CallKit performed the end action.
     case ended(CXCallEndedReason?)
 }
@@ -63,7 +85,8 @@ final class CallKitCall {
 
     private(set) var phase: CallKitCallPhase
     var isMuted = false
-    var isOnHold = false
+    /// Times the call was registered with CallKit again since it was last put on hold.
+    var reRegistrationsSinceHold = 0
     /// When the call started connecting: set on the first audio session activation.
     var startedConnectingAt: Date?
     var connectedAt: Date?
@@ -96,9 +119,21 @@ final class CallKitCall {
     }
 }
 
+extension CallKitCall {
+    var isOnHold: Bool {
+        if case .held = phase { return true }
+        return false
+    }
+}
+
 extension CallKitCallPhase {
     var isEnded: Bool {
         if case .ended = self { return true }
+        return false
+    }
+
+    var isResumed: Bool {
+        if case .resumed = self { return true }
         return false
     }
 }

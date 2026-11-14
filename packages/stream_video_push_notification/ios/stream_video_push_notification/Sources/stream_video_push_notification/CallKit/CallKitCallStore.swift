@@ -31,6 +31,9 @@ final class CallKitCallStore {
     /// The options of outgoing calls whose start action CallKit has not performed yet.
     private var pendingOutgoingOptions: [UUID: CallData] = [:]
 
+    /// Every uuid a call was asked to be registered again as.
+    private var reRegistrationUUIDs: Set<UUID> = []
+
     /// The options of the call the plugin was last given. Set by Dart's `showIncomingCall` and
     /// `startCall`, by its `endCall` and `callConnected` while `isFromPushKit` is false, and by a
     /// call shown or started from PushKit. Events use it where no tracked call matches.
@@ -54,9 +57,39 @@ final class CallKitCallStore {
         calls.first { $0.identity.callKitUUID == uuid }
     }
 
+    /// The call whose app id is `id`, in any case, else the call CallKit knows as `id`.
     func call(forAppId id: String) -> CallKitCall? {
+        let lowercasedId = id.lowercased()
+        if let call = calls.first(where: { $0.identity.appId.lowercased() == lowercasedId }) {
+            return call
+        }
         guard let uuid = UUID(uuidString: id) else { return nil }
         return call(forCallKit: uuid)
+    }
+
+    /// The uuid CallKit knows the call `id` names by: the tracked call's current uuid, else `id`
+    /// itself when it is a uuid.
+    func callKitUUID(forAppId id: String) -> UUID? {
+        call(forAppId: id)?.identity.callKitUUID ?? UUID(uuidString: id)
+    }
+
+    /// The call being registered again as `uuid`.
+    func call(reRegisteringAs uuid: UUID) -> CallKitCall? {
+        calls.first {
+            if case .reRegistering(let newUUID, _) = $0.phase { return newUUID == uuid }
+            return false
+        }
+    }
+
+    /// Whether `uuid` was handed out to register a call again, whatever became of that call.
+    func isReRegistrationUUID(_ uuid: UUID) -> Bool {
+        reRegistrationUUIDs.contains(uuid)
+    }
+
+    /// Whether `uuid` names a tracked call: as CallKit knows it now, knew it before, or is about
+    /// to know it after a re-registration.
+    func isTracked(callKitUUID uuid: UUID) -> Bool {
+        calls.contains { $0.identity.isKnown(as: uuid) } || call(reRegisteringAs: uuid) != nil
     }
 
     /// The id events report the call CallKit knows as `uuid` by: see
@@ -81,10 +114,14 @@ final class CallKitCallStore {
         return CallData(args: args)
     }
 
-    /// The `activeCalls` payload for the calls CallKit knows, in its order.
+    /// The `activeCalls` payload for the calls CallKit knows, in its order. A uuid a tracked call
+    /// was known by before, or is being registered again as, is left out.
     func activeCalls(systemCallUUIDs: [UUID]) -> [[String: Any]] {
-        systemCallUUIDs.map { uuid in
+        systemCallUUIDs.compactMap { uuid in
             guard let call = call(forCallKit: uuid) else {
+                if isTracked(callKitUUID: uuid) || isReRegistrationUUID(uuid) {
+                    return nil
+                }
                 return ["id": reportedId(for: uuid)]
             }
             var item = call.options.toJSON()
@@ -204,10 +241,19 @@ final class CallKitCallStore {
     }
 
     /// CallKit performed the hold action for `uuid`. Nil for a call the store does not track.
-    func holdPerformed(uuid: UUID, onHold: Bool) -> [CallKitEffect]? {
+    ///
+    /// Holding moves the call to `.held(origin)`; taking a held call off hold moves it to
+    /// `.resumed(activated: false)`. The call's mute is left as the user set it.
+    func holdPerformed(
+        uuid: UUID, onHold: Bool, origin: CallKitHoldOrigin = .requested
+    ) -> [CallKitEffect]? {
         guard let call = call(forCallKit: uuid) else { return nil }
-        call.isOnHold = onHold
-        call.isMuted = onHold
+        if onHold {
+            call.move(to: .held(origin))
+            call.reRegistrationsSinceHold = 0
+        } else if call.isOnHold {
+            call.move(to: .resumed(activated: false))
+        }
         return [holdEvent(call, onHold)]
     }
 
@@ -255,6 +301,11 @@ final class CallKitCallStore {
         calls.contains { !$0.phase.isEnded }
     }
 
+    /// The answered call, else the outgoing call, that has not ended.
+    var liveCall: CallKitCall? {
+        callsUsingAudio.first
+    }
+
     /// The answered and the outgoing call, when they have not ended.
     private var callsUsingAudio: [CallKitCall] {
         [answeredCall, outgoingCall].compactMap { $0 }.filter { !$0.phase.isEnded }
@@ -272,9 +323,15 @@ final class CallKitCallStore {
         callsUsingAudio.isEmpty || !callsAwaitingFirstActivation.isEmpty
     }
 
-    /// CallKit activated the audio session for the answered and the outgoing call.
+    /// CallKit activated the audio session for the answered and the outgoing call. A resumed
+    /// call is marked activated.
     func audioSessionActivated() {
-        callsUsingAudio.forEach { $0.hasActivatedAudioSession = true }
+        for call in callsUsingAudio {
+            call.hasActivatedAudioSession = true
+            if call.phase.isResumed {
+                call.move(to: .resumed(activated: true))
+            }
+        }
     }
 
     /// The answered and the outgoing call start connecting on their first audio session
@@ -331,6 +388,47 @@ final class CallKitCallStore {
             call.move(to: .ended(.remoteEnded))
             remove(call)
         }
+    }
+
+    // MARK: - Registering a call again
+
+    /// `call` was reported to CallKit as ended and is being started again as `uuid`.
+    func reRegistrationRequested(_ call: CallKitCall, as uuid: UUID) {
+        reRegistrationUUIDs.insert(uuid)
+        call.reRegistrationsSinceHold += 1
+        call.move(to: .reRegistering(as: uuid, attempt: 0))
+    }
+
+    /// CallKit refused to start the call being registered again as `uuid`, and it is asked
+    /// again.
+    func reRegistrationRefused(uuid: UUID) {
+        guard let call = call(reRegisteringAs: uuid),
+            case .reRegistering(_, let attempt) = call.phase
+        else { return }
+        call.move(to: .reRegistering(as: uuid, attempt: attempt + 1))
+    }
+
+    /// CallKit performed the start action of the call being registered again as `uuid`. The call
+    /// keeps its app id and waits for CallKit to activate its audio session. Nil when no call is
+    /// being registered as `uuid`.
+    func reRegistrationPerformed(uuid: UUID) -> CallKitCall? {
+        guard let call = call(reRegisteringAs: uuid) else { return nil }
+        call.rebind(to: uuid)
+        call.move(to: .resumed(activated: false))
+        return call
+    }
+
+    /// `call`, which CallKit already took as ended, is ended before it was registered again:
+    /// CallKit kept refusing to start it, or the app ended it.
+    func reRegisteringCallEnded(
+        _ call: CallKitCall, reason: CXCallEndedReason?
+    ) -> [CallKitEffect] {
+        call.move(to: .ended(reason))
+        remove(call)
+        if answeredCall === call {
+            answeredCall = nil
+        }
+        return [.send(event: StreamVideoIncomingCallConstants.ACTION_CALL_ENDED, body: call.options.toJSON())]
     }
 
     // MARK: - Events

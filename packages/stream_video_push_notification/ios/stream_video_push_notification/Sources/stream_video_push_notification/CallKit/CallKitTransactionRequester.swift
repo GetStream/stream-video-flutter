@@ -33,13 +33,13 @@ final class CallKitTransactionRequester {
         self.requestCall(callTransaction, action: "muteCall")
     }
 
-    func hold(uuid: UUID, onHold: Bool) {
+    func hold(uuid: UUID, onHold: Bool, completion: ((Bool) -> Void)? = nil) {
         let onHoldAction = CXSetHeldCallAction(call: uuid, onHold: onHold)
 
         let callTransaction = CXTransaction()
         callTransaction.addAction(onHoldAction)
 
-        self.requestCall(callTransaction, action: "holdCall")
+        self.requestCall(callTransaction, action: "holdCall", completion: completion)
     }
 
     func end(uuid: UUID) {

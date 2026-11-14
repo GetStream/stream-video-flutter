@@ -19,14 +19,18 @@ final class CallKitAudioSessionCoordinator {
     private let session: AudioSessionConfiguring
     let gate: WebRTCAudioEngineGate
 
+    /// Called when WebRTC could not start the audio engine on a session CallKit activated.
+    var onEngineStartFailed: (() -> Void)?
+
     init(
         session: AudioSessionConfiguring = AVAudioSession.sharedInstance(),
         gate: WebRTCAudioEngineGate = WebRTCPluginAudioEngineGate()
     ) {
         self.session = session
         self.gate = gate
-        self.gate.onEngineStartFailed = {
+        self.gate.onEngineStartFailed = { [weak self] in
             NSLog("[StreamCallKit] WebRTC could not start the audio engine")
+            self?.onEngineStartFailed?()
         }
     }
 
