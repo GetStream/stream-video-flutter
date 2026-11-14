@@ -91,12 +91,6 @@ internal class TelecomIntegration(
     /** Calls currently on hold, so hold events are only emitted on an actual transition. */
     private val heldCallIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
-    /**
-     * Hold values this app asked Telecom for. The transition Telecom reports back for one of them
-     * is not reported to Dart.
-     */
-    private val selfRequestedHold = ConcurrentHashMap<String, Boolean>()
-
     /** The calls registered with Telecom, from register until Telecom drops them. */
     private val trackedCalls = ConcurrentHashMap<String, RingingCall>()
 
@@ -256,12 +250,11 @@ internal class TelecomIntegration(
     }
 
     /**
-     * Asks Telecom to hold or resume a call. The transition Telecom reports back is not sent to
-     * Dart.
+     * Asks Telecom to hold or resume a call. The hold event is sent once Telecom has done it, as
+     * for a hold from the system.
      */
     fun setOnHold(callId: String, isOnHold: Boolean) {
         if (!isEnabled() || !isTracked(callId)) return
-        selfRequestedHold[callId] = isOnHold
         processAction(
             callId,
             if (isOnHold) TelecomCallAction.Hold else TelecomCallAction.Activate,
@@ -354,7 +347,6 @@ internal class TelecomIntegration(
         connectedCallIds.remove(callId)
         outgoingCallIds.remove(callId)
         heldCallIds.remove(callId)
-        selfRequestedHold.remove(callId)
         trackedCalls.remove(callId)
     }
 
@@ -377,7 +369,6 @@ internal class TelecomIntegration(
         connectedCallIds.clear()
         outgoingCallIds.clear()
         heldCallIds.clear()
-        selfRequestedHold.clear()
         trackedCalls.clear()
     }
 
@@ -434,22 +425,18 @@ internal class TelecomIntegration(
             mainThread { listener?.onDisconnectedBySystem(call, wasConnected) }
         }
 
-        // State is updated before the suppression check in both handlers, so heldCallIds stays
-        // accurate even when the event itself is withheld.
+        /** Reports a resume when the call was held, whoever asked for it. */
         override fun onIsCallActive(callId: String) {
             // Active also follows a connect and an answer, after which a system disconnect is an
             // end, not a decline.
             connectedCallIds.add(callId)
-            val wasHeld = heldCallIds.remove(callId)
-            if (selfRequestedHold.remove(callId, false)) return
-            if (!wasHeld) return
+            if (!heldCallIds.remove(callId)) return
             sendEvent(IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD, callId, "isOnHold" to false)
         }
 
+        /** Reports a hold when the call was not held yet, whoever asked for it. */
         override fun onIsCallInactive(callId: String) {
-            val isNewHold = heldCallIds.add(callId)
-            if (selfRequestedHold.remove(callId, true)) return
-            if (!isNewHold) return
+            if (!heldCallIds.add(callId)) return
             sendEvent(IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD, callId, "isOnHold" to true)
         }
 
@@ -457,10 +444,9 @@ internal class TelecomIntegration(
             sendEvent(IncomingCallConstants.ACTION_CALL_TOGGLE_MUTE, callId, "isMuted" to isMuted)
         }
 
+        /** A refused hold or resume changes nothing, so nothing is reported. */
         override fun onHoldChangeFailed(callId: String, requestedOnHold: Boolean) {
-            // No transition follows a refused request, so its flag is cleared, and only if it is
-            // still the flag of this request.
-            selfRequestedHold.remove(callId, requestedOnHold)
+            Log.w(TAG, "[onHoldChangeFailed] $callId, requested onHold=$requestedOnHold")
         }
 
         override fun onCallAudioEndpointsChanged(callId: String, snapshot: Map<String, Any?>) {

@@ -179,15 +179,19 @@ void main() {
     bool isRingingFlow = false,
     CallStatus? status,
   }) {
+    var audioSuspended = false;
     final callState = _MockCallState();
     when(() => callState.isRingingFlow).thenReturn(isRingingFlow);
     when(() => callState.status).thenReturn(status ?? CallStatusIdle());
+    when(() => callState.isAudioSuspended).thenAnswer((_) => audioSuspended);
     final call = _MockCall();
     when(() => call.callCid).thenReturn(StreamCallCid(cid: cid));
     when(() => call.state).thenAnswer((_) => MutableStateEmitter(callState));
     when(
       () => call.setMicrophoneEnabled(enabled: any(named: 'enabled')),
     ).thenAnswer((_) async => const Result.success(none));
+    when(call.suspendAudio).thenAnswer((_) async => audioSuspended = true);
+    when(call.resumeAudio).thenAnswer((_) async => audioSuspended = false);
     return call;
   }
 
@@ -618,5 +622,125 @@ void main() {
     verifyNever(
       () => controller.endCallByCid(any(), silent: any(named: 'silent')),
     );
+  });
+
+  group('a Telecom hold on Android', () {
+    setUp(
+      () => CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android,
+    );
+    tearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+
+    Future<_MockCall> joined() async {
+      await start();
+      final target = call(cid: _cid.value);
+      activeCalls.value = [target];
+      await pumpEventQueue();
+      when(() => controller.activeCalls()).thenAnswer(
+        (_) async => [CallData(uuid: 'u1', callCid: _cid.value)],
+      );
+      return target;
+    }
+
+    Future<void> hold({required bool isOnHold, String uuid = 'u1'}) async {
+      platform.emit(ActionCallToggleHold(uuid: uuid, isOnHold: isOnHold));
+      await pumpEventQueue();
+    }
+
+    test("suspends the call's audio, and a resume resumes it", () async {
+      final target = await joined();
+
+      await hold(isOnHold: true);
+      verify(target.suspendAudio).called(1);
+      verifyNever(target.resumeAudio);
+
+      await hold(isOnHold: false);
+      verify(target.resumeAudio).called(1);
+      verifyNever(
+        () => target.setMicrophoneEnabled(enabled: any(named: 'enabled')),
+      );
+    });
+
+    test('leaves a call whose audio was suspended already as it is', () async {
+      final target = await joined();
+      await target.suspendAudio();
+      clearInteractions(target);
+
+      await hold(isOnHold: true);
+      await hold(isOnHold: false);
+
+      verifyNever(target.suspendAudio);
+      verifyNever(target.resumeAudio);
+    });
+
+    test('a second hold suspends once, and one resume resumes', () async {
+      final target = await joined();
+
+      await hold(isOnHold: true);
+      await hold(isOnHold: true);
+      await hold(isOnHold: false);
+      await hold(isOnHold: false);
+
+      verify(target.suspendAudio).called(1);
+      verify(target.resumeAudio).called(1);
+    });
+
+    test('a resume without a hold changes nothing', () async {
+      final target = await joined();
+
+      await hold(isOnHold: false);
+
+      verifyNever(target.resumeAudio);
+    });
+
+    test(
+      'a suspend that does not take, before the call joined, is not resumed',
+      () async {
+        final target = await joined();
+        when(target.suspendAudio).thenAnswer((_) async {});
+
+        await hold(isOnHold: true);
+        await hold(isOnHold: false);
+
+        verifyNever(target.resumeAudio);
+      },
+    );
+
+    test(
+      'a call the native side does not know is held only when it is the only one',
+      () async {
+        final target = await joined();
+        when(() => controller.activeCalls()).thenAnswer((_) async => const []);
+
+        await hold(isOnHold: true, uuid: 'unknown');
+        verify(target.suspendAudio).called(1);
+
+        final second = call(cid: 'default:other', isRingingFlow: true);
+        activeCalls.value = [target, second];
+        await pumpEventQueue();
+        await hold(isOnHold: true, uuid: 'unknown');
+
+        verifyNever(second.suspendAudio);
+      },
+    );
+
+    test('a failing suspend is logged and the observer goes on', () async {
+      final target = await joined();
+      when(target.suspendAudio).thenThrow(StateError('boom'));
+
+      await hold(isOnHold: true);
+      platform.emit(const ActionCallToggleMute(uuid: 'u1', isMuted: true));
+      await pumpEventQueue();
+
+      verify(() => target.setMicrophoneEnabled(enabled: false)).called(1);
+    });
+
+    test('is ignored on iOS', () async {
+      final target = await joined();
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
+
+      await hold(isOnHold: true);
+
+      verifyNever(target.suspendAudio);
+    });
   });
 }

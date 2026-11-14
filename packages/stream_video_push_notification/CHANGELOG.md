@@ -2,6 +2,7 @@
 
 ### ⚠️ Breaking
 
+- [Android] `holdCall` no longer reports `ActionCallToggleHold` itself. The event comes once Telecom has held or resumed the call, the same as for a hold from the system, so a hold Telecom refuses is not reported. While the Telecom integration is off, the default below Android 17, `holdCall` does nothing and nothing is reported.
 - `StreamVideoPushNotificationPlatform.activeCalls()` returns `Future<List<CallData>>`.
 - `StreamVideoPushNotificationManager.removedStoredTokens` is removed.
 - `StreamVideoPushNotificationManager.currentActiveCalls` is removed; read `StreamVideo.state.activeCalls`.
@@ -14,6 +15,7 @@
 
 ### 🔄 Changed
 
+- [Android] While the Telecom integration is on and Telecom holds a call, for example for a phone call, from a watch or in a car, the call's audio is suspended with `Call.suspendAudio` and resumed with `Call.resumeAudio` when Telecom resumes it. A call whose audio was already suspended is left as it is.
 - [Android] `endCall`, `setCallConnected`, `endAllCalls` and `dismissRingingCallByCid` finish their work on the call before they return, so `activeCalls` right after them no longer lists the call.
 - [Android] `requestNotificationPermission` and `ensureFullScreenIntentPermission` show their UI from the activity of the Flutter engine that calls them, and do nothing from an engine without one. They used to use the activity of whichever engine attached last.
 - `StreamVideoPushHandler.handleBackgroundMessage` builds a client that sets up no media.
