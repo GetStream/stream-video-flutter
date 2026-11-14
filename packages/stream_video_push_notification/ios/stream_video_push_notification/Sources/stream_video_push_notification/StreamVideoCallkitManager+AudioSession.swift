@@ -3,100 +3,20 @@ import CallKit
 
 extension StreamVideoCallkitManager {
 
-    func sendDefaultAudioInterruptionNofificationToStartAudioResource() {
-        var userInfo: [AnyHashable: Any] = [:]
-        let intrepEndeRaw = AVAudioSession.InterruptionType.ended.rawValue
-        userInfo[AVAudioSessionInterruptionTypeKey] = intrepEndeRaw
-        userInfo[AVAudioSessionInterruptionOptionKey] =
-            AVAudioSession.InterruptionOptions.shouldResume.rawValue
-        NotificationCenter.default.post(
-            name: AVAudioSession.interruptionNotification, object: self, userInfo: userInfo)
-    }
-
     /// Applies `data`'s audio session options, or the last options' when `data` is nil.
     func configureAudioSession(_ data: CallData? = nil) {
-        let data = data ?? store.lastOptions
-        if data?.configureAudioSession != false {
-            let session = AVAudioSession.sharedInstance()
-            do {
-                try session.setCategory(
-                    AVAudioSession.Category.playAndRecord,
-                    options: [
-                        .allowBluetoothA2DP,
-                        .duckOthers,
-                        .allowBluetooth,
-                    ])
-
-                try session.setMode(self.getAudioSessionMode(data?.audioSessionMode))
-                try session.setActive(data?.audioSessionActive ?? true)
-                try session.setPreferredSampleRate(data?.audioSessionPreferredSampleRate ?? 44100.0)
-                try session.setPreferredIOBufferDuration(
-                    data?.audioSessionPreferredIOBufferDuration ?? 0.005)
-            } catch {
-                print(error)
-            }
-        }
+        audio.configure(data ?? store.lastOptions)
     }
 
     func getAudioSessionMode(_ audioSessionMode: String?) -> AVAudioSession.Mode {
-        var mode = AVAudioSession.Mode.default
-        switch audioSessionMode {
-        case "gameChat":
-            mode = AVAudioSession.Mode.gameChat
-            break
-        case "measurement":
-            mode = AVAudioSession.Mode.measurement
-            break
-        case "moviePlayback":
-            mode = AVAudioSession.Mode.moviePlayback
-            break
-        case "spokenAudio":
-            mode = AVAudioSession.Mode.spokenAudio
-            break
-        case "videoChat":
-            mode = AVAudioSession.Mode.videoChat
-            break
-        case "videoRecording":
-            mode = AVAudioSession.Mode.videoRecording
-            break
-        case "voiceChat":
-            mode = AVAudioSession.Mode.voiceChat
-            break
-        case "voicePrompt":
-            if #available(iOS 12.0, *) {
-                mode = AVAudioSession.Mode.voicePrompt
-            } else {
-                // Fallback on earlier versions
-            }
-            break
-        default:
-            mode = AVAudioSession.Mode.default
-        }
-        return mode
+        CallKitAudioSessionCoordinator.mode(for: audioSessionMode)
     }
 
     public func provider(_ provider: CXProvider, didActivate audioSession: AVAudioSession) {
-        if store.hasConnectedCall {
-            sendDefaultAudioInterruptionNofificationToStartAudioResource()
-            return
-        }
-        apply(store.audioActivated())
-        sendDefaultAudioInterruptionNofificationToStartAudioResource()
-        configureAudioSession()
-
-        self.sendEvent(
-            StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION, ["isActive": true]
-        )
+        apply(audio.didActivate(store))
     }
 
     public func provider(_ provider: CXProvider, didDeactivate audioSession: AVAudioSession) {
-        if store.hasHeldCall {
-            print("Call is on hold")
-            return
-        }
-
-        self.sendEvent(
-            StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION,
-            ["isActive": false])
+        apply(audio.didDeactivate(store))
     }
 }

@@ -9,6 +9,8 @@ enum CallKitEffect {
     case reportStartedConnecting(UUID, Date)
     /// Tell CallKit the call connected.
     case reportConnected(UUID, Date)
+    /// Post an ended audio interruption that asks audio code to resume.
+    case postAudioInterruptionEnded
 }
 
 /// What CallKit's end action resolves to.
@@ -243,29 +245,49 @@ final class CallKitCallStore {
         ]
     }
 
-    /// Whether the answered or the outgoing call already connected, in which case an audio
-    /// session activation only restarts audio.
-    var hasConnectedCall: Bool {
-        answeredCall?.connectedAt != nil || outgoingCall?.connectedAt != nil
-    }
-
     /// Whether the outgoing or the answered call is on hold.
     var hasHeldCall: Bool {
         outgoingCall?.isOnHold == true || answeredCall?.isOnHold == true
     }
 
-    /// CallKit activated the audio session while neither the answered nor the outgoing call is
-    /// connected.
+    /// Whether a tracked call has not ended.
+    var hasOngoingCall: Bool {
+        calls.contains { !$0.phase.isEnded }
+    }
+
+    /// The answered and the outgoing call, when they have not ended.
+    private var callsUsingAudio: [CallKitCall] {
+        [answeredCall, outgoingCall].compactMap { $0 }.filter { !$0.phase.isEnded }
+    }
+
+    /// The answered and the outgoing call, when CallKit has not activated the audio session for
+    /// them yet.
+    var callsAwaitingFirstActivation: [CallKitCall] {
+        callsUsingAudio.filter { !$0.hasActivatedAudioSession }
+    }
+
+    /// Whether an activation now is the first for a call: the answered or the outgoing call has
+    /// not had the audio session activated, or neither is live.
+    var isFirstAudioActivation: Bool {
+        callsUsingAudio.isEmpty || !callsAwaitingFirstActivation.isEmpty
+    }
+
+    /// CallKit activated the audio session for the answered and the outgoing call.
+    func audioSessionActivated() {
+        callsUsingAudio.forEach { $0.hasActivatedAudioSession = true }
+    }
+
+    /// The answered and the outgoing call start connecting on their first audio session
+    /// activation. A call whose session was activated before, such as a held one, is left as it
+    /// is.
     func audioActivated(at date: Date = Date()) -> [CallKitEffect] {
         var effects: [CallKitEffect] = []
-        if let outgoing = outgoingCall {
-            outgoing.startedConnectingAt = date
-            outgoing.move(to: .active)
-            effects.append(.reportStartedConnecting(outgoing.identity.callKitUUID, date))
-        }
-        if let answered = answeredCall {
-            answered.startedConnectingAt = date
-            answered.move(to: .active)
+        for call in callsAwaitingFirstActivation {
+            call.startedConnectingAt = date
+            call.move(to: .active)
+            if call.direction == .outgoing {
+                effects.append(.reportStartedConnecting(call.identity.callKitUUID, date))
+            }
         }
         return effects
     }
@@ -302,8 +324,11 @@ final class CallKitCallStore {
         calls.removeAll { $0 === call }
     }
 
-    func remove(uuid: UUID) {
+    /// CallKit refused to end the call it knows as `uuid`, so the call was reported as ended
+    /// remotely instead.
+    func endRefused(uuid: UUID) {
         if let call = call(forCallKit: uuid) {
+            call.move(to: .ended(.remoteEnded))
             remove(call)
         }
     }
