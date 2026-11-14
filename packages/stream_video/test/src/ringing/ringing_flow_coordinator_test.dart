@@ -214,6 +214,49 @@ void main() {
       expect(call.state.value.status, _rejectedBy(LeaveInitiator.callkit));
     });
 
+    test('a decline of a ring with no call here yet rejects it', () async {
+      ringing().observeCallDeclinedRingingEvent();
+
+      nativeEvents.add(
+        const ActionCallDecline(
+          data: CallData(uuid: uuid, callCid: cid),
+        ),
+      );
+      await pumpEventQueue();
+
+      verifyRejected(CallRejectReason.decline()).called(1);
+    });
+
+    test(
+      'the decline the native side echoes after the app rejected the ring '
+      'does not reject it again',
+      () async {
+        final call = ring();
+        ringing().observeCallDeclinedRingingEvent();
+
+        // Declined in the app: the reject leaves the call, and ending its
+        // native call comes back as a decline.
+        await call.reject(reason: CallRejectReason.decline());
+        verifyRejected(CallRejectReason.decline()).called(1);
+        getCallReturns(
+          metadata(
+            session: CallSessionData(
+              rejectedBy: {fixture.streamVideo.currentUser.id: DateTime.now()},
+            ),
+          ),
+        );
+
+        nativeEvents.add(
+          const ActionCallDecline(
+            data: CallData(uuid: uuid, callCid: cid),
+          ),
+        );
+        await pumpEventQueue();
+
+        verifyNeverRejected(CallRejectReason.decline());
+      },
+    );
+
     test('an end on iOS rejects the incoming call', () async {
       CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
       final call = ring();
