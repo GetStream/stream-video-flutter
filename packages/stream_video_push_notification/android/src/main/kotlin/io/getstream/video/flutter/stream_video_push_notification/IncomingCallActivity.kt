@@ -27,6 +27,7 @@ import android.os.PowerManager
 import android.text.TextUtils
 import android.util.Log
 import androidx.core.content.ContextCompat
+import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import io.getstream.video.flutter.stream_video_push_notification.notification.AvatarLoader
 import io.getstream.video.flutter.stream_video_push_notification.notification.IncomingCallNotificationBuilder
@@ -310,10 +311,12 @@ class IncomingCallActivity : Activity() {
     private fun onAcceptClick() {
         val data = intent.extras?.getBundle(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
 
-        // The ring stops here. On the lock screen the trampoline, which runs the accept and brings
-        // the app forward, may only start once the keyguard is dismissed.
+        // The ring and its timeout stop here. On the lock screen the trampoline, which runs the
+        // accept and brings the app forward, may only start once the keyguard is dismissed.
         if (data != null) {
-            RingingComponents.get(this).notifications.clearIncomingNotification(data, true)
+            val components = RingingComponents.get(this)
+            components.ringTimer.cancel(CallPayloadMapper.fromBundle(data).id)
+            components.notifications.clearIncomingNotification(data, true)
         }
         val acceptIntent =
             TransparentActivity.getIntent(this, IncomingCallConstants.ACTION_CALL_ACCEPT, data)

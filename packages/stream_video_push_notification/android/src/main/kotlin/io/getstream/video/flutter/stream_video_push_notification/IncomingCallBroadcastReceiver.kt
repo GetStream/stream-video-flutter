@@ -44,15 +44,11 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
                 putExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA, data)
             }
 
-        fun getIntentEnded(
-            context: Context,
-            data: Bundle?,
-            keepSystemCall: Boolean = false,
-        ) = Intent(context, IncomingCallBroadcastReceiver::class.java).apply {
-            action = "${context.packageName}.${IncomingCallConstants.ACTION_CALL_ENDED}"
-            putExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA, data)
-            putExtra(IncomingCallConstants.EXTRA_KEEP_SYSTEM_CALL, keepSystemCall)
-        }
+        fun getIntentEnded(context: Context, data: Bundle?) =
+            Intent(context, IncomingCallBroadcastReceiver::class.java).apply {
+                action = "${context.packageName}.${IncomingCallConstants.ACTION_CALL_ENDED}"
+                putExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA, data)
+            }
 
         fun getIntentTimeout(context: Context, data: Bundle?) =
             Intent(context, IncomingCallBroadcastReceiver::class.java).apply {
@@ -79,13 +75,6 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
         val prefix = "${context.packageName}."
         if (!action.startsWith(prefix)) return
 
-        RingingComponents.get(context).controller.handle(
-            action = action.removePrefix(prefix),
-            data = data,
-            keepSystemCall = intent.getBooleanExtra(
-                IncomingCallConstants.EXTRA_KEEP_SYSTEM_CALL,
-                false,
-            ),
-        )
+        RingingComponents.get(context).controller.handle(action.removePrefix(prefix), data)
     }
 }

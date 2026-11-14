@@ -180,14 +180,18 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   @override
   Future<void> endCall(String uuid) => _controller.endCall(uuid);
 
-  /// Dismisses the ringing UI of a call that the user accepted and is now in.
+  /// Ends the ring of the calls with [cid] for [reason], by default because
+  /// the user accepted the call and is now in it.
   ///
-  /// Not [endCallByCid]: on Android, ending disconnects the call from the
-  /// Telecom stack, while dismissing leaves it registered so in-call controls
-  /// on a watch, headset or car head unit keep working. On iOS the two are the
-  /// same, since CallKit is the ring.
-  Future<void> dismissRingingCallByCid(String cid) =>
-      _controller.dismissRingingCallByCid(cid);
+  /// Not [endCallByCid]: on Android, dismissing as accepted leaves the call
+  /// registered with the Telecom stack so in-call controls on a watch, headset
+  /// or car head unit keep working, and every dismissal is reported as an
+  /// [ActionCallDismissed] with its reason. On iOS this ends the call, since
+  /// CallKit is the ring.
+  Future<void> dismissRingingCallByCid(
+    String cid, {
+    CallDismissReason reason = CallDismissReason.accepted,
+  }) => _controller.dismissRingingCallByCid(cid, reason: reason);
 
   @override
   Future<void> endCallByCid(String cid, {bool silent = false}) =>

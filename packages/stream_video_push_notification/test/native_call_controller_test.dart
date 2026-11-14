@@ -55,8 +55,10 @@ class _RecordingPlatform extends StreamVideoPushNotificationPlatform {
   Future<void> endCall(String id) async => calls.add('endCall:$id');
 
   @override
-  Future<void> dismissRingingCall(String cid) async =>
-      calls.add('dismissRingingCall:$cid');
+  Future<void> dismissRingingCall(
+    String cid, {
+    CallDismissReason reason = CallDismissReason.accepted,
+  }) async => calls.add('dismissRingingCall:$cid:${reason.name}');
 
   @override
   Future<void> muteCall(String id, {bool isMuted = true}) async =>
@@ -220,7 +222,20 @@ void main() {
 
       await controller.dismissRingingCallByCid('default:c1');
 
-      expect(platform.calls, ['dismissRingingCall:default:c1']);
+      expect(platform.calls, ['dismissRingingCall:default:c1:accepted']);
+    });
+
+    test('on Android passes the reason', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+
+      await controller.dismissRingingCallByCid(
+        'default:c1',
+        reason: CallDismissReason.answeredElsewhere,
+      );
+
+      expect(platform.calls, [
+        'dismissRingingCall:default:c1:answeredElsewhere',
+      ]);
     });
   });
 

@@ -137,10 +137,16 @@ class MethodChannelStreamVideoPushNotification
     await methodChannel.invokeMethod('endAllCalls');
   }
 
-  /// Dismiss the ringing UI without ending the call.
+  /// Ends the ring of the calls with [cid] for [reason].
   @override
-  Future<void> dismissRingingCall(String cid) async {
-    await methodChannel.invokeMethod('dismissRingingCall', {'id': cid});
+  Future<void> dismissRingingCall(
+    String cid, {
+    CallDismissReason reason = CallDismissReason.accepted,
+  }) async {
+    await methodChannel.invokeMethod('dismissRingingCall', {
+      'id': cid,
+      'reason': reason.name,
+    });
   }
 
   @override
@@ -254,6 +260,10 @@ class MethodChannelStreamVideoPushNotification
         Event.actionCallDecline => ActionCallDecline(data: callData),
         Event.actionCallEnded => ActionCallEnded(data: callData),
         Event.actionCallTimeout => ActionCallTimeout(data: callData),
+        Event.actionCallDismissed => ActionCallDismissed(
+          data: callData,
+          reason: CallDismissReason.fromName(body['reason'] as String?),
+        ),
         Event.actionCallCallback => ActionCallCallback(data: callData),
         Event.actionCallConnected => ActionCallConnected(data: callData),
         Event.actionDidUpdateDevicePushTokenVoip =>

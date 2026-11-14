@@ -297,14 +297,16 @@ class BackgroundPushRouter {
     }
   }
 
-  /// Releases [session] once the user answered, declined or let the last
-  /// ring it waits on time out.
+  /// Releases [session] once the user answered or declined the last ring it
+  /// waits on, or the ring ended or was dismissed natively. A native timeout
+  /// does not release it: the session's client rejects the timed-out call
+  /// itself, and the backend's rejection releases it.
   void _onUserAnswer(BackgroundSession session, RingingEvent event) {
     if (event
         case ActionCallAccept(:final data) ||
             ActionCallDecline(:final data) ||
-            ActionCallTimeout(:final data) ||
-            ActionCallEnded(:final data)) {
+            ActionCallEnded(:final data) ||
+            ActionCallDismissed(:final data)) {
       if (session.ledger.resolveRing(data.callCid)) {
         session.releaseAfter(resolutionGrace);
       }
