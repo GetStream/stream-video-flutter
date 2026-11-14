@@ -13,10 +13,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
 import io.getstream.video.flutter.stream_video_push_notification.core.PrefsCallStore
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
-import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
+import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
 import io.mockk.verify
 import java.io.File
 import org.junit.After
@@ -49,24 +48,23 @@ class IncomingCallBroadcastReceiverTest {
         get() = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     private lateinit var dart: FakeDartSide
+    private lateinit var telecom: TelecomIntegration
     private var ringingService: ServiceController<IncomingCallNotificationService>? = null
 
     @Before
     fun attachPlugin() {
-        resetPlugin()
+        RingingComponents.reset()
         IncomingCallBroadcastReceiver.silenceEvents = false
+        telecom = mockTelecom()
         dart = FakeDartSide(context)
-        // A spy: the real Telecom code runs, and is off at this SDK level.
-        mockkObject(StreamTelecomManager)
     }
 
     @After
     fun detachPlugin() {
         ringingService?.destroy()
         ringingService = null
-        unmockkObject(StreamTelecomManager)
         IncomingCallBroadcastReceiver.silenceEvents = false
-        resetPlugin()
+        RingingComponents.reset()
     }
 
     private fun data(vararg extraTopLevel: Pair<String, Any?>) = CallPayloadMapper.fromArgs(
@@ -128,7 +126,7 @@ class IncomingCallBroadcastReceiverTest {
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_INCOMING), eventNames())
         assertEquals(listOf(CALL_ID), activeCalls().map { it["id"] })
         assertEquals(false, activeCalls().single()["isAccepted"])
-        verify { StreamTelecomManager.registerIncomingCall(any(), match { it.id == CALL_ID }) }
+        verify { telecom.registerIncomingCall(match { it.id == CALL_ID }) }
     }
 
     @Test
@@ -149,7 +147,7 @@ class IncomingCallBroadcastReceiverTest {
         assertTrue(fullScreenActivityWasToldToClose())
         assertEquals(IncomingCallConstants.ACTION_CALL_ACCEPT, eventNames().last())
         assertEquals(true, activeCalls().single()["isAccepted"])
-        verify { StreamTelecomManager.answer(any(), CALL_ID) }
+        verify { telecom.answer(CALL_ID) }
     }
 
     @Test
@@ -164,7 +162,7 @@ class IncomingCallBroadcastReceiverTest {
         assertTrue(fullScreenActivityWasToldToClose())
         assertEquals(IncomingCallConstants.ACTION_CALL_DECLINE, eventNames().last())
         assertEquals(emptyList<Any?>(), activeCalls())
-        verify { StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.REJECTED) }
+        verify { telecom.disconnect(CALL_ID, DisconnectCause.REJECTED) }
     }
 
     @Test
@@ -179,7 +177,7 @@ class IncomingCallBroadcastReceiverTest {
         assertTrue(fullScreenActivityWasToldToClose())
         assertEquals(IncomingCallConstants.ACTION_CALL_ENDED, eventNames().last())
         assertEquals(emptyList<Any?>(), activeCalls())
-        verify { StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.LOCAL) }
+        verify { telecom.disconnect(CALL_ID, DisconnectCause.LOCAL) }
     }
 
     @Test
@@ -197,7 +195,7 @@ class IncomingCallBroadcastReceiverTest {
         assertEquals(emptyList<Int>(), shownNotificationIds())
         assertEquals(IncomingCallConstants.ACTION_CALL_ENDED, eventNames().last())
         assertEquals(emptyList<Any?>(), activeCalls())
-        verify(exactly = 0) { StreamTelecomManager.disconnect(any(), any(), any()) }
+        verify(exactly = 0) { telecom.disconnect(any(), any()) }
     }
 
     @Test
@@ -223,7 +221,7 @@ class IncomingCallBroadcastReceiverTest {
         assertTrue(ringingServiceWasStopped())
         assertEquals(IncomingCallConstants.ACTION_CALL_TIMEOUT, eventNames().last())
         assertEquals(emptyList<Any?>(), activeCalls())
-        verify { StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.MISSED) }
+        verify { telecom.disconnect(CALL_ID, DisconnectCause.MISSED) }
     }
 
     @Test
@@ -253,7 +251,7 @@ class IncomingCallBroadcastReceiverTest {
         receive(IncomingCallBroadcastReceiver.getIntentConnected(context, data().toBundle()))
 
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_CONNECTED), eventNames())
-        verify { StreamTelecomManager.activate(any(), CALL_ID) }
+        verify { telecom.activate(CALL_ID) }
     }
 
     @Test
@@ -273,7 +271,7 @@ class IncomingCallBroadcastReceiverTest {
         assertNull(shadowOf(context).nextStartedService)
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_START), eventNames())
         assertEquals(true, activeCalls().single()["isAccepted"])
-        verify { StreamTelecomManager.registerOutgoingCall(any(), match { it.id == CALL_ID }) }
+        verify { telecom.registerOutgoingCall(match { it.id == CALL_ID }) }
     }
 
     @Test

@@ -7,11 +7,9 @@ import androidx.test.core.app.ApplicationProvider
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallBroadcastReceiver
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationManager
-import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
+import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
 import io.mockk.verify
 import io.mockk.verifyOrder
 import org.junit.After
@@ -24,7 +22,7 @@ import org.robolectric.RobolectricTestRunner
 
 /**
  * Pins each step of [RingingController] against an in-memory store, a mocked notification
- * manager and the Telecom manager with its calls recorded.
+ * manager and a mocked Telecom integration.
  */
 @RunWith(RobolectricTestRunner::class)
 class RingingControllerTest {
@@ -33,21 +31,20 @@ class RingingControllerTest {
 
     private val store = InMemoryCallStore()
     private val notifications = mockk<IncomingCallNotificationManager>(relaxed = true)
+    private val telecom = mockk<TelecomIntegration>(relaxed = true)
     private val events = mutableListOf<Pair<String, Map<String, Any?>>>()
     private lateinit var controller: RingingController
 
     @Before
     fun createController() {
-        mockkObject(StreamTelecomManager)
         IncomingCallBroadcastReceiver.silenceEvents = false
-        controller = RingingController(context, store, notifications) { event, body ->
+        controller = RingingController(context, store, notifications, telecom) { event, body ->
             events += event to body
         }
     }
 
     @After
-    fun releaseTelecom() {
-        unmockkObject(StreamTelecomManager)
+    fun resetSilence() {
         IncomingCallBroadcastReceiver.silenceEvents = false
     }
 
@@ -63,7 +60,7 @@ class RingingControllerTest {
         controller.handle(IncomingCallConstants.ACTION_CALL_INCOMING, data)
 
         verifyOrder {
-            StreamTelecomManager.registerIncomingCall(any(), call)
+            telecom.registerIncomingCall(call)
             notifications.showIncomingNotification(data)
         }
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_INCOMING), eventNames())
@@ -72,7 +69,7 @@ class RingingControllerTest {
 
     @Test
     fun `incoming still rings when the Telecom registration throws`() {
-        every { StreamTelecomManager.registerIncomingCall(any(), any()) } throws
+        every { telecom.registerIncomingCall(any()) } throws
             IllegalStateException("telecom down")
         val data = bundle
 
@@ -88,7 +85,7 @@ class RingingControllerTest {
 
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_START), eventNames())
         assertEquals(listOf(call.copy(isAccepted = true)), store.all())
-        verify { StreamTelecomManager.registerOutgoingCall(any(), call) }
+        verify { telecom.registerOutgoingCall(call) }
     }
 
     @Test
@@ -101,7 +98,7 @@ class RingingControllerTest {
         verify { notifications.clearIncomingNotification(data, true) }
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_ACCEPT), eventNames())
         assertEquals(true, store.byId(CALL_ID)?.isAccepted)
-        verify { StreamTelecomManager.answer(any(), CALL_ID) }
+        verify { telecom.answer(CALL_ID) }
     }
 
     @Test
@@ -114,7 +111,7 @@ class RingingControllerTest {
         verify { notifications.clearIncomingNotification(data, false) }
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_DECLINE), eventNames())
         assertNull(store.byId(CALL_ID))
-        verify { StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.REJECTED) }
+        verify { telecom.disconnect(CALL_ID, DisconnectCause.REJECTED) }
     }
 
     @Test
@@ -125,14 +122,14 @@ class RingingControllerTest {
         verify { notifications.clearIncomingNotification(any(), false) }
         assertNull(store.byId(CALL_ID))
         verify(exactly = 1) {
-            StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.LOCAL)
+            telecom.disconnect(CALL_ID, DisconnectCause.LOCAL)
         }
 
         store.add(call)
         controller.handle(IncomingCallConstants.ACTION_CALL_ENDED, bundle, keepSystemCall = true)
 
         assertNull(store.byId(CALL_ID))
-        verify(exactly = 1) { StreamTelecomManager.disconnect(any(), any(), any()) }
+        verify(exactly = 1) { telecom.disconnect(any(), any()) }
         assertEquals(
             listOf(
                 IncomingCallConstants.ACTION_CALL_ENDED,
@@ -151,7 +148,7 @@ class RingingControllerTest {
         verify { notifications.clearIncomingNotification(any(), false) }
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_TIMEOUT), eventNames())
         assertNull(store.byId(CALL_ID))
-        verify { StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.MISSED) }
+        verify { telecom.disconnect(CALL_ID, DisconnectCause.MISSED) }
     }
 
     @Test
@@ -159,7 +156,7 @@ class RingingControllerTest {
         controller.handle(IncomingCallConstants.ACTION_CALL_CONNECTED, bundle)
 
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_CONNECTED), eventNames())
-        verify { StreamTelecomManager.activate(any(), CALL_ID) }
+        verify { telecom.activate(CALL_ID) }
     }
 
     @Test
@@ -190,7 +187,7 @@ class RingingControllerTest {
         controller.handle(IncomingCallConstants.ACTION_CALL_DECLINE, bundle)
 
         assertEquals(emptyList<String>(), eventNames())
-        verify { StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.REJECTED) }
+        verify { telecom.disconnect(CALL_ID, DisconnectCause.REJECTED) }
     }
 
     @Test
@@ -222,8 +219,8 @@ class RingingControllerTest {
             ),
             eventNames(),
         )
-        verify { StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.LOCAL) }
-        verify { StreamTelecomManager.disconnect(any(), "other", DisconnectCause.REJECTED) }
+        verify { telecom.disconnect(CALL_ID, DisconnectCause.LOCAL) }
+        verify { telecom.disconnect("other", DisconnectCause.REJECTED) }
         assertEquals(emptyList<RingingCall>(), store.all())
     }
 
@@ -235,7 +232,7 @@ class RingingControllerTest {
         controller.callConnected("unknown")
 
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_CONNECTED), eventNames())
-        verify(exactly = 1) { StreamTelecomManager.activate(any(), any()) }
+        verify(exactly = 1) { telecom.activate(any()) }
     }
 
     @Test
@@ -255,8 +252,8 @@ class RingingControllerTest {
         assertEquals(emptyList<RingingCall>(), store.all())
         // Telecom sees the local sweep before the declined call's own disconnect.
         verifyOrder {
-            StreamTelecomManager.disconnectAll(any(), DisconnectCause.LOCAL)
-            StreamTelecomManager.disconnect(any(), "other", DisconnectCause.REJECTED)
+            telecom.disconnectAll(DisconnectCause.LOCAL)
+            telecom.disconnect("other", DisconnectCause.REJECTED)
         }
     }
 
@@ -267,9 +264,9 @@ class RingingControllerTest {
 
         controller.dismissRingingCall("default:a")
 
-        verify { StreamTelecomManager.answer(any(), "a") }
-        verify(exactly = 0) { StreamTelecomManager.answer(any(), "b") }
-        verify(exactly = 0) { StreamTelecomManager.disconnect(any(), any(), any()) }
+        verify { telecom.answer("a") }
+        verify(exactly = 0) { telecom.answer("b") }
+        verify(exactly = 0) { telecom.disconnect(any(), any()) }
         assertEquals(listOf("b"), store.all().map { it.id })
     }
 
@@ -280,8 +277,8 @@ class RingingControllerTest {
 
         controller.dismissRingingCall(null)
 
-        verify { StreamTelecomManager.answer(any(), "a") }
-        verify { StreamTelecomManager.answer(any(), "b") }
+        verify { telecom.answer("a") }
+        verify { telecom.answer("b") }
         assertEquals(emptyList<RingingCall>(), store.all())
     }
 
@@ -292,9 +289,49 @@ class RingingControllerTest {
 
         controller.dismissRingingCall("default:none")
 
-        verify { StreamTelecomManager.answer(any(), "a") }
-        verify { StreamTelecomManager.answer(any(), "b") }
+        verify { telecom.answer("a") }
+        verify { telecom.answer("b") }
         assertEquals(emptyList<RingingCall>(), store.all())
+    }
+
+    @Test
+    fun `an answer from the system runs the accept step`() {
+        store.add(call)
+
+        controller.onAnsweredBySystem(call)
+
+        verify { notifications.clearIncomingNotification(any(), true) }
+        assertEquals(listOf(IncomingCallConstants.ACTION_CALL_ACCEPT), eventNames())
+        assertEquals(true, store.byId(CALL_ID)?.isAccepted)
+    }
+
+    @Test
+    fun `a system hang-up ends a connected call as by the system and declines a ringing one`() {
+        store.add(call)
+        store.add(RingingCall(id = "ringing"))
+
+        controller.onDisconnectedBySystem(call, wasConnected = true)
+        controller.onDisconnectedBySystem(RingingCall(id = "ringing"), wasConnected = false)
+
+        assertEquals(
+            listOf(
+                IncomingCallConstants.ACTION_CALL_ENDED,
+                IncomingCallConstants.ACTION_CALL_DECLINE,
+            ),
+            eventNames(),
+        )
+        assertEquals(true, events.first().second["endedBySystem"])
+        assertEquals(false, events.last().second["endedBySystem"])
+        verify { telecom.disconnect(CALL_ID, DisconnectCause.LOCAL) }
+        verify { telecom.disconnect("ringing", DisconnectCause.REJECTED) }
+        assertEquals(emptyList<RingingCall>(), store.all())
+    }
+
+    @Test
+    fun `an event from Telecom is sent as it is`() {
+        controller.onEvent("event", mapOf("id" to CALL_ID))
+
+        assertEquals(listOf("event" to mapOf("id" to CALL_ID)), events)
     }
 
     @Test

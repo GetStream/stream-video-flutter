@@ -10,7 +10,8 @@ import android.util.Log
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallBroadcastReceiver
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationManager
-import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
+import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationService
+import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
 
 /**
  * Runs each step of a ringing call: shows or clears the notification and ringtone, reports the
@@ -18,14 +19,16 @@ import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamT
  *
  * The broadcast receiver, the notification trampoline and the full-screen activity call its steps
  * with the call as the Bundle [CallPayloadMapper.toBundle] writes; the method channel also calls
- * it by call id or cid. A step that fails is logged and the rest of it skipped.
+ * it by call id or cid, and the Telecom integration with what the system did to a call. A step
+ * that fails is logged and the rest of it skipped.
  */
 internal class RingingController(
     private val context: Context,
     private val store: CallStore,
     private val notifications: IncomingCallNotificationManager,
+    private val telecom: TelecomIntegration,
     private val sendEvent: (String, Map<String, Any?>) -> Unit,
-) {
+) : TelecomIntegration.Listener {
 
     /**
      * Runs the step for [action], one of the `IncomingCallConstants.ACTION_CALL_*` names without
@@ -52,7 +55,7 @@ internal class RingingController(
     fun onIncoming(data: Bundle) = step {
         val call = CallPayloadMapper.fromBundle(data)
         try {
-            StreamTelecomManager.registerIncomingCall(context, call)
+            telecom.registerIncomingCall(call)
         } catch (error: Exception) {
             Log.e(TAG, "telecom registration failed; ringing continues without it", error)
         }
@@ -66,7 +69,7 @@ internal class RingingController(
         report(IncomingCallConstants.ACTION_CALL_START, data)
         val call = CallPayloadMapper.fromBundle(data)
         store.add(call.copy(isAccepted = true))
-        StreamTelecomManager.registerOutgoingCall(context, call)
+        telecom.registerOutgoingCall(call)
     }
 
     /**
@@ -78,7 +81,7 @@ internal class RingingController(
         report(IncomingCallConstants.ACTION_CALL_ACCEPT, data)
         val call = CallPayloadMapper.fromBundle(data)
         store.add(call.copy(isAccepted = true))
-        StreamTelecomManager.answer(context, call.id)
+        telecom.answer(call.id)
     }
 
     /** Clears the ring, reports it, forgets the call and disconnects it in Telecom as rejected. */
@@ -87,7 +90,7 @@ internal class RingingController(
         report(IncomingCallConstants.ACTION_CALL_DECLINE, data)
         val call = CallPayloadMapper.fromBundle(data)
         store.remove(call.id)
-        StreamTelecomManager.disconnect(context, call.id, DisconnectCause.REJECTED)
+        telecom.disconnect(call.id, DisconnectCause.REJECTED)
     }
 
     /**
@@ -100,7 +103,7 @@ internal class RingingController(
         val call = CallPayloadMapper.fromBundle(data)
         store.remove(call.id)
         if (!keepSystemCall) {
-            StreamTelecomManager.disconnect(context, call.id, DisconnectCause.LOCAL)
+            telecom.disconnect(call.id, DisconnectCause.LOCAL)
         }
     }
 
@@ -110,13 +113,13 @@ internal class RingingController(
         report(IncomingCallConstants.ACTION_CALL_TIMEOUT, data)
         val call = CallPayloadMapper.fromBundle(data)
         store.remove(call.id)
-        StreamTelecomManager.disconnect(context, call.id, DisconnectCause.MISSED)
+        telecom.disconnect(call.id, DisconnectCause.MISSED)
     }
 
     /** Reports the call as connected and activates it in Telecom. */
     fun onConnected(data: Bundle) = step {
         report(IncomingCallConstants.ACTION_CALL_CONNECTED, data)
-        StreamTelecomManager.activate(context, CallPayloadMapper.fromBundle(data).id)
+        telecom.activate(CallPayloadMapper.fromBundle(data).id)
     }
 
     /**
@@ -157,7 +160,7 @@ internal class RingingController(
     fun endAllCalls() {
         val calls = store.all()
         store.removeAll()
-        step { StreamTelecomManager.disconnectAll(context, DisconnectCause.LOCAL) }
+        step { telecom.disconnectAll(DisconnectCause.LOCAL) }
         calls.forEach { call ->
             val data = CallPayloadMapper.toBundle(call)
             if (call.isAccepted) onEnded(data, keepSystemCall = false) else onDecline(data)
@@ -176,10 +179,39 @@ internal class RingingController(
 
         calls.forEach { call ->
             // Answered whatever `isAccepted` says; answering an answered call does nothing.
-            step { StreamTelecomManager.answer(context, call.id) }
+            step { telecom.answer(call.id) }
             onEnded(CallPayloadMapper.toBundle(call), keepSystemCall = true)
         }
     }
+
+    /**
+     * Promotes the ringing foreground service again, so it is promoted with the call in the
+     * Telecom stack.
+     */
+    override fun onIncomingCallRegistered() {
+        IncomingCallNotificationService.repromoteRingingForeground()
+    }
+
+    /** Runs the accept step for a call the user answered outside the app. */
+    override fun onAnsweredBySystem(call: RingingCall) {
+        onAccept(CallPayloadMapper.toBundle(call))
+    }
+
+    /**
+     * Runs the end step, reported to Dart as ended by the system, for a connected call the user
+     * ended outside the app, and the decline step for a ringing one.
+     */
+    override fun onDisconnectedBySystem(call: RingingCall, wasConnected: Boolean) {
+        val data = CallPayloadMapper.toBundle(call)
+        if (wasConnected) {
+            data.putBoolean(IncomingCallConstants.EXTRA_CALL_ENDED_BY_SYSTEM, true)
+            onEnded(data, keepSystemCall = false)
+        } else {
+            onDecline(data)
+        }
+    }
+
+    override fun onEvent(event: String, body: Map<String, Any?>) = sendEvent(event, body)
 
     private fun report(event: String, data: Bundle) {
         if (IncomingCallBroadcastReceiver.silenceEvents) return

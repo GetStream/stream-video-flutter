@@ -16,12 +16,10 @@ import io.getstream.video.flutter.stream_video_push_notification.core.RingingCon
 import io.getstream.video.flutter.stream_video_push_notification.notification.RingtonePlayer
 import io.getstream.video.flutter.stream_video_push_notification.permissions.FullScreenIntentPermission
 import io.getstream.video.flutter.stream_video_push_notification.permissions.NotificationPermissionFlow
-import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
+import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.slot
-import io.mockk.unmockkObject
 import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -44,6 +42,7 @@ class PushMethodCallHandlerTest {
     private val notifications = mockk<IncomingCallNotificationManager>(relaxed = true)
     private val ringtone = mockk<RingtonePlayer>(relaxed = true)
     private val events = mockk<RingingEventDispatcher>(relaxed = true)
+    private val telecom = mockk<TelecomIntegration>(relaxed = true)
     private val notificationPermission = mockk<NotificationPermissionFlow>(relaxed = true)
     private val fullScreenIntent = mockk<FullScreenIntentPermission>(relaxed = true)
     private val result = mockk<MethodChannel.Result>(relaxed = true)
@@ -52,7 +51,6 @@ class PushMethodCallHandlerTest {
 
     @Before
     fun createHandler() {
-        mockkObject(StreamTelecomManager)
         handler = PushMethodCallHandler(
             context,
             controller,
@@ -60,6 +58,7 @@ class PushMethodCallHandlerTest {
             notifications,
             ringtone,
             events,
+            telecom,
             notificationPermission,
             fullScreenIntent,
         )
@@ -67,7 +66,6 @@ class PushMethodCallHandlerTest {
 
     @After
     fun releaseTelecom() {
-        unmockkObject(StreamTelecomManager)
         IncomingCallBroadcastReceiver.silenceEvents = false
     }
 
@@ -114,7 +112,7 @@ class PushMethodCallHandlerTest {
         call("initData", configuration)
         call("getDevicePushTokenVoIP")
 
-        verify { StreamTelecomManager.init(any(), configuration) }
+        verify { telecom.init(configuration) }
         verify { result.success(null) }
         verify { result.success("") }
     }
@@ -154,7 +152,7 @@ class PushMethodCallHandlerTest {
                 mapOf("id" to "call-1", "isOnHold" to false),
             )
         }
-        verify { StreamTelecomManager.setOnHold(any(), "call-1", false) }
+        verify { telecom.setOnHold("call-1", false) }
     }
 
     @Test

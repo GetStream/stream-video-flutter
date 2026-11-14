@@ -11,11 +11,7 @@ import android.telecom.DisconnectCause
  */
 internal enum class TelecomEventSource { APP, SYS }
 
-/**
- * Callbacks for the calls tracked by [TelecomCallRepository].
- *
- * Kept out of the repository so implementors do not inherit its API-26 requirement.
- */
+/** Callbacks for the calls tracked by [TelecomCallRepository]. */
 internal interface TelecomCallListener {
     fun onCallRegistered(callId: String, incoming: Boolean) {}
     fun onRegistrationFailed(callId: String, error: Throwable?) {}

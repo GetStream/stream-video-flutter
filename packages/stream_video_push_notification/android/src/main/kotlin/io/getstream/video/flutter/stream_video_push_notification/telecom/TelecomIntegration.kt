@@ -4,14 +4,13 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.telecom.DisconnectCause
 import android.util.Log
-import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
-import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallBroadcastReceiver
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
-import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationService
-import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -20,34 +19,55 @@ import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Bridges the Android Telecom stack into this package's existing ringing flow.
+ * Bridges the Android Telecom stack into this package's ringing flow.
  *
  * All entry points are no-ops unless the integrator opted in via
  * `AndroidPushConfiguration.telecom` and the device actually supports Telecom.
+ *
+ * @param repositoryFactory builds the repository the first time a call needs Telecom; returns
+ * null where Telecom is not available.
+ * @param scope runs the registrations, each of which lasts as long as its call.
+ * @param mainThread runs the [Listener] callbacks for answers and disconnects from the system.
  */
-internal object StreamTelecomManager {
+internal class TelecomIntegration(
+    context: Context,
+    private val repositoryFactory: (Context) -> TelecomCallRepository? = ::coreRepository,
+    private val permissions: TelecomPermissions = TelecomPermissions(),
+    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
+    private val mainThread: (Runnable) -> Unit = { Handler(Looper.getMainLooper()).post(it) },
+) {
 
-    private const val TAG = "StreamTelecomManager"
+    /** What happened to a call in Telecom, and the events it reports. */
+    interface Listener {
+        /** An incoming call is now in the Telecom stack. */
+        fun onIncomingCallRegistered()
 
-    /** Payload key used for the [IncomingCallConstants.ACTION_CALL_CUSTOM] audio-endpoint event. */
-    private const val CUSTOM_EVENT_AUDIO_ENDPOINTS = "telecomAudioEndpointsChanged"
+        /** The user answered [call] somewhere else, such as on a watch or in a car. */
+        fun onAnsweredBySystem(call: RingingCall)
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+        /**
+         * The user ended [call] somewhere else. [wasConnected] tells an end of a connected or
+         * outgoing call from the decline of a ringing one.
+         */
+        fun onDisconnectedBySystem(call: RingingCall, wasConnected: Boolean)
 
-    /** Written on the main thread, read from the repository's [Dispatchers.Default] callbacks. */
+        /** A hold, mute or audio-route event to send to Dart. */
+        fun onEvent(event: String, body: Map<String, Any?>)
+    }
+
+    private val appContext: Context = context.applicationContext
+
+    /** Set once, by the components that own this integration. */
     @Volatile
-    private var appContext: Context? = null
+    var listener: Listener? = null
 
-    /**
-     * Deliberately not volatile: [isConfigResolved] is the barrier for it.
-     */
+    /** Deliberately not volatile: [isConfigResolved] is the barrier for it. */
     private var config: TelecomConfig = TelecomConfig.DISABLED
 
     /** Guards the one-off read of the persisted configuration. See [config]. */
     @Volatile
     private var isConfigResolved: Boolean = false
 
-    @SuppressLint("NewApi")
     @Volatile
     private var repository: TelecomCallRepository? = null
 
@@ -60,30 +80,25 @@ internal object StreamTelecomManager {
     /**
      * Calls Telecom has connected: answered incoming ones and activated outgoing ones.
      *
-     * Used to pick the right disconnect broadcast. A call that never connected was declined, while
-     * one that did was ended, and the two take very different paths on the Dart side.
+     * A system disconnect of one of these is reported as an end; of any other incoming call, as a
+     * decline.
      */
     private val connectedCallIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
-    /**
-     * Calls this app placed, so a system hang-up is reported as an end rather than a decline.
-     */
+    /** Calls this app placed, so a system hang-up is reported as an end rather than a decline. */
     private val outgoingCallIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
     /** Calls currently on hold, so hold events are only emitted on an actual transition. */
     private val heldCallIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
     /**
-     * Hold values we asked Telecom for, so the resulting change is not echoed back to Flutter.
-     *
-     * [heldCallIds] cannot do this job: it dedupes repeated transitions, not originators, so an
-     * app-requested hold still came back as a second identical event on top of the one the plugin
-     * had already emitted.
+     * Hold values this app asked Telecom for. The transition Telecom reports back for one of them
+     * is not reported to Dart.
      */
     private val selfRequestedHold = ConcurrentHashMap<String, Boolean>()
 
-    /** The calls tracked with Telecom, from which system-originated events rebuild their intents. */
-    private val trackedCallData = ConcurrentHashMap<String, RingingCall>()
+    /** The calls registered with Telecom, from register until Telecom drops them. */
+    private val trackedCalls = ConcurrentHashMap<String, RingingCall>()
 
     private val actionLock = Any()
 
@@ -91,53 +106,42 @@ internal object StreamTelecomManager {
 
     /**
      * Applies the configuration sent from Dart. Safe to call repeatedly; the last configuration
-     * wins and is persisted for cold starts.
+     * wins and is persisted for cold starts. Builds the repository when Telecom is enabled.
      */
-    fun init(context: Context, configuration: Map<String, Any?>?) {
-        appContext = context.applicationContext
-        config = TelecomConfig.fromConfiguration(context, configuration)
+    fun init(configuration: Map<String, Any?>?) {
+        config = TelecomConfig.fromConfiguration(appContext, configuration)
         isConfigResolved = true
-        TelecomConfig.persist(context, config)
+        TelecomConfig.persist(appContext, config)
         Log.d(TAG, "[init] telecom enabled=${config.enabled}, schema=${config.schema}")
 
-        // Warm up the repository here rather than on the first incoming call. Creating it registers
-        // the app with Telecom, which is a one-off cost we do not want on the ringing path. 
-        val appContext = context.applicationContext
         scope.launch {
-            if (isEnabled(appContext)) requireRepository(appContext)
+            if (isEnabled()) requireRepository()
         }
     }
 
-    private fun ensureInitialized(context: Context) {
-        if (appContext == null) {
-            appContext = context.applicationContext
-        }
+    private fun ensureConfigResolved() {
         if (isConfigResolved) return
-
         synchronized(this) {
             if (isConfigResolved) return
-            config = TelecomConfig.load(context)
+            config = TelecomConfig.load(appContext)
             isConfigResolved = true
         }
     }
 
     /** Whether calls should be handed to Telecom on this device with the current configuration. */
-    fun isEnabled(context: Context): Boolean {
-        ensureInitialized(context)
-        return config.enabled && TelecomPermissions.canUseTelecom(context)
+    fun isEnabled(): Boolean {
+        ensureConfigResolved()
+        return config.enabled && permissions.canUseTelecom(appContext)
     }
 
-    @SuppressLint("NewApi")
-    private fun requireRepository(context: Context): TelecomCallRepository? {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return null
-
+    private fun requireRepository(): TelecomCallRepository? {
         repository?.let { return it }
         return synchronized(this) {
             repository ?: try {
-                TelecomCallRepository(context.applicationContext)
-                    .also { it.setListener(repositoryListener) }
-                    .also { it.warmUp() }
-                    .also { repository = it }
+                repositoryFactory(appContext)
+                    ?.also { it.setListener(repositoryListener) }
+                    ?.also { it.warmUp() }
+                    ?.also { repository = it }
             } catch (error: Throwable) {
                 // Registering with Telecom can fail on devices with a broken telecom service.
                 Log.e(TAG, "[requireRepository] unable to create repository", error)
@@ -151,38 +155,36 @@ internal object StreamTelecomManager {
     // region registration
 
     /** Registers a ringing incoming call with Telecom. */
-    fun registerIncomingCall(context: Context, data: RingingCall) =
-        register(context, data, incoming = true)
+    fun registerIncomingCall(call: RingingCall) = register(call, incoming = true)
 
-    /** Registers an outgoing call with Telecom and immediately makes it active. */
-    fun registerOutgoingCall(context: Context, data: RingingCall) =
-        register(context, data, incoming = false)
+    /** Registers an outgoing call with Telecom and makes it active once registered. */
+    fun registerOutgoingCall(call: RingingCall) = register(call, incoming = false)
 
-    private fun describeAvailability(context: Context): String = when {
+    private fun describeAvailability(): String = when {
         !config.enabled -> "turned off through AndroidPushConfiguration.telecom"
-        !TelecomPermissions.isSupportedApiLevel() ->
+        !permissions.isSupportedApiLevel() ->
             "unsupported API level ${Build.VERSION.SDK_INT}, needs 26+"
-        !TelecomPermissions.hasPermissions(context) -> "MANAGE_OWN_CALLS not granted"
-        !TelecomPermissions.supportsTelecom(context) ->
+        !permissions.hasPermissions(appContext) -> "MANAGE_OWN_CALLS not granted"
+        !permissions.supportsTelecom(appContext) ->
             "no telephony feature or default dialer (pre-Android 17 requirement)"
         else -> "available"
     }
 
-    @SuppressLint("NewApi", "MissingPermission")
-    private fun register(context: Context, data: RingingCall, incoming: Boolean) {
-        if (!isEnabled(context)) {
-            Log.d(TAG, "[register] skipped: ${describeAvailability(context)}")
+    @SuppressLint("MissingPermission")
+    private fun register(call: RingingCall, incoming: Boolean) {
+        if (!isEnabled()) {
+            Log.d(TAG, "[register] skipped: ${describeAvailability()}")
             return
         }
-        val repository = requireRepository(context) ?: return
+        val repository = requireRepository() ?: return
 
-        val callId = data.id
+        val callId = call.id
         if (callId.isBlank()) {
             Log.w(TAG, "[register] missing call id, skipping telecom registration")
             return
         }
 
-        trackedCallData[callId] = data
+        trackedCalls[callId] = call
         if (!incoming) outgoingCallIds.add(callId)
 
         if (repository.getCall(callId) != null || !registeringCallIds.add(callId)) {
@@ -193,17 +195,17 @@ internal object StreamTelecomManager {
         Log.d(
             TAG,
             "[register] ${if (incoming) "incoming" else "outgoing"} call $callId as " +
-                "${addressOf(data)} (video=${data.type == 1})",
+                "${addressOf(call)} (video=${call.type == 1})",
         )
 
         scope.launch {
             try {
                 repository.registerCall(
                     callId = callId,
-                    displayName = displayNameOf(data),
-                    address = addressOf(data),
+                    displayName = displayNameOf(call),
+                    address = addressOf(call),
                     isIncoming = incoming,
-                    isVideo = data.type == 1,
+                    isVideo = call.type == 1,
                 )
             } catch (error: Exception) {
                 Log.e(TAG, "[register] registration of $callId failed", error)
@@ -213,13 +215,13 @@ internal object StreamTelecomManager {
         }
     }
 
-    private fun displayNameOf(data: RingingCall): String = data.callerName
+    private fun displayNameOf(call: RingingCall): String = call.callerName
         .takeIf { it.isNotBlank() }
-        ?: data.handle.takeIf { it.isNotBlank() }
+        ?: call.handle.takeIf { it.isNotBlank() }
         ?: "Unknown Caller"
 
-    private fun addressOf(data: RingingCall): Uri {
-        val identifier = data.callCid?.takeIf { it.isNotBlank() } ?: data.id
+    private fun addressOf(call: RingingCall): Uri {
+        val identifier = call.callCid?.takeIf { it.isNotBlank() } ?: call.id
         return Uri.parse("${config.schema}:$identifier")
     }
 
@@ -228,45 +230,51 @@ internal object StreamTelecomManager {
     // region actions
 
     /** True once [register] has run for this call and before it was cleaned up. */
-    private fun isTracked(callId: String) = trackedCallData.containsKey(callId)
+    private fun isTracked(callId: String) = trackedCalls.containsKey(callId)
 
-    /** Answers a call in Telecom. Idempotent, so it is safe on both app- and system-originated accepts. */
-    fun answer(context: Context, callId: String) {
-        if (!isEnabled(context) || !isTracked(callId)) return
-        // A system-originated answer already marked the call, so this is the echo of our own
-        // broadcast and there is nothing left to ask Telecom for.
+    /** Answers a call in Telecom. Answering a call Telecom already connected does nothing. */
+    fun answer(callId: String) {
+        if (!isEnabled() || !isTracked(callId)) return
         if (!connectedCallIds.add(callId)) return
-        processAction(context, callId, TelecomCallAction.Answer)
+        processAction(callId, TelecomCallAction.Answer, createRepository = true)
     }
 
-    /** Disconnects a call in Telecom with a cause matching the reason the ringing flow ended. */
-    fun disconnect(context: Context, callId: String, cause: Int) {
-        if (!isEnabled(context)) return
-        processAction(context, callId, TelecomCallAction.Disconnect(DisconnectCause(cause)))
-    }
-
-    /** Marks a call as active, used once an outgoing or accepted call is connected. */
-    fun activate(context: Context, callId: String) {
-        if (!isEnabled(context)) return
-        processAction(context, callId, TelecomCallAction.Activate)
-    }
-
-    fun setOnHold(context: Context, callId: String, isOnHold: Boolean) {
-        if (!isEnabled(context) || !isTracked(callId)) return
-        selfRequestedHold[callId] = isOnHold
+    /** Disconnects a call in Telecom with [cause], a [DisconnectCause] code. */
+    fun disconnect(callId: String, cause: Int) {
+        if (!isEnabled()) return
         processAction(
-            context,
             callId,
-            if (isOnHold) TelecomCallAction.Hold else TelecomCallAction.Activate,
+            TelecomCallAction.Disconnect(DisconnectCause(cause)),
+            createRepository = true,
         )
     }
 
-    /** Disconnects every call Telecom still knows about. */
-    fun disconnectAll(context: Context, cause: Int) {
-        if (!isEnabled(context)) return
+    /** Marks a call as active, used once an outgoing or accepted call is connected. */
+    fun activate(callId: String) {
+        if (!isEnabled()) return
+        processAction(callId, TelecomCallAction.Activate, createRepository = true)
+    }
+
+    /**
+     * Asks Telecom to hold or resume a call. The transition Telecom reports back is not sent to
+     * Dart.
+     */
+    fun setOnHold(callId: String, isOnHold: Boolean) {
+        if (!isEnabled() || !isTracked(callId)) return
+        selfRequestedHold[callId] = isOnHold
+        processAction(
+            callId,
+            if (isOnHold) TelecomCallAction.Hold else TelecomCallAction.Activate,
+            createRepository = true,
+        )
+    }
+
+    /** Disconnects every call Telecom holds or is still registering, with [cause]. */
+    fun disconnectAll(cause: Int) {
+        if (!isEnabled()) return
         val repository = repository ?: return
-        repository.calls.value.keys.toList().forEach { disconnect(context, it, cause) }
-        registeringCallIds.toList().forEach { disconnect(context, it, cause) }
+        repository.callIds().toList().forEach { disconnect(it, cause) }
+        registeringCallIds.toList().forEach { disconnect(it, cause) }
     }
 
     /**
@@ -275,15 +283,16 @@ internal object StreamTelecomManager {
      */
     fun isMuted(callId: String): Boolean = repository?.getCall(callId)?.isMuted ?: false
 
-    @SuppressLint("NewApi")
-    private fun processAction(context: Context, callId: String, action: TelecomCallAction) {
-        requireRepository(context) ?: return
-        processAction(callId, action)
-    }
-
-    @SuppressLint("NewApi")
-    private fun processAction(callId: String, action: TelecomCallAction) {
-        val repository = repository ?: return
+    /**
+     * Sends [action] to the call's Telecom scope, or queues it while the call is still
+     * registering. Ignored for a call Telecom does not know.
+     */
+    private fun processAction(
+        callId: String,
+        action: TelecomCallAction,
+        createRepository: Boolean = false,
+    ) {
+        val repository = (if (createRepository) requireRepository() else repository) ?: return
 
         synchronized(actionLock) {
             val call = repository.getCall(callId)
@@ -298,8 +307,6 @@ internal object StreamTelecomManager {
                     }
                 }
 
-                // Registration is still in flight; queue and replay once the scope is up. This is
-                // the race the React Native implementation solves with its pending-action queue.
                 call != null || registeringCallIds.contains(callId) -> {
                     pendingActions
                         .getOrPut(callId) { Collections.synchronizedList(mutableListOf()) }
@@ -311,6 +318,10 @@ internal object StreamTelecomManager {
         }
     }
 
+    /**
+     * Replays the actions queued while [callId] registered. A queued disconnect is sent alone,
+     * without the actions queued with it.
+     */
     private fun drainPendingActions(callId: String) {
         val repository = repository ?: return
 
@@ -319,7 +330,6 @@ internal object StreamTelecomManager {
             val actions = pendingActions.remove(callId) ?: return
             val snapshot = synchronized(actions) { actions.toList() }
 
-            // A queued disconnect wins over everything else that piled up behind it.
             val disconnect = snapshot.firstOrNull { it is TelecomCallAction.Disconnect }
             if (disconnect != null) {
                 if (!call.processAction(disconnect)) {
@@ -345,19 +355,12 @@ internal object StreamTelecomManager {
         outgoingCallIds.remove(callId)
         heldCallIds.remove(callId)
         selfRequestedHold.remove(callId)
-        trackedCallData.remove(callId)
+        trackedCalls.remove(callId)
     }
 
-    /**
-     * Releases the Telecom registration, but only when nothing is in flight.
-     *
-     * This is what engine detach calls. The unguarded [release] must not be used there: a Flutter
-     * app's background isolate attaches and detaches routinely, including while a call is ringing
-     * or connected, and tearing Telecom down then would drop a call the user is still in.
-     */
-    @SuppressLint("NewApi")
+    /** Releases the Telecom registration, but only when no call is tracked or registered. */
     fun releaseIfIdle() {
-        if (trackedCallData.isNotEmpty() || repository?.hasAnyCalls() == true) {
+        if (trackedCalls.isNotEmpty() || repository?.hasAnyCalls() == true) {
             Log.d(TAG, "[releaseIfIdle] calls still in flight; keeping the telecom registration")
             return
         }
@@ -375,7 +378,7 @@ internal object StreamTelecomManager {
         outgoingCallIds.clear()
         heldCallIds.clear()
         selfRequestedHold.clear()
-        trackedCallData.clear()
+        trackedCalls.clear()
     }
 
     // endregion
@@ -391,14 +394,9 @@ internal object StreamTelecomManager {
             Log.d(TAG, "[onCallRegistered] $callId registered with telecom, incoming=$incoming")
 
             if (incoming) {
-                // The ringing foreground service was very likely promoted before this
-                // registration finished, so re-promote it now that the call exists in the Telecom
-                // stack and the platform can grant it while-in-use capabilities.
-                IncomingCallNotificationService.repromoteRingingForeground()
+                mainThread { listener?.onIncomingCallRegistered() }
             } else {
-                // An outgoing call stays in the dialing state until it is explicitly activated.
-                // The Android SDK does this on a fixed delay after registering; doing it once the
-                // scope is actually up avoids racing that timer.
+                // An outgoing call stays dialing until it is activated, here once its scope is up.
                 processAction(callId, TelecomCallAction.Activate)
             }
         }
@@ -411,18 +409,10 @@ internal object StreamTelecomManager {
         override fun onIsCallAnswered(callId: String, source: TelecomEventSource) {
             Log.d(TAG, "[onIsCallAnswered] $callId answered, source=$source")
             connectedCallIds.add(callId)
-            // Only react to answers coming from outside the app (watch, car, headset). Our own
-            // accepts already went through the broadcast flow that triggered this action.
             if (source != TelecomEventSource.SYS) return
 
-            val context = appContext ?: return
-            val data = trackedCallData[callId] ?: return
-            context.sendBroadcast(
-                IncomingCallBroadcastReceiver.getIntentAccept(
-                    context,
-                    CallPayloadMapper.toBundle(data),
-                ),
-            )
+            val call = trackedCalls[callId] ?: return
+            mainThread { listener?.onAnsweredBySystem(call) }
         }
 
         override fun onIsCallDisconnected(
@@ -434,37 +424,21 @@ internal object StreamTelecomManager {
                 TAG,
                 "[onIsCallDisconnected] $callId disconnected, cause=${cause.code}, source=$source",
             )
-            // An outgoing call is never "answered" from this side, so it would otherwise fall
-            // through to the decline branch below.
-            val endsRatherThanDeclines =
+            val wasConnected =
                 connectedCallIds.contains(callId) || outgoingCallIds.contains(callId)
-            val data = trackedCallData[callId]
+            val call = trackedCalls[callId]
             cleanUp(callId)
 
             if (source != TelecomEventSource.SYS) return
-
-            val context = appContext ?: return
-            if (data == null) return
-
-            val bundle = CallPayloadMapper.toBundle(data)
-            val intent = if (endsRatherThanDeclines) {
-                // Marked as coming from the platform call UI. A plain ended event is ambiguous on
-                // Android, where it also means the notification was dismissed, so the Dart side
-                // ignores it; a hang-up from a watch, headset or head unit is authoritative and
-                // has to leave the call.
-                bundle.putBoolean(IncomingCallConstants.EXTRA_CALL_ENDED_BY_SYSTEM, true)
-                IncomingCallBroadcastReceiver.getIntentEnded(context, bundle)
-            } else {
-                IncomingCallBroadcastReceiver.getIntentDecline(context, bundle)
-            }
-            context.sendBroadcast(intent)
+            if (call == null) return
+            mainThread { listener?.onDisconnectedBySystem(call, wasConnected) }
         }
 
         // State is updated before the suppression check in both handlers, so heldCallIds stays
         // accurate even when the event itself is withheld.
         override fun onIsCallActive(callId: String) {
-            // A call also becomes active on connect and on answer, both of which mean it can no
-            // longer be disconnected as a decline.
+            // Active also follows a connect and an answer, after which a system disconnect is an
+            // end, not a decline.
             connectedCallIds.add(callId)
             val wasHeld = heldCallIds.remove(callId)
             if (selfRequestedHold.remove(callId, false)) return
@@ -484,9 +458,8 @@ internal object StreamTelecomManager {
         }
 
         override fun onHoldChangeFailed(callId: String, requestedOnHold: Boolean) {
-            // The request was refused, so the transition it was waiting to suppress never comes.
-            // Leaving the flag set would swallow the next system-originated hold on this call, and
-            // clearing one that belongs to a different request would do the same.
+            // No transition follows a refused request, so its flag is cleared, and only if it is
+            // still the flag of this request.
             selfRequestedHold.remove(callId, requestedOnHold)
         }
 
@@ -499,21 +472,24 @@ internal object StreamTelecomManager {
             )
         }
 
+        /** Sends an event unless events are silenced. */
         private fun sendEvent(event: String, callId: String, vararg values: Pair<String, Any?>) {
-            // Honour the same gate the broadcast-driven events go through, so silenceEvents() means
-            // silence for Telecom-originated events too.
             if (IncomingCallBroadcastReceiver.silenceEvents) return
-
-            val context = appContext ?: run {
-                Log.w(TAG, "[sendEvent] no context yet; dropping $event for $callId")
-                return
-            }
-            RingingComponents.get(context).events.send(
-                event,
-                mapOf("id" to callId) + values.toMap(),
-            )
+            listener?.onEvent(event, mapOf("id" to callId) + values.toMap())
         }
     }
 
     // endregion
+
+    private companion object {
+        const val TAG = "TelecomIntegration"
+
+        /** Payload type of the [IncomingCallConstants.ACTION_CALL_CUSTOM] audio-endpoint event. */
+        const val CUSTOM_EVENT_AUDIO_ENDPOINTS = "telecomAudioEndpointsChanged"
+    }
 }
+
+/** A [CoreTelecomCallRepository] on Android 8 and later, null below. */
+@SuppressLint("NewApi")
+private fun coreRepository(context: Context): TelecomCallRepository? =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) CoreTelecomCallRepository(context) else null
