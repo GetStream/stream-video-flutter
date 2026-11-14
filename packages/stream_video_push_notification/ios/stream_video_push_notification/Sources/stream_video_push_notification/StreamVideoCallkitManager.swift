@@ -140,14 +140,14 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         CXHandle(type: getHandleType(data.handleType), value: data.getEncryptHandle())
     }
 
-    /// What CallKit shows and allows for `data`.
+    /// What CallKit shows and allows for `data`. Merging calls is never offered.
     func callUpdate(_ data: CallData) -> CXCallUpdate {
         let callUpdate = CXCallUpdate()
         callUpdate.remoteHandle = handle(data)
         callUpdate.supportsDTMF = data.supportsDTMF
         callUpdate.supportsHolding = data.supportsHolding
-        callUpdate.supportsGrouping = data.supportsGrouping
-        callUpdate.supportsUngrouping = data.supportsUngrouping
+        callUpdate.supportsGrouping = false
+        callUpdate.supportsUngrouping = false
         callUpdate.hasVideo = data.type > 0
         callUpdate.localizedCallerName = data.callerName
         return callUpdate
@@ -375,7 +375,7 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         let configuration = CXProviderConfiguration()
         configuration.supportsVideo = data.supportsVideo
         configuration.maximumCallGroups = data.maximumCallGroups
-        configuration.maximumCallsPerCallGroup = data.maximumCallsPerCallGroup
+        configuration.maximumCallsPerCallGroup = 1
 
         configuration.supportedHandleTypes = [
             CXHandle.HandleType.generic,

@@ -12,11 +12,8 @@ final class CallKitOptionsTests: XCTestCase {
         "useComplexHandle": true,
         "supportsVideo": false,
         "maximumCallGroups": 3,
-        "maximumCallsPerCallGroup": 2,
-        "supportsDTMF": false,
-        "supportsHolding": false,
-        "supportsGrouping": false,
-        "supportsUngrouping": false,
+        "supportsDTMF": true,
+        "supportsHolding": true,
         "includesCallsInRecents": false,
         "ringtonePath": "ring.caf",
         "configureAudioSession": false,
@@ -31,11 +28,8 @@ final class CallKitOptionsTests: XCTestCase {
         XCTAssertTrue(options.useComplexHandle, line: line)
         XCTAssertFalse(options.supportsVideo, line: line)
         XCTAssertEqual(options.maximumCallGroups, 3, line: line)
-        XCTAssertEqual(options.maximumCallsPerCallGroup, 2, line: line)
-        XCTAssertFalse(options.supportsDTMF, line: line)
-        XCTAssertFalse(options.supportsHolding, line: line)
-        XCTAssertFalse(options.supportsGrouping, line: line)
-        XCTAssertFalse(options.supportsUngrouping, line: line)
+        XCTAssertTrue(options.supportsDTMF, line: line)
+        XCTAssertTrue(options.supportsHolding, line: line)
         XCTAssertFalse(options.includesCallsInRecents, line: line)
         XCTAssertEqual(options.ringtonePath, "ring.caf", line: line)
         XCTAssertFalse(options.configureAudioSession, line: line)
@@ -68,8 +62,18 @@ final class CallKitOptionsTests: XCTestCase {
         let options = CallKitOptions(args: [:], defaultIconName: "CallKitLogo")
 
         XCTAssertEqual(options.iconName, "CallKitLogo")
-        XCTAssertEqual(options.maximumCallGroups, 2)
-        XCTAssertTrue(options.supportsHolding)
+    }
+
+    /// The defaults of Dart's `IOSPushConfiguration`, which a call reported before Dart sent its
+    /// configuration, or from native code with only some keys, must not exceed.
+    func testDefaultsOfferNoHoldNoKeypadAndOneCallGroupAsDartDoes() {
+        let options = CallKitOptions(args: [:], defaultIconName: "AppLogo")
+
+        XCTAssertEqual(options.maximumCallGroups, 1)
+        XCTAssertFalse(options.supportsHolding)
+        XCTAssertFalse(options.supportsDTMF)
+        XCTAssertTrue(options.supportsVideo)
+        XCTAssertTrue(options.includesCallsInRecents)
     }
 
     func testCallDataAndTheConfigurationReadTheSameOptions() {

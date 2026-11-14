@@ -306,6 +306,9 @@ Delete `StreamVideoCallkitManager.shared`, rename `StreamVideoPKDelegateManager`
 **B-9. Outgoing ringing calls reported to CallKit (FLU-1194, change, on B-8)**
 `IOSPushConfiguration.reportOutgoingCalls`, off by default. `OutgoingCallReporter` (its own file, so it does not collide with A-3's split of the manager) follows `ClientState.outgoingCall`: `startOutgoingCall` once the call is `CallStatusOutgoing`, `setCallConnected` on the first `CallStatusConnected`, `endCall` on disconnect; a CallKit end while the call still rings, unjoined, leaves it, which cancels the ring. Native: the store forgets the outgoing call once it ended, which it never did, so later rings time out and are declined again. A-3 can move the reporter next to `RingingSyncObserver`; A-5 has to keep `uuid`, which the reporter uses.
 
+**B-10. CallKit options CallKit can be offered (FLU-1264, change, on B-9)**
+A missing option takes the same default as Dart's `IOSPushConfiguration` (no holding, no DTMF, one call group), so a VoIP push before Dart first sent its configuration, or a native `showIncomingCall` with sparse `CallData`, no longer offers Hold & Accept, Merge or a keypad. Merging is never offered: `CXCallUpdate` grouping and ungrouping off, one call per group, `CXSetGroupCallAction` refused, `ActionCallToggleGroup` no longer sent; `supportsGrouping`, `supportsUngrouping` and `maximumCallsPerCallGroup` deprecated on both sides, with a `dart fix` that removes them. `supportsDTMF` off by default: the SDK sends no DTMF, so the keypad did nothing; an app that sends the digits from `ActionCallToggleDtmf` turns it on.
+
 ### Stack C: Android
 
 **C-1. Dead code and dependency cleanup (change, mechanical)**

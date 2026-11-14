@@ -238,6 +238,7 @@ void main() {
         }),
       ]);
 
+      // ignore: deprecated_member_use
       final event = events.single! as ActionCallToggleGroup;
       expect(event.uuid, 'call-uuid');
       expect(event.callUUIDToGroupWith, 'other-uuid');

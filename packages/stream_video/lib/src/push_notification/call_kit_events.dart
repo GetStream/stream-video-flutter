@@ -210,10 +210,13 @@ class ActionCallToggleDtmf extends RingingEvent {
 
 /// Represents a call toggle group event.
 ///
-/// Note: This event is only available on iOS.
+/// Never sent: CallKit is never offered a merge of calls, and a merge it
+/// attempts anyway is refused.
+@Deprecated('Never sent. Calls cannot be merged in CallKit.')
 class ActionCallToggleGroup extends RingingEvent {
   /// Creates an [ActionCallToggleGroup] event instance with the specified
   /// [uuid] and [callUUIDToGroupWith].
+  @Deprecated('Never sent. Calls cannot be merged in CallKit.')
   const ActionCallToggleGroup({
     required this.uuid,
     required this.callUUIDToGroupWith,

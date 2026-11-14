@@ -303,19 +303,6 @@ final class CallKitCallStore {
         return [muteEvent(call, muted)]
     }
 
-    /// CallKit performed the group action for `uuid`. Nil for a call the store does not track.
-    func groupPerformed(uuid: UUID, groupWith: UUID?) -> [CallKitEffect]? {
-        guard call(forCallKit: uuid) != nil else { return nil }
-        return [
-            .send(
-                event: StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_GROUP,
-                body: [
-                    "id": reportedId(for: uuid),
-                    "callUUIDToGroupWith": groupWith.map { reportedId(for: $0) },
-                ])
-        ]
-    }
-
     /// CallKit performed the DTMF action for `uuid`. Nil for a call the store does not track.
     func dtmfPerformed(uuid: UUID, digits: String, type: Int) -> [CallKitEffect]? {
         guard call(forCallKit: uuid) != nil else { return nil }
