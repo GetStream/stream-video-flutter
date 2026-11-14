@@ -87,10 +87,9 @@ part 'call_actions.dart';
 part 'call_debug.dart';
 part 'connection/call_connection_coordinator.dart';
 
-typedef OnCallPermissionRequest =
-    void Function(
-      StreamCallPermissionRequestEvent,
-    );
+typedef OnCallPermissionRequest = void Function(
+  StreamCallPermissionRequestEvent,
+);
 
 typedef GetCurrentUserId = String? Function();
 
@@ -283,6 +282,7 @@ class Call {
   late final _logger = taggedLogger(tag: '$_tag-${_callSeq++}');
   late final _subscriptions = Subscriptions();
   late final _callInitLock = Lock();
+  late final _audioBitrateProfileLock = Lock();
 
   final CoordinatorClient _coordinatorClient;
   final CallHost _host;
@@ -1410,8 +1410,11 @@ class Call {
     final result = await _host.setAudioProcessingEnabled(true);
 
     if (result.isSuccess) {
-      await _session?.notifyNoiseCancellationStarted();
       _stateManager.setCallAudioProcessing(isAudioProcessing: true);
+      _notifySfu(
+        _session?.notifyNoiseCancellationStarted(),
+        label: 'startAudioProcessing',
+      );
     }
 
     return result;
@@ -1429,11 +1432,27 @@ class Call {
     final result = await _host.setAudioProcessingEnabled(false);
 
     if (result.isSuccess) {
-      await _session?.notifyNoiseCancellationStopped();
       _stateManager.setCallAudioProcessing(isAudioProcessing: false);
+      _notifySfu(
+        _session?.notifyNoiseCancellationStopped(),
+        label: 'stopAudioProcessing',
+      );
     }
 
     return result;
+  }
+
+  /// Sends [notification] to the SFU without waiting for it, and logs a
+  /// failure.
+  void _notifySfu(Future<Result<None>>? notification, {required String label}) {
+    if (notification == null) return;
+    unawaited(
+      notification.then((result) {
+        if (result case Failure(:final error)) {
+          _logger.w(() => '[$label] SFU not notified: $error');
+        }
+      }),
+    );
   }
 
   Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) =>
@@ -1503,34 +1522,59 @@ class Call {
   Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) =>
       _media.setAudioOutputDevice(device);
 
-  Result<None> setAudioBitrateProfile(SfuAudioBitrateProfile profile) {
+  /// Switches the audio bitrate profile, and captures the live microphone
+  /// again to match it.
+  ///
+  /// Fails when High Fidelity audio is not enabled, or when the microphone
+  /// could not be captured again; it is then reported muted, and the new
+  /// profile applies when it is unmuted.
+  Future<Result<None>> setAudioBitrateProfile(
+    SfuAudioBitrateProfile profile,
+  ) async {
     if (!state.value.settings.audio.hifiAudioEnabled) {
       return failureWithError(
         'High Fidelity audio is not enabled for this call',
       );
     }
 
-    if (_host.isAudioProcessorConfigured()) {
-      final disableAudioProcessing =
-          profile == SfuAudioBitrateProfile.musicHighQuality;
+    return _audioBitrateProfileLock.synchronized(
+      () => _switchAudioBitrateProfile(profile),
+    );
+  }
 
-      if (disableAudioProcessing) {
-        unawaited(stopAudioProcessing());
-      } else {
-        unawaited(startAudioProcessing());
-      }
-    }
-
+  Future<Result<None>> _switchAudioBitrateProfile(
+    SfuAudioBitrateProfile profile,
+  ) async {
     _stateManager.setAudioBitrateProfile(profile);
 
     final stereo = profile == SfuAudioBitrateProfile.musicHighQuality;
 
-    // On iOS, toggle stereo playout preference when switching HiFi audio modes.
-    if (CurrentPlatform.isIos) {
-      unawaited(rtc.Helper.setiOSStereoPlayoutPreferred(stereo));
+    if (_host.isAudioProcessorConfigured()) {
+      final processing = stereo
+          ? await stopAudioProcessing()
+          : await startAudioProcessing();
+      if (processing case Failure(:final error)) {
+        _logger.w(
+          () => '[setAudioBitrateProfile] audio processing not toggled: $error',
+        );
+      }
     }
 
-    _session?.rtcManager?.changeDefaultAudioConstraints(
+    // On iOS, toggle stereo playout preference when switching HiFi audio modes.
+    if (CurrentPlatform.isIos) {
+      try {
+        await rtc.Helper.setiOSStereoPlayoutPreferred(stereo);
+      } catch (e) {
+        _logger.w(
+          () => '[setAudioBitrateProfile] stereo playout not set: $e',
+        );
+      }
+    }
+
+    final rtcManager = _session?.rtcManager;
+    if (rtcManager == null) return const Result.success(none);
+
+    return rtcManager.changeDefaultAudioConstraints(
       AudioConstraints(
         noiseSuppression: !stereo,
         echoCancellation: !stereo,
@@ -1538,8 +1582,6 @@ class Call {
         channelCount: stereo ? 2 : 1,
       ),
     );
-
-    return const Result.success(none);
   }
 
   /// Whether [setAudioOutputDevice] can route audio on this platform. See
