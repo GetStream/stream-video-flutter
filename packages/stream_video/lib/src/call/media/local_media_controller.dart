@@ -628,22 +628,72 @@ class LocalMediaController {
           );
           break;
         case AudioRouteChangedEvent _:
-          if (!CurrentPlatform.isIos) break;
-
-          final device = event.device;
-          if (_state.audioOutputDevice?.id.equalsIgnoreCase(device.id) ??
-              false) {
-            break;
-          }
-
-          _connectOptions = connectOptions.copyWith(audioOutputDevice: device);
-          _stateManager.participantSetAudioOutputDevice(device: device);
-          _stateManager.audioOutputSelectedByUser = false;
+          onAudioRouteChanged(event);
           break;
         default:
           return;
       }
     });
+  }
+
+  /// Whether [setAudioOutputDevice] is applying an output. The system
+  /// re-routes while it does, which says nothing about where audio ends up.
+  bool _isSettingAudioOutput = false;
+
+  /// Follows an iOS audio route change, unless the system moved audio between
+  /// the speaker and the receiver on its own and the user had chosen one of
+  /// them: that output is put back instead. While an output is being set, the
+  /// system's own re-routing is ignored.
+  @visibleForTesting
+  void onAudioRouteChanged(AudioRouteChangedEvent event) {
+    if (!CurrentPlatform.isIos) return;
+
+    final device = event.device;
+    final selected = _state.audioOutputDevice;
+    _logger.d(
+      () =>
+          '[onAudioRouteChanged] route: ${device.id}, reason: '
+          '${event.reason.name}, selected: ${selected?.id}, '
+          'byUser: ${_stateManager.audioOutputSelectedByUser}',
+    );
+    if (selected?.id.equalsIgnoreCase(device.id) ?? false) {
+      return;
+    }
+
+    if (event.reason.isSystemReconfiguration) {
+      if (_isSettingAudioOutput) return;
+      if (_stateManager.audioOutputSelectedByUser &&
+          selected != null &&
+          _isBuiltInOutput(selected) &&
+          _isBuiltInOutput(device)) {
+        unawaited(_putBackSelectedOutput(device));
+        return;
+      }
+    }
+
+    _followAudioRoute(device);
+  }
+
+  static bool _isBuiltInOutput(RtcMediaDevice device) =>
+      device.isBuiltInSpeaker || device.isBuiltInEarpiece;
+
+  /// Puts the output the user chose back, and follows [route] when that fails.
+  Future<void> _putBackSelectedOutput(RtcMediaDevice route) async {
+    final result = await _session()?.applyCurrentAudioOutputDevice();
+    if (result is Success) return;
+
+    _logger.w(
+      () =>
+          '[onAudioRouteChanged] chosen output not put back, following '
+          '${route.id}',
+    );
+    _followAudioRoute(route);
+  }
+
+  void _followAudioRoute(RtcMediaDevice device) {
+    _connectOptions = connectOptions.copyWith(audioOutputDevice: device);
+    _stateManager.participantSetAudioOutputDevice(device: device);
+    _stateManager.audioOutputSelectedByUser = false;
   }
 
   Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) async {
@@ -1099,9 +1149,15 @@ class LocalMediaController {
   }
 
   Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) async {
-    final result =
-        await _session()?.setAudioOutputDevice(device) ??
-        failureWithError('Session is null');
+    _isSettingAudioOutput = true;
+    final Result<None> result;
+    try {
+      result =
+          await _session()?.setAudioOutputDevice(device) ??
+          failureWithError('Session is null');
+    } finally {
+      _isSettingAudioOutput = false;
+    }
 
     if (result.isSuccess) {
       _connectOptions = connectOptions.copyWith(audioOutputDevice: device);

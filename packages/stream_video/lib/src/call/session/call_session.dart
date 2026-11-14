@@ -773,7 +773,7 @@ class CallSession extends Disposable with _CallSessionMedia {
 
   /// Re-applies the audio output the user selected, if any.
   @internal
-  Future<void> applyCurrentAudioOutputDevice() =>
+  Future<Result<None>> applyCurrentAudioOutputDevice() =>
       _tracks.applyCurrentAudioOutputDevice();
 
   /// Resumes audio tracks that were suspended or arrived during suspension.
