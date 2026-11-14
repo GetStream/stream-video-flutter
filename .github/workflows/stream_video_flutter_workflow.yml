@@ -74,6 +74,11 @@ jobs:
     # Goldens compare pixels, so this matches the image update_goldens.yml
     # renders them on.
     runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      pull-requests: read
+      # Codecov authenticates the coverage upload with a GitHub OIDC token.
+      id-token: write
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
@@ -110,7 +115,7 @@ jobs:
       - name: "Upload Coverage"
         uses: codecov/codecov-action@v7
         with:
-          token: ${{secrets.CODECOV_TOKEN}}
+          use_oidc: true
           files: packages/*/coverage/lcov.info
       - name: "Test dart fixes"
         run: melos run test:fixes
