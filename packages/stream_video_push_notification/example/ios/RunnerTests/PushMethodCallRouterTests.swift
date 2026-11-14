@@ -259,13 +259,13 @@ final class PushMethodCallRouterTests: XCTestCase {
         // Dart's endAllCalls goes to the call controller, unlike the native endAllCalls(),
         // which also clears the flag.
         let manager = StreamVideoCallkitManager.shared
-        let saved = manager.isFromPushKit
-        defer { manager.isFromPushKit = saved }
-        manager.isFromPushKit = true
+        let saved = manager.store.isFromPushKit
+        defer { manager.store.isFromPushKit = saved }
+        manager.store.isFromPushKit = true
 
         manager.handle(.endAllCalls) { _ in }
 
-        XCTAssertTrue(manager.isFromPushKit)
+        XCTAssertTrue(manager.store.isFromPushKit)
     }
 
     func testSilenceEventsFromDartSilencesTheSink() {

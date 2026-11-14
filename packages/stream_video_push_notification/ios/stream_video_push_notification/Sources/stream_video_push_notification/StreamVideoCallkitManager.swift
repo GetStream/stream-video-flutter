@@ -11,26 +11,27 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     /// Every event bound for Dart goes through here.
     let eventSink = RingingEventSink()
 
-    var callController: StreamCallKitCallController
+    /// Every call the plugin tracks.
+    var store = CallKitCallStore()
+
+    let transactions = CallKitTransactionRequester()
 
     var sharedProvider: CXProvider? = nil
 
-    var outgoingCall: Call?
-    var answerCall: Call?
-
-    var data: CallData?
-    var isFromPushKit: Bool = false
-
     private override init() {
-        callController = StreamCallKitCallController()
         super.init()
+        transactions.onEndRefused = { [weak self] uuid in
+            self?.clearCallAfterRefusedEnd(uuid)
+        }
     }
 
     @objc public func getAcceptedCall() -> CallData? {
+        let data = store.lastOptions
+        let answeredUUID = store.answeredCall?.identity.callKitUUID
         NSLog(
-            "Call data ids \(String(describing: data?.uuid)) \(String(describing: answerCall?.uuid.uuidString))"
+            "Call data ids \(String(describing: data?.uuid)) \(String(describing: answeredUUID?.uuidString))"
         )
-        if data?.uuid.lowercased() == answerCall?.uuid.uuidString.lowercased() {
+        if data?.uuid.lowercased() == answeredUUID?.uuidString.lowercased() {
             return data
         }
         return nil
@@ -47,10 +48,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     @objc public func showIncomingCall(
         _ data: CallData, fromPushKit: Bool, completion: (() -> Void)?
     ) {
-        self.isFromPushKit = fromPushKit
-        if fromPushKit {
-            self.data = data
-        }
+        store.showRequested(data, fromPushKit: fromPushKit)
 
         var handle: CXHandle?
         handle = CXHandle(type: self.getHandleType(data.handleType), value: data.getEncryptHandle())
@@ -86,98 +84,121 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             }
 
             self.configureAudioSession(data)
-            let call = Call(uuid: uuid, data: data)
-            call.handle = data.handle
-            self.callController.addCall(call)
-            self.sendEvent(
-                StreamVideoIncomingCallConstants.ACTION_CALL_INCOMING, data.toJSON())
+            self.apply(
+                self.store.incomingReported(
+                    data, uuid: uuid, source: fromPushKit ? .pushKit : .app))
             self.endCallNotExist(data)
             completion?()
         }
     }
 
     @objc public func startCall(_ data: CallData, fromPushKit: Bool) {
-        self.isFromPushKit = fromPushKit
-        if fromPushKit {
-            self.data = data
-        }
+        store.startRequested(data, fromPushKit: fromPushKit)
         initCallkitProvider(data)
-        self.callController.startCall(data)
+        requestStart(data)
+    }
+
+    /// Asks CallKit to start `data` as an outgoing call, and gives CallKit the call's details
+    /// once it has.
+    private func requestStart(_ data: CallData) {
+        let handle = CXHandle(
+            type: self.getHandleType(data.handleType), value: data.getEncryptHandle())
+
+        guard let uuid = UUID(uuidString: data.uuid) else {
+            print("Error: Invalid UUID string: \(data.uuid)")
+            return
+        }
+
+        store.registerPendingOutgoing(data, uuid: uuid)
+
+        transactions.start(uuid: uuid, handle: handle, isVideo: data.type > 0) { started in
+            guard started else {
+                self.store.dropPendingOutgoing(uuid: uuid, ifStill: data)
+                return
+            }
+
+            let callUpdate = CXCallUpdate()
+            callUpdate.remoteHandle = handle
+            callUpdate.supportsDTMF = data.supportsDTMF
+            callUpdate.supportsHolding = data.supportsHolding
+            callUpdate.supportsGrouping = data.supportsGrouping
+            callUpdate.supportsUngrouping = data.supportsUngrouping
+            callUpdate.hasVideo = data.type > 0 ? true : false
+            callUpdate.localizedCallerName = data.callerName
+            self.sharedProvider?.reportCall(with: uuid, updated: callUpdate)
+        }
     }
 
     @objc public func muteCall(_ callId: String, isMuted: Bool) {
-        guard let callId = UUID(uuidString: callId),
-            let call = self.callController.callWithUUID(uuid: callId)
-        else {
+        guard let call = store.call(forAppId: callId) else {
             return
         }
         if call.isMuted == isMuted {
-            self.sendMuteEvent(self.callController.reportedId(for: callId), isMuted)
+            apply([store.muteEvent(call, isMuted)])
         } else {
-            self.callController.muteCall(call: call, isMuted: isMuted)
+            transactions.mute(uuid: call.identity.callKitUUID, isMuted: isMuted)
         }
     }
 
     @objc public func holdCall(_ callId: String, onHold: Bool) {
-        guard let callId = UUID(uuidString: callId),
-            let call = self.callController.callWithUUID(uuid: callId)
-        else {
+        guard let call = store.call(forAppId: callId) else {
             return
         }
         if call.isOnHold == onHold {
-            self.sendHoldEvent(self.callController.reportedId(for: callId), onHold)
+            apply([store.holdEvent(call, onHold)])
         } else {
-            self.callController.holdCall(call: call, onHold: onHold)
+            transactions.hold(uuid: call.identity.callKitUUID, onHold: onHold)
         }
-    }
-
-    /// Returns the options already stored for the call that `args` names.
-    ///
-    /// `callConnected` and `endCall` send only the id, so rebuilding `CallData` from their args
-    /// would reset the call's options to defaults.
-    func storedCallData(for args: [String: Any]) -> CallData {
-        guard let id = args["id"] as? String else {
-            return CallData(args: args)
-        }
-        if let data = self.data, data.uuid.lowercased() == id.lowercased() {
-            return data
-        }
-        if let uuid = UUID(uuidString: id), let call = self.callController.callWithUUID(uuid: uuid) {
-            return call.data
-        }
-        return CallData(args: args)
     }
 
     @objc public func endCall(_ data: CallData) {
-        var call: Call? = nil
-        if self.isFromPushKit {
-            call = Call(uuid: UUID(uuidString: self.data!.uuid)!, data: data)
-            self.isFromPushKit = false
+        let uuid: UUID
+        if store.isFromPushKit {
+            uuid = UUID(uuidString: store.lastOptions!.uuid)!
+            store.isFromPushKit = false
             self.sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_ENDED, data.toJSON())
         } else {
-            call = Call(uuid: UUID(uuidString: data.uuid)!, data: data)
+            uuid = UUID(uuidString: data.uuid)!
         }
-        self.callController.endCall(call: call!)
+        transactions.end(uuid: uuid)
     }
 
     @objc public func connectedCall(_ data: CallData) {
-        var call: Call? = nil
-        if self.isFromPushKit {
-            call = Call(uuid: UUID(uuidString: self.data!.uuid)!, data: data)
-            self.isFromPushKit = false
+        let uuid: UUID
+        if store.isFromPushKit {
+            uuid = UUID(uuidString: store.lastOptions!.uuid)!
+            store.isFromPushKit = false
         } else {
-            call = Call(uuid: UUID(uuidString: data.uuid)!, data: data)
+            uuid = UUID(uuidString: data.uuid)!
         }
-        self.callController.connectedCall(call: call!)
+        guard let (call, effects) = store.connected(uuid: uuid) else {
+            return
+        }
+        apply(effects)
+        if call.direction == .incoming {
+            transactions.answer(uuid: uuid)
+        }
     }
 
     @objc public func activeCalls() -> [[String: Any]] {
-        return self.callController.activeCalls()
+        return store.activeCalls(systemCallUUIDs: transactions.systemCallUUIDs)
     }
 
     @objc public func endAllCalls() {
-        self.isFromPushKit = false
-        self.callController.endAllCalls()
+        store.allCallsEndRequested()
+        transactions.endAll()
+    }
+
+    /// Clears the CallKit UI and the store's call after CallKit refused to end it.
+    ///
+    /// Reporting the call as ended goes through the provider instead of the call controller, so
+    /// it clears the UI when the controller will not take the transaction. Only the provider that
+    /// reported a call can end it this way, so this covers calls this process knows about.
+    private func clearCallAfterRefusedEnd(_ uuid: UUID) {
+        sharedProvider?.reportCall(with: uuid, endedAt: Date(), reason: .remoteEnded)
+        // Reporting the end does not run the `CXEndCallAction` delegate, which is what normally
+        // removes the call.
+        store.remove(uuid: uuid)
     }
 
     /// Reports to CallKit how a call ended, which is what decides how it is listed in Recents.
@@ -195,12 +216,12 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
 
         self.sharedProvider?.reportCall(with: callUUID, endedAt: Date(), reason: endedReason)
+        store.endReported(uuid: callUUID, reason: endedReason)
     }
 
     func endCallNotExist(_ data: CallData) {
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(data.duration)) {
-            let call = self.callController.callWithUUID(uuid: UUID(uuidString: data.uuid)!)
-            if call != nil && self.answerCall == nil && self.outgoingCall == nil {
+            if self.store.shouldTimeOut(appId: data.uuid) {
                 self.callEndTimeout(data)
             }
         }
@@ -208,10 +229,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
     func callEndTimeout(_ data: CallData) {
         self.saveEndCall(data.uuid, 3)
-        guard let call = self.callController.callWithUUID(uuid: UUID(uuidString: data.uuid)!) else {
-            return
-        }
-        sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_TIMEOUT, data.toJSON())
+        apply(store.timedOut(data))
     }
 
     func getHandleType(_ handleType: String?) -> CXHandle.HandleType {
@@ -241,7 +259,6 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             provider.setDelegate(self, queue: nil)
             self.sharedProvider = provider
         }
-        self.callController.setSharedProvider(self.sharedProvider!)
     }
 
     /// Maps a `reportNewIncomingCall` failure onto a stable identifier.
