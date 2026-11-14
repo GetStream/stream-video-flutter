@@ -236,6 +236,21 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
         XCTAssertEqual(kinds(effects), ["send \(audioEvent) false"])
     }
 
+    func testARepeatedDeactivationIsPassedOnForWebRTCToIgnore() {
+        // CallKit can deactivate more than once; the WebRTC control ignores a repeated stop.
+        answeredCall()
+
+        _ = coordinator.didDeactivate(store)
+        _ = coordinator.didDeactivate(store)
+
+        XCTAssertEqual(
+            gate.updates,
+            [
+                .init(available: false, callKitSessionActive: false),
+                .init(available: false, callKitSessionActive: false),
+            ])
+    }
+
     func testADeactivationWithNoCallLeftAllowsTheEngine() {
         _ = coordinator.didDeactivate(store)
 
