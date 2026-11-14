@@ -145,6 +145,27 @@ class LocalMediaController {
     _joinSettingsApplied = true;
   }
 
+  /// Writes the camera, microphone and camera facing [settings] ask for over
+  /// the resolved connect options, without enumerating devices.
+  ///
+  /// A call built from ringing metadata has not fetched the call, so this lets
+  /// the incoming screen show what the join turns on. An override set with
+  /// [setConnectOptions] still wins, and [applyCallSettings] writes the same
+  /// values again at join.
+  void applyRingingSettings(CallSettings settings) {
+    _connectOptions = _connectOptions.copyWith(
+      camera: TrackOption.fromSetting(
+        enabled: settings.video.cameraDefaultOn,
+      ),
+      microphone: TrackOption.fromSetting(
+        enabled: settings.audio.micDefaultOn,
+      ),
+      cameraFacingMode: settings.video.cameraFacing == CameraFacing.front
+          ? FacingMode.user
+          : FacingMode.environment,
+    );
+  }
+
   /// Writes the camera, microphone, devices and resolutions [settings] and
   /// the devices present ask for over the current connect options. A requested
   /// camera resolution is kept.
