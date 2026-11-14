@@ -3,9 +3,7 @@ package io.getstream.video.flutter.stream_video_push_notification
 import android.annotation.SuppressLint
 import android.telecom.DisconnectCause
 import android.app.Activity
-import android.app.NotificationManager
 import android.content.Context
-import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import java.lang.ref.WeakReference
@@ -83,12 +81,6 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
     private val components: RingingComponents?
         get() = context?.let { RingingComponents.get(it) }
 
-    fun getIncomingCallNotificationManager(): IncomingCallNotificationManager? =
-        components?.notifications
-
-    fun getIncomingCallSoundPlayerManager(): IncomingCallSoundPlayerManager? =
-        components?.soundPlayer
-
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     sharePluginWithRegister(flutterPluginBinding)
   }
@@ -116,8 +108,10 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                     val data = CallPayloadMapper.fromArgs(call.arguments() ?: emptyMap())
                         .copy(from = "notification")
                     
-                    getIncomingCallNotificationManager()?.clearIncomingNotification(CallPayloadMapper.toBundle(data), false)
-                    getIncomingCallNotificationManager()?.showMissCallNotification(CallPayloadMapper.toBundle(data))
+                    components?.notifications?.apply {
+                        clearIncomingNotification(CallPayloadMapper.toBundle(data), false)
+                        showMissCallNotification(CallPayloadMapper.toBundle(data))
+                    }
                     result.success(true)
                 }
 
@@ -305,29 +299,25 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                             putAll(args as Map<String, Any>)
                         }
                     }
-                    getIncomingCallNotificationManager()?.requestNotificationPermission(activity, map)
+                    components?.notificationPermission?.request(activity, map)
                     result.success(true)
                 }
 
                 "canUseFullScreenIntent" -> {
-                    result.success(getIncomingCallNotificationManager()?.canUseFullScreenIntent() ?: true)
+                    result.success(components?.fullScreenIntentPermission?.canUse() ?: true)
                 }
 
                 // EDIT - clear the incoming notification/ring (after accept/decline/timeout)
                 "hideIncomingCall" -> {
                     val data = CallPayloadMapper.fromArgs(call.arguments() ?: emptyMap())
-                    getIncomingCallSoundPlayerManager()?.stop()
-                    getIncomingCallNotificationManager()?.clearIncomingNotification(CallPayloadMapper.toBundle(data), false)
+                    components?.ringtone?.stop()
+                    components?.notifications
+                        ?.clearIncomingNotification(CallPayloadMapper.toBundle(data), false)
                     result.success(true)
                 }
 
                 "ensureFullScreenIntentPermission" -> {
-                    val notificationManager = context?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                    if (Build.VERSION.SDK_INT >= 34) {
-                        if (!notificationManager.canUseFullScreenIntent()) {
-                            getIncomingCallNotificationManager()?.requestFullIntentPermission(activity)
-                        }
-                    }
+                    components?.fullScreenIntentPermission?.request(activity)
                     result.success(true)
                 }
 
@@ -393,7 +383,7 @@ override fun onDetachedFromActivityForConfigChanges() {
         permissions: Array<out String>,
         grantResults: IntArray
     ): Boolean {
-        instance.getIncomingCallNotificationManager()?.onRequestPermissionsResult(
+        instance.components?.notificationPermission?.onRequestPermissionsResult(
             instance.activity,
             requestCode,
             grantResults
