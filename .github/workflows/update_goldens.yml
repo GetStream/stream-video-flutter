@@ -14,7 +14,7 @@ jobs:
         with:
           fetch-depth: 0
           # Bot token so the pushed commit can re-trigger CI on the branch.
-          token: ${{ secrets.BOT_GITHUB_API_TOKEN }}
+          token: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
 
       - name: 🐦 Install Flutter
         uses: ./.github/actions/setup-flutter
