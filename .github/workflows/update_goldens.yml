@@ -9,12 +9,19 @@ jobs:
   update_goldens:
     runs-on: ubuntu-latest
     steps:
+      - name: 🔑 Mint CI Bot Token
+        id: ci-bot-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
+
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          # Bot token so the pushed commit can re-trigger CI on the branch.
-          token: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
+          # CI bot app token, so the pushed commit can re-trigger CI on the branch.
+          token: ${{ steps.ci-bot-token.outputs.token }}
 
       - name: 🐦 Install Flutter
         uses: ./.github/actions/setup-flutter
@@ -33,5 +40,5 @@ jobs:
         with:
           commit_message: "chore: update goldens"
           file_pattern: "**/test/**/goldens/**/*.png"
-          commit_user_name: "Stream SDK Bot"
-          commit_user_email: "60655709+Stream-SDK-Bot@users.noreply.github.com"
+          commit_user_name: "stream-flutter-ci-bot[bot]"
+          commit_user_email: "357444665+stream-flutter-ci-bot[bot]@users.noreply.github.com"
