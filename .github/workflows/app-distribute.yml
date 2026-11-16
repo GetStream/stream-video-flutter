@@ -112,12 +112,11 @@ jobs:
 
       - name: Build and Distribute
         env:
-          # fastlane match clones ios-certificates over SSH; this rewrites the clone
-          # to HTTPS with the app token.
-          GIT_CONFIG_COUNT: 1
-          GIT_CONFIG_KEY_0: url.https://x-access-token:${{ steps.certs-token.outputs.token }}@github.com/GetStream/ios-certificates.insteadOf
-          GIT_CONFIG_VALUE_0: git@github.com:GetStream/ios-certificates
+          CERTS_TOKEN: ${{ steps.certs-token.outputs.token }}
         run: |
+          # match clones the certificates over HTTPS with this basic-auth header.
+          export MATCH_GIT_BASIC_AUTHORIZATION="$(printf 'x-access-token:%s' "$CERTS_TOKEN" | base64 | tr -d '\n')"
+          echo "::add-mask::$MATCH_GIT_BASIC_AUTHORIZATION"
           cd dogfooding/ios
           bundle exec fastlane ios build_and_deploy flavor:${{ env.FLAVOR }}
 
@@ -175,12 +174,11 @@ jobs:
 
       - name: Build and Distribute
         env:
-          # fastlane match clones ios-certificates over SSH; this rewrites the clone
-          # to HTTPS with the app token.
-          GIT_CONFIG_COUNT: 1
-          GIT_CONFIG_KEY_0: url.https://x-access-token:${{ steps.certs-token.outputs.token }}@github.com/GetStream/ios-certificates.insteadOf
-          GIT_CONFIG_VALUE_0: git@github.com:GetStream/ios-certificates
+          CERTS_TOKEN: ${{ steps.certs-token.outputs.token }}
         run: |
+          # match clones the certificates over HTTPS with this basic-auth header.
+          export MATCH_GIT_BASIC_AUTHORIZATION="$(printf 'x-access-token:%s' "$CERTS_TOKEN" | base64 | tr -d '\n')"
+          echo "::add-mask::$MATCH_GIT_BASIC_AUTHORIZATION"
           cd dogfooding/macos
           bundle exec fastlane mac build_and_deploy flavor:${{ env.FLAVOR }}
 
