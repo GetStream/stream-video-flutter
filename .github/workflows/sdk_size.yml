@@ -123,10 +123,21 @@ jobs:
       - name: Git Checkout
         uses: actions/checkout@v7
 
+      - name: 🔑 Mint Metrics Token
+        id: metrics-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
+          # A push to the base branch stores the new sizes as the benchmark.
+          owner: GetStream
+          repositories: stream-internal-metrics
+          permission-contents: write
+
       - name: Report sizes
         uses: ./.github/actions/sdk-size-report
         with:
-          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+          metrics-token: ${{ steps.metrics-token.outputs.token }}
 
   # Reports every platform: a push stores it as the benchmark, a release pull
   # request as the `release` benchmark.
@@ -155,7 +166,18 @@ jobs:
       - name: Git Checkout
         uses: actions/checkout@v7
 
+      - name: 🔑 Mint Metrics Token
+        id: metrics-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
+          # A push to the base branch stores the new sizes as the benchmark.
+          owner: GetStream
+          repositories: stream-internal-metrics
+          permission-contents: write
+
       - name: Report sizes
         uses: ./.github/actions/sdk-size-report
         with:
-          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+          metrics-token: ${{ steps.metrics-token.outputs.token }}
