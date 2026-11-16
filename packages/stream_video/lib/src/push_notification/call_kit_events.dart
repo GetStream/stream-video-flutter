@@ -164,7 +164,8 @@ class ActionCallToggleHold extends RingingEvent {
   /// Indicates whether the call is on hold.
   final bool isOnHold;
 
-  /// The cid of the call, on Android. Null on iOS.
+  /// The cid of the call, on Android. Null on iOS, and for a call registered
+  /// with Telecom without a cid.
   final String? callCid;
 
   @override
