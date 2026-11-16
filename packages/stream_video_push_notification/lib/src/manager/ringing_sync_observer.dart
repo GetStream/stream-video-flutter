@@ -143,10 +143,15 @@ class RingingSyncObserver {
   /// answered, and does not resume it when that call ends, so a held call
   /// would stay silent. A resume changes nothing.
   ///
-  /// The call is found by the cid the event carries, never guessed. A call
-  /// still ringing is left alone, as the Android SDK does, and so is every
-  /// call while several may be active: Telecom holds the call in progress when
-  /// the user answers another, and the multi-call audio policy handles that.
+  /// The call is found by the cid the event carries, never guessed. An
+  /// incoming call the user has not accepted is left alone; Telecom cannot
+  /// hold one anyway. An outgoing call is left while it still rings, since
+  /// Telecom treats it as active from the start, and leaving cancels the ring.
+  ///
+  /// Nothing is done while several calls may be active, because Telecom also
+  /// holds the call in progress when the user answers another of the app's
+  /// calls. A hold there, including one for a phone call, leaves the call
+  /// joined with its audio on, and Telecom keeps it held.
   Future<void> _onToggleHold(ActionCallToggleHold event) async {
     _logger.d(
       () =>
@@ -155,7 +160,9 @@ class RingingSyncObserver {
     );
     if (!event.isOnHold) return;
     if (_streamVideo.options.allowMultipleActiveCalls) {
-      _logger.d(() => '[onCallEvent] Hold left to the multi-call audio policy');
+      _logger.d(
+        () => '[onCallEvent] Hold ignored: several calls may be active',
+      );
       return;
     }
 
@@ -170,8 +177,8 @@ class RingingSyncObserver {
       return;
     }
     final status = call.state.value.status;
-    if (status is CallStatusIncoming || status is CallStatusOutgoing) {
-      _logger.d(() => '[onCallEvent] Hold of $cid left alone while it rings');
+    if (status is CallStatusIncoming && !status.acceptedByMe) {
+      _logger.d(() => '[onCallEvent] Hold of $cid ignored: not accepted');
       return;
     }
 
@@ -194,9 +201,9 @@ class RingingSyncObserver {
 
   /// The call a native event's [uuid] belongs to, found through the cid the
   /// native side holds for it. When the native side does not know the uuid
-  /// or its cid, or cannot be asked, the call in the ringing flow. Null, with a warning
-  /// naming [action], when the uuid names a call the app is not in or there
-  /// is no call.
+  /// or its cid, or cannot be asked, the call in the ringing flow. Null, with
+  /// a warning naming [action], when the uuid names a call the app is not in
+  /// or there is no call.
   Future<Call?> _callFor(String uuid, String action) async {
     var nativeCalls = const <CallData>[];
     try {

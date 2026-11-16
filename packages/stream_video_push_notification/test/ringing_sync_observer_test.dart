@@ -631,26 +631,33 @@ void main() {
   });
 
   group('a Telecom hold on Android', () {
-    setUp(() {
+    setUp(() async {
       CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
       when(() => streamVideo.options).thenReturn(StreamVideoOptions());
+      await start();
     });
     tearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
 
-    Future<_MockCall> joined({String cid = 'default:c1'}) async {
-      await start();
-      final target = call(cid: cid, status: CallStatusJoined());
+    /// A call the app is in, joined unless [status] says otherwise.
+    Future<_MockCall> joined({
+      String cid = 'default:c1',
+      CallStatus? status,
+    }) async {
+      final target = call(cid: cid, status: status ?? CallStatusJoined());
       activeCalls.value = [...activeCalls.value, target];
       await pumpEventQueue();
       return target;
     }
 
+    /// Sends a hold. Two equal events in a row reach the observer once, so a
+    /// test sending the same hold twice passes another [uuid].
     Future<void> hold({
       required bool isOnHold,
       String? cid = 'default:c1',
+      String uuid = 'u1',
     }) async {
       platform.emit(
-        ActionCallToggleHold(uuid: 'u1', isOnHold: isOnHold, callCid: cid),
+        ActionCallToggleHold(uuid: uuid, isOnHold: isOnHold, callCid: cid),
       );
       await pumpEventQueue();
     }
@@ -715,22 +722,36 @@ void main() {
       },
     );
 
-    test('a call still ringing is left alone', () async {
-      await start();
-      final incoming = call(cid: 'default:c1', status: CallStatus.incoming());
-      final outgoing = call(
-        cid: 'default:other',
-        status: CallStatus.outgoing(),
-      );
-      activeCalls.value = [incoming, outgoing];
-      await pumpEventQueue();
+    test('an incoming call not accepted yet is left alone', () async {
+      final incoming = await joined(status: CallStatus.incoming());
 
       await hold(isOnHold: true);
-      await hold(isOnHold: true, cid: 'default:other');
 
       verifyNotLeft(incoming);
-      verifyNotLeft(outgoing);
     });
+
+    test(
+      'a call in any other state is left, a ringing outgoing call included',
+      () async {
+        final calls = [
+          await joined(
+            cid: 'default:accepted',
+            status: CallStatus.incoming(acceptedByMe: true),
+          ),
+          await joined(cid: 'default:outgoing', status: CallStatus.outgoing()),
+          await joined(
+            cid: 'default:connecting',
+            status: CallStatusConnecting(),
+          ),
+          await joined(cid: 'default:connected', status: CallStatusConnected()),
+        ];
+
+        for (final target in calls) {
+          await hold(isOnHold: true, cid: target.callCid.value);
+          verifyLeft(target);
+        }
+      },
+    );
 
     test('nothing is left while several calls may be active', () async {
       when(
@@ -758,7 +779,8 @@ void main() {
         when(
           () => target.leave(reason: any(named: 'reason')),
         ).thenThrow(StateError('boom'));
-        await hold(isOnHold: true);
+        await hold(isOnHold: true, uuid: 'u2');
+        verify(() => target.leave(reason: any(named: 'reason'))).called(2);
 
         when(() => controller.activeCalls()).thenAnswer(
           (_) async => [const CallData(uuid: 'u1', callCid: 'default:c1')],
