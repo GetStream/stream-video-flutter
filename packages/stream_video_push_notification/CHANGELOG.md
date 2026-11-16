@@ -15,7 +15,7 @@
 
 ### 🔄 Changed
 
-- [Android] While the Telecom integration is on and Telecom holds a call, for example for a phone call, from a watch or in a car, the call's audio is suspended with `Call.suspendAudio` and resumed with `Call.resumeAudio` when Telecom resumes it. A call whose audio was already suspended is left as it is.
+- [Android] While the Telecom integration is on and Telecom holds a call, for example because the user answered a phone call, the SDK leaves the call, as the Android SDK does, with `DisconnectReason.left(initiator: LeaveInitiator.callkit, message: 'Call put on hold')`. Telecom does not resume such a call when the phone call ends, so it would otherwise stay silent. A hold asked for with `holdCall` ends the call the same way.
 - [Android] `endCall`, `setCallConnected`, `endAllCalls` and `dismissRingingCallByCid` finish their work on the call before they return, so `activeCalls` right after them no longer lists the call.
 - [Android] `requestNotificationPermission` and `ensureFullScreenIntentPermission` show their UI from the activity of the Flutter engine that calls them, and do nothing from an engine without one. They used to use the activity of whichever engine attached last.
 - `StreamVideoPushHandler.handleBackgroundMessage` builds a client that sets up no media.

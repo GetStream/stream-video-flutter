@@ -179,19 +179,18 @@ void main() {
     bool isRingingFlow = false,
     CallStatus? status,
   }) {
-    var audioSuspended = false;
     final callState = _MockCallState();
     when(() => callState.isRingingFlow).thenReturn(isRingingFlow);
     when(() => callState.status).thenReturn(status ?? CallStatusIdle());
-    when(() => callState.isAudioSuspended).thenAnswer((_) => audioSuspended);
     final call = _MockCall();
     when(() => call.callCid).thenReturn(StreamCallCid(cid: cid));
     when(() => call.state).thenAnswer((_) => MutableStateEmitter(callState));
     when(
       () => call.setMicrophoneEnabled(enabled: any(named: 'enabled')),
     ).thenAnswer((_) async => const Result.success(none));
-    when(call.suspendAudio).thenAnswer((_) async => audioSuspended = true);
-    when(call.resumeAudio).thenAnswer((_) async => audioSuspended = false);
+    when(
+      () => call.leave(reason: any(named: 'reason')),
+    ).thenAnswer((_) async => const Result.success(none));
     return call;
   }
 
@@ -646,86 +645,65 @@ void main() {
       await pumpEventQueue();
     }
 
-    test("suspends the call's audio, and a resume resumes it", () async {
-      final target = await joined();
-
-      await hold(isOnHold: true);
-      verify(target.suspendAudio).called(1);
-      verifyNever(target.resumeAudio);
-
-      await hold(isOnHold: false);
-      verify(target.resumeAudio).called(1);
-      verifyNever(
-        () => target.setMicrophoneEnabled(enabled: any(named: 'enabled')),
+    void verifyLeft(_MockCall target) {
+      final reason = verify(
+        () => target.leave(reason: captureAny(named: 'reason')),
+      ).captured.single;
+      expect(
+        reason,
+        const DisconnectReason.left(
+          initiator: LeaveInitiator.callkit,
+          message: 'Call put on hold',
+        ),
       );
-    });
+    }
 
-    test('leaves a call whose audio was suspended already as it is', () async {
-      final target = await joined();
-      await target.suspendAudio();
-      clearInteractions(target);
-
-      await hold(isOnHold: true);
-      await hold(isOnHold: false);
-
-      verifyNever(target.suspendAudio);
-      verifyNever(target.resumeAudio);
-    });
-
-    test('a second hold suspends once, and one resume resumes', () async {
+    test('leaves the call, which ends its Telecom call', () async {
       final target = await joined();
 
       await hold(isOnHold: true);
-      await hold(isOnHold: true);
-      await hold(isOnHold: false);
-      await hold(isOnHold: false);
+      verifyLeft(target);
 
-      verify(target.suspendAudio).called(1);
-      verify(target.resumeAudio).called(1);
+      activeCalls.value = const [];
+      await pumpEventQueue();
+      verify(
+        () => controller.endCallByCid(_cid.value, silent: any(named: 'silent')),
+      ).called(1);
     });
 
-    test('a resume without a hold changes nothing', () async {
+    test('a resume changes nothing', () async {
       final target = await joined();
 
       await hold(isOnHold: false);
 
-      verifyNever(target.resumeAudio);
+      verifyNever(() => target.leave(reason: any(named: 'reason')));
     });
 
     test(
-      'a suspend that does not take, before the call joined, is not resumed',
-      () async {
-        final target = await joined();
-        when(target.suspendAudio).thenAnswer((_) async {});
-
-        await hold(isOnHold: true);
-        await hold(isOnHold: false);
-
-        verifyNever(target.resumeAudio);
-      },
-    );
-
-    test(
-      'a call the native side does not know is held only when it is the only one',
+      'a call the native side does not know is left only when it is the only one',
       () async {
         final target = await joined();
         when(() => controller.activeCalls()).thenAnswer((_) async => const []);
 
         await hold(isOnHold: true, uuid: 'unknown');
-        verify(target.suspendAudio).called(1);
+        verifyLeft(target);
 
         final second = call(cid: 'default:other', isRingingFlow: true);
         activeCalls.value = [target, second];
         await pumpEventQueue();
+
         await hold(isOnHold: true, uuid: 'unknown');
 
-        verifyNever(second.suspendAudio);
+        verifyNever(() => target.leave(reason: any(named: 'reason')));
+        verifyNever(() => second.leave(reason: any(named: 'reason')));
       },
     );
 
-    test('a failing suspend is logged and the observer goes on', () async {
+    test('a failing leave is logged and the observer goes on', () async {
       final target = await joined();
-      when(target.suspendAudio).thenThrow(StateError('boom'));
+      when(
+        () => target.leave(reason: any(named: 'reason')),
+      ).thenThrow(StateError('boom'));
 
       await hold(isOnHold: true);
       platform.emit(const ActionCallToggleMute(uuid: 'u1', isMuted: true));
@@ -740,7 +718,7 @@ void main() {
 
       await hold(isOnHold: true);
 
-      verifyNever(target.suspendAudio);
+      verifyNever(() => target.leave(reason: any(named: 'reason')));
     });
   });
 }
