@@ -34,10 +34,16 @@ jobs:
           # CI bot app token, so the pushed commit can re-trigger CI on the branch.
           token: ${{ steps.ci-bot-token.outputs.token }}
 
-      - name: 🔑 Connect Bot
-        uses: webfactory/ssh-agent@v0.10.0
+      - name: 🔑 Mint Metrics Token
+        id: metrics-token
+        uses: actions/create-github-app-token@v3
         with:
-          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
+          # The badges only read the size benchmark.
+          owner: GetStream
+          repositories: stream-internal-metrics
+          permission-contents: read
 
       - name: 💎 Set up Ruby
         uses: ruby/setup-ruby@v1
@@ -50,6 +56,11 @@ jobs:
         working-directory: metrics/sdk_size
         env:
           BASE_BRANCH: ${{ inputs.base_branch }}
+          # The update_readme_badges lane clones stream-internal-metrics over SSH; this rewrites the clone
+          # to HTTPS with the app token.
+          GIT_CONFIG_COUNT: 1
+          GIT_CONFIG_KEY_0: url.https://x-access-token:${{ steps.metrics-token.outputs.token }}@github.com/GetStream/stream-internal-metrics.insteadOf
+          GIT_CONFIG_VALUE_0: git@github.com:GetStream/stream-internal-metrics
         run: bundle exec fastlane update_readme_badges
 
       - name: 📤 Commit Changes
