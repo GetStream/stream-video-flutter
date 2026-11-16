@@ -170,7 +170,7 @@ class TelecomIntegrationTest {
 
     private fun hold(isOnHold: Boolean) =
         IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD to
-            mapOf("id" to CALL_ID, "isOnHold" to isOnHold)
+            mapOf("id" to CALL_ID, "isOnHold" to isOnHold, "callCid" to "default:abc")
 
     @Test
     fun `a hold the app asked for is reported once Telecom has done it, and only then`() {

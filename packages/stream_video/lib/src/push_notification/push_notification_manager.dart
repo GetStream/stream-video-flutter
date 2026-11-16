@@ -89,6 +89,9 @@ abstract class PushNotificationManager {
 
   /// Holds or unholds the call.
   ///
+  /// On Android the push package leaves a call that Telecom holds, so a hold
+  /// there ends the call; see the push package's `holdCall`.
+  ///
   /// [uuid] is the unique identifier for the call.
   /// [isOnHold] indicates whether the call is on hold (default is true).
   Future<void> holdCall(String uuid, {bool isOnHold = true});

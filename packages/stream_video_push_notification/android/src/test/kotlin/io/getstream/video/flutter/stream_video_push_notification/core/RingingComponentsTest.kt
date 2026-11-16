@@ -58,9 +58,10 @@ class RingingComponentsTest {
         RingingComponents.reset()
     }
 
-    private fun ring(id: String) {
+    private fun ring(id: String, cid: String? = null) {
+        val extra = cid?.let { mapOf("callCid" to it) } ?: emptyMap()
         RingingComponents.get(context).controller.onIncoming(
-            CallPayloadMapper.toBundle(RingingCall(id = id, callerName = "Ada")),
+            CallPayloadMapper.toBundle(RingingCall(id = id, callerName = "Ada", extra = extra)),
         )
         repository.completeRegistration(id)
     }
@@ -98,13 +99,16 @@ class RingingComponentsTest {
     }
 
     @Test
-    fun `a hold from the system reaches Dart`() {
-        ring("call-1")
+    fun `a hold from the system reaches Dart with the call's cid`() {
+        ring("call-1", cid = "default:abc")
 
         repository.inactive("call-1")
 
         val (event, body) = events().last()
         assertEquals(IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD, event)
-        assertEquals(mapOf("id" to "call-1", "isOnHold" to true), body)
+        assertEquals(
+            mapOf("id" to "call-1", "isOnHold" to true, "callCid" to "default:abc"),
+            body,
+        )
     }
 }
