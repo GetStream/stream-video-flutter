@@ -89,7 +89,9 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
   ///
   /// On iOS through CallKit. On Android through Telecom, while the Telecom
   /// integration holds the call; an [ActionCallToggleHold] follows once
-  /// Telecom has done it. Without the integration it does nothing on Android.
+  /// Telecom has done it, and the SDK then leaves the call, as it does for any
+  /// Telecom hold of a call it is in, unless several calls may be active.
+  /// Without the integration it does nothing on Android.
   Future<void> holdCall(String id, {bool isOnHold = true}) {
     throw UnimplementedError('holdCall() has not been implemented.');
   }
@@ -118,8 +120,8 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
   ///
   /// For [CallDismissReason.accepted], the default, the call itself goes on:
   /// the incoming notification and ringtone stop, but the call stays
-  /// registered with the Telecom stack, so hanging up or holding from a watch,
-  /// headset or car head unit keeps working. For the other reasons the call
+  /// registered with the Telecom stack, so hanging up from a watch, headset or
+  /// car head unit keeps working. For the other reasons the call
   /// is disconnected from Telecom with the matching cause.
   Future<void> dismissRingingCall(
     String cid, {

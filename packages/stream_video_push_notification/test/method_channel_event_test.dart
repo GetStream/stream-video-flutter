@@ -227,6 +227,20 @@ void main() {
       final event = events.single! as ActionCallToggleHold;
       expect(event.uuid, 'call-uuid');
       expect(event.isOnHold, isTrue);
+      expect(event.callCid, isNull);
+    });
+
+    test('hold with the cid Android sends', () async {
+      final events = await receive([
+        _message(Event.actionCallToggleHold, {
+          'id': 'call-uuid',
+          'isOnHold': true,
+          'callCid': 'default:abc',
+        }),
+      ]);
+
+      final event = events.single! as ActionCallToggleHold;
+      expect(event.callCid, 'default:abc');
     });
 
     test('mute', () async {

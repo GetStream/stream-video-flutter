@@ -29,8 +29,7 @@ bool isAcceptedOnThisDevice({
 /// call: ends or dismisses it when the backend says the call ended, was
 /// rejected, lost its last participant or was accepted on another device,
 /// ends it when the app leaves the call, mirrors a native mute onto the
-/// call's microphone, and on Android suspends a call's audio while Telecom
-/// holds it.
+/// call's microphone, and on Android leaves a call Telecom holds.
 ///
 /// The backend subscriptions live only while a call rings: they start with
 /// the incoming event (or at start-up when the native side still shows a
@@ -51,9 +50,6 @@ class RingingSyncObserver {
   final NativeCallController _controller;
   final RingingEventBroadcaster _broadcaster;
   final Stream<RingingEvent> _ringingEvents;
-
-  /// The cids of the calls whose audio a Telecom hold suspended.
-  final Set<String> _heldCalls = {};
 
   final _logger = taggedLogger(tag: 'SV:PNSync');
 
@@ -95,7 +91,6 @@ class RingingSyncObserver {
 
     for (final previousCall in _currentActiveCalls) {
       if (calls.any((c) => c.callCid == previousCall.callCid)) continue;
-      _heldCalls.remove(previousCall.callCid.value);
       _logger.d(
         () => '[activeCall] Stopping previous call: ${previousCall.callCid}',
       );
@@ -107,7 +102,8 @@ class RingingSyncObserver {
   }
 
   /// Starts the backend subscriptions on a ring and stops them with the
-  /// user's answer; mirrors a native mute, and a Telecom hold on Android.
+  /// user's answer; mirrors a native mute, and leaves a call Telecom holds on
+  /// Android.
   void _onRingingEvent(RingingEvent event) {
     if (event is ActionCallToggleMute) {
       _onToggleMute(event);
@@ -142,51 +138,66 @@ class RingingSyncObserver {
     await call.setMicrophoneEnabled(enabled: !event.isMuted);
   }
 
-  /// Suspends the audio of the call a Telecom hold names while it is held,
-  /// and resumes it with the call. A call whose audio was already suspended,
-  /// for example by the multi-call audio policy, is left as it is, then and on
-  /// resume. A resume without a hold seen first changes nothing.
+  /// Leaves the call a Telecom hold names, as the Android SDK does. Telecom
+  /// holds a call to make room for another, such as a phone call the user
+  /// answered, and does not resume it when that call ends, so a held call
+  /// would stay silent. A resume changes nothing.
+  ///
+  /// The call is found by the cid the event carries, never guessed. A call
+  /// still ringing is left alone, as the Android SDK does, and so is every
+  /// call while several may be active: Telecom holds the call in progress when
+  /// the user answers another, and the multi-call audio policy handles that.
   Future<void> _onToggleHold(ActionCallToggleHold event) async {
     _logger.d(
       () =>
-          '[onCallEvent] ActionCallToggleHold received: uuid=${event.uuid}, isOnHold=${event.isOnHold}',
+          '[onCallEvent] ActionCallToggleHold received: uuid=${event.uuid}, '
+          'cid=${event.callCid}, isOnHold=${event.isOnHold}',
     );
+    if (!event.isOnHold) return;
+    if (_streamVideo.options.allowMultipleActiveCalls) {
+      _logger.d(() => '[onCallEvent] Hold left to the multi-call audio policy');
+      return;
+    }
 
-    final call = await _callFor(
-      event.uuid,
-      'Hold',
-      fallback: (calls) => calls.singleOrNull,
-    );
-    if (_disposed || call == null) return;
-    final cid = call.callCid.value;
+    final cid = event.callCid;
+    final call = cid == null
+        ? null
+        : _streamVideo.state.activeCalls.value.firstWhereOrNull(
+            (call) => call.callCid.value == cid,
+          );
+    if (call == null) {
+      _logger.w(() => '[onCallEvent] Hold of $cid names no active call');
+      return;
+    }
+    final status = call.state.value.status;
+    if (status is CallStatusIncoming || status is CallStatusOutgoing) {
+      _logger.d(() => '[onCallEvent] Hold of $cid left alone while it rings');
+      return;
+    }
 
     try {
-      if (event.isOnHold) {
-        if (_heldCalls.contains(cid) || call.state.value.isAudioSuspended) {
-          return;
-        }
-        _heldCalls.add(cid);
-        await call.suspendAudio();
-        if (!call.state.value.isAudioSuspended) _heldCalls.remove(cid);
-      } else if (_heldCalls.remove(cid)) {
-        await call.resumeAudio();
+      final result = await call.leave(
+        reason: const DisconnectReason.left(
+          initiator: LeaveInitiator.callkit,
+          message: 'Call put on hold',
+        ),
+      );
+      if (result is Failure) {
+        _logger.e(
+          () => '[onCallEvent] Leaving held $cid failed: ${result.error}',
+        );
       }
     } catch (e, stk) {
-      _logger.e(() => '[onCallEvent] Hold of $cid not applied: $e\n$stk');
+      _logger.e(() => '[onCallEvent] Leaving held $cid failed: $e\n$stk');
     }
   }
 
   /// The call a native event's [uuid] belongs to, found through the cid the
   /// native side holds for it. When the native side does not know the uuid
-  /// or its cid, or cannot be asked, the call [fallback] picks from the active
-  /// calls, by default the one in the ringing flow. Null, with a warning
+  /// or its cid, or cannot be asked, the call in the ringing flow. Null, with a warning
   /// naming [action], when the uuid names a call the app is not in or there
   /// is no call.
-  Future<Call?> _callFor(
-    String uuid,
-    String action, {
-    Call? Function(List<Call> calls)? fallback,
-  }) async {
+  Future<Call?> _callFor(String uuid, String action) async {
     var nativeCalls = const <CallData>[];
     try {
       nativeCalls = await _controller.activeCalls();
@@ -205,8 +216,6 @@ class RingingSyncObserver {
     final Call? call;
     if (cid != null) {
       call = activeCalls.firstWhereOrNull((c) => c.callCid.value == cid);
-    } else if (fallback != null) {
-      call = fallback(activeCalls);
     } else {
       call = activeCalls.firstWhereOrNull((c) => c.state.value.isRingingFlow);
     }

@@ -106,7 +106,9 @@ class MethodChannelStreamVideoPushNotification
   ///
   /// On iOS through CallKit. On Android through Telecom, while the Telecom
   /// integration holds the call; an [ActionCallToggleHold] follows once
-  /// Telecom has done it. Without the integration it does nothing on Android.
+  /// Telecom has done it, and the SDK then leaves the call, as it does for any
+  /// Telecom hold of a call it is in, unless several calls may be active.
+  /// Without the integration it does nothing on Android.
   @override
   Future<void> holdCall(String id, {bool isOnHold = true}) async {
     await methodChannel.invokeMethod('holdCall', {
@@ -273,6 +275,7 @@ class MethodChannelStreamVideoPushNotification
         Event.actionCallToggleHold => ActionCallToggleHold(
           uuid: body['id'] as String,
           isOnHold: body['isOnHold'] as bool,
+          callCid: body['callCid'] as String?,
         ),
         Event.actionCallToggleMute => ActionCallToggleMute(
           uuid: body['id'] as String,

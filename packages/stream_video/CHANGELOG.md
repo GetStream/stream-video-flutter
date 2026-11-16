@@ -86,6 +86,7 @@
 ### ✅ Added
 
 - `ActionCallDismissed` and `CallDismissReason`: the end of a call's ring that the SDK asked for, with why it ended (accepted in the app, cancelled by the caller, answered on another device, missed). Android only. `disposeAfterResolvingRinging` releases on it like on the other ring-ending events.
+- `ActionCallToggleHold.callCid`, the cid of the held call, which the push package sends on Android.
 - `CallData.fromJson`, which builds the call data of a ringing event or an active native call from the map the push plugins send.
 - `VideoLifecycleState`, the type of `ClientState.appLifecycleState`, is exported.
 - `StreamVideo.ready` completes once the client has started up: audio configured, environment collected and, with `autoConnect`, the connect attempted.

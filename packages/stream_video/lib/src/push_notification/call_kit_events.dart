@@ -186,13 +186,15 @@ class ActionCallConnected extends RingingEvent {
 
 /// Represents a call toggle hold event.
 ///
-/// Note: This event is only available on iOS.
+/// Sent by CallKit on iOS, and by Telecom on Android while the Telecom
+/// integration is on.
 class ActionCallToggleHold extends RingingEvent {
   /// Creates an [ActionCallToggleHold] event instance with the specified [uuid]
   /// and [isOnHold] flag.
   const ActionCallToggleHold({
     required this.uuid,
     required this.isOnHold,
+    this.callCid,
   });
 
   /// The unique identifier for the call.
@@ -201,8 +203,11 @@ class ActionCallToggleHold extends RingingEvent {
   /// Indicates whether the call is on hold.
   final bool isOnHold;
 
+  /// The cid of the call, on Android. Null on iOS.
+  final String? callCid;
+
   @override
-  List<Object?> get props => [uuid, isOnHold];
+  List<Object?> get props => [uuid, isOnHold, callCid];
 }
 
 /// Represents a call toggle mute event.
