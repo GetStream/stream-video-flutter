@@ -2,7 +2,7 @@
 
 ### ⚠️ Breaking
 
-- [Android] `holdCall` no longer reports `ActionCallToggleHold` itself. The event comes once Telecom has held or resumed the call, the same as for a hold from the system, so a hold Telecom refuses is not reported. While the Telecom integration is off, the default below Android 17, `holdCall` does nothing and nothing is reported.
+- [Android] `holdCall` no longer reports `ActionCallToggleHold` itself. The event comes once Telecom has held or resumed the call, the same as for a hold from the system, so a hold Telecom refuses is not reported. A hold Telecom does then ends the call, as below. While the Telecom integration is off, the default below Android 17, `holdCall` does nothing and nothing is reported.
 - `StreamVideoPushNotificationPlatform.activeCalls()` returns `Future<List<CallData>>`.
 - `StreamVideoPushNotificationManager.removedStoredTokens` is removed.
 - `StreamVideoPushNotificationManager.currentActiveCalls` is removed; read `StreamVideo.state.activeCalls`.
@@ -15,7 +15,7 @@
 
 ### 🔄 Changed
 
-- [Android] While the Telecom integration is on and Telecom holds a call, for example because the user answered a phone call, the SDK leaves the call, as the Android SDK does, with `DisconnectReason.left(initiator: LeaveInitiator.callkit, message: 'Call put on hold')`. Telecom does not resume such a call when the phone call ends, so it would otherwise stay silent. A hold asked for with `holdCall` ends the call the same way.
+- [Android] While the Telecom integration is on and Telecom holds a call the app is in, for example because the user answered a phone call or pressed hold on a watch or in a car, the SDK leaves the call, as the Android SDK does, with `DisconnectReason.left(initiator: LeaveInitiator.callkit, message: 'Call put on hold')`. Telecom does not resume such a call when the phone call ends, so it would otherwise stay silent. A hold asked for with `holdCall` ends the call the same way. A call still ringing is left alone, and so is every call while `allowMultipleActiveCalls` is on, where Telecom holds the call in progress to answer another. `ActionCallToggleHold` carries the call's cid on Android.
 - [Android] `endCall`, `setCallConnected`, `endAllCalls` and `dismissRingingCallByCid` finish their work on the call before they return, so `activeCalls` right after them no longer lists the call.
 - [Android] `requestNotificationPermission` and `ensureFullScreenIntentPermission` show their UI from the activity of the Flutter engine that calls them, and do nothing from an engine without one. They used to use the activity of whichever engine attached last.
 - `StreamVideoPushHandler.handleBackgroundMessage` builds a client that sets up no media.

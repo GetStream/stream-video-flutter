@@ -624,24 +624,27 @@ void main() {
   });
 
   group('a Telecom hold on Android', () {
-    setUp(
-      () => CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android,
-    );
+    setUp(() {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      when(() => streamVideo.options).thenReturn(StreamVideoOptions());
+    });
     tearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
 
-    Future<_MockCall> joined() async {
+    Future<_MockCall> joined({String cid = 'default:c1'}) async {
       await start();
-      final target = call(cid: _cid.value);
-      activeCalls.value = [target];
+      final target = call(cid: cid, status: CallStatusJoined());
+      activeCalls.value = [...activeCalls.value, target];
       await pumpEventQueue();
-      when(() => controller.activeCalls()).thenAnswer(
-        (_) async => [CallData(uuid: 'u1', callCid: _cid.value)],
-      );
       return target;
     }
 
-    Future<void> hold({required bool isOnHold, String uuid = 'u1'}) async {
-      platform.emit(ActionCallToggleHold(uuid: uuid, isOnHold: isOnHold));
+    Future<void> hold({
+      required bool isOnHold,
+      String? cid = 'default:c1',
+    }) async {
+      platform.emit(
+        ActionCallToggleHold(uuid: 'u1', isOnHold: isOnHold, callCid: cid),
+      );
       await pumpEventQueue();
     }
 
@@ -658,6 +661,9 @@ void main() {
       );
     }
 
+    void verifyNotLeft(_MockCall target) =>
+        verifyNever(() => target.leave(reason: any(named: 'reason')));
+
     test('leaves the call, which ends its Telecom call', () async {
       final target = await joined();
 
@@ -667,8 +673,19 @@ void main() {
       activeCalls.value = const [];
       await pumpEventQueue();
       verify(
-        () => controller.endCallByCid(_cid.value, silent: any(named: 'silent')),
+        () =>
+            controller.endCallByCid('default:c1', silent: any(named: 'silent')),
       ).called(1);
+    });
+
+    test('leaves only the call whose cid the hold carries', () async {
+      final first = await joined();
+      final second = await joined(cid: 'default:other');
+
+      await hold(isOnHold: true, cid: 'default:other');
+
+      verifyLeft(second);
+      verifyNotLeft(first);
     });
 
     test('a resume changes nothing', () async {
@@ -676,41 +693,74 @@ void main() {
 
       await hold(isOnHold: false);
 
-      verifyNever(() => target.leave(reason: any(named: 'reason')));
+      verifyNotLeft(target);
     });
 
     test(
-      'a call the native side does not know is left only when it is the only one',
+      'a hold without a cid, or naming a call the app is not in, leaves nothing',
       () async {
         final target = await joined();
-        when(() => controller.activeCalls()).thenAnswer((_) async => const []);
 
-        await hold(isOnHold: true, uuid: 'unknown');
-        verifyLeft(target);
+        await hold(isOnHold: true, cid: null);
+        await hold(isOnHold: true, cid: 'default:unknown');
 
-        final second = call(cid: 'default:other', isRingingFlow: true);
-        activeCalls.value = [target, second];
-        await pumpEventQueue();
-
-        await hold(isOnHold: true, uuid: 'unknown');
-
-        verifyNever(() => target.leave(reason: any(named: 'reason')));
-        verifyNever(() => second.leave(reason: any(named: 'reason')));
+        verifyNotLeft(target);
       },
     );
 
-    test('a failing leave is logged and the observer goes on', () async {
-      final target = await joined();
-      when(
-        () => target.leave(reason: any(named: 'reason')),
-      ).thenThrow(StateError('boom'));
-
-      await hold(isOnHold: true);
-      platform.emit(const ActionCallToggleMute(uuid: 'u1', isMuted: true));
+    test('a call still ringing is left alone', () async {
+      await start();
+      final incoming = call(cid: 'default:c1', status: CallStatus.incoming());
+      final outgoing = call(
+        cid: 'default:other',
+        status: CallStatus.outgoing(),
+      );
+      activeCalls.value = [incoming, outgoing];
       await pumpEventQueue();
 
-      verify(() => target.setMicrophoneEnabled(enabled: false)).called(1);
+      await hold(isOnHold: true);
+      await hold(isOnHold: true, cid: 'default:other');
+
+      verifyNotLeft(incoming);
+      verifyNotLeft(outgoing);
     });
+
+    test('nothing is left while several calls may be active', () async {
+      when(
+        () => streamVideo.options,
+      ).thenReturn(StreamVideoOptions(allowMultipleActiveCalls: true));
+      final target = await joined();
+
+      await hold(isOnHold: true);
+
+      verifyNotLeft(target);
+    });
+
+    test(
+      'a leave that fails or throws is logged and the observer goes on',
+      () async {
+        final target = await joined();
+        when(
+          () => target.leave(reason: any(named: 'reason')),
+        ).thenAnswer(
+          (_) async =>
+              const Result.failure(StreamVideoException(message: 'boom')),
+        );
+        await hold(isOnHold: true);
+
+        when(
+          () => target.leave(reason: any(named: 'reason')),
+        ).thenThrow(StateError('boom'));
+        await hold(isOnHold: true);
+
+        when(() => controller.activeCalls()).thenAnswer(
+          (_) async => [const CallData(uuid: 'u1', callCid: 'default:c1')],
+        );
+        platform.emit(const ActionCallToggleMute(uuid: 'u1', isMuted: true));
+        await pumpEventQueue();
+        verify(() => target.setMicrophoneEnabled(enabled: false)).called(1);
+      },
+    );
 
     test('is ignored on iOS', () async {
       final target = await joined();
@@ -718,7 +768,7 @@ void main() {
 
       await hold(isOnHold: true);
 
-      verifyNever(() => target.leave(reason: any(named: 'reason')));
+      verifyNotLeft(target);
     });
   });
 }

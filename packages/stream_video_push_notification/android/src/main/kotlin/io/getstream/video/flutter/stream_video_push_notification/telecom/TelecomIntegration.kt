@@ -431,13 +431,13 @@ internal class TelecomIntegration(
             // end, not a decline.
             connectedCallIds.add(callId)
             if (!heldCallIds.remove(callId)) return
-            sendEvent(IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD, callId, "isOnHold" to false)
+            sendHoldEvent(callId, isOnHold = false)
         }
 
         /** Reports a hold when the call was not held yet, whoever asked for it. */
         override fun onIsCallInactive(callId: String) {
             if (!heldCallIds.add(callId)) return
-            sendEvent(IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD, callId, "isOnHold" to true)
+            sendHoldEvent(callId, isOnHold = true)
         }
 
         override fun onMuteCallChanged(callId: String, isMuted: Boolean) {
@@ -455,6 +455,16 @@ internal class TelecomIntegration(
                 callId,
                 "type" to CUSTOM_EVENT_AUDIO_ENDPOINTS,
                 "audio" to snapshot,
+            )
+        }
+
+        /** Sends a hold event with the call's cid, so Dart can tell which call Telecom held. */
+        private fun sendHoldEvent(callId: String, isOnHold: Boolean) {
+            sendEvent(
+                IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD,
+                callId,
+                "isOnHold" to isOnHold,
+                "callCid" to trackedCalls[callId]?.callCid,
             )
         }
 
