@@ -9,12 +9,19 @@ jobs:
   update_goldens:
     runs-on: ubuntu-latest
     steps:
+      - name: Generate release bot token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.IOS_RELEASE_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.IOS_RELEASE_BOT_PRIVATE_KEY }}
+
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
           # Bot token so the pushed commit can re-trigger CI on the branch.
-          token: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: 🐦 Install Flutter
         uses: ./.github/actions/setup-flutter
