@@ -86,9 +86,9 @@ internal class RingingController(
     }
 
     /**
-     * Clears the ring as accepted, reports it, stores the call as accepted and answers it in
-     * Telecom. After [stopRinging] the ring is cleared a second time, which only repeats its
-     * clearing.
+     * Cancels the ring timer, clears the ring as accepted, reports it, stores the call as accepted
+     * and answers it in Telecom. After [stopRinging] the ring is cleared a second time, which only
+     * repeats its clearing.
      */
     fun onAccept(data: Bundle) = step {
         ringTimer.cancel(CallPayloadMapper.fromBundle(data).id)
