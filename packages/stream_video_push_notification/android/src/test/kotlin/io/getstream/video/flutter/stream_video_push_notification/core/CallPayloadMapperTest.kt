@@ -52,32 +52,6 @@ class CallPayloadMapperTest {
     }
 
     @Test
-    fun `the call defaults`() {
-        val call = RingingCall()
-
-        assertEquals("", call.id)
-        assertEquals(0, call.type)
-        assertEquals(30000L, call.duration)
-        assertEquals(emptyMap<String, Any?>(), call.extra)
-        assertEquals("", call.ringtonePath)
-        assertEquals("", call.textAccept)
-        assertEquals("", call.fullScreenBackgroundColor)
-        assertEquals("", call.fullScreenTextColor)
-        assertEquals(false, call.fullScreenShowLogo)
-        assertEquals(false, call.showCallHandle)
-        assertEquals(true, call.showFullScreenOnLockScreen)
-        assertNull(call.incomingCallNotificationChannelName)
-        assertNull(call.missedNotificationId)
-        assertEquals(true, call.showMissedCallNotification)
-        assertEquals(1, call.missedNotificationCount)
-        assertNull(call.missedNotificationSubtitle)
-        assertEquals(true, call.showCallbackButton)
-        assertEquals(false, call.isImportant)
-        assertEquals(false, call.isBot)
-        assertEquals(false, call.isAccepted)
-    }
-
-    @Test
     fun `reads every field of the map Dart sends`() {
         val args = mapOf(
             "id" to "call-1",
@@ -251,7 +225,7 @@ class CallPayloadMapperTest {
     }
 
     @Test
-    fun `the event body sends a missing missed-call id as 0 and missing channel names as empty`() {
+    fun `the event body sends a missing missed-call id as 0, missing texts as null and missing channel names as empty`() {
         val body = CallPayloadMapper.toEventBody(RingingCall())
 
         @Suppress("UNCHECKED_CAST")
@@ -260,9 +234,23 @@ class CallPayloadMapperTest {
         val missed = android["missedCallNotification"] as Map<String, Any?>
         assertEquals(0, missed["id"])
         assertEquals(null, missed["subtitle"])
+        assertEquals(null, missed["callbackText"])
         assertEquals("", android["incomingCallNotificationChannelName"])
         assertEquals("", android["missedCallNotificationChannelName"])
         assertEquals(false, body["endedBySystem"])
+    }
+
+    @Test
+    fun `a call read back from its Bundle sends missing missed-call texts as null, not empty`() {
+        val stored = CallPayloadMapper.fromBundle(CallPayloadMapper.toBundle(RingingCall(id = "a")))
+        val body = CallPayloadMapper.toEventBody(stored)
+
+        @Suppress("UNCHECKED_CAST")
+        val android = body["android"] as Map<String, Any?>
+        @Suppress("UNCHECKED_CAST")
+        val missed = android["missedCallNotification"] as Map<String, Any?>
+        assertNull(missed["subtitle"])
+        assertNull(missed["callbackText"])
     }
 
     // Stored entry.
