@@ -6,6 +6,7 @@ import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import io.getstream.video.flutter.stream_video_push_notification.FakeDartSide
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
+import io.getstream.video.flutter.stream_video_push_notification.PREFERENCES_FILE_NAME
 import io.getstream.video.flutter.stream_video_push_notification.telecom.FakeTelecomCallRepository
 import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomEventSource
 import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
@@ -34,7 +35,7 @@ class RingingComponentsTest {
     @Before
     fun connectTelecom() {
         RingingComponents.reset()
-        context.getSharedPreferences(PrefsCallStore.PREFERENCES_FILE_NAME, Context.MODE_PRIVATE)
+        context.getSharedPreferences(PREFERENCES_FILE_NAME, Context.MODE_PRIVATE)
             .edit().clear().commit()
         RingingComponents.telecomFactory = { ctx ->
             TelecomIntegration(
