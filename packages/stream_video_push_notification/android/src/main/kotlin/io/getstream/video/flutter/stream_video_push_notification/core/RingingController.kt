@@ -82,7 +82,8 @@ internal class RingingController(
 
     /**
      * Clears the ring as accepted, reports it, stores the call as accepted and answers it in
-     * Telecom. Clearing a ring already stopped, as after [stopRinging], changes nothing.
+     * Telecom. After [stopRinging] the ring is cleared a second time, which only repeats its
+     * clearing.
      */
     fun onAccept(data: Bundle) = step {
         notifications.clearIncomingNotification(data, true)
