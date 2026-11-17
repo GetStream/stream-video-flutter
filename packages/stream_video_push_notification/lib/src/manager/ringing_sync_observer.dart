@@ -58,6 +58,15 @@ class RingingSyncObserver {
   /// The calls the app is in, as of the last state change.
   List<Call> _currentActiveCalls = [];
 
+  /// The rings the backend subscriptions follow: their uuids, lowercased,
+  /// mapped to their call cids. An end of another native call, such as an
+  /// outgoing one, leaves the subscriptions running.
+  final Map<String, String?> _rings = {};
+
+  /// The uuids of the rings answered while the start-up probe of the native
+  /// calls runs, which its result may still list. Null once it returned.
+  Set<String>? _answeredDuringStartUp = {};
+
   bool _disposed = false;
 
   /// Starts observing. Called once, on mobile only.
@@ -71,11 +80,22 @@ class RingingSyncObserver {
     _controller
         .activeCalls()
         .then((calls) {
-          if (calls.isNotEmpty && !_disposed) {
+          final answered = _answeredDuringStartUp ?? const {};
+          _answeredDuringStartUp = null;
+          final rings = calls.where(
+            (call) => !answered.contains(call.uuid?.toLowerCase()),
+          );
+          if (rings.isNotEmpty && !_disposed) {
+            for (final ring in rings) {
+              if (ring.uuid case final uuid?) {
+                _rings[uuid.toLowerCase()] = ring.callCid;
+              }
+            }
             _subscribeToEvents();
           }
         })
         .catchError((Object e) {
+          _answeredDuringStartUp = null;
           _logger.w(() => '[start] Could not read the native calls: $e');
         });
 
@@ -104,22 +124,55 @@ class RingingSyncObserver {
   /// Starts the backend subscriptions on a ring and stops them with the
   /// user's answer; mirrors a CallKit mute.
   void _onRingingEvent(RingingEvent event) {
-    if (event is ActionCallToggleMute) {
-      _onToggleMute(event);
-    } else if (event is ActionCallIncoming) {
-      if (!_client.isConnected) {
-        _client.openConnection();
-      }
-      _subscribeToEvents();
-    } else if (event is ActionCallAccept ||
-        event is ActionCallDecline ||
-        event is ActionCallTimeout ||
-        event is ActionCallEnded) {
-      _subscriptions.cancel(_idCallAccepted);
-      _subscriptions.cancel(_idCallEnded);
-      _subscriptions.cancel(_idCallRejected);
-      _subscriptions.cancel(_idCallParticipantCount);
+    switch (event) {
+      case ActionCallToggleMute():
+        _onToggleMute(event);
+      case ActionCallIncoming(:final data):
+        if (!_client.isConnected) {
+          _client.openConnection();
+        }
+        if (data.uuid case final uuid?) {
+          _rings[uuid.toLowerCase()] = data.callCid;
+        }
+        _subscribeToEvents();
+      case ActionCallAccept(:final data) ||
+          ActionCallDecline(:final data) ||
+          ActionCallTimeout(:final data) ||
+          ActionCallEnded(:final data):
+        _onRingAnswered(data.uuid?.toLowerCase());
+      default:
+        break;
     }
+  }
+
+  /// Stops the backend subscriptions once no ring they follow is left. An
+  /// event without a uuid, or for a ring the observer did not see start,
+  /// stops them as before; one for another call while a ring is followed does
+  /// not.
+  void _onRingAnswered(String? uuid) {
+    if (uuid != null) _answeredDuringStartUp?.add(uuid);
+    if (uuid != null && _rings.isNotEmpty) {
+      if (!_rings.containsKey(uuid)) return;
+      _rings.remove(uuid);
+      if (_rings.isNotEmpty) return;
+    }
+    _rings.clear();
+    _subscriptions.cancel(_idCallAccepted);
+    _subscriptions.cancel(_idCallEnded);
+    _subscriptions.cancel(_idCallRejected);
+    _subscriptions.cancel(_idCallParticipantCount);
+  }
+
+  /// Stops following the rings of `cid`, which the backend ended or this
+  /// device accepted. Called before the native call is ended or dismissed with
+  /// its events suppressed, since the suppressed end would otherwise be what
+  /// answers the ring.
+  void _onRingEndedHere(String cid) {
+    final uuids = [
+      for (final MapEntry(:key, :value) in _rings.entries)
+        if (value == cid) key,
+    ];
+    uuids.forEach(_onRingAnswered);
   }
 
   /// Applies a CallKit mute to the call it names, found through the cid the
@@ -170,6 +223,7 @@ class RingingSyncObserver {
         _logger.d(
           () => '[subscribeToEvents] Call ended event: ${event.callCid}',
         );
+        _onRingEndedHere(event.callCid.toString());
         _broadcaster.suppressEvent();
         _controller.endCallByCid(event.callCid.toString());
       }),
@@ -196,6 +250,7 @@ class RingingSyncObserver {
                 '[subscribeToEvents] No participants left, ending call: ${event.callCid}',
           );
 
+          _onRingEndedHere(event.callCid.toString());
           _broadcaster.suppressEvent();
           await _controller.endCallByCid(event.callCid.toString());
         }
@@ -216,6 +271,7 @@ class RingingSyncObserver {
                 '[subscribeToEvents] Call rejected by the current user or call owner, ending call: ${event.callCid}',
           );
 
+          _onRingEndedHere(event.callCid.toString());
           _broadcaster.suppressEvent();
           await _controller.endCallByCid(event.callCid.toString());
         }
@@ -259,6 +315,7 @@ class RingingSyncObserver {
           );
 
           // The call is live on this device from here on, so only the ringing UI goes away.
+          _onRingEndedHere(event.callCid.toString());
           _broadcaster.suppressEvent();
           await _controller.dismissRingingCallByCid(event.callCid.toString());
         }
