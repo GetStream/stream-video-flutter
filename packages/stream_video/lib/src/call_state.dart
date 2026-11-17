@@ -60,6 +60,7 @@ class CallState extends Equatable {
       callCid: callCid,
       createdByUser: CallUser.empty(),
       isRingingFlow: false,
+      isRingingWithVideo: false,
       sessionId: '',
       status: CallStatus.idle(),
       isRecording: false,
@@ -105,6 +106,7 @@ class CallState extends Equatable {
     required this.callCid,
     required this.createdByUser,
     required this.isRingingFlow,
+    required this.isRingingWithVideo,
     required this.sessionId,
     required this.status,
     required this.isRecording,
@@ -148,6 +150,11 @@ class CallState extends Equatable {
   final StreamCallCid callCid;
   final CallUser createdByUser;
   final bool isRingingFlow;
+
+  /// Whether the ring the current user started for this call asks the callees
+  /// for video: the `video` argument of `Call.getOrCreate` or `Call.get` with
+  /// `ringing: true`. False until such a call rings.
+  final bool isRingingWithVideo;
   final String sessionId;
   final CallStatus status;
   final CallSettings settings;
@@ -266,6 +273,7 @@ class CallState extends Equatable {
     StreamCallCid? callCid,
     CallUser? createdByUser,
     bool? isRingingFlow,
+    bool? isRingingWithVideo,
     String? sessionId,
     CallStatus? status,
     bool? isRecording,
@@ -309,6 +317,7 @@ class CallState extends Equatable {
       callCid: callCid ?? this.callCid,
       createdByUser: createdByUser ?? this.createdByUser,
       isRingingFlow: isRingingFlow ?? this.isRingingFlow,
+      isRingingWithVideo: isRingingWithVideo ?? this.isRingingWithVideo,
       sessionId: sessionId ?? this.sessionId,
       status: status ?? this.status,
       isRecording: isRecording ?? this.isRecording,
@@ -415,6 +424,7 @@ class CallState extends Equatable {
     currentUserId,
     callCid,
     createdByUser,
+    isRingingWithVideo,
     sessionId,
     status,
     isRecording,

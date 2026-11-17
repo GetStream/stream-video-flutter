@@ -74,6 +74,11 @@ jobs:
     # Goldens compare pixels, so this matches the image update_goldens.yml
     # renders them on.
     runs-on: ubuntu-26.04
+    permissions:
+      contents: read
+      pull-requests: read
+      # Codecov authenticates the coverage upload with a GitHub OIDC token.
+      id-token: write
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
@@ -110,7 +115,7 @@ jobs:
       - name: "Upload Coverage"
         uses: codecov/codecov-action@v7
         with:
-          token: ${{secrets.CODECOV_TOKEN}}
+          use_oidc: true
           files: packages/*/coverage/lcov.info
       - name: "Test dart fixes"
         run: melos run test:fixes
@@ -221,6 +226,11 @@ jobs:
     if: needs.gate.outputs.should_run != 'true' && github.event_name == 'pull_request' && github.event.pull_request.draft != true
     timeout-minutes: 5
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      # Codecov authenticates the empty upload with a GitHub OIDC token.
+      id-token: write
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
@@ -228,7 +238,7 @@ jobs:
       - name: Report Skipped Coverage
         uses: codecov/codecov-action@v7
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          use_oidc: true
           run_command: empty-upload
           force: true
           fail_ci_if_error: true

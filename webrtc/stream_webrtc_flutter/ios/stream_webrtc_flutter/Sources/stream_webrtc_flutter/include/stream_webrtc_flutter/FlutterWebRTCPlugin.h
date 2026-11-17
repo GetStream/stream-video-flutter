@@ -22,6 +22,85 @@ typedef void (^CompletionHandler)(void);
 
 typedef void (^CapturerStopHandler)(CompletionHandler _Nonnull handler);
 
+/**
+ * Posted to do what -[FlutterWebRTCAudioEngineControl setAudioEngineAvailable:]
+ * does, from code that does not link this plugin. The userInfo carries
+ * FlutterWebRTCAudioEngineAvailableKey as an NSNumber BOOL. It may also carry
+ * FlutterWebRTCAudioSessionActiveKey as an NSNumber BOOL, which does what
+ * -setCallKitAudioSessionActive: does: an activation is applied before the
+ * availability, a deactivation after it. May be posted from any thread.
+ */
+FOUNDATION_EXPORT NSNotificationName _Nonnull const FlutterWebRTCAudioEngineAvailabilityNotification;
+FOUNDATION_EXPORT NSString* _Nonnull const FlutterWebRTCAudioEngineAvailableKey;
+FOUNDATION_EXPORT NSString* _Nonnull const FlutterWebRTCAudioSessionActiveKey;
+
+/**
+ * Posted, on the main thread, when a factory's audio engine could not be
+ * started after it became available. The audio session it was given will not
+ * start the engine again; an app that owns the session through CallKit can get
+ * a fresh one by registering the call with CallKit again. Any number of
+ * observers may listen.
+ */
+FOUNDATION_EXPORT NSNotificationName _Nonnull const FlutterWebRTCAudioEngineStartFailedNotification;
+
+/**
+ * Controls the audio engine of every peer-connection factory of every
+ * registration of this plugin, for an app that activates the audio session
+ * itself, such as through CallKit. Get it from
+ * FlutterWebRTCPlugin.audioEngineControl. The notifications above do the same
+ * for code that does not link this plugin.
+ */
+@protocol FlutterWebRTCAudioEngineControl <NSObject>
+
+/**
+ * Allows or stops the AVAudioEngine of every factory, the ones that exist and
+ * the ones built later, until the next call. A registration made later takes
+ * the value set last. Stopping an engine that is already stopped does nothing.
+ * May be called from any thread.
+ *
+ * The audio device module starts and stops its engine as playout and recording
+ * are enabled. When the app activates the audio session itself, that timing is
+ * wrong: the engine has to stay down while the app does not hold the session,
+ * or it runs silently. Pass NO when the session is taken away and YES once it
+ * is back; playout and recording keep their state, and the engine stops and
+ * starts with the value.
+ *
+ * A factory whose playout is running when the engine is stopped keeps pulling
+ * received audio through the audio device module's manual rendering mode, an
+ * engine without hardware, so it resumes on live audio. A factory built while
+ * the engine is stopped, or whose playout starts afterwards, does not, and may
+ * play the last seconds it received when the engine is back.
+ *
+ * When the engine cannot be started on becoming available,
+ * FlutterWebRTCAudioEngineStartFailedNotification is posted and
+ * audioEngineStartFailedHandler is called.
+ */
+- (void)setAudioEngineAvailable:(BOOL)available;
+
+/**
+ * Tells WebRTC's audio session that the app's audio session was activated
+ * (YES) or deactivated (NO) by CallKit, through RTCAudioSession's
+ * audioSessionDidActivate: and audioSessionDidDeactivate:. Without it, WebRTC
+ * activates or deactivates the session itself after an interruption ends or
+ * when the app returns to the foreground, which it must not do while CallKit
+ * owns the session. Call it with YES before allowing the engine and with NO
+ * after stopping it. Applies once for the process however many registrations
+ * there are; a repeated value does nothing. iOS only; no effect on macOS.
+ */
+- (void)setCallKitAudioSessionActive:(BOOL)active;
+
+/**
+ * Called on the main thread, once per factory, when a factory's audio engine
+ * could not be started after it became available. It is called alongside
+ * FlutterWebRTCAudioEngineStartFailedNotification, so use one or the other.
+ * There is one handler for the process and setting it replaces the previous
+ * one, so only one owner may set it; any number of observers can use the
+ * notification instead. Set it on the main thread.
+ */
+@property(nonatomic, copy, nullable) void (^audioEngineStartFailedHandler)(void);
+
+@end
+
 @interface FlutterWebRTCPlugin : NSObject <FlutterPlugin,
                                            RTCPeerConnectionDelegate,
                                            RTCAudioDeviceModuleDelegate,
@@ -30,6 +109,13 @@ typedef void (^CapturerStopHandler)(CompletionHandler _Nonnull handler);
                                            RTCDesktopCapturerDelegate,
 #endif
                                            FlutterStreamHandler>
+
+/**
+ * The audio engine control of the process. The audio session belongs to the
+ * process, so one control serves every registration of this plugin, one per
+ * Flutter engine, including registrations made later.
+ */
+@property(class, nonatomic, readonly, nonnull) id<FlutterWebRTCAudioEngineControl> audioEngineControl;
 
 /**
  * Per-call factory registry, keyed by factoryId.

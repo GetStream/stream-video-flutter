@@ -13,7 +13,7 @@ A new flutter plugin project.
   s.author           = { 'getstream.io' => 'support@getstream.io' }
   s.source           = { :path => '.' }
   s.source_files = 'stream_webrtc_flutter/Sources/stream_webrtc_flutter/**/*.{h,hpp,m,mm,c,cpp}'
-  s.public_header_files = 'stream_webrtc_flutter/Sources/stream_webrtc_flutterinclude/stream_webrtc_flutter/**/*.h'
+  s.public_header_files = 'stream_webrtc_flutter/Sources/stream_webrtc_flutter/include/stream_webrtc_flutter/**/*.h'
 
   s.dependency 'FlutterMacOS'
   s.vendored_frameworks = 'Frameworks/StreamWebRTC.xcframework'
