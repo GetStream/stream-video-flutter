@@ -8,8 +8,10 @@ name: 'PR Version Labels'
 # Kept separate from pr_review_labels.yml so it can simply be deleted once
 # the v2 branch is merged into main.
 
+# Fork pull requests get a read-only token, so they aren't labelled
+# automatically.
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, reopened, edited]
     branches:
       - main

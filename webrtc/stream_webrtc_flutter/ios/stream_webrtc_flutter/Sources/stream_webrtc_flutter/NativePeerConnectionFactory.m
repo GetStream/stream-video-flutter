@@ -1,4 +1,4 @@
-#import "include/stream_webrtc_flutter/NativePeerConnectionFactory.h"
+#import "NativePeerConnectionFactory+Private.h"
 #import "include/stream_webrtc_flutter/VideoFactoriesPrivate.h"
 
 #import <StreamWebRTC/StreamWebRTC.h>
