@@ -131,7 +131,7 @@ internal class PushMethodCallHandler(
             "getDevicePushTokenVoIP" -> result.success("")
 
             "silenceEvents" -> {
-                IncomingCallBroadcastReceiver.silenceEvents = call.arguments as? Boolean ?: false
+                RingingComponents.silenceEvents = call.arguments as? Boolean ?: false
                 result.success(true)
             }
 

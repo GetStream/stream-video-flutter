@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Bundle
 import android.telecom.DisconnectCause
 import androidx.test.core.app.ApplicationProvider
-import io.getstream.video.flutter.stream_video_push_notification.IncomingCallBroadcastReceiver
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationManager
 import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
@@ -39,7 +38,7 @@ class RingingControllerTest {
     @Before
     fun createController() {
         mockkObject(StreamTelecomManager)
-        IncomingCallBroadcastReceiver.silenceEvents = false
+        RingingComponents.silenceEvents = false
         controller = RingingController(context, store, notifications) { event, body ->
             events += event to body
         }
@@ -48,7 +47,7 @@ class RingingControllerTest {
     @After
     fun releaseTelecom() {
         unmockkObject(StreamTelecomManager)
-        IncomingCallBroadcastReceiver.silenceEvents = false
+        RingingComponents.silenceEvents = false
     }
 
     private val call = RingingCall(id = CALL_ID, callerName = "Ada")
@@ -102,6 +101,19 @@ class RingingControllerTest {
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_ACCEPT), eventNames())
         assertEquals(true, store.byId(CALL_ID)?.isAccepted)
         verify { StreamTelecomManager.answer(any(), CALL_ID) }
+    }
+
+    @Test
+    fun `stopRinging clears the ring as accepted and reports, stores and answers nothing`() {
+        store.add(call)
+        val data = bundle
+
+        controller.stopRinging(data)
+
+        verify { notifications.clearIncomingNotification(data, true) }
+        assertEquals(emptyList<String>(), eventNames())
+        assertEquals(listOf(call), store.all())
+        verify(exactly = 0) { StreamTelecomManager.answer(any(), any()) }
     }
 
     @Test
@@ -194,7 +206,7 @@ class RingingControllerTest {
 
     @Test
     fun `while events are silenced the step runs without reporting`() {
-        IncomingCallBroadcastReceiver.silenceEvents = true
+        RingingComponents.silenceEvents = true
 
         controller.handle(IncomingCallConstants.ACTION_CALL_DECLINE, bundle)
 

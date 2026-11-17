@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
 import io.getstream.video.flutter.stream_video_push_notification.core.PrefsCallStore
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
@@ -54,7 +55,7 @@ class IncomingCallBroadcastReceiverTest {
     @Before
     fun attachPlugin() {
         resetPlugin()
-        IncomingCallBroadcastReceiver.silenceEvents = false
+        RingingComponents.silenceEvents = false
         dart = FakeDartSide(context)
         // A spy: the real Telecom code runs, and is off at this SDK level.
         mockkObject(StreamTelecomManager)
@@ -65,7 +66,7 @@ class IncomingCallBroadcastReceiverTest {
         ringingService?.destroy()
         ringingService = null
         unmockkObject(StreamTelecomManager)
-        IncomingCallBroadcastReceiver.silenceEvents = false
+        RingingComponents.silenceEvents = false
         resetPlugin()
     }
 
@@ -291,7 +292,7 @@ class IncomingCallBroadcastReceiverTest {
 
     @Test
     fun `while events are silenced nothing reaches Dart and the rest still happens`() {
-        IncomingCallBroadcastReceiver.silenceEvents = true
+        RingingComponents.silenceEvents = true
 
         incoming()
 
@@ -315,7 +316,7 @@ class IncomingCallBroadcastReceiverTest {
     }
 
     @Test
-    fun `an incoming call is shown in a process with no Flutter engine`() {
+    fun `an incoming broadcast from native code is shown in a process with no Flutter engine`() {
         resetPlugin()
 
         incoming()

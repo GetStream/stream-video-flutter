@@ -313,7 +313,7 @@ class IncomingCallActivity : Activity() {
         // The ring stops here. On the lock screen the trampoline, which runs the accept and brings
         // the app forward, may only start once the keyguard is dismissed.
         if (data != null) {
-            RingingComponents.get(this).notifications.clearIncomingNotification(data, true)
+            RingingComponents.get(this).controller.stopRinging(data)
         }
         val acceptIntent =
             TransparentActivity.getIntent(this, IncomingCallConstants.ACTION_CALL_ACCEPT, data)
