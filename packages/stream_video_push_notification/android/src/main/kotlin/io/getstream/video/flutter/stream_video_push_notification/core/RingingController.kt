@@ -43,7 +43,6 @@ internal class RingingController(
             IncomingCallConstants.ACTION_CALL_ENDED -> onEnded(data)
             IncomingCallConstants.ACTION_CALL_TIMEOUT ->
                 onRingTimedOut(CallPayloadMapper.fromBundle(data).id)
-            IncomingCallConstants.ACTION_CALL_CONNECTED -> onConnected(data)
             IncomingCallConstants.ACTION_CALL_CALLBACK -> onCallback(data)
         }
     }

@@ -256,14 +256,6 @@ class IncomingCallBroadcastReceiverTest {
     }
 
     @Test
-    fun `connected is reported and activates the Telecom call`() {
-        receive(IncomingCallBroadcastReceiver.getIntentConnected(context, data().toBundle()))
-
-        assertEquals(listOf(IncomingCallConstants.ACTION_CALL_CONNECTED), eventNames())
-        verify { telecom.activate(CALL_ID) }
-    }
-
-    @Test
     fun `a call back clears the missed-call notification and is reported`() {
         notifications.notify(MISSED_ID, Notification())
 
