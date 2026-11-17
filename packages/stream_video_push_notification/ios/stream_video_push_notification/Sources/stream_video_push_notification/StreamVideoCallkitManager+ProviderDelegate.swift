@@ -50,6 +50,9 @@ extension StreamVideoCallkitManager {
     }
 
     func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
+        // Before the end reaches Dart: once CallKit has no call left, iOS can suspend the app
+        // before Dart tells the backend.
+        callEndGracePeriod.callEnded()
         suppressRecentsIfRegisteredAgain(store.call(forCallKit: action.callUUID))
         let outcome = store.endPerformed(uuid: action.callUUID)
         callsRemoved()

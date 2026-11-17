@@ -437,9 +437,9 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertEqual(store.call(forCallKit: uuid)?.phase, .ended(.remoteEnded))
     }
 
-    // MARK: - The outgoing call is never cleared
+    // MARK: - The outgoing call ends
 
-    func testAnEndedOutgoingCallIsKeptButNoLongerCountsForTheAudioSession() {
+    func testAnEndedOutgoingCallIsForgottenAndNoLongerCountsForTheAudioSession() {
         let uuid = UUID()
         store.registerPendingOutgoing(options("outgoing"), uuid: uuid)
         let call = store.startPerformed(uuid: uuid)!.call
@@ -447,11 +447,86 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertTrue(store.audioSessionActivated().isFirst)
         XCTAssertFalse(store.audioSessionActivated().isFirst)
 
-        _ = store.endPerformed(uuid: uuid)
+        let outcome = store.endPerformed(uuid: uuid)
 
-        XCTAssertTrue(store.outgoingCall === call)
+        XCTAssertEqual(names(outcome.effects), [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
+        XCTAssertNil(store.outgoingCall)
         XCTAssertEqual(call.phase, .ended(nil))
         XCTAssertTrue(store.audioSessionActivated().isFirst)
+    }
+
+    func testARingAfterAnEndedOutgoingCallTimesOutAndIsDeclined() {
+        let uuid = UUID()
+        store.registerPendingOutgoing(options("outgoing"), uuid: uuid)
+        _ = store.startPerformed(uuid: uuid)
+        _ = store.endPerformed(uuid: uuid)
+
+        let ringing = ring("ringing")
+
+        XCTAssertTrue(store.shouldTimeOut(appId: "ringing"))
+        let outcome = store.endPerformed(uuid: ringing.identity.callKitUUID)
+        XCTAssertEqual(names(outcome.effects), [StreamVideoIncomingCallConstants.ACTION_CALL_DECLINE])
+    }
+
+    func testARingDuringARingingOutgoingCallTimesOutAndIsDeclined() {
+        let uuid = UUID()
+        store.registerPendingOutgoing(options("outgoing"), uuid: uuid)
+        _ = store.startPerformed(uuid: uuid)
+
+        let ringing = ring("ringing")
+
+        XCTAssertTrue(store.shouldTimeOut(appId: "ringing"))
+        let outcome = store.endPerformed(uuid: ringing.identity.callKitUUID)
+        XCTAssertEqual(names(outcome.effects), [StreamVideoIncomingCallConstants.ACTION_CALL_DECLINE])
+        XCTAssertNotNil(store.outgoingCall)
+    }
+
+    func testARingDuringAConnectedOutgoingCallDoesNotTimeOutAndIsEnded() {
+        let uuid = UUID()
+        store.registerPendingOutgoing(options("outgoing"), uuid: uuid)
+        _ = store.startPerformed(uuid: uuid)
+        _ = store.connected(uuid: uuid)
+
+        let ringing = ring("ringing")
+
+        XCTAssertFalse(store.shouldTimeOut(appId: "ringing"))
+        let outcome = store.endPerformed(uuid: ringing.identity.callKitUUID)
+        XCTAssertEqual(names(outcome.effects), [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
+    }
+
+    func testEndingAnOutgoingCallThatNeverConnectedIsSentAsEnded() {
+        let uuid = UUID()
+        store.registerPendingOutgoing(options("outgoing"), uuid: uuid)
+        _ = store.startPerformed(uuid: uuid)
+
+        let outcome = store.endPerformed(uuid: uuid)
+
+        XCTAssertEqual(names(outcome.effects), [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
+    }
+
+    func testAStartCallKitRefusedIsNotTakenForThePushKitCall() {
+        let refused = options(UUID().uuidString)
+        let uuid = UUID(uuidString: refused.uuid)!
+        store.registerPendingOutgoing(refused, uuid: uuid)
+        store.startRefused(uuid: uuid, options: refused)
+        store.showRequested(options("pushkit"), fromPushKit: true)
+        _ = ring("pushkit")
+
+        XCTAssertTrue(store.wasRefusedToStart(appId: refused.uuid.uppercased()))
+        XCTAssertFalse(store.actsOnPushKitCall(forAppId: refused.uuid))
+
+        store.reset()
+        XCTAssertFalse(store.wasRefusedToStart(appId: refused.uuid))
+    }
+
+    func testAResetForgetsTheOutgoingCall() {
+        let uuid = UUID()
+        store.registerPendingOutgoing(options("outgoing"), uuid: uuid)
+        _ = store.startPerformed(uuid: uuid)
+
+        store.reset()
+
+        XCTAssertNil(store.outgoingCall)
     }
 
     func testACallWhoseEndWasRefusedIsEndedAndNoLongerCountsForTheAudioSession() {
@@ -507,6 +582,40 @@ final class CallKitCallStoreTests: XCTestCase {
     }
 
     // MARK: - Outgoing call started by the app
+
+    private func startOutgoing(_ id: String) -> CallKitCall {
+        let uuid = UUID()
+        store.registerPendingOutgoing(options(id), uuid: uuid)
+        return store.startPerformed(uuid: uuid)!.call
+    }
+
+    func testAnEarlierOutgoingCallStillCountsOnceALaterOneEnded() {
+        let first = startOutgoing("first")
+        let second = startOutgoing("second")
+        XCTAssertTrue(store.outgoingCall === second)
+
+        _ = store.endPerformed(uuid: second.identity.callKitUUID)
+
+        XCTAssertTrue(store.outgoingCall === first)
+        let outcome = store.endPerformed(uuid: first.identity.callKitUUID)
+        XCTAssertEqual(names(outcome.effects), [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
+        XCTAssertNil(store.outgoingCall)
+    }
+
+    func testDuringAPushKitRingOnlyAnotherTrackedCallKeepsItsOwnEndAndConnection() {
+        let outgoing = startOutgoing("outgoing")
+        store.showRequested(options("pushkit"), fromPushKit: true)
+        _ = ring("pushkit")
+
+        XCTAssertFalse(store.actsOnPushKitCall(forAppId: "outgoing"))
+        XCTAssertFalse(store.actsOnPushKitCall(forAppId: outgoing.identity.callKitUUID.uuidString))
+        XCTAssertTrue(store.actsOnPushKitCall(forAppId: "pushkit"))
+        XCTAssertTrue(store.actsOnPushKitCall(forAppId: "unknown"))
+        XCTAssertTrue(store.actsOnPushKitCall(forAppId: nil))
+
+        store.isFromPushKit = false
+        XCTAssertFalse(store.actsOnPushKitCall(forAppId: "pushkit"))
+    }
 
     func testOutgoingCall() {
         let uuid = UUID()

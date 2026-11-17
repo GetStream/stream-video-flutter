@@ -84,6 +84,7 @@
 
 ### ✅ Added
 
+- `CallState.isRingingWithVideo`: whether the ring the current user started asked the callees for video, the `video` argument of `Call.getOrCreate` or `Call.get` with `ringing: true`.
 - `AudioRouteChangedEvent.reason`, an `AudioRouteChangeReason` that says why an iOS audio route changed: iOS's `AVAudioSessionRouteChangeReason`, or `unknown` when the WebRTC plugin does not report it.
 - `CallData.fromJson`, which builds the call data of a ringing event or an active native call from the map the push plugins send.
 - `VideoLifecycleState`, the type of `ClientState.appLifecycleState`, is exported.
