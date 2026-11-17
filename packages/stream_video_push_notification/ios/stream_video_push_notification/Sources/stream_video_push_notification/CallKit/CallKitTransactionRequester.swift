@@ -1,17 +1,34 @@
 import CallKit
 import Foundation
 
+/// The parts of `CXCallController` the requester uses.
+protocol CallKitCallControlling {
+    /// The uuids of the calls CallKit knows, from this app and any earlier process of it.
+    var callUUIDs: [UUID] { get }
+    func request(_ transaction: CXTransaction, completion: @escaping (Error?) -> Void)
+}
+
+extension CXCallController: CallKitCallControlling {
+    var callUUIDs: [UUID] {
+        callObserver.calls.map { $0.uuid }
+    }
+}
+
 /// Asks CallKit, through `CXCallController`, to start, answer, mute, hold or end calls.
 final class CallKitTransactionRequester {
 
-    private let callController = CXCallController(queue: .main)
+    private let callController: CallKitCallControlling
 
     /// Called with each call an end transaction was refused for.
     var onEndRefused: ((UUID) -> Void)?
 
+    init(callController: CallKitCallControlling = CXCallController(queue: .main)) {
+        self.callController = callController
+    }
+
     /// The uuids of the calls CallKit knows, from this app and any earlier process of it.
     var systemCallUUIDs: [UUID] {
-        callController.callObserver.calls.map { $0.uuid }
+        callController.callUUIDs
     }
 
     func start(uuid: UUID, handle: CXHandle, isVideo: Bool, completion: @escaping (Bool) -> Void) {
@@ -48,7 +65,7 @@ final class CallKitTransactionRequester {
         let callTransaction = CXTransaction()
         callTransaction.addAction(endCallAction)
 
-        self.requestCall(callTransaction, action: "endCall")
+        self.requestCall(callTransaction, action: "endCall", reportsRefusedEnd: true)
     }
 
     /// Tells CallKit the call is connected, so the ringing UI becomes an in-call one. A refused
@@ -67,17 +84,22 @@ final class CallKitTransactionRequester {
             let callTransaction = CXTransaction()
             callTransaction.addAction(endCallAction)
 
-            self.requestCall(callTransaction, action: "endAllCalls")
+            self.requestCall(callTransaction, action: "endAllCalls", reportsRefusedEnd: true)
         }
     }
 
+    /// Requests `transaction`, logged as `action`. When `reportsRefusedEnd` is true and CallKit
+    /// refuses it, each of its calls goes to `onEndRefused`.
     private func requestCall(
-        _ transaction: CXTransaction, action: String, completion: ((Bool) -> Void)? = nil
+        _ transaction: CXTransaction, action: String, reportsRefusedEnd: Bool = false,
+        completion: ((Bool) -> Void)? = nil
     ) {
         callController.request(transaction) { [weak self] error in
             if let error = error {
                 NSLog("CallKit transaction '\(action)' failed: \(error.localizedDescription)")
-                self?.reportRefusedEnd(transaction, action: action)
+                if reportsRefusedEnd {
+                    self?.reportRefusedEnd(transaction, action: action)
+                }
                 completion?(false)
                 return
             }
@@ -89,8 +111,6 @@ final class CallKitTransactionRequester {
 
     /// Hands each call of a refused end transaction to `onEndRefused`.
     private func reportRefusedEnd(_ transaction: CXTransaction, action: String) {
-        guard action == "endCall" || action == "endAllCalls" else { return }
-
         for callAction in transaction.actions.compactMap({ $0 as? CXCallAction }) {
             NSLog("Reporting call \(callAction.callUUID) as ended after the failed \(action)")
             onEndRefused?(callAction.callUUID)

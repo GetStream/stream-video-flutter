@@ -84,9 +84,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             }
 
             self.configureAudioSession(data)
-            self.apply(
-                self.store.incomingReported(
-                    data, uuid: uuid, source: fromPushKit ? .pushKit : .app))
+            self.apply(self.store.incomingReported(data, uuid: uuid))
             self.endCallNotExist(data)
             completion?()
         }
@@ -134,7 +132,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             return
         }
         if call.isMuted == isMuted {
-            apply([store.muteEvent(call, isMuted)])
+            apply([call.muteEffect(isMuted: isMuted)])
         } else {
             transactions.mute(uuid: call.identity.callKitUUID, isMuted: isMuted)
         }
@@ -145,7 +143,7 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             return
         }
         if call.isOnHold == onHold {
-            apply([store.holdEvent(call, onHold)])
+            apply([call.holdEffect(isOnHold: onHold)])
         } else {
             transactions.hold(uuid: call.identity.callKitUUID, onHold: onHold)
         }

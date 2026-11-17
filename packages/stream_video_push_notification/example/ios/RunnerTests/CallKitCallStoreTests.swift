@@ -34,9 +34,9 @@ final class CallKitCallStoreTests: XCTestCase {
 
     /// Reports `id` as a ringing incoming call CallKit knows as a new uuid.
     @discardableResult
-    private func ring(_ id: String, source: CallKitCall.Source = .app) -> CallKitCall {
+    private func ring(_ id: String) -> CallKitCall {
         let uuid = UUID()
-        _ = store.incomingReported(options(id), uuid: uuid, source: source)
+        _ = store.incomingReported(options(id), uuid: uuid)
         return store.call(forCallKit: uuid)!
     }
 
@@ -44,7 +44,7 @@ final class CallKitCallStoreTests: XCTestCase {
 
     func testACallIsFoundByItsCallKitUUIDAndByItsAppIdInAnyCase() {
         let uuid = UUID()
-        _ = store.incomingReported(options(uuid.uuidString), uuid: uuid, source: .app)
+        _ = store.incomingReported(options(uuid.uuidString), uuid: uuid)
 
         XCTAssertNotNil(store.call(forCallKit: uuid))
         XCTAssertTrue(store.call(forAppId: uuid.uuidString.lowercased()) === store.call(forCallKit: uuid))
@@ -54,7 +54,7 @@ final class CallKitCallStoreTests: XCTestCase {
 
     func testEventsReportTheAppIdAsGivenOrTheLowercasedUUID() {
         let uuid = UUID()
-        _ = store.incomingReported(options(uuid.uuidString), uuid: uuid, source: .app)
+        _ = store.incomingReported(options(uuid.uuidString), uuid: uuid)
         let unrelated = ring("not-the-uuid")
 
         XCTAssertEqual(store.reportedId(for: uuid), uuid.uuidString)
@@ -83,21 +83,21 @@ final class CallKitCallStoreTests: XCTestCase {
     func testAnsweredIncomingCall() {
         let uuid = UUID()
         XCTAssertEqual(
-            names(store.incomingReported(options("a"), uuid: uuid, source: .app)),
+            names(store.incomingReported(options("a"), uuid: uuid)),
             [StreamVideoIncomingCallConstants.ACTION_CALL_INCOMING])
         let call = store.call(forCallKit: uuid)!
         XCTAssertEqual(call.phase, .ringing)
         XCTAssertEqual(call.direction, .incoming)
 
         let accept = store.answerPerformed(uuid: uuid)
-        XCTAssertEqual(names(accept), [StreamVideoIncomingCallConstants.ACTION_CALL_ACCEPT])
+        XCTAssertTrue(accept?.call === call)
+        XCTAssertEqual(names(accept?.effects), [StreamVideoIncomingCallConstants.ACTION_CALL_ACCEPT])
         XCTAssertEqual(call.phase, .answering)
         XCTAssertTrue(call.options.isAccepted)
         XCTAssertTrue(store.answeredCall === call)
 
         XCTAssertTrue(store.audioActivated().isEmpty)
         XCTAssertEqual(call.phase, .active)
-        XCTAssertNotNil(call.startedConnectingAt)
 
         let date = Date()
         let connected = store.connected(uuid: uuid, at: date)
@@ -136,11 +136,10 @@ final class CallKitCallStoreTests: XCTestCase {
         let pushed = options("pushed")
 
         store.showRequested(pushed, fromPushKit: true)
-        let call = ring("pushed", source: .pushKit)
+        ring("pushed")
 
         XCTAssertTrue(store.isFromPushKit)
         XCTAssertTrue(store.lastOptions === pushed)
-        XCTAssertEqual(call.source, .pushKit)
     }
 
     func testShowingFromTheAppClearsThePushKitFlagAndKeepsTheLastOptions() {
@@ -189,7 +188,7 @@ final class CallKitCallStoreTests: XCTestCase {
     func testATrackedRingTimesOutSendingTimeoutAndStaysTracked() {
         let uuid = UUID()
         let shown = options(uuid.uuidString)
-        _ = store.incomingReported(shown, uuid: uuid, source: .app)
+        _ = store.incomingReported(shown, uuid: uuid)
         XCTAssertTrue(store.shouldTimeOut(appId: shown.uuid))
 
         let effects = store.timedOut(shown)
@@ -227,7 +226,7 @@ final class CallKitCallStoreTests: XCTestCase {
         let second = ring("second")
         store.lastOptions = second.options
 
-        XCTAssertEqual(sentIds(store.answerPerformed(uuid: first.identity.callKitUUID)), ["first"])
+        XCTAssertEqual(sentIds(store.answerPerformed(uuid: first.identity.callKitUUID)?.effects), ["first"])
         XCTAssertTrue(first.options.isAccepted)
         XCTAssertFalse(second.options.isAccepted, "the last options belong to another call")
         XCTAssertEqual(
@@ -236,7 +235,7 @@ final class CallKitCallStoreTests: XCTestCase {
 
     func testMuteAndHoldEventsNameTheirCall() {
         let uuid = UUID()
-        _ = store.incomingReported(options(uuid.uuidString), uuid: uuid, source: .app)
+        _ = store.incomingReported(options(uuid.uuidString), uuid: uuid)
 
         XCTAssertEqual(sentIds(store.mutePerformed(uuid: uuid, muted: true)), [uuid.uuidString])
         XCTAssertTrue(store.call(forCallKit: uuid)!.isMuted)
@@ -297,7 +296,7 @@ final class CallKitCallStoreTests: XCTestCase {
     func testAnEndedCallStaysEnded() {
         let uuid = UUID()
         let shown = options(uuid.uuidString)
-        _ = store.incomingReported(shown, uuid: uuid, source: .app)
+        _ = store.incomingReported(shown, uuid: uuid)
         _ = store.timedOut(shown)
 
         _ = store.answerPerformed(uuid: uuid)
@@ -405,7 +404,7 @@ final class CallKitCallStoreTests: XCTestCase {
 
     func testOptionsForArgsPreferTheLastOptionsThenTheTrackedCall() {
         let uuid = UUID()
-        _ = store.incomingReported(options(uuid.uuidString), uuid: uuid, source: .app)
+        _ = store.incomingReported(options(uuid.uuidString), uuid: uuid)
         store.lastOptions = options("last")
 
         XCTAssertTrue(store.options(for: ["id": "LAST"]) === store.lastOptions)
@@ -417,7 +416,7 @@ final class CallKitCallStoreTests: XCTestCase {
 
     func testActiveCallsKeepTheirShape() {
         let tracked = UUID()
-        _ = store.incomingReported(options(tracked.uuidString), uuid: tracked, source: .app)
+        _ = store.incomingReported(options(tracked.uuidString), uuid: tracked)
         _ = store.answerPerformed(uuid: tracked)
         _ = store.connected(uuid: tracked)
         let untracked = UUID()
@@ -444,5 +443,77 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertEqual(answered.phase, .ended(nil))
         XCTAssertTrue(store.answeredCall === answered)
         XCTAssertNil(store.startPerformed(uuid: pending))
+    }
+}
+
+/// Pins which refused CallKit requests reach `onEndRefused`.
+final class CallKitTransactionRequesterTests: XCTestCase {
+
+    /// Answers every request with `error`, and reports `callUUIDs` as CallKit's calls.
+    private final class FakeCallController: CallKitCallControlling {
+        var error: Error?
+        var callUUIDs: [UUID] = []
+        private(set) var requested: [CXTransaction] = []
+
+        func request(_ transaction: CXTransaction, completion: @escaping (Error?) -> Void) {
+            requested.append(transaction)
+            completion(error)
+        }
+    }
+
+    private struct Refused: Error {}
+
+    private var controller: FakeCallController!
+    private var requester: CallKitTransactionRequester!
+    private var refused: [UUID] = []
+
+    override func setUp() {
+        super.setUp()
+        controller = FakeCallController()
+        requester = CallKitTransactionRequester(callController: controller)
+        refused = []
+        requester.onEndRefused = { [weak self] in self?.refused.append($0) }
+    }
+
+    func testARefusedEndReportsItsCall() {
+        controller.error = Refused()
+        let uuid = UUID()
+
+        requester.end(uuid: uuid)
+
+        XCTAssertEqual(refused, [uuid])
+    }
+
+    func testARefusedEndOfAllCallsReportsEachCall() {
+        controller.error = Refused()
+        controller.callUUIDs = [UUID(), UUID()]
+
+        requester.endAll()
+
+        XCTAssertEqual(refused, controller.callUUIDs)
+    }
+
+    func testAnEndCallKitPerformsReportsNothing() {
+        requester.end(uuid: UUID())
+
+        XCTAssertEqual(controller.requested.count, 1)
+        XCTAssertTrue(refused.isEmpty)
+    }
+
+    func testOtherRefusedRequestsReportNothing() {
+        controller.error = Refused()
+        let uuid = UUID()
+        var answered: Bool?
+
+        requester.mute(uuid: uuid, isMuted: true)
+        requester.hold(uuid: uuid, onHold: true)
+        requester.answer(uuid: uuid) { answered = $0 }
+        requester.start(uuid: uuid, handle: CXHandle(type: .generic, value: "x"), isVideo: false) {
+            _ in
+        }
+
+        XCTAssertEqual(controller.requested.count, 4)
+        XCTAssertEqual(answered, false)
+        XCTAssertTrue(refused.isEmpty)
     }
 }

@@ -19,7 +19,7 @@ extension StreamVideoCallkitManager {
     }
 
     public func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
-        guard store.call(forCallKit: action.callUUID) != nil else {
+        guard let (_, effects) = store.answerPerformed(uuid: action.callUUID) else {
             action.fail()
             return
         }
@@ -27,7 +27,7 @@ extension StreamVideoCallkitManager {
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(1200)) {
             self.configureAudioSession()
         }
-        apply(store.answerPerformed(uuid: action.callUUID) ?? [])
+        apply(effects)
         action.fulfill()
     }
 

@@ -29,14 +29,14 @@ final class CallKitCallStore {
     /// The options of outgoing calls whose start action CallKit has not performed yet.
     private var pendingOutgoingOptions: [UUID: CallData] = [:]
 
-    /// The options of the call the plugin was last given. Set by Dart's `showIncomingCall` and
-    /// `startCall`, by its `endCall` and `callConnected` while `isFromPushKit` is false, and by a
-    /// call shown or started from PushKit. Events use it where no tracked call matches.
+    /// The options of the call the plugin was last asked about: the call last shown or started,
+    /// by Dart or from PushKit, or the call Dart last asked to end or connect while
+    /// `isFromPushKit` was false. Events use them where no tracked call matches.
     var lastOptions: CallData?
 
-    /// True from a call shown or started from PushKit until Dart ends or connects a call, the
-    /// app shows or starts another, or all calls are ended natively. While true, Dart's
-    /// `endCall` and `callConnected` act on `lastOptions` whatever id they name.
+    /// Whether the call last shown or started came from PushKit, with no request from Dart to
+    /// end or connect a call since and no native end of all calls. While true, Dart's requests
+    /// to end or connect a call act on `lastOptions`, whatever id they name.
     var isFromPushKit = false
 
     /// The call CallKit last answered. Cleared when CallKit ends any tracked call while this or
@@ -102,6 +102,9 @@ final class CallKitCallStore {
     }
 
     /// The app or a push asked to start `options` as an outgoing call.
+    ///
+    /// Starting records what showing does today. It has its own name so callers say which they
+    /// mean, and a difference between the two lands in one place.
     func startRequested(_ options: CallData, fromPushKit: Bool) {
         showRequested(options, fromPushKit: fromPushKit)
     }
@@ -122,12 +125,10 @@ final class CallKitCallStore {
     // MARK: - Transitions
 
     /// CallKit accepted the incoming call `options` describes, as `uuid`.
-    func incomingReported(
-        _ options: CallData, uuid: UUID, source: CallKitCall.Source
-    ) -> [CallKitEffect] {
+    func incomingReported(_ options: CallData, uuid: UUID) -> [CallKitEffect] {
         let call = CallKitCall(
             identity: CallKitCallIdentity(appId: options.uuid, callKitUUID: uuid),
-            direction: .incoming, source: source, options: options, phase: .ringing)
+            direction: .incoming, options: options, phase: .ringing)
         calls.append(call)
         return [.send(event: StreamVideoIncomingCallConstants.ACTION_CALL_INCOMING, body: options.toJSON())]
     }
@@ -154,8 +155,7 @@ final class CallKitCallStore {
         }
         let call = CallKitCall(
             identity: CallKitCallIdentity(appId: options.uuid, callKitUUID: uuid),
-            direction: .outgoing, source: isFromPushKit ? .pushKit : .app, options: options,
-            phase: .starting)
+            direction: .outgoing, options: options, phase: .starting)
         call.reportsConnection = true
         outgoingCall = call
         calls.append(call)
@@ -165,7 +165,8 @@ final class CallKitCallStore {
     /// CallKit performed the answer action for `uuid`. Nil for a call the store does not track.
     ///
     /// Marks the call's options accepted, and the last options too when they name this call.
-    func answerPerformed(uuid: UUID) -> [CallKitEffect]? {
+    @discardableResult
+    func answerPerformed(uuid: UUID) -> (call: CallKitCall, effects: [CallKitEffect])? {
         guard let call = call(forCallKit: uuid) else { return nil }
         call.reportsConnection = true
         if let last = lastOptions, last.uuid.lowercased() == call.identity.appId.lowercased() {
@@ -174,7 +175,7 @@ final class CallKitCallStore {
         call.options.isAccepted = true
         call.move(to: .answering)
         answeredCall = call
-        return [.send(event: StreamVideoIncomingCallConstants.ACTION_CALL_ACCEPT, body: call.options.toJSON())]
+        return (call, [.send(event: StreamVideoIncomingCallConstants.ACTION_CALL_ACCEPT, body: call.options.toJSON())])
     }
 
     /// CallKit performed the end action for `uuid`.
@@ -206,14 +207,14 @@ final class CallKitCallStore {
         guard let call = call(forCallKit: uuid) else { return nil }
         call.isOnHold = onHold
         call.isMuted = onHold
-        return [holdEvent(call, onHold)]
+        return [call.holdEffect(isOnHold: onHold)]
     }
 
     /// CallKit performed the mute action for `uuid`. Nil for a call the store does not track.
     func mutePerformed(uuid: UUID, muted: Bool) -> [CallKitEffect]? {
         guard let call = call(forCallKit: uuid) else { return nil }
         call.isMuted = muted
-        return [muteEvent(call, muted)]
+        return [call.muteEffect(isMuted: muted)]
     }
 
     /// CallKit performed the group action for `uuid`. Nil for a call the store does not track.
@@ -259,12 +260,10 @@ final class CallKitCallStore {
     func audioActivated(at date: Date = Date()) -> [CallKitEffect] {
         var effects: [CallKitEffect] = []
         if let outgoing = outgoingCall {
-            outgoing.startedConnectingAt = date
             outgoing.move(to: .active)
             effects.append(.reportStartedConnecting(outgoing.identity.callKitUUID, date))
         }
         if let answered = answeredCall {
-            answered.startedConnectingAt = date
             answered.move(to: .active)
         }
         return effects
@@ -306,19 +305,5 @@ final class CallKitCallStore {
         if let call = call(forCallKit: uuid) {
             remove(call)
         }
-    }
-
-    // MARK: - Events
-
-    func muteEvent(_ call: CallKitCall, _ isMuted: Bool) -> CallKitEffect {
-        .send(
-            event: StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_MUTE,
-            body: ["id": call.identity.reportedId, "isMuted": isMuted])
-    }
-
-    func holdEvent(_ call: CallKitCall, _ isOnHold: Bool) -> CallKitEffect {
-        .send(
-            event: StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_HOLD,
-            body: ["id": call.identity.reportedId, "isOnHold": isOnHold])
     }
 }

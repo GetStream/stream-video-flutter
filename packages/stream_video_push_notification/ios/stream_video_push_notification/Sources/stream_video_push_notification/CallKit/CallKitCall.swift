@@ -51,34 +51,39 @@ final class CallKitCall {
         case outgoing
     }
 
-    enum Source {
-        case pushKit
-        case app
-    }
-
     private(set) var identity: CallKitCallIdentity
     let direction: Direction
-    let source: Source
     let options: CallData
 
     private(set) var phase: CallKitCallPhase
     var isMuted = false
     var isOnHold = false
-    /// When the call last started connecting: set each time an audio session is activated.
-    var startedConnectingAt: Date?
     var connectedAt: Date?
     /// Whether CallKit is told the call connected: true once CallKit started or answered it.
     var reportsConnection = false
 
     init(
-        identity: CallKitCallIdentity, direction: Direction, source: Source, options: CallData,
+        identity: CallKitCallIdentity, direction: Direction, options: CallData,
         phase: CallKitCallPhase
     ) {
         self.identity = identity
         self.direction = direction
-        self.source = source
         self.options = options
         self.phase = phase
+    }
+
+    /// Tells Dart whether the call is muted.
+    func muteEffect(isMuted: Bool) -> CallKitEffect {
+        .send(
+            event: StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_MUTE,
+            body: ["id": identity.reportedId, "isMuted": isMuted])
+    }
+
+    /// Tells Dart whether the call is on hold.
+    func holdEffect(isOnHold: Bool) -> CallKitEffect {
+        .send(
+            event: StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_HOLD,
+            body: ["id": identity.reportedId, "isOnHold": isOnHold])
     }
 
     func rebind(to uuid: UUID) {

@@ -68,7 +68,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
     /// A ringing incoming call CallKit accepted. Its INCOMING event is not sent.
     private func track(id: String) -> CallKitCall {
         let uuid = UUID()
-        _ = manager.store.incomingReported(CallData(args: ["id": id]), uuid: uuid, source: .app)
+        _ = manager.store.incomingReported(CallData(args: ["id": id]), uuid: uuid)
         return manager.store.call(forCallKit: uuid)!
     }
 
@@ -262,7 +262,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         let uuid = UUID()
         let shown = CallData(args: ["id": uuid.uuidString])
         manager.store.lastOptions = shown
-        _ = manager.store.incomingReported(shown, uuid: uuid, source: .app)
+        _ = manager.store.incomingReported(shown, uuid: uuid)
         XCTAssertNil(manager.getAcceptedCall())
 
         _ = manager.store.answerPerformed(uuid: uuid)
@@ -340,7 +340,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         let uuid = UUID()
         let pushed = CallData(args: ["id": uuid.uuidString])
         manager.store.showRequested(pushed, fromPushKit: true)
-        _ = manager.store.incomingReported(pushed, uuid: uuid, source: .pushKit)
+        _ = manager.store.incomingReported(pushed, uuid: uuid)
 
         manager.handle(.callConnected(["id": UUID().uuidString])) { _ in }
 
@@ -365,7 +365,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         let uuid = UUID()
         let pushed = CallData(args: ["id": uuid.uuidString])
         manager.store.showRequested(pushed, fromPushKit: true)
-        _ = manager.store.incomingReported(pushed, uuid: uuid, source: .pushKit)
+        _ = manager.store.incomingReported(pushed, uuid: uuid)
 
         manager.handle(.callConnected(nil)) { _ in }
 
@@ -376,8 +376,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
     func testDartEndCallWithoutPushKitUsesTheTrackedCallsOptions() {
         let uuid = UUID()
         _ = manager.store.incomingReported(
-            CallData(args: ["id": uuid.uuidString, "callerName": "Tracked"]), uuid: uuid,
-            source: .app)
+            CallData(args: ["id": uuid.uuidString, "callerName": "Tracked"]), uuid: uuid)
         let call = manager.store.call(forCallKit: uuid)!
 
         manager.handle(.endCall(["id": uuid.uuidString])) { _ in }
@@ -389,7 +388,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
     func testDartCallConnectedWithoutPushKitConnectsTheTrackedCall() {
         let uuid = UUID()
         _ = manager.store.incomingReported(
-            CallData(args: ["id": uuid.uuidString]), uuid: uuid, source: .app)
+            CallData(args: ["id": uuid.uuidString]), uuid: uuid)
         let call = manager.store.call(forCallKit: uuid)!
 
         manager.handle(.callConnected(["id": uuid.uuidString.lowercased()])) { _ in }
@@ -401,7 +400,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
     func testARingTheAppEndedDoesNotTimeOutLater() {
         let uuid = UUID()
         let shown = CallData(args: ["id": uuid.uuidString])
-        _ = manager.store.incomingReported(shown, uuid: uuid, source: .app)
+        _ = manager.store.incomingReported(shown, uuid: uuid)
 
         manager.saveEndCall(uuid.uuidString, 2)
         XCTAssertFalse(manager.store.shouldTimeOut(appId: shown.uuid))
@@ -411,7 +410,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         listen()
         let uuid = UUID()
         _ = manager.store.incomingReported(
-            CallData(args: ["id": uuid.uuidString]), uuid: uuid, source: .app)
+            CallData(args: ["id": uuid.uuidString]), uuid: uuid)
 
         manager.muteCall(uuid.uuidString, isMuted: false)
         manager.holdCall(uuid.uuidString, onHold: false)
@@ -430,7 +429,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         listen()
         let uuid = UUID()
         let shown = CallData(args: ["id": uuid.uuidString])
-        _ = manager.store.incomingReported(shown, uuid: uuid, source: .app)
+        _ = manager.store.incomingReported(shown, uuid: uuid)
 
         manager.callEndTimeout(shown)
         drainMainQueue()
