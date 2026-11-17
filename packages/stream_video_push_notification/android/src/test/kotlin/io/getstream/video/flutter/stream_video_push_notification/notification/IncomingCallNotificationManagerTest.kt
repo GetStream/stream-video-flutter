@@ -32,8 +32,8 @@ class IncomingCallNotificationManagerTest {
     private val notifications: NotificationManager
         get() = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-    /** The pending avatar loads, by URL. */
-    private val loads = mutableMapOf<String, Target>()
+    /** The avatar loads started so far, by URL, oldest first. */
+    private val loads = mutableMapOf<String, MutableList<Target>>()
 
     private val manager by lazy {
         IncomingCallNotificationManager(
@@ -43,7 +43,9 @@ class IncomingCallNotificationManagerTest {
                 context,
                 Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
             ),
-            loadCircleImage = { _, url, _, target -> loads[url] = target },
+            loadCircleImage = { _, url, _, target ->
+                loads.getOrPut(url) { mutableListOf() } += target
+            },
         )
     }
 
@@ -58,8 +60,12 @@ class IncomingCallNotificationManagerTest {
         .getBundleExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
         ?.getString(IncomingCallConstants.EXTRA_CALL_ID)
 
-    private fun loadAvatar(id: String) =
-        loads.getValue("https://x.io/$id.png").onSuccess(BitmapDrawable(context.resources, bitmap))
+    /** Finishes the latest avatar load of call [id], or the one [index] counts from the first. */
+    private fun loadAvatar(id: String, index: Int = -1) {
+        val started = loads.getValue("https://x.io/$id.png")
+        started[if (index < 0) started.lastIndex else index]
+            .onSuccess(BitmapDrawable(context.resources, bitmap))
+    }
 
     private val bitmap: Bitmap = Bitmap.createBitmap(4, 4, Bitmap.Config.ARGB_8888)
 
@@ -104,6 +110,21 @@ class IncomingCallNotificationManagerTest {
         loadAvatar("b")
         assertNotNull(posted("b").getLargeIcon())
         assertEquals("b", callIdOf("b"))
+    }
+
+    @Test
+    fun `an older load finishing does not forget the newer load of the same call`() {
+        val data = CallPayloadMapper.toBundle(call("a"))
+        manager.showIncomingNotification(data)
+        manager.showIncomingNotification(data)
+
+        // The first load was replaced by the second; finishing it must leave the second tracked,
+        // so clearing the call still cancels it.
+        loadAvatar("a", index = 0)
+        manager.clearIncomingNotification(data, false)
+        loadAvatar("a")
+
+        assertEquals(emptyList<Int>(), notifications.activeNotifications.map { it.id })
     }
 
     private fun missedCall(id: String) = call(id).copy(missedNotificationId = MISSED_ID)
