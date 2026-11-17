@@ -105,13 +105,6 @@ class MethodChannelStreamVideoPushNotification
     });
   }
 
-  /// Asks the system to route the audio of the calls with [cid] to
-  /// [endpoint], and answers whether it did.
-  ///
-  /// Android only, while the Telecom integration holds the call: Telecom owns
-  /// the audio route of a call it holds. `false` without the integration, for
-  /// a call it does not hold, when Telecom offers no such endpoint and when it
-  /// refuses the change. Always `false` on iOS.
   @override
   Future<bool> requestAudioEndpoint(
     String cid,
