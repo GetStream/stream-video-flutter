@@ -1,22 +1,26 @@
 package io.getstream.video.flutter.stream_video_push_notification
 
+import android.app.Activity
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.PluginRegistry
-import io.getstream.video.flutter.stream_video_push_notification.channel.PushMethodCallHandler
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
+import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 
 /**
  * Pins what the plugin's method channel answers, observed through a fake engine attached to the
@@ -73,37 +77,48 @@ class StreamVideoPushNotificationPluginTest {
     }
 
     @Test
-    fun `the permission listener is removed with the activity and answers only its own code`() {
+    fun `the notification permission is asked from the attached activity, until it detaches`() {
         val listener = slot<PluginRegistry.RequestPermissionsResultListener>()
-        val activityBinding = mockk<ActivityPluginBinding>(relaxed = true) {
-            every { activity } returns mockk(relaxed = true)
-            every { addRequestPermissionsResultListener(capture(listener)) } returns Unit
-        }
+        val first = Robolectric.buildActivity(Activity::class.java).setup().get()
+        val second = Robolectric.buildActivity(Activity::class.java).setup().get()
+        val firstBinding = activityBinding(first, listener)
+        val secondBinding = activityBinding(second, listener)
 
-        dart.plugin.onAttachedToActivity(activityBinding)
-        assertEquals(activityBinding.activity, handlerActivity())
+        dart.plugin.onAttachedToActivity(firstBinding)
+        dart.invoke("requestNotificationPermission", emptyMap<String, Any?>())
+        assertNotNull(shadowOf(first).lastRequestedPermission)
         assertEquals(
             false,
             listener.captured.onRequestPermissionsResult(1234, arrayOf(), intArrayOf()),
         )
 
         dart.plugin.onDetachedFromActivityForConfigChanges()
-        dart.plugin.onReattachedToActivityForConfigChanges(activityBinding)
-        dart.plugin.onDetachedFromActivity()
+        dart.plugin.onReattachedToActivityForConfigChanges(secondBinding)
+        dart.invoke("requestNotificationPermission", emptyMap<String, Any?>())
+        assertNotNull(shadowOf(second).lastRequestedPermission)
 
-        assertEquals(null, handlerActivity())
-        verify(exactly = 2) { activityBinding.addRequestPermissionsResultListener(any()) }
-        verify(exactly = 2) {
-            activityBinding.removeRequestPermissionsResultListener(listener.captured)
-        }
+        dart.plugin.onDetachedFromActivity()
+        verify { firstBinding.removeRequestPermissionsResultListener(listener.captured) }
+        verify { secondBinding.removeRequestPermissionsResultListener(listener.captured) }
     }
 
-    /** The activity the plugin handed to its method channel handler. */
-    private fun handlerActivity(): Any? {
-        val handler = StreamVideoPushNotificationPlugin::class.java.getDeclaredField("handler")
-            .apply { isAccessible = true }
-            .get(dart.plugin) as PushMethodCallHandler
-        return handler.activity
+    @Test
+    fun `Telecom is released only when the last engine detaches`() {
+        val second = FakeDartSide(context)
+
+        second.detach()
+        verify(exactly = 0) { telecom.releaseIfIdle() }
+
+        dart.detach()
+        verify(exactly = 1) { telecom.releaseIfIdle() }
+    }
+
+    private fun activityBinding(
+        activity: Activity,
+        listener: CapturingSlot<PluginRegistry.RequestPermissionsResultListener>,
+    ): ActivityPluginBinding = mockk(relaxed = true) {
+        every { this@mockk.activity } returns activity
+        every { addRequestPermissionsResultListener(capture(listener)) } returns Unit
     }
 
     private companion object {
