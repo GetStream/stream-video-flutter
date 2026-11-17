@@ -105,6 +105,15 @@ class RingingControllerTest {
     }
 
     @Test
+    fun `a repeated incoming for an accepted call keeps it accepted`() {
+        controller.handle(IncomingCallConstants.ACTION_CALL_ACCEPT, bundle)
+
+        controller.handle(IncomingCallConstants.ACTION_CALL_INCOMING, bundle)
+
+        assertEquals(true, store.byId(CALL_ID)?.isAccepted)
+    }
+
+    @Test
     fun `decline clears the ring, reports, forgets the call and rejects it in Telecom`() {
         store.add(call)
         val data = bundle
@@ -220,8 +229,11 @@ private class InMemoryCallStore : CallStore {
 
     override fun add(call: RingingCall) {
         val index = calls.indexOfFirst { it.id == call.id }
-        if (index >= 0) calls[index] = calls[index].copy(isAccepted = call.isAccepted)
-        else calls += call
+        if (index >= 0) {
+            calls[index] = calls[index].copy(isAccepted = calls[index].isAccepted || call.isAccepted)
+        } else {
+            calls += call
+        }
     }
 
     override fun remove(id: String) {
