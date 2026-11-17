@@ -638,6 +638,12 @@ class LocalMediaController {
 
   /// Whether [setAudioOutputDevice] is applying an output. The system
   /// re-routes while it does, which says nothing about where audio ends up.
+  ///
+  /// Best effort: the WebRTC plugin delivers route changes asynchronously, so
+  /// the ones an output change causes usually arrive after it returned, when
+  /// this is false again. One that names the other built-in output then puts
+  /// the selection back once more, and the last one names the output that
+  /// was set, so the selection still ends up where the user put it.
   bool _isSettingAudioOutput = false;
 
   /// Follows an iOS audio route change, unless the system moved audio between
@@ -666,7 +672,7 @@ class LocalMediaController {
           selected != null &&
           _isBuiltInOutput(selected) &&
           _isBuiltInOutput(device)) {
-        unawaited(_putBackSelectedOutput(device));
+        unawaited(_putBackSelectedOutput(selected, route: device));
         return;
       }
     }
@@ -677,10 +683,24 @@ class LocalMediaController {
   static bool _isBuiltInOutput(RtcMediaDevice device) =>
       device.isBuiltInSpeaker || device.isBuiltInEarpiece;
 
-  /// Puts the output the user chose back, and follows [route] when that fails.
-  Future<void> _putBackSelectedOutput(RtcMediaDevice route) async {
+  /// Puts [selected], the output the user chose, back, and follows [route]
+  /// when that fails, unless another output was selected in the meantime.
+  Future<void> _putBackSelectedOutput(
+    RtcMediaDevice selected, {
+    required RtcMediaDevice route,
+  }) async {
     final result = await _session()?.applyCurrentAudioOutputDevice();
     if (result is Success) return;
+
+    final current = _state.audioOutputDevice;
+    if (!(current?.id.equalsIgnoreCase(selected.id) ?? false)) {
+      _logger.d(
+        () =>
+            '[onAudioRouteChanged] chosen output not put back, but '
+            '${current?.id} was selected since; keeping it',
+      );
+      return;
+    }
 
     _logger.w(
       () =>

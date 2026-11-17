@@ -84,6 +84,7 @@
 
 ### ✅ Added
 
+- `AudioRouteChangedEvent.reason`, an `AudioRouteChangeReason` that says why an iOS audio route changed: iOS's `AVAudioSessionRouteChangeReason`, or `unknown` when the WebRTC plugin does not report it.
 - `CallData.fromJson`, which builds the call data of a ringing event or an active native call from the map the push plugins send.
 - `VideoLifecycleState`, the type of `ClientState.appLifecycleState`, is exported.
 - `StreamVideo.ready` completes once the client has started up: audio configured, environment collected and, with `autoConnect`, the connect attempted.
@@ -136,7 +137,7 @@
 
 ### 🐞 Fixed
 
-- [iOS] When the user chose the speaker or the receiver and the system moves audio between the two on its own, such as after a CallKit hold, the chosen output is put back instead of being replaced by the system's choice. A route to any other device, such as Bluetooth or AirPlay, is followed, and so is the system's route when the chosen output cannot be put back. `AudioRouteChangedEvent` carries the route change `reason`.
+- [iOS] When the user chose the speaker or the receiver and the system moves audio between the two on its own, such as after a CallKit hold, the chosen output is put back instead of being replaced by the system's choice. A route to any other device, such as Bluetooth or AirPlay, is followed, and so is the system's route when the chosen output cannot be put back.
 - A muted microphone or camera is announced to the SFU as muted.
 - Joining a call retries sooner when the SFU connection closes before the join response.
 - On iOS, a call that defaults to the loudspeaker now starts on it, instead of switching to it after the microphone is already recording.
