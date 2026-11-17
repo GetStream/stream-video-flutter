@@ -404,6 +404,26 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         XCTAssertEqual(session.calls, configuredOnAnswer + configuredOnAnswer)
     }
 
+    func testOnlyTheLastAnsweredCallIsConfiguredAgainAfterItsAnswer() {
+        let first = UUID()
+        _ = manager.store.incomingReported(
+            CallData(args: ["id": "first", "audioSessionMode": "videoChat"]), uuid: first)
+        let second = UUID()
+        _ = manager.store.incomingReported(
+            CallData(args: ["id": "second", "audioSessionMode": "gameChat"]), uuid: second)
+        manager.provider(provider, perform: CXAnswerCallAction(call: first))
+        manager.provider(provider, perform: CXAnswerCallAction(call: second))
+        let configuredOnAnswers = session.calls.count
+
+        waitPastTheReconfigureAfterAnswer()
+
+        let reconfigured = Array(session.calls.dropFirst(configuredOnAnswers))
+        XCTAssertTrue(reconfigured.contains("mode \(AVAudioSession.Mode.gameChat.rawValue)"))
+        XCTAssertFalse(
+            reconfigured.contains("mode \(AVAudioSession.Mode.videoChat.rawValue)"),
+            "the first call's options were applied again after the second was answered")
+    }
+
     func testACallThatEndedBeforeTheReconfigureAfterItsAnswerIsNotConfiguredAgain() {
         let call = track(id: "answered")
         manager.provider(provider, perform: CXAnswerCallAction(call: call.identity.callKitUUID))
