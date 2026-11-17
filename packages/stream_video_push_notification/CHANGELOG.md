@@ -8,10 +8,6 @@
 - `isAcceptedOnThisDevice` is no longer exported.
 - [iOS] The public `Call` class is removed. Nothing public returned it, but native code that named the type no longer compiles.
 
-### 🐞 Fixed
-
-- [iOS] The plugin no longer activates the audio session itself when it shows, answers or starts a call. The session it activated kept CallKit from activating its own, so WebRTC could run on a session CallKit did not own. CallKit now activates it. `audioSessionActive` has no effect.
-
 ### 🔄 Changed
 
 - `StreamVideoPushHandler.handleBackgroundMessage` builds a client that sets up no media.
@@ -35,7 +31,10 @@
 
 ### 🐞 Fixed
 
+- [iOS] The plugin no longer activates the audio session itself when it shows, answers or starts a call. The session it activated kept CallKit from activating its own, so WebRTC could run on a session CallKit did not own. CallKit now activates it. `audioSessionActive` has no effect.
+- [iOS] With `supportsHolding: true` (off by default), a call put on hold by another app's call, such as a cellular call answered with Hold & Accept, gets its audio back when that call ends. CallKit takes it off hold even when the other side hung up, and if CallKit then gives the call no working audio session, the plugin ends and starts the call again with CallKit under a new uuid. Dart keeps the call's id and is not told. Until the call is next held, an audio engine that cannot start on a later activation of it restarts it too; a call is restarted at most three times per hold. Recents lists the call once, with its length up to the first restart. A call CallKit refuses to start again after four attempts is ended with `ActionCallEnded`.
 - A mute from the CallKit screen applies to the call it was made on.
+- [iOS] Taking a call off hold no longer marks it unmuted, so muting or unmuting from the app afterwards reaches the CallKit screen.
 - [iOS] Answering one of two ringing calls from CallKit no longer reports the other one as accepted in `activeCalls`.
 - [iOS] A ring that was already ended, for example because the caller cancelled it, no longer times out later and reports a second, unanswered end.
 - [iOS] Declining a waiting call during an answered one no longer forgets the answered call. Hanging it up afterwards is sent as `ActionCallEnded` instead of `ActionCallDecline`, and holding and resuming it no longer reports the audio session inactive or configures it again.
