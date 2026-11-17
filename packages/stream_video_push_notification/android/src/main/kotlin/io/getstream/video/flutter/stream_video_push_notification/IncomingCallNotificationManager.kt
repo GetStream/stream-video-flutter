@@ -7,7 +7,8 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.core.app.NotificationManagerCompat
 import coil.target.Target
-import io.getstream.video.flutter.stream_video_push_notification.notification.AvatarLoader
+import io.getstream.video.flutter.stream_video_push_notification.notification.CallImageLoader
+import io.getstream.video.flutter.stream_video_push_notification.notification.SafeTarget
 import io.getstream.video.flutter.stream_video_push_notification.notification.IncomingCallNotificationBuilder
 import io.getstream.video.flutter.stream_video_push_notification.notification.MissedCallNotificationBuilder
 import io.getstream.video.flutter.stream_video_push_notification.notification.NotificationChannels
@@ -26,7 +27,7 @@ internal class IncomingCallNotificationManager(
     private val missedBuilder: MissedCallNotificationBuilder =
         MissedCallNotificationBuilder(context),
     private val loadCircleImage: (Context, String, Map<String, String>, Target) -> Unit =
-        AvatarLoader::loadCircle,
+        CallImageLoader::loadCircle,
 ) {
 
     /**
@@ -146,9 +147,12 @@ internal class IncomingCallNotificationManager(
     ) {
         targets.remove(id)?.isCancelled = true
         lateinit var target: SafeTarget
-        target = SafeTarget(onLoaded, onFinished = { targets.remove(id, target) })
+        // Not Map.remove(key, value), which a MutableMap only has from API 24.
+        target = SafeTarget(onLoaded, onFinished = {
+            if (targets[id] === target) targets.remove(id)
+        })
         targets[id] = target
-        loadCircleImage(context, url, AvatarLoader.headers(data), target)
+        loadCircleImage(context, url, CallImageLoader.headers(data), target)
     }
 }
 
