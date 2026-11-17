@@ -4,8 +4,9 @@ package io.getstream.video.flutter.stream_video_push_notification.core
 internal interface CallStore {
 
     /**
-     * Adds [call]. When a call with the same id is already stored, only its
-     * [RingingCall.isAccepted] is updated, to the value [call] carries.
+     * Adds [call]. When a call with the same id is already stored, the stored call is kept and
+     * only marked accepted when [call] is: a call once accepted stays accepted, so a repeated
+     * incoming for it does not turn it back into a ringing call.
      */
     fun add(call: RingingCall)
 
