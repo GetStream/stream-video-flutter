@@ -4,10 +4,10 @@ import android.content.Context
 import android.net.Uri
 import android.telecom.DisconnectCause
 import androidx.test.core.app.ApplicationProvider
-import io.getstream.video.flutter.stream_video_push_notification.IncomingCallBroadcastReceiver
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
 import io.getstream.video.flutter.stream_video_push_notification.PREFERENCES_FILE_NAME
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.junit.After
@@ -76,7 +76,7 @@ class TelecomIntegrationTest {
     fun clearPersistedConfig() {
         context.getSharedPreferences(PREFERENCES_FILE_NAME, Context.MODE_PRIVATE)
             .edit().clear().commit()
-        IncomingCallBroadcastReceiver.silenceEvents = false
+        RingingComponents.silenceEvents = false
     }
 
     // Registration.
@@ -215,7 +215,7 @@ class TelecomIntegrationTest {
         val telecom = integration().apply { init(enabled()) }
         telecom.registerIncomingCall(call)
         repository.completeRegistration(CALL_ID)
-        IncomingCallBroadcastReceiver.silenceEvents = true
+        RingingComponents.silenceEvents = true
 
         repository.inactive(CALL_ID)
 
