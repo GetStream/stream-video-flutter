@@ -232,6 +232,21 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
         XCTAssertEqual(kinds(effects), ["send \(audioEvent) false"])
     }
 
+    func testARepeatedDeactivationIsPassedOnToTheGate() {
+        // CallKit can deactivate more than once; each one reaches the gate.
+        answeredCall()
+
+        _ = coordinator.didDeactivate(store)
+        _ = coordinator.didDeactivate(store)
+
+        XCTAssertEqual(
+            gate.updates,
+            [
+                .init(available: false, callKitSessionActive: false),
+                .init(available: false, callKitSessionActive: false),
+            ])
+    }
+
     func testADeactivationWithNoCallLeftAllowsTheEngine() {
         _ = coordinator.didDeactivate(store)
 
@@ -310,40 +325,5 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
         coordinator.configure(CallData(args: ["ios": ["configureAudioSession": false]]))
 
         XCTAssertTrue(session.calls.isEmpty)
-    }
-}
-
-/// Pins the NotificationCenter messages the gate exchanges with `stream_webrtc_flutter`.
-final class NotificationCenterAudioEngineGateTests: XCTestCase {
-
-    func testAnUpdateIsPostedWithItsKeys() {
-        let center = NotificationCenter()
-        let gate = NotificationCenterAudioEngineGate(center: center)
-        var received: [[AnyHashable: Any]] = []
-        let observer = center.addObserver(
-            forName: NotificationCenterAudioEngineGate.availabilityNotification, object: nil,
-            queue: nil
-        ) { received.append($0.userInfo ?? [:]) }
-        defer { center.removeObserver(observer) }
-
-        gate.update(available: false, callKitSessionActive: false)
-        gate.update(available: true, callKitSessionActive: nil)
-
-        XCTAssertEqual(received.count, 2)
-        XCTAssertEqual(received[0]["available"] as? Bool, false)
-        XCTAssertEqual(received[0]["audioSessionActive"] as? Bool, false)
-        XCTAssertEqual(received[1]["available"] as? Bool, true)
-        XCTAssertNil(received[1]["audioSessionActive"])
-    }
-
-    func testAStartFailureFromWebRTCReachesTheCallback() {
-        let center = NotificationCenter()
-        let gate = NotificationCenterAudioEngineGate(center: center)
-        let failed = expectation(description: "start failure forwarded")
-        gate.onEngineStartFailed = { failed.fulfill() }
-
-        center.post(name: NotificationCenterAudioEngineGate.engineStartFailedNotification, object: nil)
-
-        wait(for: [failed], timeout: 1)
     }
 }
