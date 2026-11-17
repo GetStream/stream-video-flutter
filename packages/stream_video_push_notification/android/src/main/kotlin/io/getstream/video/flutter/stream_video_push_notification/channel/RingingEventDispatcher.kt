@@ -18,6 +18,9 @@ internal class RingingEventDispatcher {
     /** A new sink for one engine's event channel, which gets every event from now on. */
     fun attach(): EngineSink = EngineSink().also { sinks += it }
 
+    /** Whether any engine has a sink attached. */
+    val hasAttachedEngines: Boolean get() = sinks.isNotEmpty()
+
     /** Stops sending to [sink]. */
     fun detach(sink: EngineSink) {
         sinks -= sink

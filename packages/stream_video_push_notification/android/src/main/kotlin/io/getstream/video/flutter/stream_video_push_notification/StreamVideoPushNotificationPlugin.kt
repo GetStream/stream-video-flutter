@@ -12,8 +12,8 @@ import io.getstream.video.flutter.stream_video_push_notification.core.RingingCom
 import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
 
 /**
- * The plugin instance of one Flutter engine. It gives the engine its own method channel handler
- * and event sink, and connects them to the process-wide [RingingComponents].
+ * The plugin of one Flutter engine: it handles the engine's method channel and sends the engine
+ * the ringing events. Every engine of the process shares the same calls and notifications.
  */
 class StreamVideoPushNotificationPlugin : FlutterPlugin, ActivityAware {
 
@@ -51,17 +51,22 @@ class StreamVideoPushNotificationPlugin : FlutterPlugin, ActivityAware {
         }
     }
 
-    /** Releases this engine's channels and event sink; the ringing components stay. */
+    /**
+     * Releases this engine's channels and event sink. The Telecom registration is released only
+     * when no other engine is attached, such as the app's while a push's background engine
+     * detaches, and no call is in flight.
+     */
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         methodChannel?.setMethodCallHandler(null)
         methodChannel = null
         eventChannel?.setStreamHandler(null)
         eventChannel = null
-        eventSink?.let { components?.events?.detach(it) }
+        val events = components?.events
+        eventSink?.let { events?.detach(it) }
         eventSink = null
         handler = null
         components = null
-        StreamTelecomManager.releaseIfIdle()
+        if (events?.hasAttachedEngines != true) StreamTelecomManager.releaseIfIdle()
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) = attachActivity(binding)

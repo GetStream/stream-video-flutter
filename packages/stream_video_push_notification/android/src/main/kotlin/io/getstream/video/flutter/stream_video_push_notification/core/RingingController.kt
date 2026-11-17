@@ -38,7 +38,6 @@ internal class RingingController(
             IncomingCallConstants.ACTION_CALL_DECLINE -> onDecline(data)
             IncomingCallConstants.ACTION_CALL_ENDED -> onEnded(data, keepSystemCall)
             IncomingCallConstants.ACTION_CALL_TIMEOUT -> onTimeout(data)
-            IncomingCallConstants.ACTION_CALL_CONNECTED -> onConnected(data)
             IncomingCallConstants.ACTION_CALL_CALLBACK -> onCallback(data)
         }
     }

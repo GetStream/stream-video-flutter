@@ -177,7 +177,7 @@ class RingingControllerTest {
 
     @Test
     fun `connected reports and activates the Telecom call`() {
-        controller.handle(IncomingCallConstants.ACTION_CALL_CONNECTED, bundle)
+        controller.onConnected(bundle)
 
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_CONNECTED), eventNames())
         verify { StreamTelecomManager.activate(any(), CALL_ID) }
@@ -221,7 +221,7 @@ class RingingControllerTest {
         store.add(call)
 
         controller.handle(IncomingCallConstants.ACTION_CALL_DECLINE, bundle)
-        controller.handle(IncomingCallConstants.ACTION_CALL_CONNECTED, bundle)
+        controller.onConnected(bundle)
 
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_CONNECTED), eventNames())
         assertEquals(listOf(call), store.all())
