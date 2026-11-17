@@ -6,7 +6,7 @@ import android.telecom.DisconnectCause
 import androidx.test.core.app.ApplicationProvider
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallBroadcastReceiver
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
-import io.getstream.video.flutter.stream_video_push_notification.core.PrefsCallStore
+import io.getstream.video.flutter.stream_video_push_notification.PREFERENCES_FILE_NAME
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -74,7 +74,7 @@ class TelecomIntegrationTest {
     @Before
     @After
     fun clearPersistedConfig() {
-        context.getSharedPreferences(PrefsCallStore.PREFERENCES_FILE_NAME, Context.MODE_PRIVATE)
+        context.getSharedPreferences(PREFERENCES_FILE_NAME, Context.MODE_PRIVATE)
             .edit().clear().commit()
         IncomingCallBroadcastReceiver.silenceEvents = false
     }
