@@ -202,6 +202,15 @@ class RingingControllerTest {
     }
 
     @Test
+    fun `a Telecom event is not sent while events are silenced`() {
+        RingingComponents.silenceEvents = true
+
+        controller.onEvent(IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD, mapOf("id" to CALL_ID))
+
+        assertEquals(emptyList<String>(), eventNames())
+    }
+
+    @Test
     fun `while events are silenced the step runs without reporting`() {
         RingingComponents.silenceEvents = true
 
@@ -327,7 +336,7 @@ class RingingControllerTest {
     }
 
     @Test
-    fun `a system hang-up ends a connected call as by the system and declines a ringing one`() {
+    fun `a system hang-up ends a connected call as by the system, without disconnecting it again, and declines a ringing one`() {
         store.add(call)
         store.add(RingingCall(id = "ringing"))
 
@@ -343,7 +352,7 @@ class RingingControllerTest {
         )
         assertEquals(true, events.first().second["endedBySystem"])
         assertEquals(false, events.last().second["endedBySystem"])
-        verify { telecom.disconnect(CALL_ID, DisconnectCause.LOCAL) }
+        verify(exactly = 0) { telecom.disconnect(CALL_ID, any()) }
         verify { telecom.disconnect("ringing", DisconnectCause.REJECTED) }
         assertEquals(emptyList<RingingCall>(), store.all())
     }
