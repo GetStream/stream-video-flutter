@@ -7,11 +7,11 @@ import android.os.Bundle
 import androidx.test.core.app.ApplicationProvider
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import io.getstream.video.flutter.stream_video_push_notification.IncomingCallBroadcastReceiver
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationManager
 import io.getstream.video.flutter.stream_video_push_notification.core.CallStore
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingController
 import io.getstream.video.flutter.stream_video_push_notification.notification.RingtonePlayer
 import io.getstream.video.flutter.stream_video_push_notification.permissions.FullScreenIntentPermission
@@ -66,7 +66,7 @@ class PushMethodCallHandlerTest {
 
     @After
     fun releaseTelecom() {
-        IncomingCallBroadcastReceiver.silenceEvents = false
+        RingingComponents.silenceEvents = false
     }
 
     private fun call(method: String, arguments: Any? = null) =
@@ -190,10 +190,10 @@ class PushMethodCallHandlerTest {
     @Test
     fun `silenceEvents sets the flag`() {
         call("silenceEvents", true)
-        assertTrue(IncomingCallBroadcastReceiver.silenceEvents)
+        assertTrue(RingingComponents.silenceEvents)
 
         call("silenceEvents", false)
-        assertFalse(IncomingCallBroadcastReceiver.silenceEvents)
+        assertFalse(RingingComponents.silenceEvents)
     }
 
     @Test
