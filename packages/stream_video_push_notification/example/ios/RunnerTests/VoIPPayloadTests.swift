@@ -110,15 +110,4 @@ final class StreamVideoPKDelegateManagerAliasTests: XCTestCase {
     func testTheOldNameIsTheSameHandler() {
         XCTAssertTrue(StreamVideoPKDelegateManager.shared === VoIPPushRegistryHandler.shared)
     }
-
-    func testTheOldNameKeepsTheMembersAnAppDelegateCalls() {
-        let handler = StreamVideoPKDelegateManager.shared
-        let register: () -> Void = handler.registerForPushNotifications
-        let initChannel: (FlutterMethodChannel) -> Void = handler.initChannel(mainChannel:)
-        let initData: ([String: Any]) -> Void = handler.initData(data:)
-
-        XCTAssertNotNil(register as Any)
-        XCTAssertNotNil(initChannel as Any)
-        XCTAssertNotNil(initData as Any)
-    }
 }

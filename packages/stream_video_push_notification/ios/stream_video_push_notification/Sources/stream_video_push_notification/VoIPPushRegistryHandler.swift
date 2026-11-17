@@ -6,9 +6,7 @@ import PushKit
 ///
 /// Call `VoIPPushRegistryHandler.shared.registerForPushNotifications()` from the app delegate's
 /// `application(_:didFinishLaunchingWithOptions:)`.
-public class VoIPPushRegistryHandler: NSObject, PKPushRegistryDelegate,
-    UNUserNotificationCenterDelegate
-{
+public class VoIPPushRegistryHandler: NSObject, PKPushRegistryDelegate {
     public static let shared = VoIPPushRegistryHandler()
 
     private var pushRegistry: PKPushRegistry?
@@ -25,11 +23,11 @@ public class VoIPPushRegistryHandler: NSObject, PKPushRegistryDelegate,
         pushRegistry?.desiredPushTypes = [.voIP]
     }
 
-    public func initChannel(mainChannel: FlutterMethodChannel) {
+    func initChannel(mainChannel: FlutterMethodChannel) {
         self.mainChannel = mainChannel
     }
 
-    public func initData(data: [String: Any]) {
+    func initData(data: [String: Any]) {
         defaultConfiguration = StreamVideoPushConfiguration(args: data)
     }
 

@@ -6,7 +6,7 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
 
     let persistentState: UserDefaults = UserDefaults.standard
 
-    @objc public private(set) static var sharedInstance: StreamVideoPushNotificationPlugin?
+    private(set) static var sharedInstance: StreamVideoPushNotificationPlugin?
 
     private var callKitManager: StreamVideoCallkitManager
 
@@ -95,11 +95,11 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
         return StreamVideoCallkitManager.shared.activeCalls()
     }
 
-    @objc public func setDevicePushTokenVoIP(deviceToken: String) {
+    func setDevicePushTokenVoIP(deviceToken: String) {
         persistentState.set(deviceToken, forKey: Self.devicePushTokenVoIPKey)
     }
 
-    @objc public func getDevicePushTokenVoIP() -> String {
+    func getDevicePushTokenVoIP() -> String {
         return persistentState.string(forKey: Self.devicePushTokenVoIPKey) ?? ""
     }
 }
