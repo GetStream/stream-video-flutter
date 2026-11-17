@@ -335,4 +335,95 @@ void main() {
       expect(notifier.isAudioPlayoutPaused, isFalse);
     });
   });
+
+  group('AudioRouteChangeReason', () {
+    test('has the AVAudioSessionRouteChangeReason codes', () {
+      expect(
+        {
+          for (final reason in AudioRouteChangeReason.values)
+            reason: reason.code,
+        },
+        {
+          AudioRouteChangeReason.unknown: 0,
+          AudioRouteChangeReason.newDeviceAvailable: 1,
+          AudioRouteChangeReason.oldDeviceUnavailable: 2,
+          AudioRouteChangeReason.categoryChange: 3,
+          AudioRouteChangeReason.override: 4,
+          AudioRouteChangeReason.wakeFromSleep: 6,
+          AudioRouteChangeReason.noSuitableRouteForCategory: 7,
+          AudioRouteChangeReason.routeConfigurationChange: 8,
+        },
+      );
+    });
+
+    test('maps each code back, and an unknown or missing one to unknown', () {
+      for (final reason in AudioRouteChangeReason.values) {
+        expect(AudioRouteChangeReason.fromCode(reason.code), reason);
+      }
+      expect(
+        AudioRouteChangeReason.fromCode(5),
+        AudioRouteChangeReason.unknown,
+      );
+      expect(
+        AudioRouteChangeReason.fromCode(null),
+        AudioRouteChangeReason.unknown,
+      );
+    });
+
+    test(
+      'counts only a category or route configuration change as the system re-routing',
+      () {
+        expect(
+          AudioRouteChangeReason.values.where(
+            (reason) => reason.isSystemReconfiguration,
+          ),
+          [
+            AudioRouteChangeReason.categoryChange,
+            AudioRouteChangeReason.routeConfigurationChange,
+          ],
+        );
+      },
+    );
+  });
+
+  group('the onAudioRouteChange message from the WebRTC plugin', () {
+    test('carries the device and the reason', () {
+      final event = RtcMediaDeviceNotifier.nativeWebRtcEventFrom({
+        'onAudioRouteChange': {
+          'deviceId': 'Speaker',
+          'label': 'Speaker',
+          'reason': 8,
+        },
+      });
+
+      expect(event, isA<AudioRouteChangedEvent>());
+      final routeChange = event! as AudioRouteChangedEvent;
+      expect(routeChange.device.id, 'Speaker');
+      expect(routeChange.device.kind, RtcMediaDeviceKind.audioOutput);
+      expect(
+        routeChange.reason,
+        AudioRouteChangeReason.routeConfigurationChange,
+      );
+    });
+
+    test('without a reason has an unknown one', () {
+      final event = RtcMediaDeviceNotifier.nativeWebRtcEventFrom({
+        'onAudioRouteChange': {'deviceId': 'Receiver'},
+      });
+
+      expect(
+        (event! as AudioRouteChangedEvent).reason,
+        AudioRouteChangeReason.unknown,
+      );
+    });
+
+    test('without a device is dropped', () {
+      expect(
+        RtcMediaDeviceNotifier.nativeWebRtcEventFrom({
+          'onAudioRouteChange': {'reason': 8},
+        }),
+        isNull,
+      );
+    });
+  });
 }

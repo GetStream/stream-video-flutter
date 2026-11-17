@@ -365,7 +365,7 @@ void main() {
         ).thenAnswer((_) async => const Result.success(none));
         when(
           () => callSession.applyCurrentAudioOutputDevice(),
-        ).thenAnswer((_) async {});
+        ).thenAnswer((_) async => const Result.success(none));
         when(
           () => callSession.resumeSuspendedAudioTracks(any()),
         ).thenAnswer((_) async {});
