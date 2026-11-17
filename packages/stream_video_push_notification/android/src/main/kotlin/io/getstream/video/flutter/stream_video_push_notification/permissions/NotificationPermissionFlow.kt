@@ -67,16 +67,13 @@ internal class NotificationPermissionFlow {
             }
         } else {
             val required = messages["postNotificationMessageRequired"] as? String
-            val useGiven = title != null && required != null
-            showDialog(
-                activity,
-                if (useGiven) title!! else activity.getString(R.string.text_title_post_notification),
-                if (useGiven) {
-                    required!!
-                } else {
+            val (dialogTitle, dialogMessage) = if (title != null && required != null) {
+                title to required
+            } else {
+                activity.getString(R.string.text_title_post_notification) to
                     activity.getString(R.string.text_post_notification_message_required)
-                },
-            ) { dialog, _ ->
+            }
+            showDialog(activity, dialogTitle, dialogMessage) { dialog, _ ->
                 dialog?.dismiss()
                 val intent = Intent(
                     Settings.ACTION_APPLICATION_DETAILS_SETTINGS,

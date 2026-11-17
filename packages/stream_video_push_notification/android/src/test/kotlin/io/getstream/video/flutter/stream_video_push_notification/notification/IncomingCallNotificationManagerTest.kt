@@ -14,6 +14,7 @@ import io.getstream.video.flutter.stream_video_push_notification.core.RingingCal
 import io.mockk.mockk
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNotSame
 import org.junit.Assert.assertNull
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,8 +22,8 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 
 /**
- * Pins that two calls ringing at once keep their own notifications and avatars, with the avatar
- * loads captured instead of run.
+ * Pins that calls keep their own notifications and avatars, and that a cleared notification's
+ * avatar load changes nothing, with the avatar loads captured instead of run.
  */
 @RunWith(RobolectricTestRunner::class)
 class IncomingCallNotificationManagerTest {
@@ -103,5 +104,47 @@ class IncomingCallNotificationManagerTest {
         loadAvatar("b")
         assertNotNull(posted("b").getLargeIcon())
         assertEquals("b", callIdOf("b"))
+    }
+
+    private fun missedCall(id: String) = call(id).copy(missedNotificationId = MISSED_ID)
+
+    private fun postedMissed() =
+        notifications.activeNotifications.singleOrNull { it.id == MISSED_ID }?.notification
+
+    @Test
+    fun `a missed-call avatar reposts its notification once it loads`() {
+        manager.showMissCallNotification(CallPayloadMapper.toBundle(missedCall("m")))
+        val withoutAvatar = postedMissed()
+
+        loadAvatar("m")
+
+        assertNotNull(withoutAvatar)
+        assertNotSame(withoutAvatar, postedMissed())
+    }
+
+    @Test
+    fun `clearing a missed-call notification cancels its avatar load`() {
+        val data = CallPayloadMapper.toBundle(missedCall("m"))
+        manager.showMissCallNotification(data)
+
+        manager.clearMissCallNotification(data)
+        loadAvatar("m")
+
+        assertNull(postedMissed())
+    }
+
+    @Test
+    fun `stopping the ring cancels the current call's avatar load`() {
+        manager.showIncomingNotification(CallPayloadMapper.toBundle(call("a")))
+
+        manager.stopIncomingCallRinging()
+        loadAvatar("a")
+
+        assertNull(posted("a").getLargeIcon())
+        assertNull(manager.currentIncomingNotification)
+    }
+
+    private companion object {
+        const val MISSED_ID = 7
     }
 }

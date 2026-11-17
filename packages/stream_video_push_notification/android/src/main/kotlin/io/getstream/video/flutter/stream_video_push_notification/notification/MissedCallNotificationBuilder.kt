@@ -79,17 +79,14 @@ internal class MissedCallNotificationBuilder(private val context: Context) {
 
         return MissedNotificationContent(
             id,
-            AvatarLoader.avatarUrl(call.avatar, call.defaultAvatar),
+            CallImageLoader.avatarUrl(call.avatar, call.defaultAvatar),
             builder,
             listOf(bigViews, smallViews),
         )
     }
 
-    private fun smallIcon(type: Int): Int {
-        if (type > 0) return R.drawable.ic_video_missed
-        val appIcon = context.applicationInfo.icon
-        return if (appIcon >= 0) R.drawable.ic_call_missed else appIcon
-    }
+    private fun smallIcon(type: Int): Int =
+        if (type > 0) R.drawable.ic_video_missed else R.drawable.ic_call_missed
 
     private fun textOr(text: String?, fallback: Int): String =
         if (text.isNullOrEmpty()) context.getString(fallback) else text
