@@ -212,6 +212,34 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertFalse(store.shouldTimeOut(appId: ringing.identity.callKitUUID.uuidString))
     }
 
+    /// However the answered call ends, it no longer keeps a later ring from timing out, or a
+    /// decline of that ring from being sent as declined.
+    func testTheAnsweredCallStopsCountingOnceItEndsInAnyWay() {
+        let ends: [(String, (CallKitCall) -> Void)] = [
+            ("end action", { _ = self.store.endPerformed(uuid: $0.identity.callKitUUID) }),
+            ("reported end", { self.store.endReported(uuid: $0.identity.callKitUUID, reason: .remoteEnded) }),
+            ("refused end", { self.store.endRefused(uuid: $0.identity.callKitUUID) }),
+            ("reset", { _ in self.store.reset() }),
+        ]
+        for (name, end) in ends {
+            store = CallKitCallStore()
+            let answered = ring("answered")
+            _ = store.answerPerformed(uuid: answered.identity.callKitUUID)
+            _ = store.holdPerformed(uuid: answered.identity.callKitUUID, onHold: true)
+
+            end(answered)
+
+            XCTAssertNil(store.answeredCall, name)
+            XCTAssertFalse(store.hasHeldCall, name)
+            let uuid = UUID()
+            _ = store.incomingReported(options(uuid.uuidString), uuid: uuid)
+            XCTAssertTrue(store.shouldTimeOut(appId: uuid.uuidString), name)
+            XCTAssertEqual(
+                names(store.endPerformed(uuid: uuid).effects),
+                [StreamVideoIncomingCallConstants.ACTION_CALL_DECLINE], name)
+        }
+    }
+
     func testARingThatEndedDoesNotTimeOut() {
         let call = ring("ended")
         store.endReported(uuid: call.identity.callKitUUID, reason: .remoteEnded)
@@ -459,7 +487,7 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertEqual(calls[1] as? [String: String], ["id": untracked.uuidString.lowercased()])
     }
 
-    func testAResetForgetsEveryCallButNotTheAnsweredOrOutgoingOnes() {
+    func testAResetForgetsEveryCallAndThePendingOutgoingOnes() {
         let answered = ring("answered")
         _ = store.answerPerformed(uuid: answered.identity.callKitUUID)
         let pending = UUID()
@@ -469,7 +497,7 @@ final class CallKitCallStoreTests: XCTestCase {
 
         XCTAssertTrue(store.calls.isEmpty)
         XCTAssertEqual(answered.phase, .ended(nil))
-        XCTAssertTrue(store.answeredCall === answered)
+        XCTAssertNil(store.answeredCall)
         XCTAssertNil(store.startPerformed(uuid: pending))
     }
 }

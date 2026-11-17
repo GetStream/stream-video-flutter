@@ -51,9 +51,16 @@ final class CallKitCallStore {
     /// to end or connect a call act on `lastOptions`, whatever id they name.
     var isFromPushKit = false
 
-    /// The call CallKit last answered. Cleared when CallKit ends any tracked call while this or
-    /// `outgoingCall` is set.
-    private(set) var answeredCall: CallKitCall?
+    /// The call CallKit last answered, until it ends.
+    ///
+    /// It ends however the call does: through CallKit's end action, reported by the app,
+    /// refused by CallKit, or with a provider reset. After that it no longer keeps a ring from
+    /// timing out, or a declined ring from being sent as declined.
+    var answeredCall: CallKitCall? {
+        lastAnsweredCall.flatMap { $0.phase.isEnded ? nil : $0 }
+    }
+
+    private var lastAnsweredCall: CallKitCall?
 
     /// The call CallKit last started. Never cleared.
     private(set) var outgoingCall: CallKitCall?
@@ -186,7 +193,7 @@ final class CallKitCallStore {
         }
         call.options.isAccepted = true
         call.move(to: .answering)
-        answeredCall = call
+        lastAnsweredCall = call
         return (call, [.send(event: StreamVideoIncomingCallConstants.ACTION_CALL_ACCEPT, body: call.options.toJSON())])
     }
 
@@ -207,9 +214,6 @@ final class CallKitCallStore {
             return CallKitEndOutcome(
                 fulfills: true,
                 effects: [.send(event: StreamVideoIncomingCallConstants.ACTION_CALL_DECLINE, body: call.options.toJSON())])
-        }
-        if answeredCall === call {
-            answeredCall = nil
         }
         return CallKitEndOutcome(
             fulfills: true,

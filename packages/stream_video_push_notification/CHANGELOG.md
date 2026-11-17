@@ -34,6 +34,7 @@
 - [iOS] Answering one of two ringing calls from CallKit no longer reports the other one as accepted in `activeCalls`.
 - [iOS] A ring that was already ended, for example because the caller cancelled it, no longer times out later and reports a second, unanswered end.
 - [iOS] Declining a waiting call during an answered one no longer forgets the answered call. Hanging it up afterwards is sent as `ActionCallEnded` instead of `ActionCallDecline`, and holding and resuming it no longer reports the audio session inactive or configures it again.
+- [iOS] An answered call that ends without CallKit's end action, such as one the app reports ended, one whose end CallKit refuses, or a provider reset, no longer keeps a later ring from timing out, or declining it from being sent as `ActionCallDecline`.
 - `registerDevice` right after `connect`, and `unregisterDevice` on web and desktop, no longer throw.
 - A failing push token read is logged instead of reported as an uncaught error.
 - `unregisterDevice` always stops registering refreshed tokens.
