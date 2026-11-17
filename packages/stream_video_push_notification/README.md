@@ -68,6 +68,10 @@ the active Bluetooth device is surfaced and its name falls back to a generic def
 On Android, outgoing calls are registered with Telecom when you call `startOutgoingCall`; the SDK
 does not call it for you there. On iOS it can, with `reportOutgoingCalls`, below.
 
+Telecom owns the audio route of a call registered with it. `Call.setAudioOutputDevice` asks Telecom
+for the matching endpoint (earpiece, speaker, wired headset or Bluetooth) as well as switching WebRTC
+to the device, so the output picker works the same way with the integration on.
+
 ### iOS outgoing calls
 
 By default only incoming calls go through CallKit. To report the ringing calls the current user
@@ -88,10 +92,6 @@ screen. The CallKit call is marked connected when the call connects and ends wit
 from CallKit while it still rings cancels the ring.
 
 Leave it off if your app already calls `startOutgoingCall` itself, or CallKit shows two calls.
-
-Telecom owns the audio route of a call it holds. `Call.setAudioOutputDevice` asks Telecom for the
-matching endpoint (earpiece, speaker, wired headset or Bluetooth) as well as switching WebRTC to the
-device, so the output picker works the same way with the integration on.
 
 ### iOS call history
 
