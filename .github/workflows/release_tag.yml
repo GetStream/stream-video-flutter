@@ -20,12 +20,19 @@ jobs:
       contents: write # push tags
 
     steps:
+      - name: 🔑 Mint CI Bot Token
+        id: ci-bot-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
+
       - name: 📚 Checkout branch
-        # Bot PAT: GITHUB_TOKEN tag pushes don't trigger the publish workflow.
+        # CI bot app token: GITHUB_TOKEN tag pushes don't trigger the publish workflow.
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          token: ${{ secrets.BOT_GITHUB_API_TOKEN }}
+          token: ${{ steps.ci-bot-token.outputs.token }}
 
       - name: 🐦 Install Flutter
         uses: ./.github/actions/setup-flutter

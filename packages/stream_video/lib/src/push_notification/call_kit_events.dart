@@ -214,29 +214,12 @@ class ActionCallToggleDtmf extends RingingEvent {
   List<Object?> get props => [uuid, digits];
 }
 
-/// Represents a call toggle group event.
-///
-/// Note: This event is only available on iOS.
-class ActionCallToggleGroup extends RingingEvent {
-  /// Creates an [ActionCallToggleGroup] event instance with the specified
-  /// [uuid] and [callUUIDToGroupWith].
-  const ActionCallToggleGroup({
-    required this.uuid,
-    required this.callUUIDToGroupWith,
-  });
-
-  /// The unique identifier for the call.
-  final String uuid;
-
-  /// The unique identifier for the call to group with, or null when the call
-  /// is ungrouped.
-  final String? callUUIDToGroupWith;
-
-  @override
-  List<Object?> get props => [uuid, callUUIDToGroupWith];
-}
-
 /// Represents a call toggle audio session event.
+///
+/// Sent when CallKit activates the app's audio session, as when a call starts,
+/// is answered or resumes, and when it deactivates it, except while the call
+/// is on hold. The SDK keeps the call's audio engine in step with these
+/// changes.
 ///
 /// Note: This event is only available on iOS.
 class ActionCallToggleAudioSession extends RingingEvent {
