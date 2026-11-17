@@ -7,6 +7,7 @@
 * [iOS] Added `setCallKitAudioSessionActive:` on `audioEngineControl`, to tell WebRTC that CallKit activated or deactivated the audio session, so WebRTC stops activating or deactivating it itself while CallKit owns it. The availability notification carries it as `FlutterWebRTCAudioSessionActiveKey`.
 * [iOS] The `onAudioRouteChange` event carries the system's route change `reason`, and is also sent when the system re-routes on its own, such as after a CallKit hold.
 * [iOS] fix: disposing the last stream or peer connection no longer tries to deactivate an audio session CallKit owns.
+* [iOS/macOS] fix: with CocoaPods, only the headers under `include/` are public, as with Swift Package Manager. The podspecs' `public_header_files` pattern matched nothing, so every header was public.
 
 [4.0.1] - 2026.10.22
 
