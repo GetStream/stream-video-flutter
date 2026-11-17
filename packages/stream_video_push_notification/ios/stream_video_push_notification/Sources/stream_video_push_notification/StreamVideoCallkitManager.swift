@@ -18,6 +18,8 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
     /// Configures the audio session and tells WebRTC when it may use it.
     var audio = CallKitAudioSessionCoordinator()
+    /// How long after answering the answered call's audio session options are applied again.
+    var reconfigureAfterAnswerDelay: DispatchTimeInterval = .milliseconds(1200)
 
     var sharedProvider: CXProvider? = nil
 

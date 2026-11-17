@@ -8,6 +8,10 @@
 - `isAcceptedOnThisDevice` is no longer exported.
 - [iOS] The public `Call` class is removed. Nothing public returned it, but native code that named the type no longer compiles.
 
+### 🐞 Fixed
+
+- [iOS] The plugin no longer activates the audio session itself when it shows, answers or starts a call. The session it activated kept CallKit from activating its own, so WebRTC could run on a session CallKit did not own. CallKit now activates it. `audioSessionActive` has no effect.
+
 ### 🔄 Changed
 
 - `StreamVideoPushHandler.handleBackgroundMessage` builds a client that sets up no media.
@@ -15,6 +19,7 @@
 - [iOS] `StreamVideoCallkitManager.showIncomingCall(_:fromPushKit:completion:)` configures the audio session before reporting the call, as the variant without a completion does, and its `completion` is optional.
 - [iOS] `StreamVideoCallkitManager.showIncomingCall` configures the audio session with the options of the call it reports, before and after reporting it. The variant without a completion used the options stored for the last PushKit call, so a call not from PushKit got an earlier call's options, or the defaults when none was stored, and the configuration after reporting could take a newer call's.
 - [iOS] `ActionCallAccept` and `ActionCallDecline` carry the call CallKit answered or ended, instead of the options last given to the plugin, which could belong to another call or be empty.
+- [iOS] Answering a call from CallKit applies that call's audio session options, and again 1.2 s later, instead of the options last given to the plugin, which could belong to another call. The second pass is skipped once the call has ended or another call was answered.
 - [iOS] Only the first activation of a call's audio session applies its audio session options and reports an outgoing call as connecting. A later activation, such as a resume from hold, leaves the session as it is. Every activation now sends `ActionCallToggleAudioSession`, including after the call connected.
 - [Android] The full-screen incoming call activity follows the redesigned ringing screen: the app surface instead of the blue `#0955fa`, a 104dp avatar, 64dp accept and decline buttons centred 80dp apart above the bottom, and the design system's `#00A46E` and `#D90D10` in place of the Material green and red. An app that sets `IncomingCallNotificationParams` keeps whatever it set.
 - [Android] `IncomingCallNotificationParams.fullScreenTextColor` no longer defaults to white. Left unset, the caller's name, the handle under it and the action labels each take the colour the design gives them rather than all four being painted the same. Setting it still paints all four.
