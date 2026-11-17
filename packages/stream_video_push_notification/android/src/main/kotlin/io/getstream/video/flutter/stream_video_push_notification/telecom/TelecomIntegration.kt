@@ -8,9 +8,9 @@ import android.os.Handler
 import android.os.Looper
 import android.telecom.DisconnectCause
 import android.util.Log
-import io.getstream.video.flutter.stream_video_push_notification.IncomingCallBroadcastReceiver
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -530,7 +530,7 @@ internal class TelecomIntegration(
 
         /** Sends an event unless events are silenced. */
         private fun sendEvent(event: String, callId: String, vararg values: Pair<String, Any?>) {
-            if (IncomingCallBroadcastReceiver.silenceEvents) return
+            if (RingingComponents.silenceEvents) return
             listener?.onEvent(event, mapOf("id" to callId) + values.toMap())
         }
     }

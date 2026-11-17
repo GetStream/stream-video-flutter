@@ -49,6 +49,16 @@ internal class RingingComponents private constructor(context: Context) {
     ).also { telecom.listener = it }
 
     companion object {
+        /**
+         * While true, no ringing event reaches Dart, from the controller or from Telecom. Set from
+         * Dart through the method channel.
+         *
+         * Volatile: set on the main thread, but read from the Telecom listener callbacks, which run
+         * on a background dispatcher.
+         */
+        @Volatile
+        var silenceEvents = false
+
         @SuppressLint("StaticFieldLeak") // Holds the application context only.
         @Volatile
         private var instance: RingingComponents? = null

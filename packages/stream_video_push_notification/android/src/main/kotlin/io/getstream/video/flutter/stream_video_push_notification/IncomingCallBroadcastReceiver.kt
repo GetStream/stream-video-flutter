@@ -8,18 +8,11 @@ import android.os.Bundle
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 
 /**
- * Receives the call actions sent as broadcasts, from the plugin and the notifications, and hands
- * them to the [RingingComponents] controller.
+ * Receives the call actions of the incoming call: the ones its notifications and the system call
+ * integration send, and the ones built with the intents below.
  */
 class IncomingCallBroadcastReceiver : BroadcastReceiver() {
     companion object {
-        /**
-         * Volatile: set from the method channel on the main thread, but read from the Telecom
-         * listener callbacks, which run on a background dispatcher.
-         */
-        @Volatile
-        var silenceEvents = false
-
         fun getIntentIncoming(context: Context, data: Bundle?) =
             Intent(context, IncomingCallBroadcastReceiver::class.java).apply {
                 action = "${context.packageName}.${IncomingCallConstants.ACTION_CALL_INCOMING}"
