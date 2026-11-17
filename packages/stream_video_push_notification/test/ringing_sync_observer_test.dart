@@ -359,6 +359,27 @@ void main() {
       );
     });
 
+    test('stop once a missed call dismisses the last followed ring', () async {
+      await start();
+      await ringAs('ring-1');
+      await ringAs('ring-2');
+      await endNative('ring-1');
+      platform.emit(
+        ActionCallDismissed(
+          data: CallData(uuid: 'ring-2', callCid: _cid.value),
+          reason: CallDismissReason.missed,
+        ),
+      );
+      await pumpEventQueue();
+
+      backendEvents.emit(ended());
+      await pumpEventQueue();
+
+      verifyNever(
+        () => controller.endCallByCid(any(), silent: any(named: 'silent')),
+      );
+    });
+
     test('follow the native calls found at start-up by their uuids', () async {
       when(() => controller.activeCalls()).thenAnswer(
         (_) async => [CallData(uuid: 'ring-1', callCid: _cid.value)],

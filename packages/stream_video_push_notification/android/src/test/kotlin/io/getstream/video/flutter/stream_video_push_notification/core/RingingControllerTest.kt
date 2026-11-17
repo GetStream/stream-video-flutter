@@ -411,10 +411,12 @@ class RingingControllerTest {
         verify(exactly = 0) { telecom.disconnect("accepted-id", any()) }
         verify { notifications.showMissCallNotification(missed) }
         assertEquals(listOf("accepted-id"), store.all().map { it.id })
+        assertEquals(listOf(IncomingCallConstants.ACTION_CALL_DISMISSED), eventNames())
+        assertEquals("missed", events.single().second["reason"])
     }
 
     @Test
-    fun `showMissedCall replaces the ring with the missed call and ends it as missed`() {
+    fun `showMissedCall replaces the ring with the missed call and dismisses it as missed`() {
         store.add(call)
 
         controller.showMissedCall(bundle)
@@ -425,6 +427,19 @@ class RingingControllerTest {
         }
         assertNull(store.byId(CALL_ID))
         verify { telecom.disconnect(CALL_ID, DisconnectCause.MISSED) }
+        assertEquals(listOf(IncomingCallConstants.ACTION_CALL_DISMISSED), eventNames())
+    }
+
+    @Test
+    fun `showMissedCall for a call it does not store clears its ring and reports nothing`() {
+        val data = bundle
+
+        controller.showMissedCall(data)
+
+        verify { ringTimer.cancel(CALL_ID) }
+        verify { notifications.clearIncomingNotification(any(), false) }
+        verify { telecom.disconnect(CALL_ID, DisconnectCause.MISSED) }
+        verify { notifications.showMissCallNotification(data) }
         assertEquals(emptyList<String>(), eventNames())
     }
 
