@@ -10,7 +10,7 @@
 </div>
 
 <p align="center">
-  <img id="android-stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/android:stream_video-15.7%20MB-blue"/>
+  <img id="android-stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/android:stream_video-99.9%20MB-blue"/>
   <img id="android-stream-video-flutter-label" alt="StreamVideoFlutter" src="https://img.shields.io/badge/android:stream_video_flutter-1.9%20MB-blue"/>
   <img id="ios-stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/ios:stream_video-16.1%20MB-blue"/>
   <img id="ios-stream-video-flutter-label" alt="StreamVideoFlutter" src="https://img.shields.io/badge/ios:stream_video_flutter-2.3%20MB-blue"/>
