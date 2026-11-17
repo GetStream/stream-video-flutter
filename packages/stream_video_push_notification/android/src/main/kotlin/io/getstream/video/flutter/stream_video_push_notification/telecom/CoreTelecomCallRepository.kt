@@ -20,7 +20,6 @@ import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -51,7 +50,6 @@ internal class CoreTelecomCallRepository(
     }
 
     private val _calls = MutableStateFlow<Map<String, TelecomCall.Registered>>(emptyMap())
-    private val calls: StateFlow<Map<String, TelecomCall.Registered>> = _calls.asStateFlow()
 
     private val actionFlags = ConcurrentHashMap<String, CallActionFlags>()
     private val registrationMutex = Mutex()
@@ -64,7 +62,8 @@ internal class CoreTelecomCallRepository(
     @Volatile
     private var listener: TelecomCallListener? = null
 
-    // Not volatile: only ever touched from setListener and release, both on the main thread.
+    /** Set from setListener and release, which run on whichever thread calls them. */
+    @Volatile
     private var observeCallsJob: Job? = null
 
     @Volatile
@@ -252,7 +251,7 @@ internal class CoreTelecomCallRepository(
     private fun observeCalls(): Job {
         var previousCalls: Map<String, TelecomCall.Registered> = emptyMap()
 
-        return calls
+        return _calls
             .onEach { allCalls ->
                 // Pending calls are not in Telecom yet, don't report them.
                 val currentCalls = allCalls.filterValues { !it.isPending }

@@ -6,11 +6,15 @@ import android.os.Looper
 import androidx.test.core.app.ApplicationProvider
 import io.getstream.video.flutter.stream_video_push_notification.FakeDartSide
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
+import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationService
 import io.getstream.video.flutter.stream_video_push_notification.PREFERENCES_FILE_NAME
 import io.getstream.video.flutter.stream_video_push_notification.telecom.FakeTelecomCallRepository
 import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomEventSource
 import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
 import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomPermissions
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import io.mockk.verify
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.junit.After
@@ -70,6 +74,18 @@ class RingingComponentsTest {
     private fun events(): List<Pair<Any?, Map<*, *>>> {
         shadowOf(Looper.getMainLooper()).idle()
         return dart.receivedEvents().map { it["event"] to it["body"] as Map<*, *> }
+    }
+
+    @Test
+    fun `a call registered with Telecom promotes the ringing service again`() {
+        mockkObject(IncomingCallNotificationService.Companion)
+        try {
+            ring("call-1")
+
+            verify(exactly = 1) { IncomingCallNotificationService.repromoteRingingForeground() }
+        } finally {
+            unmockkObject(IncomingCallNotificationService.Companion)
+        }
     }
 
     @Test
