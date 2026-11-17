@@ -8,12 +8,12 @@ import android.os.Bundle
 import androidx.core.app.NotificationManagerCompat
 import coil.target.Target
 import io.getstream.video.flutter.stream_video_push_notification.notification.CallImageLoader
-import io.getstream.video.flutter.stream_video_push_notification.notification.SafeTarget
 import io.getstream.video.flutter.stream_video_push_notification.notification.IncomingCallNotificationBuilder
 import io.getstream.video.flutter.stream_video_push_notification.notification.MissedCallNotificationBuilder
 import io.getstream.video.flutter.stream_video_push_notification.notification.NotificationChannels
 import io.getstream.video.flutter.stream_video_push_notification.notification.NotificationIds
 import io.getstream.video.flutter.stream_video_push_notification.notification.RingtonePlayer
+import io.getstream.video.flutter.stream_video_push_notification.notification.SafeTarget
 
 /**
  * Posts and clears the incoming and missed-call notifications and owns the ringtone of the call
