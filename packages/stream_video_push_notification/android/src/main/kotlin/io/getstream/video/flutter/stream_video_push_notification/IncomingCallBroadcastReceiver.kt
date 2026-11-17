@@ -58,12 +58,6 @@ class IncomingCallBroadcastReceiver : BroadcastReceiver() {
                 action = "${context.packageName}.${IncomingCallConstants.ACTION_CALL_CALLBACK}"
                 putExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA, data)
             }
-
-        fun getIntentConnected(context: Context, data: Bundle?) =
-            Intent(context, IncomingCallBroadcastReceiver::class.java).apply {
-                action = "${context.packageName}.${IncomingCallConstants.ACTION_CALL_CONNECTED}"
-                putExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA, data)
-            }
     }
 
     override fun onReceive(context: Context, intent: Intent) {

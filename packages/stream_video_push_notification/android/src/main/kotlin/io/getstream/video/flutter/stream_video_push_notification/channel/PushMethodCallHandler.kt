@@ -22,7 +22,6 @@ import io.getstream.video.flutter.stream_video_push_notification.telecom.Telecom
  * controller, the call store, the notifications, Telecom or the permission flows. Any exception
  * is answered as an `error` result.
  */
-@Suppress("UNCHECKED_CAST")
 internal class PushMethodCallHandler(
     private val context: Context,
     private val controller: RingingController,
@@ -49,7 +48,7 @@ internal class PushMethodCallHandler(
     private fun handle(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "initData" -> {
-                telecom.init(call.arguments as? Map<String, Any?>)
+                telecom.init(mapArgument(call))
                 result.success(null)
             }
 
@@ -138,7 +137,7 @@ internal class PushMethodCallHandler(
             "requestNotificationPermission" -> {
                 notificationPermission.request(
                     activity,
-                    mapArgument(call).filterValues { it != null } as Map<String, Any>,
+                    buildMap { mapArgument(call).forEach { (k, v) -> if (v != null) put(k, v) } },
                 )
                 result.success(true)
             }
@@ -177,7 +176,9 @@ internal class PushMethodCallHandler(
     private fun callArgument(call: MethodCall): RingingCall {
         val arguments = call.arguments ?: return CallPayloadMapper.fromArgs(emptyMap())
         require(arguments is Map<*, *>) { "${call.method} expects a map of call parameters" }
-        return CallPayloadMapper.fromArgs(arguments as Map<String, Any?>)
+        @Suppress("UNCHECKED_CAST")
+        val parameters = arguments as Map<String, Any?>
+        return CallPayloadMapper.fromArgs(parameters)
     }
 
     /** The arguments as a map with String keys; empty when they are not a map. */
