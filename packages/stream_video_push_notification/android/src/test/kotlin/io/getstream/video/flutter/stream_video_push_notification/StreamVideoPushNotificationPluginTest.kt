@@ -15,6 +15,7 @@ import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -98,6 +99,9 @@ class StreamVideoPushNotificationPluginTest {
         assertNotNull(shadowOf(second).lastRequestedPermission)
 
         dart.plugin.onDetachedFromActivity()
+        val lastRequest = shadowOf(second).lastRequestedPermission
+        dart.invoke("requestNotificationPermission", emptyMap<String, Any?>())
+        assertSame(lastRequest, shadowOf(second).lastRequestedPermission)
         verify { firstBinding.removeRequestPermissionsResultListener(listener.captured) }
         verify { secondBinding.removeRequestPermissionsResultListener(listener.captured) }
     }
