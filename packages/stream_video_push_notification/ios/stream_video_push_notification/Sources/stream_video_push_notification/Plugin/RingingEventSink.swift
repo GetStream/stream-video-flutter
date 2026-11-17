@@ -4,12 +4,28 @@ import Foundation
 /// The one queue between the native side and Dart's event channel.
 ///
 /// Events go to the handler of the most recently registered event channel once Dart listens on
-/// it, and are held in order until then, including across a new registration. While silenced,
-/// events are dropped rather than held; events already held are still delivered.
+/// it, and are held in order until then, including across a new registration. Events sent while
+/// silenced are dropped rather than held; events already held are still delivered.
 final class RingingEventSink {
 
-    /// While true, events are dropped instead of being delivered or held. Set on the main thread.
-    var isSilenced = false
+    /// While true, events sent are dropped instead of being delivered or held. It is read when an
+    /// event is sent, from any thread: an event sent while silenced is dropped even if silencing
+    /// ends before the event would reach Dart, and one sent before silencing is still delivered.
+    var isSilenced: Bool {
+        get {
+            silencedLock.lock()
+            defer { silencedLock.unlock() }
+            return silenced
+        }
+        set {
+            silencedLock.lock()
+            defer { silencedLock.unlock() }
+            silenced = newValue
+        }
+    }
+
+    private var silenced = false
+    private let silencedLock = NSLock()
 
     /// The handler events go to.
     private(set) var handler: EventCallbackHandler?
@@ -23,18 +39,17 @@ final class RingingEventSink {
         }
     }
 
-    /// Delivers or holds `event` on the main thread. Whether events are silenced is read there
-    /// too, so an event sent from any thread just before `isSilenced` is set is dropped.
+    /// Drops `event` if events are silenced; otherwise delivers or holds it on the main thread.
     func send(_ event: String, _ body: Any) {
+        if isSilenced {
+            NSLog("[StreamCallKit] %@ silenced", event)
+            return
+        }
         let payload: [String: Any] = [
             "event": event,
             "body": body,
         ]
         DispatchQueue.main.async {
-            if self.isSilenced {
-                print(event, " silenced")
-                return
-            }
             if let listener = self.handler?.listener {
                 listener(payload)
             } else {

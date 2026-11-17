@@ -12,53 +12,41 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
     private let manager = StreamVideoCallkitManager.shared
     private let provider = CXProvider(configuration: CXProviderConfiguration())
 
-    private var savedEventHandler: EventCallbackHandler?
+    private var savedEventSink: RingingEventSink!
     private var savedAnswerCall: Call?
     private var savedOutgoingCall: Call?
     private var savedData: CallData?
-    private var savedSilenced = false
     private var trackedCalls: [Call] = []
     private var received: [[String: Any]] = []
 
     override func setUp() {
         super.setUp()
         // The manager is a singleton the host app also uses, so its state is saved and restored.
-        savedEventHandler = manager.eventSink.handler
+        // Each test gets a sink of its own, which leaves the host's handler and held events alone.
+        savedEventSink = manager.eventSink
         savedAnswerCall = manager.answerCall
         savedOutgoingCall = manager.outgoingCall
         savedData = manager.data
-        savedSilenced = manager.eventSink.isSilenced
 
-        discardHeldEvents()
+        manager.eventSink = RingingEventSink()
         // An attached handler Dart does not listen on yet, so events are held.
         manager.setEventHandler(EventCallbackHandler(sink: manager.eventSink))
         manager.answerCall = nil
         manager.outgoingCall = nil
         manager.data = nil
-        manager.eventSink.isSilenced = false
         received = []
     }
 
     override func tearDown() {
         trackedCalls.forEach { manager.callController.removeCall($0) }
         trackedCalls = []
-        discardHeldEvents()
-        if let savedEventHandler = savedEventHandler {
-            manager.setEventHandler(savedEventHandler)
-        }
+        // Lets events still on their way to this test's sink arrive there.
+        drainMainQueue()
+        manager.eventSink = savedEventSink
         manager.answerCall = savedAnswerCall
         manager.outgoingCall = savedOutgoingCall
         manager.data = savedData
-        manager.eventSink.isSilenced = savedSilenced
         super.tearDown()
-    }
-
-    /// Hands whatever the sink holds to a listener that drops it.
-    private func discardHeldEvents() {
-        drainMainQueue()
-        let handler = EventCallbackHandler(sink: manager.eventSink)
-        _ = handler.onListen(withArguments: nil) { _ in }
-        manager.setEventHandler(handler)
     }
 
     /// Sets a handler that already has a listener, so every event it gets is recorded.

@@ -5,10 +5,10 @@ import XCTest
 
 /// Pins how each method-channel call is parsed, including what a call with missing arguments
 /// is answered with.
-final class PushMethodCallRouterTests: XCTestCase {
+final class PushCommandTests: XCTestCase {
 
     private func command(_ method: String, _ arguments: Any? = nil) -> PushCommand {
-        PushMethodCallRouter.command(for: FlutterMethodCall(methodName: method, arguments: arguments))
+        PushCommand(FlutterMethodCall(methodName: method, arguments: arguments))
     }
 
     /// The reply of an `.ignored` command, or nil for any other command.

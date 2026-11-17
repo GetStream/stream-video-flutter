@@ -21,7 +21,7 @@
 		AF021016A67D0594176FBF3F /* CallDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68A8A8F98A5EAE592974D52A /* CallDataTests.swift */; };
 		BBB82CEFC94F67B7F07AE9DF /* StreamVideoCallkitManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F9E3C2349EE7C480379409BD /* StreamVideoCallkitManagerTests.swift */; };
 		D7E14EE1039ABCF975ECBBBA /* CallKitOptionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88A7888558341F53FF1AB2C6 /* CallKitOptionsTests.swift */; };
-		E3BAD45DAAAC7CFE1040DFAC /* PushMethodCallRouterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D621E34FC23BDF127BA0C30C /* PushMethodCallRouterTests.swift */; };
+		E3BAD45DAAAC7CFE1040DFAC /* PushCommandTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D621E34FC23BDF127BA0C30C /* PushCommandTests.swift */; };
 		F30E6AE9D2EA99032D2BD49B /* StreamVideoPushConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D78680DB1BA7C1EAE890F1CE /* StreamVideoPushConfigurationTests.swift */; };
 		F743676E7FD4D3EEC5857955 /* VoIPPayloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 286AD5FA6170A2DE5F0AA256 /* VoIPPayloadTests.swift */; };
 /* End PBXBuildFile section */
@@ -77,7 +77,7 @@
 		A074F8368F6ECACDC15CD045 /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
 		AAEA170A0CAA76184275D76E /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 		D56956315DE1E88D606FAAA2 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
-		D621E34FC23BDF127BA0C30C /* PushMethodCallRouterTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PushMethodCallRouterTests.swift; sourceTree = "<group>"; };
+		D621E34FC23BDF127BA0C30C /* PushCommandTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PushCommandTests.swift; sourceTree = "<group>"; };
 		D64030FC8B4D5515328E096E /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
 		D78680DB1BA7C1EAE890F1CE /* StreamVideoPushConfigurationTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = StreamVideoPushConfigurationTests.swift; sourceTree = "<group>"; };
 		DE90696D0F772DDF60F6CE55 /* RingingEventSinkTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RingingEventSinkTests.swift; sourceTree = "<group>"; };
@@ -115,7 +115,7 @@
 				63F8E6E30A4ADA2AD73BF2D1 /* CallKitMappingTests.swift */,
 				F9E3C2349EE7C480379409BD /* StreamVideoCallkitManagerTests.swift */,
 				DE90696D0F772DDF60F6CE55 /* RingingEventSinkTests.swift */,
-				D621E34FC23BDF127BA0C30C /* PushMethodCallRouterTests.swift */,
+				D621E34FC23BDF127BA0C30C /* PushCommandTests.swift */,
 				88A7888558341F53FF1AB2C6 /* CallKitOptionsTests.swift */,
 			);
 			path = RunnerTests;
@@ -392,7 +392,7 @@
 				0B4E3105D82CA3B70D2ED61A /* CallKitMappingTests.swift in Sources */,
 				BBB82CEFC94F67B7F07AE9DF /* StreamVideoCallkitManagerTests.swift in Sources */,
 				3EB0EB6B8A1EB9A682C6A395 /* RingingEventSinkTests.swift in Sources */,
-				E3BAD45DAAAC7CFE1040DFAC /* PushMethodCallRouterTests.swift in Sources */,
+				E3BAD45DAAAC7CFE1040DFAC /* PushCommandTests.swift in Sources */,
 				D7E14EE1039ABCF975ECBBBA /* CallKitOptionsTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

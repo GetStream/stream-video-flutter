@@ -33,7 +33,7 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
     }
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        switch PushMethodCallRouter.command(for: call) {
+        switch PushCommand(call) {
         case .initData(let arguments):
             if let arguments = arguments {
                 if let iosData = arguments["ios"] as? [String: Any],

@@ -21,16 +21,20 @@ enum PushCommand {
     case silenceEvents(Bool)
     case reportCallEnded(id: String, reason: Int)
     case requestNotificationPermission
-    /// The arguments the method needs are missing; the call is answered with `reply` and nothing
-    /// else happens.
+    /// The arguments the method needs are missing or not of the expected type; the call is
+    /// answered with `reply` and nothing else happens.
     case ignored(reply: Any?)
     case notImplemented
 }
 
-/// Parses method-channel calls into `PushCommand`s.
-enum PushMethodCallRouter {
+extension PushCommand {
 
-    static func command(for call: FlutterMethodCall) -> PushCommand {
+    /// Parses `call`'s method and arguments.
+    init(_ call: FlutterMethodCall) {
+        self = Self.parse(call)
+    }
+
+    private static func parse(_ call: FlutterMethodCall) -> PushCommand {
         switch call.method {
         case "initData":
             return .initData(call.arguments as? [String: Any])

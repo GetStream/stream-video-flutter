@@ -4,7 +4,7 @@ import Foundation
 extension StreamVideoCallkitManager {
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-        handle(PushMethodCallRouter.command(for: call), result: result)
+        handle(PushCommand(call), result: result)
     }
 
     func handle(_ command: PushCommand, result: @escaping FlutterResult) {

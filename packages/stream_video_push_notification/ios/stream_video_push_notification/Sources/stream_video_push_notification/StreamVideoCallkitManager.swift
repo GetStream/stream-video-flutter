@@ -8,8 +8,8 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
     @objc public static let shared = StreamVideoCallkitManager()
 
-    /// Every event bound for Dart goes through here.
-    let eventSink = RingingEventSink()
+    /// Every event bound for Dart goes through here. Tests replace it with a sink of their own.
+    var eventSink = RingingEventSink()
 
     var callController: StreamCallKitCallController
 
