@@ -2,6 +2,7 @@
 
 ### ⚠️ Breaking
 
+- `ActionCallToggleGroup` is removed. It was never sent: CallKit is never offered a merge of calls, and refuses a merge it attempts anyway.
 - Test mocks that implement `StreamVideo` get a `subtype_of_sealed_class` warning, because `StreamVideo` implements the `@sealed` `CallHost`; add `// ignore: subtype_of_sealed_class` to them.
 - The deprecated `observeCoreCallKitEvents`, `observeCall*CallKitEvent` and `handleVoipPushNotification` methods are removed; use `observeCoreRingingEvents`, `observeCall*RingingEvent` and `handleRingingFlowNotifications` on `StreamVideo.ringing`.
 - `StreamVideo.create` no longer sets up logging; call `StreamVideo.configureLogging` for such a client.

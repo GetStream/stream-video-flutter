@@ -57,3 +57,75 @@ transforms:
     changes:
       - kind: "removeParameter"
         name: "audioSessionActive"
+
+  - title: "Remove the CallKit grouping options, which have no effect"
+    date: "2026-11-12"
+    element:
+      uris:
+        [
+          "package:stream_video_push_notification/src/stream_video_push_configuration.dart",
+          "package:stream_video_push_notification/stream_video_push_notification.dart",
+        ]
+      constructor: ""
+      inClass: "IOSPushConfiguration"
+    changes:
+      - kind: "removeParameter"
+        name: "maximumCallsPerCallGroup"
+      - kind: "removeParameter"
+        name: "supportsGrouping"
+      - kind: "removeParameter"
+        name: "supportsUngrouping"
+
+  - title: "Remove the CallKit grouping options, which have no effect"
+    date: "2026-11-12"
+    element:
+      uris:
+        [
+          "package:stream_video_push_notification/src/stream_video_push_configuration.dart",
+          "package:stream_video_push_notification/stream_video_push_notification.dart",
+        ]
+      method: "copyWith"
+      inClass: "IOSPushConfiguration"
+    changes:
+      - kind: "removeParameter"
+        name: "maximumCallsPerCallGroup"
+      - kind: "removeParameter"
+        name: "supportsGrouping"
+      - kind: "removeParameter"
+        name: "supportsUngrouping"
+
+  - title: "Remove the CallKit grouping options, which have no effect"
+    date: "2026-11-12"
+    element:
+      uris:
+        [
+          "package:stream_video_push_notification/src/stream_video_push_params.dart",
+          "package:stream_video_push_notification/stream_video_push_notification.dart",
+        ]
+      constructor: ""
+      inClass: "IOSParams"
+    changes:
+      - kind: "removeParameter"
+        name: "maximumCallsPerCallGroup"
+      - kind: "removeParameter"
+        name: "supportsGrouping"
+      - kind: "removeParameter"
+        name: "supportsUngrouping"
+
+  - title: "Remove the CallKit grouping options, which have no effect"
+    date: "2026-11-12"
+    element:
+      uris:
+        [
+          "package:stream_video_push_notification/src/stream_video_push_params.dart",
+          "package:stream_video_push_notification/stream_video_push_notification.dart",
+        ]
+      method: "copyWith"
+      inClass: "IOSParams"
+    changes:
+      - kind: "removeParameter"
+        name: "maximumCallsPerCallGroup"
+      - kind: "removeParameter"
+        name: "supportsGrouping"
+      - kind: "removeParameter"
+        name: "supportsUngrouping"

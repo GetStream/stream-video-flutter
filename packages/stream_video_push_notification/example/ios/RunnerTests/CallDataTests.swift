@@ -28,6 +28,20 @@ final class CallDataTests: XCTestCase {
         XCTAssertEqual(data.extra["callCid"] as? String, "default:ada")
     }
 
+    func testTheNativeInitializerTakesTheSameDefaultsAsAnEmptyMap() {
+        let data = CallData(id: "call-uuid", callerName: "Ada", handle: "ada", type: 1)
+
+        XCTAssertEqual(data.uuid, "call-uuid")
+        XCTAssertEqual(data.callerName, "Ada")
+        XCTAssertEqual(data.handle, "ada")
+        XCTAssertEqual(data.type, 1)
+        XCTAssertEqual(data.duration, 30000)
+        XCTAssertEqual(data.iconName, "AppLogo")
+        XCTAssertEqual(data.maximumCallGroups, 1)
+        XCTAssertFalse(data.supportsDTMF)
+        XCTAssertFalse(data.supportsHolding)
+    }
+
     func testDefaultsWhenTheMapIsEmpty() {
         let data = CallData(args: [String: Any]())
 
@@ -39,12 +53,9 @@ final class CallDataTests: XCTestCase {
         XCTAssertEqual(data.handleType, "")
         XCTAssertFalse(data.useComplexHandle)
         XCTAssertTrue(data.supportsVideo)
-        XCTAssertEqual(data.maximumCallGroups, 2)
-        XCTAssertEqual(data.maximumCallsPerCallGroup, 1)
-        XCTAssertTrue(data.supportsDTMF)
-        XCTAssertTrue(data.supportsHolding)
-        XCTAssertTrue(data.supportsGrouping)
-        XCTAssertTrue(data.supportsUngrouping)
+        XCTAssertEqual(data.maximumCallGroups, 1)
+        XCTAssertFalse(data.supportsDTMF)
+        XCTAssertFalse(data.supportsHolding)
         XCTAssertTrue(data.includesCallsInRecents)
         XCTAssertEqual(data.ringtonePath, "")
         XCTAssertTrue(data.configureAudioSession)
@@ -59,8 +70,8 @@ final class CallDataTests: XCTestCase {
             "iconName": "CallIcon",
             "handleType": "email",
             "supportsVideo": false,
-            "maximumCallGroups": 1,
-            "supportsHolding": false,
+            "maximumCallGroups": 2,
+            "supportsHolding": true,
             "includesCallsInRecents": false,
             "ringtonePath": "ring.caf",
             "configureAudioSession": false,
@@ -73,40 +84,41 @@ final class CallDataTests: XCTestCase {
         XCTAssertEqual(data.iconName, "CallIcon")
         XCTAssertEqual(data.handleType, "email")
         XCTAssertFalse(data.supportsVideo)
-        XCTAssertEqual(data.maximumCallGroups, 1)
-        XCTAssertFalse(data.supportsHolding)
+        XCTAssertEqual(data.maximumCallGroups, 2)
+        XCTAssertTrue(data.supportsHolding)
         XCTAssertFalse(data.includesCallsInRecents)
         XCTAssertEqual(data.ringtonePath, "ring.caf")
         XCTAssertFalse(data.configureAudioSession)
         XCTAssertEqual(data.audioSessionMode, "voiceChat")
         XCTAssertEqual(data.audioSessionPreferredSampleRate, 48000.0)
         // Not in the sub-map: the defaults, not the top level.
-        XCTAssertTrue(data.supportsDTMF)
+        XCTAssertFalse(data.supportsDTMF)
     }
 
     func testReadsTheIOSOptionsFromTheTopLevelWithoutASubMap() {
         var args = base
         args["iconName"] = "FlatIcon"
-        args["supportsHolding"] = false
+        args["supportsHolding"] = true
         args["audioSessionMode"] = "videoChat"
 
         let data = CallData(args: args)
 
         XCTAssertEqual(data.iconName, "FlatIcon")
-        XCTAssertFalse(data.supportsHolding)
+        XCTAssertTrue(data.supportsHolding)
         XCTAssertEqual(data.audioSessionMode, "videoChat")
     }
 
     func testTheIOSSubMapWinsOverTopLevelKeys() {
         var args = base
         args["iconName"] = "FlatIcon"
-        args["ios"] = ["supportsHolding": false]
+        args["supportsHolding"] = false
+        args["ios"] = ["supportsHolding": true]
 
         let data = CallData(args: args)
 
         // With a sub-map present the top level is not read at all.
         XCTAssertEqual(data.iconName, "AppLogo")
-        XCTAssertFalse(data.supportsHolding)
+        XCTAssertTrue(data.supportsHolding)
     }
 
     func testToJSONCarriesTheIdTwiceAndTheIOSSection() {
@@ -121,12 +133,16 @@ final class CallDataTests: XCTestCase {
         XCTAssertEqual(json["isAccepted"] as? Bool, true)
         let ios = json["ios"] as? [String: Any]
         XCTAssertEqual(ios?["iconName"] as? String, "AppLogo")
-        XCTAssertEqual(ios?["supportsHolding"] as? Bool, true)
+        XCTAssertEqual(ios?["supportsHolding"] as? Bool, false)
+        XCTAssertNil(ios?["supportsGrouping"])
     }
 
     func testToJSONRoundTripsThroughInit() {
         var args = base
-        args["ios"] = ["iconName": "CallIcon", "supportsHolding": false, "ringtonePath": "ring.caf"]
+        args["ios"] = [
+            "iconName": "CallIcon", "supportsHolding": true, "supportsDTMF": true,
+            "maximumCallGroups": 2, "ringtonePath": "ring.caf",
+        ]
         let original = CallData(args: args)
 
         let restored = CallData(args: original.toJSON())
@@ -134,7 +150,9 @@ final class CallDataTests: XCTestCase {
         XCTAssertEqual(restored.uuid, original.uuid)
         XCTAssertEqual(restored.callerName, original.callerName)
         XCTAssertEqual(restored.iconName, "CallIcon")
-        XCTAssertFalse(restored.supportsHolding)
+        XCTAssertTrue(restored.supportsHolding)
+        XCTAssertTrue(restored.supportsDTMF)
+        XCTAssertEqual(restored.maximumCallGroups, 2)
         XCTAssertEqual(restored.ringtonePath, "ring.caf")
         XCTAssertEqual(restored.extra["callCid"] as? String, "default:ada")
     }
@@ -149,7 +167,7 @@ final class CallDataTests: XCTestCase {
             JSONSerialization.jsonObject(with: Data(contentsOf: fixtureURL)) as? NSDictionary)
         var args = base
         args["isAccepted"] = false
-        args["ios"] = ["iconName": "CallIcon", "supportsHolding": false, "ringtonePath": "ring.caf"]
+        args["ios"] = ["iconName": "CallIcon", "supportsHolding": true, "ringtonePath": "ring.caf"]
 
         let json = CallData(args: args).toJSON() as NSDictionary
 

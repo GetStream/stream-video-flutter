@@ -76,13 +76,18 @@ final class VoIPPayloadTests: XCTestCase {
 
     func testTheConfigurationSuppliesTheCallKitOptions() {
         let configuration = StreamVideoPushConfiguration(args: [
-            "ios": ["iconName": "CallIcon", "supportsHolding": false, "ringtonePath": "ring.caf"],
+            "ios": [
+                "iconName": "CallIcon", "supportsHolding": true, "supportsDTMF": true,
+                "maximumCallGroups": 2, "ringtonePath": "ring.caf",
+            ],
         ])
 
         let data = callData(payload, configuration: configuration)
 
         XCTAssertEqual(data.iconName, "CallIcon")
-        XCTAssertFalse(data.supportsHolding)
+        XCTAssertTrue(data.supportsHolding)
+        XCTAssertTrue(data.supportsDTMF)
+        XCTAssertEqual(data.maximumCallGroups, 2)
         XCTAssertEqual(data.ringtonePath, "ring.caf")
     }
 
@@ -90,7 +95,8 @@ final class VoIPPayloadTests: XCTestCase {
         let data = callData(payload)
 
         XCTAssertEqual(data.iconName, "AppLogo")
-        XCTAssertTrue(data.supportsHolding)
+        XCTAssertFalse(data.supportsHolding)
+        XCTAssertEqual(data.maximumCallGroups, 1)
     }
 
     func testThePersistedIconNameWinsOverTheConfiguration() {

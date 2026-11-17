@@ -91,7 +91,6 @@ const _iosOnlyEvents = {
   Event.actionDidUpdateDevicePushTokenVoip,
   Event.actionCallIncomingFailed,
   Event.actionCallToggleDtmf,
-  Event.actionCallToggleGroup,
   Event.actionCallToggleAudioSession,
 };
 

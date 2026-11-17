@@ -10,7 +10,6 @@ final class StreamVideoPushConfiguration: NSObject {
     var useComplexHandle: Bool
     var supportsVideo: Bool
     var maximumCallGroups: Int
-    var maximumCallsPerCallGroup: Int
     var audioSessionMode: String
     var audioSessionPreferredSampleRate: Double
     var audioSessionPreferredIOBufferDuration: Double
@@ -18,31 +17,14 @@ final class StreamVideoPushConfiguration: NSObject {
 
     var supportsDTMF: Bool
     var supportsHolding: Bool
-    var supportsGrouping: Bool
-    var supportsUngrouping: Bool
     var ringtonePath: String
     var includesCallsInRecents: Bool
 
-    init(headers: NSDictionary) {
-        self.headers = headers
-
-        // Default iOS values
-        self.iconName = "CallKitLogo"
-        self.handleType = ""
-        self.useComplexHandle = false
-        self.supportsVideo = true
-        self.maximumCallGroups = 2
-        self.maximumCallsPerCallGroup = 1
-        self.audioSessionMode = ""
-        self.audioSessionPreferredSampleRate = 44100.0
-        self.audioSessionPreferredIOBufferDuration = 0.005
-        self.configureAudioSession = true
-        self.supportsDTMF = true
-        self.supportsHolding = true
-        self.supportsGrouping = true
-        self.supportsUngrouping = true
-        self.ringtonePath = ""
-        self.includesCallsInRecents = true
+    /// The default CallKit options: no holding, no keypad and one call group, as the SDK sends
+    /// from Dart.
+    convenience init(headers: NSDictionary) {
+        let args: [String: Any?] = ["headers": headers]
+        self.init(args: args)
     }
 
     convenience init(args: NSDictionary) {
@@ -65,11 +47,8 @@ final class StreamVideoPushConfiguration: NSObject {
         self.useComplexHandle = options.useComplexHandle
         self.supportsVideo = options.supportsVideo
         self.maximumCallGroups = options.maximumCallGroups
-        self.maximumCallsPerCallGroup = options.maximumCallsPerCallGroup
         self.supportsDTMF = options.supportsDTMF
         self.supportsHolding = options.supportsHolding
-        self.supportsGrouping = options.supportsGrouping
-        self.supportsUngrouping = options.supportsUngrouping
         self.includesCallsInRecents = options.includesCallsInRecents
         self.ringtonePath = options.ringtonePath
         self.configureAudioSession = options.configureAudioSession
@@ -122,15 +101,12 @@ final class StreamVideoPushConfiguration: NSObject {
             "useComplexHandle": useComplexHandle,
             "supportsVideo": supportsVideo,
             "maximumCallGroups": maximumCallGroups,
-            "maximumCallsPerCallGroup": maximumCallsPerCallGroup,
             "audioSessionMode": audioSessionMode,
             "audioSessionPreferredSampleRate": audioSessionPreferredSampleRate,
             "audioSessionPreferredIOBufferDuration": audioSessionPreferredIOBufferDuration,
             "configureAudioSession": configureAudioSession,
             "supportsDTMF": supportsDTMF,
             "supportsHolding": supportsHolding,
-            "supportsGrouping": supportsGrouping,
-            "supportsUngrouping": supportsUngrouping,
             "ringtonePath": ringtonePath,
             "includesCallsInRecents": includesCallsInRecents,
         ]

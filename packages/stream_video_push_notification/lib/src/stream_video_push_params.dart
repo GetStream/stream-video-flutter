@@ -252,6 +252,7 @@ class IOSParams {
     this.useComplexHandle,
     this.supportsVideo,
     this.maximumCallGroups,
+    @Deprecated('Has no effect. Calls cannot be merged in CallKit.')
     this.maximumCallsPerCallGroup,
     this.audioSessionMode,
     @Deprecated('Has no effect. CallKit activates the audio session.')
@@ -261,7 +262,9 @@ class IOSParams {
     this.configureAudioSession,
     this.supportsDTMF,
     this.supportsHolding,
+    @Deprecated('Has no effect. Calls cannot be merged in CallKit.')
     this.supportsGrouping,
+    @Deprecated('Has no effect. Calls cannot be merged in CallKit.')
     this.supportsUngrouping,
     this.ringtonePath,
     this.includesCallsInRecents,
@@ -298,8 +301,15 @@ class IOSParams {
   /// Type handle call `generic`, `number`, `email`
   final String? handleType;
   final bool? useComplexHandle;
+
+  /// See [IOSPushConfiguration.supportsVideo].
   final bool? supportsVideo;
+
+  /// See [IOSPushConfiguration.maximumCallGroups].
   final int? maximumCallGroups;
+
+  /// Has no effect: CallKit is never offered a merge of calls.
+  @Deprecated('Has no effect. Calls cannot be merged in CallKit.')
   final int? maximumCallsPerCallGroup;
   final String? audioSessionMode;
 
@@ -310,9 +320,19 @@ class IOSParams {
   final double? audioSessionPreferredSampleRate;
   final double? audioSessionPreferredIOBufferDuration;
   final bool? configureAudioSession;
+
+  /// See [IOSPushConfiguration.supportsDTMF].
   final bool? supportsDTMF;
+
+  /// See [IOSPushConfiguration.supportsHolding].
   final bool? supportsHolding;
+
+  /// Has no effect: CallKit is never offered a merge of calls.
+  @Deprecated('Has no effect. Calls cannot be merged in CallKit.')
   final bool? supportsGrouping;
+
+  /// Has no effect: CallKit is never offered a merge of calls.
+  @Deprecated('Has no effect. Calls cannot be merged in CallKit.')
   final bool? supportsUngrouping;
 
   /// Add file to root project xcode /ios/Runner/Ringtone.caf and Copy Bundle Resources(Build Phases) -> value: "Ringtone.caf"
@@ -328,6 +348,7 @@ class IOSParams {
     bool? useComplexHandle,
     bool? supportsVideo,
     int? maximumCallGroups,
+    @Deprecated('Has no effect. Calls cannot be merged in CallKit.')
     int? maximumCallsPerCallGroup,
     String? audioSessionMode,
     @Deprecated('Has no effect. CallKit activates the audio session.')
@@ -337,7 +358,9 @@ class IOSParams {
     bool? configureAudioSession,
     bool? supportsDTMF,
     bool? supportsHolding,
+    @Deprecated('Has no effect. Calls cannot be merged in CallKit.')
     bool? supportsGrouping,
+    @Deprecated('Has no effect. Calls cannot be merged in CallKit.')
     bool? supportsUngrouping,
     String? ringtonePath,
     bool? includesCallsInRecents,
