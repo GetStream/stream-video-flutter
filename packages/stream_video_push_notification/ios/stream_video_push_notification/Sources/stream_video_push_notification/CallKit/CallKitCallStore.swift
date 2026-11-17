@@ -436,9 +436,6 @@ final class CallKitCallStore {
     ) -> [CallKitEffect] {
         call.move(to: .ended(reason))
         remove(call)
-        if answeredCall === call {
-            answeredCall = nil
-        }
         return [.send(event: StreamVideoIncomingCallConstants.ACTION_CALL_ENDED, body: call.options.toJSON())]
     }
 }
