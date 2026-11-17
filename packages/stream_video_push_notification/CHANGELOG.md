@@ -7,13 +7,24 @@
 - `StreamVideoPushNotificationManager.currentActiveCalls` is removed; read `StreamVideo.state.activeCalls`.
 - `isAcceptedOnThisDevice` is no longer exported.
 - [iOS] The public `Call` class is removed. Nothing public returned it, but native code that named the type no longer compiles.
+- [iOS] `StreamVideoCallkitManager` and `EventCallbackHandler` are no longer public. `StreamVideoPushNotificationPlugin.showIncomingCall`, `startOutgoingCall` and `activeCalls` remain the way to reach CallKit from native code. For the manager's other public members, use instead:
+  - `showIncomingCall(_:fromPushKit:completion:)`: `StreamVideoPushNotificationPlugin.showIncomingCall(data:fromPushKit:completion:)`.
+  - `startCall` and `activeCalls`: the plugin's `startOutgoingCall` and `activeCalls`.
+  - `getAcceptedCall()`: the plugin's `activeCalls()`, where the accepted call has `accepted: true`.
+  - `endCall`, `endAllCalls`, `connectedCall`, `muteCall`, `holdCall` and `saveEndCall`: from Dart, `StreamVideoPushNotificationManager`'s `endCall` or `endCallByCid`, `endAllCalls`, `setCallConnected`, `muteCall` or `setCallMutedByCid`, `holdCall` and `reportCallEnded`. Natively, a `CXEndCallAction`, `CXSetMutedCallAction` or `CXSetHeldCallAction` through your own `CXCallController` reaches the plugin's provider as well.
+  - `sendEventCustom`: none; use your app's own platform channel.
+  - `initCallkitProvider`: none needed; the plugin sets up its provider when it registers.
+- [iOS] Only what an app calls from native code stays public: `CallData`, `VoIPPushRegistryHandler.shared` with `registerForPushNotifications()` and its `PKPushRegistryDelegate` methods, and the plugin's static `showIncomingCall`, `startOutgoingCall`, `activeCalls` and `setDevicePushTokenVoIP`. The native `StreamVideoPushConfiguration`, `StreamVideoIncomingCallConstants`, `VoIPPushRegistryHandler.initChannel` and `initData`, and the plugin's `sharedInstance` and instance VoIP token methods are internal: the plugin sets them up itself, and Dart receives the events.
+- [iOS] `VoIPPushRegistryHandler` no longer conforms to `UNUserNotificationCenterDelegate`, whose methods it never implemented. An app that set `UNUserNotificationCenter.current().delegate = VoIPPushRegistryHandler.shared` no longer compiles; remove that line, or set a delegate of its own.
+
+### ⚠️ Deprecated
+
+- [iOS] `StreamVideoPKDelegateManager` is renamed `VoIPPushRegistryHandler`. The old name still works as a deprecated alias with the same members, so an `AppDelegate` that calls `StreamVideoPKDelegateManager.shared.registerForPushNotifications()` compiles and rings unchanged, with a deprecation warning.
+- `IOSPushConfiguration.audioSessionActive` and `IOSParams.audioSessionActive`, and on iOS `CallData.audioSessionActive`, have no effect: CallKit activates the audio session. `dart fix --apply` removes the Dart arguments.
 
 ### 🔄 Changed
 
 - `StreamVideoPushHandler.handleBackgroundMessage` builds a client that sets up no media.
-- [iOS] `EventCallbackHandler` no longer holds events of its own. `send` goes through the plugin's one event queue, which delivers to the event channel registered last; events still held when a new event channel registers go to that channel.
-- [iOS] `StreamVideoCallkitManager.showIncomingCall(_:fromPushKit:completion:)` configures the audio session before reporting the call, as the variant without a completion does, and its `completion` is optional.
-- [iOS] `StreamVideoCallkitManager.showIncomingCall` configures the audio session with the options of the call it reports, before and after reporting it. The variant without a completion used the options stored for the last PushKit call, so a call not from PushKit got an earlier call's options, or the defaults when none was stored, and the configuration after reporting could take a newer call's.
 - [iOS] `ActionCallAccept` and `ActionCallDecline` carry the call CallKit answered or ended, instead of the options last given to the plugin, which could belong to another call or be empty.
 - [iOS] Answering a call from CallKit applies that call's audio session options, and again 1.2 s later, instead of the options last given to the plugin, which could belong to another call. The second pass is skipped once the call has ended or another call was answered.
 - [iOS] Only the first activation of a call's audio session applies its audio session options and reports an outgoing call as connecting. A later activation, such as a resume from hold, leaves the session as it is. Every activation now sends `ActionCallToggleAudioSession`, including after the call connected.
@@ -27,11 +38,12 @@
 
 ### ✅ Added
 
+- [iOS] `StreamVideoPushNotificationPlugin.showIncomingCall(data:fromPushKit:completion:)` runs `completion` once CallKit accepted or refused the call, for an app with its own PushKit delegate that calls PushKit's completion from it.
 - Added `StreamVideoPushHandler.handleBackgroundMessage`, which simplifies the ringing setup by running a Stream ringing push through its whole background lifecycle from your Firebase background handler: it builds the client through the factory you give it, observes the ringing events a background isolate can act on, and disposes the client — along with whatever that factory set up — once the user has answered, declined, or let the call time out, or the ring has ended without them, such as when the caller cancels it. It replaces the setup and teardown each integration had to write by hand.
 
 ### 🐞 Fixed
 
-- [iOS] The plugin no longer activates the audio session itself when it shows, answers or starts a call. The session it activated kept CallKit from activating its own, so WebRTC could run on a session CallKit did not own. CallKit now activates it. `audioSessionActive` has no effect.
+- [iOS] The plugin no longer activates the audio session itself when it shows, answers or starts a call. The session it activated kept CallKit from activating its own, so WebRTC could run on a session CallKit did not own. CallKit now activates it.
 - [iOS] With `supportsHolding: true` (off by default), a call put on hold by another app's call, such as a cellular call answered with Hold & Accept, gets its audio back when that call ends. CallKit takes it off hold even when the other side hung up, and if CallKit then gives the call no working audio session, the plugin ends and starts the call again with CallKit under a new uuid. Dart keeps the call's id and is not told. Until the call is next held, an audio engine that cannot start on a later activation of it restarts it too; a call is restarted at most three times per hold. Recents lists the call once, with its length up to the first restart. A call CallKit refuses to start again after four attempts is ended with `ActionCallEnded`.
 - A mute from the CallKit screen applies to the call it was made on.
 - [iOS] Taking a call off hold no longer marks it unmuted, so muting or unmuting from the app afterwards reaches the CallKit screen.

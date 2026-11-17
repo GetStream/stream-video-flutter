@@ -72,6 +72,20 @@ final class StreamVideoPushConfigurationTests: XCTestCase {
         XCTAssertNil((UserDefaults.standard.dictionary(forKey: persistedKey) ?? [:])["headers"])
     }
 
+    func testAConfigurationStoredWithAKeyNoLongerReadStillLoads() {
+        // Stored by an earlier version, which also wrote `audioSessionActive`.
+        UserDefaults.standard.set(
+            ["ios": ["iconName": "CallIcon", "audioSessionActive": false]],
+            forKey: persistedKey)
+
+        let loaded = StreamVideoPushConfiguration.loadPersisted()
+
+        XCTAssertEqual(loaded?.iconName, "CallIcon")
+        let ios = loaded?.toJSON()["ios"] as? [String: Any]
+        XCTAssertNotNil(ios)
+        XCTAssertNil(ios?["audioSessionActive"])
+    }
+
     func testPersistSurvivesANullHeaderValue() {
         // A Dart `null` in the headers arrives as NSNull, which UserDefaults cannot store.
         let configuration = StreamVideoPushConfiguration(args: [

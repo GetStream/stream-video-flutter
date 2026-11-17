@@ -3,7 +3,7 @@ import Foundation
 extension StreamVideoCallkitManager {
 
     /// Makes `handler`, the stream handler of the latest event channel, the one events go to.
-    public func setEventHandler(_ handler: EventCallbackHandler) {
+    func setEventHandler(_ handler: EventCallbackHandler) {
         eventSink.attach(handler)
     }
 
@@ -25,11 +25,5 @@ extension StreamVideoCallkitManager {
                 audio.postInterruptionEnded(object: self)
             }
         }
-    }
-
-    @objc public func sendEventCustom(_ event: String, body: NSDictionary?) {
-        // Convert NSDictionary to [String: Any?] for queueing if needed
-        let bodyDict = body as? [String: Any?]
-        sendEvent(event, bodyDict)
     }
 }

@@ -21,7 +21,6 @@ final class CallKitOptionsTests: XCTestCase {
         "ringtonePath": "ring.caf",
         "configureAudioSession": false,
         "audioSessionMode": "voiceChat",
-        "audioSessionActive": false,
         "audioSessionPreferredSampleRate": 48000.0,
         "audioSessionPreferredIOBufferDuration": 0.01,
     ]
@@ -41,7 +40,6 @@ final class CallKitOptionsTests: XCTestCase {
         XCTAssertEqual(options.ringtonePath, "ring.caf", line: line)
         XCTAssertFalse(options.configureAudioSession, line: line)
         XCTAssertEqual(options.audioSessionMode, "voiceChat", line: line)
-        XCTAssertFalse(options.audioSessionActive, line: line)
         XCTAssertEqual(options.audioSessionPreferredSampleRate, 48000.0, line: line)
         XCTAssertEqual(options.audioSessionPreferredIOBufferDuration, 0.01, line: line)
     }

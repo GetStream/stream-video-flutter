@@ -201,6 +201,7 @@ class IOSPushConfiguration {
     this.maximumCallGroups,
     this.maximumCallsPerCallGroup,
     this.audioSessionMode,
+    @Deprecated('Has no effect. CallKit activates the audio session.')
     this.audioSessionActive,
     this.audioSessionPreferredSampleRate,
     this.audioSessionPreferredIOBufferDuration,
@@ -236,7 +237,11 @@ class IOSPushConfiguration {
   final int? maximumCallGroups;
   final int? maximumCallsPerCallGroup;
   final String? audioSessionMode;
+
+  /// Has no effect: CallKit activates the audio session when it needs it.
+  @Deprecated('Has no effect. CallKit activates the audio session.')
   final bool? audioSessionActive;
+
   final double? audioSessionPreferredSampleRate;
   final double? audioSessionPreferredIOBufferDuration;
   final bool? configureAudioSession;
@@ -260,6 +265,7 @@ class IOSPushConfiguration {
     int? maximumCallGroups,
     int? maximumCallsPerCallGroup,
     String? audioSessionMode,
+    @Deprecated('Has no effect. CallKit activates the audio session.')
     bool? audioSessionActive,
     double? audioSessionPreferredSampleRate,
     double? audioSessionPreferredIOBufferDuration,

@@ -1,29 +1,29 @@
 import Foundation
 
-@objc public class StreamVideoPushConfiguration: NSObject {
-    @objc public var headers: NSDictionary
+/// The CallKit options Dart last sent, kept for VoIP pushes that arrive before Dart runs.
+final class StreamVideoPushConfiguration: NSObject {
+    var headers: NSDictionary
 
     // flattened iOS params
-    @objc public var iconName: String
-    @objc public var handleType: String
-    @objc public var useComplexHandle: Bool
-    @objc public var supportsVideo: Bool
-    @objc public var maximumCallGroups: Int
-    @objc public var maximumCallsPerCallGroup: Int
-    @objc public var audioSessionMode: String
-    /// Has no effect: CallKit activates the audio session when it needs it.
-    @objc public var audioSessionActive: Bool
-    @objc public var audioSessionPreferredSampleRate: Double
-    @objc public var audioSessionPreferredIOBufferDuration: Double
-    @objc public var configureAudioSession: Bool
-    @objc public var supportsDTMF: Bool
-    @objc public var supportsHolding: Bool
-    @objc public var supportsGrouping: Bool
-    @objc public var supportsUngrouping: Bool
-    @objc public var ringtonePath: String
-    @objc public var includesCallsInRecents: Bool
+    var iconName: String
+    var handleType: String
+    var useComplexHandle: Bool
+    var supportsVideo: Bool
+    var maximumCallGroups: Int
+    var maximumCallsPerCallGroup: Int
+    var audioSessionMode: String
+    var audioSessionPreferredSampleRate: Double
+    var audioSessionPreferredIOBufferDuration: Double
+    var configureAudioSession: Bool
 
-    @objc public init(headers: NSDictionary) {
+    var supportsDTMF: Bool
+    var supportsHolding: Bool
+    var supportsGrouping: Bool
+    var supportsUngrouping: Bool
+    var ringtonePath: String
+    var includesCallsInRecents: Bool
+
+    init(headers: NSDictionary) {
         self.headers = headers
 
         // Default iOS values
@@ -34,7 +34,6 @@ import Foundation
         self.maximumCallGroups = 2
         self.maximumCallsPerCallGroup = 1
         self.audioSessionMode = ""
-        self.audioSessionActive = true
         self.audioSessionPreferredSampleRate = 44100.0
         self.audioSessionPreferredIOBufferDuration = 0.005
         self.configureAudioSession = true
@@ -46,7 +45,7 @@ import Foundation
         self.includesCallsInRecents = true
     }
 
-    @objc public convenience init(args: NSDictionary) {
+    convenience init(args: NSDictionary) {
 
         var argsConvert = [String: Any?]()
         for (key, value) in args {
@@ -57,7 +56,7 @@ import Foundation
         self.init(args: argsConvert)
     }
 
-    public init(args: [String: Any?]) {
+    init(args: [String: Any?]) {
         self.headers = args["headers"] as? NSDictionary ?? [:]
 
         let options = CallKitOptions(args: args, defaultIconName: "CallKitLogo")
@@ -75,7 +74,6 @@ import Foundation
         self.ringtonePath = options.ringtonePath
         self.configureAudioSession = options.configureAudioSession
         self.audioSessionMode = options.audioSessionMode
-        self.audioSessionActive = options.audioSessionActive
         self.audioSessionPreferredSampleRate = options.audioSessionPreferredSampleRate
         self.audioSessionPreferredIOBufferDuration = options.audioSessionPreferredIOBufferDuration
     }
@@ -91,7 +89,7 @@ import Foundation
     /// `initData` has not been called yet and the in-memory configuration is empty. Without a
     /// persisted copy the CallKit provider would be built from defaults, losing the configured
     /// ringtone, icon and Recents behaviour. 
-    @objc public func persist() {
+    func persist() {
         UserDefaults.standard.set(persistedPayload(), forKey: Self.persistedConfigurationKey)
     }
 
@@ -108,7 +106,7 @@ import Foundation
     }
 
     /// Returns the last persisted configuration, or nil when none was stored yet.
-    @objc public static func loadPersisted() -> StreamVideoPushConfiguration? {
+    static func loadPersisted() -> StreamVideoPushConfiguration? {
         guard
             let stored = UserDefaults.standard.dictionary(forKey: persistedConfigurationKey)
         else {
@@ -117,7 +115,7 @@ import Foundation
         return StreamVideoPushConfiguration(args: stored)
     }
 
-    open func toJSON() -> [String: Any] {
+    func toJSON() -> [String: Any] {
         let ios: [String: Any] = [
             "iconName": iconName,
             "handleType": handleType,
@@ -126,7 +124,6 @@ import Foundation
             "maximumCallGroups": maximumCallGroups,
             "maximumCallsPerCallGroup": maximumCallsPerCallGroup,
             "audioSessionMode": audioSessionMode,
-            "audioSessionActive": audioSessionActive,
             "audioSessionPreferredSampleRate": audioSessionPreferredSampleRate,
             "audioSessionPreferredIOBufferDuration": audioSessionPreferredIOBufferDuration,
             "configureAudioSession": configureAudioSession,
