@@ -2,6 +2,7 @@ package io.getstream.video.flutter.stream_video_push_notification.core
 
 import android.content.Context
 import com.fasterxml.jackson.core.type.TypeReference
+import io.getstream.video.flutter.stream_video_push_notification.PREFERENCES_FILE_NAME
 import io.getstream.video.flutter.stream_video_push_notification.Utils
 
 /**
@@ -19,7 +20,8 @@ internal class PrefsCallStore(context: Context) : CallStore {
     override fun add(call: RingingCall) = update { calls ->
         val index = calls.indexOfFirst { it.id == call.id }
         if (index >= 0) {
-            calls[index] = calls[index].copy(isAccepted = call.isAccepted)
+            val stored = calls[index]
+            calls[index] = stored.copy(isAccepted = stored.isAccepted || call.isAccepted)
         } else {
             calls += call
         }
@@ -60,7 +62,6 @@ internal class PrefsCallStore(context: Context) : CallStore {
     }
 
     companion object {
-        const val PREFERENCES_FILE_NAME = "stream_video_incoming_call_preferences"
         const val KEY = "ACTIVE_CALLS"
 
         private val lock = Any()
