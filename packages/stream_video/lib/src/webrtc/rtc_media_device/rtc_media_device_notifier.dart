@@ -37,8 +37,63 @@ class ScreenSharingStartedEvent extends NativeWebRtcEvent {
 /// different output through the native route-selection UI
 /// ([RtcMediaDeviceNotifier.triggeriOSAudioRouteSelectionUI]).
 class AudioRouteChangedEvent extends NativeWebRtcEvent {
-  AudioRouteChangedEvent({required this.device});
+  AudioRouteChangedEvent({
+    required this.device,
+    this.reason = AudioRouteChangeReason.unknown,
+  });
+
+  /// The output audio is routed to now.
   final RtcMediaDevice device;
+
+  /// Why the route changed, or [AudioRouteChangeReason.unknown] when the
+  /// WebRTC plugin does not say.
+  final AudioRouteChangeReason reason;
+}
+
+/// Why the audio route changed: iOS's `AVAudioSessionRouteChangeReason`.
+enum AudioRouteChangeReason {
+  /// The reason is not known.
+  unknown(0),
+
+  /// A device became available, such as headphones that were plugged in.
+  newDeviceAvailable(1),
+
+  /// The device in use became unavailable, such as headphones that were
+  /// unplugged.
+  oldDeviceUnavailable(2),
+
+  /// The audio session's category changed.
+  categoryChange(3),
+
+  /// The app overrode the route, such as to the loudspeaker.
+  override(4),
+
+  /// The device woke from sleep.
+  wakeFromSleep(6),
+
+  /// No route suits the audio session's category.
+  noSuitableRouteForCategory(7),
+
+  /// The route's configuration changed without a device being added or
+  /// removed, such as when the audio unit is rebuilt after a CallKit hold.
+  routeConfigurationChange(8);
+
+  const AudioRouteChangeReason(this.code);
+
+  /// The `AVAudioSessionRouteChangeReason` raw value.
+  final int code;
+
+  /// The reason with [code], or [unknown] for a code it does not know.
+  static AudioRouteChangeReason fromCode(int? code) => values.firstWhere(
+    (reason) => reason.code == code,
+    orElse: () => AudioRouteChangeReason.unknown,
+  );
+
+  /// Whether the system re-routed on its own, with no device added or
+  /// removed: after a category change, or when the audio unit was rebuilt,
+  /// such as after a CallKit hold.
+  bool get isSystemReconfiguration =>
+      this == categoryChange || this == routeConfigurationChange;
 }
 
 sealed class SpeechActivityEvent {
@@ -167,36 +222,42 @@ class RtcMediaDeviceNotifier {
 
   Stream<NativeWebRtcEvent> nativeWebRtcEventsStream() {
     return rtc.eventStream
-        .map<NativeWebRtcEvent?>((data) {
-          if (data.isEmpty) return null;
-
-          final event = data.keys.first;
-          final values = data.values.first;
-
-          if (values is! Map<dynamic, dynamic>?) return null;
-
-          switch (event) {
-            case 'screenSharingStopped':
-              return ScreenSharingStoppedEvent(data: values);
-            case 'screenSharingStarted':
-              return ScreenSharingStartedEvent(data: values);
-            case 'onAudioRouteChange':
-              final deviceId = values?['deviceId'] as String?;
-              if (deviceId == null || deviceId.isEmpty) return null;
-              return AudioRouteChangedEvent(
-                device: RtcMediaDevice(
-                  id: deviceId,
-                  label: values?['label'] as String? ?? deviceId,
-                  groupId: values?['groupId'] as String?,
-                  kind: RtcMediaDeviceKind.audioOutput,
-                ),
-              );
-            default:
-              return null;
-          }
-        })
+        .map<NativeWebRtcEvent?>(nativeWebRtcEventFrom)
         .whereNotNull()
         .asBroadcastStream();
+  }
+
+  /// The event a message from the WebRTC plugin's event channel carries, or
+  /// null for one this SDK does not follow.
+  @visibleForTesting
+  static NativeWebRtcEvent? nativeWebRtcEventFrom(Map<String, dynamic> data) {
+    if (data.isEmpty) return null;
+
+    final event = data.keys.first;
+    final values = data.values.first;
+
+    if (values is! Map<dynamic, dynamic>?) return null;
+
+    switch (event) {
+      case 'screenSharingStopped':
+        return ScreenSharingStoppedEvent(data: values);
+      case 'screenSharingStarted':
+        return ScreenSharingStartedEvent(data: values);
+      case 'onAudioRouteChange':
+        final deviceId = values?['deviceId'] as String?;
+        if (deviceId == null || deviceId.isEmpty) return null;
+        return AudioRouteChangedEvent(
+          device: RtcMediaDevice(
+            id: deviceId,
+            label: values?['label'] as String? ?? deviceId,
+            groupId: values?['groupId'] as String?,
+            kind: RtcMediaDeviceKind.audioOutput,
+          ),
+          reason: AudioRouteChangeReason.fromCode(values?['reason'] as int?),
+        );
+      default:
+        return null;
+    }
   }
 
   void _listenForAudioProcessingStateChanges() {

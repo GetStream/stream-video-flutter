@@ -16,6 +16,9 @@ concurrency:
 
 jobs:
   release:
+    # Publishing waits for a flutter-developers approval, and pub.dev only
+    # accepts uploads from this environment.
+    environment: pub.dev
     permissions:
       contents: write # create the GitHub Release
       id-token: write # OIDC auth to pub.dev
@@ -228,6 +231,13 @@ jobs:
 
           echo "path=$notes_file" >> "$GITHUB_OUTPUT"
 
+      - name: 🔑 Mint CI Bot Token
+        id: ci-bot-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
+
       - name: 🚀 Create GitHub Release
         uses: softprops/action-gh-release@v3
         with:
@@ -236,5 +246,5 @@ jobs:
           body_path: ${{ steps.notes.outputs.path }}
           prerelease: ${{ steps.parse.outputs.prerelease }}
           make_latest: ${{ steps.parse.outputs.make_latest }}
-          # Bot PAT, so the published release starts app-distribute.yml.
-          token: ${{ secrets.BOT_GITHUB_API_TOKEN }}
+          # CI bot app token, so the published release starts app-distribute.yml.
+          token: ${{ steps.ci-bot-token.outputs.token }}
