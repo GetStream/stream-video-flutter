@@ -230,20 +230,6 @@ void main() {
       expect(event.digits, '12#');
     });
 
-    test('group', () async {
-      final events = await receive([
-        _message(Event.actionCallToggleGroup, {
-          'id': 'call-uuid',
-          'callUUIDToGroupWith': 'other-uuid',
-        }),
-      ]);
-
-      // ignore: deprecated_member_use
-      final event = events.single! as ActionCallToggleGroup;
-      expect(event.uuid, 'call-uuid');
-      expect(event.callUUIDToGroupWith, 'other-uuid');
-    });
-
     test('audio session', () async {
       final events = await receive([
         _message(Event.actionCallToggleAudioSession, {'isActive': true}),

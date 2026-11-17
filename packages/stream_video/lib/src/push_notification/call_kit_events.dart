@@ -208,31 +208,6 @@ class ActionCallToggleDtmf extends RingingEvent {
   List<Object?> get props => [uuid, digits];
 }
 
-/// Represents a call toggle group event.
-///
-/// Never sent: CallKit is never offered a merge of calls, and a merge it
-/// attempts anyway is refused.
-@Deprecated('Never sent. Calls cannot be merged in CallKit.')
-class ActionCallToggleGroup extends RingingEvent {
-  /// Creates an [ActionCallToggleGroup] event instance with the specified
-  /// [uuid] and [callUUIDToGroupWith].
-  @Deprecated('Never sent. Calls cannot be merged in CallKit.')
-  const ActionCallToggleGroup({
-    required this.uuid,
-    required this.callUUIDToGroupWith,
-  });
-
-  /// The unique identifier for the call.
-  final String uuid;
-
-  /// The unique identifier for the call to group with, or null when the call
-  /// is ungrouped.
-  final String? callUUIDToGroupWith;
-
-  @override
-  List<Object?> get props => [uuid, callUUIDToGroupWith];
-}
-
 /// Represents a call toggle audio session event.
 ///
 /// Sent when CallKit activates the app's audio session, as when a call starts,

@@ -28,7 +28,7 @@
 - [iOS] Only an outgoing call that has connected, through `setCallConnected`, keeps an incoming ring from timing out and makes ending that ring send `ActionCallEnded`. An app that calls `startOutgoingCall` itself and never `setCallConnected` now sees a ring during its call time out, or arrive as `ActionCallDecline` when the user declines it, as it would with no call.
 - `StreamVideoPushHandler.handleBackgroundMessage` builds a client that sets up no media.
 - `IOSPushConfiguration.supportsDTMF` is off by default. The SDK sends no DTMF tones, so CallKit's keypad did nothing. An app that sends the digits itself from `ActionCallToggleDtmf` turns it on.
-- [iOS] `ActionCallToggleGroup` is no longer sent.
+- [iOS] `ActionCallToggleGroup` is no longer sent, and `stream_video` removes it.
 - [iOS] `ActionCallAccept` and `ActionCallDecline` carry the call CallKit answered or ended, instead of the options last given to the plugin, which could belong to another call or be empty.
 - [iOS] Answering a call from CallKit applies that call's audio session options, and again 1.2 s later, instead of the options last given to the plugin, which could belong to another call. The second pass is skipped once the call has ended or another call was answered.
 - [iOS] Only the first activation of a call's audio session applies its audio session options and reports an outgoing call as connecting. A later activation, such as a resume from hold, leaves the session as it is. Every activation now sends `ActionCallToggleAudioSession`, including after the call connected.

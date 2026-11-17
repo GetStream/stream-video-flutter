@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
-import 'package:stream_video/stream_video.dart' show ActionCallToggleDtmf;
+import 'package:stream_video/stream_video.dart'
+    show ActionCallToggleDtmf, StreamVideoOptions;
 import '../stream_video_push_notification.dart';
 
 part 'stream_video_push_configuration.g.dart';
@@ -246,7 +247,8 @@ class IOSPushConfiguration {
   ///
   /// 1 is enough to hold a call for another app's call, such as a phone call.
   /// Holding one of the app's calls to answer another of its calls, with
-  /// `allowMultipleActiveCalls`, needs 2 and [supportsHolding].
+  /// [StreamVideoOptions.allowMultipleActiveCalls], needs 2 and
+  /// [supportsHolding].
   final int? maximumCallGroups;
 
   /// Has no effect: CallKit is never offered a merge of calls.
