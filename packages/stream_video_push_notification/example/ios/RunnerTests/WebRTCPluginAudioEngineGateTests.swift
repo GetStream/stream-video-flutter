@@ -52,15 +52,16 @@ final class WebRTCPluginAudioEngineGateTests: XCTestCase {
         XCTAssertEqual(failures, 1)
     }
 
-    func testTheDefaultGateUsesTheProcessWideControl() {
+    func testTheDefaultGateTakesTheProcessWideStartFailureHandler() {
         let shared = FlutterWebRTCPlugin.audioEngineControl
         let handler = shared.audioEngineStartFailedHandler
         defer { shared.audioEngineStartFailedHandler = handler }
-
         let defaultGate = WebRTCPluginAudioEngineGate()
+        var failures = 0
+        defaultGate.onEngineStartFailed = { failures += 1 }
 
-        XCTAssertTrue(defaultGate.control === shared)
-        XCTAssertTrue(FlutterWebRTCPlugin.audioEngineControl === shared)
-        XCTAssertNotNil(shared.audioEngineStartFailedHandler)
+        shared.audioEngineStartFailedHandler?()
+
+        XCTAssertEqual(failures, 1)
     }
 }
