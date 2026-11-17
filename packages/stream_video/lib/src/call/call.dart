@@ -1232,6 +1232,7 @@ class Call {
           data,
           ringing: ringing,
           notify: notify,
+          video: video,
         );
         _ringing.startRingStatePollingIfNeeded(data.metadata);
 
@@ -1341,6 +1342,7 @@ class Call {
         _stateManager.updateFromCallCreatedData(
           data.data,
           ringing: ringing,
+          video: video,
           callConnectOptions: connectOptions,
         );
 

@@ -30,8 +30,7 @@ const _swiftSources =
     'ios/stream_video_push_notification/Sources/stream_video_push_notification';
 const _swiftConstants = '$_swiftSources/StreamVideoIncomingCallConstants.swift';
 const _swiftMethodHandlers = [
-  '$_swiftSources/StreamVideoPushNotificationPlugin.swift',
-  '$_swiftSources/StreamVideoCallkitManager.swift',
+  '$_swiftSources/Plugin/PushCommand.swift',
 ];
 
 const _kotlinSources =
@@ -78,13 +77,6 @@ const _androidOnlyMethods = {
   'canUseFullScreenIntent',
 };
 
-/// Cases the iOS switch has beyond what Dart invokes there. The first two
-/// answer `true` and do nothing; Dart never sends them to iOS.
-const _iosExtraHandledMethods = {
-  'showMissCallNotification',
-  'requestNotificationPermission',
-};
-
 /// Cases the Android switch has beyond what Dart invokes there.
 /// `getDevicePushTokenVoIP` answers an empty string and Dart short-circuits
 /// before asking.
@@ -97,7 +89,6 @@ const _iosOnlyEvents = {
   Event.actionDidUpdateDevicePushTokenVoip,
   Event.actionCallIncomingFailed,
   Event.actionCallToggleDtmf,
-  Event.actionCallToggleGroup,
   Event.actionCallToggleAudioSession,
 };
 
@@ -210,7 +201,6 @@ void main() {
         equals({
           ..._sharedMethods,
           ..._iosOnlyMethods,
-          ..._iosExtraHandledMethods,
         }),
         reason:
             'the iOS method switch changed; update the contract sets at the '
