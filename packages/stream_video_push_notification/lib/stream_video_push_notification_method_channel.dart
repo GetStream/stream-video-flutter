@@ -91,25 +91,12 @@ class MethodChannelStreamVideoPushNotification
     });
   }
 
-  /// Whether the system call UI has the call muted.
-  ///
-  /// On iOS this is CallKit's mute state, which [muteCall] sets. On Android it
-  /// is the mute state Telecom reports while the Telecom integration holds the
-  /// call, and `false` otherwise; [muteCall] does not change it there.
   @override
   Future<bool> isMuted(String id) async {
     return (await methodChannel.invokeMethod('isMuted', {'id': id})) as bool? ??
         false;
   }
 
-  /// Holds or resumes an ongoing call.
-  ///
-  /// On iOS through CallKit. On Android through Telecom, while the Telecom
-  /// integration holds the call; an [ActionCallToggleHold] follows once
-  /// Telecom has done it, and the SDK then leaves the call, as it does for any
-  /// Telecom hold of a call it is in, unless several calls may be active
-  /// (`StreamVideoOptions.allowMultipleActiveCalls`).
-  /// Without the integration it does nothing on Android.
   @override
   Future<void> holdCall(String id, {bool isOnHold = true}) async {
     await methodChannel.invokeMethod('holdCall', {
