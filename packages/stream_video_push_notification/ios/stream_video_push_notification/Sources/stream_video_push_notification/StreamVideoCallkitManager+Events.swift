@@ -21,6 +21,8 @@ extension StreamVideoCallkitManager {
                 sharedProvider?.reportOutgoingCall(with: uuid, startedConnectingAt: date)
             case .reportConnected(let uuid, let date):
                 sharedProvider?.reportOutgoingCall(with: uuid, connectedAt: date)
+            case .postAudioInterruptionEnded:
+                audio.postInterruptionEnded(object: self)
             }
         }
     }

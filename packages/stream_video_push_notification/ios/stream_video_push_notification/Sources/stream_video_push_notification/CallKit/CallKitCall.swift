@@ -61,6 +61,8 @@ final class CallKitCall {
     var connectedAt: Date?
     /// Whether CallKit is told the call connected: true once CallKit started or answered it.
     var reportsConnection = false
+    /// Whether CallKit activated the audio session since the call was started or answered.
+    var hasActivatedAudioSession = false
 
     init(
         identity: CallKitCallIdentity, direction: Direction, options: CallData,

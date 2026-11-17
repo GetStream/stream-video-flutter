@@ -15,6 +15,9 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
 
     private var savedEventSink: RingingEventSink!
     private var savedStore: CallKitCallStore!
+    private var savedAudio: CallKitAudioSessionCoordinator!
+    private var session: FakeAudioSession!
+    private var gate: FakeAudioEngineGate!
     private var received: [[String: Any]] = []
 
     override func setUp() {
@@ -23,11 +26,15 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         // Each test gets a sink of its own, which leaves the host's handler and held events alone.
         savedEventSink = manager.eventSink
         savedStore = manager.store
+        savedAudio = manager.audio
 
         manager.eventSink = RingingEventSink()
         // An attached handler Dart does not listen on yet, so events are held.
         manager.setEventHandler(EventCallbackHandler(sink: manager.eventSink))
         manager.store = CallKitCallStore()
+        session = FakeAudioSession()
+        gate = FakeAudioEngineGate()
+        manager.audio = CallKitAudioSessionCoordinator(session: session, gate: gate)
         received = []
     }
 
@@ -36,6 +43,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         drainMainQueue()
         manager.eventSink = savedEventSink
         manager.store = savedStore
+        manager.audio = savedAudio
         super.tearDown()
     }
 
@@ -207,10 +215,9 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         XCTAssertFalse(manager.store.shouldTimeOut(appId: ringing.identity.appId))
     }
 
-    /// Current behaviour, pinned: declining a second ringing call during an answered one is sent
-    /// as ENDED and forgets the answered call, so hanging that one up later is sent as DECLINE,
-    /// and the answered call's end never reaches Dart as ENDED.
-    func testDecliningASecondCallDuringAnAnsweredOneForgetsTheAnsweredCall() {
+    /// Declining a second ringing call during an answered one is sent as ENDED, as before, and
+    /// keeps the answered call, so hanging that one up later is sent as ENDED too.
+    func testDecliningASecondCallDuringAnAnsweredOneKeepsTheAnsweredCall() {
         listen()
         let answered = track(id: "answered")
         answer(answered)
@@ -220,7 +227,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
 
         XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
         XCTAssertEqual(receivedId(at: 0), "ringing")
-        XCTAssertNil(manager.store.answeredCall)
+        XCTAssertTrue(manager.store.answeredCall === answered)
 
         end(answered.identity.callKitUUID)
 
@@ -228,10 +235,40 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
             receivedNames,
             [
                 StreamVideoIncomingCallConstants.ACTION_CALL_ENDED,
-                StreamVideoIncomingCallConstants.ACTION_CALL_DECLINE,
+                StreamVideoIncomingCallConstants.ACTION_CALL_ENDED,
             ])
         XCTAssertEqual(receivedId(at: 1), "answered")
+        XCTAssertNil(manager.store.answeredCall)
         XCTAssertNil(manager.store.call(forCallKit: answered.identity.callKitUUID))
+    }
+
+    /// After a waiting call is declined, holding the answered call does not tell Dart the session
+    /// went inactive, and resuming it does not configure the session again.
+    func testHoldAndResumeAfterDecliningAWaitingCallKeepTheSessionAsItIs() {
+        listen()
+        let answered = track(id: "answered")
+        answer(answered)
+        manager.provider(provider, didActivate: AVAudioSession.sharedInstance())
+        end(track(id: "waiting").identity.callKitUUID)
+        received = []
+        let configured = session.calls
+
+        let uuid = answered.identity.callKitUUID
+        manager.provider(provider, perform: CXSetHeldCallAction(call: uuid, onHold: true))
+        manager.provider(provider, didDeactivate: AVAudioSession.sharedInstance())
+        manager.provider(provider, perform: CXSetHeldCallAction(call: uuid, onHold: false))
+        manager.provider(provider, didActivate: AVAudioSession.sharedInstance())
+        drainMainQueue()
+
+        XCTAssertEqual(session.calls, configured, "the resume configured the session")
+        XCTAssertEqual(
+            receivedNames,
+            [
+                StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_HOLD,
+                StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_HOLD,
+                StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION,
+            ])
+        XCTAssertEqual(receivedIsActive, true)
     }
 
     func testEndingAnUntrackedCallWhileAnOutgoingCallExistsSendsEnded() {
@@ -278,7 +315,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         (received.last?["body"] as? [String: Any])?["isActive"] as? Bool
     }
 
-    func testAnActivationWithNoConnectedCallReportsTheSessionActive() {
+    func testTheFirstActivationConfiguresTheSessionAndReportsItActive() {
         listen()
         let call = track(id: "answered")
         answer(call)
@@ -290,18 +327,129 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
             receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION])
         XCTAssertEqual(receivedIsActive, true)
         XCTAssertEqual(call.phase, .active)
+        XCTAssertFalse(session.calls.isEmpty)
+        XCTAssertEqual(gate.updates, [.init(available: true, callKitSessionActive: true)])
     }
 
-    func testAnActivationOnceTheAnsweredCallConnectedSendsNothing() {
+    func testALaterActivationReportsTheSessionActiveAndLeavesItAsItIs() {
         listen()
         let call = track(id: "answered")
         answer(call)
         _ = manager.store.connected(uuid: call.identity.callKitUUID)
+        manager.provider(provider, didActivate: AVAudioSession.sharedInstance())
+        let configured = session.calls
 
         manager.provider(provider, didActivate: AVAudioSession.sharedInstance())
         drainMainQueue()
 
-        XCTAssertTrue(received.isEmpty)
+        XCTAssertEqual(
+            receivedNames,
+            [
+                StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION,
+                StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION,
+            ])
+        XCTAssertEqual(session.calls, configured)
+    }
+
+    func testACallConnectedInTheAppBeforeItsAnswerBecomesActiveOnItsFirstActivation() {
+        // Accepting in the app reports the call connected before the answer transaction runs.
+        let call = track(id: "answered")
+        _ = manager.store.connected(uuid: call.identity.callKitUUID)
+        manager.provider(provider, perform: CXAnswerCallAction(call: call.identity.callKitUUID))
+
+        manager.provider(provider, didActivate: AVAudioSession.sharedInstance())
+
+        XCTAssertEqual(call.phase, .active)
+        XCTAssertEqual(gate.updates.last, .init(available: true, callKitSessionActive: true))
+    }
+
+    func testEndingTheActiveCallWhileAnotherRingsStopsTheEngineUntilTheRingEnds() {
+        let active = track(id: "active")
+        answer(active)
+        let ringing = track(id: "ringing")
+        manager.provider(provider, didActivate: AVAudioSession.sharedInstance())
+
+        end(active.identity.callKitUUID)
+        manager.provider(provider, didDeactivate: AVAudioSession.sharedInstance())
+        end(ringing.identity.callKitUUID)
+
+        XCTAssertEqual(
+            gate.updates,
+            [
+                .init(available: true, callKitSessionActive: true),
+                .init(available: false, callKitSessionActive: false),
+                .init(available: true, callKitSessionActive: nil),
+            ])
+    }
+
+    func testEndingTheLastCallAllowsTheAudioEngine() {
+        let call = track(id: "ringing")
+
+        end(call.identity.callKitUUID)
+
+        XCTAssertEqual(gate.updates, [.init(available: true, callKitSessionActive: nil)])
+    }
+
+    func testEndingACallWhileAnotherIsLeftKeepsTheAudioEngineAsItIs() {
+        _ = track(id: "left")
+        let call = track(id: "ended")
+
+        end(call.identity.callKitUUID)
+
+        XCTAssertTrue(gate.updates.isEmpty)
+    }
+
+    func testReportingTheLastCallEndedAllowsTheAudioEngine() {
+        let uuid = UUID()
+        _ = manager.store.incomingReported(
+            CallData(args: ["id": uuid.uuidString]), uuid: uuid)
+
+        manager.saveEndCall(uuid.uuidString, 2)
+
+        XCTAssertEqual(gate.updates, [.init(available: true, callKitSessionActive: nil)])
+    }
+
+    func testTheLastRingTimingOutAllowsTheAudioEngine() {
+        let uuid = UUID()
+        let shown = CallData(args: ["id": uuid.uuidString])
+        _ = manager.store.incomingReported(shown, uuid: uuid)
+
+        manager.callEndTimeout(shown)
+
+        XCTAssertEqual(gate.updates, [.init(available: true, callKitSessionActive: nil)])
+    }
+
+    func testAProviderResetAllowsTheAudioEngine() {
+        _ = track(id: "ringing")
+
+        manager.providerDidReset(provider)
+
+        XCTAssertEqual(gate.updates, [.init(available: true, callKitSessionActive: nil)])
+    }
+
+    func testARefusedEndOfTheLastCallAllowsTheAudioEngine() {
+        let call = track(id: "ringing")
+
+        manager.transactions.onEndRefused?(call.identity.callKitUUID)
+
+        XCTAssertEqual(gate.updates, [.init(available: true, callKitSessionActive: nil)])
+        XCTAssertEqual(call.phase, .ended(.remoteEnded))
+    }
+
+    func testAnActivationPostsAnEndedInterruptionFromTheManager() {
+        answer(track(id: "answered"))
+        var posted: [Notification] = []
+        let observer = NotificationCenter.default.addObserver(
+            forName: AVAudioSession.interruptionNotification, object: manager, queue: nil
+        ) { posted.append($0) }
+        defer { NotificationCenter.default.removeObserver(observer) }
+
+        manager.provider(provider, didActivate: AVAudioSession.sharedInstance())
+
+        XCTAssertEqual(posted.count, 1)
+        XCTAssertEqual(
+            posted.first?.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
+            AVAudioSession.InterruptionType.ended.rawValue)
     }
 
     func testADeactivationReportsTheSessionInactiveUnlessTheAnsweredCallIsHeld() {
@@ -319,6 +467,12 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         manager.provider(provider, didDeactivate: AVAudioSession.sharedInstance())
         drainMainQueue()
         XCTAssertEqual(received.count, 1)
+        XCTAssertEqual(
+            gate.updates,
+            [
+                .init(available: false, callKitSessionActive: false),
+                .init(available: false, callKitSessionActive: false),
+            ])
     }
 
     // MARK: - Calls from Dart
