@@ -109,13 +109,16 @@ internal class RingingController(
     }
 
     /** Clears the ring, reports it, forgets the call and disconnects it in Telecom as local. */
-    fun onEnded(data: Bundle) = step {
+    fun onEnded(data: Bundle) = end(data, disconnectTelecom = true)
+
+    /** [onEnded], disconnecting the call in Telecom only when [disconnectTelecom]. */
+    private fun end(data: Bundle, disconnectTelecom: Boolean) = step {
         ringTimer.cancel(CallPayloadMapper.fromBundle(data).id)
         notifications.clearIncomingNotification(data, false)
         report(IncomingCallConstants.ACTION_CALL_ENDED, data)
         val call = CallPayloadMapper.fromBundle(data)
         store.remove(call.id)
-        telecom.disconnect(call.id, DisconnectCause.LOCAL)
+        if (disconnectTelecom) telecom.disconnect(call.id, DisconnectCause.LOCAL)
     }
 
     /**
@@ -264,13 +267,18 @@ internal class RingingController(
         val data = CallPayloadMapper.toBundle(call)
         if (wasConnected) {
             data.putBoolean(IncomingCallConstants.EXTRA_CALL_ENDED_BY_SYSTEM, true)
-            onEnded(data)
+            // Telecom has ended the call already; disconnecting it again would only be dropped.
+            end(data, disconnectTelecom = false)
         } else {
             onDecline(data)
         }
     }
 
-    override fun onEvent(event: String, body: Map<String, Any?>) = sendEvent(event, body)
+    /** Sends a hold, mute or audio-route event from Telecom, unless events are silenced. */
+    override fun onEvent(event: String, body: Map<String, Any?>) {
+        if (RingingComponents.silenceEvents) return
+        sendEvent(event, body)
+    }
 
     private fun report(event: String, data: Bundle, vararg extra: Pair<String, Any?>) {
         if (RingingComponents.silenceEvents) return

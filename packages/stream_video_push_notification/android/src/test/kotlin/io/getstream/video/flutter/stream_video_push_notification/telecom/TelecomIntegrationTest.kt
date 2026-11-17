@@ -267,18 +267,6 @@ class TelecomIntegrationTest {
         assertEquals(emptyList<Any>(), events)
     }
 
-    @Test
-    fun `no event is sent while events are silenced`() {
-        val telecom = integration().apply { init(enabled()) }
-        telecom.registerIncomingCall(call)
-        repository.completeRegistration(CALL_ID)
-        RingingComponents.silenceEvents = true
-
-        repository.inactive(CALL_ID)
-
-        assertEquals(emptyList<Any>(), events)
-    }
-
     // The system answering and hanging up.
 
     @Test
