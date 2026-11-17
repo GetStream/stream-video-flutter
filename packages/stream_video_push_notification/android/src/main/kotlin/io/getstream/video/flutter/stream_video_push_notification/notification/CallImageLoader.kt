@@ -22,6 +22,7 @@ import okhttp3.OkHttpClient
 internal object CallImageLoader {
 
     @SuppressLint("StaticFieldLeak") // Holds the application context only.
+    @Volatile
     private var loader: ImageLoader? = null
 
     /**
