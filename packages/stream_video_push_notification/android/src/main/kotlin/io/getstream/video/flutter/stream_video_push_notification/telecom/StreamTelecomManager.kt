@@ -8,6 +8,7 @@ import android.telecom.DisconnectCause
 import android.util.Log
 import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallBroadcastReceiver
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationService
@@ -502,7 +503,7 @@ internal object StreamTelecomManager {
         private fun sendEvent(event: String, callId: String, vararg values: Pair<String, Any?>) {
             // Honour the same gate the broadcast-driven events go through, so silenceEvents() means
             // silence for Telecom-originated events too.
-            if (IncomingCallBroadcastReceiver.silenceEvents) return
+            if (RingingComponents.silenceEvents) return
 
             StreamVideoPushNotificationPlugin.sendEvent(
                 event,

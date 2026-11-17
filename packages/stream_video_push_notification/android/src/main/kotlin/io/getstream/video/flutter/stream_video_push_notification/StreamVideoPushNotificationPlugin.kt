@@ -288,7 +288,7 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
 
                 "silenceEvents" -> {
                     val silence = call.arguments as? Boolean ?: false
-                    IncomingCallBroadcastReceiver.silenceEvents = silence
+                    RingingComponents.silenceEvents = silence
                     result.success(true)
                 }
 

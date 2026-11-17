@@ -7,8 +7,8 @@ import android.os.Bundle
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 
 /**
- * An invisible activity that runs a call action on the controller and brings the app forward.
- * Notification actions and the full-screen screen's accept open it.
+ * An invisible activity that carries out a call action, such as an accept from a notification or
+ * the full-screen screen, and brings the app to the foreground.
  */
 class TransparentActivity : Activity() {
 

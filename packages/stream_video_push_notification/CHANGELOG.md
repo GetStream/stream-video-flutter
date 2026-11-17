@@ -20,6 +20,7 @@
   - `initCallkitProvider`: none needed; the plugin sets up its provider when it registers.
 - [iOS] Only what an app calls from native code stays public: `CallData`, `VoIPPushRegistryHandler.shared` with `registerForPushNotifications()` and its `PKPushRegistryDelegate` methods, and the plugin's static `showIncomingCall`, `startOutgoingCall`, `activeCalls` and `setDevicePushTokenVoIP`. The native `StreamVideoPushConfiguration`, `StreamVideoIncomingCallConstants`, `VoIPPushRegistryHandler.initChannel` and `initData`, and the plugin's `sharedInstance` and instance VoIP token methods are internal: the plugin sets them up itself, and Dart receives the events.
 - [iOS] `VoIPPushRegistryHandler` no longer conforms to `UNUserNotificationCenterDelegate`, whose methods it never implemented. An app that set `UNUserNotificationCenter.current().delegate = VoIPPushRegistryHandler.shared` no longer compiles; remove that line, or set a delegate of its own.
+- [Android] `IncomingCallBroadcastReceiver.silenceEvents` is removed. Silence ringing events through `silenceEvents` from Dart, as before.
 
 ### ⚠️ Deprecated
 
@@ -61,7 +62,7 @@
 - [iOS] CallKit no longer offers to merge calls, and a merge it asks for is refused. A merge used to be accepted although the calls stayed apart, so CallKit showed a conference that did not exist.
 - [iOS] A call reported with only some CallKit options, from a VoIP push before Dart first sent its configuration or from native code, no longer offers Hold & Accept or a keypad. A missing option takes the default the SDK sends from Dart: no holding, no DTMF, one call group.
 - A mute from the CallKit screen applies to the call it was made on.
-- [Android] A decline or accept from the incoming call notification or the full-screen screen in a process no Flutter engine has attached to, such as after the app was killed, now cancels the incoming notification and closes the full-screen screen. An incoming call is also shown in such a process. The decline still does not reach the backend there, since no Dart code runs to send it.
+- [Android] A decline or accept from the incoming call notification or the full-screen screen in a process no Flutter engine has attached to, such as after the app was killed, now cancels the incoming notification and closes the full-screen screen. The decline still does not reach the backend there, since no Dart code runs to send it.
 - [Android] Accepting or starting a call no longer starts a background service, which Android 8 and later refuse for an app in the background and which then skipped the rest of the accept.
 - [Android] Two calls ringing at once each keep their own notification and caller avatar. When the first call's avatar loaded, its notification used to be replaced by the second call's, actions included, and the second call's avatar was posted under the first call's notification.
 - [Android] Avatar, logo and background requests carry only their own call's headers. The first call's headers used to be added to every later request.
