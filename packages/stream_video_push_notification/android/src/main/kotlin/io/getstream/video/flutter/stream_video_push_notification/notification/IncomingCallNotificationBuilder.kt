@@ -57,7 +57,7 @@ internal class IncomingCallNotificationBuilder(
             .setContentIntent(NotificationIntents.fullScreen(context, id, data))
             .setSmallIcon(smallIcon(call.type))
 
-        val avatarUrl = AvatarLoader.avatarUrl(call.avatar, call.defaultAvatar)
+        val avatarUrl = CallImageLoader.avatarUrl(call.avatar, call.defaultAvatar)
 
         if (sdkInt >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             val person = Person.Builder()
@@ -124,11 +124,8 @@ internal class IncomingCallNotificationBuilder(
         )
     }
 
-    private fun smallIcon(type: Int): Int {
-        if (type > 0) return R.drawable.ic_video
-        val appIcon = context.applicationInfo.icon
-        return if (appIcon >= 0) R.drawable.ic_accept else appIcon
-    }
+    private fun smallIcon(type: Int): Int =
+        if (type > 0) R.drawable.ic_video else R.drawable.ic_accept
 
     private fun textOr(text: String, fallback: Int): String =
         if (TextUtils.isEmpty(text)) context.getString(fallback) else text
