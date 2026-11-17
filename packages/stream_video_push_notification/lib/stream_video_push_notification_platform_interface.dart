@@ -135,8 +135,8 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
   /// For [CallDismissReason.accepted], the default, the call itself goes on:
   /// the incoming notification and ringtone stop, but the call stays
   /// registered with the Telecom stack, so hanging up from a watch, headset or
-  /// car head unit keeps working. For the other reasons the call
-  /// is disconnected from Telecom with the matching cause.
+  /// car head unit keeps working. For the other reasons the call is
+  /// disconnected from Telecom with the matching cause.
   Future<void> dismissRingingCall(
     String cid, {
     CallDismissReason reason = CallDismissReason.accepted,
