@@ -127,7 +127,6 @@ class MethodChannelStreamVideoPushNotification
     await methodChannel.invokeMethod('endAllCalls');
   }
 
-  /// Ends the ring of the calls with [cid] for [reason].
   @override
   Future<void> dismissRingingCall(
     String cid, {
