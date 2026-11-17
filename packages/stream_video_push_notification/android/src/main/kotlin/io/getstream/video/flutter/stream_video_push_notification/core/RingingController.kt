@@ -7,7 +7,6 @@ import android.os.Build
 import android.os.Bundle
 import android.telecom.DisconnectCause
 import android.util.Log
-import io.getstream.video.flutter.stream_video_push_notification.IncomingCallBroadcastReceiver
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationManager
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationService
@@ -77,8 +76,18 @@ internal class RingingController(
     }
 
     /**
+     * Stops the ring of the call in [data] and its timeout without answering it, for the
+     * full-screen screen's accept: the ringtone has to stop at once, but on the lock screen the
+     * trampoline that runs the accept may only start once the keyguard is dismissed.
+     */
+    fun stopRinging(data: Bundle) = step {
+        ringTimer.cancel(CallPayloadMapper.fromBundle(data).id)
+        notifications.clearIncomingNotification(data, true)
+    }
+
+    /**
      * Clears the ring as accepted, reports it, stores the call as accepted and answers it in
-     * Telecom.
+     * Telecom. Clearing a ring already stopped, as after [stopRinging], changes nothing.
      */
     fun onAccept(data: Bundle) = step {
         ringTimer.cancel(CallPayloadMapper.fromBundle(data).id)
@@ -264,7 +273,7 @@ internal class RingingController(
     override fun onEvent(event: String, body: Map<String, Any?>) = sendEvent(event, body)
 
     private fun report(event: String, data: Bundle, vararg extra: Pair<String, Any?>) {
-        if (IncomingCallBroadcastReceiver.silenceEvents) return
+        if (RingingComponents.silenceEvents) return
         val body = CallPayloadMapper.toEventBody(
             CallPayloadMapper.fromBundle(data),
             endedBySystem = data.getBoolean(

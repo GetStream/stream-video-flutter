@@ -56,7 +56,7 @@ class IncomingCallBroadcastReceiverTest {
     @Before
     fun attachPlugin() {
         RingingComponents.reset()
-        IncomingCallBroadcastReceiver.silenceEvents = false
+        RingingComponents.silenceEvents = false
         telecom = mockTelecom()
         dart = FakeDartSide(context)
     }
@@ -65,7 +65,7 @@ class IncomingCallBroadcastReceiverTest {
     fun detachPlugin() {
         ringingService?.destroy()
         ringingService = null
-        IncomingCallBroadcastReceiver.silenceEvents = false
+        RingingComponents.silenceEvents = false
         RingingComponents.reset()
     }
 
@@ -298,7 +298,7 @@ class IncomingCallBroadcastReceiverTest {
 
     @Test
     fun `while events are silenced nothing reaches Dart and the rest still happens`() {
-        IncomingCallBroadcastReceiver.silenceEvents = true
+        RingingComponents.silenceEvents = true
 
         incoming()
 
@@ -322,7 +322,7 @@ class IncomingCallBroadcastReceiverTest {
     }
 
     @Test
-    fun `an incoming call is shown in a process with no Flutter engine`() {
+    fun `an incoming broadcast from native code is shown in a process with no Flutter engine`() {
         resetPlugin()
 
         incoming()
