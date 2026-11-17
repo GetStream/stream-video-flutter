@@ -2,6 +2,7 @@ package io.getstream.video.flutter.stream_video_push_notification.core
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
+import io.getstream.video.flutter.stream_video_push_notification.PREFERENCES_FILE_NAME
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
@@ -27,7 +28,7 @@ class PrefsCallStoreTest {
     private val context: Context get() = ApplicationProvider.getApplicationContext()
     private val prefs
         get() = context.getSharedPreferences(
-            PrefsCallStore.PREFERENCES_FILE_NAME,
+            PREFERENCES_FILE_NAME,
             Context.MODE_PRIVATE,
         )
     private lateinit var store: PrefsCallStore
@@ -61,6 +62,14 @@ class PrefsCallStoreTest {
         val stored = store.all().single()
         assertTrue(stored.isAccepted)
         assertEquals("Ada", stored.callerName)
+    }
+
+    @Test
+    fun `adding an accepted call again as ringing keeps it accepted`() {
+        store.add(call("a").copy(isAccepted = true))
+        store.add(call("a"))
+
+        assertTrue(store.all().single().isAccepted)
     }
 
     @Test
