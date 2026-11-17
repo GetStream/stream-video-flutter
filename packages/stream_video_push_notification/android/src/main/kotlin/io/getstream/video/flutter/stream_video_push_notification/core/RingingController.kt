@@ -213,13 +213,18 @@ internal class RingingController(
         val data = CallPayloadMapper.toBundle(call)
         if (wasConnected) {
             data.putBoolean(IncomingCallConstants.EXTRA_CALL_ENDED_BY_SYSTEM, true)
-            onEnded(data, keepSystemCall = false)
+            // Telecom has ended the call already; disconnecting it again would only be dropped.
+            onEnded(data, keepSystemCall = true)
         } else {
             onDecline(data)
         }
     }
 
-    override fun onEvent(event: String, body: Map<String, Any?>) = sendEvent(event, body)
+    /** Sends a hold, mute or audio-route event from Telecom, unless events are silenced. */
+    override fun onEvent(event: String, body: Map<String, Any?>) {
+        if (RingingComponents.silenceEvents) return
+        sendEvent(event, body)
+    }
 
     private fun report(event: String, data: Bundle) {
         if (RingingComponents.silenceEvents) return

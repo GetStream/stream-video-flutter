@@ -10,7 +10,6 @@ import android.telecom.DisconnectCause
 import android.util.Log
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
-import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -24,8 +23,8 @@ import java.util.concurrent.ConcurrentHashMap
  * All entry points are no-ops unless the integrator opted in via
  * `AndroidPushConfiguration.telecom` and the device actually supports Telecom.
  *
- * @param repositoryFactory builds the repository the first time a call needs Telecom; returns
- * null where Telecom is not available.
+ * @param repositoryFactory builds the repository once, on [init] or on the first call that needs
+ * Telecom; returns null where Telecom is not available.
  * @param scope runs the registrations, each of which lasts as long as its call.
  * @param mainThread runs the [Listener] callbacks for answers and disconnects from the system.
  */
@@ -34,7 +33,7 @@ internal class TelecomIntegration(
     private val repositoryFactory: (Context) -> TelecomCallRepository? = ::coreRepository,
     private val permissions: TelecomPermissions = TelecomPermissions(),
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
-    private val mainThread: (Runnable) -> Unit = { Handler(Looper.getMainLooper()).post(it) },
+    private val mainThread: (Runnable) -> Unit = Handler(Looper.getMainLooper())::post,
 ) {
 
     /** What happened to a call in Telecom, and the events it reports. */
@@ -91,7 +90,13 @@ internal class TelecomIntegration(
     /** Calls currently on hold, so hold events are only emitted on an actual transition. */
     private val heldCallIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
 
-    /** The calls registered with Telecom, from register until Telecom drops them. */
+    /**
+     * The calls registered with Telecom, from register until Telecom drops them.
+     *
+     * Kept apart from the call store on purpose: the store forgets an accepted call when its ring
+     * is dismissed, while Telecom keeps the call until it is hung up, and a hang-up from a watch
+     * afterwards still has to reach Dart with the call.
+     */
     private val trackedCalls = ConcurrentHashMap<String, RingingCall>()
 
     private val actionLock = Any()
@@ -468,9 +473,8 @@ internal class TelecomIntegration(
             )
         }
 
-        /** Sends an event unless events are silenced. */
+        /** Sends an event to the listener, which drops it while events are silenced. */
         private fun sendEvent(event: String, callId: String, vararg values: Pair<String, Any?>) {
-            if (RingingComponents.silenceEvents) return
             listener?.onEvent(event, mapOf("id" to callId) + values.toMap())
         }
     }
@@ -486,6 +490,5 @@ internal class TelecomIntegration(
 }
 
 /** A [CoreTelecomCallRepository] on Android 8 and later, null below. */
-@SuppressLint("NewApi")
 private fun coreRepository(context: Context): TelecomCallRepository? =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) CoreTelecomCallRepository(context) else null
