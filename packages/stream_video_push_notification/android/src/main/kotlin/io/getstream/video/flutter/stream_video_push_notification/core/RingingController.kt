@@ -213,23 +213,23 @@ internal class RingingController(
 
     /**
      * Shows the missed-call notification of the call in [data] and ends the rings of the stored
-     * calls with its call cid that were not accepted: clears each, forgets it and disconnects it
-     * in Telecom as missed. Without such a stored call, clears the ring of the id in [data].
-     * Nothing is reported.
+     * calls it is about that were not accepted, the ones with its call cid or, without one, its
+     * id: dismisses each as missed, which reports it so Dart stops following the ring. Without
+     * such a stored call, clears the ring of the id in [data] and reports nothing.
      */
     fun showMissedCall(data: Bundle) = step {
         val missed = CallPayloadMapper.fromBundle(data)
-        val ringing = missed.callCid
-            ?.let { store.byCallCid(it) }
-            .orEmpty()
-            .filter { !it.isAccepted }
-            .ifEmpty { listOf(missed) }
+        val stored = missed.callCid?.let { store.byCallCid(it) }
+            ?: listOfNotNull(store.byId(missed.id))
+        val ringing = stored.filter { !it.isAccepted }
 
-        ringing.forEach { call ->
-            ringTimer.cancel(call.id)
-            notifications.clearIncomingNotification(CallPayloadMapper.toBundle(call), false)
-            store.remove(call.id)
-            telecom.disconnect(call.id, DisconnectCause.MISSED)
+        if (ringing.isEmpty()) {
+            ringTimer.cancel(missed.id)
+            notifications.clearIncomingNotification(CallPayloadMapper.toBundle(missed), false)
+            store.remove(missed.id)
+            telecom.disconnect(missed.id, DisconnectCause.MISSED)
+        } else {
+            ringing.forEach { dismiss(it, DismissReason.MISSED) }
         }
         notifications.showMissCallNotification(data)
     }
