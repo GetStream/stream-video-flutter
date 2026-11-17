@@ -31,9 +31,6 @@ on:
 env:
   MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
   CREDENTIAL_FILE_CONTENT: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
-  APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
-  APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
-  APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
   APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
   FASTLANE_APPLE_ID: ${{ secrets.FASTLANE_APPLE_ID }}
   FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 120
@@ -132,7 +129,7 @@ jobs:
 
       - name: Prepare environment
         run: |
-          echo "${{ env.CREDENTIAL_FILE_CONTENT }}" | base64 --decode | jq > dogfooding/android/firebase-service-account.json
+          echo "${{ env.CREDENTIAL_FILE_CONTENT }}" | base64 --decode | jq > dogfooding/android/google-play-service-account.json
 
       - name: Setup Ruby and Gems
         uses: ruby/setup-ruby@v1
