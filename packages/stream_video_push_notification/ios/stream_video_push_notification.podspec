@@ -16,6 +16,7 @@ Official Push Notification Plugin for Stream Video.
   s.source_files = 'stream_video_push_notification/Sources/stream_video_push_notification/**/*.swift'
   s.dependency 'Flutter'
   s.dependency 'CryptoSwift', '~> 1.8'
+  s.dependency 'stream_webrtc_flutter'
   s.platform = :ios, '14'
 
   # Flutter.framework does not contain a i386 slice.

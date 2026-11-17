@@ -73,7 +73,7 @@ These are the scenarios every native PR gets checked against on a device. They a
 2. **Freeze the channel contract until a PR explicitly changes it.** Method names, event names and payload keys between Dart, Swift and Kotlin stay as they are. A Dart test asserts that the Swift and Kotlin constants are exactly the Dart `Event` names each platform is expected to emit, plus Android's documented internal intent actions (the existing `incoming_call_failure_reason_test.dart` already parses Swift source this way). Contract changes are their own small PRs.
 3. **Pure core, thin shell.** On every platform the state machine, identity mapping, payload parsing and policies are plain classes with no `Flutter`, `CallKit`, `android.*` dependency reachable without a protocol/interface, so they get unit tests. The shell (plugin class, `CXProviderDelegate`, `BroadcastReceiver`) is as thin as possible.
 4. **One owner per piece of state.** Call state lives in one store per platform. Identity (app id vs CallKit uuid vs notification id) is mapped in that store, nowhere else.
-5. **Hold behaviour stays off by default** (`supportsHolding: false`) until R13–R17 pass on device. Nothing in the refactor PRs turns it on.
+5. **Hold behaviour stays off by default** (`supportsHolding: false`) until R13–R17 pass on device. Nothing in the refactor PRs turns it on in the SDK. Dogfooding turns it on from B-6 (FLU-1213), so those checks can be run on a device.
 
 ### 2.2 iOS target layout
 
@@ -81,7 +81,7 @@ These are the scenarios every native PR gets checked against on a device. They a
 Sources/stream_video_push_notification/
   Plugin/
     StreamVideoPushNotificationPlugin.swift   FlutterPlugin registration only; public statics kept
-    PushMethodCallRouter.swift                FlutterMethodCall -> typed PushCommand -> coordinator
+    PushCommand.swift                         FlutterMethodCall -> typed PushCommand -> coordinator
     RingingEventSink.swift                    the single pending-event queue + EventChannel handler
   Model/
     CallKitCallOptions.swift                  today's CallData (parsing deduped, one parser)
@@ -155,7 +155,7 @@ final class CallKitCall {
   - `didDeactivate` while calls remain → `setAvailable(false)` then `setCallKitSessionActive(false)`; with no calls left → `setAvailable(true)` (gate lifted, no activation to wait for)
   - `onEngineStartFailed` → forwarded to the store as an event (feeds `HoldRecoveryPolicy`).
 
-Transport: the push plugin links `stream_webrtc_flutter` natively (podspec `s.dependency 'stream_webrtc_flutter'`, SPM `.package(path: "../stream_webrtc_flutter")`), exactly as `stream_video_flutter` and `stream_video_noise_cancellation` already do. On `v2` the webrtc plugin is vendored in the monorepo (`webrtc/stream_webrtc_flutter`), so the two sides land together. The webrtc plugin exposes an ObjC-visible `FlutterWebRTCAudioEngineControl` with the three calls; the gate's default implementation resolves `FlutterWebRTCPlugin.sharedSingleton` lazily and falls back to the existing `NotificationCenter` names when it is nil, so a cold-start ordering problem can never silently drop the gate. The NotificationCenter transport from the fix branch is therefore kept as a fallback, not as the design.
+Transport: the push plugin links `stream_webrtc_flutter` natively (podspec `s.dependency 'stream_webrtc_flutter'`, SPM `.package(path: "../stream_webrtc_flutter")`), exactly as `stream_video_flutter` and `stream_video_noise_cancellation` already do. On `v2` the webrtc plugin is vendored in the monorepo (`webrtc/stream_webrtc_flutter`), so the two sides land together. The webrtc plugin exposes an ObjC-visible `FlutterWebRTCAudioEngineControl` with the three calls, as `FlutterWebRTCPlugin.audioEngineControl`: one control for the process that every registration of the plugin follows, including ones made later, so the gate needs no plugin lookup and no fallback. The NotificationCenter names from the fix branch stay in the webrtc plugin for code that does not link it; the push plugin does not use them.
 
 On the webrtc side the fix branch's `FlutterWebRTCPlugin.m` changes stay as they are (gate, manual-rendering drain, `setCallKitAudioSessionActive`, route-change `reason`), but "engine start failed" becomes a callback on the control object instead of a notification.
 
@@ -277,7 +277,7 @@ Optional, after A-6: `PNManagerProvider` takes `StreamVideo` only; delete the v1
 ### Stack B: iOS
 
 **B-1. File split and dedupe (move)**
-Split `StreamVideoCallkitManager.swift` by extension into `+MethodCalls`, `+ProviderDelegate`, `+AudioSession`, `+Events` files with no code change; merge the two `showIncomingCall` overloads into one with an optional completion; one pending-event queue (`RingingEventSink`), delete the manager's `pendingEvents`; one `ios`-sub-map-or-top-level parser shared by `CallData` and `StreamVideoPushConfiguration`; `PushMethodCallRouter` parses arguments into a `PushCommand` enum and the manager handles typed commands. Characterization tests from 0-3 keep passing. ~-300/+350 lines across 8 files.
+Split `StreamVideoCallkitManager.swift` by extension into `+MethodCalls`, `+ProviderDelegate`, `+AudioSession`, `+Events` files with no code change; merge the two `showIncomingCall` overloads into one with an optional completion; one pending-event queue (`RingingEventSink`), delete the manager's `pendingEvents`; one `ios`-sub-map-or-top-level parser shared by `CallData` and `StreamVideoPushConfiguration`; `PushCommand.init(_:)` parses arguments into a `PushCommand` enum and the manager handles typed commands. Characterization tests from 0-3 keep passing. ~-300/+350 lines across 8 files.
 
 **B-2. `CallKitCallStore` and identity (move)**
 `CallKitCall` with `identity`, `direction`, `source` and a `phase` enum covering today's states only (`ringing`, `starting`, `answering`, `active`, `ended`); `CallKitCallStore` replaces `calls`, `pendingOutgoingCalls`, `reportedId(for:)` and the aliasing. `StreamCallKitCallController` shrinks to `CallKitTransactionRequester`. The manager's `data`, `answerCall`, `outgoingCall`, `isFromPushKit` are replaced by store queries (`store.call(forAppId:)`, `store.pushKitCall`). Every delegate method becomes "look up, apply transition, emit returned events". Store transition tests cover R1, R3, R5, R7, R9, R12 as event sequences. ~-400/+550 lines. This is the largest PR of the stack and the one to review slowest; it changes no wire behaviour.
@@ -289,10 +289,10 @@ All `AVAudioSession` code and `didActivate`/`didDeactivate` move to the coordina
 `configureAudioSession` stops calling `setActive`. One-line behaviour change kept alone so R1–R4 and R12 can be re-verified and the PR reverted on its own if a plain-ringing regression shows up (the ticket flags this as unverified). ~10 lines.
 
 **W-1. webrtc: audio engine gate and CallKit session forwarding (change, `webrtc/stream_webrtc_flutter`)**
-Port of `fix/ios-audio-engine-availability` (iOS and macOS copies; `darwin_parity_test` keeps them identical) with "engine start failed" exposed as a callback on `FlutterWebRTCAudioEngineControl` next to the notification; route-change `reason` added to `onAudioRouteChange`. Changelog, version bump to 4.1.0 in the pubspec. ~+600 lines (×2 for macOS, parity-checked).
+Port of `fix/ios-audio-engine-availability` (iOS and macOS copies; `darwin_parity_test` keeps them identical) with "engine start failed" exposed as a callback on `FlutterWebRTCAudioEngineControl` next to the notification; route-change `reason` added to `onAudioRouteChange`. Changelog entries under the unreleased 5.0.0 that v2 already carries. ~+600 lines (×2 for macOS, parity-checked).
 
 **B-5. Native link to the webrtc plugin (change; depends on W-1)**
-Podspec and SPM dependency on `stream_webrtc_flutter`; `WebRTCAudioEngineGate` default implementation calls the control object directly and falls back to notifications when `sharedSingleton` is nil. `didActivate`/`didDeactivate` gate the engine (today's R1–R4 behaviour unchanged, since the gate is lifted whenever no call remains). Dogfooding Pods+SPM CI job covers the link. ~+120 lines.
+Podspec and SPM dependency on `stream_webrtc_flutter`; `WebRTCAudioEngineGate` default implementation calls `FlutterWebRTCPlugin.audioEngineControl` directly; the NotificationCenter gate is gone. `didActivate`/`didDeactivate` gate the engine (today's R1–R4 behaviour unchanged, since the gate is lifted whenever no call remains). Dogfooding Pods+SPM CI job covers the link. ~+120 lines.
 
 **B-6. Hold and resume (change; after the spike in 3.3)**
 `.held(origin)`, `.resumedAwaitingSession`, `.reRegistering` phases; `SystemCallObserver` protocol over `CXCallObserver`; `HoldRecoveryPolicy` with injected clock and retry policy; `CallKitProviderController.withRecentsSuppressed`; the hold delegate handler no longer re-requests holds. Tests drive R13–R15 as store event sequences (`heldByOtherCall → otherCallEnded → unheldPerformed → audioDeactivated → recovery → startPerformed(newUUID) → audioActivated`). `supportsHolding` default stays `false`. ~+450 lines, of which ~200 are tests.
@@ -303,7 +303,11 @@ Podspec and SPM dependency on `stream_webrtc_flutter`; `WebRTCAudioEngineGate` d
 **B-8. Public facade cleanup (change)**
 Delete `StreamVideoCallkitManager.shared`, rename `StreamVideoPKDelegateManager` to `VoIPPushRegistryHandler` with a deprecated typealias, remove `sendEventCustom`, `showMissCallNotification` no-op case, `requestNotificationPermission` no-op case from the iOS router. Changelog (Breaking). ~-100 lines.
 
-Optional B-9 (FLU-1194, not in this plan's scope): with `direction == .outgoing` and `.starting` already modelled, registering outgoing ringing calls out of the box is a `RingingSyncObserver` change plus `setCallConnected` on `CallStatusConnected`, behind an option.
+**B-9. Outgoing ringing calls reported to CallKit (FLU-1194, change, on B-8)**
+`IOSPushConfiguration.reportOutgoingCalls`, off by default. `OutgoingCallReporter` (its own file, so it does not collide with A-3's split of the manager) follows `ClientState.outgoingCall`: `startOutgoingCall` once the call is `CallStatusOutgoing`, `setCallConnected` on the first `CallStatusConnected`, `endCall` on disconnect; a CallKit end while the call still rings, unjoined, leaves it, which cancels the ring. Native: the store forgets the outgoing call once it ended, which it never did, so later rings time out and are declined again. A-3 can move the reporter next to `RingingSyncObserver`; A-5 has to keep `uuid`, which the reporter uses.
+
+**B-10. CallKit options CallKit can be offered (FLU-1264, change, on B-9)**
+A missing option takes the same default as Dart's `IOSPushConfiguration` (no holding, no DTMF, one call group), so a VoIP push before Dart first sent its configuration, or a native `showIncomingCall` with sparse `CallData`, no longer offers Hold & Accept, Merge or a keypad. Merging is never offered: `CXCallUpdate` grouping and ungrouping off, one call per group, `CXSetGroupCallAction` refused, `ActionCallToggleGroup` no longer sent; `supportsGrouping`, `supportsUngrouping` and `maximumCallsPerCallGroup` deprecated on both sides, with a `dart fix` that removes them. `supportsDTMF` off by default: the SDK sends no DTMF, so the keypad did nothing; an app that sends the digits from `ActionCallToggleDtmf` turns it on.
 
 ### Stack C: Android
 
@@ -401,7 +405,7 @@ Outcomes feed B-6's `HoldRecoveryPolicy`: each experiment that passes removes a 
 | A "move" PR silently changes behaviour on a cold-start path nobody runs locally | 0-2/0-3 characterization tests before any move; R3 and R18 are mandatory device checks on every iOS and Android move PR. |
 | B-2 (store) is big | It is the only PR of its size on iOS; its tests are event-sequence tests a reviewer can read as a spec; it changes no method/event payloads. |
 | `configureAudioSession` without `setActive` regresses plain ringing | Alone in B-4, 10 lines, revertable without touching anything else. |
-| webrtc and push plugin ship out of step | Both live in the monorepo on `v2`; B-5 bumps the pubspec constraint to `^4.1.0` in the same PR; the dogfooding Pods+SPM job builds the native link. |
+| webrtc and push plugin ship out of step | Both live in the monorepo on `v2`; every package on v2 already requires `^5.0.0`, the version W-1's changes ship in; the dogfooding Pods+SPM job builds the native link. |
 | Hold still needs re-registration after the spike | The design (2.5) already models it; `HoldRecoveryPolicy` is the only place timing lives, with a fake clock in tests. `supportsHolding` stays off by default. |
 | Dart consolidation (A-6) drops a ring-end path that only one platform relied on | A-6 is last, after C-8 gives Android explicit reasons; R5–R9 are re-run on both platforms; core's existing ringing tests (`ringing_flow_coordinator_test`, `ringing_cancelled_by_caller_test`, `call_accepted_on_this_device_test`) must stay green. |
 | Firebase stage 1 breaks apps that pass `RemoteMessage` | Breaking change documented; migration is `message.data`; one-line fix. |
