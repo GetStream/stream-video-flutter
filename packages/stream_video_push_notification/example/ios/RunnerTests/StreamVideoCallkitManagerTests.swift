@@ -215,10 +215,9 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         XCTAssertFalse(manager.store.shouldTimeOut(appId: ringing.identity.appId))
     }
 
-    /// Current behaviour, pinned: declining a second ringing call during an answered one is sent
-    /// as ENDED and forgets the answered call, so hanging that one up later is sent as DECLINE,
-    /// and the answered call's end never reaches Dart as ENDED.
-    func testDecliningASecondCallDuringAnAnsweredOneForgetsTheAnsweredCall() {
+    /// Declining a second ringing call during an answered one is sent as ENDED, as before, and
+    /// keeps the answered call, so hanging that one up later is sent as ENDED too.
+    func testDecliningASecondCallDuringAnAnsweredOneKeepsTheAnsweredCall() {
         listen()
         let answered = track(id: "answered")
         answer(answered)
@@ -228,7 +227,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
 
         XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
         XCTAssertEqual(receivedId(at: 0), "ringing")
-        XCTAssertNil(manager.store.answeredCall)
+        XCTAssertTrue(manager.store.answeredCall === answered)
 
         end(answered.identity.callKitUUID)
 
@@ -236,10 +235,40 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
             receivedNames,
             [
                 StreamVideoIncomingCallConstants.ACTION_CALL_ENDED,
-                StreamVideoIncomingCallConstants.ACTION_CALL_DECLINE,
+                StreamVideoIncomingCallConstants.ACTION_CALL_ENDED,
             ])
         XCTAssertEqual(receivedId(at: 1), "answered")
+        XCTAssertNil(manager.store.answeredCall)
         XCTAssertNil(manager.store.call(forCallKit: answered.identity.callKitUUID))
+    }
+
+    /// After a waiting call is declined, holding the answered call does not tell Dart the session
+    /// went inactive, and resuming it does not configure the session again.
+    func testHoldAndResumeAfterDecliningAWaitingCallKeepTheSessionAsItIs() {
+        listen()
+        let answered = track(id: "answered")
+        answer(answered)
+        manager.provider(provider, didActivate: AVAudioSession.sharedInstance())
+        end(track(id: "waiting").identity.callKitUUID)
+        received = []
+        let configured = session.calls
+
+        let uuid = answered.identity.callKitUUID
+        manager.provider(provider, perform: CXSetHeldCallAction(call: uuid, onHold: true))
+        manager.provider(provider, didDeactivate: AVAudioSession.sharedInstance())
+        manager.provider(provider, perform: CXSetHeldCallAction(call: uuid, onHold: false))
+        manager.provider(provider, didActivate: AVAudioSession.sharedInstance())
+        drainMainQueue()
+
+        XCTAssertEqual(session.calls, configured, "the resume configured the session")
+        XCTAssertEqual(
+            receivedNames,
+            [
+                StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_HOLD,
+                StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_HOLD,
+                StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION,
+            ])
+        XCTAssertEqual(receivedIsActive, true)
     }
 
     func testEndingAnUntrackedCallWhileAnOutgoingCallExistsSendsEnded() {

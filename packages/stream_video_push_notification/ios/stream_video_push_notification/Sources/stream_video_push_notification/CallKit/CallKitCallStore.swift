@@ -13,6 +13,16 @@ enum CallKitEffect {
     case postAudioInterruptionEnded
 }
 
+/// What an audio session activation resolves to.
+struct CallKitAudioActivation {
+    /// Whether it is the first activation for a call, so the session is configured.
+    let isFirst: Bool
+    /// The options to configure the session with: the first call awaiting its first activation's,
+    /// else `lastOptions`.
+    let options: CallData?
+    let effects: [CallKitEffect]
+}
+
 /// What CallKit's end action resolves to.
 struct CallKitEndOutcome {
     /// Whether the action is fulfilled; it fails for a call the store does not track.
@@ -198,7 +208,9 @@ final class CallKitCallStore {
                 fulfills: true,
                 effects: [.send(event: StreamVideoIncomingCallConstants.ACTION_CALL_DECLINE, body: call.options.toJSON())])
         }
-        answeredCall = nil
+        if answeredCall === call {
+            answeredCall = nil
+        }
         return CallKitEndOutcome(
             fulfills: true,
             effects: [.send(event: StreamVideoIncomingCallConstants.ACTION_CALL_ENDED, body: call.options.toJSON())])
@@ -263,33 +275,28 @@ final class CallKitCallStore {
 
     /// The answered and the outgoing call, when CallKit has not activated the audio session for
     /// them yet.
-    var callsAwaitingFirstActivation: [CallKitCall] {
+    private var callsAwaitingFirstActivation: [CallKitCall] {
         callsUsingAudio.filter { !$0.hasActivatedAudioSession }
     }
 
-    /// Whether an activation now is the first for a call: the answered or the outgoing call has
-    /// not had the audio session activated, or neither is live.
-    var isFirstAudioActivation: Bool {
-        callsUsingAudio.isEmpty || !callsAwaitingFirstActivation.isEmpty
-    }
-
-    /// CallKit activated the audio session for the answered and the outgoing call.
-    func audioSessionActivated() {
+    /// CallKit activated the audio session.
+    ///
+    /// It is the first activation when the answered or the outgoing call has not had one yet, or
+    /// neither is live. Each call having its first activation starts connecting, and an outgoing
+    /// one is reported to CallKit as connecting; a call activated before, such as a held one, is
+    /// left as it is. Afterwards every live call counts as activated.
+    func audioSessionActivated(at date: Date = Date()) -> CallKitAudioActivation {
+        let awaiting = callsAwaitingFirstActivation
+        let activation = CallKitAudioActivation(
+            isFirst: callsUsingAudio.isEmpty || !awaiting.isEmpty,
+            options: awaiting.first?.options ?? lastOptions,
+            effects: awaiting.compactMap { call in
+                call.move(to: .active)
+                guard call.direction == .outgoing else { return nil }
+                return .reportStartedConnecting(call.identity.callKitUUID, date)
+            })
         callsUsingAudio.forEach { $0.hasActivatedAudioSession = true }
-    }
-
-    /// The answered and the outgoing call start connecting on their first audio session
-    /// activation. A call whose session was activated before, such as a held one, is left as it
-    /// is.
-    func audioActivated(at date: Date = Date()) -> [CallKitEffect] {
-        var effects: [CallKitEffect] = []
-        for call in callsAwaitingFirstActivation {
-            call.move(to: .active)
-            if call.direction == .outgoing {
-                effects.append(.reportStartedConnecting(call.identity.callKitUUID, date))
-            }
-        }
-        return effects
+        return activation
     }
 
     /// The app reported the call CallKit knows as `uuid` connected. Nil for a call the store does

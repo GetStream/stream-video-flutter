@@ -16,7 +16,6 @@
 - [iOS] `StreamVideoCallkitManager.showIncomingCall` configures the audio session with the options of the call it reports, before and after reporting it. The variant without a completion used the options stored for the last PushKit call, so a call not from PushKit got an earlier call's options, or the defaults when none was stored, and the configuration after reporting could take a newer call's.
 - [iOS] `ActionCallAccept` and `ActionCallDecline` carry the call CallKit answered or ended, instead of the options last given to the plugin, which could belong to another call or be empty.
 - [iOS] Only the first activation of a call's audio session applies its audio session options and reports an outgoing call as connecting. A later activation, such as a resume from hold, leaves the session as it is. Every activation now sends `ActionCallToggleAudioSession`, including after the call connected.
-- [iOS] The plugin posts `io.getstream.webrtc.audioEngineAvailability` to tell `stream_webrtc_flutter` when CallKit activates or deactivates the audio session, and when no call is left.
 - [Android] The full-screen incoming call activity follows the redesigned ringing screen: the app surface instead of the blue `#0955fa`, a 104dp avatar, 64dp accept and decline buttons centred 80dp apart above the bottom, and the design system's `#00A46E` and `#D90D10` in place of the Material green and red. An app that sets `IncomingCallNotificationParams` keeps whatever it set.
 - [Android] `IncomingCallNotificationParams.fullScreenTextColor` no longer defaults to white. Left unset, the caller's name, the handle under it and the action labels each take the colour the design gives them rather than all four being painted the same. Setting it still paints all four.
 - [Android] `IncomingCallNotificationParams.fullScreenBackgroundColor` no longer defaults to `#0955fa` on the Dart side. The default is the plugin's own resource, so it can be overridden by an app's `colors.xml` as well as through the params.
@@ -26,6 +25,7 @@
 
 ### ✅ Added
 
+- [iOS] The plugin posts `io.getstream.webrtc.audioEngineAvailability` to tell `stream_webrtc_flutter` when CallKit activates or deactivates the audio session, and when no call is left. Nothing observes it yet in this release.
 - Added `StreamVideoPushHandler.handleBackgroundMessage`, which simplifies the ringing setup by running a Stream ringing push through its whole background lifecycle from your Firebase background handler: it builds the client through the factory you give it, observes the ringing events a background isolate can act on, and disposes the client — along with whatever that factory set up — once the user has answered, declined, or let the call time out, or the ring has ended without them, such as when the caller cancels it. It replaces the setup and teardown each integration had to write by hand.
 
 ### 🐞 Fixed
@@ -33,6 +33,7 @@
 - A mute from the CallKit screen applies to the call it was made on.
 - [iOS] Answering one of two ringing calls from CallKit no longer reports the other one as accepted in `activeCalls`.
 - [iOS] A ring that was already ended, for example because the caller cancelled it, no longer times out later and reports a second, unanswered end.
+- [iOS] Declining a waiting call during an answered one no longer forgets the answered call. Hanging it up afterwards is sent as `ActionCallEnded` instead of `ActionCallDecline`, and holding and resuming it no longer reports the audio session inactive or configures it again.
 - `registerDevice` right after `connect`, and `unregisterDevice` on web and desktop, no longer throw.
 - A failing push token read is logged instead of reported as an uncaught error.
 - `unregisterDevice` always stops registering refreshed tokens.

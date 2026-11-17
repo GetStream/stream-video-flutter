@@ -18,14 +18,17 @@ extension AVAudioSession: AudioSessionConfiguring {}
 final class CallKitAudioSessionCoordinator {
 
     private let session: AudioSessionConfiguring
-    let gate: WebRTCAudioEngineGate
+    private let gate: WebRTCAudioEngineGate
+    private let center: NotificationCenter
 
     init(
         session: AudioSessionConfiguring = AVAudioSession.sharedInstance(),
-        gate: WebRTCAudioEngineGate = NotificationCenterAudioEngineGate()
+        gate: WebRTCAudioEngineGate = NotificationCenterAudioEngineGate(),
+        center: NotificationCenter = .default
     ) {
         self.session = session
         self.gate = gate
+        self.center = center
         self.gate.onEngineStartFailed = {
             NSLog("[StreamCallKit] WebRTC could not start the audio engine")
         }
@@ -41,13 +44,11 @@ final class CallKitAudioSessionCoordinator {
     /// engine is allowed, so WebRTC starts its engine on the configured session. Every activation
     /// allows the audio engine and is reported to Dart.
     func didActivate(_ store: CallKitCallStore) -> [CallKitEffect] {
-        let isFirstActivation = store.isFirstAudioActivation
-        let options = store.callsAwaitingFirstActivation.first?.options ?? store.lastOptions
-        var effects: [CallKitEffect] = isFirstActivation ? store.audioActivated() : []
-        store.audioSessionActivated()
+        let activation = store.audioSessionActivated()
+        var effects = activation.effects
 
-        if isFirstActivation {
-            configure(options)
+        if activation.isFirst {
+            configure(activation.options)
         }
         gate.update(available: true, callKitSessionActive: true)
         effects.append(.postAudioInterruptionEnded)
@@ -65,7 +66,7 @@ final class CallKitAudioSessionCoordinator {
     func didDeactivate(_ store: CallKitCallStore) -> [CallKitEffect] {
         gate.update(available: !store.hasOngoingCall, callKitSessionActive: false)
         if store.hasHeldCall {
-            print("Call is on hold")
+            NSLog("[StreamCallKit] The audio session was deactivated for a call on hold")
             return []
         }
         return [
@@ -114,7 +115,7 @@ final class CallKitAudioSessionCoordinator {
         userInfo[AVAudioSessionInterruptionTypeKey] = intrepEndeRaw
         userInfo[AVAudioSessionInterruptionOptionKey] =
             AVAudioSession.InterruptionOptions.shouldResume.rawValue
-        NotificationCenter.default.post(
+        center.post(
             name: AVAudioSession.interruptionNotification, object: object, userInfo: userInfo)
     }
 
