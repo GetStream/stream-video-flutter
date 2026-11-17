@@ -192,47 +192,24 @@ public class Call: NSObject {
         self.isAccepted = args["isAccepted"] as? Bool ?? false
         self.extra = args["extra"] as? NSDictionary ?? [:]
 
-        if let ios = args["ios"] as? [String: Any] {
-            self.iconName = ios["iconName"] as? String ?? "AppLogo"
-            self.handleType = ios["handleType"] as? String ?? ""
-            self.useComplexHandle = ios["useComplexHandle"] as? Bool ?? false
-            self.supportsVideo = ios["supportsVideo"] as? Bool ?? true
-            self.maximumCallGroups = ios["maximumCallGroups"] as? Int ?? 2
-            self.maximumCallsPerCallGroup = ios["maximumCallsPerCallGroup"] as? Int ?? 1
-            self.supportsDTMF = ios["supportsDTMF"] as? Bool ?? true
-            self.supportsHolding = ios["supportsHolding"] as? Bool ?? true
-            self.supportsGrouping = ios["supportsGrouping"] as? Bool ?? true
-            self.supportsUngrouping = ios["supportsUngrouping"] as? Bool ?? true
-            self.includesCallsInRecents = ios["includesCallsInRecents"] as? Bool ?? true
-            self.ringtonePath = ios["ringtonePath"] as? String ?? ""
-            self.configureAudioSession = ios["configureAudioSession"] as? Bool ?? true
-            self.audioSessionMode = ios["audioSessionMode"] as? String ?? ""
-            self.audioSessionActive = ios["audioSessionActive"] as? Bool ?? true
-            self.audioSessionPreferredSampleRate =
-                ios["audioSessionPreferredSampleRate"] as? Double ?? 44100.0
-            self.audioSessionPreferredIOBufferDuration =
-                ios["audioSessionPreferredIOBufferDuration"] as? Double ?? 0.005
-        } else {
-            self.iconName = args["iconName"] as? String ?? "AppLogo"
-            self.handleType = args["handleType"] as? String ?? ""
-            self.useComplexHandle = args["useComplexHandle"] as? Bool ?? false
-            self.supportsVideo = args["supportsVideo"] as? Bool ?? true
-            self.maximumCallGroups = args["maximumCallGroups"] as? Int ?? 2
-            self.maximumCallsPerCallGroup = args["maximumCallsPerCallGroup"] as? Int ?? 1
-            self.supportsDTMF = args["supportsDTMF"] as? Bool ?? true
-            self.supportsHolding = args["supportsHolding"] as? Bool ?? true
-            self.supportsGrouping = args["supportsGrouping"] as? Bool ?? true
-            self.supportsUngrouping = args["supportsUngrouping"] as? Bool ?? true
-            self.includesCallsInRecents = args["includesCallsInRecents"] as? Bool ?? true
-            self.ringtonePath = args["ringtonePath"] as? String ?? ""
-            self.configureAudioSession = args["configureAudioSession"] as? Bool ?? true
-            self.audioSessionMode = args["audioSessionMode"] as? String ?? ""
-            self.audioSessionActive = args["audioSessionActive"] as? Bool ?? true
-            self.audioSessionPreferredSampleRate =
-                args["audioSessionPreferredSampleRate"] as? Double ?? 44100.0
-            self.audioSessionPreferredIOBufferDuration =
-                args["audioSessionPreferredIOBufferDuration"] as? Double ?? 0.005
-        }
+        let options = CallKitOptions(args: args, defaultIconName: "AppLogo")
+        self.iconName = options.iconName
+        self.handleType = options.handleType
+        self.useComplexHandle = options.useComplexHandle
+        self.supportsVideo = options.supportsVideo
+        self.maximumCallGroups = options.maximumCallGroups
+        self.maximumCallsPerCallGroup = options.maximumCallsPerCallGroup
+        self.supportsDTMF = options.supportsDTMF
+        self.supportsHolding = options.supportsHolding
+        self.supportsGrouping = options.supportsGrouping
+        self.supportsUngrouping = options.supportsUngrouping
+        self.includesCallsInRecents = options.includesCallsInRecents
+        self.ringtonePath = options.ringtonePath
+        self.configureAudioSession = options.configureAudioSession
+        self.audioSessionMode = options.audioSessionMode
+        self.audioSessionActive = options.audioSessionActive
+        self.audioSessionPreferredSampleRate = options.audioSessionPreferredSampleRate
+        self.audioSessionPreferredIOBufferDuration = options.audioSessionPreferredIOBufferDuration
     }
 
     open func toJSON() -> [String: Any] {

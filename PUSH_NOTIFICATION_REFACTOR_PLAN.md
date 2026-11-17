@@ -81,7 +81,7 @@ These are the scenarios every native PR gets checked against on a device. They a
 Sources/stream_video_push_notification/
   Plugin/
     StreamVideoPushNotificationPlugin.swift   FlutterPlugin registration only; public statics kept
-    PushMethodCallRouter.swift                FlutterMethodCall -> typed PushCommand -> coordinator
+    PushCommand.swift                         FlutterMethodCall -> typed PushCommand -> coordinator
     RingingEventSink.swift                    the single pending-event queue + EventChannel handler
   Model/
     CallKitCallOptions.swift                  today's CallData (parsing deduped, one parser)
@@ -277,7 +277,7 @@ Optional, after A-6: `PNManagerProvider` takes `StreamVideo` only; delete the v1
 ### Stack B: iOS
 
 **B-1. File split and dedupe (move)**
-Split `StreamVideoCallkitManager.swift` by extension into `+MethodCalls`, `+ProviderDelegate`, `+AudioSession`, `+Events` files with no code change; merge the two `showIncomingCall` overloads into one with an optional completion; one pending-event queue (`RingingEventSink`), delete the manager's `pendingEvents`; one `ios`-sub-map-or-top-level parser shared by `CallData` and `StreamVideoPushConfiguration`; `PushMethodCallRouter` parses arguments into a `PushCommand` enum and the manager handles typed commands. Characterization tests from 0-3 keep passing. ~-300/+350 lines across 8 files.
+Split `StreamVideoCallkitManager.swift` by extension into `+MethodCalls`, `+ProviderDelegate`, `+AudioSession`, `+Events` files with no code change; merge the two `showIncomingCall` overloads into one with an optional completion; one pending-event queue (`RingingEventSink`), delete the manager's `pendingEvents`; one `ios`-sub-map-or-top-level parser shared by `CallData` and `StreamVideoPushConfiguration`; `PushCommand.init(_:)` parses arguments into a `PushCommand` enum and the manager handles typed commands. Characterization tests from 0-3 keep passing. ~-300/+350 lines across 8 files.
 
 **B-2. `CallKitCallStore` and identity (move)**
 `CallKitCall` with `identity`, `direction`, `source` and a `phase` enum covering today's states only (`ringing`, `starting`, `answering`, `active`, `ended`); `CallKitCallStore` replaces `calls`, `pendingOutgoingCalls`, `reportedId(for:)` and the aliasing. `StreamCallKitCallController` shrinks to `CallKitTransactionRequester`. The manager's `data`, `answerCall`, `outgoingCall`, `isFromPushKit` are replaced by store queries (`store.call(forAppId:)`, `store.pushKitCall`). Every delegate method becomes "look up, apply transition, emit returned events". Store transition tests cover R1, R3, R5, R7, R9, R12 as event sequences. ~-400/+550 lines. This is the largest PR of the stack and the one to review slowest; it changes no wire behaviour.

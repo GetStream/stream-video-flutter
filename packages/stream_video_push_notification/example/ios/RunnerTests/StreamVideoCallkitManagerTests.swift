@@ -4,55 +4,54 @@ import XCTest
 
 @testable import stream_video_push_notification
 
-/// Pins the manager's own event path: events sent before an `EventCallbackHandler` is set are
-/// queued and flushed in order, `silenceEvents` drops them, and which event the CallKit end
-/// action sends for each kind of call.
+/// Pins the manager's event path, from a call into the manager to Dart's listener: events sent
+/// before Dart listens are held and delivered in order, `silenceEvents` drops them, and which
+/// event the CallKit end action sends for each kind of call.
 final class StreamVideoCallkitManagerTests: XCTestCase {
 
     private let manager = StreamVideoCallkitManager.shared
     private let provider = CXProvider(configuration: CXProviderConfiguration())
 
-    private var savedEventHandler: EventCallbackHandler?
+    private var savedEventSink: RingingEventSink!
     private var savedAnswerCall: Call?
     private var savedOutgoingCall: Call?
     private var savedData: CallData?
-    private var savedSilenceEvents = false
     private var trackedCalls: [Call] = []
     private var received: [[String: Any]] = []
 
     override func setUp() {
         super.setUp()
         // The manager is a singleton the host app also uses, so its state is saved and restored.
-        savedEventHandler = manager.eventHandler
+        // Each test gets a sink of its own, which leaves the host's handler and held events alone.
+        savedEventSink = manager.eventSink
         savedAnswerCall = manager.answerCall
         savedOutgoingCall = manager.outgoingCall
         savedData = manager.data
-        savedSilenceEvents = manager.silenceEvents
 
-        manager.eventHandler = nil
-        manager.pendingEvents = []
+        manager.eventSink = RingingEventSink()
+        // An attached handler Dart does not listen on yet, so events are held.
+        manager.setEventHandler(EventCallbackHandler(sink: manager.eventSink))
         manager.answerCall = nil
         manager.outgoingCall = nil
         manager.data = nil
-        manager.silenceEvents = false
         received = []
     }
 
     override func tearDown() {
         trackedCalls.forEach { manager.callController.removeCall($0) }
         trackedCalls = []
-        manager.pendingEvents = []
-        manager.eventHandler = savedEventHandler
+        // Lets events still on their way to this test's sink arrive there.
+        drainMainQueue()
+        manager.eventSink = savedEventSink
         manager.answerCall = savedAnswerCall
         manager.outgoingCall = savedOutgoingCall
         manager.data = savedData
-        manager.silenceEvents = savedSilenceEvents
         super.tearDown()
     }
 
     /// Sets a handler that already has a listener, so every event it gets is recorded.
     private func listen() {
-        let handler = EventCallbackHandler()
+        let handler = EventCallbackHandler(sink: manager.eventSink)
         _ = handler.onListen(withArguments: nil) { [weak self] event in
             if let event = event as? [String: Any] {
                 self?.received.append(event)
@@ -90,33 +89,32 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
 
     // MARK: - Pending events
 
-    func testEventsSentBeforeAHandlerIsSetAreFlushedInOrder() {
+    func testEventsSentBeforeDartListensAreDeliveredInOrder() {
         manager.sendEventCustom("first", body: ["id": "1"])
         manager.sendEventCustom("second", body: nil)
-        XCTAssertEqual(manager.pendingEvents.map { $0.event }, ["first", "second"])
+        drainMainQueue()
+        XCTAssertTrue(received.isEmpty)
 
         listen()
         drainMainQueue()
 
         XCTAssertEqual(receivedNames, ["first", "second"])
         XCTAssertEqual(receivedId(at: 0), "1")
-        XCTAssertTrue(manager.pendingEvents.isEmpty)
     }
 
-    func testEventsSentAfterAHandlerIsSetAreNotQueued() {
+    func testEventsSentWhileDartListensGoStraightThrough() {
         listen()
 
         manager.sendEventCustom("live", body: nil)
         drainMainQueue()
 
         XCTAssertEqual(receivedNames, ["live"])
-        XCTAssertTrue(manager.pendingEvents.isEmpty)
     }
 
-    func testSilencedEventsAreDroppedRatherThanQueued() {
+    func testSilencedEventsAreDroppedRatherThanHeld() {
         manager.handle(FlutterMethodCall(methodName: "silenceEvents", arguments: true)) { _ in }
         manager.sendEventCustom("dropped", body: nil)
-        XCTAssertTrue(manager.pendingEvents.isEmpty)
+        drainMainQueue()
 
         listen()
         manager.handle(FlutterMethodCall(methodName: "silenceEvents", arguments: false)) { _ in }
