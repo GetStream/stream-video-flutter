@@ -11,11 +11,6 @@
 - [Android] `IncomingCallNotificationService.startServiceWithAction` and `IncomingCallBroadcastReceiver.getIntent` are removed.
 - [Android] The notification classes are internal: `IncomingCallNotificationManager`, `IncomingCallSoundPlayerManager` (now `RingtonePlayer`), `ImageLoaderProvider`, `SafeTarget` and `IncomingCallNotification`, along with `IncomingCallNotificationManager`'s constants (`NOTIFICATION_CHANNEL_ID_INCOMING`, `NOTIFICATION_CHANNEL_ID_MISSED`, `MISSED_GROUP_KEY`, `EXTRA_TIME_START_CALL`, `PERMISSION_NOTIFICATION_REQUEST_CODE`). The channel ids are unchanged. `StreamVideoPushNotificationPlugin.getIncomingCallNotificationManager` and `getIncomingCallSoundPlayerManager` are removed.
 - [Android] `StreamVideoPushNotificationPlugin` is created per Flutter engine and only implements `FlutterPlugin` and `ActivityAware`; it is no longer a `MethodChannel.MethodCallHandler` or a `PluginRegistry.RequestPermissionsResultListener`. Its static `getInstance`, `hasInstance`, `sendEvent`, `sharePluginWithRegister` and `initSharedInstance`, its `onMethodCall` and `onRequestPermissionsResult`, the nested `EventCallbackHandler` and `Utils.reapCollection` are removed.
-
-### 🔄 Changed
-
-- [Android] `endCall`, `setCallConnected`, `endAllCalls` and `dismissRingingCallByCid` finish their work on the call before they return, so `activeCalls` right after them no longer lists the call.
-- [Android] `requestNotificationPermission` and `ensureFullScreenIntentPermission` show their UI from the activity of the Flutter engine that calls them, and do nothing from an engine without one. They used to use the activity of whichever engine attached last.
 - [iOS] The public `Call` class is removed. Nothing public returned it, but native code that named the type no longer compiles.
 - [iOS] `StreamVideoCallkitManager` and `EventCallbackHandler` are no longer public. `StreamVideoPushNotificationPlugin.showIncomingCall`, `startOutgoingCall` and `activeCalls` remain the way to reach CallKit from native code. For the manager's other public members, use instead:
   - `showIncomingCall(_:fromPushKit:completion:)`: `StreamVideoPushNotificationPlugin.showIncomingCall(data:fromPushKit:completion:)`.
@@ -35,6 +30,8 @@
 
 ### 🔄 Changed
 
+- [Android] `endCall`, `setCallConnected`, `endAllCalls` and `dismissRingingCallByCid` finish their work on the call before they return, so `activeCalls` right after them no longer lists the call.
+- [Android] `requestNotificationPermission` and `ensureFullScreenIntentPermission` show their UI from the activity of the Flutter engine that calls them, and do nothing from an engine without one. They used to use the activity of whichever engine attached last.
 - [iOS] Only an outgoing call that has connected, through `setCallConnected`, keeps an incoming ring from timing out and makes ending that ring send `ActionCallEnded`. An app that calls `startOutgoingCall` itself and never `setCallConnected` now sees a ring during its call time out, or arrive as `ActionCallDecline` when the user declines it, as it would with no call.
 - `StreamVideoPushHandler.handleBackgroundMessage` builds a client that sets up no media.
 - `IOSPushConfiguration.supportsDTMF` is off by default. The SDK sends no DTMF tones, so CallKit's keypad did nothing. An app that sends the digits itself from `ActionCallToggleDtmf` turns it on.
