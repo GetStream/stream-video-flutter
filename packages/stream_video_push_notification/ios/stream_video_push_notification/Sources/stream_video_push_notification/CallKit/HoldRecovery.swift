@@ -50,6 +50,9 @@ protocol HoldRecoveryActions: AnyObject {
 /// hand its audio session back in a usable state: either no activation comes, or the audio engine
 /// cannot start on the one that does. Then the call is reported to CallKit as ended and started
 /// again under a new uuid, keeping its app id, which makes CallKit activate a new session.
+///
+/// A call stays resumed until it is next put on hold, so an engine that cannot start on any later
+/// activation of that call registers it again too, up to `maxReRegistrationsPerHold` times.
 final class HoldRecovery {
 
     /// How long an activation is waited for after a call comes off hold.
@@ -157,13 +160,17 @@ final class HoldRecovery {
         }
     }
 
-    /// CallKit activated the audio session.
+    /// CallKit activated the audio session. A registration left for when the app becomes active
+    /// is dropped: the activation it waited for came. If the engine cannot start on it, that
+    /// failure arrives afterwards and asks again.
     func audioActivated() {
         activationTimer?.cancel()
         activationTimer = nil
+        pendingReRegistration = nil
     }
 
-    /// WebRTC could not start the audio engine on the session CallKit activated.
+    /// WebRTC could not start the audio engine on the session CallKit activated. Registers the
+    /// live call again if it came off hold since it was last held.
     func audioEngineStartFailed() {
         guard let call = store().liveCall, call.phase.isResumed else { return }
         NSLog("[StreamCallKit] the audio engine did not start after \(call.identity.appId) came off hold")

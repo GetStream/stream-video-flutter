@@ -23,8 +23,14 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     /// How long after answering the answered call's audio session options are applied again.
     var reconfigureAfterAnswerDelay: DispatchTimeInterval = .milliseconds(1200)
 
-    /// Brings a call's audio back after another app's call held it.
-    var holdRecovery: HoldRecovery!
+    /// Brings a call's audio back after another app's call held it. Made on first use, the
+    /// first audio session activation at the latest, so its observers are installed only once a
+    /// call uses audio.
+    lazy var holdRecovery: HoldRecovery = {
+        let recovery = HoldRecovery(store: { [unowned self] in self.store })
+        recovery.actions = self
+        return recovery
+    }()
 
     /// The options Recents was turned off for, while a call registered again with CallKit is
     /// left. Nil while Recents follows the options.
@@ -37,8 +43,6 @@ public class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         transactions.onEndRefused = { [weak self] uuid in
             self?.clearCallAfterRefusedEnd(uuid)
         }
-        holdRecovery = HoldRecovery(store: { [unowned self] in self.store })
-        holdRecovery.actions = self
         observeEngineStartFailures()
     }
 

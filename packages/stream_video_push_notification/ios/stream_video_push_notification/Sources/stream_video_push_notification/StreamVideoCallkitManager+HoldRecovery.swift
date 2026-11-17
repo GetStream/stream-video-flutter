@@ -56,7 +56,9 @@ extension StreamVideoCallkitManager: HoldRecoveryActions {
     ///
     /// CallKit reads the flag when a call ends, after the code reporting the end has returned.
     /// So the end of the call as first reported is listed, and the end of each registration
-    /// made since is not. Nothing changes for options that keep calls out of Recents anyway.
+    /// made since is not. Recents therefore lists the call once, with the duration it had when
+    /// it was first registered again rather than its whole length. Nothing changes for options
+    /// that keep calls out of Recents anyway.
     func suppressRecentsIfRegisteredAgain(_ call: CallKitCall?) {
         guard let call = call, !call.identity.previousCallKitUUIDs.isEmpty,
             call.options.includesCallsInRecents, recentsSuppressedFor == nil

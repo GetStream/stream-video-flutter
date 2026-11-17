@@ -345,6 +345,32 @@ final class HoldRecoveryTests: XCTestCase {
         XCTAssertEqual(actions.starts.count, 1)
     }
 
+    func testALateActivationInTheBackgroundDropsThePendingReRegistration() {
+        // The activation the wait gave up on comes after all, and the engine starts on it.
+        holdForOtherCall()
+        isAppActive = false
+        resume()
+        scheduler.advance(by: HoldRecovery.activationWait)
+        activate()
+
+        appBecomesActive()
+
+        XCTAssertEqual(actions.starts, [])
+    }
+
+    func testAnEngineFailureOnALateActivationIsStillRegisteredAgainOnceTheAppIsActive() {
+        holdForOtherCall()
+        isAppActive = false
+        resume()
+        scheduler.advance(by: HoldRecovery.activationWait)
+        activate()
+        recovery.audioEngineStartFailed()
+
+        appBecomesActive()
+
+        XCTAssertEqual(actions.starts.count, 1)
+    }
+
     func testAPendingReRegistrationIsDroppedWhenItsCallEnds() {
         // A comes off hold in the background with no activation, then ends from the lock screen.
         holdForOtherCall()
