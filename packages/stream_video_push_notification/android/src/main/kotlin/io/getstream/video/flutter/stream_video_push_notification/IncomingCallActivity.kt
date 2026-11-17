@@ -28,7 +28,7 @@ import android.text.TextUtils
 import android.util.Log
 import androidx.core.content.ContextCompat
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
-import io.getstream.video.flutter.stream_video_push_notification.notification.AvatarLoader
+import io.getstream.video.flutter.stream_video_push_notification.notification.CallImageLoader
 import io.getstream.video.flutter.stream_video_push_notification.notification.IncomingCallNotificationBuilder
 
 class IncomingCallActivity : Activity() {
@@ -212,17 +212,17 @@ class IncomingCallActivity : Activity() {
 
         val showLogo = data.getBoolean(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_SHOW_LOGO, false)
         ivLogo.visibility = if (showLogo) View.VISIBLE else View.INVISIBLE
-        val headers = AvatarLoader.headers(data)
-        AvatarLoader.resolve(
+        val headers = CallImageLoader.headers(data)
+        CallImageLoader.resolve(
             data.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_LOGO_URL, ""),
-        )?.let { AvatarLoader.loadInto(ivLogo, it, headers, R.drawable.transparent) }
+        )?.let { CallImageLoader.loadInto(ivLogo, it, headers, R.drawable.transparent) }
 
-        AvatarLoader.avatarUrl(
+        CallImageLoader.avatarUrl(
             data.getString(IncomingCallConstants.EXTRA_CALL_AVATAR, ""),
             data.getString(IncomingCallConstants.EXTRA_CALL_DEFAULT_AVATAR, ""),
         )?.let {
             ivAvatar.visibility = View.VISIBLE
-            AvatarLoader.loadInto(ivAvatar, it, headers, R.drawable.ic_default_avatar)
+            CallImageLoader.loadInto(ivAvatar, it, headers, R.drawable.ic_default_avatar)
         }
 
         val callType = data.getInt(IncomingCallConstants.EXTRA_CALL_TYPE, 0)
@@ -250,9 +250,9 @@ class IncomingCallActivity : Activity() {
             data.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_COLOR)
         ) ?: ContextCompat.getColor(this, R.color.incoming_call_background)
         ivBackground.setBackgroundColor(backgroundColor)
-        AvatarLoader.resolve(
+        CallImageLoader.resolve(
             data.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_URL, ""),
-        )?.let { AvatarLoader.loadInto(ivBackground, it, headers, R.drawable.transparent) }
+        )?.let { CallImageLoader.loadInto(ivBackground, it, headers, R.drawable.transparent) }
     }
 
     private fun finishTimeout(data: Bundle?, duration: Long) {
