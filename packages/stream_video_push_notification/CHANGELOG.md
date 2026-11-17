@@ -23,7 +23,7 @@
   - `initCallkitProvider`: none needed; the plugin sets up its provider when it registers.
 - [iOS] Only what an app calls from native code stays public: `CallData`, `VoIPPushRegistryHandler.shared` with `registerForPushNotifications()` and its `PKPushRegistryDelegate` methods, and the plugin's static `showIncomingCall`, `startOutgoingCall`, `activeCalls` and `setDevicePushTokenVoIP`. The native `StreamVideoPushConfiguration`, `StreamVideoIncomingCallConstants`, `VoIPPushRegistryHandler.initChannel` and `initData`, and the plugin's `sharedInstance` and instance VoIP token methods are internal: the plugin sets them up itself, and Dart receives the events.
 - [iOS] `VoIPPushRegistryHandler` no longer conforms to `UNUserNotificationCenterDelegate`, whose methods it never implemented. An app that set `UNUserNotificationCenter.current().delegate = VoIPPushRegistryHandler.shared` no longer compiles; remove that line, or set a delegate of its own.
-- [Android] `IncomingCallBroadcastReceiver.silenceEvents` is removed. Silence ringing events through `silenceEvents` from Dart, as before.
+- [Android] `IncomingCallBroadcastReceiver.silenceEvents` is removed. Silence ringing events from Dart with `StreamVideoPushNotificationPlatform.silenceEvents()` and `unsilenceEvents()`, as before.
 
 ### ⚠️ Deprecated
 
