@@ -58,6 +58,10 @@ class RingingSyncObserver {
   /// The calls the app is in, as of the last state change.
   List<Call> _currentActiveCalls = [];
 
+  /// The uuids, lowercased, of the rings the backend subscriptions follow. An
+  /// end of another native call, such as an outgoing one, leaves them running.
+  final Set<String> _ringUuids = {};
+
   bool _disposed = false;
 
   /// Starts observing. Called once, on mobile only.
@@ -72,6 +76,9 @@ class RingingSyncObserver {
         .activeCalls()
         .then((calls) {
           if (calls.isNotEmpty && !_disposed) {
+            _ringUuids.addAll(
+              calls.map((call) => call.uuid?.toLowerCase()).nonNulls,
+            );
             _subscribeToEvents();
           }
         })
@@ -104,22 +111,39 @@ class RingingSyncObserver {
   /// Starts the backend subscriptions on a ring and stops them with the
   /// user's answer; mirrors a CallKit mute.
   void _onRingingEvent(RingingEvent event) {
-    if (event is ActionCallToggleMute) {
-      _onToggleMute(event);
-    } else if (event is ActionCallIncoming) {
-      if (!_client.isConnected) {
-        _client.openConnection();
-      }
-      _subscribeToEvents();
-    } else if (event is ActionCallAccept ||
-        event is ActionCallDecline ||
-        event is ActionCallTimeout ||
-        event is ActionCallEnded) {
-      _subscriptions.cancel(_idCallAccepted);
-      _subscriptions.cancel(_idCallEnded);
-      _subscriptions.cancel(_idCallRejected);
-      _subscriptions.cancel(_idCallParticipantCount);
+    switch (event) {
+      case ActionCallToggleMute():
+        _onToggleMute(event);
+      case ActionCallIncoming(:final data):
+        if (!_client.isConnected) {
+          _client.openConnection();
+        }
+        if (data.uuid case final uuid?) _ringUuids.add(uuid.toLowerCase());
+        _subscribeToEvents();
+      case ActionCallAccept(:final data) ||
+          ActionCallDecline(:final data) ||
+          ActionCallTimeout(:final data) ||
+          ActionCallEnded(:final data):
+        _onRingAnswered(data.uuid?.toLowerCase());
+      default:
+        break;
     }
+  }
+
+  /// Stops the backend subscriptions once no ring they follow is left. An
+  /// event without a uuid, or for a ring the observer did not see start,
+  /// stops them as before; one for another call while a ring is followed does
+  /// not.
+  void _onRingAnswered(String? uuid) {
+    if (uuid != null && _ringUuids.isNotEmpty) {
+      if (!_ringUuids.remove(uuid)) return;
+      if (_ringUuids.isNotEmpty) return;
+    }
+    _ringUuids.clear();
+    _subscriptions.cancel(_idCallAccepted);
+    _subscriptions.cancel(_idCallEnded);
+    _subscriptions.cancel(_idCallRejected);
+    _subscriptions.cancel(_idCallParticipantCount);
   }
 
   /// Applies a CallKit mute to the call it names, found through the cid the

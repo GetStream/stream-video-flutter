@@ -32,7 +32,7 @@ final class CallEndGracePeriod {
     init(
         duration: TimeInterval = CallEndGracePeriod.defaultDuration,
         tasks: BackgroundTasks = ApplicationBackgroundTasks(),
-        scheduler: HoldRecoveryScheduler = MainQueueHoldRecoveryScheduler()
+        scheduler: Scheduler = MainQueueScheduler()
     ) {
         self.duration = duration
         self.tasks = tasks
@@ -41,10 +41,10 @@ final class CallEndGracePeriod {
 
     private let duration: TimeInterval
     private let tasks: BackgroundTasks
-    private let scheduler: HoldRecoveryScheduler
+    private let scheduler: Scheduler
 
     private var task = UIBackgroundTaskIdentifier.invalid
-    private var timer: HoldRecoveryTimer?
+    private var timer: ScheduledWork?
 
     var isRunning: Bool { task != .invalid }
 

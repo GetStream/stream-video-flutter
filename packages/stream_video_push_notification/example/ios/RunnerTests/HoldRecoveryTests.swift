@@ -5,9 +5,9 @@ import XCTest
 @testable import stream_video_push_notification
 
 /// Runs scheduled work only when the test moves time on.
-final class FakeHoldRecoveryScheduler: HoldRecoveryScheduler {
+final class FakeScheduler: Scheduler {
 
-    private final class Timer: HoldRecoveryTimer {
+    private final class Timer: ScheduledWork {
         var isCancelled = false
         func cancel() { isCancelled = true }
     }
@@ -15,7 +15,7 @@ final class FakeHoldRecoveryScheduler: HoldRecoveryScheduler {
     private var pending: [(at: TimeInterval, timer: Timer, work: () -> Void)] = []
     private var now: TimeInterval = 0
 
-    func schedule(after delay: TimeInterval, _ work: @escaping () -> Void) -> HoldRecoveryTimer {
+    func schedule(after delay: TimeInterval, _ work: @escaping () -> Void) -> ScheduledWork {
         let timer = Timer()
         pending.append((now + delay, timer, work))
         return timer
@@ -98,7 +98,7 @@ final class HoldRecoveryTests: XCTestCase {
 
     private var store: CallKitCallStore!
     private var observer: FakeSystemCallObserver!
-    private var scheduler: FakeHoldRecoveryScheduler!
+    private var scheduler: FakeScheduler!
     private var actions: FakeHoldRecoveryActions!
     private var center: NotificationCenter!
     private var isAppActive = true
@@ -110,7 +110,7 @@ final class HoldRecoveryTests: XCTestCase {
         super.setUp()
         store = CallKitCallStore()
         observer = FakeSystemCallObserver()
-        scheduler = FakeHoldRecoveryScheduler()
+        scheduler = FakeScheduler()
         actions = FakeHoldRecoveryActions()
         center = NotificationCenter()
         isAppActive = true

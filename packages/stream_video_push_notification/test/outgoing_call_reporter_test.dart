@@ -39,7 +39,7 @@ class _FakeCall {
       ).copyWith(
         callMembers:
             members ?? [_member(_me), _member('ada', name: 'Ada Lovelace')],
-        settings: CallSettings(video: StreamVideoSettings(enabled: video)),
+        isRingingWithVideo: video,
       ),
     );
     // `thenAnswer`: a StateEmitter is a Stream, which `thenReturn` refuses.

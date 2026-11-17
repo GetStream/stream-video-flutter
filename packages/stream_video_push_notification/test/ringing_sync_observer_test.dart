@@ -279,6 +279,89 @@ void main() {
       });
     }
 
+    Future<void> ringAs(String uuid) async {
+      platform.emit(
+        ActionCallIncoming(
+          data: CallData(uuid: uuid, callCid: _cid.value),
+        ),
+      );
+      await pumpEventQueue();
+    }
+
+    Future<void> endNative(String uuid) async {
+      platform.emit(
+        ActionCallEnded(
+          data: CallData(uuid: uuid, callCid: 'default:other'),
+        ),
+      );
+      await pumpEventQueue();
+    }
+
+    test('keep following a ring when another native call ends', () async {
+      await start();
+      await ringAs('ring-1');
+      // An outgoing call CallKit ended while the ring is up.
+      await endNative('outgoing-1');
+
+      backendEvents.emit(ended());
+      await pumpEventQueue();
+
+      verify(() => controller.endCallByCid(_cid.value)).called(1);
+    });
+
+    test("stop with the followed ring's own answer, in any case", () async {
+      await start();
+      await ringAs('Ring-1');
+      await endNative('ring-1');
+
+      backendEvents.emit(ended());
+      await pumpEventQueue();
+
+      verifyNever(
+        () => controller.endCallByCid(any(), silent: any(named: 'silent')),
+      );
+    });
+
+    test('keep following while another ring is still up', () async {
+      await start();
+      await ringAs('ring-1');
+      await ringAs('ring-2');
+      await endNative('ring-1');
+
+      backendEvents.emit(ended());
+      await pumpEventQueue();
+
+      verify(() => controller.endCallByCid(_cid.value)).called(1);
+    });
+
+    test('stop once every followed ring is answered', () async {
+      await start();
+      await ringAs('ring-1');
+      await ringAs('ring-2');
+      await endNative('ring-1');
+      await endNative('ring-2');
+
+      backendEvents.emit(ended());
+      await pumpEventQueue();
+
+      verifyNever(
+        () => controller.endCallByCid(any(), silent: any(named: 'silent')),
+      );
+    });
+
+    test('follow the native calls found at start-up by their uuids', () async {
+      when(() => controller.activeCalls()).thenAnswer(
+        (_) async => [CallData(uuid: 'ring-1', callCid: _cid.value)],
+      );
+      await start();
+      await endNative('outgoing-1');
+
+      backendEvents.emit(ended());
+      await pumpEventQueue();
+
+      verify(() => controller.endCallByCid(_cid.value)).called(1);
+    });
+
     test(
       'the incoming event opens the backend connection when closed',
       () async {

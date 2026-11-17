@@ -101,7 +101,7 @@ class OutgoingCallReporter {
         callerName: callees.isEmpty
             ? null
             : callees.map(_displayName).join(', '),
-        hasVideo: state.settings.video.enabled,
+        hasVideo: state.isRingingWithVideo,
       ),
     );
   }

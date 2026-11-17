@@ -39,7 +39,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
 
         backgroundTasks = FakeBackgroundTasks()
         manager.callEndGracePeriod = CallEndGracePeriod(
-            tasks: backgroundTasks, scheduler: FakeHoldRecoveryScheduler())
+            tasks: backgroundTasks, scheduler: FakeScheduler())
         manager.eventSink = RingingEventSink()
         // An attached handler Dart does not listen on yet, so events are held.
         manager.setEventHandler(EventCallbackHandler(sink: manager.eventSink))
@@ -933,13 +933,13 @@ final class FakeBackgroundTasks: BackgroundTasks {
 final class CallEndGracePeriodTests: XCTestCase {
 
     private var tasks: FakeBackgroundTasks!
-    private var scheduler: FakeHoldRecoveryScheduler!
+    private var scheduler: FakeScheduler!
     private var grace: CallEndGracePeriod!
 
     override func setUp() {
         super.setUp()
         tasks = FakeBackgroundTasks()
-        scheduler = FakeHoldRecoveryScheduler()
+        scheduler = FakeScheduler()
         grace = CallEndGracePeriod(duration: 10, tasks: tasks, scheduler: scheduler)
     }
 

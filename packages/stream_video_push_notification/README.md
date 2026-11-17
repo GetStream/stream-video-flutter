@@ -65,7 +65,8 @@ Nothing about ringing depends on it. `CallsManager.addCall` requires only `MANAG
 Jetpack Telecom checks the Bluetooth grant before every use and falls back cleanly. Without it, only
 the active Bluetooth device is surfaced and its name falls back to a generic default.
 
-Outgoing calls are registered when you call `startOutgoingCall`; the SDK does not call it for you.
+On Android, outgoing calls are registered with Telecom when you call `startOutgoingCall`; the SDK
+does not call it for you there. On iOS it can, with `reportOutgoingCalls`, below.
 
 ### iOS outgoing calls
 

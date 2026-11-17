@@ -1,33 +1,6 @@
 import Foundation
 import UIKit
 
-/// Runs work after a delay.
-protocol HoldRecoveryScheduler {
-    @discardableResult
-    func schedule(after delay: TimeInterval, _ work: @escaping () -> Void) -> HoldRecoveryTimer
-}
-
-/// Work a scheduler will run, until cancelled.
-protocol HoldRecoveryTimer {
-    func cancel()
-}
-
-/// Schedules on the main queue.
-final class MainQueueHoldRecoveryScheduler: HoldRecoveryScheduler {
-
-    private final class Timer: HoldRecoveryTimer {
-        let item: DispatchWorkItem
-        init(_ item: DispatchWorkItem) { self.item = item }
-        func cancel() { item.cancel() }
-    }
-
-    func schedule(after delay: TimeInterval, _ work: @escaping () -> Void) -> HoldRecoveryTimer {
-        let item = DispatchWorkItem(block: work)
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: item)
-        return Timer(item)
-    }
-}
-
 /// What hold recovery asks of CallKit.
 protocol HoldRecoveryActions: AnyObject {
     /// Asks CallKit to take the call it knows as `uuid` off hold.
@@ -68,13 +41,13 @@ final class HoldRecovery {
 
     private let store: () -> CallKitCallStore
     private let observer: SystemCallObserver
-    private let scheduler: HoldRecoveryScheduler
+    private let scheduler: Scheduler
     private let isAppActive: () -> Bool
     private let notificationCenter: NotificationCenter
     private var didBecomeActiveObserver: NSObjectProtocol?
 
-    private var activationTimer: HoldRecoveryTimer?
-    private var unholdTimer: HoldRecoveryTimer?
+    private var activationTimer: ScheduledWork?
+    private var unholdTimer: ScheduledWork?
     /// The calls an unhold was requested for and not answered yet, by CallKit uuid.
     private var requestedUnholds: Set<UUID> = []
     /// The calls the app asked CallKit to hold, by CallKit uuid.
@@ -85,7 +58,7 @@ final class HoldRecovery {
     init(
         store: @escaping () -> CallKitCallStore,
         observer: SystemCallObserver = CXSystemCallObserver(),
-        scheduler: HoldRecoveryScheduler = MainQueueHoldRecoveryScheduler(),
+        scheduler: Scheduler = MainQueueScheduler(),
         isAppActive: @escaping () -> Bool = { UIApplication.shared.applicationState == .active },
         notificationCenter: NotificationCenter = .default
     ) {
