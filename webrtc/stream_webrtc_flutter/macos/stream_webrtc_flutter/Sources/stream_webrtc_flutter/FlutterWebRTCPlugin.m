@@ -1,4 +1,5 @@
 #import "include/stream_webrtc_flutter/FlutterWebRTCPlugin.h"
+#import "NativePeerConnectionFactory+Private.h"
 #if TARGET_OS_IPHONE
 #import "include/stream_webrtc_flutter/AudioUtils.h"
 #endif
@@ -194,7 +195,8 @@ NSNotificationName const FlutterWebRTCAudioEngineStartFailedNotification =
   BOOL hasSessionState = [sessionActive isKindOfClass:[NSNumber class]];
   BOOL isAvailable = ((NSNumber*)available).boolValue;
   // WebRTC learns about the activation before the engine may start on it, and
-  // about the deactivation after the engine has been told to stop.
+  // about the deactivation once each factory's stop is queued on its ADM queue;
+  // the stop itself may still be running.
   if (hasSessionState && ((NSNumber*)sessionActive).boolValue) {
     [self setCallKitAudioSessionActive:YES];
   }
