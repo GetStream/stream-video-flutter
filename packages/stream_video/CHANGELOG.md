@@ -5,6 +5,7 @@
 - The app-wide audio members of `RtcMediaDeviceNotifier` moved to the new `PlatformAudioController`: `handleCallInterruptionCallbacks`, `nativeWebRtcEventsStream`, `speechActivityStream`, `triggeriOSAudioRouteSelectionUI`, `isAudioPlayoutPauseSupported`, `isAudioPlayoutPaused`, `audioPlayoutPausedChanges`, `pauseAudioPlayout`, `resumeAudioPlayout`, `resumeWebAudioPlayback`, `regainAndroidAudioFocus` and `reinitializeAudioConfiguration`; use `PlatformAudioController.instance`.
 - `PlatformAudioController.handleCallInterruptionCallbacks` no longer takes the deprecated `androidAudioAttributesUsageType` and `androidAudioAttributesContentType`.
 - `ScreenSharingStoppedEvent` carries a `trackId` instead of a `data` map, and `ScreenSharingStartedEvent` has no `data`.
+- `ActionCallToggleGroup` is removed. It was never sent: CallKit is never offered a merge of calls, and refuses a merge it attempts anyway.
 - Test mocks that implement `StreamVideo` get a `subtype_of_sealed_class` warning, because `StreamVideo` implements the `@sealed` `CallHost`; add `// ignore: subtype_of_sealed_class` to them.
 - The deprecated `observeCoreCallKitEvents`, `observeCall*CallKitEvent` and `handleVoipPushNotification` methods are removed; use `observeCoreRingingEvents`, `observeCall*RingingEvent` and `handleRingingFlowNotifications` on `StreamVideo.ringing`.
 - `StreamVideo.create` no longer sets up logging; call `StreamVideo.configureLogging` for such a client.
@@ -88,6 +89,8 @@
 ### ✅ Added
 
 - `AudioConfigurationPolicy.toFactoryOptions` returns the settings a peer connection factory is built with under the policy.
+- `CallState.isRingingWithVideo`: whether the ring the current user started asked the callees for video, the `video` argument of `Call.getOrCreate` or `Call.get` with `ringing: true`.
+- `AudioRouteChangedEvent.reason`, an `AudioRouteChangeReason` that says why an iOS audio route changed: iOS's `AVAudioSessionRouteChangeReason`, or `unknown` when the WebRTC plugin does not report it.
 - `CallData.fromJson`, which builds the call data of a ringing event or an active native call from the map the push plugins send.
 - `VideoLifecycleState`, the type of `ClientState.appLifecycleState`, is exported.
 - `StreamVideo.ready` completes once the client has started up: audio configured, environment collected and, with `autoConnect`, the connect attempted.
@@ -140,6 +143,7 @@
 
 ### 🐞 Fixed
 
+- [iOS] When the user chose the speaker or the receiver and the system moves audio between the two on its own, such as after a CallKit hold, the chosen output is put back instead of being replaced by the system's choice. A route to any other device, such as Bluetooth or AirPlay, is followed, and so is the system's route when the chosen output cannot be put back.
 - A muted microphone or camera is announced to the SFU as muted.
 - Joining a call retries sooner when the SFU connection closes before the join response.
 - On iOS, a call that defaults to the loudspeaker now starts on it, instead of switching to it after the microphone is already recording.
