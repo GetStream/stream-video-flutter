@@ -14,6 +14,7 @@ import '../utils/call_encryption.dart';
 import '../utils/e2ee.dart';
 import '../utils/random_words.dart';
 import '../widgets/lobby_encryption.dart';
+import '../widgets/lobby_hifi_audio.dart';
 import '../widgets/stream_button.dart';
 
 /// Hands the call over to the call screen once the lobby is done with it.
@@ -70,6 +71,12 @@ class _LobbyScreenState extends State<LobbyScreen> {
   List<RtcMediaDevice> _videoInputDevices = const [];
 
   final _userAuthController = locator.get<UserAuthController>();
+
+  /// Whether the call is joined with the HiFi audio policy. Off by default.
+  bool _hiFiAudioEnabled = false;
+
+  /// Bumped to remount the preview after its tracks were stopped.
+  int _previewGeneration = 0;
   late StreamVideoEffectsManager _videoEffectsManager;
 
   /// The call about to be joined.
@@ -225,6 +232,48 @@ class _LobbyScreenState extends State<LobbyScreen> {
     }
   }
 
+  Future<void> _toggleHiFiAudio(bool enabled) async {
+    // Changing the policy discards the factory the preview tracks run on, so
+    // they are stopped first and the preview is remounted with fresh tracks
+    // on the new factory.
+    await _stopPreviewTracks();
+    if (!mounted) return;
+
+    final applied = _applyHiFiAudio(enabled: enabled);
+    setState(() {
+      _previewGeneration++;
+      if (applied) _hiFiAudioEnabled = enabled;
+    });
+
+    if (!applied) {
+      _showError('Could not change the audio policy for this call.');
+    }
+  }
+
+  /// HiFi bypasses voice processing, which on iOS turns on stereo playout and
+  /// keeps Bluetooth headphones on A2DP instead of the mono hands-free profile.
+  ///
+  /// Returns whether the policy was applied.
+  bool _applyHiFiAudio({required bool enabled}) {
+    final result = _call.setAudioConfigurationPolicy(
+      enabled ? const AudioConfigurationPolicy.hiFi() : null,
+    );
+    if (result is Failure) {
+      debugPrint('Failed to set the audio policy: ${result.error.message}');
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> _stopPreviewTracks() async {
+    final cameraTrack = _cameraTrack;
+    final microphoneTrack = _microphoneTrack;
+    _cameraTrack = null;
+    _microphoneTrack = null;
+    await cameraTrack?.stop();
+    await microphoneTrack?.stop();
+  }
+
   /// Records the encryption mode to create the call with.
   void _toggleEncryption(bool enabled) {
     setState(() {
@@ -374,10 +423,14 @@ class _LobbyScreenState extends State<LobbyScreen> {
                 ),
                 const SizedBox(height: 16),
                 StreamLobbyVideo(
-                  // Keyed on the selected camera, since the preview owns the
-                  // track it renders and has no way to be handed a different
-                  // one — remounting is how the device change reaches it.
-                  key: ValueKey(_selectedVideoInputDevice?.id),
+                  // Keyed on the selected camera and a generation bumped by the
+                  // HiFi switch, since the preview owns the tracks it renders
+                  // and has no way to be handed different ones — remounting is
+                  // how a device change, or a policy change that rebuilds the
+                  // factory, reaches it.
+                  key: ValueKey(
+                    (_selectedVideoInputDevice?.id, _previewGeneration),
+                  ),
                   call: _call,
                   initialCameraDevice: _selectedVideoInputDevice,
                   onMicrophoneTrackSet: (track) => _microphoneTrack = track,
@@ -512,6 +565,11 @@ class _LobbyScreenState extends State<LobbyScreen> {
                   },
                   onGenerateKey: () =>
                       setState(() => _setEncryptionKey(getRandomWords())),
+                ),
+                const SizedBox(height: 12),
+                LobbyHiFiAudio(
+                  enabled: _hiFiAudioEnabled,
+                  onChanged: _toggleHiFiAudio,
                 ),
                 const SizedBox(height: 24),
                 Container(

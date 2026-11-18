@@ -10,6 +10,8 @@
 - Added `Call.participantsStream`, which emits the participant list at an interval that grows with the participant count.
 - Added `CallPreferences.participantsThrottleIntervalResolver` to override that interval, or set it to `null` to emit every change.
 - Added `isSameCallStateSelection`, which compares two selected values the way `Call.partialState` does.
+- Added `Call.setAudioConfigurationPolicy`, which sets the call's audio policy before joining without rebuilding the rest of its preferences. Pass `null` to fall back to `StreamVideoOptions.audioConfigurationPolicy`.
+- Added `CallPreferences.withAudioConfigurationPolicy`, which returns a copy of any `CallPreferences` with a different audio policy and every other value unchanged.
 
 ### 🔄 Changed
 
@@ -27,11 +29,11 @@
 - `CallState.localParticipant`, `otherParticipants` and `activeSpeakers` are now computed once per participant list instead of on every read, which keeps them cheap in calls with many participants. `callParticipants`, `otherParticipants` and `activeSpeakers` now return unmodifiable lists shared by every reader, so call `.toList()` before sorting or otherwise mutating them.
 - Simulcast layers are now announced to the SFU and bitrate-capped from the resolution the camera actually captures on iOS and Android, instead of the requested resolution. A camera that captures below the requested size, or at a different aspect ratio, no longer over-reports its layers or over-allocates their bitrate.
 - `RtcMediaDeviceNotifier` now enumerates devices once per burst of device-change events, and calls made while an enumeration is running share its result instead of starting another one. The device list emitted by `RtcMediaDeviceNotifier.onDeviceChange` is now unmodifiable, so copy it with `.toList()` before sorting or otherwise mutating it.
-- Remote audio is now always negotiated as stereo: the subscriber answer adds `stereo=1` to every Opus track, as the iOS SDK does, instead of only when the SFU's offer contained `sprop-stereo=1`. Stereo playout still depends on the audio policy (for example `HiFiAudioPolicy`); otherwise the stereo audio is mixed down to mono.
 
 ### 🐞 Fixed
 
 - [iOS] Stereo playout now follows the call's own audio policy: a call whose policy bypasses voice processing (`HiFiAudioPolicy`, `ViewerAudioPolicy`) plays stereo without also needing the `musicHighQuality` microphone profile. The preference is set again whenever a session starts, so a call no longer keeps stereo playout, with voice processing bypassed, from an earlier HiFi call.
+- [iOS] Selecting an audio output device, including the one passed in `CallConnectOptions.audioOutputDevice`, now applies the call's own audio policy to the audio session instead of the client default. A call using `HiFiAudioPolicy` was switched back to the voice-chat mode with Bluetooth HFP on join, which kept playback mono.
 - Fixed the microphone ignoring an audio bitrate profile set before joining, and losing it after a reconnect: the profile's microphone constraints (for `musicHighQuality`, voice processing off) were only applied once the profile was set again.
 - Fixed `Call.partialState` streams staying subscribed to the call state after their last listener cancelled.
 - Fixed server-pinned participants being reordered on every pins event.

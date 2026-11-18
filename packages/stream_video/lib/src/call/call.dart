@@ -350,6 +350,12 @@ class Call {
     }
   }
 
+  /// The audio policy the call's current peer connection factory was built
+  /// with, or null when no factory exists yet.
+  @visibleForTesting
+  AudioConfigurationPolicy? get pcFactoryAudioConfigurationPolicy =>
+      _pcFactory?.audioConfigurationPolicy;
+
   StreamPeerConnectionFactory _ensurePcFactory() {
     return _pcFactory ??= StreamPeerConnectionFactory(
       callCid: callCid,
@@ -1066,6 +1072,45 @@ class Call {
         }),
       );
     }
+  }
+
+  /// Sets the audio configuration policy for this call, keeping every other
+  /// preference as it is. Pass null to fall back to the client default,
+  /// `StreamVideoOptions.audioConfigurationPolicy`.
+  ///
+  /// Call this before [join]: the policy is applied when the call's peer
+  /// connection factory is built. A factory built earlier by a lobby preview
+  /// is discarded, as with [updateCallPreferences]; stop any preview tracks
+  /// first. While the call is joining or joined, the policy can no longer
+  /// change and this returns a failure.
+  ///
+  /// The policy is stored in the call's preferences, so a later
+  /// [updateCallPreferences] replaces it along with every other preference.
+  ///
+  /// ```dart
+  /// call.setAudioConfigurationPolicy(const AudioConfigurationPolicy.hiFi());
+  /// await call.join();
+  /// ```
+  Result<None> setAudioConfigurationPolicy(AudioConfigurationPolicy? policy) {
+    _logger.i(() => '[setAudioConfigurationPolicy] policy: $policy');
+
+    final status = state.value.status;
+    if (status is CallStatusConnecting ||
+        status is CallStatusConnected ||
+        status is CallStatusJoining ||
+        status is CallStatusJoined) {
+      _logger.w(
+        () => '[setAudioConfigurationPolicy] rejected: call status is $status',
+      );
+      return Result.error(
+        'The audio configuration policy can only be changed before joining.',
+      );
+    }
+
+    updateCallPreferences(
+      _stateManager.callState.preferences.withAudioConfigurationPolicy(policy),
+    );
+    return const Result.success(none);
   }
 
   /// Enables the given SFU client capabilities for this call.
@@ -3214,9 +3259,7 @@ class Call {
       if (CurrentPlatform.isIos) {
         await _session?.rtcManager?.setAppleAudioConfiguration(
           speakerOn: _connectOptions.speakerDefaultOn,
-          policy:
-              _stateManager.callState.preferences.audioConfigurationPolicy ??
-              _streamVideo.options.audioConfigurationPolicy,
+          policy: _effectiveAudioConfigurationPolicy,
         );
       }
     }

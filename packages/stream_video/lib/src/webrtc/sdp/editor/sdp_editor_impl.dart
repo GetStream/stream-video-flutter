@@ -102,7 +102,7 @@ List<SdpRuleToggle> _createRules() {
     // into the SDP.
     SdpRuleToggle(
       enabled: true,
-      rule: const SdpMungingRule.enableOpusStereo(
+      rule: const SdpMungingRule.mirrorSpropStereo(
         types: [SdpType.localAnswer],
       ),
     ),

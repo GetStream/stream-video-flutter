@@ -76,6 +76,16 @@ class RtcManager extends Disposable {
 
   final _logger = taggedLogger(tag: _tag);
 
+  /// The call's own audio policy, falling back to the client default.
+  ///
+  /// Re-applying the client default here would undo a per-call policy: a
+  /// [HiFiAudioPolicy] call would drop back to `voiceChat` with Bluetooth HFP
+  /// as soon as an audio output device is selected.
+  @visibleForTesting
+  AudioConfigurationPolicy get effectiveAudioConfigurationPolicy =>
+      stateManager.callState.preferences.audioConfigurationPolicy ??
+      _streamVideo.options.audioConfigurationPolicy;
+
   final String sessionId;
   final StreamCallCid callCid;
   final String? publisherId;
@@ -2294,11 +2304,11 @@ extension RtcManagerTrackHelper on RtcManager {
           )) {
         await setAppleAudioConfiguration(
           speakerOn: true,
-          policy: _streamVideo.options.audioConfigurationPolicy,
+          policy: effectiveAudioConfigurationPolicy,
         );
       } else {
         await setAppleAudioConfiguration(
-          policy: _streamVideo.options.audioConfigurationPolicy,
+          policy: effectiveAudioConfigurationPolicy,
         );
       }
 
