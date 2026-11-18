@@ -113,10 +113,12 @@ class StreamLivestreamThemeData with Diagnosticable {
   /// The icon theme for the participant icon
   final IconThemeData participantIconTheme;
 
-  /// The icon theme for the speaker enabled icon on the control bar
+  /// The icon theme for the speaker icon on the control bar while the
+  /// stream's audio is playing.
   final IconThemeData speakerEnabledIconTheme;
 
-  /// The icon theme for the speaker disabled icon on the control bar
+  /// The icon theme for the speaker icon on the control bar while the
+  /// stream's audio is muted.
   final IconThemeData speakerDisabledIconTheme;
 
   /// The icon theme for the expand icon on the control bar

@@ -251,17 +251,48 @@ enum VideoFit {
   /// to cover the entire widget area.
   cover,
 
-  /// Automatically pick between [cover] and [contain] based on the video's
-  /// own orientation: landscape (or square) video fills the widget ([cover]),
-  /// while portrait/tall video is letterboxed so the whole frame stays
-  /// visible ([contain]).
+  /// Pick between [cover] and [contain] by comparing the video's orientation
+  /// with the widget's: the video fills the widget ([cover]) when both are
+  /// landscape or both are portrait, and is letterboxed ([contain]) when they
+  /// differ, so a landscape feed in a portrait widget (or a portrait feed in a
+  /// landscape one) is shown whole rather than cropped.
+  ///
+  /// Square counts as landscape on either side. When the widget's size cannot
+  /// be measured, the widget is treated as landscape.
   adaptive,
+}
+
+/// Resolves [videoFit] to [VideoFit.cover] or [VideoFit.contain] for a video
+/// of [videoAspectRatio] (width / height, rotation applied) shown in a widget
+/// of [viewSize].
+///
+/// [VideoFit.cover] and [VideoFit.contain] are returned as they are.
+@visibleForTesting
+VideoFit resolveVideoFit(
+  VideoFit videoFit, {
+  required double videoAspectRatio,
+  Size? viewSize,
+}) {
+  switch (videoFit) {
+    case VideoFit.cover:
+    case VideoFit.contain:
+      return videoFit;
+    case VideoFit.adaptive:
+      final isVideoWide = videoAspectRatio >= 1.0;
+      // A view that cannot be measured, such as one in an unbounded scroll
+      // direction, counts as landscape, so the fit follows the video alone.
+      final canMeasureView =
+          viewSize != null && viewSize.isFinite && !viewSize.isEmpty;
+      final isViewWide = !canMeasureView || viewSize.aspectRatio >= 1.0;
+      return isVideoWide == isViewWide ? VideoFit.cover : VideoFit.contain;
+  }
 }
 
 /// The [VideoFit] used for participant video when none is explicitly set.
 ///
-/// Resolves to [VideoFit.adaptive] on web and desktop, so portrait video is
-/// letterboxed instead of cropped, and to [VideoFit.cover] on mobile.
+/// Resolves to [VideoFit.adaptive] on web and desktop, so video whose
+/// orientation differs from its tile is letterboxed instead of cropped, and to
+/// [VideoFit.cover] on mobile.
 VideoFit get defaultVideoFit {
   if (CurrentPlatform.isMobile) return VideoFit.cover;
   return VideoFit.adaptive;
@@ -342,37 +373,32 @@ class _VideoTrackRendererState extends State<VideoTrackRenderer> {
 
     // Listen to the renderer's value so [VideoFit.adaptive] can recompute the
     // object fit whenever the incoming video dimensions or rotation change.
+    //
+    // The LayoutBuilder is there for every fit, not only the one that reads
+    // the size, so switching fits keeps the tree shape and does not remount
+    // the video view (which is stateful on web and would flash black).
     return ValueListenableBuilder<rtc.RTCVideoValue>(
       valueListenable: _videoRenderer,
-      builder: (context, value, _) {
-        return rtc.RTCVideoView(
-          _videoRenderer,
-          mirror: widget.mirror,
-          objectFit: _getVideoViewObjectFit(videoFit, value),
-          filterQuality: FilterQuality.medium,
-          placeholderBuilder: widget.placeholderBuilder,
-        );
-      },
+      builder: (context, value, _) => LayoutBuilder(
+        builder: (context, constraints) {
+          // [RTCVideoValue.aspectRatio] is rotation-aware and returns 1.0
+          // until the first frame arrives.
+          final resolved = resolveVideoFit(
+            videoFit,
+            videoAspectRatio: value.aspectRatio,
+            viewSize: constraints.biggest,
+          );
+          return rtc.RTCVideoView(
+            _videoRenderer,
+            mirror: widget.mirror,
+            objectFit: resolved == VideoFit.cover
+                ? rtc.RTCVideoViewObjectFit.RTCVideoViewObjectFitCover
+                : rtc.RTCVideoViewObjectFit.RTCVideoViewObjectFitContain,
+            filterQuality: FilterQuality.medium,
+            placeholderBuilder: widget.placeholderBuilder,
+          );
+        },
+      ),
     );
-  }
-
-  rtc.RTCVideoViewObjectFit _getVideoViewObjectFit(
-    VideoFit videoFit,
-    rtc.RTCVideoValue value,
-  ) {
-    switch (videoFit) {
-      case VideoFit.cover:
-        return rtc.RTCVideoViewObjectFit.RTCVideoViewObjectFitCover;
-      case VideoFit.contain:
-        return rtc.RTCVideoViewObjectFit.RTCVideoViewObjectFitContain;
-      case VideoFit.adaptive:
-        // [RTCVideoValue.aspectRatio] is rotation-aware and returns 1.0 until
-        // the first frame arrives, so tall/portrait video is letterboxed while
-        // landscape (or square, or not-yet-known) video fills the widget.
-        final isWide = value.aspectRatio >= 1.0;
-        return isWide
-            ? rtc.RTCVideoViewObjectFit.RTCVideoViewObjectFitCover
-            : rtc.RTCVideoViewObjectFit.RTCVideoViewObjectFitContain;
-    }
   }
 }

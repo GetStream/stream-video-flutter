@@ -775,11 +775,6 @@ class IncomingCallNotificationManager(
         }
     }
 
-    fun destroy() {
-
-        incomingCallSoundPlayerManager?.destroy()
-    }
-
 }
 
 data class IncomingCallNotification(val id: Int, val notification: Notification)

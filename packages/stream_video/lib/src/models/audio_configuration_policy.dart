@@ -1,5 +1,7 @@
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
+import 'android_call_service_kind.dart';
+
 /// A policy that defines how audio should be configured on both iOS and Android.
 ///
 /// ## Predefined Policies
@@ -61,13 +63,24 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 ///
 /// **Viewer Policy:**
 /// - Voice processing **bypassed** for pure, high-fidelity audio
-/// - Always uses speaker by default
+/// - Plays through the loudspeaker by default, whatever the call settings
+///   say, unless headphones or a Bluetooth device are connected
 /// - Optimized for music/media quality
 ///
 /// **HiFi Policy:**
 /// - Voice processing **bypassed** for pure, high-fidelity audio
 /// - Uses `playAndRecord` category for active microphone use
-/// - Always uses speaker by default
+/// - Picks its default output from the call settings, like the broadcaster
+///   policy
+///
+/// ## Android foreground service
+///
+/// On Android a call runs in a foreground service that declares what kind of
+/// work it does, and the policy decides which one through
+/// [androidCallServiceKind]: the viewer policy runs in the media playback
+/// service, every other predefined policy in the call service. Both add
+/// microphone and camera when the app holds those permissions. See
+/// [AndroidCallServiceKind].
 ///
 /// ## Custom Configuration
 /// - [AudioConfigurationPolicy.custom] - Full control over platform settings
@@ -93,6 +106,8 @@ sealed class AudioConfigurationPolicy {
     appleConfiguration,
     rtc.AndroidAudioConfiguration? androidConfiguration,
     bool bypassVoiceProcessing,
+    AndroidCallServiceKind? androidCallServiceKind,
+    bool? defaultsToSpeaker,
   }) = CustomAudioPolicy;
 
   rtc.AppleAudioConfiguration getAppleConfiguration({
@@ -102,6 +117,32 @@ sealed class AudioConfigurationPolicy {
   rtc.AndroidAudioConfiguration getAndroidConfiguration();
 
   bool get bypassVoiceProcessing;
+
+  /// Whether audio plays through the loudspeaker by default under this
+  /// policy, whatever the call settings say.
+  ///
+  /// Headphones and Bluetooth devices still take the audio when connected,
+  /// and an output picked with `Call.setAudioOutputDevice` still applies.
+  ///
+  /// True for [AudioConfigurationPolicy.viewer]. False for
+  /// [AudioConfigurationPolicy.broadcaster] and
+  /// [AudioConfigurationPolicy.hiFi], whose default output follows the call
+  /// settings. A custom policy follows its base policy unless it sets its
+  /// own.
+  bool get defaultsToSpeaker;
+
+  /// The Android foreground service a call under this policy runs in.
+  ///
+  /// [AudioConfigurationPolicy.viewer] runs in the livestream viewer service,
+  /// which requests `mediaPlayback` in place of `phoneCall`. Every other
+  /// predefined policy runs in the call service, which requests `phoneCall`.
+  /// Both add `microphone` and `camera` when the app holds those permissions,
+  /// so a viewer brought on stage keeps publishing in the background.
+  ///
+  /// The kind is read once, when the call becomes active. A policy changed
+  /// through the call preferences afterwards does not move the call to
+  /// another service.
+  AndroidCallServiceKind get androidCallServiceKind;
 }
 
 /// Audio policy optimized for active participation in calls.
@@ -153,6 +194,13 @@ class BroadcasterAudioPolicy extends AudioConfigurationPolicy {
 
   @override
   bool get bypassVoiceProcessing => false;
+
+  @override
+  bool get defaultsToSpeaker => false;
+
+  @override
+  AndroidCallServiceKind get androidCallServiceKind =>
+      AndroidCallServiceKind.call;
 }
 
 /// Audio policy optimized for passive consumption of audio/video content.
@@ -164,6 +212,13 @@ class BroadcasterAudioPolicy extends AudioConfigurationPolicy {
 ///
 /// This disables voice processing and treats the session as media playback
 /// on both platforms, providing higher audio fidelity.
+///
+/// On Android the call runs in the livestream viewer foreground service,
+/// which requests `mediaPlayback` rather than `phoneCall`. A viewer brought on
+/// stage can still publish in the background: the service adds `microphone`
+/// and `camera` once the app holds those permissions. An app whose viewers
+/// never publish can remove the microphone and camera foreground service
+/// permissions from its manifest; see [AndroidCallServiceKind].
 ///
 /// See [AudioConfigurationPolicy] for detailed platform-specific behavior.
 class ViewerAudioPolicy extends AudioConfigurationPolicy {
@@ -201,6 +256,13 @@ class ViewerAudioPolicy extends AudioConfigurationPolicy {
 
   @override
   bool get bypassVoiceProcessing => true;
+
+  @override
+  bool get defaultsToSpeaker => true;
+
+  @override
+  AndroidCallServiceKind get androidCallServiceKind =>
+      AndroidCallServiceKind.livestreamViewer;
 }
 
 /// Audio policy optimized for broadcasting high-fidelity audio.
@@ -259,6 +321,13 @@ class HiFiAudioPolicy extends AudioConfigurationPolicy {
 
   @override
   bool get bypassVoiceProcessing => true;
+
+  @override
+  bool get defaultsToSpeaker => false;
+
+  @override
+  AndroidCallServiceKind get androidCallServiceKind =>
+      AndroidCallServiceKind.call;
 }
 
 /// Custom audio policy with full control over platform settings.
@@ -271,6 +340,8 @@ class CustomAudioPolicy extends AudioConfigurationPolicy {
     this.appleConfiguration,
     this.androidConfiguration,
     this.bypassVoiceProcessing = false,
+    this._androidCallServiceKind,
+    this._defaultsToSpeaker,
   });
 
   /// The base policy used for platforms where a custom configuration
@@ -284,6 +355,29 @@ class CustomAudioPolicy extends AudioConfigurationPolicy {
 
   @override
   final bool bypassVoiceProcessing;
+
+  final AndroidCallServiceKind? _androidCallServiceKind;
+
+  /// The Android foreground service kind, when one was given.
+  ///
+  /// Otherwise, like the other Android settings, it comes from [basePolicy]
+  /// only when no [androidConfiguration] was given. A custom Android
+  /// configuration may set up two-way audio whatever the base policy, so it
+  /// runs in the call service unless the kind is named.
+  @override
+  AndroidCallServiceKind get androidCallServiceKind =>
+      _androidCallServiceKind ??
+      (androidConfiguration != null
+          ? AndroidCallServiceKind.call
+          : basePolicy.androidCallServiceKind);
+
+  final bool? _defaultsToSpeaker;
+
+  /// Whether audio plays through the loudspeaker by default, when it was
+  /// given. Otherwise follows [basePolicy].
+  @override
+  bool get defaultsToSpeaker =>
+      _defaultsToSpeaker ?? basePolicy.defaultsToSpeaker;
 
   @override
   rtc.AppleAudioConfiguration getAppleConfiguration({

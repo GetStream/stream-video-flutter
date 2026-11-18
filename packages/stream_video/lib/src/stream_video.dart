@@ -392,8 +392,12 @@ class StreamVideo extends Disposable {
   ConnectionState get _connectionState => _state.connection.value;
 
   /// Connects the user to the Stream Video service.
+  ///
+  /// [includeUserDetails] controls whether the user's name, image and custom
+  /// data are sent when connecting. When omitted, it falls back to
+  /// [StreamVideoOptions.includeUserDetailsForAutoConnect].
   Future<Result<UserToken>> connect({
-    bool includeUserDetails = true,
+    bool? includeUserDetails,
     bool registerPushDevice = true,
   }) async {
     if (currentUserType == UserType.anonymous) {
@@ -404,7 +408,8 @@ class StreamVideo extends Disposable {
     }
 
     _connectOperation ??= _connect(
-      includeUserDetails: includeUserDetails,
+      includeUserDetails:
+          includeUserDetails ?? _options.includeUserDetailsForAutoConnect,
       registerPushDevice: registerPushDevice,
     ).asCancelable();
 
@@ -417,6 +422,9 @@ class StreamVideo extends Disposable {
   }
 
   /// Disconnects the user from the Stream Video service.
+  ///
+  /// Leaves every active call first, so none keeps publishing audio and
+  /// video after the user is gone.
   Future<Result<None>> disconnect() async {
     _disconnectOperation ??= _disconnect().asCancelable();
     return _disconnectOperation!
@@ -495,8 +503,35 @@ class StreamVideo extends Disposable {
     _handledIncomingCallCids.clear();
   }
 
+  /// Leaves every active call that has not been left yet. A call that fails
+  /// to leave is logged and does not stop the others.
+  Future<void> _leaveAllCalls() async {
+    for (final call in [..._state.activeCalls.value]) {
+      if (call.state.value.status.isDisconnected) continue;
+
+      _logger.i(() => '[disconnect] leaving call: ${call.callCid}');
+      try {
+        final result = await call.leave();
+        if (result is Failure) {
+          _logger.e(
+            () => '[disconnect] leaving call ${call.callCid} failed: $result',
+          );
+        }
+      } catch (e, stk) {
+        _logger.e(
+          () => '[disconnect] leaving call ${call.callCid} failed: $e\n$stk',
+        );
+      }
+    }
+  }
+
   Future<Result<None>> _disconnect() async {
     _logger.i(() => '[disconnect] currentUser.id: ${_state.currentUser.id}');
+
+    // Before the connection check: the websocket can drop while a call is
+    // still publishing, and the call must not outlive the user's session.
+    await _leaveAllCalls();
+
     if (_connectionState.isDisconnected) {
       _logger.w(() => '[disconnect] rejected (already disconnected)');
       // Reachable with state still held: a dropped websocket marks the client

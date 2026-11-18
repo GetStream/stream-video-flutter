@@ -15,16 +15,24 @@ typedef OnNotificationButtonClick =
 typedef OnPlatformUiLayerDestroyed = void Function(String callCid);
 
 mixin StreamVideoFlutterBackground {
+  /// Starts the Android foreground service of [type] for the call in
+  /// [options].
+  ///
+  /// For [ServiceType.call], [kind] picks which Android service hosts the
+  /// call, and so which foreground service types it requests. See
+  /// [AndroidCallServiceKind].
   static Future<bool> startService(
     NotificationPayload options,
-    ServiceType type,
-  ) async {
+    ServiceType type, {
+    AndroidCallServiceKind kind = AndroidCallServiceKind.call,
+  }) async {
     if (!isAndroid) {
       return false;
     }
     return StreamVideoFlutterPlatform.instance.startBackgroundService(
       payload: options,
       type: type,
+      kind: kind,
     );
   }
 

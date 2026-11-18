@@ -1,15 +1,7 @@
 ## Upcoming
 
-### ⚠️ Breaking
-
-- `CallPreferences` now requires a `participantsThrottleIntervalResolver`; custom implementations must provide it.
-- `CallParticipantState.audioLevels` and `CallState.ringingMembers` are now unmodifiable.
-
 ### ✅ Added
 
-- Added `Call.participantsStream`, which emits the participant list at an interval that grows with the participant count.
-- Added `CallPreferences.participantsThrottleIntervalResolver` to override that interval, or set it to `null` to emit every change.
-- Added `isSameCallStateSelection`, which compares two selected values the way `Call.partialState` does.
 - Added `Call.setAudioConfigurationPolicy`, which sets the call's audio policy before joining without rebuilding the rest of its preferences. Pass `null` to fall back to `StreamVideoOptions.audioConfigurationPolicy`.
 - Added `CallPreferences.withAudioConfigurationPolicy`, which returns a copy of any `CallPreferences` with a different audio policy and every other value unchanged.
 
@@ -18,23 +10,67 @@
 - Switching back to `voiceStandard` with `Call.setAudioBitrateProfile` is now always allowed, even when HiFi audio is not enabled for the call.
 - Leaving `musicHighQuality` now restores noise cancellation only if it was on before switching to music, instead of always starting it.
 - Changing the audio configuration policy with `Call.updateCallPreferences` before joining now takes effect even after a lobby preview has started the camera or microphone: the peer connection factory built for the preview is discarded and rebuilt with the new policy. Stop the preview tracks before changing the policy.
+- `ActionCallToggleGroup.callUUIDToGroupWith` is now nullable. It is null when CallKit ungroups the call.
+- `StreamVideo.connect()` now sends user details according to `StreamVideoOptions.includeUserDetailsForAutoConnect` when `includeUserDetails` isn't passed, instead of always sending them.
+
+### 🐞 Fixed
+
+- [iOS] Stereo playout now follows the call's own audio policy: a call whose policy bypasses voice processing (`HiFiAudioPolicy`, `ViewerAudioPolicy`) plays stereo without also needing the `musicHighQuality` microphone profile. The preference is set again whenever a session starts, so a call no longer keeps stereo playout, with voice processing bypassed, from an earlier HiFi call.
+- Fixed the microphone ignoring an audio bitrate profile set before joining, and losing it after a reconnect: the profile's microphone constraints (for `musicHighQuality`, voice processing off) were only applied once the profile was set again.
+- `StreamVideo.disconnect()` now leaves every active call before disconnecting, as the JS SDK does. Before, a call stayed joined and kept publishing audio and video after the user disconnected, also when the connection had already dropped.
+- Accepting a call from the native ringing screen on a cold start no longer sends user details when `includeUserDetailsForAutoConnect` is `false`. It used to overwrite the user's name set on the server with an empty one.
+
+## 1.7.2
+
+### ✅ Added
+
+- Added `RtcMediaDeviceNotifier.isAudioPlayoutPaused`, `audioPlayoutPausedChanges` and `isAudioPlayoutPauseSupported`.
+- [Web] `RtcMediaDeviceNotifier.pauseAudioPlayout()` and `resumeAudioPlayout()` now work on web.
+- Added `AudioConfigurationPolicy.defaultsToSpeaker`, which is `true` for the viewer policy. `AudioConfigurationPolicy.custom` takes an optional `defaultsToSpeaker`, which otherwise follows the base policy.
+- `CallState.participantCount` and `anonymousParticipantCount` are set from the call's session as soon as it is fetched, instead of staying 0 until the first count update. Once you join, the SFU's counts still take over.
+
+### 🔄 Changed
+
+- `stream_video` now requires `jose` 0.3.5+2 or newer.
+
+### 🐞 Fixed
+
+- `CallState.endedAt` is now set when the call ends while you are joined or watching it.
+- [iOS] Livestream viewers on `AudioConfigurationPolicy.viewer()` now hear the stream through the loudspeaker instead of the earpiece, whatever the call type's audio settings say. Headphones and Bluetooth devices still take priority, and an output picked with `Call.setAudioOutputDevice` still applies.
+- [iOS] `Call.resumeAudio` now restores the audio output the call was using, such as the loudspeaker, instead of falling back to the earpiece.
+- Changing the audio output device now uses the call's audio policy instead of the client-wide one.
+
+## 1.7.1
+
+### ✅ Added
+
+- Added `AndroidCallServiceKind` and `AudioConfigurationPolicy.androidCallServiceKind`, which pick the Android foreground service a call runs in.
+
+## 1.7.0
+
+### ✅ Added
+
+- Added `Call.participantsStream`, which emits the participant list at an interval that grows with the participant count.
+- Added `CallPreferences.participantsThrottleIntervalResolver` to override that interval, or set it to `null` to emit every change. `DefaultCallPreferences` provides a default. If your app implements `CallPreferences` directly, add the getter to your implementation.
+
+### 🔄 Changed
+
 - `Call.partialState` now compares maps, sets and nested collections by their contents.
 - `CallState` keeps its `ownCapabilities`, `blockedUserIds`, `custom`, `capabilitiesByRole` and `callMembers` instances when a call update leaves their contents unchanged.
 - Reduced the cost of call updates in calls with many members.
-- [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed — apps on AGP 9 failed to build because of it.
+- Stopped sending the deprecated raw WebRTC stats and input device lists in SFU stats reports.
+- [Android] Migrated the Android module to AGP's built-in Kotlin. The module no longer applies the Kotlin Gradle Plugin (KGP), whose application Android Gradle Plugin 9.0 removed. Apps on AGP 9 failed to build because of it.
 - Increased minimum Flutter version to 3.44.0, which is required for the built-in Kotlin migration: from 3.44 Flutter applies the Kotlin Gradle Plugin to plugin modules that no longer declare it, keeping AGP 8 builds working.
 - SFU participant events no longer emit a new call state when they leave every participant unchanged.
 - Reduced the cost of participant state updates in large calls.
 - `CallParticipantState.audioLevel` and `audioLevels` now hold at their last value while a participant is silent.
-- `CallState.localParticipant`, `otherParticipants` and `activeSpeakers` are now computed once per participant list instead of on every read, which keeps them cheap in calls with many participants. `callParticipants`, `otherParticipants` and `activeSpeakers` now return unmodifiable lists shared by every reader, so call `.toList()` before sorting or otherwise mutating them.
+- `CallParticipantState.audioLevels` and `CallState.ringingMembers` now return unmodifiable lists, so call `.toList()` before sorting or otherwise mutating them.
+- `CallState.localParticipant`, `otherParticipants` and `activeSpeakers` are now computed once per participant list instead of on every read, which keeps them cheap in calls with many participants.
 - Simulcast layers are now announced to the SFU and bitrate-capped from the resolution the camera actually captures on iOS and Android, instead of the requested resolution. A camera that captures below the requested size, or at a different aspect ratio, no longer over-reports its layers or over-allocates their bitrate.
 - `RtcMediaDeviceNotifier` now enumerates devices once per burst of device-change events, and calls made while an enumeration is running share its result instead of starting another one. The device list emitted by `RtcMediaDeviceNotifier.onDeviceChange` is now unmodifiable, so copy it with `.toList()` before sorting or otherwise mutating it.
 
 ### 🐞 Fixed
 
-- [iOS] Stereo playout now follows the call's own audio policy: a call whose policy bypasses voice processing (`HiFiAudioPolicy`, `ViewerAudioPolicy`) plays stereo without also needing the `musicHighQuality` microphone profile. The preference is set again whenever a session starts, so a call no longer keeps stereo playout, with voice processing bypassed, from an earlier HiFi call.
-- [iOS] Selecting an audio output device, including the one passed in `CallConnectOptions.audioOutputDevice`, now applies the call's own audio policy to the audio session instead of the client default. A call using `HiFiAudioPolicy` was switched back to the voice-chat mode with Bluetooth HFP on join, which kept playback mono.
-- Fixed the microphone ignoring an audio bitrate profile set before joining, and losing it after a reconnect: the profile's microphone constraints (for `musicHighQuality`, voice processing off) were only applied once the profile was set again.
 - Fixed `Call.partialState` streams staying subscribed to the call state after their last listener cancelled.
 - Fixed server-pinned participants being reordered on every pins event.
 - Fixed `CallParticipantState.copyWithUpdatedAudioLevels` mutating the audio level history of the previous state.
@@ -42,8 +78,8 @@
 - Fixed leaving a call trying to stop noise cancellation when no audio processor is configured.
 - Fixed leaving a call calling `removeTrack` on the publisher for received tracks, which failed and logged `sender is null` on every leave.
 - [iOS/Android] Fixed camera video layers being announced in landscape while the phone is held upright.
-- Fixed fast reconnect failing for participants who are not publishing any tracks, such as livestream viewers. Instead of recovering the existing session, they fell back to a full rejoin with a new session after every network drop.
-- Fixed video layers being given a `maxBitrate` of 0 when the SFU's publish option carries no bitrate, and an empty publish option dimension being used as the bitrate target instead of the 1280x720 default. Publishing a video track now logs the publish option, the capture size and the computed encodings at debug level.
+- Fixed fast reconnect failing for participants who are not publishing any tracks, such as livestream viewers.
+- Fixed video layers being given a `maxBitrate` of 0 when the SFU's publish option carries no bitrate, and an empty publish option dimension being used as the bitrate target instead of the 1280x720 default.
 
 ## 1.6.0
 

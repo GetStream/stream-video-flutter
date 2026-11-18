@@ -49,6 +49,8 @@ class CallScreen extends StatefulWidget {
 }
 
 class _CallScreenState extends State<CallScreen> {
+  late final _logger = taggedLogger(tag: 'SV:Dogfooding:CallScreen');
+
   late final _userChatRepo = locator.get<UserChatRepository>();
 
   late String? _encryptionKey = widget.encryptionKey;
@@ -114,10 +116,32 @@ class _CallScreenState extends State<CallScreen> {
     _speakingWhileMutedSubscription.cancel();
     _speakingWhileMuted.dispose();
     _chatConnectionRecoverySubscription?.cancel();
-    widget.call.leave();
+    // Covers every way out of the screen (host ended the call, connection
+    // lost, back navigation), not only the leave button.
+    unawaited(_leaveCall(widget.call));
     _userChatRepo.disconnectUser();
     _videoEffectsManager.dispose();
     super.dispose();
+  }
+
+  /// Releases the natively registered filter processors before leaving the
+  /// call; they are registered again the next time a filter is applied.
+  ///
+  /// This has to happen before [Call.leave]: once the local video track is
+  /// torn down, the effects attached to it can no longer be detached, and the
+  /// processors stay alive. A failed release is logged and does not block
+  /// leaving.
+  Future<void> _leaveCall(Call call) async {
+    try {
+      // Bounded so a hanging native call cannot keep the call joined.
+      await _videoEffectsManager.unregisterAllFilters().timeout(
+        const Duration(seconds: 3),
+      );
+    } catch (e, st) {
+      _logger.e(() => 'Failed to release video effects: $e\n$st');
+    } finally {
+      await call.leave();
+    }
   }
 
   Future<void> _connectChatChannel() async {
@@ -295,6 +319,7 @@ class _CallScreenState extends State<CallScreen> {
               callAppBarWidgetBuilder: (context, call) {
                 return CallAppBar(
                   call: call,
+                  onLeaveCallTap: () => unawaited(_leaveCall(call)),
                   leadingWidth: 120,
                   leading: Row(
                     children: [

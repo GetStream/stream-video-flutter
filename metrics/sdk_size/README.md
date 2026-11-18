@@ -59,6 +59,23 @@ needs read access to `GetStream/stream-internal-metrics`:
 cd metrics/sdk_size && bundle install && BASE_BRANCH=main bundle exec fastlane sdk_size
 ```
 
+## README badges
+
+The size badges in the root `README.md` show a benchmark from
+`GetStream/stream-internal-metrics`:
+
+- `stream_video`: what the LLC adds to an empty app.
+- `stream_video_flutter`: what the UI adds on top of `stream_video`.
+- `stream_video_push_notification` and `stream_video_screen_sharing`: their
+  pub.dev archive size.
+
+They are updated for each release, on the release branch, by the
+`update_size_badges` workflow:
+
+```bash
+gh workflow run update_size_badges.yml --ref release/v<version> -f base_branch=main
+```
+
 ## Adding a variant
 
 Add a folder under `variants/` with:

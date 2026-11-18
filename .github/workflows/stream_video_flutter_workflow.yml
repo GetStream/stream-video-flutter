@@ -23,6 +23,11 @@ jobs:
   analyze:
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      # Codecov authenticates the coverage upload with a GitHub OIDC token.
+      id-token: write
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
@@ -59,7 +64,7 @@ jobs:
       - name: "Upload Coverage"
         uses: codecov/codecov-action@v7
         with:
-          token: ${{secrets.CODECOV_TOKEN}}
+          use_oidc: true
           files: packages/*/coverage/lcov.info
       - name: "Test dart fixes"
         run: melos run test:fixes
@@ -88,3 +93,21 @@ jobs:
       - name: Build Example
         run: |
           melos run build:example:android
+
+  # The one check to mark as required: it passes when every check above
+  # passed.
+  sdk-verified:
+    if: always()
+    needs: [analyze, build]
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check results
+        env:
+          FAILED: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: |
+          if [[ "$FAILED" == "true" ]]; then
+            echo "A required check failed or was cancelled."
+            exit 1
+          fi
+          echo "All checks passed."

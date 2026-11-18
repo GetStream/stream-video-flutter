@@ -222,8 +222,9 @@ class ActionCallToggleGroup extends RingingEvent {
   /// The unique identifier for the call.
   final String uuid;
 
-  /// The unique identifier for the call to group with.
-  final String callUUIDToGroupWith;
+  /// The unique identifier for the call to group with, or null when the call
+  /// is ungrouped.
+  final String? callUUIDToGroupWith;
 
   @override
   List<Object?> get props => [uuid, callUUIDToGroupWith];

@@ -37,28 +37,35 @@ grant_android_permissions
 start_logcat
 
 # --- log in the callee ------------------------------------------------------
-launch_app
-if ! tap_until_ime $A_USER_X $A_USER_Y; then
-  fail "login" "the username field never took focus"; shot "err-login-field"; exit 1
-fi
-adb shell input text "$RING_CALLEE"; sleep 1
-hide_keyboard; sleep 2                           # keyboard covers the sign-up button
+# login_callee <check-prefix> <log> — logs RING_CALLEE in on the current
+# ANDROID_SERIAL and waits for its push token to be registered. The prefix keeps
+# the second device's results apart from the primary's.
+login_callee() {
+  local p="$1" log="$2"
+  launch_app
+  if ! tap_until_ime $A_USER_X $A_USER_Y; then
+    fail "${p}login" "the username field never took focus"; shot "err-${p}login-field"; return 1
+  fi
+  adb shell input text "$RING_CALLEE"; sleep 1
+  hide_keyboard; sleep 2                           # keyboard covers the sign-up button
 
-if tap_until $A_SIGNUP_X $A_SIGNUP_Y "$ANDROID_LOG" "handleHealthCheckEvent|connectUser" 3 30; then
-  pass "login" "callee logged in as $RING_CALLEE"
-else
-  fail "login" "callee login did not complete"; shot "err-login"; exit 1
-fi
+  if tap_until $A_SIGNUP_X $A_SIGNUP_Y "$log" "handleHealthCheckEvent|connectUser" 3 30; then
+    pass "${p}login" "callee logged in as $RING_CALLEE on $ANDROID_SERIAL"
+  else
+    fail "${p}login" "callee login did not complete"; shot "err-${p}login"; return 1
+  fi
 
-# --- push registration -------------------------------------------------------
-# The whole run depends on this: the ring is delivered to the device token
-# registered here. If it never happens, every later check fails for one reason.
-if wait_log "$ANDROID_LOG" "\[createDevice\]" 40; then
-  pass "push-register" "device token registered with Stream"
-else
-  fail "push-register" "no createDevice call — the ring cannot reach this device"
-  shot "err-register"; exit 1
-fi
+  # The whole run depends on this: the ring is delivered to the device token
+  # registered here. If it never happens, every later check fails for one reason.
+  if wait_log "$log" "\[createDevice\]" 40; then
+    pass "${p}push-register" "device token registered with Stream"
+  else
+    fail "${p}push-register" "no createDevice call — the ring cannot reach this device"
+    shot "err-${p}register"; return 1
+  fi
+}
+
+login_callee "" "$ANDROID_LOG" || exit 1
 
 # --- Telecom opt-in ---------------------------------------------------------
 # Reported, not assumed. With Telecom off the telecom-* checks would all pass
@@ -75,6 +82,29 @@ else
 fi
 
 shot "01-callee-logged-in"
+
+# --- the callee's second device ---------------------------------------------
+# Same user, second token. Registered after the primary on purpose: if the
+# backend replaced rather than added device tokens, the primary would stop
+# ringing and every case would fail at its first delivery check, loudly.
+install_callee2() {
+  android_geometry || return 1                     # its own screen, its own scale
+  adb shell pm clear "$ANDROID_PKG" >/dev/null 2>&1 || true
+  adb install -r -d "$APK" >/dev/null 2>&1 \
+    || { fail "dev2-install" "adb install on the second callee failed"; return 1; }
+  grant_android_permissions
+  local api
+  api=$(adb shell getprop ro.build.version.sdk | tr -d '\r')
+  [ "$api" -lt 34 ] || adb shell appops set "$ANDROID_PKG" USE_FULL_SCREEN_INTENT allow >/dev/null 2>&1
+  start_callee2_logcat
+  login_callee "dev2-" "$CALLEE2_LOG" || return 1
+  shot "01b-callee2-logged-in"
+}
+
+if [ "$RING_MULTI_DEVICE" = "1" ]; then
+  echo "  installing the callee's second device on $RING_CALLEE2_SERIAL"
+  on_callee2 install_callee2 || exit 1
+fi
 
 # --- the caller app ---------------------------------------------------------
 # A real second instance places the ring through Direct Call, so call creation

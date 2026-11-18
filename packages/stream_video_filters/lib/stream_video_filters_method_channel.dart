@@ -38,4 +38,11 @@ class MethodChannelStreamVideoFilters extends StreamVideoFiltersPlatform {
       'registerFullFrameBlurEffectProcessor',
     );
   }
+
+  @override
+  Future<void> unregisterAllFilters() {
+    return methodChannel.invokeMethod(
+      'unregisterAllFilters',
+    );
+  }
 }

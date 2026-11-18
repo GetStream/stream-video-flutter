@@ -10,12 +10,12 @@
 </div>
 
 <p align="center">
-  <img id="android-stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/android:stream_video-19.2%20MB-blue"/>
-  <img id="android-stream-video-flutter-label" alt="StreamVideoFlutter" src="https://img.shields.io/badge/android:stream_video_flutter-3.2%20MB-blue"/>
-  <img id="ios-stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/ios:stream_video-10.1%20MB-blue"/>
-  <img id="ios-stream-video-flutter-label" alt="StreamVideoFlutter" src="https://img.shields.io/badge/ios:stream_video_flutter-825%20KB-blue"/>
-  <img id="stream-video-push-notification" alt="StreamVideoPushNotification" src="https://img.shields.io/badge/stream_video_push_notification-<1%20MB-blue"/>
-  <img id="stream-video-screen-sharing" alt="StreamVideoScreenSharing" src="https://img.shields.io/badge/stream_video_screen_sharing-<1%20MB-blue"/>
+  <img id="android-stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/android:stream_video-15.7%20MB-blue"/>
+  <img id="android-stream-video-flutter-label" alt="StreamVideoFlutter" src="https://img.shields.io/badge/android:stream_video_flutter-1.9%20MB-blue"/>
+  <img id="ios-stream-video-label" alt="StreamVideo" src="https://img.shields.io/badge/ios:stream_video-16.1%20MB-blue"/>
+  <img id="ios-stream-video-flutter-label" alt="StreamVideoFlutter" src="https://img.shields.io/badge/ios:stream_video_flutter-2.3%20MB-blue"/>
+  <img id="stream-video-push-notification" alt="StreamVideoPushNotification" src="https://img.shields.io/badge/stream_video_push_notification-354%20KB-blue"/>
+  <img id="stream-video-screen-sharing" alt="StreamVideoScreenSharing" src="https://img.shields.io/badge/stream_video_screen_sharing-12%20KB-blue"/>
 </p>
 
 ## Quick Links
@@ -31,7 +31,6 @@ We use [Melos](https://melos.invertase.dev) to manage this repository.
 
 * The `packages` folder contains the packages and plugins that the SDK consists of.
 * The `examples` folder holds the samples created using the Flutter Video SDK.
-* The `docusaurus` folder contains the documentation and guides.
 * The `dogfooding` folder contains a complete example app that implements all of the features of the SDK.
 
 ## Process to get started with this repository

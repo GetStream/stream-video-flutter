@@ -10,6 +10,7 @@ class CallSessionData extends Equatable {
     this.id = '',
     this.participants = const {},
     this.participantsCountByRole = const {},
+    this.anonymousParticipantCount = 0,
     this.rejectedBy = const {},
     this.acceptedBy = const {},
     this.missedBy = const {},
@@ -23,6 +24,7 @@ class CallSessionData extends Equatable {
   final String id;
   final Map<UserSessionId, CallParticipant> participants;
   final Map<Role, int> participantsCountByRole;
+  final int anonymousParticipantCount;
   final Map<String, DateTime> rejectedBy;
   final Map<String, DateTime> acceptedBy;
   final Map<String, DateTime> missedBy;
@@ -37,6 +39,7 @@ class CallSessionData extends Equatable {
     id,
     participants,
     participantsCountByRole,
+    anonymousParticipantCount,
     rejectedBy,
     acceptedBy,
     missedBy,

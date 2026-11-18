@@ -66,8 +66,8 @@ resolve_main_activity() {
   fi
 }
 
-# Users. The callee lives on the emulator; the caller only ever exists as a
-# token used to place the ring over REST. Both need a digit or underscore — the
+# Users. The callee lives on the emulator (on two of them with RING_MULTI_DEVICE=1);
+# the caller runs the app on its own device. Both need a digit or underscore — the
 # emulator IME autocorrects plain words, which the smoke test found the hard way.
 RING_CALLEE="${RING_CALLEE:-ring_callee1}"
 RING_CALLER="${RING_CALLER:-ring_caller1}"
@@ -408,6 +408,49 @@ stop_caller_logcat() {
     kill "$(cat "$RING_DIR/caller-logcat.pid")" 2>/dev/null || true
     rm -f "$RING_DIR/caller-logcat.pid"
   fi
+}
+
+# ---------------------------------------------------------------- second callee
+# RING_MULTI_DEVICE=1 adds a second emulator logged in as the SAME user as the
+# callee, so one ring rings both. It exists for the "answered on another device"
+# scenario (elsewhere.sh): the ring is resolved on the primary callee and the
+# assertions are about this one stopping.
+RING_MULTI_DEVICE="${RING_MULTI_DEVICE:-0}"
+CALLEE2_LOG="$RING_DIR/callee2.log"
+
+# on_callee2 <command...> — runs a helper against the second callee.
+#
+# Every helper above talks to bare `adb`, so pointing ANDROID_SERIAL at the other
+# device is enough to reuse all of them unchanged. A subshell keeps the switch
+# from leaking back; pass()/fail() still land in results.tsv because they append
+# to a file. Log paths are passed explicitly by callers, but ANDROID_LOG is
+# swapped too so helpers that default to it read the right capture.
+on_callee2() {
+  ( export ANDROID_SERIAL="$RING_CALLEE2_SERIAL"; ANDROID_LOG="$CALLEE2_LOG"; "$@" )
+}
+
+# Started with an explicit `-s`, never through ANDROID_SERIAL: stop_logcat's
+# fallback pkill matches `adb logcat -v time StreamTelecomManager`, and an
+# identical command line here would be killed every time the primary restarts.
+start_callee2_logcat() {
+  stop_callee2_logcat
+  adb -s "$RING_CALLEE2_SERIAL" logcat -c >/dev/null 2>&1 || true
+  # shellcheck disable=SC2086
+  adb -s "$RING_CALLEE2_SERIAL" logcat -v time $RING_LOG_TAGS "*:S" >"$CALLEE2_LOG" 2>&1 &
+  echo $! >"$RING_DIR/callee2-logcat.pid"
+  sleep 1
+}
+
+stop_callee2_logcat() {
+  if [ -f "$RING_DIR/callee2-logcat.pid" ]; then
+    kill "$(cat "$RING_DIR/callee2-logcat.pid")" 2>/dev/null || true
+    rm -f "$RING_DIR/callee2-logcat.pid"
+  fi
+}
+
+# logcat_alive <pid-file> — the capture behind it is still running.
+logcat_alive() {
+  [ -f "$1" ] && kill -0 "$(cat "$1")" 2>/dev/null
 }
 
 # ring_from_caller_app [callee]

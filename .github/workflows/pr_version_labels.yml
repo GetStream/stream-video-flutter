@@ -8,8 +8,10 @@ name: 'PR Version Labels'
 # Kept separate from pr_review_labels.yml so it can simply be deleted once
 # the v2 branch is merged into main.
 
+# Fork pull requests get a read-only token, so they aren't labelled
+# automatically.
 on:
-  pull_request_target:
+  pull_request:
     types: [opened, reopened, edited]
     branches:
       - main
@@ -25,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/github-script@v8
+      - uses: actions/github-script@v9
         with:
           script: |
             const BRANCH_LABELS = { main: 'v1', v2: 'v2' };
