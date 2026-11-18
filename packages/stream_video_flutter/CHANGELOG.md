@@ -1,8 +1,13 @@
 ## Upcoming
 
+### ✅ Added
+
+- Added `StreamLobbyVideo.initialMicrophoneEnabled` and `initialCameraEnabled`, which override the call's `micDefaultOn` and `cameraDefaultOn` for the preview. Pass the user's current choice when the preview is rebuilt, so it does not turn the microphone or camera back on.
+
 ### 🐞 Fixed
 
 - [iOS] A participant's video or screen share no longer stays blank after returning from picture-in-picture.
+- `StreamLobbyVideo` no longer hands out a camera or microphone track that finished starting after the preview was removed. It stops the track instead.
 
 ## 1.7.2
 

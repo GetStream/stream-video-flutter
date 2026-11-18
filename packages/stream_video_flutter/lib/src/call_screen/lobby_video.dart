@@ -20,6 +20,8 @@ class StreamLobbyVideo extends StatefulWidget {
     this.streamVideo,
     this.additionalActionsBuilder,
     this.initialCameraDevice,
+    this.initialMicrophoneEnabled,
+    this.initialCameraEnabled,
   });
 
   /// Represents a call.
@@ -29,6 +31,20 @@ class StreamLobbyVideo extends StatefulWidget {
   final Color? cardBackgroundColor;
 
   final RtcMediaDevice? initialCameraDevice;
+
+  /// Whether the preview starts with the microphone on. Defaults to the
+  /// call's `micDefaultOn` setting.
+  ///
+  /// Pass the user's current choice when the preview is rebuilt (for example
+  /// with a new key), so it does not fall back to the call's default.
+  final bool? initialMicrophoneEnabled;
+
+  /// Whether the preview starts with the camera on. Defaults to the call's
+  /// `cameraDefaultOn` setting.
+  ///
+  /// Pass the user's current choice when the preview is rebuilt (for example
+  /// with a new key), so it does not fall back to the call's default.
+  final bool? initialCameraEnabled;
 
   /// Theme for the avatar.
   final StreamUserAvatarThemeData? userAvatarTheme;
@@ -58,12 +74,14 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
     super.initState();
 
     Future.delayed(Duration.zero, () {
+      if (!mounted) return;
+
       final callSettings = widget.call.state.value.settings;
-      if (callSettings.audio.micDefaultOn) {
+      if (widget.initialMicrophoneEnabled ?? callSettings.audio.micDefaultOn) {
         toggleMicrophone();
       }
 
-      if (callSettings.video.cameraDefaultOn) {
+      if (widget.initialCameraEnabled ?? callSettings.video.cameraDefaultOn) {
         toggleCamera();
       }
     });
@@ -85,6 +103,15 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
         ),
         nativeFactory: nativeFactory,
       );
+
+      // The preview can be removed while the track is being created, for
+      // example when a policy change rebuilds the call's factory. The track
+      // is then released instead of being handed out.
+      if (!mounted) {
+        await cameraTrack.stop();
+        return;
+      }
+
       await widget.onCameraTrackSet?.call(cameraTrack);
 
       return setState(() => _cameraTrack = cameraTrack);
@@ -106,6 +133,13 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
       final microphoneTrack = await RtcLocalTrack.audio(
         nativeFactory: nativeFactory,
       );
+
+      // See toggleCamera.
+      if (!mounted) {
+        await microphoneTrack.stop();
+        return;
+      }
+
       await widget.onMicrophoneTrackSet?.call(microphoneTrack);
 
       return setState(() => _microphoneTrack = microphoneTrack);

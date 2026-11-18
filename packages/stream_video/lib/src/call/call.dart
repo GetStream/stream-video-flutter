@@ -1122,13 +1122,18 @@ class Call {
   Result<None> setAudioConfigurationPolicy(AudioConfigurationPolicy? policy) {
     _logger.i(() => '[setAudioConfigurationPolicy] policy: $policy');
 
+    // A pending join is checked too: join() can still be waiting (for
+    // example on the encryption key) before the status moves on.
     final status = state.value.status;
-    if (status is CallStatusConnecting ||
+    if (_pendingJoin != null ||
+        status is CallStatusConnecting ||
         status is CallStatusConnected ||
         status is CallStatusJoining ||
         status is CallStatusJoined) {
       _logger.w(
-        () => '[setAudioConfigurationPolicy] rejected: call status is $status',
+        () =>
+            '[setAudioConfigurationPolicy] rejected: call status is $status, '
+            'join pending: ${_pendingJoin != null}',
       );
       return Result.error(
         'The audio configuration policy can only be changed before joining.',
@@ -2182,12 +2187,21 @@ class Call {
     if (_streamVideo.isAudioProcessorConfigured() &&
         joinResult.data.metadata.settings.audio.noiseCancellation?.mode ==
             NoiseCancellationSettingsMode.autoOn) {
-      // AutoOn will enable noise cancellation if the device has sufficient processing power
-      unawaited(
-        startAudioProcessing(
-          requireAdvancedAudioProcessingSupport: true,
-        ),
-      );
+      if (_stateManager.callState.audioBitrateProfile ==
+          SfuAudioBitrateProfile.musicHighQuality) {
+        // Music keeps noise cancellation off. Leaving music starts it, as
+        // autoOn would have. This overrides the `false` recorded when music
+        // was chosen before joining, when noise cancellation was not on yet.
+        _logger.d(() => '[joinCall] autoOn deferred (music profile)');
+        _audioProcessingBeforeMusic = true;
+      } else {
+        // AutoOn will enable noise cancellation if the device has sufficient processing power
+        unawaited(
+          startAudioProcessing(
+            requireAdvancedAudioProcessingSupport: true,
+          ),
+        );
+      }
     }
 
     _logger.v(() => '[joinCall] completed: $joined');
@@ -2290,6 +2304,13 @@ class Call {
     }
 
     await _applyStereoPlayoutPreference();
+
+    // Checked again: the call can be left while the stereo request is
+    // pending, and a torn-down session must not be started.
+    if (_callLifecycleCompleter.isCompleted) {
+      _logger.w(() => '[startSession] rejected (call was left)');
+      return Result.error('call was left');
+    }
 
     final result = await session.start(
       reconnectDetails: reconnectDetails,

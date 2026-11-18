@@ -470,7 +470,12 @@ void main() {
           // stopTrackOnMute — but only for the cycle.
           try {
             await rtcManager.changeDefaultAudioConstraints(
-              const AudioConstraints(),
+              const AudioConstraints(
+                noiseSuppression: false,
+                echoCancellation: false,
+                autoGainControl: false,
+                channelCount: 2,
+              ),
             );
           } catch (_) {
             // Track recreation needs the platform plugin.
@@ -482,6 +487,26 @@ void main() {
             isFalse,
             reason: 'a forced hard mute must not become the new preference',
           );
+        },
+      );
+
+      test(
+        'changing to the constraints a live track already uses leaves it '
+        'running',
+        () async {
+          final mediaTrack = _FakeMediaStreamTrack(kind: 'audio');
+          final track = addAudioTrack(
+            mediaTrack: mediaTrack,
+            mediaStream: _FakeMediaStream(),
+          );
+
+          await rtcManager.changeDefaultAudioConstraints(
+            const AudioConstraints(),
+          );
+
+          expect(mediaTrack.stopCallCount, 0);
+          expect(mediaTrack.enabled, isTrue);
+          expect(rtcManager.tracks[track.trackId], same(track));
         },
       );
 

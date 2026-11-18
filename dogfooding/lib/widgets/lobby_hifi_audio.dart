@@ -14,7 +14,9 @@ class LobbyHiFiAudio extends StatelessWidget {
   });
 
   final bool enabled;
-  final ValueChanged<bool> onChanged;
+
+  /// Null while the switch is inert.
+  final ValueChanged<bool>? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -68,10 +70,13 @@ class LobbyHiFiAudio extends StatelessWidget {
               ],
             ),
           ),
-          Switch.adaptive(
-            value: enabled,
-            activeTrackColor: colorTheme.accentPrimary,
-            onChanged: onChanged,
+          Semantics(
+            label: 'HiFi audio',
+            child: Switch.adaptive(
+              value: enabled,
+              activeTrackColor: colorTheme.accentPrimary,
+              onChanged: onChanged,
+            ),
           ),
         ],
       ),
