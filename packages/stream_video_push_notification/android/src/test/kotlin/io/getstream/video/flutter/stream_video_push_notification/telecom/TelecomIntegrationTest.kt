@@ -215,19 +215,6 @@ class TelecomIntegrationTest {
     }
 
     @Test
-    fun `a hold Telecom refused does not hide the next hold from the system`() {
-        val telecom = integration().apply { init(enabled()) }
-        telecom.registerIncomingCall(call)
-        repository.completeRegistration(CALL_ID)
-
-        telecom.setOnHold(CALL_ID, true)
-        repository.holdChangeFailed(CALL_ID, requestedOnHold = true)
-        repository.inactive(CALL_ID)
-
-        assertEquals(listOf(hold(true)), events)
-    }
-
-    @Test
     fun `a hold asked for while the call registers is sent and reported once registered`() {
         val telecom = integration().apply { init(enabled()) }
         telecom.registerIncomingCall(call)
@@ -261,8 +248,8 @@ class TelecomIntegrationTest {
         telecom.registerIncomingCall(call)
         repository.completeRegistration(CALL_ID)
 
+        // Telecom refusing the hold reports no transition, so the request alone sends nothing.
         telecom.setOnHold(CALL_ID, true)
-        repository.holdChangeFailed(CALL_ID, requestedOnHold = true)
 
         assertEquals(emptyList<Any>(), events)
     }

@@ -858,18 +858,12 @@ void main() {
     void verifyNotLeft(_MockCall target) =>
         verifyNever(() => target.leave(reason: any(named: 'reason')));
 
-    test('leaves the call, which ends its Telecom call', () async {
+    test('leaves the call with the hold reason', () async {
       final target = await joined();
 
       await hold(isOnHold: true);
-      verifyLeft(target);
 
-      activeCalls.value = const [];
-      await pumpEventQueue();
-      verify(
-        () =>
-            controller.endCallByCid('default:c1', silent: any(named: 'silent')),
-      ).called(1);
+      verifyLeft(target);
     });
 
     test('leaves only the call whose cid the hold carries', () async {

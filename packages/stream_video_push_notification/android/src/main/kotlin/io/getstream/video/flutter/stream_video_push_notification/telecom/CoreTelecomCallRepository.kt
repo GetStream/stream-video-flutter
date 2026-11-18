@@ -335,8 +335,6 @@ internal class CoreTelecomCallRepository(
                     is CallControlResult.Error -> {
                         Log.e(TAG, "[processCallActions] hold failed: ${result.errorCode}")
                         updateCallById(callId) { copy(errorCode = result.errorCode) }
-                        // No transition follows a refused request.
-                        listener?.onHoldChangeFailed(callId, requestedOnHold = true)
                     }
                 }
 
@@ -345,7 +343,6 @@ internal class CoreTelecomCallRepository(
                     is CallControlResult.Error -> {
                         Log.e(TAG, "[processCallActions] activate failed: ${result.errorCode}")
                         updateCallById(callId) { copy(errorCode = result.errorCode) }
-                        listener?.onHoldChangeFailed(callId, requestedOnHold = false)
                     }
                 }
             }

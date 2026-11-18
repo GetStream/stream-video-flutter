@@ -123,8 +123,6 @@ internal class FakeTelecomCallRepository : TelecomCallRepository {
 
     fun inactive(callId: String) = listener?.onIsCallInactive(callId)
 
-    fun holdChangeFailed(callId: String, requestedOnHold: Boolean) =
-        listener?.onHoldChangeFailed(callId, requestedOnHold)
 
     /** Telecom disconnects the call, which ends its registration. */
     fun disconnect(callId: String, source: TelecomEventSource) {

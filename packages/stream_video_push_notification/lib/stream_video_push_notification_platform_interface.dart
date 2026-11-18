@@ -100,12 +100,10 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
 
   /// Holds or resumes an ongoing call.
   ///
-  /// On iOS through CallKit. On Android through Telecom, while the Telecom
-  /// integration holds the call; an [ActionCallToggleHold] follows once
-  /// Telecom has done it, and the SDK then leaves the call, as it does for any
-  /// Telecom hold of a call it is in, unless several calls may be active
-  /// (`StreamVideoOptions.allowMultipleActiveCalls`).
-  /// Without the integration it does nothing on Android.
+  /// On iOS through CallKit. On Android through Telecom, for a call the
+  /// Telecom integration has registered; without the integration it does
+  /// nothing there. An [ActionCallToggleHold] follows once the system has
+  /// held or resumed the call.
   Future<void> holdCall(String id, {bool isOnHold = true}) {
     throw UnimplementedError('holdCall() has not been implemented.');
   }
