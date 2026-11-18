@@ -92,6 +92,7 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
       await _cameraTrack?.stop();
       await widget.onCameraTrackSet?.call(null);
 
+      if (!mounted) return;
       return setState(() => _cameraTrack = null);
     }
 
@@ -114,6 +115,8 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
 
       await widget.onCameraTrackSet?.call(cameraTrack);
 
+      // The track now belongs to the callback's owner, so it is not stopped.
+      if (!mounted) return;
       return setState(() => _cameraTrack = cameraTrack);
     } catch (e) {
       _logger.w(() => 'Error creating camera track: $e');
@@ -125,6 +128,7 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
       await _microphoneTrack?.stop();
       await widget.onMicrophoneTrackSet?.call(null);
 
+      if (!mounted) return;
       return setState(() => _microphoneTrack = null);
     }
 
@@ -142,6 +146,8 @@ class _StreamLobbyVideoState extends State<StreamLobbyVideo> {
 
       await widget.onMicrophoneTrackSet?.call(microphoneTrack);
 
+      // See toggleCamera.
+      if (!mounted) return;
       return setState(() => _microphoneTrack = microphoneTrack);
     } catch (e) {
       _logger.w(() => 'Error creating microphone track: $e');

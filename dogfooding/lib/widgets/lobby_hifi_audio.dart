@@ -34,7 +34,7 @@ class LobbyHiFiAudio extends StatelessWidget {
       child: Row(
         children: [
           Padding(
-            padding: const EdgeInsets.only(right: 12),
+            padding: const EdgeInsetsDirectional.only(end: 12),
             child: Icon(
               Icons.graphic_eq,
               color: enabled

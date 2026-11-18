@@ -320,6 +320,10 @@ class Call {
   /// exactly that. Null while not in music.
   bool? _audioProcessingBeforeMusic;
 
+  /// Whether the restore when leaving music stands in for the autoOn start
+  /// skipped on join, and so keeps autoOn's device-capability check.
+  bool _audioProcessingRestoreIsAutoOn = false;
+
   /// The audio policy set for this call: the one in its preferences, else the
   /// client default. Used to build the call's peer connection factory.
   AudioConfigurationPolicy get _preferredAudioConfigurationPolicy =>
@@ -355,11 +359,47 @@ class Call {
 
     final preferred = prefersStereoPlayout;
     _logger.d(() => '[applyStereoPlayoutPreference] preferred: $preferred');
+    _stereoPlayoutPreferredByThisCall = preferred;
     try {
       await rtc.Helper.setiOSStereoPlayoutPreferred(preferred);
     } catch (e) {
       _logger.w(() => '[applyStereoPlayoutPreference] failed: $e');
     }
+  }
+
+  /// Whether this call last turned the iOS stereo playout preference on.
+  bool _stereoPlayoutPreferredByThisCall = false;
+
+  /// Turns the iOS stereo playout preference off when this call turned it on
+  /// and no other active call prefers stereo.
+  ///
+  /// The native preference is process-wide and is replayed onto every
+  /// factory created afterwards, so leaving it on would build the next
+  /// call's lobby preview with voice processing bypassed.
+  void _resetStereoPlayoutPreference() {
+    if (!_stereoPlayoutPreferredByThisCall) return;
+    _stereoPlayoutPreferredByThisCall = false;
+
+    final anotherCallPrefersStereo = _streamVideo.state.activeCalls.value.any(
+      (other) =>
+          other.callCid != callCid &&
+          other.state.value.status is! CallStatusDisconnected &&
+          other.prefersStereoPlayout,
+    );
+    if (anotherCallPrefersStereo) {
+      _logger.d(
+        () =>
+            '[clear] keeping stereo playout preferred '
+            '(another active call prefers it)',
+      );
+      return;
+    }
+
+    unawaited(
+      rtc.Helper.setiOSStereoPlayoutPreferred(false).catchError((Object e) {
+        _logger.w(() => '[clear] resetting stereo playout failed: $e');
+      }),
+    );
   }
 
   /// The audio policy the call's current peer connection factory was built
@@ -1070,36 +1110,9 @@ class Call {
     _session?.trace(tag, data);
   }
 
-  /// Replaces this call's preferences.
-  ///
-  /// The audio configuration policy is applied when the per-call peer
-  /// connection factory is built. Changing it before joining discards a
-  /// factory built earlier (for example by a lobby preview), so the next one
-  /// uses the new policy; stop any tracks created from the old factory first.
-  /// After joining, a new policy only takes effect on the next call.
   void updateCallPreferences(CallPreferences preferences) {
     _logger.i(() => '[updateCallPreferences] $preferences');
     _stateManager.updateCallPreferences(preferences);
-
-    final pcFactory = _pcFactory;
-    if (pcFactory != null &&
-        _session == null &&
-        pcFactory.resolvedAudioConfigurationPolicy !=
-            _preferredAudioConfigurationPolicy) {
-      _logger.i(
-        () =>
-            '[updateCallPreferences] audio policy changed, '
-            'discarding the pre-join factory',
-      );
-      _pcFactory = null;
-      unawaited(
-        pcFactory.dispose().catchError((Object e) {
-          _logger.w(
-            () => '[updateCallPreferences] pcFactory dispose failed: $e',
-          );
-        }),
-      );
-    }
   }
 
   /// Sets the audio configuration policy for this call, keeping every other
@@ -1108,9 +1121,14 @@ class Call {
   ///
   /// Call this before [join]: the policy is applied when the call's peer
   /// connection factory is built. A factory built earlier by a lobby preview
-  /// is discarded, as with [updateCallPreferences]; stop any preview tracks
-  /// first. While the call is joining or joined, the policy can no longer
+  /// with a different policy is discarded, so stop any preview tracks first.
+  /// A policy equal to the current one keeps the factory. While a join is
+  /// pending or the call is joining or joined, the policy can no longer
   /// change and this returns a failure.
+  ///
+  /// Unlike this method, [updateCallPreferences] never discards the factory,
+  /// so a policy it sets after a lobby preview started only takes effect on
+  /// the next call.
   ///
   /// The policy is stored in the call's preferences, so a later
   /// [updateCallPreferences] replaces it along with every other preference.
@@ -1143,7 +1161,35 @@ class Call {
     updateCallPreferences(
       _stateManager.callState.preferences.withAudioConfigurationPolicy(policy),
     );
+    _discardPcFactoryWithOtherPolicy();
     return const Result.success(none);
+  }
+
+  /// Discards a factory built before joining (for example by a lobby
+  /// preview) whose policy no longer matches the call's, so the next one is
+  /// built with the new policy.
+  void _discardPcFactoryWithOtherPolicy() {
+    final pcFactory = _pcFactory;
+    if (pcFactory == null ||
+        _session != null ||
+        pcFactory.resolvedAudioConfigurationPolicy ==
+            _preferredAudioConfigurationPolicy) {
+      return;
+    }
+
+    _logger.i(
+      () =>
+          '[setAudioConfigurationPolicy] audio policy changed, '
+          'discarding the pre-join factory',
+    );
+    _pcFactory = null;
+    unawaited(
+      pcFactory.dispose().catchError((Object e) {
+        _logger.w(
+          () => '[setAudioConfigurationPolicy] pcFactory dispose failed: $e',
+        );
+      }),
+    );
   }
 
   /// Enables the given SFU client capabilities for this call.
@@ -2189,11 +2235,15 @@ class Call {
             NoiseCancellationSettingsMode.autoOn) {
       if (_stateManager.callState.audioBitrateProfile ==
           SfuAudioBitrateProfile.musicHighQuality) {
-        // Music keeps noise cancellation off. Leaving music starts it, as
-        // autoOn would have. This overrides the `false` recorded when music
-        // was chosen before joining, when noise cancellation was not on yet.
-        _logger.d(() => '[joinCall] autoOn deferred (music profile)');
-        _audioProcessingBeforeMusic = true;
+        // Music keeps noise cancellation off. On the first join, leaving
+        // music starts it, as autoOn would have; this overrides the `false`
+        // recorded when music was chosen before joining. On a rejoin or
+        // migration, what was recorded before music stands.
+        if (_reconnectStrategy == SfuReconnectionStrategy.unspecified) {
+          _logger.d(() => '[joinCall] autoOn deferred (music profile)');
+          _audioProcessingBeforeMusic = true;
+          _audioProcessingRestoreIsAutoOn = true;
+        }
       } else {
         // AutoOn will enable noise cancellation if the device has sufficient processing power
         unawaited(
@@ -3110,6 +3160,8 @@ class Call {
         );
       }
     }
+
+    _resetStereoPlayoutPreference();
 
     if (_session != null) {
       await _session!.dispose().catchError((Object e) {
@@ -4549,9 +4601,15 @@ class Call {
     }
 
     final restore = _audioProcessingBeforeMusic;
+    final restoreIsAutoOn = _audioProcessingRestoreIsAutoOn;
     _audioProcessingBeforeMusic = null;
+    _audioProcessingRestoreIsAutoOn = false;
     if (restore ?? false) {
-      unawaited(startAudioProcessing());
+      unawaited(
+        startAudioProcessing(
+          requireAdvancedAudioProcessingSupport: restoreIsAutoOn,
+        ),
+      );
     }
   }
 

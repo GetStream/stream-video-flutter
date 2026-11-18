@@ -160,6 +160,12 @@ class BroadcasterAudioPolicy extends AudioConfigurationPolicy {
   const BroadcasterAudioPolicy();
 
   @override
+  bool operator ==(Object other) => other.runtimeType == runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
   rtc.AppleAudioConfiguration getAppleConfiguration({
     bool defaultToSpeaker = false,
   }) {
@@ -225,6 +231,12 @@ class ViewerAudioPolicy extends AudioConfigurationPolicy {
   const ViewerAudioPolicy();
 
   @override
+  bool operator ==(Object other) => other.runtimeType == runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
   rtc.AppleAudioConfiguration getAppleConfiguration({
     bool defaultToSpeaker = false,
   }) {
@@ -288,6 +300,12 @@ class ViewerAudioPolicy extends AudioConfigurationPolicy {
 /// See [AudioConfigurationPolicy] for detailed platform-specific behavior.
 class HiFiAudioPolicy extends AudioConfigurationPolicy {
   const HiFiAudioPolicy();
+
+  @override
+  bool operator ==(Object other) => other.runtimeType == runtimeType;
+
+  @override
+  int get hashCode => runtimeType.hashCode;
 
   @override
   rtc.AppleAudioConfiguration getAppleConfiguration({
@@ -372,6 +390,30 @@ class CustomAudioPolicy extends AudioConfigurationPolicy {
           : basePolicy.androidCallServiceKind);
 
   final bool? _defaultsToSpeaker;
+
+  /// Equal when every field is. [appleConfiguration] and
+  /// [androidConfiguration] have no value equality of their own, so they
+  /// compare by identity.
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CustomAudioPolicy &&
+          other.basePolicy == basePolicy &&
+          other.appleConfiguration == appleConfiguration &&
+          other.androidConfiguration == androidConfiguration &&
+          other.bypassVoiceProcessing == bypassVoiceProcessing &&
+          other._androidCallServiceKind == _androidCallServiceKind &&
+          other._defaultsToSpeaker == _defaultsToSpeaker;
+
+  @override
+  int get hashCode => Object.hash(
+    basePolicy,
+    appleConfiguration,
+    androidConfiguration,
+    bypassVoiceProcessing,
+    _androidCallServiceKind,
+    _defaultsToSpeaker,
+  );
 
   /// Whether audio plays through the loudspeaker by default, when it was
   /// given. Otherwise follows [basePolicy].

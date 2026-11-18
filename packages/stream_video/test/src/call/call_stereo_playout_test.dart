@@ -202,5 +202,91 @@ void main() {
       await call.ensureNativeFactory();
       expect(call.pcFactoryAudioConfigurationPolicy, isA<HiFiAudioPolicy>());
     });
+
+    test('keeps a pre-join factory for an equal policy', () async {
+      CurrentPlatform.debugPlatformOverride = PlatformType.web;
+      addTearDown(() => CurrentPlatform.debugPlatformOverride = null);
+
+      final call = createTestCall();
+      call.setAudioConfigurationPolicy(const AudioConfigurationPolicy.hiFi());
+      await call.ensureNativeFactory();
+      final before = call.pcFactoryAudioConfigurationPolicy;
+
+      // A new, non-const instance of the same policy.
+      // ignore: prefer_const_constructors
+      call.setAudioConfigurationPolicy(HiFiAudioPolicy());
+
+      expect(call.pcFactoryAudioConfigurationPolicy, same(before));
+    });
+
+    test('updateCallPreferences leaves a pre-join factory alone', () async {
+      CurrentPlatform.debugPlatformOverride = PlatformType.web;
+      addTearDown(() => CurrentPlatform.debugPlatformOverride = null);
+
+      final call = createTestCall();
+      await call.ensureNativeFactory();
+      final before = call.pcFactoryAudioConfigurationPolicy;
+
+      call.updateCallPreferences(
+        DefaultCallPreferences(
+          audioConfigurationPolicy: const AudioConfigurationPolicy.hiFi(),
+        ),
+      );
+
+      expect(call.pcFactoryAudioConfigurationPolicy, same(before));
+    });
+  });
+
+  group('AudioConfigurationPolicy equality', () {
+    test('built-in policies are equal to any instance of their type', () {
+      // ignore: prefer_const_constructors
+      expect(HiFiAudioPolicy(), const AudioConfigurationPolicy.hiFi());
+      // ignore: prefer_const_constructors
+      expect(ViewerAudioPolicy(), const AudioConfigurationPolicy.viewer());
+      expect(
+        // ignore: prefer_const_constructors
+        BroadcasterAudioPolicy(),
+        const AudioConfigurationPolicy.broadcaster(),
+      );
+      expect(
+        const AudioConfigurationPolicy.hiFi(),
+        isNot(const AudioConfigurationPolicy.viewer()),
+      );
+      expect(
+        // ignore: prefer_const_constructors
+        HiFiAudioPolicy().hashCode,
+        const AudioConfigurationPolicy.hiFi().hashCode,
+      );
+    });
+
+    test('custom policies compare by their fields', () {
+      // ignore: prefer_const_constructors
+      final a = CustomAudioPolicy(
+        // ignore: prefer_const_constructors
+        basePolicy: HiFiAudioPolicy(),
+        bypassVoiceProcessing: true,
+      );
+      // ignore: prefer_const_constructors
+      final b = CustomAudioPolicy(
+        basePolicy: const HiFiAudioPolicy(),
+        bypassVoiceProcessing: true,
+      );
+      // ignore: prefer_const_constructors
+      final c = CustomAudioPolicy(basePolicy: const HiFiAudioPolicy());
+
+      expect(a, b);
+      expect(a.hashCode, b.hashCode);
+      expect(a, isNot(c));
+    });
+
+    test('withAudioConfigurationPolicy returns the original for an equal '
+        'policy', () {
+      final base = DefaultCallPreferences(
+        audioConfigurationPolicy: const AudioConfigurationPolicy.hiFi(),
+      );
+
+      // ignore: prefer_const_constructors
+      expect(base.withAudioConfigurationPolicy(HiFiAudioPolicy()), same(base));
+    });
   });
 }

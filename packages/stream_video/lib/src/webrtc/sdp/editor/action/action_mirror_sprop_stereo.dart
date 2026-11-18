@@ -1,8 +1,11 @@
+import '../../../../logger/impl/tagged_logger.dart';
 import '../../attributes/fmtp.dart';
 import '../../attributes/rtpmap.dart';
 import '../../codec/sdp_codec.dart';
 import '../../sdp.dart';
 import 'sdp_edit_action.dart';
+
+final _logger = taggedLogger(tag: 'SV:MirrorSpropStereo');
 
 /// Adds `stereo=1` to the Opus fmtp line in the answer for audio sections
 /// whose offer contained `sprop-stereo=1`.
@@ -20,11 +23,18 @@ class MirrorSpropStereoAction implements SdpEditAction {
   @override
   void execute(List<SdpLine> sdpLines) {
     final offer = offerSdp;
-    if (offer == null) return;
+    if (offer == null) {
+      _logger.d(() => '[execute] no offerSdp available, skipping');
+      return;
+    }
 
     final stereoMids = _findSpropStereoMids(offer);
-    if (stereoMids.isEmpty) return;
+    if (stereoMids.isEmpty) {
+      _logger.d(() => '[execute] no sprop-stereo=1 mids in offer');
+      return;
+    }
 
+    _logger.d(() => '[execute] sprop-stereo mids from offer: $stereoMids');
     _addStereoToMatchingMids(sdpLines, stereoMids);
   }
 
@@ -59,9 +69,10 @@ class MirrorSpropStereoAction implements SdpEditAction {
         }
       } else if (opusPayloadType != null && line.isFmtp) {
         final fmtp = fmtpParser.parse(line);
-        if (fmtp == null || fmtp.payloadType != opusPayloadType) continue;
-
-        if (fmtp.parameters['sprop-stereo'] == '1' && currentMid != null) {
+        if (fmtp != null &&
+            fmtp.payloadType == opusPayloadType &&
+            fmtp.parameters['sprop-stereo'] == '1' &&
+            currentMid != null) {
           mids.add(currentMid);
         }
       }
