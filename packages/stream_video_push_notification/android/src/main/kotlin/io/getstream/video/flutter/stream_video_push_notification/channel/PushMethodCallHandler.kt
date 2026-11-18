@@ -72,13 +72,10 @@ internal class PushMethodCallHandler(
                 result.success(true)
             }
 
+            // Run here, not through a broadcast, so Telecom tracks the call by the time Dart
+            // gets the answer and can ask for its audio route.
             "startCall" -> {
-                context.sendBroadcast(
-                    IncomingCallBroadcastReceiver.getIntentStart(
-                        context,
-                        CallPayloadMapper.toBundle(callArgument(call)),
-                    ),
-                )
+                controller.onStart(CallPayloadMapper.toBundle(callArgument(call)))
                 result.success(true)
             }
 

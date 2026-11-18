@@ -131,7 +131,14 @@ class NativeCallController {
     // joining before has to be asked for again. Not awaited, as the output
     // can take seconds to appear.
     if (_audioOutputs[callCid] case final device?) {
-      unawaited(setCallAudioOutputDeviceByCid(callCid, device));
+      unawaited(
+        setCallAudioOutputDeviceByCid(callCid, device).catchError((
+          Object e,
+          StackTrace stk,
+        ) {
+          _logger.w(() => '[startOutgoingCall] output not routed: $e\n$stk');
+        }),
+      );
     }
   }
 

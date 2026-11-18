@@ -87,7 +87,10 @@ class PushMethodCallHandlerTest {
     }
 
     @Test
-    fun `showIncomingCall and startCall broadcast the call to the receiver`() {
+    fun `showIncomingCall broadcasts the call to the receiver, startCall starts it at once`() {
+        val started = slot<Bundle>()
+        every { controller.onStart(capture(started)) } returns Unit
+
         call("showIncomingCall", mapOf("id" to "call-1", "callerName" to "Ada"))
         call("startCall", mapOf("id" to "call-2"))
 
@@ -101,10 +104,15 @@ class PushMethodCallHandlerTest {
             "notification",
             incoming.getString(IncomingCallConstants.EXTRA_CALL_ACTION_FROM),
         )
-        val start = broadcasts.single {
-            it.action == "${context.packageName}.${IncomingCallConstants.ACTION_CALL_START}"
-        }.getBundleExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)!!
-        assertEquals("call-2", start.getString(IncomingCallConstants.EXTRA_CALL_ID))
+        assertEquals(
+            "call-2",
+            started.captured.getString(IncomingCallConstants.EXTRA_CALL_ID),
+        )
+        assertTrue(
+            broadcasts.none {
+                it.action == "${context.packageName}.${IncomingCallConstants.ACTION_CALL_START}"
+            },
+        )
     }
 
     @Test
