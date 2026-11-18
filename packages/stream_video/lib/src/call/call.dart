@@ -822,7 +822,7 @@ class Call {
       event,
     ) {
       _logger.d(
-        () => '[_onNativeWebRtcEvent] screenSharingStopped: $event',
+        () => '[_onNativeWebRtcEvent] event: $event',
       );
 
       switch (event) {

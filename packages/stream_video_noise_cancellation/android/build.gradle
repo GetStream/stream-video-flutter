@@ -44,8 +44,8 @@ android {
     }
 
     dependencies {
-        implementation 'io.getstream:stream-video-webrtc-android:145.9.0'
-        implementation 'io.getstream:stream-video-android-noise-cancellation-libwebrtc:3.0.0'
+        implementation 'io.getstream:stream-video-webrtc-android:156.0.7'
+        implementation 'io.getstream:stream-video-android-noise-cancellation-libwebrtc:3.0.1'
     }
 
     testOptions {
