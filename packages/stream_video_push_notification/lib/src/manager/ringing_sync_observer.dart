@@ -178,16 +178,45 @@ class RingingSyncObserver {
     uuids.forEach(_onRingAnswered);
   }
 
-  /// Applies a native mute to the call it names, found by [_callFor].
+  /// Applies a CallKit mute to the call it names, found through the cid the
+  /// native side holds for the event's uuid. When the native side does not
+  /// know the uuid or its cid, or cannot be asked, the mute goes to the call
+  /// in the ringing flow. When the uuid names a call the app is not in, the
+  /// mute is dropped.
   Future<void> _onToggleMute(ActionCallToggleMute event) async {
     _logger.d(
       () =>
           '[onCallEvent] ActionCallToggleMute received: uuid=${event.uuid}, isMuted=${event.isMuted}',
     );
 
-    final call = await _callFor(event.uuid, 'Mute');
-    if (_disposed || call == null) return;
-    await call.setMicrophoneEnabled(enabled: !event.isMuted);
+    var nativeCalls = const <CallData>[];
+    try {
+      nativeCalls = await _controller.activeCalls();
+    } catch (e, stk) {
+      _logger.w(
+        () => '[onCallEvent] Could not read the native calls: $e\n$stk',
+      );
+    }
+    if (_disposed) return;
+
+    final nativeCall = nativeCalls.firstWhereOrNull(
+      (call) => call.uuid?.toLowerCase() == event.uuid.toLowerCase(),
+    );
+    final cid = nativeCall?.callCid;
+    final activeCalls = _streamVideo.state.activeCalls.value;
+    final call = cid == null
+        ? activeCalls.firstWhereOrNull((c) => c.state.value.isRingingFlow)
+        : activeCalls.firstWhereOrNull((c) => c.callCid.value == cid);
+
+    if (call != null) {
+      await call.setMicrophoneEnabled(enabled: !event.isMuted);
+    } else if (cid != null) {
+      _logger.w(
+        () => '[onCallEvent] Mute dropped: the app is not in call $cid',
+      );
+    } else {
+      _logger.w(() => '[onCallEvent] Cannot toggle mute: no active call');
+    }
   }
 
   /// Leaves the call a Telecom hold names, as the Android SDK does. Telecom
@@ -249,44 +278,6 @@ class RingingSyncObserver {
     } catch (e, stk) {
       _logger.e(() => '[onCallEvent] Leaving held $cid failed: $e\n$stk');
     }
-  }
-
-  /// The call a native event's [uuid] belongs to, found through the cid the
-  /// native side holds for it. When the native side does not know the uuid
-  /// or its cid, or cannot be asked, the call in the ringing flow. Null, with
-  /// a warning naming [action], when the uuid names a call the app is not in
-  /// or there is no call.
-  Future<Call?> _callFor(String uuid, String action) async {
-    var nativeCalls = const <CallData>[];
-    try {
-      nativeCalls = await _controller.activeCalls();
-    } catch (e, stk) {
-      _logger.w(
-        () => '[onCallEvent] Could not read the native calls: $e\n$stk',
-      );
-    }
-    if (_disposed) return null;
-
-    final nativeCall = nativeCalls.firstWhereOrNull(
-      (call) => call.uuid?.toLowerCase() == uuid.toLowerCase(),
-    );
-    final cid = nativeCall?.callCid;
-    final activeCalls = _streamVideo.state.activeCalls.value;
-    final Call? call;
-    if (cid != null) {
-      call = activeCalls.firstWhereOrNull((c) => c.callCid.value == cid);
-    } else {
-      call = activeCalls.firstWhereOrNull((c) => c.state.value.isRingingFlow);
-    }
-
-    if (call == null && cid != null) {
-      _logger.w(
-        () => '[onCallEvent] $action dropped: the app is not in call $cid',
-      );
-    } else if (call == null) {
-      _logger.w(() => '[onCallEvent] $action dropped: no active call');
-    }
-    return call;
   }
 
   void _subscribeToEvents() {

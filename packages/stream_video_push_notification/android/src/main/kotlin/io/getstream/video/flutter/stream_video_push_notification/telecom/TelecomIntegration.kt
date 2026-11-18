@@ -450,11 +450,6 @@ internal class TelecomIntegration(
             sendEvent(IncomingCallConstants.ACTION_CALL_TOGGLE_MUTE, callId, "isMuted" to isMuted)
         }
 
-        /** A refused hold or resume changes nothing, so nothing is reported. */
-        override fun onHoldChangeFailed(callId: String, requestedOnHold: Boolean) {
-            Log.w(TAG, "[onHoldChangeFailed] $callId, requested onHold=$requestedOnHold")
-        }
-
         override fun onCallAudioEndpointsChanged(callId: String, snapshot: Map<String, Any?>) {
             sendEvent(
                 IncomingCallConstants.ACTION_CALL_CUSTOM,

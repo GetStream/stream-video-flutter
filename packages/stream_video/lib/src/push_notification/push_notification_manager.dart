@@ -86,11 +86,8 @@ abstract class PushNotificationManager {
   /// [isMuted] indicates whether the call is muted (default is true).
   Future<void> muteCall(String uuid, {bool isMuted = true});
 
-  /// Holds or unholds the call.
-  ///
-  /// On Android the push package leaves a call that Telecom holds, so a hold
-  /// there ends the call, unless several calls may be active; see the push
-  /// package's `holdCall`.
+  /// Holds or unholds the call in the system call UI, and reports
+  /// [ActionCallToggleHold] once the system has done it.
   ///
   /// [uuid] is the unique identifier for the call.
   /// [isOnHold] indicates whether the call is on hold (default is true).
