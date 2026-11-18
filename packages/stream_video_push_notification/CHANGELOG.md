@@ -2,7 +2,7 @@
 
 ### ⚠️ Breaking
 
-- [Android] `dismissRingingCall` reports its end of the ring as an `ActionCallDismissed` with the reason, where it used to report an `ActionCallEnded`. It no longer dismisses every call when no stored call has the cid. `StreamVideoPushNotificationPlatform.dismissRingingCall` takes a `reason`, so a custom platform implementation has to add it. `IncomingCallBroadcastReceiver.getIntentEnded` no longer takes `keepSystemCall`, and `IncomingCallConstants.EXTRA_KEEP_SYSTEM_CALL` is removed. A timeout broadcast, such as one built with `getIntentTimeout`, ends only a call that is still stored and not accepted.
+- [Android] `dismissRingingCall` reports its end of the ring as an `ActionCallDismissed` with the reason, where it used to report an `ActionCallEnded`. It no longer dismisses every call when no stored call has the cid. An unknown reason fails and dismisses nothing. `StreamVideoPushNotificationPlatform.dismissRingingCall` takes a `reason`, so a custom platform implementation has to add it. `IncomingCallBroadcastReceiver.getIntentEnded` no longer takes `keepSystemCall`, and `IncomingCallConstants.EXTRA_KEEP_SYSTEM_CALL` is removed. A timeout broadcast, such as one built with `getIntentTimeout`, ends only a call that is still stored and not accepted.
 - [Android] `holdCall` no longer reports `ActionCallToggleHold` itself. The event comes once Telecom has held or resumed the call, the same as for a hold from the system, so a hold Telecom refuses is not reported. A hold Telecom does then ends the call, as below. While the Telecom integration is off, the default below Android 17, `holdCall` does nothing and nothing is reported.
 - `StreamVideoPushNotificationPlatform.activeCalls()` returns `Future<List<CallData>>`.
 - `StreamVideoPushNotificationManager.removedStoredTokens` is removed.
@@ -61,6 +61,8 @@
 
 ### 🐞 Fixed
 
+- [Android] While the Telecom integration is on, a call that Telecom fails to answer on Android 14 and later is disconnected in Telecom. It used to be logged as a failed registration and was not disconnected.
+- An incoming call shown from a ringing push rings natively for the call's `autoRejectTimeout`, after which the client rejects it, instead of a fixed 30 seconds. `StreamVideoPushNotificationManager.showIncomingCall` takes it as `ringTimeout`.
 - [Android] An unanswered ring ends natively once its duration has passed: the notification, the ringtone and the stored call are cleared, Telecom disconnects the call as missed, and an `ActionCallTimeout` is reported. The notification used to disappear after the duration while the ringtone, the ringing service and the Telecom call stayed until Dart ended them. After the app was killed, an alarm clears the stored call and the notification instead; Doze can delay it.
 - [Android] `showMissCallNotification` also ends the ring of the call with the same call cid that is still ringing: its notification and ringtone stop, it is forgotten, Telecom disconnects it as missed, and an `ActionCallDismissed` with `CallDismissReason.missed` is reported. It used to leave the ring going.
 - An incoming ring keeps following the backend when another native call ends while it rings, such as the user's own outgoing call. It used to stop, so a ring the caller cancelled kept ringing until it timed out.

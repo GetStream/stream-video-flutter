@@ -240,17 +240,13 @@ internal class TelecomIntegration(
     }
 
     /**
-     * Disconnects a call in Telecom with [cause], a [DisconnectCause] code. Telecom's call control
-     * takes only LOCAL, REMOTE, MISSED and REJECTED; any other cause is sent as LOCAL.
+     * Disconnects a call in Telecom with [cause], a [DisconnectCause] code; the repository sends a
+     * cause Telecom's call control does not take as LOCAL. Without a repository no call is
+     * registered in this process, so none is built for it.
      */
     fun disconnect(callId: String, cause: Int) {
         if (!isEnabled()) return
-        val accepted = cause.takeIf { it in CALL_CONTROL_CAUSES } ?: DisconnectCause.LOCAL
-        processAction(
-            callId,
-            TelecomCallAction.Disconnect(DisconnectCause(accepted)),
-            createRepository = true,
-        )
+        processAction(callId, TelecomCallAction.Disconnect(DisconnectCause(cause)))
     }
 
     /** Marks a call as active, used once an outgoing or accepted call is connected. */
@@ -486,14 +482,6 @@ internal class TelecomIntegration(
 
         /** Payload type of the [IncomingCallConstants.ACTION_CALL_CUSTOM] audio-endpoint event. */
         const val CUSTOM_EVENT_AUDIO_ENDPOINTS = "telecomAudioEndpointsChanged"
-
-        /** The disconnect causes `CallControlScope.disconnect` accepts. */
-        val CALL_CONTROL_CAUSES = setOf(
-            DisconnectCause.LOCAL,
-            DisconnectCause.REMOTE,
-            DisconnectCause.MISSED,
-            DisconnectCause.REJECTED,
-        )
     }
 }
 

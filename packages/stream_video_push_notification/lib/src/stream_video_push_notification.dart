@@ -137,6 +137,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     String? handle,
     String? callerName,
     bool hasVideo = true,
+    Duration? ringTimeout,
   }) {
     return _controller.showIncomingCall(
       uuid: uuid,
@@ -145,6 +146,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       handle: handle,
       callerName: callerName,
       hasVideo: hasVideo,
+      ringTimeout: ringTimeout,
     );
   }
 

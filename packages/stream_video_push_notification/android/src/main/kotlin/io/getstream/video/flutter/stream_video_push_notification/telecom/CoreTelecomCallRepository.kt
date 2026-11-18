@@ -40,6 +40,21 @@ internal class CoreTelecomCallRepository(
 
     companion object {
         private const val TAG = "StreamTelecomRepo"
+
+        /** The disconnect causes `CallControlScope.disconnect` takes. */
+        private val CALL_CONTROL_CAUSES = setOf(
+            DisconnectCause.LOCAL,
+            DisconnectCause.REMOTE,
+            DisconnectCause.MISSED,
+            DisconnectCause.REJECTED,
+        )
+
+        /**
+         * [cause], or LOCAL for a cause Telecom's call control does not take: from Android 14 it
+         * throws for anything but LOCAL, REMOTE, MISSED and REJECTED.
+         */
+        private fun supportedCause(cause: DisconnectCause): DisconnectCause =
+            if (cause.code in CALL_CONTROL_CAUSES) cause else DisconnectCause(DisconnectCause.LOCAL)
     }
 
     /** Per-call flags telling whether an action was started by us or by the system. */
@@ -292,9 +307,10 @@ internal class CoreTelecomCallRepository(
                 is TelecomCallAction.Answer -> doAnswer(callId, flags)
 
                 is TelecomCallAction.Disconnect -> {
+                    val cause = supportedCause(action.cause)
                     flags.isSelfDisconnected.set(true)
-                    disconnect(action.cause)
-                    onIsCallDisconnected(callId, flags)(action.cause)
+                    disconnect(cause)
+                    onIsCallDisconnected(callId, flags)(cause)
                     // The call is gone, so stop consuming instead of failing whatever was still
                     // queued behind the disconnect.
                     return
@@ -330,8 +346,9 @@ internal class CoreTelecomCallRepository(
                 Log.e(TAG, "[doAnswer] answer failed: ${result.errorCode}")
                 flags.isSelfAnswered.set(false)
 
-                // Call disconnect to ensure Telecom call teardown before removing locally.
-                val cause = DisconnectCause(DisconnectCause.BUSY)
+                // Disconnects in Telecom before removing the call locally. Telecom's call control
+                // takes only LOCAL, REMOTE, MISSED and REJECTED.
+                val cause = DisconnectCause(DisconnectCause.LOCAL)
                 flags.isSelfDisconnected.set(true)
                 disconnect(cause)
                 onIsCallDisconnected(callId, flags)(cause)
