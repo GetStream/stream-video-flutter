@@ -51,7 +51,8 @@ internal object StreamTelecomManager {
     private var repository: TelecomCallRepository? = null
 
     /** Calls whose registration was started but has not reached the Telecom scope yet. */
-    private val registeringCallIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
+    private val registeringCallIds: MutableSet<String> =
+        Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
 
     /** Actions requested before the Telecom scope was ready, replayed on registration. */
     private val pendingActions = ConcurrentHashMap<String, MutableList<TelecomCallAction>>()
@@ -62,15 +63,18 @@ internal object StreamTelecomManager {
      * Used to pick the right disconnect broadcast. A call that never connected was declined, while
      * one that did was ended, and the two take very different paths on the Dart side.
      */
-    private val connectedCallIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
+    private val connectedCallIds: MutableSet<String> =
+        Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
 
     /**
      * Calls this app placed, so a system hang-up is reported as an end rather than a decline.
      */
-    private val outgoingCallIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
+    private val outgoingCallIds: MutableSet<String> =
+        Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
 
     /** Calls currently on hold, so hold events are only emitted on an actual transition. */
-    private val heldCallIds: MutableSet<String> = ConcurrentHashMap.newKeySet()
+    private val heldCallIds: MutableSet<String> =
+        Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
 
     /**
      * Hold values we asked Telecom for, so the resulting change is not echoed back to Flutter.
