@@ -63,7 +63,12 @@ void main() {
       final route = await firstAfter(
         events.onAudioRouteChanged,
         'onAudioRouteChange',
-        {'deviceId': 'speaker-uid', 'label': 'Speaker', 'groupId': 'Speaker'},
+        {
+          'deviceId': 'speaker-uid',
+          'label': 'Speaker',
+          'groupId': 'Speaker',
+          'reason': 8,
+        },
       );
 
       expect(
@@ -72,6 +77,7 @@ void main() {
           deviceId: 'speaker-uid',
           label: 'Speaker',
           groupId: 'Speaker',
+          reasonCode: 8,
         ),
       );
     });

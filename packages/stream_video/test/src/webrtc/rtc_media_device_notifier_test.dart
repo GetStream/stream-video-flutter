@@ -394,6 +394,26 @@ void main() {
       ]);
     });
 
+    test('an audio route change carries its reason', () async {
+      final events = <NativeWebRtcEvent>[];
+      final subscription = notifier.nativeWebRtcEventsStream().listen(
+        events.add,
+      );
+
+      await emit('onAudioRouteChange', {
+        'deviceId': 'Speaker',
+        'label': 'Speaker',
+        'reason': 8,
+      });
+      await emit('onAudioRouteChange', {'deviceId': 'Receiver'});
+      await subscription.cancel();
+
+      expect(events.cast<AudioRouteChangedEvent>().map((e) => e.reason), [
+        AudioRouteChangeReason.routeConfigurationChange,
+        AudioRouteChangeReason.unknown,
+      ]);
+    });
+
     test('an audio route without a device id is dropped', () async {
       final events = <NativeWebRtcEvent>[];
       final subscription = notifier.nativeWebRtcEventsStream().listen(
@@ -530,6 +550,56 @@ void main() {
         'androidAudioConfiguration': policy.getAndroidConfiguration().toMap(),
       });
     });
+  });
+
+  group('AudioRouteChangeReason', () {
+    test('has the AVAudioSessionRouteChangeReason codes', () {
+      expect(
+        {
+          for (final reason in AudioRouteChangeReason.values)
+            reason: reason.code,
+        },
+        {
+          AudioRouteChangeReason.unknown: 0,
+          AudioRouteChangeReason.newDeviceAvailable: 1,
+          AudioRouteChangeReason.oldDeviceUnavailable: 2,
+          AudioRouteChangeReason.categoryChange: 3,
+          AudioRouteChangeReason.override: 4,
+          AudioRouteChangeReason.wakeFromSleep: 6,
+          AudioRouteChangeReason.noSuitableRouteForCategory: 7,
+          AudioRouteChangeReason.routeConfigurationChange: 8,
+        },
+      );
+    });
+
+    test('maps each code back, and an unknown or missing one to unknown', () {
+      for (final reason in AudioRouteChangeReason.values) {
+        expect(AudioRouteChangeReason.fromCode(reason.code), reason);
+      }
+      expect(
+        AudioRouteChangeReason.fromCode(5),
+        AudioRouteChangeReason.unknown,
+      );
+      expect(
+        AudioRouteChangeReason.fromCode(null),
+        AudioRouteChangeReason.unknown,
+      );
+    });
+
+    test(
+      'counts only a category or route configuration change as the system re-routing',
+      () {
+        expect(
+          AudioRouteChangeReason.values.where(
+            (reason) => reason.isSystemReconfiguration,
+          ),
+          [
+            AudioRouteChangeReason.categoryChange,
+            AudioRouteChangeReason.routeConfigurationChange,
+          ],
+        );
+      },
+    );
   });
 }
 

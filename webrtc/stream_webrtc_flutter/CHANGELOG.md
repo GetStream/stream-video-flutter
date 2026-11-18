@@ -7,6 +7,12 @@
 * The Android and Apple audio configuration types moved to `stream_webrtc_interface`; this package still exports them.
 * **Breaking:** depends on `stream_dart_webrtc` and `stream_webrtc_interface` instead of `dart_webrtc` and `webrtc_interface`. The re-exported types now come from `stream_webrtc_interface`, so they no longer match `package:webrtc_interface` types.
 * Licensed under the Stream licence; the code from upstream keeps its MIT licence (see `LICENSE`).
+* [iOS/macOS] Added `FlutterWebRTCPlugin.audioEngineControl`, for an app that activates the audio session itself, such as through CallKit. `setAudioEngineAvailable:` stops and restarts the audio engine of every peer-connection factory, including ones built later, and `audioEngineStartFailedHandler` is called when the engine cannot be started again. `FlutterWebRTCAudioEngineAvailabilityNotification` and `FlutterWebRTCAudioEngineStartFailedNotification` do the same for code that does not link the plugin.
+* [iOS/macOS] A call whose audio engine was stopped while its playout ran resumes on live audio, instead of replaying the last seconds received while it was stopped, such as what others said during a CallKit hold.
+* [iOS] Added `setCallKitAudioSessionActive:` on `audioEngineControl`, to tell WebRTC that CallKit activated or deactivated the audio session, so WebRTC stops activating or deactivating it itself while CallKit owns it. The availability notification carries it as `FlutterWebRTCAudioSessionActiveKey`.
+* [iOS] The `onAudioRouteChange` event carries the system's route change `reason`, and is also sent when the system re-routes on its own, such as after a CallKit hold.
+* [iOS] fix: disposing the last stream or peer connection no longer tries to deactivate an audio session CallKit owns.
+* [iOS/macOS] fix: with CocoaPods, only the headers under `include/` are public, as with Swift Package Manager. The podspecs' `public_header_files` pattern matched nothing, so every header was public.
 
 [4.0.1] - 2026.10.22
 

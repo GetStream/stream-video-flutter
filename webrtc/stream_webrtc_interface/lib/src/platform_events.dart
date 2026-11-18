@@ -9,6 +9,7 @@ class AudioRoute {
     required this.deviceId,
     required this.label,
     this.groupId,
+    this.reasonCode,
   });
 
   /// The output's identifier. Never empty: a change without one is not
@@ -21,20 +22,26 @@ class AudioRoute {
   /// The kind of output (the port type on iOS).
   final String? groupId;
 
+  /// Why the route changed: the raw `AVAudioSessionRouteChangeReason` on iOS.
+  /// Null when the platform does not report it.
+  final int? reasonCode;
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is AudioRoute &&
           other.deviceId == deviceId &&
           other.label == label &&
-          other.groupId == groupId;
+          other.groupId == groupId &&
+          other.reasonCode == reasonCode;
 
   @override
-  int get hashCode => Object.hash(deviceId, label, groupId);
+  int get hashCode => Object.hash(deviceId, label, groupId, reasonCode);
 
   @override
   String toString() =>
-      'AudioRoute(deviceId: $deviceId, label: $label, groupId: $groupId)';
+      'AudioRoute(deviceId: $deviceId, label: $label, groupId: $groupId, '
+      'reasonCode: $reasonCode)';
 }
 
 /// Whether the local user started or stopped speaking, reported by the audio
