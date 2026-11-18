@@ -81,9 +81,10 @@ class _RecordingPlatform extends StreamVideoPushNotificationPlatform {
   @override
   Future<bool> requestAudioEndpoint(
     String cid,
-    TelecomAudioEndpoint endpoint,
-  ) async {
-    calls.add('requestAudioEndpoint:$cid:${endpoint.name}');
+    TelecomAudioEndpoint endpoint, {
+    String? name,
+  }) async {
+    calls.add('requestAudioEndpoint:$cid:${endpoint.name}:$name');
     return routed;
   }
 }
@@ -294,16 +295,67 @@ void main() {
 
       await controller.setCallAudioOutputDeviceByCid('default:c1', speaker);
 
-      expect(platform.calls, ['requestAudioEndpoint:default:c1:speaker']);
+      expect(platform.calls, [
+        'requestAudioEndpoint:default:c1:speaker:Speaker',
+      ]);
     });
 
-    test('goes on when Telecom does not route the call', () async {
+    test('completes when Telecom does not route the call', () async {
       CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
       platform.routed = false;
 
-      await controller.setCallAudioOutputDeviceByCid('default:c1', speaker);
+      await expectLater(
+        controller.setCallAudioOutputDeviceByCid('default:c1', speaker),
+        completes,
+      );
+    });
 
-      expect(platform.calls, ['requestAudioEndpoint:default:c1:speaker']);
+    test('names the Bluetooth headset by its label', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+
+      await controller.setCallAudioOutputDeviceByCid(
+        'default:c1',
+        const RtcMediaDevice(
+          id: 'bluetooth',
+          label: 'Car',
+          groupId: 'bluetooth',
+          kind: RtcMediaDeviceKind.audioOutput,
+        ),
+      );
+
+      expect(platform.calls, [
+        'requestAudioEndpoint:default:c1:bluetooth:Car',
+      ]);
+    });
+
+    test(
+      'asks again once an outgoing call started later is registered',
+      () async {
+        CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+        platform.routed = false;
+        await controller.setCallAudioOutputDeviceByCid('default:c1', speaker);
+        platform.calls.clear();
+
+        await controller.startOutgoingCall(uuid: 'u1', callCid: 'default:c1');
+        await pumpEventQueue();
+
+        expect(platform.calls, [
+          'startCall',
+          'requestAudioEndpoint:default:c1:speaker:Speaker',
+        ]);
+      },
+    );
+
+    test('asks nothing again for a call that ended', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      await controller.setCallAudioOutputDeviceByCid('default:c1', speaker);
+      await controller.endCallByCid('default:c1');
+      platform.calls.clear();
+
+      await controller.startOutgoingCall(uuid: 'u1', callCid: 'default:c1');
+      await pumpEventQueue();
+
+      expect(platform.calls, ['startCall']);
     });
 
     test('asks nothing for a device Telecom has no endpoint for', () async {

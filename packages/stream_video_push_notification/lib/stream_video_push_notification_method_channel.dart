@@ -108,13 +108,14 @@ class MethodChannelStreamVideoPushNotification
   @override
   Future<bool> requestAudioEndpoint(
     String cid,
-    TelecomAudioEndpoint endpoint,
-  ) async {
+    TelecomAudioEndpoint endpoint, {
+    String? name,
+  }) async {
     if (!CurrentPlatform.isAndroid) return false;
 
     final routed = await methodChannel.invokeMethod<bool>(
       'requestAudioEndpoint',
-      {'cid': cid, 'type': endpoint.wireName},
+      {'cid': cid, 'type': endpoint.wireName, 'name': ?name},
     );
     return routed ?? false;
   }

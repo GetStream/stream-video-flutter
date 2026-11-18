@@ -86,13 +86,18 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
   }
 
   /// Asks the system to route the audio of the calls with [cid] to
-  /// [endpoint], and answers whether it did.
+  /// [endpoint], and answers whether it did. Among several endpoints of that
+  /// type, such as two Bluetooth headsets, the one called [name] is preferred.
   ///
   /// Android only, while the Telecom integration holds the call: Telecom owns
   /// the audio route of a call it holds. `false` without the integration, for
   /// a call it does not hold, when Telecom offers no such endpoint and when it
   /// refuses the change. Always `false` on iOS.
-  Future<bool> requestAudioEndpoint(String cid, TelecomAudioEndpoint endpoint) {
+  Future<bool> requestAudioEndpoint(
+    String cid,
+    TelecomAudioEndpoint endpoint, {
+    String? name,
+  }) {
     throw UnimplementedError(
       'requestAudioEndpoint() has not been implemented.',
     );
@@ -237,19 +242,17 @@ enum TelecomAudioEndpoint {
   /// `telecomAudioEndpointsChanged` event.
   final String wireName;
 
-  /// The endpoint the SDK's [RtcMediaDevice] for an Android audio output
-  /// names, or null for one Telecom has no endpoint for.
+  /// The Telecom endpoint for [device], an Android audio output, or null
+  /// when Telecom has none. Android names an output by its kind, for example
+  /// `bluetooth`, in both its id and its group id.
   static TelecomAudioEndpoint? fromAudioOutput(RtcMediaDevice device) {
     if (device.isSpeaker) return speaker;
     if (device.isEarpiece) return earpiece;
 
-    final group = device.groupId?.toLowerCase() ?? '';
-    if (device.id == 'bluetooth' || group.contains('bluetooth')) {
-      return bluetooth;
-    }
-    if (device.id == 'wired-headset' || group.contains('wired-headset')) {
-      return wiredHeadset;
-    }
-    return null;
+    return switch (device.id) {
+      'bluetooth' => bluetooth,
+      'wired-headset' => wiredHeadset,
+      _ => null,
+    };
   }
 }

@@ -100,15 +100,19 @@ internal class PushMethodCallHandler(
             }
 
             // Answers whether Telecom routed the cid's calls to the endpoint; false without
-            // Telecom or for an endpoint type it does not name.
+            // Telecom or for an endpoint type it does not name. The optional name picks among
+            // several endpoints of the type.
             "requestAudioEndpoint" -> {
                 val args = mapArgument(call)
                 val callCid = args["cid"] as? String
                 val type = AudioEndpointUtils.endpointTypeFromString(args["type"] as? String)
+                val name = args["name"] as? String
                 if (callCid == null || type == null) {
                     result.success(false)
                 } else {
-                    telecom.requestEndpoint(callCid, type) { routed -> result.success(routed) }
+                    telecom.requestEndpoint(callCid, type, name) { routed ->
+                        result.success(routed)
+                    }
                 }
             }
 

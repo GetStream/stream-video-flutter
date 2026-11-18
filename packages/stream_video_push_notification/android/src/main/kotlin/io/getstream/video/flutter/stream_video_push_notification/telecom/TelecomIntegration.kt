@@ -279,14 +279,19 @@ internal class TelecomIntegration(
 
     /**
      * Asks Telecom to route the audio of the calls with [callCid] to an endpoint of
-     * [endpointType], a `CallEndpointCompat.TYPE_*`, and calls [onResult] on the main thread with
-     * whether Telecom routed them there.
+     * [endpointType], a `CallEndpointCompat.TYPE_*`, preferring the one named [endpointName], and
+     * calls [onResult] on the main thread with whether Telecom routed them there.
      *
      * A call still registering gets the request once registered; a newer request for it replaces
      * one still queued. False without Telecom, for a cid Telecom holds no call for, and when the
      * answer takes longer than [ENDPOINT_REQUEST_TIMEOUT_MS].
      */
-    fun requestEndpoint(callCid: String, endpointType: Int, onResult: (Boolean) -> Unit) {
+    fun requestEndpoint(
+        callCid: String,
+        endpointType: Int,
+        endpointName: String? = null,
+        onResult: (Boolean) -> Unit,
+    ) {
         val callIds = if (isEnabled()) {
             trackedCalls.filterValues { it.callCid == callCid }.keys
         } else {
@@ -299,7 +304,8 @@ internal class TelecomIntegration(
         }
 
         val requests = callIds.map { callId ->
-            TelecomCallAction.RequestEndpoint(endpointType).also { processAction(callId, it) }
+            TelecomCallAction.RequestEndpoint(endpointType, endpointName)
+                .also { processAction(callId, it) }
         }
         scope.launch {
             val routed = requests.all { request ->
@@ -540,8 +546,8 @@ internal class TelecomIntegration(
         const val CUSTOM_EVENT_AUDIO_ENDPOINTS = "telecomAudioEndpointsChanged"
 
         /**
-         * How long [requestEndpoint] waits for Telecom's answer: longer than the repository waits
-         * for the endpoint to be offered, plus the change itself.
+         * How long [requestEndpoint] waits for Telecom's answer: longer than [EndpointSwitcher]
+         * waits for the endpoint to be offered, plus the change itself.
          */
         const val ENDPOINT_REQUEST_TIMEOUT_MS = 5_000L
     }

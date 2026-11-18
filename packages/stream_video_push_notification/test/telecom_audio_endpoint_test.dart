@@ -4,10 +4,11 @@ import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification_method_channel.dart';
 
-RtcMediaDevice _output(String id, {String? groupId}) => RtcMediaDevice(
+// Android names an output by its kind in both its id and its group id.
+RtcMediaDevice _output(String id) => RtcMediaDevice(
   id: id,
   label: id,
-  groupId: groupId,
+  groupId: id,
   kind: RtcMediaDeviceKind.audioOutput,
 );
 
@@ -29,26 +30,14 @@ void main() {
         TelecomAudioEndpoint.bluetooth,
       );
       expect(
-        TelecomAudioEndpoint.fromAudioOutput(
-          _output('9', groupId: 'bluetooth'),
-        ),
-        TelecomAudioEndpoint.bluetooth,
-      );
-      expect(
         TelecomAudioEndpoint.fromAudioOutput(_output('wired-headset')),
-        TelecomAudioEndpoint.wiredHeadset,
-      );
-      expect(
-        TelecomAudioEndpoint.fromAudioOutput(
-          _output('4', groupId: 'wired-headset'),
-        ),
         TelecomAudioEndpoint.wiredHeadset,
       );
     });
 
     test('maps an output Telecom has no endpoint for to none', () {
       expect(
-        TelecomAudioEndpoint.fromAudioOutput(_output('12', groupId: '22')),
+        TelecomAudioEndpoint.fromAudioOutput(_output('usb-headset')),
         isNull,
       );
     });
@@ -102,6 +91,22 @@ void main() {
         });
       },
     );
+
+    test('sends the endpoint name when there is one', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+
+      await platform.requestAudioEndpoint(
+        'default:abc',
+        TelecomAudioEndpoint.bluetooth,
+        name: 'Car',
+      );
+
+      expect(calls.single.arguments, {
+        'cid': 'default:abc',
+        'type': 'bluetooth',
+        'name': 'Car',
+      });
+    });
 
     test('answers false when Android answers nothing', () async {
       CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;

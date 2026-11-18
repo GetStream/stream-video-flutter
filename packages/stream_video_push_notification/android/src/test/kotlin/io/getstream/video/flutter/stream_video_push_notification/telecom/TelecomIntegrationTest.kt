@@ -11,6 +11,10 @@ import io.getstream.video.flutter.stream_video_push_notification.core.RingingCal
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -24,6 +28,7 @@ import org.robolectric.RobolectricTestRunner
  * Pins what [TelecomIntegration] asks Telecom for and what it reports back, against a fake
  * repository, with registrations and callbacks run on the calling thread.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class TelecomIntegrationTest {
 
@@ -51,13 +56,16 @@ class TelecomIntegrationTest {
         }
     }
 
-    private fun integration(canUseTelecom: Boolean = true) = TelecomIntegration(
+    private fun integration(
+        canUseTelecom: Boolean = true,
+        scope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined),
+    ) = TelecomIntegration(
         context,
         repositoryFactory = { repository },
         permissions = object : TelecomPermissions() {
             override fun canUseTelecom(context: Context) = canUseTelecom
         },
-        scope = CoroutineScope(Dispatchers.Unconfined),
+        scope = scope,
         mainThread = { it.run() },
     ).also { it.listener = listener }
 
@@ -426,6 +434,24 @@ class TelecomIntegrationTest {
         request.result.complete(true)
 
         assertEquals(listOf(true), routed)
+    }
+
+    @Test
+    fun `an endpoint request Telecom does not answer answers false after five seconds`() {
+        val scope = TestScope()
+        val telecom = integration(scope = scope).apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        scope.runCurrent()
+        repository.completeRegistration(CALL_ID)
+        scope.runCurrent()
+
+        telecom.requestSpeaker()
+        scope.advanceTimeBy(4_999)
+        assertEquals(emptyList<Boolean>(), routed)
+
+        scope.advanceTimeBy(2)
+        assertEquals(listOf(false), routed)
+        assertEquals(1, endpointRequests().size)
     }
 
     @Test

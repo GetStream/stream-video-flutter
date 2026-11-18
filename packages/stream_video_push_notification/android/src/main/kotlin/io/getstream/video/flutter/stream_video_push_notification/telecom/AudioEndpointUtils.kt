@@ -44,15 +44,22 @@ internal object AudioEndpointUtils {
 
     /**
      * Which of [available] to ask Telecom for to route a call to [type], given its [current]
-     * endpoint: the first one of that type, unless [current] is of that type already.
+     * endpoint. Telecom lists one Bluetooth endpoint per connected headset, so the one named
+     * [name] wins; without one, the first of the type. [current] is kept when it is of the type
+     * and is the named endpoint, or none is named.
      */
     fun chooseEndpoint(
         type: Int,
         current: CallEndpointCompat?,
         available: List<CallEndpointCompat>,
+        name: String? = null,
     ): EndpointChoice {
-        if (current?.type == type) return EndpointChoice.AlreadyCurrent
-        val endpoint = available.firstOrNull { it.type == type } ?: return EndpointChoice.Unavailable
+        val ofType = available.filter { it.type == type }
+        val named = name?.let { wanted -> ofType.firstOrNull { it.name.toString() == wanted } }
+        if (current?.type == type && (named == null || current.identifier == named.identifier)) {
+            return EndpointChoice.AlreadyCurrent
+        }
+        val endpoint = named ?: ofType.firstOrNull() ?: return EndpointChoice.Unavailable
         return EndpointChoice.Request(endpoint)
     }
 

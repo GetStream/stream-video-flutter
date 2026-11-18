@@ -20,13 +20,17 @@ internal sealed interface TelecomCallAction {
     object Activate : TelecomCallAction
 
     /**
-     * Route the call's audio to the endpoint of [endpointType], a `CallEndpointCompat.TYPE_*`.
+     * Route the call's audio to the endpoint of [endpointType], a `CallEndpointCompat.TYPE_*`;
+     * among several of that type, such as Bluetooth headsets, the one named [endpointName].
      *
      * [result] completes with true once Telecom routes the call there, or already did, and with
      * false when it does not: no such endpoint, a refused change, a newer request, or a call that
      * ended first.
      */
-    class RequestEndpoint(val endpointType: Int) : TelecomCallAction {
+    class RequestEndpoint(
+        val endpointType: Int,
+        val endpointName: String? = null,
+    ) : TelecomCallAction {
         val result = CompletableDeferred<Boolean>()
     }
 }

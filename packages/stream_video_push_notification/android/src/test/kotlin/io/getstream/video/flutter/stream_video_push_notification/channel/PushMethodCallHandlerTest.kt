@@ -168,7 +168,12 @@ class PushMethodCallHandlerTest {
     fun `requestAudioEndpoint asks Telecom for the cid's endpoint and answers what it did`() {
         val onResult = slot<(Boolean) -> Unit>()
         every {
-            telecom.requestEndpoint("default:abc", CallEndpointCompat.TYPE_SPEAKER, capture(onResult))
+            telecom.requestEndpoint(
+                "default:abc",
+                CallEndpointCompat.TYPE_SPEAKER,
+                null,
+                capture(onResult),
+            )
         } answers { onResult.captured(true) }
 
         call("requestAudioEndpoint", mapOf("cid" to "default:abc", "type" to "speaker"))
@@ -177,12 +182,29 @@ class PushMethodCallHandlerTest {
     }
 
     @Test
+    fun `requestAudioEndpoint passes the endpoint name`() {
+        call(
+            "requestAudioEndpoint",
+            mapOf("cid" to "default:abc", "type" to "bluetooth", "name" to "Car"),
+        )
+
+        verify {
+            telecom.requestEndpoint(
+                "default:abc",
+                CallEndpointCompat.TYPE_BLUETOOTH,
+                "Car",
+                any(),
+            )
+        }
+    }
+
+    @Test
     fun `requestAudioEndpoint answers false for an unknown endpoint or no cid`() {
         call("requestAudioEndpoint", mapOf("cid" to "default:abc", "type" to "car"))
         call("requestAudioEndpoint", mapOf("type" to "speaker"))
 
         verify(exactly = 2) { result.success(false) }
-        verify(exactly = 0) { telecom.requestEndpoint(any(), any(), any()) }
+        verify(exactly = 0) { telecom.requestEndpoint(any(), any(), any(), any()) }
     }
 
     @Test

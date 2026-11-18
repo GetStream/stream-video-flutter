@@ -312,6 +312,74 @@ void main() {
     });
   });
 
+  group('a rejoin with an audio output', () {
+    const speaker = RtcMediaDevice(
+      id: 'speaker',
+      label: 'Speaker',
+      kind: RtcMediaDeviceKind.audioOutput,
+    );
+
+    late ConnectionHarness harness;
+    late _MockPushNotificationManager pushManager;
+
+    setUp(() {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      final messenger =
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+      for (final channel in ['thermal', 'thermal/events']) {
+        messenger.setMockMethodCallHandler(
+          MethodChannel(channel),
+          (_) async => null,
+        );
+      }
+      addTearDown(() {
+        CurrentPlatform.debugCurrentPlatformOverride = null;
+        for (final channel in ['thermal', 'thermal/events']) {
+          messenger.setMockMethodCallHandler(MethodChannel(channel), null);
+        }
+      });
+
+      harness = _harnessWithCamera(3);
+      for (final session in harness.sessions) {
+        when(
+          () => session.setAudioOutputDevice(any()),
+        ).thenAnswer((_) async => const Result.success(none));
+      }
+      pushManager = _MockPushNotificationManager();
+      when(
+        () => pushManager.setCallAudioOutputDeviceByCid(any(), any()),
+      ).thenAnswer((_) async {});
+      when(
+        () => harness.streamVideo.pushNotificationManager,
+      ).thenReturn(pushManager);
+    });
+
+    tearDown(() => harness.dispose());
+
+    test(
+      'applies it to WebRTC again but leaves the system route alone',
+      () async {
+        final [_, second, _] = harness.sessions;
+        final call = harness.buildCall();
+        await call.join(
+          connectOptions: const CallConnectOptions(audioOutputDevice: speaker),
+        );
+        await pumpEventQueue();
+
+        harness.requestReconnect(0, SfuReconnectionStrategy.rejoin);
+        await waitUntil(() => harness.reconnectionCallbacks.length == 2);
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+        await pumpEventQueue();
+
+        verify(() => second.setAudioOutputDevice(speaker)).called(1);
+        verify(
+          () => pushManager.setCallAudioOutputDeviceByCid(any(), speaker),
+        ).called(1);
+      },
+      timeout: const Timeout(Duration(seconds: 30)),
+    );
+  });
+
   group('setCameraTargetResolution', () {
     const resolution = StreamTargetResolution(
       width: 640,
