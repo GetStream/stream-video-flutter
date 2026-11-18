@@ -68,6 +68,13 @@ the active Bluetooth device is surfaced and its name falls back to a generic def
 On Android, outgoing calls are registered with Telecom when you call `startOutgoingCall`; the SDK
 does not call it for you there. On iOS it can, with `reportOutgoingCalls`, below.
 
+When Telecom puts a call on hold, for example because the user answered a phone call with
+**Hold and answer** or pressed hold on a watch, the SDK leaves the call, as the native Android SDK
+does: Telecom does not resume the call when the phone call ends, so it would stay silent. A hold
+asked for with `holdCall` ends the call the same way. With `allowMultipleActiveCalls` on, the SDK
+does not leave the call, since Telecom also holds the call in progress when the user answers
+another of the app's calls.
+
 Telecom owns the audio route of a call registered with it. `Call.setAudioOutputDevice` asks Telecom
 for the matching endpoint (earpiece, speaker, wired headset or Bluetooth) as well as switching WebRTC
 to the device, so the output picker works the same way with the integration on.

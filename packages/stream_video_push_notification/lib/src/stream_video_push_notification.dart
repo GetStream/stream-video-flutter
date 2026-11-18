@@ -233,6 +233,12 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     return null;
   }
 
+  /// Holds or resumes the call in the system call UI.
+  ///
+  /// On iOS through CallKit. On Android through Telecom, for a call the
+  /// Telecom integration has registered, and nothing without the integration.
+  /// On Android the SDK leaves a call Telecom holds, so a hold there ends the
+  /// call, unless `StreamVideoOptions.allowMultipleActiveCalls` is on.
   @override
   Future<void> holdCall(String uuid, {bool isOnHold = true}) =>
       _controller.holdCall(uuid, isOnHold: isOnHold);

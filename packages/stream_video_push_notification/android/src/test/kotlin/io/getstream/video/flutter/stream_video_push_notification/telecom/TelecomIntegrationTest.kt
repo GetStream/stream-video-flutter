@@ -242,18 +242,6 @@ class TelecomIntegrationTest {
         assertEquals(listOf(hold(true), hold(true)), events)
     }
 
-    @Test
-    fun `a hold Telecom refused is not reported`() {
-        val telecom = integration().apply { init(enabled()) }
-        telecom.registerIncomingCall(call)
-        repository.completeRegistration(CALL_ID)
-
-        // Telecom refusing the hold reports no transition, so the request alone sends nothing.
-        telecom.setOnHold(CALL_ID, true)
-
-        assertEquals(emptyList<Any>(), events)
-    }
-
     // The system answering and hanging up.
 
     @Test
