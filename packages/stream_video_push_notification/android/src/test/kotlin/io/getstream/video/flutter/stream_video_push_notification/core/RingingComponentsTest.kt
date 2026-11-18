@@ -12,6 +12,9 @@ import io.getstream.video.flutter.stream_video_push_notification.telecom.FakeTel
 import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomEventSource
 import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
 import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomPermissions
+import io.mockk.Runs
+import io.mockk.every
+import io.mockk.just
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
@@ -79,6 +82,7 @@ class RingingComponentsTest {
     @Test
     fun `a call registered with Telecom promotes the ringing service again`() {
         mockkObject(IncomingCallNotificationService.Companion)
+        every { IncomingCallNotificationService.repromoteRingingForeground() } just Runs
         try {
             ring("call-1")
 
