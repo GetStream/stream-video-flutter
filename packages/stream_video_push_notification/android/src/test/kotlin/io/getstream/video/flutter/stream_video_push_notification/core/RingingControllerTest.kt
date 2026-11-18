@@ -477,7 +477,7 @@ class RingingControllerTest {
     }
 
     @Test
-    fun `a system hang-up ends a connected call as by the system, without disconnecting it again, and declines a ringing one`() {
+    fun `a system hang-up ends a connected call as by the system and declines a ringing one, disconnecting neither again`() {
         store.add(call)
         store.add(RingingCall(id = "ringing"))
 
@@ -493,8 +493,7 @@ class RingingControllerTest {
         )
         assertEquals(true, events.first().second["endedBySystem"])
         assertEquals(false, events.last().second["endedBySystem"])
-        verify(exactly = 0) { telecom.disconnect(CALL_ID, any()) }
-        verify { telecom.disconnect("ringing", DisconnectCause.REJECTED) }
+        verify(exactly = 0) { telecom.disconnect(any(), any()) }
         assertEquals(emptyList<RingingCall>(), store.all())
     }
 

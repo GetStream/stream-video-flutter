@@ -24,10 +24,11 @@ import java.util.concurrent.ConcurrentHashMap
  * All entry points are no-ops unless the integrator opted in via
  * `AndroidPushConfiguration.telecom` and the device actually supports Telecom.
  *
- * @param repositoryFactory builds the repository once, on [init] or on the first call that needs
- * Telecom; returns null where Telecom is not available.
+ * @param repositoryFactory builds the repository when Telecom is first needed, on [init] when it
+ * is enabled or on the first call, and again after [release]; returns null where Telecom is not
+ * available.
  * @param scope runs the registrations, each of which lasts as long as its call.
- * @param mainThread runs the [Listener] callbacks for answers and disconnects from the system.
+ * @param mainThread runs the [Listener] callbacks.
  */
 internal class TelecomIntegration(
     context: Context,

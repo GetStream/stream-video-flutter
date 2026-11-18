@@ -99,13 +99,16 @@ internal class RingingController(
     }
 
     /** Clears the ring, reports it, forgets the call and disconnects it in Telecom as rejected. */
-    fun onDecline(data: Bundle) = step {
+    fun onDecline(data: Bundle) = decline(data, disconnectTelecom = true)
+
+    /** [onDecline], disconnecting the call in Telecom only when [disconnectTelecom]. */
+    private fun decline(data: Bundle, disconnectTelecom: Boolean) = step {
         ringTimer.cancel(CallPayloadMapper.fromBundle(data).id)
         notifications.clearIncomingNotification(data, false)
         report(IncomingCallConstants.ACTION_CALL_DECLINE, data)
         val call = CallPayloadMapper.fromBundle(data)
         store.remove(call.id)
-        telecom.disconnect(call.id, DisconnectCause.REJECTED)
+        if (disconnectTelecom) telecom.disconnect(call.id, DisconnectCause.REJECTED)
     }
 
     /** Clears the ring, reports it, forgets the call and disconnects it in Telecom as local. */
@@ -265,12 +268,13 @@ internal class RingingController(
      */
     override fun onDisconnectedBySystem(call: RingingCall, wasConnected: Boolean) {
         val data = CallPayloadMapper.toBundle(call)
+        // Telecom has ended the call already. Disconnecting it again would be dropped at best, and
+        // could reach a new call registered with the same id since.
         if (wasConnected) {
             data.putBoolean(IncomingCallConstants.EXTRA_CALL_ENDED_BY_SYSTEM, true)
-            // Telecom has ended the call already; disconnecting it again would only be dropped.
             end(data, disconnectTelecom = false)
         } else {
-            onDecline(data)
+            decline(data, disconnectTelecom = false)
         }
     }
 
