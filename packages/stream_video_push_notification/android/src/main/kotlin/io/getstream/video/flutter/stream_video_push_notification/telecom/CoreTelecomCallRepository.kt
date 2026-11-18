@@ -304,7 +304,8 @@ internal class CoreTelecomCallRepository(
     ) {
         for (action in actionSource) {
             when (action) {
-                is TelecomCallAction.Answer -> doAnswer(callId, flags)
+                // A failed answer disconnects the call, so stop consuming like a disconnect.
+                is TelecomCallAction.Answer -> if (!doAnswer(callId, flags)) return
 
                 is TelecomCallAction.Disconnect -> {
                     val cause = supportedCause(action.cause)
@@ -335,13 +336,20 @@ internal class CoreTelecomCallRepository(
         }
     }
 
-    private suspend fun CallControlScope.doAnswer(callId: String, flags: CallActionFlags) {
+    /** Answers the call; false when the answer failed and the call was disconnected. */
+    private suspend fun CallControlScope.doAnswer(
+        callId: String,
+        flags: CallActionFlags,
+    ): Boolean {
         flags.isSelfAnswered.set(true)
         val callType = _calls.value[callId]?.callAttributes?.callType
             ?: CallAttributesCompat.CALL_TYPE_VIDEO_CALL
 
-        when (val result = answer(callType)) {
-            is CallControlResult.Success -> onIsCallAnswered(callId, flags)(callType)
+        return when (val result = answer(callType)) {
+            is CallControlResult.Success -> {
+                onIsCallAnswered(callId, flags)(callType)
+                true
+            }
             is CallControlResult.Error -> {
                 Log.e(TAG, "[doAnswer] answer failed: ${result.errorCode}")
                 flags.isSelfAnswered.set(false)
@@ -352,6 +360,7 @@ internal class CoreTelecomCallRepository(
                 flags.isSelfDisconnected.set(true)
                 disconnect(cause)
                 onIsCallDisconnected(callId, flags)(cause)
+                false
             }
         }
     }

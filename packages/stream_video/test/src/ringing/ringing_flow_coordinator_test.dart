@@ -484,6 +484,23 @@ void main() {
       ).called(1);
     });
 
+    test('rings for the platform default without a positive timeout', () async {
+      getCallReturns(metadata(autoRejectTimeout: Duration.zero));
+
+      await ringing().handleRingingFlowNotifications(pushOf('call.ring'));
+
+      verify(
+        () => push.showIncomingCall(
+          uuid: any(named: 'uuid'),
+          callCid: cid,
+          handle: any(named: 'handle'),
+          callerName: any(named: 'callerName'),
+          hasVideo: any(named: 'hasVideo'),
+          ringTimeout: null,
+        ),
+      ).called(1);
+    });
+
     test('does not show a ringing call that was cancelled', () async {
       getCallReturns(
         metadata(

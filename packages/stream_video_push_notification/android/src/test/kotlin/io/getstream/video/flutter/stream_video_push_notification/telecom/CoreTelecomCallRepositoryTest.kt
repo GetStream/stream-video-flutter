@@ -93,9 +93,12 @@ class CoreTelecomCallRepositoryTest {
             while (repository.getCall(CALL_ID) == null) delay(10)
         }
 
-        repository.getCall(CALL_ID)!!.processAction(TelecomCallAction.Answer)
+        val call = repository.getCall(CALL_ID)!!
+        call.processAction(TelecomCallAction.Answer)
+        call.processAction(TelecomCallAction.Activate)
         withTimeout(TIMEOUT_MS) { registration.join() }
 
+        // The activate queued behind the failed answer is not run on the disconnected call.
         assertEquals(listOf(DisconnectCause.LOCAL), disconnectCauses.toList())
         assertEquals(
             listOf("disconnected $CALL_ID cause=${DisconnectCause.LOCAL} source=APP"),
@@ -149,7 +152,10 @@ class CoreTelecomCallRepositoryTest {
 
         override fun getCallId(): ParcelUuid = ParcelUuid(UUID(0, 0))
 
-        override suspend fun setActive(): CallControlResult = CallControlResult.Success()
+        override suspend fun setActive(): CallControlResult {
+            disconnectCauses += ACTIVATED
+            return CallControlResult.Success()
+        }
 
         override suspend fun setInactive(): CallControlResult = CallControlResult.Success()
 
@@ -176,6 +182,9 @@ class CoreTelecomCallRepositoryTest {
     private companion object {
         const val CALL_ID = "call-1"
         const val TIMEOUT_MS = 5_000L
+
+        /** Recorded among the disconnect causes when the call is set active. */
+        const val ACTIVATED = -1
 
         val CALL_CONTROL_CAUSES = setOf(
             DisconnectCause.LOCAL,

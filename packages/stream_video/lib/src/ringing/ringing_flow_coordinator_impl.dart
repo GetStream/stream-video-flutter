@@ -891,8 +891,8 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
   }) async => (await _fetchRinging(callType: callType, id: id)).state;
 
   /// The current user's ringing state for the call, with how long its ring
-  /// lasts before the client rejects it; [CallRingingState.ended] and no
-  /// timeout when the call cannot be fetched.
+  /// lasts before the client rejects it, when positive;
+  /// [CallRingingState.ended] and no timeout when the call cannot be fetched.
   Future<({CallRingingState state, Duration? ringTimeout})> _fetchRinging({
     required StreamCallType callType,
     required String id,
@@ -913,9 +913,11 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
         final metadata = success.data.metadata;
         final state = metadata.ringingStateFor(_state.currentUser.id);
         _logger.d(() => '[getCallRingingState] state: $state');
+        final timeout = metadata.settings.ring.autoRejectTimeout;
         return (
           state: state,
-          ringTimeout: metadata.settings.ring.autoRejectTimeout,
+          // A ring without a positive timeout keeps the platform's default.
+          ringTimeout: timeout > Duration.zero ? timeout : null,
         );
       },
     );
