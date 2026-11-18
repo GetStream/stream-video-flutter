@@ -109,7 +109,6 @@ internal class FakeTelecomCallRepository : TelecomCallRepository {
 
     fun inactive(callId: String) = listener?.onIsCallInactive(callId)
 
-
     /** Telecom disconnects the call, which ends its registration. */
     fun disconnect(callId: String, source: TelecomEventSource) {
         listener?.onIsCallDisconnected(callId, DisconnectCause(DisconnectCause.LOCAL), source)
