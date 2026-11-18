@@ -81,9 +81,10 @@ class StreamVideoPushParams {
   final int? type;
 
   /// How long an incoming call rings before it times out natively, in
-  /// milliseconds; 30 seconds when null. The SDK sets it to the call's
+  /// milliseconds; 30 seconds when null. For a call shown from a ringing push
+  /// through `handleRingingFlowNotifications`, the SDK sets it to the call's
   /// `autoRejectTimeout`, so the native ring ends when the client rejects the
-  /// call.
+  /// call. An iOS VoIP push is shown natively and keeps the default.
   final int? duration;
   final Map<String, dynamic>? extra;
   final Map<String, dynamic>? headers;
