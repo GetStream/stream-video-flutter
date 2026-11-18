@@ -133,14 +133,20 @@ class PushMethodCallHandlerTest {
         call("dismissRingingCall", mapOf("id" to "default:abc", "reason" to "remoteCancelled"))
         call("dismissRingingCall", mapOf("id" to "default:abc", "reason" to "answeredElsewhere"))
         call("dismissRingingCall", mapOf("reason" to "missed"))
-        call("dismissRingingCall", mapOf("id" to "default:abc", "reason" to "unknown"))
         call("dismissRingingCall")
 
         verify { controller.dismissRingingCall("default:abc", DismissReason.REMOTE_CANCELLED) }
         verify { controller.dismissRingingCall("default:abc", DismissReason.ANSWERED_ELSEWHERE) }
         verify { controller.dismissRingingCall(null, DismissReason.MISSED) }
-        verify { controller.dismissRingingCall("default:abc", DismissReason.ACCEPTED) }
         verify { controller.dismissRingingCall(null, DismissReason.ACCEPTED) }
+    }
+
+    @Test
+    fun `dismissRingingCall with an unknown reason fails and dismisses nothing`() {
+        call("dismissRingingCall", mapOf("id" to "default:abc", "reason" to "unknown"))
+
+        verify { result.error("error", any(), "") }
+        verify(exactly = 0) { controller.dismissRingingCall(any(), any()) }
     }
 
     @Test

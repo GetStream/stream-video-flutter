@@ -855,12 +855,12 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
       return false;
     }
 
-    final callRingingState = await getCallRingingState(
+    final (:state, :ringTimeout) = await _fetchRinging(
       callType: callType,
       id: callId,
     );
 
-    switch (callRingingState) {
+    switch (state) {
       case CallRingingState.ringing:
         unawaited(
           manager.showIncomingCall(
@@ -871,6 +871,7 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
                 : createdByName,
             callCid: callCid,
             hasVideo: hasVideo != 'false',
+            ringTimeout: ringTimeout,
           ),
         );
         return true;
@@ -887,6 +888,14 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
   Future<CallRingingState> getCallRingingState({
     required StreamCallType callType,
     required String id,
+  }) async => (await _fetchRinging(callType: callType, id: id)).state;
+
+  /// The current user's ringing state for the call, with how long its ring
+  /// lasts before the client rejects it; [CallRingingState.ended] and no
+  /// timeout when the call cannot be fetched.
+  Future<({CallRingingState state, Duration? ringTimeout})> _fetchRinging({
+    required StreamCallType callType,
+    required String id,
   }) async {
     final callResult = await _client.getCall(
       callCid: StreamCallCid.from(type: callType, id: id),
@@ -898,14 +907,16 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
     return callResult.foldResult(
       failure: (failure) {
         _logger.e(() => '[getCallRingingState] failed: $failure');
-        return CallRingingState.ended;
+        return (state: CallRingingState.ended, ringTimeout: null);
       },
       success: (success) {
-        final state = success.data.metadata.ringingStateFor(
-          _state.currentUser.id,
-        );
+        final metadata = success.data.metadata;
+        final state = metadata.ringingStateFor(_state.currentUser.id);
         _logger.d(() => '[getCallRingingState] state: $state');
-        return state;
+        return (
+          state: state,
+          ringTimeout: metadata.settings.ring.autoRejectTimeout,
+        );
       },
     );
   }

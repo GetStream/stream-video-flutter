@@ -3,7 +3,8 @@
 ### ⚠️ Breaking
 
 - `PushNotificationManager` has a new method, `setCallAudioOutputDeviceByCid`. A class that `implements` it has to add it; one that `extends` it inherits a no-op.
-- `RingingEvent` has a new subtype, `ActionCallDismissed`, so an exhaustive `switch` over ringing events needs a case for it. `disposeAfterResolvingRinging` no longer disposes on `ActionCallTimeout`, which Android now sends when a ring times out natively, so the client's own ring timeout can still reject the call.
+- `RingingEvent` has a new subtype, `ActionCallDismissed`, so an exhaustive `switch` over ringing events needs a case for it. `disposeAfterResolvingRinging` no longer disposes on `ActionCallTimeout`, which iOS sends when CallKit's ring times out and Android now sends when a ring times out natively, so the client's own ring timeout can still reject the call.
+- `PushNotificationManager.showIncomingCall` takes a `ringTimeout`, so a custom implementation has to add it. `handleRingingFlowNotifications` passes the call's `autoRejectTimeout`.
 - `ActionCallToggleGroup` is removed. It was never sent: CallKit is never offered a merge of calls, and refuses a merge it attempts anyway.
 - Test mocks that implement `StreamVideo` get a `subtype_of_sealed_class` warning, because `StreamVideo` implements the `@sealed` `CallHost`; add `// ignore: subtype_of_sealed_class` to them.
 - The deprecated `observeCoreCallKitEvents`, `observeCall*CallKitEvent` and `handleVoipPushNotification` methods are removed; use `observeCoreRingingEvents`, `observeCall*RingingEvent` and `handleRingingFlowNotifications` on `StreamVideo.ringing`.

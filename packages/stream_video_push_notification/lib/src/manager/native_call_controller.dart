@@ -63,6 +63,7 @@ class NativeCallController {
     String? handle,
     String? callerName,
     bool hasVideo = true,
+    Duration? ringTimeout,
   }) {
     final params = StreamVideoPushParams.forCall(
       configuration,
@@ -72,6 +73,7 @@ class NativeCallController {
       handle: handle,
       callerName: callerName,
       hasVideo: hasVideo,
+      ringTimeout: ringTimeout,
     );
 
     return _resolvedPlatform.showIncomingCall(params);

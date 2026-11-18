@@ -19,8 +19,11 @@ internal enum class DismissReason(val wireName: String) {
     ;
 
     companion object {
-        /** The reason with [wireName], or [ACCEPTED] for a missing or unknown one. */
-        fun fromWireName(wireName: String?): DismissReason =
-            entries.firstOrNull { it.wireName == wireName } ?: ACCEPTED
+        /**
+         * The reason with [wireName], [ACCEPTED] when there is none, or null for an unknown one:
+         * guessing would answer in Telecom a call that ended some other way.
+         */
+        fun fromWireName(wireName: String?): DismissReason? =
+            if (wireName == null) ACCEPTED else entries.firstOrNull { it.wireName == wireName }
     }
 }

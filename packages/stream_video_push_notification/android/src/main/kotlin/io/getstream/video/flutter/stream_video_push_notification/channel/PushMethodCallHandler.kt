@@ -132,11 +132,17 @@ internal class PushMethodCallHandler(
                 result.success(true)
             }
 
-            // Ends the ring of the cid's calls for the reason Dart gives; see DismissReason.
+            // Ends the ring of the cid's calls for the reason Dart gives; see DismissReason. An
+            // unknown reason fails and dismisses nothing.
             "dismissRingingCall" -> {
-                val reason = (call.arguments as? Map<*, *>)?.get("reason") as? String
-                controller.dismissRingingCall(idArgument(call), DismissReason.fromWireName(reason))
-                result.success(true)
+                val wireName = (call.arguments as? Map<*, *>)?.get("reason") as? String
+                val reason = DismissReason.fromWireName(wireName)
+                if (reason == null) {
+                    result.error("error", "Unknown dismiss reason: $wireName", "")
+                } else {
+                    controller.dismissRingingCall(idArgument(call), reason)
+                    result.success(true)
+                }
             }
 
             "activeCalls" -> result.success(store.all().map(CallPayloadMapper::toStoredMap))

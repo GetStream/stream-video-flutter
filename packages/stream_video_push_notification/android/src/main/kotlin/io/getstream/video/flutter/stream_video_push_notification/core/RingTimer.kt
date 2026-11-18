@@ -22,6 +22,8 @@ internal interface RingTimer {
 
 /**
  * A [RingTimer] that calls [onTimeout] on the main thread when a ring's duration has passed.
+ * Main-thread only, like the controller steps that drive it: [start] and [cancel] are not
+ * synchronized.
  *
  * Also sets an inexact alarm for the same time, which sends the timeout broadcast to the receiver.
  * It ends the ring when the main-thread timer cannot, for example after the process died or while

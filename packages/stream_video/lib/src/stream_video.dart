@@ -901,7 +901,11 @@ class StreamVideo extends Disposable implements CallHost {
   );
 
   /// Disposes this client a second after the ringing flow resolves — once the
-  /// user has answered, declined, or let the call time out.
+  /// user has answered or declined, or the ring ended or was dismissed.
+  ///
+  /// A native ring timeout ([ActionCallTimeout], from either platform) does
+  /// not dispose it: the client's own ring timeout rejects the call, and that
+  /// ends the ring.
   ///
   /// [disposingCallback] runs first, for whatever the caller set up alongside
   /// the client.

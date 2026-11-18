@@ -125,10 +125,12 @@ void main() {
         avatar: 'ada.png',
         callerName: 'Ada',
         hasVideo: false,
+        ringTimeout: const Duration(seconds: 45),
       );
 
       expect(platform.calls, ['showIncomingCall']);
       final params = platform.lastParams!;
+      expect(params.duration, 45000);
       expect(params.id, 'u1');
       expect(params.extra, {'callCid': 'default:c1'});
       expect(params.callerName, 'Ada');

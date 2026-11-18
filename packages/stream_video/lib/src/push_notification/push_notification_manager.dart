@@ -38,6 +38,8 @@ abstract class PushNotificationManager {
   /// [handle] is the handle of the caller.
   /// [callerName] is the name of the caller.
   /// [hasVideo] indicates whether the call has video (default is true).
+  /// [ringTimeout] is how long the call rings before it times out, the call's
+  /// `autoRejectTimeout`; the platform's default when null.
   Future<void> showIncomingCall({
     required String uuid,
     required String callCid,
@@ -45,6 +47,7 @@ abstract class PushNotificationManager {
     String? handle,
     String? callerName,
     bool hasVideo = true,
+    Duration? ringTimeout,
   });
 
   /// Displays a missed call notification.

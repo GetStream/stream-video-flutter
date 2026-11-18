@@ -337,21 +337,22 @@ class TelecomIntegrationTest {
     }
 
     @Test
-    fun `a disconnect cause Telecom's call control does not take is sent as local`() {
-        val telecom = integration().apply { init(enabled()) }
-        telecom.registerIncomingCall(call)
-        repository.completeRegistration(CALL_ID)
-
-        telecom.disconnect(CALL_ID, DisconnectCause.ANSWERED_ELSEWHERE)
-        telecom.disconnect(CALL_ID, DisconnectCause.REMOTE)
-
-        assertEquals(
-            listOf(
-                TelecomCallAction.Disconnect(DisconnectCause(DisconnectCause.LOCAL)),
-                TelecomCallAction.Disconnect(DisconnectCause(DisconnectCause.REMOTE)),
-            ),
-            repository.actions(CALL_ID),
+    fun `a disconnect after a cold start builds no repository`() {
+        integration().init(enabled())
+        var built = 0
+        val coldStarted = TelecomIntegration(
+            context,
+            repositoryFactory = { built++; repository },
+            permissions = object : TelecomPermissions() {
+                override fun canUseTelecom(context: Context) = true
+            },
+            scope = CoroutineScope(Dispatchers.Unconfined),
+            mainThread = { it.run() },
         )
+
+        coldStarted.disconnect(CALL_ID, DisconnectCause.MISSED)
+
+        assertEquals(0, built)
     }
 
     @Test
