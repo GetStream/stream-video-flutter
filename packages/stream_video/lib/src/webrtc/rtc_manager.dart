@@ -141,7 +141,12 @@ class RtcManager extends Disposable {
   }
 
   List<SfuPublishOptions> publishOptions;
-  AudioConstraints _defaultAudioConstraints = const AudioConstraints();
+  // Seeded from the call state, so a bitrate profile chosen before joining,
+  // or before a reconnect built this manager, applies to the microphone.
+  late AudioConstraints _defaultAudioConstraints =
+      AudioConstraints.forBitrateProfile(
+        stateManager.callState.audioBitrateProfile,
+      );
 
   final tracks = </*trackId*/ String, RtcTrack>{};
 
@@ -347,9 +352,12 @@ class RtcManager extends Disposable {
     // unmuting it here would put the user back on air behind their back, and
     // on iOS/macOS also clear the ADM mute. It picks the new constraints up
     // from [_defaultAudioConstraints] when it is recreated on unmute.
+    // A track already capturing with these constraints is left alone, so
+    // re-requesting the current profile does not restart the microphone.
     final liveTracks = tracks.values
         .whereType<RtcLocalAudioTrack>()
         .where((it) => it.mediaTrack.enabled)
+        .where(_hasStaleAudioConstraints)
         .toList();
 
     // The cycle has to stop and recreate the track for the new constraints to
@@ -367,6 +375,15 @@ class RtcManager extends Disposable {
       for (final track in liveTracks) {
         await unmuteTrack(trackId: track.trackId);
       }
+
+      // Profiles can share constraints (voiceStandard and voiceHighQuality),
+      // so a track left running still needs the profile's sender bitrate.
+      await _updateAudioPublishOptions(
+        SfuTrackType.audio,
+        RtcTrackPublishOptions(
+          audioBitrateProfile: stateManager.callState.audioBitrateProfile,
+        ),
+      );
     } finally {
       // Restored even if the cycle failed part-way: leaving the forced flag
       // behind would silently downgrade the mute strategy for the rest of the

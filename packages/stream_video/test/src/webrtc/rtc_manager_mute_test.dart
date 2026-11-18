@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/state_emitter.dart';
 import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/src/webrtc/traced_peer_connection.dart';
@@ -7,6 +8,7 @@ import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../test_helpers.dart';
+import '../call/fixtures/call_test_helpers.dart';
 import '../call/fixtures/data.dart';
 
 class _MockTracedPeerConnection extends Mock
@@ -71,7 +73,12 @@ void main() {
       publisher: null,
       subscriber: _MockTracedPeerConnection(),
       publishOptions: [],
-      stateManager: MockCallStateNotifier(),
+      stateManager: createTestCallStateManager(
+        callState: MutableStateEmitterImpl<CallState>(
+          createTestCallState(),
+          sync: true,
+        ),
+      ),
       streamVideo: streamVideo,
       pcFactory: pcFactory,
     );
@@ -463,7 +470,12 @@ void main() {
           // stopTrackOnMute — but only for the cycle.
           try {
             await rtcManager.changeDefaultAudioConstraints(
-              const AudioConstraints(),
+              const AudioConstraints(
+                noiseSuppression: false,
+                echoCancellation: false,
+                autoGainControl: false,
+                channelCount: 2,
+              ),
             );
           } catch (_) {
             // Track recreation needs the platform plugin.
@@ -475,6 +487,26 @@ void main() {
             isFalse,
             reason: 'a forced hard mute must not become the new preference',
           );
+        },
+      );
+
+      test(
+        'changing to the constraints a live track already uses leaves it '
+        'running',
+        () async {
+          final mediaTrack = _FakeMediaStreamTrack(kind: 'audio');
+          final track = addAudioTrack(
+            mediaTrack: mediaTrack,
+            mediaStream: _FakeMediaStream(),
+          );
+
+          await rtcManager.changeDefaultAudioConstraints(
+            const AudioConstraints(),
+          );
+
+          expect(mediaTrack.stopCallCount, 0);
+          expect(mediaTrack.enabled, isTrue);
+          expect(rtcManager.tracks[track.trackId], same(track));
         },
       );
 

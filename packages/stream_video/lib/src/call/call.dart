@@ -315,20 +315,103 @@ class Call {
   /// Audio track states captured at suspension time.
   final _suspendedTrackStates = <String, SuspendedTrackState>{};
 
+  /// Whether noise cancellation was on when the microphone switched to
+  /// [SfuAudioBitrateProfile.musicHighQuality], so leaving music restores
+  /// exactly that. Null while not in music.
+  bool? _audioProcessingBeforeMusic;
+
+  /// Whether the restore when leaving music stands in for the autoOn start
+  /// skipped on join, and so keeps autoOn's device-capability check.
+  bool _audioProcessingRestoreIsAutoOn = false;
+
+  /// The audio policy set for this call: the one in its preferences, else the
+  /// client default. Used to build the call's peer connection factory.
+  AudioConfigurationPolicy get _preferredAudioConfigurationPolicy =>
+      _stateManager.callState.preferences.audioConfigurationPolicy ??
+      _streamVideo.options.audioConfigurationPolicy;
+
   /// The audio policy in effect for this call.
   ///
   /// Once the call's peer connection factory exists, the policy it was built
-  /// with, which stays fixed for its lifetime. Before that, the one set in
-  /// the call preferences, else the client default.
+  /// with, which stays fixed for its lifetime. Before that,
+  /// [_preferredAudioConfigurationPolicy].
   AudioConfigurationPolicy get _audioConfigurationPolicy =>
       _pcFactory?.resolvedAudioConfigurationPolicy ??
-      _stateManager.callState.preferences.audioConfigurationPolicy ??
-      _streamVideo.options.audioConfigurationPolicy;
+      _preferredAudioConfigurationPolicy;
+
+  /// Whether this call wants stereo playout: its audio policy bypasses voice
+  /// processing (for example [HiFiAudioPolicy] or [ViewerAudioPolicy]), or the
+  /// microphone uses [SfuAudioBitrateProfile.musicHighQuality].
+  @visibleForTesting
+  bool get prefersStereoPlayout =>
+      _audioConfigurationPolicy.bypassVoiceProcessing ||
+      _stateManager.callState.audioBitrateProfile ==
+          SfuAudioBitrateProfile.musicHighQuality;
+
+  /// Applies [prefersStereoPlayout] to the iOS audio device modules.
+  ///
+  /// The native preference is process-wide and outlives the call, and it also
+  /// bypasses voice processing. It is therefore set explicitly, true or false,
+  /// every time a session starts, so a call never inherits it from an earlier
+  /// one.
+  Future<void> _applyStereoPlayoutPreference() async {
+    if (!CurrentPlatform.isIos) return;
+
+    final preferred = prefersStereoPlayout;
+    _logger.d(() => '[applyStereoPlayoutPreference] preferred: $preferred');
+    _stereoPlayoutPreferredByThisCall = preferred;
+    try {
+      await rtc.Helper.setiOSStereoPlayoutPreferred(preferred);
+    } catch (e) {
+      _logger.w(() => '[applyStereoPlayoutPreference] failed: $e');
+    }
+  }
+
+  /// Whether this call last turned the iOS stereo playout preference on.
+  bool _stereoPlayoutPreferredByThisCall = false;
+
+  /// Turns the iOS stereo playout preference off when this call turned it on
+  /// and no other active call prefers stereo.
+  ///
+  /// The native preference is process-wide and is replayed onto every
+  /// factory created afterwards, so leaving it on would build the next
+  /// call's lobby preview with voice processing bypassed.
+  void _resetStereoPlayoutPreference() {
+    if (!_stereoPlayoutPreferredByThisCall) return;
+    _stereoPlayoutPreferredByThisCall = false;
+
+    final anotherCallPrefersStereo = _streamVideo.state.activeCalls.value.any(
+      (other) =>
+          other.callCid != callCid &&
+          other.state.value.status is! CallStatusDisconnected &&
+          other.prefersStereoPlayout,
+    );
+    if (anotherCallPrefersStereo) {
+      _logger.d(
+        () =>
+            '[clear] keeping stereo playout preferred '
+            '(another active call prefers it)',
+      );
+      return;
+    }
+
+    unawaited(
+      rtc.Helper.setiOSStereoPlayoutPreferred(false).catchError((Object e) {
+        _logger.w(() => '[clear] resetting stereo playout failed: $e');
+      }),
+    );
+  }
+
+  /// The audio policy the call's current peer connection factory was built
+  /// with, or null when no factory exists yet.
+  @visibleForTesting
+  AudioConfigurationPolicy? get pcFactoryAudioConfigurationPolicy =>
+      _pcFactory?.audioConfigurationPolicy;
 
   StreamPeerConnectionFactory _ensurePcFactory() {
     return _pcFactory ??= StreamPeerConnectionFactory(
       callCid: callCid,
-      audioConfigurationPolicy: _audioConfigurationPolicy,
+      audioConfigurationPolicy: _preferredAudioConfigurationPolicy,
     );
   }
 
@@ -1030,6 +1113,83 @@ class Call {
   void updateCallPreferences(CallPreferences preferences) {
     _logger.i(() => '[updateCallPreferences] $preferences');
     _stateManager.updateCallPreferences(preferences);
+  }
+
+  /// Sets the audio configuration policy for this call, keeping every other
+  /// preference as it is. Pass null to fall back to the client default,
+  /// `StreamVideoOptions.audioConfigurationPolicy`.
+  ///
+  /// Call this before [join]: the policy is applied when the call's peer
+  /// connection factory is built. A factory built earlier by a lobby preview
+  /// with a different policy is discarded, so stop any preview tracks first.
+  /// A policy equal to the current one keeps the factory. While a join is
+  /// pending or the call is joining or joined, the policy can no longer
+  /// change and this returns a failure.
+  ///
+  /// Unlike this method, [updateCallPreferences] never discards the factory,
+  /// so a policy it sets after a lobby preview started only takes effect on
+  /// the next call.
+  ///
+  /// The policy is stored in the call's preferences, so a later
+  /// [updateCallPreferences] replaces it along with every other preference.
+  ///
+  /// ```dart
+  /// call.setAudioConfigurationPolicy(const AudioConfigurationPolicy.hiFi());
+  /// await call.join();
+  /// ```
+  Result<None> setAudioConfigurationPolicy(AudioConfigurationPolicy? policy) {
+    _logger.i(() => '[setAudioConfigurationPolicy] policy: $policy');
+
+    // A pending join is checked too: join() can still be waiting (for
+    // example on the encryption key) before the status moves on.
+    final status = state.value.status;
+    if (_pendingJoin != null ||
+        status is CallStatusConnecting ||
+        status is CallStatusConnected ||
+        status is CallStatusJoining ||
+        status is CallStatusJoined) {
+      _logger.w(
+        () =>
+            '[setAudioConfigurationPolicy] rejected: call status is $status, '
+            'join pending: ${_pendingJoin != null}',
+      );
+      return Result.error(
+        'The audio configuration policy can only be changed before joining.',
+      );
+    }
+
+    updateCallPreferences(
+      _stateManager.callState.preferences.withAudioConfigurationPolicy(policy),
+    );
+    _discardPcFactoryWithOtherPolicy();
+    return const Result.success(none);
+  }
+
+  /// Discards a factory built before joining (for example by a lobby
+  /// preview) whose policy no longer matches the call's, so the next one is
+  /// built with the new policy.
+  void _discardPcFactoryWithOtherPolicy() {
+    final pcFactory = _pcFactory;
+    if (pcFactory == null ||
+        _session != null ||
+        pcFactory.resolvedAudioConfigurationPolicy ==
+            _preferredAudioConfigurationPolicy) {
+      return;
+    }
+
+    _logger.i(
+      () =>
+          '[setAudioConfigurationPolicy] audio policy changed, '
+          'discarding the pre-join factory',
+    );
+    _pcFactory = null;
+    unawaited(
+      pcFactory.dispose().catchError((Object e) {
+        _logger.w(
+          () => '[setAudioConfigurationPolicy] pcFactory dispose failed: $e',
+        );
+      }),
+    );
   }
 
   /// Enables the given SFU client capabilities for this call.
@@ -2073,12 +2233,25 @@ class Call {
     if (_streamVideo.isAudioProcessorConfigured() &&
         joinResult.data.metadata.settings.audio.noiseCancellation?.mode ==
             NoiseCancellationSettingsMode.autoOn) {
-      // AutoOn will enable noise cancellation if the device has sufficient processing power
-      unawaited(
-        startAudioProcessing(
-          requireAdvancedAudioProcessingSupport: true,
-        ),
-      );
+      if (_stateManager.callState.audioBitrateProfile ==
+          SfuAudioBitrateProfile.musicHighQuality) {
+        // Music keeps noise cancellation off. On the first join, leaving
+        // music starts it, as autoOn would have; this overrides the `false`
+        // recorded when music was chosen before joining. On a rejoin or
+        // migration, what was recorded before music stands.
+        if (_reconnectStrategy == SfuReconnectionStrategy.unspecified) {
+          _logger.d(() => '[joinCall] autoOn deferred (music profile)');
+          _audioProcessingBeforeMusic = true;
+          _audioProcessingRestoreIsAutoOn = true;
+        }
+      } else {
+        // AutoOn will enable noise cancellation if the device has sufficient processing power
+        unawaited(
+          startAudioProcessing(
+            requireAdvancedAudioProcessingSupport: true,
+          ),
+        );
+      }
     }
 
     _logger.v(() => '[joinCall] completed: $joined');
@@ -2175,6 +2348,15 @@ class Call {
       sessionId: session.sessionId,
     );
 
+    if (_callLifecycleCompleter.isCompleted) {
+      _logger.w(() => '[startSession] rejected (call was left)');
+      return Result.error('call was left');
+    }
+
+    await _applyStereoPlayoutPreference();
+
+    // Checked again: the call can be left while the stereo request is
+    // pending, and a torn-down session must not be started.
     if (_callLifecycleCompleter.isCompleted) {
       _logger.w(() => '[startSession] rejected (call was left)');
       return Result.error('call was left');
@@ -2978,6 +3160,8 @@ class Call {
         );
       }
     }
+
+    _resetStereoPlayoutPreference();
 
     if (_session != null) {
       await _session!.dispose().catchError((Object e) {
@@ -4378,41 +4562,55 @@ class Call {
     return result;
   }
 
+  /// Sets the audio bitrate profile used to publish the microphone.
+  ///
+  /// [SfuAudioBitrateProfile.musicHighQuality] turns voice processing and
+  /// noise cancellation off; leaving it turns noise cancellation back on only
+  /// if it was on before.
+  ///
+  /// The profiles other than [SfuAudioBitrateProfile.voiceStandard] require
+  /// HiFi audio to be enabled for the call. Going back to
+  /// [SfuAudioBitrateProfile.voiceStandard] is always allowed.
   Result<None> setAudioBitrateProfile(SfuAudioBitrateProfile profile) {
-    if (!state.value.settings.audio.hifiAudioEnabled) {
+    if (profile != SfuAudioBitrateProfile.voiceStandard &&
+        !state.value.settings.audio.hifiAudioEnabled) {
       return Result.error('High Fidelity audio is not enabled for this call');
     }
 
-    if (_streamVideo.isAudioProcessorConfigured()) {
-      final disableAudioProcessing =
-          profile == SfuAudioBitrateProfile.musicHighQuality;
-
-      if (disableAudioProcessing) {
-        unawaited(stopAudioProcessing());
-      } else {
-        unawaited(startAudioProcessing());
-      }
-    }
-
+    _applyNoiseCancellationForProfile(profile);
     _stateManager.setAudioBitrateProfile(profile);
-
-    final stereo = profile == SfuAudioBitrateProfile.musicHighQuality;
-
-    // On iOS, toggle stereo playout preference when switching HiFi audio modes.
-    if (CurrentPlatform.isIos) {
-      unawaited(rtc.Helper.setiOSStereoPlayoutPreferred(stereo));
-    }
+    unawaited(_applyStereoPlayoutPreference());
 
     _session?.rtcManager?.changeDefaultAudioConstraints(
-      AudioConstraints(
-        noiseSuppression: !stereo,
-        echoCancellation: !stereo,
-        autoGainControl: !stereo,
-        channelCount: stereo ? 2 : 1,
-      ),
+      AudioConstraints.forBitrateProfile(profile),
     );
 
     return const Result.success(none);
+  }
+
+  /// Turns noise cancellation off when entering music, and back to what it
+  /// was before when leaving it. A call that never entered music keeps
+  /// whatever the app or the user chose.
+  void _applyNoiseCancellationForProfile(SfuAudioBitrateProfile profile) {
+    if (!_streamVideo.isAudioProcessorConfigured()) return;
+
+    if (profile == SfuAudioBitrateProfile.musicHighQuality) {
+      _audioProcessingBeforeMusic ??= state.value.isAudioProcessing;
+      unawaited(stopAudioProcessing());
+      return;
+    }
+
+    final restore = _audioProcessingBeforeMusic;
+    final restoreIsAutoOn = _audioProcessingRestoreIsAutoOn;
+    _audioProcessingBeforeMusic = null;
+    _audioProcessingRestoreIsAutoOn = false;
+    if (restore ?? false) {
+      unawaited(
+        startAudioProcessing(
+          requireAdvancedAudioProcessingSupport: restoreIsAutoOn,
+        ),
+      );
+    }
   }
 
   bool checkIfAudioOutputChangeSupported() {

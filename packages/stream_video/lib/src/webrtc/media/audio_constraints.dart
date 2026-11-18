@@ -1,4 +1,5 @@
 import '../../platform_detector/platform_detector.dart';
+import '../../sfu/data/models/sfu_audio_bitrate.dart';
 import 'media_constraints.dart';
 
 /// Options used when creating an AudioTrack.
@@ -12,6 +13,20 @@ class AudioConstraints extends MediaConstraints {
     this.typingNoiseDetection = true,
     this.channelCount = 1,
   });
+
+  /// The microphone constraints for [profile].
+  ///
+  /// [SfuAudioBitrateProfile.musicHighQuality] requests two channels with
+  /// voice processing turned off; every other profile uses the defaults.
+  factory AudioConstraints.forBitrateProfile(SfuAudioBitrateProfile profile) {
+    final music = profile == SfuAudioBitrateProfile.musicHighQuality;
+    return AudioConstraints(
+      noiseSuppression: !music,
+      echoCancellation: !music,
+      autoGainControl: !music,
+      channelCount: music ? 2 : 1,
+    );
+  }
 
   /// Attempt to use noiseSuppression option (if supported by the platform)
   /// See https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackSettings/noiseSuppression

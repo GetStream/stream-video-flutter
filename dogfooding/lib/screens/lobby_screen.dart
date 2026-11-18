@@ -14,6 +14,7 @@ import '../utils/call_encryption.dart';
 import '../utils/e2ee.dart';
 import '../utils/random_words.dart';
 import '../widgets/lobby_encryption.dart';
+import '../widgets/lobby_hifi_audio.dart';
 import '../widgets/stream_button.dart';
 
 /// Hands the call over to the call screen once the lobby is done with it.
@@ -70,6 +71,22 @@ class _LobbyScreenState extends State<LobbyScreen> {
   List<RtcMediaDevice> _videoInputDevices = const [];
 
   final _userAuthController = locator.get<UserAuthController>();
+
+  /// Whether the call is joined with the HiFi audio policy. Off by default.
+  bool _hiFiAudioEnabled = false;
+
+  /// Bumped to remount the preview after its tracks were stopped.
+  int _previewGeneration = 0;
+
+  /// Whether the HiFi policy is being changed. Join and the switch are inert
+  /// meanwhile, since the preview tracks are stopped and not yet replaced.
+  bool _changingHiFiAudio = false;
+
+  /// The microphone and camera state the preview last reported, to remount it
+  /// with, so a remount keeps the user's choice instead of the call's
+  /// defaults. Null until the preview reports one.
+  bool? _previewMicrophoneEnabled;
+  bool? _previewCameraEnabled;
   late StreamVideoEffectsManager _videoEffectsManager;
 
   /// The call about to be joined.
@@ -127,7 +144,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 
   Future<void> joinCallPressed() async {
-    if (_creatingCall) return;
+    if (_creatingCall || _changingHiFiAudio) return;
 
     // Creation is deferred to here so the switch above stays live for as long
     // as it means anything: the encryption mode is fixed at creation, and this
@@ -223,6 +240,58 @@ class _LobbyScreenState extends State<LobbyScreen> {
     } finally {
       if (mounted) setState(() => _creatingCall = false);
     }
+  }
+
+  Future<void> _toggleHiFiAudio(bool enabled) async {
+    if (_changingHiFiAudio) return;
+    setState(() => _changingHiFiAudio = true);
+
+    // Changing the policy discards the factory the preview tracks run on, so
+    // they are stopped first and the preview is remounted with fresh tracks
+    // on the new factory, in the state the user left them.
+    var applied = false;
+    try {
+      await _stopPreviewTracks();
+      if (!mounted) return;
+
+      applied = _applyHiFiAudio(enabled: enabled);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _previewGeneration++;
+          if (applied) _hiFiAudioEnabled = enabled;
+          _changingHiFiAudio = false;
+        });
+      }
+    }
+
+    if (!applied) {
+      _showError('Could not change the audio policy for this call.');
+    }
+  }
+
+  /// HiFi bypasses voice processing, which on iOS turns on stereo playout and
+  /// keeps Bluetooth headphones on A2DP instead of the mono hands-free profile.
+  ///
+  /// Returns whether the policy was applied.
+  bool _applyHiFiAudio({required bool enabled}) {
+    final result = _call.setAudioConfigurationPolicy(
+      enabled ? const AudioConfigurationPolicy.hiFi() : null,
+    );
+    if (result is Failure) {
+      debugPrint('Failed to set the audio policy: ${result.error.message}');
+      return false;
+    }
+    return true;
+  }
+
+  Future<void> _stopPreviewTracks() async {
+    final cameraTrack = _cameraTrack;
+    final microphoneTrack = _microphoneTrack;
+    _cameraTrack = null;
+    _microphoneTrack = null;
+    await cameraTrack?.stop();
+    await microphoneTrack?.stop();
   }
 
   /// Records the encryption mode to create the call with.
@@ -374,14 +443,36 @@ class _LobbyScreenState extends State<LobbyScreen> {
                 ),
                 const SizedBox(height: 16),
                 StreamLobbyVideo(
-                  // Keyed on the selected camera, since the preview owns the
-                  // track it renders and has no way to be handed a different
-                  // one — remounting is how the device change reaches it.
-                  key: ValueKey(_selectedVideoInputDevice?.id),
+                  // Keyed on the selected camera and a generation bumped by the
+                  // HiFi switch, since the preview owns the tracks it renders
+                  // and has no way to be handed different ones — remounting is
+                  // how a device change, or a policy change that rebuilds the
+                  // factory, reaches it.
+                  key: ValueKey(
+                    (_selectedVideoInputDevice?.id, _previewGeneration),
+                  ),
                   call: _call,
                   initialCameraDevice: _selectedVideoInputDevice,
-                  onMicrophoneTrackSet: (track) => _microphoneTrack = track,
+                  initialMicrophoneEnabled: _previewMicrophoneEnabled,
+                  initialCameraEnabled: _previewCameraEnabled,
+                  onMicrophoneTrackSet: (track) {
+                    _previewMicrophoneEnabled = track != null;
+                    // A track that finishes starting while HiFi changes runs
+                    // on the factory being discarded. The remounted preview
+                    // starts a fresh one.
+                    if (_changingHiFiAudio) {
+                      unawaited(track?.stop());
+                      return;
+                    }
+                    _microphoneTrack = track;
+                  },
                   onCameraTrackSet: (track) {
+                    _previewCameraEnabled = track != null;
+                    // See onMicrophoneTrackSet.
+                    if (_changingHiFiAudio) {
+                      unawaited(track?.stop());
+                      return;
+                    }
                     _cameraTrack = track;
 
                     if (track != null && _blurEnabled) {
@@ -513,6 +604,11 @@ class _LobbyScreenState extends State<LobbyScreen> {
                   onGenerateKey: () =>
                       setState(() => _setEncryptionKey(getRandomWords())),
                 ),
+                const SizedBox(height: 12),
+                LobbyHiFiAudio(
+                  enabled: _hiFiAudioEnabled,
+                  onChanged: _changingHiFiAudio ? null : _toggleHiFiAudio,
+                ),
                 const SizedBox(height: 24),
                 Container(
                   constraints: const BoxConstraints(maxWidth: 360),
@@ -574,7 +670,10 @@ class _LobbyScreenState extends State<LobbyScreen> {
                                       ),
                                     StreamButton.active(
                                       label: 'Start a test call',
-                                      onPressed: needsKey || _creatingCall
+                                      onPressed:
+                                          needsKey ||
+                                              _creatingCall ||
+                                              _changingHiFiAudio
                                           ? null
                                           : joinCallPressed,
                                     ),
