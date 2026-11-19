@@ -6,14 +6,64 @@ import '../l10n/localization_extension.dart';
 /// The livestream's video with its toolbar: whether the stream is live, how
 /// many people watch it, a speakerphone toggle and a fullscreen button.
 ///
-/// Used by both the host and the viewers. [child] is what the tile shows,
-/// typically [StreamLivestreamHosts] or a [StreamParticipantTile]; a
-/// participant tile already draws the host's avatar on a bordered surface
-/// while their video is off.
+/// Used by both the host and the viewers. [StreamLivestreamTileProps.child]
+/// is what the tile shows, typically [StreamLivestreamHosts] or a
+/// [StreamParticipantTile]; a participant tile already draws the host's
+/// avatar on a bordered surface while their video is off.
+///
+/// The rendering can be replaced app-wide by registering a `livestreamTile`
+/// builder with [streamVideoComponentBuilders] on a [StreamComponentFactory].
+/// When no builder is registered, [DefaultStreamLivestreamTile] is used.
+///
+/// See also:
+///
+///  * [StreamLivestreamTileTheme], for customizing its appearance.
 class StreamLivestreamTile extends StatelessWidget {
   /// Creates a [StreamLivestreamTile].
-  const StreamLivestreamTile({
+  StreamLivestreamTile({
     super.key,
+    required Call call,
+    required Widget child,
+    VoidCallback? onFullscreenTapped,
+    bool isFullscreen = false,
+    bool? showLiveIndicator,
+    bool? showSpectatorsIndicator,
+    bool includeAnonymousParticipants = true,
+    bool? showSpeakerphoneToggle,
+    StreamLivestreamTileStyle? style,
+  }) : props = .new(
+         call: call,
+         child: child,
+         onFullscreenTapped: onFullscreenTapped,
+         isFullscreen: isFullscreen,
+         showLiveIndicator: showLiveIndicator,
+         showSpectatorsIndicator: showSpectatorsIndicator,
+         includeAnonymousParticipants: includeAnonymousParticipants,
+         showSpeakerphoneToggle: showSpeakerphoneToggle,
+         style: style,
+       );
+
+  /// The properties that configure this tile.
+  final StreamLivestreamTileProps props;
+
+  @override
+  Widget build(BuildContext context) {
+    final builder = context.videoComponentBuilder<StreamLivestreamTileProps>();
+    return builder?.call(context, props) ??
+        DefaultStreamLivestreamTile(props: props);
+  }
+}
+
+/// Properties for configuring a [StreamLivestreamTile].
+///
+/// See also:
+///
+///  * [StreamLivestreamTile], which uses these properties.
+///  * [DefaultStreamLivestreamTile], the default implementation.
+@immutable
+class StreamLivestreamTileProps {
+  /// Creates properties for a livestream tile.
+  const StreamLivestreamTileProps({
     required this.call,
     required this.child,
     this.onFullscreenTapped,
@@ -60,21 +110,60 @@ class StreamLivestreamTile extends StatelessWidget {
   /// true.
   final bool? showSpeakerphoneToggle;
 
-  /// Overrides the style from [StreamLivestreamTileTheme].
+  /// Overrides for this tile's appearance.
+  ///
+  /// Merged over the ambient [StreamLivestreamTileTheme].
   final StreamLivestreamTileStyle? style;
+
+  /// Creates a copy of these properties with the given fields replaced.
+  StreamLivestreamTileProps copyWith({
+    Call? call,
+    Widget? child,
+    VoidCallback? onFullscreenTapped,
+    bool? isFullscreen,
+    bool? showLiveIndicator,
+    bool? showSpectatorsIndicator,
+    bool? includeAnonymousParticipants,
+    bool? showSpeakerphoneToggle,
+    StreamLivestreamTileStyle? style,
+  }) {
+    return StreamLivestreamTileProps(
+      call: call ?? this.call,
+      child: child ?? this.child,
+      onFullscreenTapped: onFullscreenTapped ?? this.onFullscreenTapped,
+      isFullscreen: isFullscreen ?? this.isFullscreen,
+      showLiveIndicator: showLiveIndicator ?? this.showLiveIndicator,
+      showSpectatorsIndicator:
+          showSpectatorsIndicator ?? this.showSpectatorsIndicator,
+      includeAnonymousParticipants:
+          includeAnonymousParticipants ?? this.includeAnonymousParticipants,
+      showSpeakerphoneToggle:
+          showSpeakerphoneToggle ?? this.showSpeakerphoneToggle,
+      style: style ?? this.style,
+    );
+  }
+}
+
+/// The default implementation of [StreamLivestreamTile].
+class DefaultStreamLivestreamTile extends StatelessWidget {
+  /// Creates the default livestream tile.
+  const DefaultStreamLivestreamTile({super.key, required this.props});
+
+  /// The properties that configure this tile.
+  final StreamLivestreamTileProps props;
 
   @override
   Widget build(BuildContext context) {
     final themeStyle = StreamLivestreamTileTheme.of(context).style;
     final resolved = _StreamLivestreamTileStyleDefaults(
       context,
-      themeStyle?.merge(style) ?? style,
+      themeStyle?.merge(props.style) ?? props.style,
     );
 
     return Stack(
       fit: StackFit.expand,
       children: [
-        child,
+        props.child,
         PositionedDirectional(
           start: 0,
           end: 0,
@@ -92,31 +181,31 @@ class StreamLivestreamTile extends StatelessWidget {
     final translations = context.translations;
 
     final leading = [
-      if (showLiveIndicator ?? resolved.showLiveIndicator)
-        Flexible(child: StreamLiveIndicator(call: call)),
-      if (showSpectatorsIndicator ?? resolved.showSpectatorsIndicator)
+      if (props.showLiveIndicator ?? resolved.showLiveIndicator)
+        Flexible(child: StreamLiveIndicator(call: props.call)),
+      if (props.showSpectatorsIndicator ?? resolved.showSpectatorsIndicator)
         Flexible(
           child: StreamSpectatorsIndicator(
-            call: call,
-            includeAnonymousParticipants: includeAnonymousParticipants,
+            call: props.call,
+            includeAnonymousParticipants: props.includeAnonymousParticipants,
           ),
         ),
     ];
 
     final trailing = [
-      if (showSpeakerphoneToggle ?? resolved.showSpeakerphoneToggle)
+      if (props.showSpeakerphoneToggle ?? resolved.showSpeakerphoneToggle)
         LivestreamSpeakerphoneOption(
-          call: call,
+          call: props.call,
           enabledSpeakerphoneIconTheme: const IconThemeData(),
           disabledSpeakerphoneIconTheme: const IconThemeData(),
           type: StreamButtonType.solid,
           size: resolved.buttonSize,
         ),
-      if (onFullscreenTapped case final onFullscreenTapped?)
+      if (props.onFullscreenTapped case final onFullscreenTapped?)
         StreamButton.icon(
           // The same glyph either way, as in the design.
           icon: Icon(context.streamIcons.fullscreen),
-          tooltip: isFullscreen
+          tooltip: props.isFullscreen
               ? translations.livestreamExitFullscreen
               : translations.livestreamEnterFullscreen,
           style: StreamButtonStyle.secondary,

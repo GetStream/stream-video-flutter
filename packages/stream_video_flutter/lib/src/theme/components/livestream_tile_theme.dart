@@ -91,17 +91,17 @@ class StreamLivestreamTileStyle with _$StreamLivestreamTileStyle {
 
   /// Whether the toolbar shows [StreamLiveIndicator].
   ///
-  /// [StreamLivestreamTile.showLiveIndicator] wins over this.
+  /// [StreamLivestreamTileProps.showLiveIndicator] wins over this.
   final bool? showLiveIndicator;
 
   /// Whether the toolbar shows [StreamSpectatorsIndicator].
   ///
-  /// [StreamLivestreamTile.showSpectatorsIndicator] wins over this.
+  /// [StreamLivestreamTileProps.showSpectatorsIndicator] wins over this.
   final bool? showSpectatorsIndicator;
 
   /// Whether the toolbar shows [LivestreamSpeakerphoneOption].
   ///
-  /// [StreamLivestreamTile.showSpeakerphoneToggle] wins over this.
+  /// [StreamLivestreamTileProps.showSpeakerphoneToggle] wins over this.
   final bool? showSpeakerphoneToggle;
 
   /// Linearly interpolates between two [StreamLivestreamTileStyle]s.
