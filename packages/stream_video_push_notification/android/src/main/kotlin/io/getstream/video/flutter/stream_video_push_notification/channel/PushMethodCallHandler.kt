@@ -86,9 +86,9 @@ internal class PushMethodCallHandler(
                 result.success(true)
             }
 
+            // The hold event follows once Telecom has held or resumed the call.
             "holdCall" -> {
                 val args = mapArgument(call)
-                events.send(IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD, args)
                 (args["id"] as? String)?.let { callId ->
                     telecom.setOnHold(
                         callId,

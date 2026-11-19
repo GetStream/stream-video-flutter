@@ -97,9 +97,6 @@ class MethodChannelStreamVideoPushNotification
         false;
   }
 
-  /// Hold an Ongoing call.
-  /// On iOS, using Callkit(update the ongoing call ui).
-  /// On Android, Nothing(only callback event listener).
   @override
   Future<void> holdCall(String id, {bool isOnHold = true}) async {
     await methodChannel.invokeMethod('holdCall', {
@@ -256,6 +253,7 @@ class MethodChannelStreamVideoPushNotification
         Event.actionCallToggleHold => ActionCallToggleHold(
           uuid: body['id'] as String,
           isOnHold: body['isOnHold'] as bool,
+          callCid: body['callCid'] as String?,
         ),
         Event.actionCallToggleMute => ActionCallToggleMute(
           uuid: body['id'] as String,

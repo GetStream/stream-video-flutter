@@ -85,9 +85,12 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
     throw UnimplementedError('isMuted() has not been implemented.');
   }
 
-  /// Hold an Ongoing call.
-  /// On iOS, using Callkit(update the ongoing call ui).
-  /// On Android, Nothing(only callback event listener).
+  /// Holds or resumes an ongoing call.
+  ///
+  /// On iOS through CallKit. On Android through Telecom, for a call the
+  /// Telecom integration has registered; without the integration it does
+  /// nothing there. An [ActionCallToggleHold] follows once the system has
+  /// held or resumed the call.
   Future<void> holdCall(String id, {bool isOnHold = true}) {
     throw UnimplementedError('holdCall() has not been implemented.');
   }
@@ -114,8 +117,8 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
   /// Dismiss the ringing UI of a call the user just accepted and is now in.
   ///
   /// Unlike [endAllCalls] this does not end the call: on Android the incoming notification and
-  /// ringtone stop, but the call stays registered with the Telecom stack, so hanging up or
-  /// holding from a watch, headset or car head unit keeps working for the rest of the call.
+  /// ringtone stop, but the call stays registered with the Telecom stack, so hanging up from a
+  /// watch, headset or car head unit keeps working for the rest of the call.
   Future<void> dismissRingingCall(String cid) {
     throw UnimplementedError('dismissRingingCall() has not been implemented.');
   }
