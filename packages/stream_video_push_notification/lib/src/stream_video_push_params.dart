@@ -37,7 +37,7 @@ class StreamVideoPushParams {
 
   /// The params for one call: [configuration]'s defaults with the call's own
   /// fields on top. The avatar goes into the Android params; without them it
-  /// is dropped.
+  /// is dropped. [ringTimeout] becomes [duration].
   @internal
   factory StreamVideoPushParams.forCall(
     StreamVideoPushConfiguration configuration, {
@@ -47,6 +47,7 @@ class StreamVideoPushParams {
     String? handle,
     String? callerName,
     bool hasVideo = true,
+    Duration? ringTimeout,
   }) {
     final fromConfiguration = StreamVideoPushParams.fromPushConfiguration(
       configuration,
@@ -56,6 +57,7 @@ class StreamVideoPushParams {
       handle: handle,
       callerName: callerName,
       type: hasVideo ? 1 : 0,
+      duration: ringTimeout?.inMilliseconds,
       extra: {'callCid': callCid},
       android: fromConfiguration.android?.copyWith(avatar: avatar),
     );
@@ -77,6 +79,12 @@ class StreamVideoPushParams {
   final String? callerName;
   final String? handle;
   final int? type;
+
+  /// How long an incoming call rings before it times out natively, in
+  /// milliseconds; 30 seconds when null. For a call shown from a ringing push
+  /// through `handleRingingFlowNotifications`, the SDK sets it to the call's
+  /// `autoRejectTimeout`, so the native ring ends when the client rejects the
+  /// call. An iOS VoIP push is shown natively and keeps the default.
   final int? duration;
   final Map<String, dynamic>? extra;
   final Map<String, dynamic>? headers;

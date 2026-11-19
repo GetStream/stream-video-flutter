@@ -310,8 +310,8 @@ class IncomingCallActivity : Activity() {
     private fun onAcceptClick() {
         val data = intent.extras?.getBundle(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
 
-        // The ring stops here. On the lock screen the trampoline, which runs the accept and brings
-        // the app forward, may only start once the keyguard is dismissed.
+        // The ring and its timeout stop here. On the lock screen the trampoline, which runs the
+        // accept and brings the app forward, may only start once the keyguard is dismissed.
         if (data != null) {
             RingingComponents.get(this).controller.stopRinging(data)
         }

@@ -102,6 +102,45 @@ class ActionCallEnded extends RingingEvent {
   List<Object?> get props => [data];
 }
 
+/// Why the SDK dismissed the ring of a call: accepted in the app, or ended
+/// elsewhere than on this device's ringing UI. See [ActionCallDismissed].
+enum CallDismissReason {
+  /// The user accepted the call on this device, outside the native ringing
+  /// UI, so only the ring ends.
+  accepted,
+
+  /// The caller cancelled the call.
+  remoteCancelled,
+
+  /// The user answered the call on another device.
+  answeredElsewhere,
+
+  /// The call rang out unanswered.
+  missed;
+
+  /// The reason named [name], or null for a missing or unknown one.
+  static CallDismissReason? fromName(String? name) => values.asNameMap()[name];
+}
+
+/// Represents the end of a call's ring that the SDK asked for, with its
+/// [reason].
+///
+/// Note: This event is only available on Android.
+class ActionCallDismissed extends RingingEvent {
+  /// Creates an [ActionCallDismissed] event instance with the specified
+  /// [data] and [reason].
+  const ActionCallDismissed({required this.data, this.reason});
+
+  /// The call data associated with the call whose ring ended.
+  final CallData data;
+
+  /// Why the ring ended; null when the native side sent no known reason.
+  final CallDismissReason? reason;
+
+  @override
+  List<Object?> get props => [data, reason];
+}
+
 /// Represents a call timeout event.
 ///
 /// This event is triggered when a call times out. This can happen when a user

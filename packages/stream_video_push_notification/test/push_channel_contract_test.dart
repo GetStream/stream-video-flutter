@@ -95,6 +95,7 @@ const _iosOnlyEvents = {
 /// Events only the Android plugin declares.
 const _androidOnlyEvents = {
   Event.actionCallCallback,
+  Event.actionCallDismissed,
 };
 
 /// `ACTION_*` constants the Android plugin declares for its own intents, which

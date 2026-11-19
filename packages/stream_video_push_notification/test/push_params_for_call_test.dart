@@ -88,6 +88,26 @@ void main() {
     );
   });
 
+  test('the ring timeout becomes the duration in milliseconds', () {
+    expect(
+      StreamVideoPushParams.forCall(
+        configuration,
+        uuid: 'u',
+        callCid: 'c',
+        ringTimeout: const Duration(seconds: 45),
+      ).toJson()['duration'],
+      45000,
+    );
+    expect(
+      StreamVideoPushParams.forCall(
+        configuration,
+        uuid: 'u',
+        callCid: 'c',
+      ).duration,
+      isNull,
+    );
+  });
+
   test(
     'the wire shape carries the id and the call cid where native reads them',
     () {

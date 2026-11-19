@@ -1,5 +1,6 @@
 package io.getstream.video.flutter.stream_video_push_notification
 
+import android.app.AlarmManager
 import android.app.Application
 import android.app.KeyguardManager
 import android.app.NotificationManager
@@ -94,8 +95,10 @@ class RingingActivitiesTest {
 
         activity.findViewById<ImageView>(R.id.ivAcceptCall).performClick()
 
-        // The ring is cleared at once; the accept itself waits for the trampoline.
+        // The ring and its timeout stop at once; the accept itself waits for the trampoline.
         assertEquals(emptyList<Int>(), shownNotificationIds())
+        val alarms = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        assertNull(shadowOf(alarms).nextScheduledAlarm)
         assertEquals(listOf(call), PrefsCallStore(context).all())
         verify(exactly = 0) { telecom.answer(any()) }
         val next = shadowOf(context).nextStartedActivity

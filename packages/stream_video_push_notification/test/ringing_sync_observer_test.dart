@@ -266,6 +266,13 @@ void main() {
       ('decline', () => ActionCallDecline(data: CallData(callCid: _cid.value))),
       ('timeout', () => ActionCallTimeout(data: CallData(callCid: _cid.value))),
       ('ended', () => ActionCallEnded(data: CallData(callCid: _cid.value))),
+      (
+        'dismissed',
+        () => ActionCallDismissed(
+          data: CallData(callCid: _cid.value),
+          reason: CallDismissReason.remoteCancelled,
+        ),
+      ),
     ]) {
       test("stop with the user's answer: $name", () async {
         await start();
@@ -343,6 +350,27 @@ void main() {
       await ringAs('ring-2');
       await endNative('ring-1');
       await endNative('ring-2');
+
+      backendEvents.emit(ended());
+      await pumpEventQueue();
+
+      verifyNever(
+        () => controller.endCallByCid(any(), silent: any(named: 'silent')),
+      );
+    });
+
+    test('stop once a missed call dismisses the last followed ring', () async {
+      await start();
+      await ringAs('ring-1');
+      await ringAs('ring-2');
+      await endNative('ring-1');
+      platform.emit(
+        ActionCallDismissed(
+          data: CallData(uuid: 'ring-2', callCid: _cid.value),
+          reason: CallDismissReason.missed,
+        ),
+      );
+      await pumpEventQueue();
 
       backendEvents.emit(ended());
       await pumpEventQueue();

@@ -239,14 +239,14 @@ internal class TelecomIntegration(
         processAction(callId, TelecomCallAction.Answer, createRepository = true)
     }
 
-    /** Disconnects a call in Telecom with [cause], a [DisconnectCause] code. */
+    /**
+     * Disconnects a call in Telecom with [cause], a [DisconnectCause] code; the repository sends a
+     * cause Telecom's call control does not take as LOCAL. Without a repository no call is
+     * registered in this process, so none is built for it.
+     */
     fun disconnect(callId: String, cause: Int) {
         if (!isEnabled()) return
-        processAction(
-            callId,
-            TelecomCallAction.Disconnect(DisconnectCause(cause)),
-            createRepository = true,
-        )
+        processAction(callId, TelecomCallAction.Disconnect(DisconnectCause(cause)))
     }
 
     /** Marks a call as active, used once an outgoing or accepted call is connected. */

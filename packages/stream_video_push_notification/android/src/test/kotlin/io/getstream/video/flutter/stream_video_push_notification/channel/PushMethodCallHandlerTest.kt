@@ -10,6 +10,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationManager
 import io.getstream.video.flutter.stream_video_push_notification.core.CallStore
+import io.getstream.video.flutter.stream_video_push_notification.core.DismissReason
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingController
@@ -127,12 +128,24 @@ class PushMethodCallHandlerTest {
     }
 
     @Test
-    fun `dismissRingingCall passes the call cid, or null without one`() {
-        call("dismissRingingCall", mapOf("id" to "default:abc"))
+    fun `dismissRingingCall passes the call cid and the reason, accepted by default`() {
+        call("dismissRingingCall", mapOf("id" to "default:abc", "reason" to "remoteCancelled"))
+        call("dismissRingingCall", mapOf("id" to "default:abc", "reason" to "answeredElsewhere"))
+        call("dismissRingingCall", mapOf("reason" to "missed"))
         call("dismissRingingCall")
 
-        verify { controller.dismissRingingCall("default:abc") }
-        verify { controller.dismissRingingCall(null) }
+        verify { controller.dismissRingingCall("default:abc", DismissReason.REMOTE_CANCELLED) }
+        verify { controller.dismissRingingCall("default:abc", DismissReason.ANSWERED_ELSEWHERE) }
+        verify { controller.dismissRingingCall(null, DismissReason.MISSED) }
+        verify { controller.dismissRingingCall(null, DismissReason.ACCEPTED) }
+    }
+
+    @Test
+    fun `dismissRingingCall with an unknown reason fails and dismisses nothing`() {
+        call("dismissRingingCall", mapOf("id" to "default:abc", "reason" to "unknown"))
+
+        verify { result.error("error", any(), "") }
+        verify(exactly = 0) { controller.dismissRingingCall(any(), any()) }
     }
 
     @Test
@@ -165,13 +178,11 @@ class PushMethodCallHandlerTest {
     }
 
     @Test
-    fun `showMissCallNotification clears the ring and shows the missed call for the same call`() {
+    fun `showMissCallNotification hands the call to the controller's missed-call step`() {
         call("showMissCallNotification", mapOf("id" to "call-1"))
 
-        val cleared = slot<Bundle>()
         val shown = slot<Bundle>()
-        verify { notifications.clearIncomingNotification(capture(cleared), false) }
-        verify { notifications.showMissCallNotification(capture(shown)) }
+        verify { controller.showMissedCall(capture(shown)) }
         assertEquals("call-1", shown.captured.getString(IncomingCallConstants.EXTRA_CALL_ID))
         assertEquals(
             "notification",

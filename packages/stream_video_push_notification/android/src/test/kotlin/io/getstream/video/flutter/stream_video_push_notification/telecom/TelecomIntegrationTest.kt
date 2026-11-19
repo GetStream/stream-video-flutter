@@ -336,6 +336,25 @@ class TelecomIntegrationTest {
     }
 
     @Test
+    fun `a disconnect after a cold start builds no repository`() {
+        integration().init(enabled())
+        var built = 0
+        val coldStarted = TelecomIntegration(
+            context,
+            repositoryFactory = { built++; repository },
+            permissions = object : TelecomPermissions() {
+                override fun canUseTelecom(context: Context) = true
+            },
+            scope = CoroutineScope(Dispatchers.Unconfined),
+            mainThread = { it.run() },
+        )
+
+        coldStarted.disconnect(CALL_ID, DisconnectCause.MISSED)
+
+        assertEquals(0, built)
+    }
+
+    @Test
     fun `disconnectAll disconnects registered and still registering calls`() {
         val telecom = integration().apply { init(enabled()) }
         telecom.registerIncomingCall(call)

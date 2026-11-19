@@ -1,5 +1,6 @@
 package io.getstream.video.flutter.stream_video_push_notification
 
+import android.app.AlarmManager
 import android.app.Application
 import android.app.Notification
 import android.app.NotificationManager
@@ -18,6 +19,7 @@ import io.getstream.video.flutter.stream_video_push_notification.core.RingingCal
 import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
 import io.mockk.verify
 import java.io.File
+import java.time.Duration
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -181,21 +183,28 @@ class IncomingCallBroadcastReceiverTest {
     }
 
     @Test
-    fun `ending with keepSystemCall clears the ring but keeps the Telecom call`() {
+    fun `an unanswered ring times out natively after its duration`() {
         incoming()
 
-        receive(
-            IncomingCallBroadcastReceiver.getIntentEnded(
-                context,
-                data().toBundle(),
-                keepSystemCall = true,
-            ),
-        )
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(15_000))
 
+        assertEquals(IncomingCallConstants.ACTION_CALL_TIMEOUT, eventNames().last())
         assertEquals(emptyList<Int>(), shownNotificationIds())
-        assertEquals(IncomingCallConstants.ACTION_CALL_ENDED, eventNames().last())
         assertEquals(emptyList<Any?>(), activeCalls())
-        verify(exactly = 0) { telecom.disconnect(any(), any()) }
+        verify { telecom.disconnect(CALL_ID, DisconnectCause.MISSED) }
+    }
+
+    @Test
+    fun `an accepted ring does not time out`() {
+        incoming()
+        receive(IncomingCallBroadcastReceiver.getIntentAccept(context, data().toBundle()))
+
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(15_000))
+
+        assertEquals(IncomingCallConstants.ACTION_CALL_ACCEPT, eventNames().last())
+        assertEquals(true, activeCalls().single()["isAccepted"])
+        val alarms = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        assertNull(shadowOf(alarms).nextScheduledAlarm)
     }
 
     @Test

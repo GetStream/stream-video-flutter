@@ -141,7 +141,8 @@ class RingingSyncObserver {
       case ActionCallAccept(:final data) ||
           ActionCallDecline(:final data) ||
           ActionCallTimeout(:final data) ||
-          ActionCallEnded(:final data):
+          ActionCallEnded(:final data) ||
+          ActionCallDismissed(:final data):
         _onRingAnswered(data.uuid?.toLowerCase());
       default:
         break;

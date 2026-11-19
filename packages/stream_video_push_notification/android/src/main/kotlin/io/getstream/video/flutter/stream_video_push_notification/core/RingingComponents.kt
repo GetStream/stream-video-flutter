@@ -35,11 +35,16 @@ internal class RingingComponents private constructor(context: Context) {
 
     val telecom: TelecomIntegration = telecomFactory(context)
 
-    val controller = RingingController(
+    val ringTimer: RingTimer = HandlerRingTimer(context) { callId ->
+        controller.onRingTimedOut(callId)
+    }
+
+    val controller: RingingController = RingingController(
         context = context,
         store = callStore,
         notifications = notifications,
         telecom = telecom,
+        ringTimer = ringTimer,
         sendEvent = events::send,
     ).also { telecom.listener = it }
 

@@ -26,6 +26,7 @@ internal class RingingController(
     private val store: CallStore,
     private val notifications: IncomingCallNotificationManager,
     private val telecom: TelecomIntegration,
+    private val ringTimer: RingTimer,
     private val sendEvent: (String, Map<String, Any?>) -> Unit,
 ) : TelecomIntegration.Listener {
 
@@ -33,21 +34,23 @@ internal class RingingController(
      * Runs the step for [action], one of the `IncomingCallConstants.ACTION_CALL_*` names without
      * the package prefix. An unknown action does nothing.
      */
-    fun handle(action: String, data: Bundle, keepSystemCall: Boolean = false) {
+    fun handle(action: String, data: Bundle) {
         when (action) {
             IncomingCallConstants.ACTION_CALL_INCOMING -> onIncoming(data)
             IncomingCallConstants.ACTION_CALL_START -> onStart(data)
             IncomingCallConstants.ACTION_CALL_ACCEPT -> onAccept(data)
             IncomingCallConstants.ACTION_CALL_DECLINE -> onDecline(data)
-            IncomingCallConstants.ACTION_CALL_ENDED -> onEnded(data, keepSystemCall)
-            IncomingCallConstants.ACTION_CALL_TIMEOUT -> onTimeout(data)
+            IncomingCallConstants.ACTION_CALL_ENDED -> onEnded(data)
+            IncomingCallConstants.ACTION_CALL_TIMEOUT ->
+                onRingTimedOut(CallPayloadMapper.fromBundle(data).id)
             IncomingCallConstants.ACTION_CALL_CALLBACK -> onCallback(data)
         }
     }
 
     /**
-     * Registers the call with Telecom, then shows the incoming notification, reports it and stores
-     * it. A registration that throws is logged and the ring goes on without Telecom.
+     * Registers the call with Telecom, then shows the incoming notification, reports it, stores it
+     * and starts timing the ring out. A registration that throws is logged and the ring goes on
+     * without Telecom.
      */
     @SuppressLint("MissingPermission")
     fun onIncoming(data: Bundle) = step {
@@ -60,6 +63,7 @@ internal class RingingController(
         notifications.showIncomingNotification(data)
         report(IncomingCallConstants.ACTION_CALL_INCOMING, data)
         store.add(call)
+        ringTimer.start(call)
     }
 
     /** Reports an outgoing call, stores it as accepted and registers it with Telecom. */
@@ -71,20 +75,22 @@ internal class RingingController(
     }
 
     /**
-     * Stops the ring of the call in [data] without answering it, for the full-screen screen's
-     * accept: the ringtone has to stop at once, but on the lock screen the trampoline that runs the
-     * accept may only start once the keyguard is dismissed.
+     * Stops the ring of the call in [data] and its timeout without answering it, for the
+     * full-screen screen's accept: the ringtone has to stop at once, but on the lock screen the
+     * trampoline that runs the accept may only start once the keyguard is dismissed.
      */
     fun stopRinging(data: Bundle) = step {
+        ringTimer.cancel(CallPayloadMapper.fromBundle(data).id)
         notifications.clearIncomingNotification(data, true)
     }
 
     /**
-     * Clears the ring as accepted, reports it, stores the call as accepted and answers it in
-     * Telecom. After [stopRinging] the ring is cleared a second time, which only repeats its
-     * clearing.
+     * Cancels the ring timer, clears the ring as accepted, reports it, stores the call as accepted
+     * and answers it in Telecom. After [stopRinging] the ring is cleared a second time, which only
+     * repeats its clearing.
      */
     fun onAccept(data: Bundle) = step {
+        ringTimer.cancel(CallPayloadMapper.fromBundle(data).id)
         notifications.clearIncomingNotification(data, true)
         report(IncomingCallConstants.ACTION_CALL_ACCEPT, data)
         val call = CallPayloadMapper.fromBundle(data)
@@ -97,6 +103,7 @@ internal class RingingController(
 
     /** [onDecline], disconnecting the call in Telecom only when [disconnectTelecom]. */
     private fun decline(data: Bundle, disconnectTelecom: Boolean) = step {
+        ringTimer.cancel(CallPayloadMapper.fromBundle(data).id)
         notifications.clearIncomingNotification(data, false)
         report(IncomingCallConstants.ACTION_CALL_DECLINE, data)
         val call = CallPayloadMapper.fromBundle(data)
@@ -104,22 +111,32 @@ internal class RingingController(
         if (disconnectTelecom) telecom.disconnect(call.id, DisconnectCause.REJECTED)
     }
 
-    /**
-     * Clears the ring, reports it and forgets the call. Telecom is disconnected too unless
-     * [keepSystemCall] is set, which marks the end of the ring of a call that is now live.
-     */
-    fun onEnded(data: Bundle, keepSystemCall: Boolean) = step {
+    /** Clears the ring, reports it, forgets the call and disconnects it in Telecom as local. */
+    fun onEnded(data: Bundle) = end(data, disconnectTelecom = true)
+
+    /** [onEnded], disconnecting the call in Telecom only when [disconnectTelecom]. */
+    private fun end(data: Bundle, disconnectTelecom: Boolean) = step {
+        ringTimer.cancel(CallPayloadMapper.fromBundle(data).id)
         notifications.clearIncomingNotification(data, false)
         report(IncomingCallConstants.ACTION_CALL_ENDED, data)
         val call = CallPayloadMapper.fromBundle(data)
         store.remove(call.id)
-        if (!keepSystemCall) {
-            telecom.disconnect(call.id, DisconnectCause.LOCAL)
-        }
+        if (disconnectTelecom) telecom.disconnect(call.id, DisconnectCause.LOCAL)
+    }
+
+    /**
+     * Runs the timeout step for the stored call with [callId] if it is still ringing: stored and
+     * not accepted. Otherwise does nothing.
+     */
+    fun onRingTimedOut(callId: String) = step {
+        val call = store.byId(callId) ?: return@step
+        if (call.isAccepted) return@step
+        onTimeout(CallPayloadMapper.toBundle(call))
     }
 
     /** Clears the ring, reports it, forgets the call and disconnects it in Telecom as missed. */
-    fun onTimeout(data: Bundle) = step {
+    private fun onTimeout(data: Bundle) = step {
+        ringTimer.cancel(CallPayloadMapper.fromBundle(data).id)
         notifications.clearIncomingNotification(data, false)
         report(IncomingCallConstants.ACTION_CALL_TIMEOUT, data)
         val call = CallPayloadMapper.fromBundle(data)
@@ -153,7 +170,7 @@ internal class RingingController(
     fun endCall(id: String) {
         val call = store.byId(id) ?: return
         val data = CallPayloadMapper.toBundle(call)
-        if (call.isAccepted) onEnded(data, keepSystemCall = false) else onDecline(data)
+        if (call.isAccepted) onEnded(data) else onDecline(data)
     }
 
     /**
@@ -174,25 +191,62 @@ internal class RingingController(
         step { telecom.disconnectAll(DisconnectCause.LOCAL) }
         calls.forEach { call ->
             val data = CallPayloadMapper.toBundle(call)
-            if (call.isAccepted) onEnded(data, keepSystemCall = false) else onDecline(data)
+            if (call.isAccepted) onEnded(data) else onDecline(data)
         }
     }
 
     /**
      * Ends the ring of the stored calls with [callCid], or of every stored call when [callCid] is
-     * null or matches none, and keeps them in Telecom as answered calls.
+     * null, for [reason]: clears it, reports it as dismissed with the reason and forgets the call.
+     *
+     * For [DismissReason.ACCEPTED] the call stays in Telecom, answered whatever `isAccepted` says.
+     * For the other reasons Telecom disconnects it: as remote for a cancel and for an answer on
+     * another device, as missed for a missed call.
      */
-    fun dismissRingingCall(callCid: String?) {
-        val calls = callCid
-            ?.let { store.byCallCid(it) }
-            ?.takeIf { it.isNotEmpty() }
-            ?: store.all()
+    fun dismissRingingCall(callCid: String?, reason: DismissReason) {
+        val calls = callCid?.let { store.byCallCid(it) } ?: store.all()
 
         calls.forEach { call ->
-            // Answered whatever `isAccepted` says; answering an answered call does nothing.
-            step { telecom.answer(call.id) }
-            onEnded(CallPayloadMapper.toBundle(call), keepSystemCall = true)
+            if (reason == DismissReason.ACCEPTED) step { telecom.answer(call.id) }
+            dismiss(call, reason)
         }
+    }
+
+    private fun dismiss(call: RingingCall, reason: DismissReason) = step {
+        ringTimer.cancel(call.id)
+        val data = CallPayloadMapper.toBundle(call)
+        notifications.clearIncomingNotification(data, false)
+        report(IncomingCallConstants.ACTION_CALL_DISMISSED, data, "reason" to reason.wireName)
+        store.remove(call.id)
+        when (reason) {
+            DismissReason.ACCEPTED -> Unit
+            DismissReason.REMOTE_CANCELLED -> telecom.disconnect(call.id, DisconnectCause.REMOTE)
+            DismissReason.ANSWERED_ELSEWHERE -> telecom.disconnect(call.id, DisconnectCause.REMOTE)
+            DismissReason.MISSED -> telecom.disconnect(call.id, DisconnectCause.MISSED)
+        }
+    }
+
+    /**
+     * Shows the missed-call notification of the call in [data] and ends the rings of the stored
+     * calls it is about that were not accepted, the ones with its call cid or, without one, its
+     * id: dismisses each as missed, which reports it so Dart stops following the ring. Without
+     * such a stored call, clears the ring of the id in [data] and reports nothing.
+     */
+    fun showMissedCall(data: Bundle) = step {
+        val missed = CallPayloadMapper.fromBundle(data)
+        val stored = missed.callCid?.let { store.byCallCid(it) }
+            ?: listOfNotNull(store.byId(missed.id))
+        val ringing = stored.filter { !it.isAccepted }
+
+        if (ringing.isEmpty()) {
+            ringTimer.cancel(missed.id)
+            notifications.clearIncomingNotification(CallPayloadMapper.toBundle(missed), false)
+            store.remove(missed.id)
+            telecom.disconnect(missed.id, DisconnectCause.MISSED)
+        } else {
+            ringing.forEach { dismiss(it, DismissReason.MISSED) }
+        }
+        notifications.showMissCallNotification(data)
     }
 
     /**
@@ -218,7 +272,7 @@ internal class RingingController(
         // could reach a new call registered with the same id since.
         if (wasConnected) {
             data.putBoolean(IncomingCallConstants.EXTRA_CALL_ENDED_BY_SYSTEM, true)
-            onEnded(data, keepSystemCall = true)
+            end(data, disconnectTelecom = false)
         } else {
             decline(data, disconnectTelecom = false)
         }
@@ -230,7 +284,7 @@ internal class RingingController(
         sendEvent(event, body)
     }
 
-    private fun report(event: String, data: Bundle) {
+    private fun report(event: String, data: Bundle, vararg extra: Pair<String, Any?>) {
         if (RingingComponents.silenceEvents) return
         val body = CallPayloadMapper.toEventBody(
             CallPayloadMapper.fromBundle(data),
@@ -239,7 +293,7 @@ internal class RingingController(
                 false,
             ),
         )
-        sendEvent(event, body)
+        sendEvent(event, body + extra)
     }
 
     private inline fun step(block: () -> Unit) {
