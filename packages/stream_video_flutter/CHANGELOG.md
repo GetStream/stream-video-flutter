@@ -2,7 +2,7 @@
 
 ### ✅ Added
 
-- Added `StreamLivestreamTile`, the livestream's video with its live, viewer count, speakerphone and fullscreen toolbar, used by both host and viewers, with `StreamLivestreamTileThemeData` on `StreamVideoTheme`.
+- Added `StreamLivestreamTile`, the livestream's video with its live, viewer count, speakerphone and fullscreen toolbar, used by both host and viewers, with `StreamLivestreamTileThemeData` on `StreamVideoTheme` and a `livestreamTile` builder in `streamVideoComponentBuilders`.
 - Added `type` and `size` to `LivestreamSpeakerphoneOption`.
 - Added `StreamLiveIndicator` and `StreamSpectatorsIndicator`, the livestream's LIVE pill and viewer count, with `StreamLiveIndicatorThemeData` and `StreamSpectatorsIndicatorThemeData` on `StreamVideoTheme`.
 - Added `StreamMediaDevicesController.supportsAudioOutputSelection`; `audioOutputs` is empty where it is false.

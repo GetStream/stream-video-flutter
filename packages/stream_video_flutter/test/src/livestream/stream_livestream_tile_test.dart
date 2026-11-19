@@ -329,4 +329,35 @@ void main() {
         tester.getRect(find.byType(StreamLiveIndicator)).right;
     expect(gap, 6);
   });
+
+  testWidgets('renders the builder registered on the component factory', (
+    tester,
+  ) async {
+    StreamLivestreamTileProps? receivedProps;
+
+    await tester.pumpWidget(
+      StreamComponentFactory(
+        builders: StreamComponentBuilders(
+          extensions: streamVideoComponentBuilders(
+            livestreamTile: (context, props) {
+              receivedProps = props;
+              return const Text('custom tile');
+            },
+          ),
+        ),
+        child: TestWrapper(
+          child: StreamLivestreamTile(
+            call: call,
+            isFullscreen: true,
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('custom tile'), findsOneWidget);
+    expect(find.byType(DefaultStreamLivestreamTile), findsNothing);
+    expect(receivedProps?.isFullscreen, isTrue);
+  });
 }
