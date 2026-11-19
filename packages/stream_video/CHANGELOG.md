@@ -2,25 +2,23 @@
 
 ### ✅ Added
 
-- Added `Call.setAudioConfigurationPolicy`, which sets the call's audio policy before joining without rebuilding the rest of its preferences. Pass `null` to fall back to `StreamVideoOptions.audioConfigurationPolicy`. A peer connection factory built earlier by a lobby preview with a different policy is discarded and rebuilt with the new one, so stop the preview tracks first.
-- Added `CallPreferences.withAudioConfigurationPolicy`, which returns a copy of any `CallPreferences` with a different audio policy and every other value unchanged.
+- Added `Call.setAudioConfigurationPolicy` to set a call's audio policy before joining. Pass `null` to fall back to `StreamVideoOptions.audioConfigurationPolicy`. Stop lobby preview tracks before changing it.
+- Added `CallPreferences.withAudioConfigurationPolicy`, which returns a copy with a different audio policy.
 
 ### 🔄 Changed
 
-- Switching back to `voiceStandard` with `Call.setAudioBitrateProfile` is now always allowed, even when HiFi audio is not enabled for the call. Setting the profile the microphone already uses no longer restarts it.
-- Leaving `musicHighQuality` now restores noise cancellation only if it was on before switching to music, instead of always starting it.
-- Joining with `musicHighQuality` selected no longer turns noise cancellation on for a call type set to `autoOn`. It starts when the microphone leaves music instead.
-- `AudioConfigurationPolicy` values now compare by value: `AudioConfigurationPolicy.hiFi()` equals any other `HiFiAudioPolicy`, and two `CustomAudioPolicy` values are equal when their fields are.
-- `ActionCallToggleGroup.callUUIDToGroupWith` is now nullable. It is null when CallKit ungroups the call.
-- `StreamVideo.connect()` now sends user details according to `StreamVideoOptions.includeUserDetailsForAutoConnect` when `includeUserDetails` isn't passed, instead of always sending them.
+- `Call.setAudioBitrateProfile` now always allows switching back to `voiceStandard`, and setting the current profile no longer restarts the microphone.
+- Leaving `musicHighQuality` restores noise cancellation only if it was on before. Joining with `musicHighQuality` no longer turns it on for `autoOn` call types.
+- `AudioConfigurationPolicy` values now compare by value.
+- `ActionCallToggleGroup.callUUIDToGroupWith` is now nullable (null when CallKit ungroups the call).
+- `StreamVideo.connect()` now respects `StreamVideoOptions.includeUserDetailsForAutoConnect` when `includeUserDetails` isn't passed.
 
 ### 🐞 Fixed
 
-- [iOS] Stereo playout now follows the call's own audio policy: a call whose policy bypasses voice processing (`HiFiAudioPolicy`, `ViewerAudioPolicy`) plays stereo without also needing the `musicHighQuality` microphone profile. As before, iOS only plays stereo while the local microphone is muted. The preference is set again whenever a session starts, and turned off when a call that turned it on ends unless another active call prefers stereo, so a call, or its lobby preview, no longer keeps stereo playout, with voice processing bypassed, from an earlier HiFi call.
-- Fixed the microphone ignoring an audio bitrate profile set before joining, and losing it after a reconnect: the profile's microphone constraints (for `musicHighQuality`, voice processing off) were only applied once the profile was set again.
-- `StreamVideo.disconnect()` now leaves every active call before disconnecting, as the JS SDK does. Before, a call stayed joined and kept publishing audio and video after the user disconnected, also when the connection had already dropped.
-- `Call.leave()` and `Call.end()` called while the call is already leaving or ending now wait for that to finish, including the server request of an in-flight `end()`. Before, they returned right away while the call was still publishing, so `StreamVideo.disconnect()` could return before a call it was leaving had stopped, and a third overlapping `leave()` could run the cleanup a second time.
-- Accepting a call from the native ringing screen on a cold start no longer sends user details when `includeUserDetailsForAutoConnect` is `false`. It used to overwrite the user's name set on the server with an empty one.
+- [iOS] Stereo playout now follows the call's audio policy (`HiFiAudioPolicy`, `ViewerAudioPolicy`) and no longer carries over from an earlier HiFi call.
+- Fixed an audio bitrate profile set before joining being ignored, or lost after a reconnect.
+- `StreamVideo.disconnect()` now leaves all active calls first, so they no longer keep publishing after disconnect.
+- Accepting a call from the native ringing screen on a cold start no longer overwrites the user's name when `includeUserDetailsForAutoConnect` is `false`.
 
 ## 1.7.2
 
