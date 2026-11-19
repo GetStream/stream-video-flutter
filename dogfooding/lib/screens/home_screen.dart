@@ -443,7 +443,7 @@ class _JoinForm extends StatelessWidget {
   );
 
   Widget _scanQRButton(BuildContext context) => StreamButton.icon(
-    icon: const Icon(Icons.qr_code),
+    icon: Icon(context.streamIcons.qrCodeFill),
     style: .secondary,
     type: .ghost,
     onPressed: () async {
