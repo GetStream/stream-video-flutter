@@ -28,8 +28,8 @@ bool isAcceptedOnThisDevice({
 /// Keeps the native call UI in step with what the SDK knows about a ringing
 /// call: ends or dismisses it when the backend says the call ended, was
 /// rejected, lost its last participant or was accepted on another device,
-/// ends it when the app leaves the call, and mirrors a CallKit mute onto the
-/// call's microphone.
+/// ends it when the app leaves the call, mirrors a native mute onto the
+/// call's microphone, and on Android leaves a call Telecom holds.
 ///
 /// The backend subscriptions live only while a call rings: they start with
 /// the incoming event (or at start-up when the native side still shows a
@@ -122,11 +122,14 @@ class RingingSyncObserver {
   }
 
   /// Starts the backend subscriptions on a ring and stops them with the
-  /// user's answer; mirrors a CallKit mute.
+  /// user's answer; mirrors a native mute, and leaves a call Telecom holds on
+  /// Android.
   void _onRingingEvent(RingingEvent event) {
     switch (event) {
       case ActionCallToggleMute():
         _onToggleMute(event);
+      case ActionCallToggleHold():
+        if (CurrentPlatform.isAndroid) _onToggleHold(event);
       case ActionCallIncoming(:final data):
         if (!_client.isConnected) {
           _client.openConnection();
@@ -138,7 +141,8 @@ class RingingSyncObserver {
       case ActionCallAccept(:final data) ||
           ActionCallDecline(:final data) ||
           ActionCallTimeout(:final data) ||
-          ActionCallEnded(:final data):
+          ActionCallEnded(:final data) ||
+          ActionCallDismissed(:final data):
         _onRingAnswered(data.uuid?.toLowerCase());
       default:
         break;
@@ -213,6 +217,67 @@ class RingingSyncObserver {
       );
     } else {
       _logger.w(() => '[onCallEvent] Cannot toggle mute: no active call');
+    }
+  }
+
+  /// Leaves the call a Telecom hold names, as the Android SDK does. Telecom
+  /// holds a call to make room for another, such as a phone call the user
+  /// answered, and does not resume it when that call ends, so a held call
+  /// would stay silent. A resume changes nothing.
+  ///
+  /// The call is found by the cid the event carries, never guessed. An
+  /// incoming call the user has not accepted is left alone; Telecom cannot
+  /// hold one anyway. An outgoing call is left while it still rings, since
+  /// Telecom treats it as active from the start, and leaving cancels the ring.
+  ///
+  /// Nothing is done while several calls may be active, because Telecom also
+  /// holds the call in progress when the user answers another of the app's
+  /// calls. A hold there, including one for a phone call, leaves the call
+  /// joined with its audio on, and Telecom keeps it held.
+  Future<void> _onToggleHold(ActionCallToggleHold event) async {
+    _logger.d(
+      () =>
+          '[onCallEvent] ActionCallToggleHold received: uuid=${event.uuid}, '
+          'cid=${event.callCid}, isOnHold=${event.isOnHold}',
+    );
+    if (!event.isOnHold) return;
+    if (_streamVideo.options.allowMultipleActiveCalls) {
+      _logger.d(
+        () => '[onCallEvent] Hold ignored: several calls may be active',
+      );
+      return;
+    }
+
+    final cid = event.callCid;
+    final call = cid == null
+        ? null
+        : _streamVideo.state.activeCalls.value.firstWhereOrNull(
+            (call) => call.callCid.value == cid,
+          );
+    if (call == null) {
+      _logger.w(() => '[onCallEvent] Hold of $cid names no active call');
+      return;
+    }
+    final status = call.state.value.status;
+    if (status is CallStatusIncoming && !status.acceptedByMe) {
+      _logger.d(() => '[onCallEvent] Hold of $cid ignored: not accepted');
+      return;
+    }
+
+    try {
+      final result = await call.leave(
+        reason: const DisconnectReason.left(
+          initiator: LeaveInitiator.callkit,
+          message: 'Call put on hold',
+        ),
+      );
+      if (result is Failure) {
+        _logger.e(
+          () => '[onCallEvent] Leaving held $cid failed: ${result.error}',
+        );
+      }
+    } catch (e, stk) {
+      _logger.e(() => '[onCallEvent] Leaving held $cid failed: $e\n$stk');
     }
   }
 

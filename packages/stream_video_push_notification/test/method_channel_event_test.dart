@@ -164,6 +164,32 @@ void main() {
   });
 
   group('the other events read their own keys', () {
+    test('dismissed carries the call data and the reason', () async {
+      for (final reason in CallDismissReason.values) {
+        final events = await receive([
+          _message(Event.actionCallDismissed, {
+            ..._androidCallBody,
+            'reason': reason.name,
+          }),
+        ]);
+
+        final event = events.single! as ActionCallDismissed;
+        expect(event.data.callCid, 'default:ada');
+        expect(event.reason, reason);
+      }
+    });
+
+    test('dismissed with an unknown reason has none', () async {
+      final events = await receive([
+        _message(Event.actionCallDismissed, {
+          ..._androidCallBody,
+          'reason': 'somethingNew',
+        }),
+      ]);
+
+      expect((events.single! as ActionCallDismissed).reason, isNull);
+    });
+
     test('incoming failed', () async {
       final events = await receive([
         _message(Event.actionCallIncomingFailed, {
@@ -201,6 +227,20 @@ void main() {
       final event = events.single! as ActionCallToggleHold;
       expect(event.uuid, 'call-uuid');
       expect(event.isOnHold, isTrue);
+      expect(event.callCid, isNull);
+    });
+
+    test('hold with the cid Android sends', () async {
+      final events = await receive([
+        _message(Event.actionCallToggleHold, {
+          'id': 'call-uuid',
+          'isOnHold': true,
+          'callCid': 'default:abc',
+        }),
+      ]);
+
+      final event = events.single! as ActionCallToggleHold;
+      expect(event.callCid, 'default:abc');
     });
 
     test('mute', () async {

@@ -1,4 +1,4 @@
-package io.getstream.video.flutter.stream_video_push_notification
+package io.getstream.video.flutter.stream_video_push_notification.notification
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -11,8 +11,12 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.*
 import android.text.TextUtils
+import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
 
-class IncomingCallSoundPlayerManager(private val context: Context) {
+/**
+ * Plays the ringtone and vibrates for an incoming call, and stops both when the screen goes off.
+ */
+internal class RingtonePlayer(private val context: Context) {
 
     private var vibrator: Vibrator? = null
     private var audioManager: AudioManager? = null
@@ -24,7 +28,7 @@ class IncomingCallSoundPlayerManager(private val context: Context) {
 
     inner class ScreenOffIncomingCallBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            synchronized(this@IncomingCallSoundPlayerManager) {
+            synchronized(this@RingtonePlayer) {
                 if (isPlaying) {
                     stop()
                 }
@@ -41,6 +45,8 @@ class IncomingCallSoundPlayerManager(private val context: Context) {
         this.playSound(data)
         this.playVibrator()
 
+        // Registered once, however often play runs before a stop.
+        unregisterScreenOffReceiver()
         val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
         context.registerReceiver(screenOffIncomingCallBroadcastReceiver, filter)
     }
@@ -52,9 +58,15 @@ class IncomingCallSoundPlayerManager(private val context: Context) {
         vibrator?.cancel()
         ringtone = null
         vibrator = null
+        unregisterScreenOffReceiver()
+    }
+
+    private fun unregisterScreenOffReceiver() {
         try {
             context.unregisterReceiver(screenOffIncomingCallBroadcastReceiver)
-        }catch (_: Exception){}
+        } catch (_: IllegalArgumentException) {
+            // Not registered.
+        }
     }
 
     private fun prepare() {

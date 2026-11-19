@@ -76,16 +76,39 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
     throw UnimplementedError('muteCall() has not been implemented.');
   }
 
-  /// Get Callkit Mic Status (muted/unmuted).
-  /// On iOS, using Callkit(update call ui).
-  /// On Android, Nothing(only callback event listener).
+  /// Whether the system call UI has the call muted.
+  ///
+  /// On iOS this is CallKit's mute state, which [muteCall] sets. On Android it
+  /// is the mute state Telecom reports while the Telecom integration holds the
+  /// call, and `false` otherwise; [muteCall] does not change it there.
   Future<bool> isMuted(String id) {
     throw UnimplementedError('isMuted() has not been implemented.');
   }
 
-  /// Hold an Ongoing call.
-  /// On iOS, using Callkit(update the ongoing call ui).
-  /// On Android, Nothing(only callback event listener).
+  /// Asks the system to route the audio of the calls with [cid] to
+  /// [endpoint], and answers whether it did. Among several endpoints of that
+  /// type, such as two Bluetooth headsets, the one called [name] is preferred.
+  ///
+  /// Android only, while the Telecom integration holds the call: Telecom owns
+  /// the audio route of a call it holds. `false` without the integration, for
+  /// a call it does not hold, when Telecom offers no such endpoint and when it
+  /// refuses the change. Always `false` on iOS.
+  Future<bool> requestAudioEndpoint(
+    String cid,
+    TelecomAudioEndpoint endpoint, {
+    String? name,
+  }) {
+    throw UnimplementedError(
+      'requestAudioEndpoint() has not been implemented.',
+    );
+  }
+
+  /// Holds or resumes an ongoing call.
+  ///
+  /// On iOS through CallKit. On Android through Telecom, for a call the
+  /// Telecom integration has registered; without the integration it does
+  /// nothing there. An [ActionCallToggleHold] follows once the system has
+  /// held or resumed the call.
   Future<void> holdCall(String id, {bool isOnHold = true}) {
     throw UnimplementedError('holdCall() has not been implemented.');
   }
@@ -109,12 +132,18 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
     throw UnimplementedError('endAllCalls() has not been implemented.');
   }
 
-  /// Dismiss the ringing UI of a call the user just accepted and is now in.
+  /// Ends the ring of the calls with [cid] for [reason], and reports it as an
+  /// [ActionCallDismissed] carrying the reason. Android only.
   ///
-  /// Unlike [endAllCalls] this does not end the call: on Android the incoming notification and
-  /// ringtone stop, but the call stays registered with the Telecom stack, so hanging up or
-  /// holding from a watch, headset or car head unit keeps working for the rest of the call.
-  Future<void> dismissRingingCall(String cid) {
+  /// For [CallDismissReason.accepted], the default, the call itself goes on:
+  /// the incoming notification and ringtone stop, but the call stays
+  /// registered with the Telecom stack, so hanging up from a watch, headset or
+  /// car head unit keeps working. For the other reasons the call is
+  /// disconnected from Telecom with the matching cause.
+  Future<void> dismissRingingCall(
+    String cid, {
+    CallDismissReason reason = CallDismissReason.accepted,
+  }) {
     throw UnimplementedError('dismissRingingCall() has not been implemented.');
   }
 
@@ -191,4 +220,39 @@ enum CallEndedReason {
 
   /// Raw value passed to the platform, matching `CXCallEndedReason`.
   final int rawValue;
+}
+
+/// An audio output the Android Telecom stack can route a call to.
+enum TelecomAudioEndpoint {
+  /// The earpiece.
+  earpiece('earpiece'),
+
+  /// The loudspeaker.
+  speaker('speaker'),
+
+  /// A wired headset or headphones.
+  wiredHeadset('wired_headset'),
+
+  /// A Bluetooth headset.
+  bluetooth('bluetooth');
+
+  const TelecomAudioEndpoint(this.wireName);
+
+  /// The name the method channel sends, matching the `type` of the
+  /// `telecomAudioEndpointsChanged` event.
+  final String wireName;
+
+  /// The Telecom endpoint for [device], an Android audio output, or null
+  /// when Telecom has none. Android names an output by its kind, for example
+  /// `bluetooth`, in both its id and its group id.
+  static TelecomAudioEndpoint? fromAudioOutput(RtcMediaDevice device) {
+    if (device.isSpeaker) return speaker;
+    if (device.isEarpiece) return earpiece;
+
+    return switch (device.id) {
+      'bluetooth' => bluetooth,
+      'wired-headset' => wiredHeadset,
+      _ => null,
+    };
+  }
 }

@@ -11,11 +11,7 @@ import android.telecom.DisconnectCause
  */
 internal enum class TelecomEventSource { APP, SYS }
 
-/**
- * Callbacks for the calls tracked by [TelecomCallRepository].
- *
- * Kept out of the repository so implementors do not inherit its API-26 requirement.
- */
+/** Callbacks for the calls tracked by [TelecomCallRepository]. */
 internal interface TelecomCallListener {
     fun onCallRegistered(callId: String, incoming: Boolean) {}
     fun onRegistrationFailed(callId: String, error: Throwable?) {}
@@ -29,13 +25,6 @@ internal interface TelecomCallListener {
     fun onIsCallInactive(callId: String) {}
     fun onMuteCallChanged(callId: String, isMuted: Boolean) {}
 
-    /**
-     * A hold or unhold this app requested was refused by Telecom, so no transition will arrive.
-     *
-     * @param requestedOnHold the value that was asked for, so an implementor can tell a refused
-     * hold apart from a refused unhold instead of clearing whatever it happens to be tracking.
-     */
-    fun onHoldChangeFailed(callId: String, requestedOnHold: Boolean) {}
     fun onCallAudioEndpointsChanged(
         callId: String,
         snapshot: Map<String, Any?>,

@@ -57,4 +57,71 @@ class AudioEndpointUtilsTest {
         assertNull(snapshot["currentEndpoint"])
         assertEquals(emptyList<Map<String, Any?>>(), snapshot["endpoints"])
     }
+
+    @Test
+    fun `every wire name reads back as its endpoint type, anything else as none`() {
+        listOf(
+            CallEndpointCompat.TYPE_EARPIECE,
+            CallEndpointCompat.TYPE_SPEAKER,
+            CallEndpointCompat.TYPE_WIRED_HEADSET,
+            CallEndpointCompat.TYPE_BLUETOOTH,
+        ).forEach { type ->
+            assertEquals(
+                type,
+                AudioEndpointUtils.endpointTypeFromString(AudioEndpointUtils.endpointTypeToString(type)),
+            )
+        }
+        assertNull(AudioEndpointUtils.endpointTypeFromString("unknown"))
+        assertNull(AudioEndpointUtils.endpointTypeFromString("wired-headset"))
+        assertNull(AudioEndpointUtils.endpointTypeFromString(null))
+    }
+
+    @Test
+    fun `an endpoint of the type is requested, unless the call already uses one or none is offered`() {
+        val speaker = endpoint("Speaker", CallEndpointCompat.TYPE_SPEAKER, speakerId)
+        val headset = endpoint("Headset", CallEndpointCompat.TYPE_WIRED_HEADSET, headsetId)
+
+        assertEquals(
+            AudioEndpointUtils.EndpointChoice.Request(speaker),
+            AudioEndpointUtils.chooseEndpoint(CallEndpointCompat.TYPE_SPEAKER, headset, listOf(headset, speaker)),
+        )
+        assertEquals(
+            AudioEndpointUtils.EndpointChoice.AlreadyCurrent,
+            AudioEndpointUtils.chooseEndpoint(CallEndpointCompat.TYPE_SPEAKER, speaker, listOf(headset, speaker)),
+        )
+        assertEquals(
+            AudioEndpointUtils.EndpointChoice.Unavailable,
+            AudioEndpointUtils.chooseEndpoint(CallEndpointCompat.TYPE_BLUETOOTH, speaker, listOf(headset, speaker)),
+        )
+        assertEquals(
+            AudioEndpointUtils.EndpointChoice.Unavailable,
+            AudioEndpointUtils.chooseEndpoint(CallEndpointCompat.TYPE_SPEAKER, null, emptyList()),
+        )
+    }
+
+    @Test
+    fun `among several Bluetooth headsets the named one is requested, else the first`() {
+        val bluetooth = CallEndpointCompat.TYPE_BLUETOOTH
+        val buds = endpoint("Buds", bluetooth, UUID.randomUUID())
+        val car = endpoint("Car", bluetooth, UUID.randomUUID())
+        val available = listOf(buds, car)
+
+        assertEquals(
+            AudioEndpointUtils.EndpointChoice.Request(car),
+            AudioEndpointUtils.chooseEndpoint(bluetooth, buds, available, name = "Car"),
+        )
+        assertEquals(
+            AudioEndpointUtils.EndpointChoice.AlreadyCurrent,
+            AudioEndpointUtils.chooseEndpoint(bluetooth, car, available, name = "Car"),
+        )
+        // A name Telecom does not list keeps a current headset, or falls back to the first.
+        assertEquals(
+            AudioEndpointUtils.EndpointChoice.AlreadyCurrent,
+            AudioEndpointUtils.chooseEndpoint(bluetooth, car, available, name = "Watch"),
+        )
+        assertEquals(
+            AudioEndpointUtils.EndpointChoice.Request(buds),
+            AudioEndpointUtils.chooseEndpoint(bluetooth, null, available, name = "Watch"),
+        )
+    }
 }

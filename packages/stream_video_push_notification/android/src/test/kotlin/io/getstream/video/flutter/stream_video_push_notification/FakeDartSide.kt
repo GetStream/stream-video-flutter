@@ -1,0 +1,91 @@
+package io.getstream.video.flutter.stream_video_push_notification
+
+import android.content.Context
+import android.os.Looper
+import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.plugin.common.BinaryMessenger
+import io.flutter.plugin.common.MethodCall
+import io.flutter.plugin.common.StandardMethodCodec
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
+import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
+import io.mockk.every
+import io.mockk.mockk
+import java.nio.ByteBuffer
+import org.robolectric.Shadows.shadowOf
+
+/**
+ * Forgets the process-wide ringing components, so the next use builds them for a new process with
+ * no engine attached. The Telecom integration [mockTelecom] installed carries over.
+ */
+internal fun resetPlugin() {
+    val telecom = RingingComponents.telecomFactory
+    RingingComponents.reset()
+    RingingComponents.telecomFactory = telecom
+}
+
+/** A relaxed mock the ringing components built from now on use as their Telecom integration. */
+internal fun mockTelecom(): TelecomIntegration =
+    mockk<TelecomIntegration>(relaxed = true)
+        .also { RingingComponents.telecomFactory = { _ -> it } }
+
+/**
+ * Stands in for one Flutter engine on the other end of the plugin's channels: it attaches the
+ * plugin, listens on the event channel the way the Dart side does, and decodes what arrives.
+ */
+internal class FakeDartSide(context: Context) : BinaryMessenger {
+
+    private val handlers = mutableMapOf<String, BinaryMessenger.BinaryMessageHandler>()
+    private val events = mutableListOf<Map<String, Any?>>()
+
+    val plugin = StreamVideoPushNotificationPlugin()
+    val binding: FlutterPlugin.FlutterPluginBinding = mockk {
+        every { applicationContext } returns context.applicationContext
+        every { binaryMessenger } returns this@FakeDartSide
+    }
+
+    init {
+        plugin.onAttachedToEngine(binding)
+        handlers.getValue(EVENTS).onMessage(encode(MethodCall("listen", null))) {}
+    }
+
+    /** Detaches the plugin from this engine, as the engine's destruction does. */
+    fun detach() = plugin.onDetachedFromEngine(binding)
+
+    override fun send(channel: String, message: ByteBuffer?) = send(channel, message, null)
+
+    override fun send(channel: String, message: ByteBuffer?, callback: BinaryMessenger.BinaryReply?) {
+        if (channel == EVENTS && message != null) {
+            message.rewind()
+            @Suppress("UNCHECKED_CAST")
+            events += codec.decodeEnvelope(message) as Map<String, Any?>
+        }
+        callback?.reply(null)
+    }
+
+    override fun setMessageHandler(channel: String, handler: BinaryMessenger.BinaryMessageHandler?) {
+        if (handler == null) handlers.remove(channel) else handlers[channel] = handler
+    }
+
+    /** The events received so far, each a map of `event` and `body`. */
+    fun receivedEvents(): List<Map<String, Any?>> {
+        shadowOf(Looper.getMainLooper()).idle()
+        return events.toList()
+    }
+
+    /** Calls [method] on the plugin's method channel and returns what it answered. */
+    fun invoke(method: String, arguments: Any? = null): Any? {
+        var answer: ByteBuffer? = null
+        handlers.getValue(METHODS).onMessage(encode(MethodCall(method, arguments))) { answer = it }
+        val reply = answer ?: error("the plugin did not answer $method")
+        reply.rewind()
+        return codec.decodeEnvelope(reply)
+    }
+
+    private fun encode(call: MethodCall) = codec.encodeMethodCall(call).also { it.rewind() }
+
+    private companion object {
+        const val EVENTS = "stream_video_push_notification_events"
+        const val METHODS = "stream_video_push_notification"
+        val codec: StandardMethodCodec = StandardMethodCodec.INSTANCE
+    }
+}

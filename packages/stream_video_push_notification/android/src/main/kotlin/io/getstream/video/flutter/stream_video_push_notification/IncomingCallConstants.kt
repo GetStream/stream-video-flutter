@@ -20,11 +20,13 @@ object IncomingCallConstants {
         "io.getstream.video.ACTION_CALL_CALLBACK"
     const val ACTION_CALL_CUSTOM =
         "io.getstream.video.ACTION_CALL_CUSTOM"
-    const val ACTION_CALL_AUDIO_STATE_CHANGE =
-        "io.getstream.video.ACTION_CALL_AUDIO_STATE_CHANGE"
-    const val ACTION_CALL_HELD = "io.getstream.video.ACTION_CALL_HELD"
-    const val ACTION_CALL_UNHELD = "io.getstream.video.ACTION_CALL_UNHELD"
     const val ACTION_CALL_CONNECTED = "io.getstream.video.ACTION_CALL_CONNECTED"
+
+    /**
+     * The ring of a call ended because the SDK dismissed it, with a reason: accepted in the app,
+     * cancelled by the caller, answered on another device, or missed.
+     */
+    const val ACTION_CALL_DISMISSED = "io.getstream.video.ACTION_CALL_DISMISSED"
 
     /** Internal action that runs [IncomingCallNotificationService] as a foreground service while ringing. */
     const val ACTION_CALL_RINGING = "io.getstream.video.ACTION_CALL_RINGING"
@@ -38,7 +40,6 @@ object IncomingCallConstants {
 
     const val EXTRA_CALL_ID = "EXTRA_CALL_ID"
     const val EXTRA_CALL_NAME_CALLER = "EXTRA_CALL_NAME_CALLER"
-    const val EXTRA_CALL_APP_NAME = "EXTRA_CALL_APP_NAME"
     const val EXTRA_CALL_HANDLE = "EXTRA_CALL_HANDLE"
     const val EXTRA_CALL_TYPE = "EXTRA_CALL_TYPE"
     const val EXTRA_CALL_AVATAR = "EXTRA_CALL_AVATAR"
@@ -70,8 +71,6 @@ object IncomingCallConstants {
         "EXTRA_CALL_INCOMING_CALL_NOTIFICATION_CHANNEL_NAME"
     const val EXTRA_CALL_MISSED_CALL_NOTIFICATION_CHANNEL_NAME =
         "EXTRA_CALL_MISSED_CALL_NOTIFICATION_CHANNEL_NAME"
-    const val EXTRA_CALL_ONGOING_CALL_NOTIFICATION_CHANNEL_NAME =
-        "EXTRA_CALL_ONGOING_CALL_NOTIFICATION_CHANNEL_NAME"
 
     const val EXTRA_CALL_ACTION_FROM = "EXTRA_CALL_ACTION_FROM"
 
@@ -83,12 +82,6 @@ object IncomingCallConstants {
      * authoritative and the call has to be left.
      */
     const val EXTRA_CALL_ENDED_BY_SYSTEM = "EXTRA_CALL_ENDED_BY_SYSTEM"
-
-    /**
-     * Set on an ENDED intent that only dismisses the ringing UI of a call that is now live, so the
-     * Telecom registration is kept and in-call system controls survive the accept.
-     */
-    const val EXTRA_KEEP_SYSTEM_CALL = "EXTRA_KEEP_SYSTEM_CALL"
 
     const val EXTRA_CALL_IS_SHOW_FULL_LOCKED_SCREEN = "EXTRA_CALL_IS_SHOW_FULL_LOCKED_SCREEN"
     const val EXTRA_CALL_IS_IMPORTANT = "EXTRA_CALL_IS_IMPORTANT"
