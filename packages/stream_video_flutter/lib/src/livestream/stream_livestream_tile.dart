@@ -118,7 +118,7 @@ class StreamLivestreamTile extends StatelessWidget {
           icon: Icon(
             isFullscreen
                 ? Icons.fullscreen_exit
-                : context.streamIcons.fullscreenFill,
+                : context.streamIcons.fullscreen,
           ),
           tooltip: isFullscreen
               ? translations.livestreamExitFullscreen

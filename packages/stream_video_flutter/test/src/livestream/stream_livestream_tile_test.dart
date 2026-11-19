@@ -243,7 +243,7 @@ void main() {
         child: const SizedBox(),
       ),
     );
-    expect(find.byIcon(const StreamIcons().fullscreenFill), findsOneWidget);
+    expect(find.byIcon(const StreamIcons().fullscreen), findsOneWidget);
     expect(find.byTooltip('Full screen'), findsOneWidget);
 
     await pump(
