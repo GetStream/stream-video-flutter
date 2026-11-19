@@ -113,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     unawaited(showLoadingIndicator(context));
 
-    final call = makeAppCall(callId);
+    final call = makeAppCall(callId, callType: callType);
 
     try {
       final result = await call.getOrCreate(

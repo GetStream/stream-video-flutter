@@ -26,11 +26,15 @@ class _LivestreamGoLiveButtonState extends State<LivestreamGoLiveButton> {
   Future<void> _toggle({required bool goLive}) async {
     setState(() => _busy = true);
     final messenger = ScaffoldMessenger.maybeOf(context);
-    final result = goLive
-        ? await widget.call.goLive()
-        : await widget.call.stopLive();
+    final Result<Object?> result;
+    try {
+      result = goLive
+          ? await widget.call.goLive()
+          : await widget.call.stopLive();
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
     if (!mounted) return;
-    setState(() => _busy = false);
 
     if (result case final Failure failure) {
       messenger?.showSnackBar(
