@@ -231,34 +231,37 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('swaps the fullscreen glyph and tooltip in fullscreen', (
-    tester,
-  ) async {
-    await pump(
+  testWidgets(
+    'keeps the fullscreen glyph and swaps the tooltip in fullscreen',
+    (
       tester,
-      StreamLivestreamTile(
-        call: call,
-        showSpeakerphoneToggle: false,
-        onFullscreenTapped: () {},
-        child: const SizedBox(),
-      ),
-    );
-    expect(find.byIcon(const StreamIcons().fullscreen), findsOneWidget);
-    expect(find.byTooltip('Full screen'), findsOneWidget);
+    ) async {
+      await pump(
+        tester,
+        StreamLivestreamTile(
+          call: call,
+          showSpeakerphoneToggle: false,
+          onFullscreenTapped: () {},
+          child: const SizedBox(),
+        ),
+      );
+      expect(find.byIcon(const StreamIcons().fullscreen), findsOneWidget);
+      expect(find.byTooltip('Full screen'), findsOneWidget);
 
-    await pump(
-      tester,
-      StreamLivestreamTile(
-        call: call,
-        isFullscreen: true,
-        showSpeakerphoneToggle: false,
-        onFullscreenTapped: () {},
-        child: const SizedBox(),
-      ),
-    );
-    expect(find.byIcon(Icons.fullscreen_exit), findsOneWidget);
-    expect(find.byTooltip('Exit full screen'), findsOneWidget);
-  });
+      await pump(
+        tester,
+        StreamLivestreamTile(
+          call: call,
+          isFullscreen: true,
+          showSpeakerphoneToggle: false,
+          onFullscreenTapped: () {},
+          child: const SizedBox(),
+        ),
+      );
+      expect(find.byIcon(const StreamIcons().fullscreen), findsOneWidget);
+      expect(find.byTooltip('Exit full screen'), findsOneWidget);
+    },
+  );
 
   testWidgets('the style hides parts of the toolbar, the props win', (
     tester,
