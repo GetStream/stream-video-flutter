@@ -93,7 +93,7 @@ class LivestreamContent extends StatefulWidget {
   /// * [videoRendererBuilder] allows you to build a custom video renderer
   ///
   /// * [livestreamHostsUnavailableBuilder] allows you to build a custom widget when
-  /// a livestream is connected but no hosts have video enabled.
+  /// a livestream is connected but no host is in it.
   ///
   /// * [livestreamNotConnectedBuilder] allows you to build a custom widget when
   /// the livestream is not connected. Provides connection state information.
@@ -129,8 +129,8 @@ class LivestreamContent extends StatefulWidget {
   @Deprecated(PartialStateDeprecationMessage.callState)
   final CallState? callState;
 
-  /// [WidgetBuilder] used to build an action button on the top left side of
-  /// the screen.
+  /// [WidgetBuilder] used to build an action button over the top start
+  /// corner.
   final WidgetBuilder? backButtonBuilder;
 
   /// The builder used to create a custom widget for the video placeholder.
@@ -139,8 +139,8 @@ class LivestreamContent extends StatefulWidget {
   /// Builder function used to build a video renderer.
   final VideoRendererBuilder? videoRendererBuilder;
 
-  /// Builder function used to create a custom widget when a livestream is connected
-  /// but no hosts have video enabled.
+  /// Builder function used to create a custom widget when a livestream is
+  /// connected but no host is in it.
   final LivestreamHostsUnavailableBuilder? livestreamHostsUnavailableBuilder;
 
   /// Builder function used to create a custom widget when the livestream is not connected.
@@ -156,8 +156,11 @@ class LivestreamContent extends StatefulWidget {
   final LivestreamHostsParticipantBuilder? livestreamHostsParticipantBuilder;
 
   /// Function used to select the hosts from all the call participants.
-  /// If null, participants that have video enabled will be treated as hosts.
-  /// If [showMultipleHosts] is false, only the first streaming participant will be shown.
+  ///
+  /// If null, the participants with video enabled are the hosts. While none
+  /// has video, the participants with the `host` role and the call's creator
+  /// are, and their tiles show their avatar.
+  /// If [showMultipleHosts] is false, only the first host is shown.
   final LivestreamHostsParticipantsFilter? livestreamHostsParticipantsFilter;
 
   /// Boolean to allow a user to double-tap a call to see diagnostic data.
@@ -197,8 +200,7 @@ class _LivestreamContentState extends State<LivestreamContent> {
   /// Represents a call.
   Call get call => widget.call;
 
-  /// Denotes if the video fits the width (contain) or expands to
-  /// the whole size (cover).
+  /// How the video is fitted.
   VideoFit get videoFit => widget.videoFit;
 
   /// The participants sharing video, or, while none is, the hosts: their
@@ -332,9 +334,9 @@ class _LivestreamContentState extends State<LivestreamContent> {
                             context,
                             LivestreamFastReconnectingProperties(call),
                           ) ??
-                          Positioned(
+                          PositionedDirectional(
                             top: context.streamSpacing.md,
-                            left: context.streamSpacing.md,
+                            start: context.streamSpacing.md,
                             child: StreamLoadingSpinner(),
                           ),
                   ],
@@ -343,7 +345,9 @@ class _LivestreamContentState extends State<LivestreamContent> {
             } else {
               final isMigrating = status.isMigrating;
               final isReconnecting = status.isReconnecting;
-              final statusText = isReconnecting ? 'Reconnecting' : 'Connecting';
+              final statusText = isReconnecting
+                  ? translations.callConnectionReconnecting
+                  : translations.callConnectionConnecting;
 
               bodyWidget =
                   widget.livestreamNotConnectedBuilder?.call(
@@ -362,9 +366,9 @@ class _LivestreamContentState extends State<LivestreamContent> {
               children: [
                 bodyWidget,
                 if (widget.backButtonBuilder case final backButtonBuilder?)
-                  Positioned(
+                  PositionedDirectional(
                     top: 0,
-                    left: 0,
+                    start: 0,
                     child: SafeArea(child: backButtonBuilder(context)),
                   ),
                 if (widget.displayDiagnostics)
