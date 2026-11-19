@@ -1,8 +1,11 @@
 package io.getstream.video.flutter.stream_video_push_notification
 
 import android.os.Bundle
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 
+// Keys in the stored JSON that this class does not declare are ignored.
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Suppress("UNCHECKED_CAST")
 data class Data(val args: Map<String, Any?>) {
 
@@ -99,15 +102,6 @@ data class Data(val args: Map<String, Any?>) {
 
     @JsonProperty("isAccepted")
     var isAccepted: Boolean = false
-
-    @JsonProperty("isOnHold")
-    var isOnHold: Boolean = (args["isOnHold"] as? Boolean) ?: false
-
-    @JsonProperty("audioRoute")
-    var audioRoute: Int = (args["audioRoute"] as? Int) ?: 1
-
-    @JsonProperty("isMuted")
-    var isMuted: Boolean = (args["isMuted"] as? Boolean) ?: false
 
     @JsonProperty("showFullScreenOnLockScreen")
     var showFullScreenOnLockScreen: Boolean = true

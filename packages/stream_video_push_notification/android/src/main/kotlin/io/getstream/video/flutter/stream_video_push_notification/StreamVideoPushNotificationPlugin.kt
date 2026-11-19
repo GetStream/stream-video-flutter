@@ -2,12 +2,9 @@ package io.getstream.video.flutter.stream_video_push_notification
 
 import android.annotation.SuppressLint
 import android.telecom.DisconnectCause
-import androidx.annotation.NonNull
 import android.app.Activity
 import android.app.NotificationManager
 import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -18,7 +15,6 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
-import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationManager
 import io.getstream.video.flutter.stream_video_push_notification.Utils.Companion.reapCollection
 import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
 
@@ -49,13 +45,6 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                 it.get()?.send(event, body)
             }
         }
-
-        public fun sendEventCustom(event: String, body: Map<String, Any>) {
-            eventHandlers.reapCollection().forEach {
-                it.get()?.send(event, body)
-            }
-        }
-
 
         fun sharePluginWithRegister(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
             initSharedInstance(
@@ -105,61 +94,6 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
     sharePluginWithRegister(flutterPluginBinding)
   }
 
-  public fun showIncomingNotification(data: Data) {
-        data.from = "notification"
-        //send BroadcastReceiver
-        context?.sendBroadcast(
-            IncomingCallBroadcastReceiver.getIntentIncoming(
-                requireNotNull(context),
-                data.toBundle()
-            )
-        )
-    }
-
-    public fun showMissCallNotification(data: Data) {
-        incomingCallNotificationManager?.showMissCallNotification(data.toBundle())
-    }
-
-    public fun startCall(data: Data) {
-        context?.sendBroadcast(
-            IncomingCallBroadcastReceiver.getIntentStart(
-                requireNotNull(context),
-                data.toBundle()
-            )
-        )
-    }
-
-    public fun endCall(data: Data) {
-        context?.sendBroadcast(
-            IncomingCallBroadcastReceiver.getIntentEnded(
-                requireNotNull(context),
-                data.toBundle()
-            )
-        )
-    }
-
-    public fun endAllCalls() {
-        val calls = getDataActiveCalls(context)
-        calls.forEach {
-            context?.sendBroadcast(
-                IncomingCallBroadcastReceiver.getIntentEnded(
-                    requireNotNull(context),
-                    it.toBundle()
-                )
-            )
-        }
-        removeAllCalls(context)
-        context?.let { StreamTelecomManager.disconnectAll(it, DisconnectCause.LOCAL) }
-    }
-
-    public fun sendEventCustom(body: Map<String, Any>) {
-        eventHandlers.reapCollection().forEach {
-            it.get()?.send(IncomingCallConstants.ACTION_CALL_CUSTOM, body)
-        }
-    }
-
-
-
   override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
      try {
             when (call.method) {
@@ -173,13 +107,6 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                             data.toBundle()
                         )
                     )
-
-                    result.success(true)
-                }
-
-                "showIncomingCallSilently" -> {
-                    val data = Data(call.arguments() ?: HashMap())
-                    data.from = "notification"
 
                     result.success(true)
                 }
@@ -247,7 +174,8 @@ class StreamVideoPushNotificationPlugin: FlutterPlugin, MethodCallHandler, Activ
                 }
 
                 "isMuted" -> {
-                    result.success(true)
+                    val callId = (call.arguments as? Map<*, *>)?.get("id") as? String
+                    result.success(callId?.let { StreamTelecomManager.isMuted(it) } ?: false)
                 }
 
                 "endCall" -> {

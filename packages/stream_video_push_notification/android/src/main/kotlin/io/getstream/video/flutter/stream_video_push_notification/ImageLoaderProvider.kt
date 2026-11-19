@@ -10,7 +10,6 @@ import android.widget.ImageView
 import coil.ImageLoader
 import coil.request.ImageRequest
 import coil.target.Target
-import io.getstream.video.flutter.stream_video_flutter.service.notification.image.CircleTransform
 import okhttp3.OkHttpClient
 
 object ImageLoaderProvider {

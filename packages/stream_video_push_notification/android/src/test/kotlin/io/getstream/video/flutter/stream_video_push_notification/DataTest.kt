@@ -234,6 +234,25 @@ class DataTest {
     }
 
     @Test
+    fun `an active call stored with keys Data does not declare still reads`() {
+        putString(
+            context,
+            "ACTIVE_CALLS",
+            """[{"id":"call-uuid","callerName":"Ada","extra":{"callCid":"default:ada"},""" +
+                """"isAccepted":true,"onHold":false,"isOnHold":false,"audioRoute":1,""" +
+                """"muted":false,"isMuted":false}]""",
+        )
+
+        val restored = getDataActiveCalls(context)
+
+        assertEquals("call-uuid", restored.single().id)
+        assertEquals("Ada", restored.single().callerName)
+        assertEquals("default:ada", restored.single().extra["callCid"])
+        assertTrue(restored.single().isAccepted)
+        removeAllCalls(context)
+    }
+
+    @Test
     fun `removing a call and removing all calls empty the list`() {
         removeAllCalls(context)
         addCall(context, Data(args()))

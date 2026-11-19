@@ -20,10 +20,6 @@ object IncomingCallConstants {
         "io.getstream.video.ACTION_CALL_CALLBACK"
     const val ACTION_CALL_CUSTOM =
         "io.getstream.video.ACTION_CALL_CUSTOM"
-    const val ACTION_CALL_AUDIO_STATE_CHANGE =
-        "io.getstream.video.ACTION_CALL_AUDIO_STATE_CHANGE"
-    const val ACTION_CALL_HELD = "io.getstream.video.ACTION_CALL_HELD"
-    const val ACTION_CALL_UNHELD = "io.getstream.video.ACTION_CALL_UNHELD"
     const val ACTION_CALL_CONNECTED = "io.getstream.video.ACTION_CALL_CONNECTED"
 
     /** Internal action that runs [IncomingCallNotificationService] as a foreground service while ringing. */
@@ -38,7 +34,6 @@ object IncomingCallConstants {
 
     const val EXTRA_CALL_ID = "EXTRA_CALL_ID"
     const val EXTRA_CALL_NAME_CALLER = "EXTRA_CALL_NAME_CALLER"
-    const val EXTRA_CALL_APP_NAME = "EXTRA_CALL_APP_NAME"
     const val EXTRA_CALL_HANDLE = "EXTRA_CALL_HANDLE"
     const val EXTRA_CALL_TYPE = "EXTRA_CALL_TYPE"
     const val EXTRA_CALL_AVATAR = "EXTRA_CALL_AVATAR"
@@ -70,8 +65,6 @@ object IncomingCallConstants {
         "EXTRA_CALL_INCOMING_CALL_NOTIFICATION_CHANNEL_NAME"
     const val EXTRA_CALL_MISSED_CALL_NOTIFICATION_CHANNEL_NAME =
         "EXTRA_CALL_MISSED_CALL_NOTIFICATION_CHANNEL_NAME"
-    const val EXTRA_CALL_ONGOING_CALL_NOTIFICATION_CHANNEL_NAME =
-        "EXTRA_CALL_ONGOING_CALL_NOTIFICATION_CHANNEL_NAME"
 
     const val EXTRA_CALL_ACTION_FROM = "EXTRA_CALL_ACTION_FROM"
 

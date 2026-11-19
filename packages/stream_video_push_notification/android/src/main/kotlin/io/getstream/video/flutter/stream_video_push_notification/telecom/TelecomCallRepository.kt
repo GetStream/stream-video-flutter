@@ -404,14 +404,11 @@ internal class TelecomCallRepository(private val context: Context) {
 
     private fun updateCallById(
         callId: String,
-        transform: TelecomCall.Registered.() -> TelecomCall,
+        transform: TelecomCall.Registered.() -> TelecomCall.Registered,
     ) {
         _calls.update { current ->
             val call = current[callId] ?: return@update current
-            when (val updated = call.transform()) {
-                is TelecomCall.Registered -> current + (callId to updated)
-                else -> current - callId
-            }
+            current + (callId to call.transform())
         }
     }
 
