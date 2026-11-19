@@ -81,8 +81,6 @@ class LivestreamContent extends StatefulWidget {
   ///
   /// * [call] is the livestream call intended to be viewed.
   ///
-  /// * [callState] is the livestream call state.
-  ///
   /// * [backButtonBuilder] allows you to build a back/close button for closing
   /// the livestream.
   ///
@@ -105,7 +103,6 @@ class LivestreamContent extends StatefulWidget {
   const LivestreamContent({
     super.key,
     required this.call,
-    @Deprecated(PartialStateDeprecationMessage.callState) this.callState,
     this.backButtonBuilder,
     this.videoPlaceholderBuilder,
     this.videoRendererBuilder,
@@ -124,10 +121,6 @@ class LivestreamContent extends StatefulWidget {
 
   /// Represents a call.
   final Call call;
-
-  /// Holds information about the call.
-  @Deprecated(PartialStateDeprecationMessage.callState)
-  final CallState? callState;
 
   /// [WidgetBuilder] used to build an action button over the top start
   /// corner.

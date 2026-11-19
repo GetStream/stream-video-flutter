@@ -1,4 +1,4 @@
-// ignore_for_file: strict_raw_type, deprecated_member_use_from_same_package
+// ignore_for_file: strict_raw_type
 
 import 'dart:async';
 
@@ -6,27 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../stream_video_flutter.dart';
-
-typedef LivestreamEndedBuilder =
-    Widget Function(
-      BuildContext context,
-      Call call,
-      CallState callState,
-    );
-
-typedef LivestreamBackstageBuilder =
-    Widget Function(
-      BuildContext context,
-      Call call,
-      CallState callState,
-    );
-
-typedef LivestreamControlsBuilder =
-    Widget Function(
-      BuildContext context,
-      Call call,
-      CallState callState,
-    );
 
 typedef LivestreamEndedWidgetBuilder =
     Widget Function(
@@ -96,14 +75,8 @@ class LivestreamPlayer extends StatefulWidget {
     this.showSpeakerphoneToggle,
     this.showRecordingsWhenEnded = true,
     this.backButtonBuilder,
-    @Deprecated('Use livestreamEndedWidgetBuilder instead.')
-    this.livestreamEndedBuilder,
     this.livestreamEndedWidgetBuilder,
-    @Deprecated('Use livestreamBackstageWidgetBuilder instead.')
-    this.livestreamBackstageBuilder,
     this.livestreamBackstageWidgetBuilder,
-    @Deprecated('Use livestreamControlsWidgetBuilder instead.')
-    this.livestreamControlsBuilder,
     this.livestreamControlsWidgetBuilder,
     this.videoPlaceholderBuilder,
     this.videoRendererBuilder,
@@ -174,31 +147,10 @@ class LivestreamPlayer extends StatefulWidget {
   final WidgetBuilder? backButtonBuilder;
 
   /// The builder used to create a custom widget when the livestream has ended.
-  ///
-  /// Recommend to use [livestreamEndedWidgetBuilder] and listen to the partialState of the call.
-  @Deprecated('Use livestreamEndedWidgetBuilder instead.')
-  final LivestreamEndedBuilder? livestreamEndedBuilder;
-
-  /// The builder used to create a custom widget when the livestream has ended.
   final LivestreamEndedWidgetBuilder? livestreamEndedWidgetBuilder;
 
   /// The builder used to create a custom widget when the livestream is in backstage mode.
-  ///
-  /// Recommend to use [livestreamBackstageWidgetBuilder] and listen to the partialState of the call.
-  @Deprecated('Use livestreamBackstageWidgetBuilder instead.')
-  final LivestreamBackstageBuilder? livestreamBackstageBuilder;
-
-  /// The builder used to create a custom widget when the livestream is in backstage mode.
   final LivestreamBackstageWidgetBuilder? livestreamBackstageWidgetBuilder;
-
-  /// The builder used to create custom controls for the livestream player.
-  ///
-  /// The controls replace the tile's toolbar and are laid over the video,
-  /// in fullscreen too.
-  ///
-  /// Recommend to use [livestreamControlsWidgetBuilder] and listen to the partialState of the call.
-  @Deprecated('Use livestreamControlsWidgetBuilder instead.')
-  final LivestreamControlsBuilder? livestreamControlsBuilder;
 
   /// The builder used to create custom controls for the livestream player.
   ///
@@ -307,10 +259,6 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   /// Represents a call.
   Call get call => widget.call;
 
-  /// Holds information about the call.
-  @Deprecated(PartialStateDeprecationMessage.callState)
-  late CallState _callState;
-
   /// Controls the visibility of diagnostic data.
   bool _isStatsVisible = false;
 
@@ -326,9 +274,6 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   void initState() {
     super.initState();
 
-    //Remove once partial state deprecation is complete.
-    _callState = call.state.value;
-
     _fullscreen = widget.startInFullscreenMode;
 
     if (widget.joinBehaviour != LivestreamJoinBehaviour.manualJoin) {
@@ -336,20 +281,6 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     }
 
     _leaveOnDisconnect();
-
-    // Only listen to call state if any of the builders that depend on it are provided.
-    // Remove once partial state deprecation is complete.
-    if (widget.livestreamEndedBuilder != null ||
-        widget.livestreamBackstageBuilder != null ||
-        widget.livestreamControlsBuilder != null) {
-      _compositeSubscription.add(
-        widget.call.state.listen((callState) {
-          setState(() {
-            _callState = callState;
-          });
-        }),
-      );
-    }
   }
 
   void _joinWhenPossible() {
@@ -502,7 +433,6 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
       builder: (context, data) {
         if (data.hasEnded) {
           return widget.livestreamEndedWidgetBuilder?.call(context, call) ??
-              widget.livestreamEndedBuilder?.call(context, call, _callState) ??
               _layout(
                 context,
                 body: LivestreamEndedContent(
@@ -515,11 +445,6 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
 
         if (data.isBackstage) {
           return widget.livestreamBackstageWidgetBuilder?.call(context, call) ??
-              widget.livestreamBackstageBuilder?.call(
-                context,
-                call,
-                _callState,
-              ) ??
               _layout(
                 context,
                 body: LivestreamBackstageContent(call: widget.call),
@@ -528,7 +453,6 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
 
         Widget content = LivestreamContent(
           call: call,
-          callState: _callState,
           videoPlaceholderBuilder: widget.videoPlaceholderBuilder,
           videoRendererBuilder: widget.videoRendererBuilder,
           livestreamHostsUnavailableBuilder:
@@ -560,9 +484,10 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
           );
         }
 
-        final controls =
-            widget.livestreamControlsWidgetBuilder?.call(context, call) ??
-            widget.livestreamControlsBuilder?.call(context, call, _callState);
+        final controls = widget.livestreamControlsWidgetBuilder?.call(
+          context,
+          call,
+        );
 
         final tile = GestureDetector(
           onDoubleTap: () {

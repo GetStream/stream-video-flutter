@@ -1,25 +1,9 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../test_utils/goldens.dart';
-
-// Answers every partial-state request from one fixed call state.
-class _FakeCall extends Mock implements Call {
-  _FakeCall(this._callState)
-    : _emitter = MutableStateEmitter<CallState>(_callState, sync: true);
-
-  final CallState _callState;
-  final MutableStateEmitter<CallState> _emitter;
-
-  @override
-  StateEmitter<CallState> get state => _emitter;
-
-  @override
-  Stream<T> partialState<T>(CallStateSelector<T> selector) =>
-      Stream.value(selector(_callState));
-}
+import 'fake_livestream_call.dart';
 
 void main() {
   final base = CallState(
@@ -43,14 +27,14 @@ void main() {
           GoldenTestScenario(
             name: 'ended',
             child: LivestreamEndedContent(
-              call: _FakeCall(base),
+              call: FakeLivestreamCall(base),
               showRecordings: false,
             ),
           ),
           GoldenTestScenario(
             name: 'backstage',
             child: LivestreamBackstageContent(
-              call: _FakeCall(
+              call: FakeLivestreamCall(
                 base.copyWith(isBackstage: true, participantCount: 12),
               ),
             ),

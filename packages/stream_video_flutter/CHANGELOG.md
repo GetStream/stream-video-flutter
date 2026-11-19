@@ -330,6 +330,7 @@
 ### ⚠️ Breaking
 
 - `LivestreamPlayer.backButtonBuilder` sits at the start of the app bar, and over the video only in fullscreen.
+- Removed `LivestreamPlayer.livestreamEndedBuilder`, `livestreamBackstageBuilder` and `livestreamControlsBuilder` with their typedefs, and `LivestreamContent.callState`. Use `livestreamEndedWidgetBuilder`, `livestreamBackstageWidgetBuilder` and `livestreamControlsWidgetBuilder` instead.
 - `LivestreamEndedContent`, `LivestreamBackstageContent` and `LivestreamContent` no longer bring their own `Scaffold`.
 - `isMobileLandscape` and `isMobilePortrait` are removed.
 - `StreamScreenSize` is `small` for any window shorter than 480, and `StreamScreenSize.fromSize` buckets a size by both axes.
