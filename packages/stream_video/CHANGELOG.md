@@ -1,4 +1,4 @@
-## Upcoming
+## 1.8.0
 
 ### ✅ Added
 
