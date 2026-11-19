@@ -44,7 +44,7 @@ dependency_overrides:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core_flutter
-      ref: d21db9d93f17203e3525d4ce4e2fd65ab763cd5f
+      ref: 1553108cc38556a8b427e8ca389b33250c80278f
 
 melos:
   ignore:

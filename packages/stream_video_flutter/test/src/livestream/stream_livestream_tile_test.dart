@@ -232,7 +232,7 @@ void main() {
   });
 
   testWidgets(
-    'keeps the fullscreen glyph and swaps the tooltip in fullscreen',
+    'swaps the glyph and tooltip in fullscreen',
     (
       tester,
     ) async {
@@ -258,7 +258,7 @@ void main() {
           child: const SizedBox(),
         ),
       );
-      expect(find.byIcon(const StreamIcons().fullscreen), findsOneWidget);
+      expect(find.byIcon(const StreamIcons().fullscreenExit), findsOneWidget);
       expect(find.byTooltip('Exit full screen'), findsOneWidget);
     },
   );

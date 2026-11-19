@@ -53,6 +53,7 @@ final m3eStreamIcons = const StreamIcons().copyWith(
   folderLarge: Icons.folder_rounded,
   fullBlurFill: Icons.blur_circular_rounded,
   fullscreen: Icons.fullscreen_rounded,
+  fullscreenExit: Icons.fullscreen_exit_rounded,
   fullscreenFill: Icons.fullscreen_rounded,
   gallery: Icons.photo_library_rounded,
   gridDefaultFill: Icons.grid_view_rounded,
