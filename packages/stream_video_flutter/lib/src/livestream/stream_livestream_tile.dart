@@ -86,8 +86,8 @@ class StreamLivestreamTileProps {
   /// The button is left out when null.
   final VoidCallback? onFullscreenTapped;
 
-  /// Whether the tile fills the screen, which makes the fullscreen button's
-  /// tooltip say that it leaves fullscreen.
+  /// Whether the tile fills the screen, which makes the fullscreen button
+  /// show the exit glyph and tooltip.
   final bool isFullscreen;
 
   /// Whether the toolbar shows [StreamLiveIndicator].
@@ -203,8 +203,11 @@ class DefaultStreamLivestreamTile extends StatelessWidget {
         ),
       if (props.onFullscreenTapped case final onFullscreenTapped?)
         StreamButton.icon(
-          // The same glyph either way, as in the design.
-          icon: Icon(context.streamIcons.fullscreen),
+          icon: Icon(
+            props.isFullscreen
+                ? context.streamIcons.fullscreenExit
+                : context.streamIcons.fullscreen,
+          ),
           tooltip: props.isFullscreen
               ? translations.livestreamExitFullscreen
               : translations.livestreamEnterFullscreen,

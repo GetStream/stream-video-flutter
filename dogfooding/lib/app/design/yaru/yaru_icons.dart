@@ -55,6 +55,7 @@ final yaruStreamIcons = const StreamIcons().copyWith(
   folderLarge: YaruIcons.folder,
   fullBlurFill: YaruIcons.droplets,
   fullscreen: YaruIcons.fullscreen,
+  fullscreenExit: YaruIcons.fullscreen_exit,
   fullscreenFill: YaruIcons.fullscreen,
   gallery: YaruIcons.image,
   gridDefaultFill: YaruIcons.app_grid,

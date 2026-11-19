@@ -55,6 +55,7 @@ final fluentStreamIcons = const StreamIcons().copyWith(
   folderLarge: FluentIcons.folder_24_regular,
   fullBlurFill: FluentIcons.blur_24_filled,
   fullscreen: FluentIcons.full_screen_maximize_24_regular,
+  fullscreenExit: FluentIcons.full_screen_minimize_24_regular,
   fullscreenFill: FluentIcons.full_screen_maximize_24_filled,
   gallery: FluentIcons.image_multiple_24_regular,
   gridDefaultFill: FluentIcons.grid_24_filled,

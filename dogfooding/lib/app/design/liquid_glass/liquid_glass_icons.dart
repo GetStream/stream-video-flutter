@@ -55,6 +55,7 @@ final liquidGlassStreamIcons = const StreamIcons().copyWith(
   folderLarge: CupertinoIcons.folder,
   fullBlurFill: CupertinoIcons.drop_fill,
   fullscreen: CupertinoIcons.fullscreen,
+  fullscreenExit: CupertinoIcons.fullscreen_exit,
   fullscreenFill: CupertinoIcons.fullscreen,
   gallery: CupertinoIcons.photo_on_rectangle,
   gridDefaultFill: CupertinoIcons.square_grid_2x2_fill,
