@@ -69,12 +69,15 @@ class StreamLivestreamTileStyle with _$StreamLivestreamTileStyle {
     this.leadingSpacing,
     this.trailingSpacing,
     this.buttonSize,
+    this.showLiveIndicator,
+    this.showSpectatorsIndicator,
+    this.showSpeakerphoneToggle,
   });
 
   /// Padding around the toolbar at the bottom of the tile.
   final EdgeInsetsGeometry? toolbarPadding;
 
-  /// Gap between the leading indicators and the trailing buttons.
+  /// Smallest gap between the leading indicators and the trailing buttons.
   final double? toolbarSpacing;
 
   /// Gap between the live indicator and the spectators indicator.
@@ -85,6 +88,21 @@ class StreamLivestreamTileStyle with _$StreamLivestreamTileStyle {
 
   /// Size of the speakerphone and fullscreen buttons.
   final StreamButtonSize? buttonSize;
+
+  /// Whether the toolbar shows [StreamLiveIndicator].
+  ///
+  /// [StreamLivestreamTile.showLiveIndicator] wins over this.
+  final bool? showLiveIndicator;
+
+  /// Whether the toolbar shows [StreamSpectatorsIndicator].
+  ///
+  /// [StreamLivestreamTile.showSpectatorsIndicator] wins over this.
+  final bool? showSpectatorsIndicator;
+
+  /// Whether the toolbar shows [LivestreamSpeakerphoneOption].
+  ///
+  /// [StreamLivestreamTile.showSpeakerphoneToggle] wins over this.
+  final bool? showSpeakerphoneToggle;
 
   /// Linearly interpolates between two [StreamLivestreamTileStyle]s.
   static StreamLivestreamTileStyle? lerp(

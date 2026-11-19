@@ -135,6 +135,14 @@
   "@livestreamBackstage": {
     "description": "The badge text shown when the call mode is backstage"
   },
+  "livestreamEnterFullscreen": "Full screen",
+  "@livestreamEnterFullscreen": {
+    "description": "Tooltip of the livestream button that fills the screen with the video"
+  },
+  "livestreamExitFullscreen": "Exit full screen",
+  "@livestreamExitFullscreen": {
+    "description": "Tooltip of the livestream button that leaves fullscreen"
+  },
   "livestreamLive": "Live",
   "@livestreamLive": {
     "description": "The badge text shown when the call mode is live"
