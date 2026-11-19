@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:stream_video_filters/video_effects_manager.dart';
@@ -75,6 +77,10 @@ class _CallRoutePageState extends State<CallRoutePage> {
   Call? _call;
   bool _callExists = false;
 
+  /// Whether the user only watches [_call], a livestream: they get the
+  /// livestream player instead of the lobby and the call screen.
+  bool _isLivestreamViewer = false;
+
   /// Why the call could not be opened, null while it can.
   String? _error;
 
@@ -128,9 +134,11 @@ class _CallRoutePageState extends State<CallRoutePage> {
       }
 
       if (!mounted) return;
+      final callExists = (lookup as Success<bool>).data;
       setState(() {
         _call = call;
-        _callExists = (lookup as Success<bool>).data;
+        _callExists = callExists;
+        _isLivestreamViewer = callExists && _watchesOnly(call);
       });
     } catch (e, stk) {
       debugPrint('Could not open call ${widget.callId}: $e');
@@ -139,18 +147,62 @@ class _CallRoutePageState extends State<CallRoutePage> {
     }
   }
 
-  /// Whether [call] is a livestream this user only watches: they skip the
-  /// lobby and get the livestream player, like the other SDKs' demo apps.
-  /// Hosts, who can publish video, go through the lobby to the call screen.
-  bool _isLivestreamViewer(Call call) {
-    if (call.type != StreamCallType.liveStream() || !_callExists) return false;
+  /// Whether [call] is a livestream this user only watches. Hosts, who can
+  /// publish video, go through the lobby to the call screen.
+  static bool _watchesOnly(Call call) {
+    if (call.type != StreamCallType.liveStream()) return false;
 
     final capabilities = call.state.value.ownCapabilities;
     return !capabilities.contains(CallPermission.sendVideo);
   }
 
-  /// Leaves this page once it is on screen, for a call that is already over.
+  @override
+  void dispose() {
+    // The call screen leaves on its own; the player does not, so leaving
+    // this page any way at all (system back included) leaves the call.
+    if (_isLivestreamViewer) {
+      unawaited(
+        _call?.leave(
+          reason: const DisconnectReason.left(initiator: LeaveInitiator.user),
+        ),
+      );
+    }
+    super.dispose();
+  }
+
+  /// Keeps the page for a livestream that ended, so the viewer sees that it
+  /// did; any other disconnect closes it.
+  void _onViewerDisconnected(CallDisconnectedProperties properties) {
+    final reason = properties.reason;
+    if (reason is DisconnectReasonEnded) return;
+
+    final message = switch (reason) {
+      DisconnectReasonLeft() => null,
+      DisconnectReasonFailure(:final error) =>
+        "Couldn't join the livestream: ${error.message}",
+      DisconnectReasonReconnectionFailed() =>
+        "Couldn't restore the connection to the livestream.",
+      DisconnectReasonUnsupportedNetwork() =>
+        'This network blocks calls. Try another network, or turn off your '
+            'VPN.',
+      _ => 'The livestream disconnected.',
+    };
+    if (message != null) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+      );
+    }
+    _close();
+  }
+
+  /// Whether [_close] has been asked for, so a second tap does not pop the
+  /// page under this one too.
+  bool _closing = false;
+
+  /// Leaves this page once it is on screen.
   void _close() {
+    if (_closing) return;
+    _closing = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       if (context.canPop()) {
@@ -206,24 +258,15 @@ class _CallRoutePageState extends State<CallRoutePage> {
       );
     }
 
-    if (_isLivestreamViewer(call)) {
+    if (_isLivestreamViewer) {
       return LivestreamPlayer(
         call: call,
-        // Stays open when the host ends the livestream, so the viewer sees
-        // that it ended; the close button leaves.
-        onCallDisconnected: (_) {},
+        onCallDisconnected: _onViewerDisconnected,
+        // Closing the page leaves the call; see [dispose].
         backButtonBuilder: (context) => StreamToolbarButton.icon(
           icon: Icon(context.streamIcons.xmark),
           tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
-          onPressed: () async {
-            // The player only leaves on its own when the call disconnects.
-            await call.leave(
-              reason: const DisconnectReason.left(
-                initiator: LeaveInitiator.user,
-              ),
-            );
-            if (context.mounted) await Navigator.maybePop(context);
-          },
+          onPressed: _close,
         ),
       );
     }

@@ -795,9 +795,10 @@ class _CallScreenState extends State<CallScreen>
                         _layoutToggle(
                           menuDirection: StreamMenuDirection.down,
                         ),
-                      // A livestream host gets only the go live button here.
+                      // A livestream host gets the go live button instead of
+                      // the layout toggle.
                       if (_isLivestream) LivestreamGoLiveButton(call: call),
-                      if (StreamFlipCameraButton.isSupported && !_isLivestream)
+                      if (StreamFlipCameraButton.isSupported)
                         PartialCallStateBuilder(
                           call: call,
                           selector: (state) => state.localParticipant != null,
