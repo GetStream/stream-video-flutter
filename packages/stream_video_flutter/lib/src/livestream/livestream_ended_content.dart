@@ -22,8 +22,11 @@ class LivestreamEndedContent extends StatefulWidget {
 }
 
 class _LivestreamEndedContentState extends State<LivestreamEndedContent> {
-  // Fetched once rather than on every rebuild.
-  late final _recordings = widget.call.listRecordings();
+  static final _logger = taggedLogger(tag: 'SV:LivestreamEnded');
+
+  late var _recordings = widget.call.listRecordings();
+
+  void _retry() => setState(() => _recordings = widget.call.listRecordings());
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +40,11 @@ class _LivestreamEndedContentState extends State<LivestreamEndedContent> {
           FutureBuilder(
             future: _recordings,
             builder: (context, snapshot) {
+              if (snapshot.data case Failure(:final error)) {
+                _logger.w(() => '[recordings] failed: $error');
+                return _RecordingsFailed(onRetry: _retry);
+              }
+
               final recordings = snapshot.data?.getDataOrNull();
               if (recordings == null || recordings.isEmpty) {
                 return const SizedBox.shrink();
@@ -86,6 +94,40 @@ class _Recordings extends StatelessWidget {
                   : () => onRecordingTapped!(url),
               child: Text(url, maxLines: 1, overflow: TextOverflow.ellipsis),
             ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RecordingsFailed extends StatelessWidget {
+  const _RecordingsFailed({required this.onRetry});
+
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+    final translations = context.translations;
+
+    return Padding(
+      padding: EdgeInsets.only(top: spacing.md),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: spacing.xxs,
+        children: [
+          Text(
+            translations.recordingsErrorTitle,
+            style: context.streamTextTheme.captionDefault.copyWith(
+              color: context.streamColorScheme.textSecondary,
+            ),
+          ),
+          StreamButton(
+            type: StreamButtonType.ghost,
+            size: StreamButtonSize.small,
+            onPressed: onRetry,
+            child: Text(translations.recordingsRetry),
+          ),
         ],
       ),
     );

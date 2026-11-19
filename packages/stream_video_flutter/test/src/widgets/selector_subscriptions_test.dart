@@ -107,7 +107,7 @@ void main() {
     await tester.pump();
 
     expect(find.byType(LivestreamContent), findsOneWidget);
-    expect(find.byType(LivestreamInfo), findsOneWidget);
+    expect(find.byType(StreamLivestreamTile), findsOneWidget);
     expect(find.byType(LivestreamSpeakerphoneOption), findsOneWidget);
   });
 }

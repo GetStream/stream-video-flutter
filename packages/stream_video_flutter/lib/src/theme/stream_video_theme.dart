@@ -363,16 +363,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           fontWeight: FontWeight.bold,
         ),
       ),
+      // Only the deprecated LivestreamInfo reads these.
       livestreamTheme: StreamLivestreamThemeData(
-        playIconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
-        pauseIconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
-        playPauseIconSize: 64,
         liveButtonColor: colorTheme.accentPrimary,
-        backstageButtonColor: colorTheme.accentError,
         callStateButtonTextStyle: const TextStyle(
           color: Colors.white,
         ),
