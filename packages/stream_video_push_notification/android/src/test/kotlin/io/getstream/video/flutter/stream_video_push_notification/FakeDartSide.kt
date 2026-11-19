@@ -7,18 +7,26 @@ import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.StandardMethodCodec
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
+import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
 import io.mockk.every
 import io.mockk.mockk
 import java.nio.ByteBuffer
 import org.robolectric.Shadows.shadowOf
 
 /**
- * Forgets the process-wide ringing components, so each test starts with its own context and no
- * engine attached, as a fresh process would.
+ * Forgets the process-wide ringing components, so the next use builds them for a new process with
+ * no engine attached. The Telecom integration [mockTelecom] installed carries over.
  */
 internal fun resetPlugin() {
+    val telecom = RingingComponents.telecomFactory
     RingingComponents.reset()
+    RingingComponents.telecomFactory = telecom
 }
+
+/** A relaxed mock the ringing components built from now on use as their Telecom integration. */
+internal fun mockTelecom(): TelecomIntegration =
+    mockk<TelecomIntegration>(relaxed = true)
+        .also { RingingComponents.telecomFactory = { _ -> it } }
 
 /**
  * Stands in for one Flutter engine on the other end of the plugin's channels: it attaches the

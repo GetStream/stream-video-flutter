@@ -9,7 +9,6 @@ import io.flutter.plugin.common.PluginRegistry
 import io.getstream.video.flutter.stream_video_push_notification.channel.PushMethodCallHandler
 import io.getstream.video.flutter.stream_video_push_notification.channel.RingingEventDispatcher
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
-import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
 
 /**
  * The plugin of one Flutter engine: it handles the engine's method channel and sends the engine
@@ -62,11 +61,12 @@ class StreamVideoPushNotificationPlugin : FlutterPlugin, ActivityAware {
         eventChannel?.setStreamHandler(null)
         eventChannel = null
         val events = components?.events
+        val telecom = components?.telecom
         eventSink?.let { events?.detach(it) }
         eventSink = null
         handler = null
         components = null
-        if (events?.hasAttachedEngines != true) StreamTelecomManager.releaseIfIdle()
+        if (events?.hasAttachedEngines != true) telecom?.releaseIfIdle()
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) = attachActivity(binding)

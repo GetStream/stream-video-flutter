@@ -3,18 +3,14 @@ package io.getstream.video.flutter.stream_video_push_notification
 import android.app.Activity
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
-import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
-import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomCall
-import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomCallRepository
+import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.PluginRegistry
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import io.mockk.CapturingSlot
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
 import io.mockk.slot
-import io.mockk.unmockkObject
 import io.mockk.verify
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -38,41 +34,26 @@ class StreamVideoPushNotificationPluginTest {
 
     private lateinit var dart: FakeDartSide
 
+    private lateinit var telecom: TelecomIntegration
+
     @Before
     fun attachPlugin() {
-        resetPlugin()
+        RingingComponents.reset()
+        telecom = mockTelecom()
         dart = FakeDartSide(context)
     }
 
     @After
     fun detachPlugin() {
-        setTelecomRepository(null)
-        resetPlugin()
+        RingingComponents.reset()
     }
 
     @Test
-    fun `isMuted answers the mute state of the call Telecom holds`() {
-        val call = mockk<TelecomCall.Registered>()
-        setTelecomRepository(mockk { every { getCall(CALL_ID) } returns call })
-
-        every { call.isMuted } returns true
+    fun `isMuted answers the mute state Telecom reports for the call`() {
+        every { telecom.isMuted(CALL_ID) } returns true
         assertEquals(true, dart.invoke("isMuted", mapOf("id" to CALL_ID)))
 
-        every { call.isMuted } returns false
-        assertEquals(false, dart.invoke("isMuted", mapOf("id" to CALL_ID)))
-    }
-
-    @Test
-    fun `isMuted answers false for a call Telecom does not hold`() {
-        setTelecomRepository(mockk { every { getCall(CALL_ID) } returns null })
-
-        assertEquals(false, dart.invoke("isMuted", mapOf("id" to CALL_ID)))
-    }
-
-    @Test
-    fun `isMuted answers false while the Telecom integration has no repository`() {
-        setTelecomRepository(null)
-
+        every { telecom.isMuted(CALL_ID) } returns false
         assertEquals(false, dart.invoke("isMuted", mapOf("id" to CALL_ID)))
     }
 
@@ -127,18 +108,13 @@ class StreamVideoPushNotificationPluginTest {
 
     @Test
     fun `Telecom is released only when the last engine detaches`() {
-        mockkObject(StreamTelecomManager)
-        try {
-            val second = FakeDartSide(context)
+        val second = FakeDartSide(context)
 
-            second.detach()
-            verify(exactly = 0) { StreamTelecomManager.releaseIfIdle() }
+        second.detach()
+        verify(exactly = 0) { telecom.releaseIfIdle() }
 
-            dart.detach()
-            verify(exactly = 1) { StreamTelecomManager.releaseIfIdle() }
-        } finally {
-            unmockkObject(StreamTelecomManager)
-        }
+        dart.detach()
+        verify(exactly = 1) { telecom.releaseIfIdle() }
     }
 
     private fun activityBinding(
@@ -147,14 +123,6 @@ class StreamVideoPushNotificationPluginTest {
     ): ActivityPluginBinding = mockk(relaxed = true) {
         every { this@mockk.activity } returns activity
         every { addRequestPermissionsResultListener(capture(listener)) } returns Unit
-    }
-
-    /** Replaces the repository [StreamTelecomManager] reads, which it otherwise builds itself. */
-    private fun setTelecomRepository(repository: TelecomCallRepository?) {
-        StreamTelecomManager::class.java.getDeclaredField("repository").apply {
-            isAccessible = true
-            set(null, repository)
-        }
     }
 
     private companion object {

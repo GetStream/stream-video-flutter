@@ -11,7 +11,7 @@ import io.getstream.video.flutter.stream_video_push_notification.IncomingCallCon
 /**
  * Capability and permission checks required before handing a call to the Telecom stack.
  */
-internal object TelecomPermissions {
+internal open class TelecomPermissions {
 
     /**
      * `androidx.core.telecom` requires API 26 to register an app with Telecom.
@@ -63,7 +63,7 @@ internal object TelecomPermissions {
         return (hasTelephony && hasDefaultDialer).also { if (it) supportConfirmed = true }
     }
 
-    fun canUseTelecom(context: Context): Boolean =
+    open fun canUseTelecom(context: Context): Boolean =
         isSupportedApiLevel() && supportsTelecom(context) && hasPermissions(context)
 
     private fun safeTelecomManager(context: Context): TelecomManager? = try {

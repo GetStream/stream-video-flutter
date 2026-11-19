@@ -15,7 +15,7 @@ import io.getstream.video.flutter.stream_video_push_notification.core.RingingCon
 import io.getstream.video.flutter.stream_video_push_notification.notification.RingtonePlayer
 import io.getstream.video.flutter.stream_video_push_notification.permissions.FullScreenIntentPermission
 import io.getstream.video.flutter.stream_video_push_notification.permissions.NotificationPermissionFlow
-import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
+import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
 
 /**
  * The method channel of one Flutter engine: reads each call's arguments and hands it to the
@@ -29,6 +29,7 @@ internal class PushMethodCallHandler(
     private val notifications: IncomingCallNotificationManager,
     private val ringtone: RingtonePlayer,
     private val events: RingingEventDispatcher,
+    private val telecom: TelecomIntegration,
     private val notificationPermission: NotificationPermissionFlow,
     private val fullScreenIntentPermission: FullScreenIntentPermission,
 ) : MethodChannel.MethodCallHandler {
@@ -47,7 +48,7 @@ internal class PushMethodCallHandler(
     private fun handle(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "initData" -> {
-                StreamTelecomManager.init(context, mapArgument(call))
+                telecom.init(mapArgument(call))
                 result.success(null)
             }
 
@@ -89,8 +90,7 @@ internal class PushMethodCallHandler(
                 val args = mapArgument(call)
                 events.send(IncomingCallConstants.ACTION_CALL_TOGGLE_HOLD, args)
                 (args["id"] as? String)?.let { callId ->
-                    StreamTelecomManager.setOnHold(
-                        context,
+                    telecom.setOnHold(
                         callId,
                         args["isOnHold"] as? Boolean ?: true,
                     )
@@ -100,7 +100,7 @@ internal class PushMethodCallHandler(
 
             "isMuted" -> {
                 val callId = idArgument(call)
-                result.success(callId?.let { StreamTelecomManager.isMuted(it) } ?: false)
+                result.success(callId?.let { telecom.isMuted(it) } ?: false)
             }
 
             "endCall" -> {
@@ -198,6 +198,7 @@ internal class PushMethodCallHandler(
             notifications = components.notifications,
             ringtone = components.ringtone,
             events = components.events,
+            telecom = components.telecom,
             notificationPermission = components.notificationPermission,
             fullScreenIntentPermission = components.fullScreenIntentPermission,
         )
