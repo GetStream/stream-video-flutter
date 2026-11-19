@@ -52,14 +52,19 @@ class StreamSpectatorsIndicator extends StatelessWidget {
               size: resolved.iconSize,
               color: resolved.iconColor,
             ),
-            PartialCallStateBuilder(
-              call: call,
-              selector: includeAnonymousParticipants
-                  ? _allViewers
-                  : _namedViewers,
-              builder: (context, count) => Text(
-                '$count',
-                style: resolved.textStyle,
+            Flexible(
+              child: PartialCallStateBuilder(
+                call: call,
+                selector: includeAnonymousParticipants
+                    ? _allViewers
+                    : _namedViewers,
+                builder: (context, count) => Text(
+                  '$count',
+                  maxLines: 1,
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                  style: resolved.textStyle,
+                ),
               ),
             ),
           ],

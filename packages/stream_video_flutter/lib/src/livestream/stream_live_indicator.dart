@@ -66,9 +66,15 @@ class StreamLiveIndicator extends StatelessWidget {
                       ),
                     ),
                   ),
-                Text(
-                  label.toUpperCase(),
-                  style: resolved.textStyle.copyWith(color: foreground),
+                // Shrinks with an ellipsis when the toolbar runs out of room.
+                Flexible(
+                  child: Text(
+                    label.toUpperCase(),
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    style: resolved.textStyle.copyWith(color: foreground),
+                  ),
                 ),
               ],
             ),

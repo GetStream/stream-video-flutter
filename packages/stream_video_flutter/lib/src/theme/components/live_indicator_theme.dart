@@ -88,6 +88,9 @@ class StreamLiveIndicatorStyle with _$StreamLiveIndicatorStyle {
   final BorderRadiusGeometry? borderRadius;
 
   /// Style of the label.
+  ///
+  /// Its colour is not used: the label takes [liveForegroundColor] or
+  /// [backstageForegroundColor].
   final TextStyle? textStyle;
 
   /// Pill colour while the call is live.
