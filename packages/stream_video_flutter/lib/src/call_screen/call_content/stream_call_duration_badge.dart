@@ -88,18 +88,16 @@ class StreamCallDurationBadge extends StatelessWidget {
           // A record compares by value, so the stream stays distinct.
           child: PartialCallStateBuilder(
             call: call,
-            selector: (state) => (
-              encrypted: showEncryption && state.isE2eeEnabled,
-              recording: showRecording && state.isRecording,
-              presenting:
-                  showScreenShare &&
-                  state.callParticipants.any((it) => it.isScreenShareEnabled),
-            ),
+            selector: _status,
             builder: (context, status) => Row(
               mainAxisSize: MainAxisSize.min,
               spacing: resolved.spacing,
               children: [
-                ?_indicators(context, resolved, status),
+                ?_indicators(context, resolved, (
+                  encrypted: showEncryption && status.encrypted,
+                  recording: showRecording && status.recording,
+                  presenting: showScreenShare && status.presenting,
+                )),
                 _Duration(call: call, style: resolved),
               ],
             ),
@@ -108,6 +106,14 @@ class StreamCallDurationBadge extends StatelessWidget {
       ),
     );
   }
+
+  static ({bool encrypted, bool recording, bool presenting}) _status(
+    CallState state,
+  ) => (
+    encrypted: state.isE2eeEnabled,
+    recording: state.isRecording,
+    presenting: state.callParticipants.any((it) => it.isScreenShareEnabled),
+  );
 
   /// The indicators [status] calls for, or null when it calls for none.
   Widget? _indicators(
