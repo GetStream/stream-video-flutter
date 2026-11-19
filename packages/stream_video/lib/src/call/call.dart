@@ -522,6 +522,10 @@ class Call {
   bool _initialized = false;
   bool _leaveCallTriggered = false;
 
+  // Completes when the [leave] or [end] that owns the running disconnect
+  // finishes, so concurrent callers can wait for its cleanup.
+  Completer<void>? _disconnectCompleter;
+
   // Completer that will be completed when call lifecycle ends (call leave is called)
   final Completer<void> _callLifecycleCompleter = Completer<void>();
 
@@ -1290,6 +1294,7 @@ class Call {
       return Result.error('invalid status: ${state.value.status}');
     }
 
+    final ownsDisconnect = !_leaveCallTriggered;
     try {
       final didDisconnect = await _disconnect(
         sfuLeaveReason: reason ?? 'user is ending the call',
@@ -1309,7 +1314,7 @@ class Call {
       _logger.v(() => '[end] completed: $result');
       return result;
     } finally {
-      _leaveCallTriggered = false;
+      if (ownsDisconnect) _finishDisconnect();
     }
   }
 
@@ -3019,6 +3024,7 @@ class Call {
       ..abort(callCid, abortCode)
       ..unregisterCall(callCid);
 
+    final ownsDisconnect = !_leaveCallTriggered;
     try {
       final didDisconnect = await _disconnect(
         sfuLeaveReason: _sfuLeaveReason(reason),
@@ -3031,7 +3037,7 @@ class Call {
       _logger.v(() => '[leave] finished');
       return const Result.success(none);
     } finally {
-      _leaveCallTriggered = false;
+      if (ownsDisconnect) _finishDisconnect();
     }
   }
 
@@ -3039,16 +3045,22 @@ class Call {
   ///
   /// Sets [_leaveCallTriggered], completes [_callLifecycleCompleter], sends
   /// the SFU leave message, and runs [_clear]. Returns `true` when the
-  /// cleanup actually ran; `false` if it was short-circuited because a
-  /// concurrent disconnect was already in flight or the call was already
-  /// disconnected.
+  /// cleanup actually ran; `false` if the call was already disconnected or
+  /// another disconnect was already in flight. In the latter case it first
+  /// waits for that disconnect to finish, so the caller never returns while
+  /// the call is still publishing.
+  ///
+  /// The caller that found [_leaveCallTriggered] unset owns this disconnect
+  /// and must call [_finishDisconnect] once it is done.
   Future<bool> _disconnect({required String sfuLeaveReason}) async {
     if (_leaveCallTriggered) {
-      _logger.i(() => '[disconnect] rejected (already disconnecting)');
+      _logger.i(() => '[disconnect] waiting for the in-flight disconnect');
+      await _disconnectCompleter?.future;
       return false;
     }
 
     _leaveCallTriggered = true;
+    _disconnectCompleter = Completer<void>();
 
     // Complete the lifecycle completer to cancel ongoing operations awaiting
     // it (e.g. _startSession). This must run regardless of whether the
@@ -3069,6 +3081,15 @@ class Call {
     }
 
     return true;
+  }
+
+  /// Ends the disconnect started by [_disconnect] and releases any callers
+  /// waiting on it.
+  void _finishDisconnect() {
+    _leaveCallTriggered = false;
+    final completer = _disconnectCompleter;
+    _disconnectCompleter = null;
+    if (completer != null && !completer.isCompleted) completer.complete();
   }
 
   Future<void> _flushAndStopSfuStatsReporter() async {
