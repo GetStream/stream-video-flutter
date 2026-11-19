@@ -174,4 +174,156 @@ void main() {
     expect(find.byType(StreamLiveIndicator), findsNothing);
     expect(find.byType(StreamSpectatorsIndicator), findsNothing);
   });
+
+  testWidgets('holds the pills 8 from the bottom without any button', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      StreamLivestreamTile(
+        call: call,
+        showSpeakerphoneToggle: false,
+        child: const SizedBox(),
+      ),
+    );
+
+    final tile = tester.getRect(find.byType(StreamLivestreamTile));
+    final indicator = tester.getRect(find.byType(StreamLiveIndicator));
+    expect(tile.bottom - indicator.bottom, const StreamSpacing().xs);
+  });
+
+  testWidgets('shrinks the indicators instead of overflowing', (
+    tester,
+  ) async {
+    final state = MockCallState();
+    when(() => state.isBackstage).thenReturn(true);
+    when(() => state.participantCount).thenReturn(1234567);
+    when(() => state.anonymousParticipantCount).thenReturn(0);
+    when(() => call.partialState<bool>(any())).thenAnswer((invocation) {
+      final CallStateSelector<bool> selector =
+          invocation.positionalArguments[0];
+      return Stream.value(selector(state));
+    });
+    when(() => call.partialState<int>(any())).thenAnswer((invocation) {
+      final CallStateSelector<int> selector = invocation.positionalArguments[0];
+      return Stream.value(selector(state));
+    });
+
+    await tester.pumpWidget(
+      TestWrapper(
+        child: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.5)),
+          child: SizedBox(
+            width: 200,
+            height: 300,
+            child: StreamLivestreamTile(
+              call: call,
+              showSpeakerphoneToggle: false,
+              onFullscreenTapped: () {},
+              child: const SizedBox(),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('swaps the fullscreen glyph and tooltip in fullscreen', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      StreamLivestreamTile(
+        call: call,
+        showSpeakerphoneToggle: false,
+        onFullscreenTapped: () {},
+        child: const SizedBox(),
+      ),
+    );
+    expect(find.byIcon(const StreamIcons().fullscreenFill), findsOneWidget);
+    expect(find.byTooltip('Full screen'), findsOneWidget);
+
+    await pump(
+      tester,
+      StreamLivestreamTile(
+        call: call,
+        isFullscreen: true,
+        showSpeakerphoneToggle: false,
+        onFullscreenTapped: () {},
+        child: const SizedBox(),
+      ),
+    );
+    expect(find.byIcon(Icons.fullscreen_exit), findsOneWidget);
+    expect(find.byTooltip('Exit full screen'), findsOneWidget);
+  });
+
+  testWidgets('the style hides parts of the toolbar, the props win', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      StreamLivestreamTile(
+        call: call,
+        showSpectatorsIndicator: true,
+        style: const StreamLivestreamTileStyle(
+          showLiveIndicator: false,
+          showSpectatorsIndicator: false,
+          showSpeakerphoneToggle: false,
+        ),
+        child: const SizedBox(),
+      ),
+    );
+
+    expect(find.byType(StreamLiveIndicator), findsNothing);
+    expect(find.byType(StreamSpectatorsIndicator), findsOneWidget);
+    expect(find.byType(LivestreamSpeakerphoneOption), findsNothing);
+  });
+
+  testWidgets('the widget style beats the local theme', (tester) async {
+    await pump(
+      tester,
+      StreamLivestreamTile(
+        call: call,
+        showSpeakerphoneToggle: false,
+        style: const StreamLivestreamTileStyle(leadingSpacing: 4),
+        child: const SizedBox(),
+      ),
+    );
+    final defaultGap =
+        tester.getRect(find.byType(StreamSpectatorsIndicator)).left -
+        tester.getRect(find.byType(StreamLiveIndicator)).right;
+    expect(defaultGap, 4);
+
+    await tester.pumpWidget(
+      TestWrapper(
+        child: SizedBox(
+          width: 280,
+          height: 482,
+          child: StreamLivestreamTileTheme(
+            data: const StreamLivestreamTileThemeData(
+              style: StreamLivestreamTileStyle(
+                leadingSpacing: 10,
+                showLiveIndicator: true,
+              ),
+            ),
+            child: StreamLivestreamTile(
+              call: call,
+              showSpeakerphoneToggle: false,
+              style: const StreamLivestreamTileStyle(leadingSpacing: 6),
+              child: const SizedBox(),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final gap =
+        tester.getRect(find.byType(StreamSpectatorsIndicator)).left -
+        tester.getRect(find.byType(StreamLiveIndicator)).right;
+    expect(gap, 6);
+  });
 }

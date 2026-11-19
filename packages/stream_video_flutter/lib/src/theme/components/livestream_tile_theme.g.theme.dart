@@ -108,6 +108,13 @@ mixin _$StreamLivestreamTileStyle {
       leadingSpacing: lerpDouble$(a.leadingSpacing, b.leadingSpacing, t),
       trailingSpacing: lerpDouble$(a.trailingSpacing, b.trailingSpacing, t),
       buttonSize: t < 0.5 ? a.buttonSize : b.buttonSize,
+      showLiveIndicator: t < 0.5 ? a.showLiveIndicator : b.showLiveIndicator,
+      showSpectatorsIndicator: t < 0.5
+          ? a.showSpectatorsIndicator
+          : b.showSpectatorsIndicator,
+      showSpeakerphoneToggle: t < 0.5
+          ? a.showSpeakerphoneToggle
+          : b.showSpeakerphoneToggle,
     );
   }
 
@@ -117,6 +124,9 @@ mixin _$StreamLivestreamTileStyle {
     double? leadingSpacing,
     double? trailingSpacing,
     StreamButtonSize? buttonSize,
+    bool? showLiveIndicator,
+    bool? showSpectatorsIndicator,
+    bool? showSpeakerphoneToggle,
   }) {
     final _this = (this as StreamLivestreamTileStyle);
 
@@ -126,6 +136,11 @@ mixin _$StreamLivestreamTileStyle {
       leadingSpacing: leadingSpacing ?? _this.leadingSpacing,
       trailingSpacing: trailingSpacing ?? _this.trailingSpacing,
       buttonSize: buttonSize ?? _this.buttonSize,
+      showLiveIndicator: showLiveIndicator ?? _this.showLiveIndicator,
+      showSpectatorsIndicator:
+          showSpectatorsIndicator ?? _this.showSpectatorsIndicator,
+      showSpeakerphoneToggle:
+          showSpeakerphoneToggle ?? _this.showSpeakerphoneToggle,
     );
   }
 
@@ -146,6 +161,9 @@ mixin _$StreamLivestreamTileStyle {
       leadingSpacing: other.leadingSpacing,
       trailingSpacing: other.trailingSpacing,
       buttonSize: other.buttonSize,
+      showLiveIndicator: other.showLiveIndicator,
+      showSpectatorsIndicator: other.showSpectatorsIndicator,
+      showSpeakerphoneToggle: other.showSpeakerphoneToggle,
     );
   }
 
@@ -166,7 +184,10 @@ mixin _$StreamLivestreamTileStyle {
         _other.toolbarSpacing == _this.toolbarSpacing &&
         _other.leadingSpacing == _this.leadingSpacing &&
         _other.trailingSpacing == _this.trailingSpacing &&
-        _other.buttonSize == _this.buttonSize;
+        _other.buttonSize == _this.buttonSize &&
+        _other.showLiveIndicator == _this.showLiveIndicator &&
+        _other.showSpectatorsIndicator == _this.showSpectatorsIndicator &&
+        _other.showSpeakerphoneToggle == _this.showSpeakerphoneToggle;
   }
 
   @override
@@ -180,6 +201,9 @@ mixin _$StreamLivestreamTileStyle {
       _this.leadingSpacing,
       _this.trailingSpacing,
       _this.buttonSize,
+      _this.showLiveIndicator,
+      _this.showSpectatorsIndicator,
+      _this.showSpeakerphoneToggle,
     );
   }
 }

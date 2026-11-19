@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import '../l10n/localization_extension.dart';
 
 /// The livestream's video with its toolbar: whether the stream is live, how
 /// many people watch it, a speakerphone toggle and a fullscreen button.
@@ -16,10 +17,11 @@ class StreamLivestreamTile extends StatelessWidget {
     required this.call,
     required this.child,
     this.onFullscreenTapped,
-    this.showLiveIndicator = true,
-    this.showSpectatorsIndicator = true,
+    this.isFullscreen = false,
+    this.showLiveIndicator,
+    this.showSpectatorsIndicator,
     this.includeAnonymousParticipants = true,
-    this.showSpeakerphoneToggle = true,
+    this.showSpeakerphoneToggle,
     this.style,
   });
 
@@ -34,17 +36,29 @@ class StreamLivestreamTile extends StatelessWidget {
   /// The button is left out when null.
   final VoidCallback? onFullscreenTapped;
 
+  /// Whether the tile fills the screen, which turns the fullscreen button
+  /// into an exit-fullscreen button.
+  final bool isFullscreen;
+
   /// Whether the toolbar shows [StreamLiveIndicator].
-  final bool showLiveIndicator;
+  ///
+  /// Falls back to [StreamLivestreamTileStyle.showLiveIndicator], then true.
+  final bool? showLiveIndicator;
 
   /// Whether the toolbar shows [StreamSpectatorsIndicator].
-  final bool showSpectatorsIndicator;
+  ///
+  /// Falls back to [StreamLivestreamTileStyle.showSpectatorsIndicator], then
+  /// true.
+  final bool? showSpectatorsIndicator;
 
   /// Whether anonymous viewers are part of the spectators count.
   final bool includeAnonymousParticipants;
 
   /// Whether the toolbar shows [LivestreamSpeakerphoneOption].
-  final bool showSpeakerphoneToggle;
+  ///
+  /// Falls back to [StreamLivestreamTileStyle.showSpeakerphoneToggle], then
+  /// true.
+  final bool? showSpeakerphoneToggle;
 
   /// Overrides the style from [StreamLivestreamTileTheme].
   final StreamLivestreamTileStyle? style;
@@ -61,55 +75,87 @@ class StreamLivestreamTile extends StatelessWidget {
       fit: StackFit.expand,
       children: [
         child,
-        Positioned(
-          left: 0,
-          right: 0,
+        PositionedDirectional(
+          start: 0,
+          end: 0,
           bottom: 0,
-          child: Padding(
-            padding: resolved.toolbarPadding,
-            child: Row(
-              spacing: resolved.toolbarSpacing,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: resolved.leadingSpacing,
-                  children: [
-                    if (showLiveIndicator) StreamLiveIndicator(call: call),
-                    if (showSpectatorsIndicator)
-                      StreamSpectatorsIndicator(
-                        call: call,
-                        includeAnonymousParticipants:
-                            includeAnonymousParticipants,
-                      ),
-                  ],
-                ),
-                const Spacer(),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: resolved.trailingSpacing,
-                  children: [
-                    if (showSpeakerphoneToggle)
-                      LivestreamSpeakerphoneOption(
-                        call: call,
-                        enabledSpeakerphoneIconTheme: const IconThemeData(),
-                        disabledSpeakerphoneIconTheme: const IconThemeData(),
-                        type: StreamButtonType.solid,
-                        size: resolved.buttonSize,
-                      ),
-                    if (onFullscreenTapped case final onFullscreenTapped?)
-                      StreamButton.icon(
-                        icon: Icon(context.streamIcons.fullscreenFill),
-                        style: StreamButtonStyle.secondary,
-                        size: resolved.buttonSize,
-                        onPressed: onFullscreenTapped,
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          child: _toolbar(context, resolved),
         ),
       ],
+    );
+  }
+
+  Widget _toolbar(
+    BuildContext context,
+    _StreamLivestreamTileStyleDefaults resolved,
+  ) {
+    final translations = context.translations;
+
+    final leading = [
+      if (showLiveIndicator ?? resolved.showLiveIndicator)
+        Flexible(child: StreamLiveIndicator(call: call)),
+      if (showSpectatorsIndicator ?? resolved.showSpectatorsIndicator)
+        Flexible(
+          child: StreamSpectatorsIndicator(
+            call: call,
+            includeAnonymousParticipants: includeAnonymousParticipants,
+          ),
+        ),
+    ];
+
+    final trailing = [
+      if (showSpeakerphoneToggle ?? resolved.showSpeakerphoneToggle)
+        LivestreamSpeakerphoneOption(
+          call: call,
+          enabledSpeakerphoneIconTheme: const IconThemeData(),
+          disabledSpeakerphoneIconTheme: const IconThemeData(),
+          type: StreamButtonType.solid,
+          size: resolved.buttonSize,
+        ),
+      if (onFullscreenTapped case final onFullscreenTapped?)
+        StreamButton.icon(
+          // Core has no exit-fullscreen glyph; see CLAUDE.md.
+          icon: Icon(
+            isFullscreen
+                ? Icons.fullscreen_exit
+                : context.streamIcons.fullscreenFill,
+          ),
+          tooltip: isFullscreen
+              ? translations.livestreamExitFullscreen
+              : translations.livestreamEnterFullscreen,
+          style: StreamButtonStyle.secondary,
+          size: resolved.buttonSize,
+          onPressed: onFullscreenTapped,
+        ),
+    ];
+
+    return Padding(
+      padding: resolved.toolbarPadding,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(minHeight: resolved.toolbarMinHeight),
+        child: Row(
+          children: [
+            Expanded(
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: resolved.leadingSpacing,
+                  children: leading,
+                ),
+              ),
+            ),
+            if (trailing.isNotEmpty) ...[
+              SizedBox(width: resolved.toolbarSpacing),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: resolved.trailingSpacing,
+                children: trailing,
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }
@@ -123,6 +169,10 @@ class _StreamLivestreamTileStyleDefaults extends StreamLivestreamTileStyle {
   final StreamLivestreamTileStyle? _style;
 
   late final StreamSpacing _spacing = _context.streamSpacing;
+
+  // The toolbar is at least one tap target tall, so the pills sit 8 from
+  // the bottom edge like the buttons, with or without a button beside them.
+  double get toolbarMinHeight => kMinInteractiveDimension;
 
   // No bottom or end inset: each button's 48 tap target already pads its 32
   // visual by 8, which holds it 8 from the tile's bottom and end edges.
@@ -144,4 +194,13 @@ class _StreamLivestreamTileStyleDefaults extends StreamLivestreamTileStyle {
   @override
   StreamButtonSize get buttonSize =>
       _style?.buttonSize ?? StreamButtonSize.small;
+
+  @override
+  bool get showLiveIndicator => _style?.showLiveIndicator ?? true;
+
+  @override
+  bool get showSpectatorsIndicator => _style?.showSpectatorsIndicator ?? true;
+
+  @override
+  bool get showSpeakerphoneToggle => _style?.showSpeakerphoneToggle ?? true;
 }
