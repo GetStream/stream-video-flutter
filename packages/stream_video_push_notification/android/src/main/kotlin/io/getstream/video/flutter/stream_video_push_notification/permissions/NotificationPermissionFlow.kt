@@ -24,10 +24,14 @@ internal class NotificationPermissionFlow {
 
     private var messages: Map<String, Any> = emptyMap()
 
+    /**
+     * Asks for the permission from [activity] when it is not granted yet. Without an activity, or
+     * below Android 13, does nothing and keeps the texts of the last request.
+     */
     fun request(activity: Activity?, messages: Map<String, Any>) {
-        this.messages = messages
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
         activity ?: return
+        this.messages = messages
         if (ActivityCompat.checkSelfPermission(activity, Manifest.permission.POST_NOTIFICATIONS) !=
             PackageManager.PERMISSION_GRANTED
         ) {

@@ -4,14 +4,14 @@ import android.annotation.SuppressLint
 import android.content.Context
 import androidx.annotation.VisibleForTesting
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationManager
-import io.getstream.video.flutter.stream_video_push_notification.StreamVideoPushNotificationPlugin
+import io.getstream.video.flutter.stream_video_push_notification.channel.RingingEventDispatcher
 import io.getstream.video.flutter.stream_video_push_notification.notification.RingtonePlayer
 import io.getstream.video.flutter.stream_video_push_notification.permissions.FullScreenIntentPermission
 import io.getstream.video.flutter.stream_video_push_notification.permissions.NotificationPermissionFlow
 
 /**
  * The ringing state the plugin shares across the process: the call store, the ringtone, the
- * notifications, the permission flows and the controller that drives them.
+ * notifications, the permission flows, the event dispatcher and the controller that drives them.
  *
  * One instance per process, built from the application context on first use, whether or not a
  * Flutter engine has attached. The plugin, the broadcast receiver, the service and the activities
@@ -29,11 +29,13 @@ internal class RingingComponents private constructor(context: Context) {
 
     val fullScreenIntentPermission = FullScreenIntentPermission(context)
 
+    val events = RingingEventDispatcher()
+
     val controller = RingingController(
         context = context,
         store = callStore,
         notifications = notifications,
-        sendEvent = StreamVideoPushNotificationPlugin::sendEvent,
+        sendEvent = events::send,
     )
 
     companion object {

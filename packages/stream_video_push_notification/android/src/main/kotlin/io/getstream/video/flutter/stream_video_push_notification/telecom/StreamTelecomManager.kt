@@ -12,7 +12,6 @@ import io.getstream.video.flutter.stream_video_push_notification.core.RingingCom
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallBroadcastReceiver
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationService
-import io.getstream.video.flutter.stream_video_push_notification.StreamVideoPushNotificationPlugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -505,7 +504,11 @@ internal object StreamTelecomManager {
             // silence for Telecom-originated events too.
             if (RingingComponents.silenceEvents) return
 
-            StreamVideoPushNotificationPlugin.sendEvent(
+            val context = appContext ?: run {
+                Log.w(TAG, "[sendEvent] no context yet; dropping $event for $callId")
+                return
+            }
+            RingingComponents.get(context).events.send(
                 event,
                 mapOf("id" to callId) + values.toMap(),
             )

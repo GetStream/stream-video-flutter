@@ -3,7 +3,6 @@ package io.getstream.video.flutter.stream_video_push_notification
 import android.content.Context
 import android.content.res.Resources
 import com.fasterxml.jackson.databind.ObjectMapper
-import java.lang.ref.WeakReference
 
 
 class Utils {
@@ -47,13 +46,6 @@ class Utils {
             return if (id > 0) {
                 resources.getDimensionPixelSize(id)
             } else 0
-        }
-
-        fun <T, C : MutableCollection<WeakReference<T>>> C.reapCollection(): C {
-            this.removeAll {
-                it.get() == null
-            }
-            return this
         }
 
         fun isTablet(context: Context): Boolean {
