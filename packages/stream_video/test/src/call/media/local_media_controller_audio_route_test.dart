@@ -49,6 +49,7 @@ void main() {
       muteVideoWhenInBackground: () => false,
       muteAudioWhenInBackground: () => false,
       onMicrophoneMuted: (_) async {},
+      onAudioOutputDeviceSet: (_) async {},
       logger: taggedLogger(tag: 'test'),
     );
   });

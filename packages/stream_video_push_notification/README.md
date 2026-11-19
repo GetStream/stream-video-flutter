@@ -75,6 +75,12 @@ asked for with `holdCall` ends the call the same way. With `allowMultipleActiveC
 does not leave the call, since Telecom also holds the call in progress when the user answers
 another of the app's calls.
 
+Telecom owns the audio route of a call registered with it. `Call.setAudioOutputDevice` asks Telecom
+for the matching endpoint (earpiece, speaker, wired headset or Bluetooth) as well as switching WebRTC
+to the device, so the output picker works the same way with the integration on. The output passed
+to `join` is asked for once; a rejoin or migration leaves Telecom's route as it is, since the
+system may have moved it to a headset or a car.
+
 ### iOS outgoing calls
 
 By default only incoming calls go through CallKit. To report the ringing calls the current user

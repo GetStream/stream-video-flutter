@@ -16,6 +16,7 @@ import io.getstream.video.flutter.stream_video_push_notification.core.RingingCon
 import io.getstream.video.flutter.stream_video_push_notification.notification.RingtonePlayer
 import io.getstream.video.flutter.stream_video_push_notification.permissions.FullScreenIntentPermission
 import io.getstream.video.flutter.stream_video_push_notification.permissions.NotificationPermissionFlow
+import io.getstream.video.flutter.stream_video_push_notification.telecom.AudioEndpointUtils
 import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
 
 /**
@@ -71,13 +72,10 @@ internal class PushMethodCallHandler(
                 result.success(true)
             }
 
+            // Run here, not through a broadcast, so Telecom tracks the call by the time Dart
+            // gets the answer and can ask for its audio route.
             "startCall" -> {
-                context.sendBroadcast(
-                    IncomingCallBroadcastReceiver.getIntentStart(
-                        context,
-                        CallPayloadMapper.toBundle(callArgument(call)),
-                    ),
-                )
+                controller.onStart(CallPayloadMapper.toBundle(callArgument(call)))
                 result.success(true)
             }
 
@@ -96,6 +94,23 @@ internal class PushMethodCallHandler(
                     )
                 }
                 result.success(true)
+            }
+
+            // Answers whether Telecom routed the cid's calls to the endpoint; false without
+            // Telecom or for an endpoint type it does not name. The optional name picks among
+            // several endpoints of the type.
+            "requestAudioEndpoint" -> {
+                val args = mapArgument(call)
+                val callCid = args["cid"] as? String
+                val type = AudioEndpointUtils.endpointTypeFromString(args["type"] as? String)
+                val name = args["name"] as? String
+                if (callCid == null || type == null) {
+                    result.success(false)
+                } else {
+                    telecom.requestEndpoint(callCid, type, name) { routed ->
+                        result.success(routed)
+                    }
+                }
             }
 
             "isMuted" -> {

@@ -85,6 +85,24 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
     throw UnimplementedError('isMuted() has not been implemented.');
   }
 
+  /// Asks the system to route the audio of the calls with [cid] to
+  /// [endpoint], and answers whether it did. Among several endpoints of that
+  /// type, such as two Bluetooth headsets, the one called [name] is preferred.
+  ///
+  /// Android only, while the Telecom integration holds the call: Telecom owns
+  /// the audio route of a call it holds. `false` without the integration, for
+  /// a call it does not hold, when Telecom offers no such endpoint and when it
+  /// refuses the change. Always `false` on iOS.
+  Future<bool> requestAudioEndpoint(
+    String cid,
+    TelecomAudioEndpoint endpoint, {
+    String? name,
+  }) {
+    throw UnimplementedError(
+      'requestAudioEndpoint() has not been implemented.',
+    );
+  }
+
   /// Holds or resumes an ongoing call.
   ///
   /// On iOS through CallKit. On Android through Telecom, for a call the
@@ -202,4 +220,39 @@ enum CallEndedReason {
 
   /// Raw value passed to the platform, matching `CXCallEndedReason`.
   final int rawValue;
+}
+
+/// An audio output the Android Telecom stack can route a call to.
+enum TelecomAudioEndpoint {
+  /// The earpiece.
+  earpiece('earpiece'),
+
+  /// The loudspeaker.
+  speaker('speaker'),
+
+  /// A wired headset or headphones.
+  wiredHeadset('wired_headset'),
+
+  /// A Bluetooth headset.
+  bluetooth('bluetooth');
+
+  const TelecomAudioEndpoint(this.wireName);
+
+  /// The name the method channel sends, matching the `type` of the
+  /// `telecomAudioEndpointsChanged` event.
+  final String wireName;
+
+  /// The Telecom endpoint for [device], an Android audio output, or null
+  /// when Telecom has none. Android names an output by its kind, for example
+  /// `bluetooth`, in both its id and its group id.
+  static TelecomAudioEndpoint? fromAudioOutput(RtcMediaDevice device) {
+    if (device.isSpeaker) return speaker;
+    if (device.isEarpiece) return earpiece;
+
+    return switch (device.id) {
+      'bluetooth' => bluetooth,
+      'wired-headset' => wiredHeadset,
+      _ => null,
+    };
+  }
 }

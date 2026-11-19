@@ -75,6 +75,7 @@ const _androidOnlyMethods = {
   'ensureFullScreenIntentPermission',
   'requestNotificationPermission',
   'canUseFullScreenIntent',
+  'requestAudioEndpoint',
 };
 
 /// Cases the Android switch has beyond what Dart invokes there.

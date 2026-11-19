@@ -3,6 +3,7 @@ package io.getstream.video.flutter.stream_video_push_notification.telecom
 import android.content.Context
 import android.net.Uri
 import android.telecom.DisconnectCause
+import androidx.core.telecom.CallEndpointCompat
 import androidx.test.core.app.ApplicationProvider
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
 import io.getstream.video.flutter.stream_video_push_notification.PREFERENCES_FILE_NAME
@@ -10,6 +11,10 @@ import io.getstream.video.flutter.stream_video_push_notification.core.RingingCal
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.runCurrent
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -23,6 +28,7 @@ import org.robolectric.RobolectricTestRunner
  * Pins what [TelecomIntegration] asks Telecom for and what it reports back, against a fake
  * repository, with registrations and callbacks run on the calling thread.
  */
+@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 class TelecomIntegrationTest {
 
@@ -50,13 +56,16 @@ class TelecomIntegrationTest {
         }
     }
 
-    private fun integration(canUseTelecom: Boolean = true) = TelecomIntegration(
+    private fun integration(
+        canUseTelecom: Boolean = true,
+        scope: CoroutineScope = CoroutineScope(Dispatchers.Unconfined),
+    ) = TelecomIntegration(
         context,
         repositoryFactory = { repository },
         permissions = object : TelecomPermissions() {
             override fun canUseTelecom(context: Context) = canUseTelecom
         },
-        scope = CoroutineScope(Dispatchers.Unconfined),
+        scope = scope,
         mainThread = { it.run() },
     ).also { it.listener = listener }
 
@@ -399,6 +408,163 @@ class TelecomIntegrationTest {
         integration().registerIncomingCall(call)
 
         assertEquals(emptyList<Any>(), repository.registrations)
+    }
+
+    // Audio endpoint requests.
+
+    private val routed = mutableListOf<Boolean>()
+
+    private fun TelecomIntegration.requestSpeaker(callCid: String = "default:abc") =
+        requestEndpoint(callCid, CallEndpointCompat.TYPE_SPEAKER) { routed += it }
+
+    private fun endpointRequests(callId: String = CALL_ID) =
+        repository.actions(callId).filterIsInstance<TelecomCallAction.RequestEndpoint>()
+
+    @Test
+    fun `an endpoint request goes to the call with the cid and answers what Telecom did`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        repository.completeRegistration(CALL_ID)
+
+        telecom.requestSpeaker()
+        val request = endpointRequests().single()
+        assertEquals(CallEndpointCompat.TYPE_SPEAKER, request.endpointType)
+        assertEquals(emptyList<Boolean>(), routed)
+
+        request.result.complete(true)
+
+        assertEquals(listOf(true), routed)
+    }
+
+    @Test
+    fun `an endpoint request Telecom does not answer answers false after five seconds`() {
+        val scope = TestScope()
+        val telecom = integration(scope = scope).apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        scope.runCurrent()
+        repository.completeRegistration(CALL_ID)
+        scope.runCurrent()
+
+        telecom.requestSpeaker()
+        scope.advanceTimeBy(4_999)
+        assertEquals(emptyList<Boolean>(), routed)
+
+        scope.advanceTimeBy(2)
+        assertEquals(listOf(false), routed)
+        assertEquals(1, endpointRequests().size)
+    }
+
+    @Test
+    fun `an endpoint request Telecom does not carry out answers false`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        repository.completeRegistration(CALL_ID)
+
+        telecom.requestSpeaker()
+        endpointRequests().single().result.complete(false)
+
+        assertEquals(listOf(false), routed)
+    }
+
+    @Test
+    fun `an endpoint request answers false without Telecom or a call with the cid`() {
+        integration(canUseTelecom = false).apply { init(enabled()) }.requestSpeaker()
+        val telecom = integration().apply { init(enabled()) }
+        telecom.requestSpeaker()
+        telecom.registerIncomingCall(call)
+        repository.completeRegistration(CALL_ID)
+        telecom.requestSpeaker(callCid = "default:other")
+
+        assertEquals(listOf(false, false, false), routed)
+        assertEquals(emptyList<TelecomCallAction>(), repository.actions(CALL_ID))
+    }
+
+    @Test
+    fun `an endpoint request while registering is sent once registered, the newest replacing older`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+
+        telecom.requestSpeaker()
+        telecom.requestEndpoint("default:abc", CallEndpointCompat.TYPE_EARPIECE) { routed += it }
+        assertEquals(listOf(false), routed)
+
+        repository.completeRegistration(CALL_ID)
+
+        val request = endpointRequests().single()
+        assertEquals(CallEndpointCompat.TYPE_EARPIECE, request.endpointType)
+        request.result.complete(true)
+        assertEquals(listOf(false, true), routed)
+    }
+
+    @Test
+    fun `an endpoint request queued behind a disconnect answers false and is not sent`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+
+        telecom.requestSpeaker()
+        telecom.disconnect(CALL_ID, DisconnectCause.LOCAL)
+        repository.completeRegistration(CALL_ID)
+
+        assertEquals(
+            listOf(TelecomCallAction.Disconnect(DisconnectCause(DisconnectCause.LOCAL))),
+            repository.actions(CALL_ID),
+        )
+        assertEquals(listOf(false), routed)
+    }
+
+    @Test
+    fun `an endpoint request made after the scope is up but before the queue is replayed wins`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        telecom.requestEndpoint("default:abc", CallEndpointCompat.TYPE_EARPIECE) { routed += it }
+
+        repository.startScope(CALL_ID)
+        telecom.requestSpeaker()
+        assertEquals(emptyList<TelecomCallAction>(), repository.actions(CALL_ID))
+
+        repository.reportRegistered(CALL_ID)
+
+        assertEquals(CallEndpointCompat.TYPE_SPEAKER, endpointRequests().single().endpointType)
+        assertEquals(listOf(false), routed)
+    }
+
+    @Test
+    fun `an action made before the queue is replayed does not overtake it`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        telecom.answer(CALL_ID)
+
+        repository.startScope(CALL_ID)
+        telecom.setOnHold(CALL_ID, true)
+        repository.reportRegistered(CALL_ID)
+
+        assertEquals(
+            listOf(TelecomCallAction.Answer, TelecomCallAction.Hold),
+            repository.actions(CALL_ID),
+        )
+    }
+
+    @Test
+    fun `an endpoint request to a call whose scope stopped taking actions answers false`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        repository.completeRegistration(CALL_ID)
+        repository.endScope(CALL_ID)
+
+        telecom.requestSpeaker()
+
+        assertEquals(listOf(false), routed)
+    }
+
+    @Test
+    fun `an endpoint request still queued when Telecom is released answers false`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        telecom.requestSpeaker()
+
+        telecom.release()
+
+        assertEquals(listOf(false), routed)
     }
 
     private companion object {

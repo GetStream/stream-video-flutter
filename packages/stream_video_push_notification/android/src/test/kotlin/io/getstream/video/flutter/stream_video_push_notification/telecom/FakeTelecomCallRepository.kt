@@ -86,9 +86,23 @@ internal class FakeTelecomCallRepository : TelecomCallRepository {
 
     /** Telecom brings up the call's scope. */
     fun completeRegistration(callId: String) {
-        val call = calls.getValue(callId).copy(isPending = false)
-        calls[callId] = call
-        listener?.onCallRegistered(callId, call.isIncoming())
+        startScope(callId)
+        reportRegistered(callId)
+    }
+
+    /** The call's scope is up; the repository has not reported it yet. */
+    fun startScope(callId: String) {
+        calls[callId] = calls.getValue(callId).copy(isPending = false)
+    }
+
+    /** The repository reports the call whose scope is up. */
+    fun reportRegistered(callId: String) {
+        listener?.onCallRegistered(callId, calls.getValue(callId).isIncoming())
+    }
+
+    /** The call's scope stops taking actions, as when it ended without a callback yet. */
+    fun endScope(callId: String) {
+        calls.getValue(callId).closeActionSource()
     }
 
     fun setMuted(callId: String, isMuted: Boolean) {

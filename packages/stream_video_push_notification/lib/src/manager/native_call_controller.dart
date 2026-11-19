@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -50,6 +52,13 @@ class NativeCallController {
 
   final RingingEventBroadcaster _broadcaster;
   final StreamVideoPushNotificationPlatform? _platform;
+
+  final _logger = taggedLogger(tag: 'SV:NativeCallController');
+
+  /// The audio output last asked of Telecom for each call cid, sent again
+  /// once an outgoing call the app starts after joining is registered.
+  /// Android only.
+  final _audioOutputs = <String, RtcMediaDevice>{};
 
   StreamVideoPushNotificationPlatform get _resolvedPlatform =>
       _platform ?? StreamVideoPushNotificationPlatform.instance;
@@ -105,7 +114,7 @@ class NativeCallController {
     String? handle,
     String? callerName,
     bool hasVideo = true,
-  }) {
+  }) async {
     final params = StreamVideoPushParams.forCall(
       configuration,
       uuid: uuid,
@@ -116,7 +125,21 @@ class NativeCallController {
       hasVideo: hasVideo,
     );
 
-    return _resolvedPlatform.startCall(params);
+    await _resolvedPlatform.startCall(params);
+
+    // Telecom holds the call only from here, so an output picked while
+    // joining before has to be asked for again. Not awaited, as the output
+    // can take seconds to appear.
+    if (_audioOutputs[callCid] case final device?) {
+      unawaited(
+        setCallAudioOutputDeviceByCid(callCid, device).catchError((
+          Object e,
+          StackTrace stk,
+        ) {
+          _logger.w(() => '[startOutgoingCall] output not routed: $e\n$stk');
+        }),
+      );
+    }
   }
 
   /// The calls the native side currently shows or tracks; none off mobile.
@@ -126,7 +149,10 @@ class NativeCallController {
     return _resolvedPlatform.activeCalls();
   }
 
-  Future<void> endAllCalls() => _resolvedPlatform.endAllCalls();
+  Future<void> endAllCalls() {
+    _audioOutputs.clear();
+    return _resolvedPlatform.endAllCalls();
+  }
 
   Future<void> endCall(String uuid) => _resolvedPlatform.endCall(uuid);
 
@@ -149,6 +175,7 @@ class NativeCallController {
   /// Ends the native calls of [cid], see [resolveCallsToEnd]. With [silent],
   /// the native events the end produces are suppressed.
   Future<void> endCallByCid(String cid, {bool silent = false}) async {
+    _audioOutputs.remove(cid);
     final decision = resolveCallsToEnd(await activeCalls(), cid);
 
     if (decision.endAll) {
@@ -183,6 +210,43 @@ class NativeCallController {
       );
 
       await _resolvedPlatform.muteCall(call.uuid!, isMuted: isMuted);
+    }
+  }
+
+  /// Routes the audio of the calls with [cid] to [device] in Telecom, which
+  /// owns the audio route of a call it holds. Android only. An outgoing call
+  /// started later with [startOutgoingCall] asks for [device] again.
+  ///
+  /// Does nothing for a device Telecom has no endpoint for. When Telecom does
+  /// not route the call there, that is logged; the SDK has picked the device
+  /// for WebRTC either way.
+  Future<void> setCallAudioOutputDeviceByCid(
+    String cid,
+    RtcMediaDevice device,
+  ) async {
+    if (!CurrentPlatform.isAndroid) return;
+
+    _audioOutputs[cid] = device;
+    final endpoint = TelecomAudioEndpoint.fromAudioOutput(device);
+    if (endpoint == null) {
+      _logger.d(
+        () => '[setCallAudioOutputDeviceByCid] no endpoint for $device',
+      );
+      return;
+    }
+
+    // The label is the device's name, which tells Bluetooth headsets apart.
+    final routed = await _resolvedPlatform.requestAudioEndpoint(
+      cid,
+      endpoint,
+      name: device.label.isEmpty ? null : device.label,
+    );
+    if (!routed) {
+      _logger.d(
+        () =>
+            '[setCallAudioOutputDeviceByCid] Telecom did not route $cid to '
+            '${endpoint.name}; fine when the integration does not hold it',
+      );
     }
   }
 

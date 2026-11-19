@@ -302,6 +302,25 @@ internal class CoreTelecomCallRepository(
         flags: CallActionFlags,
         actionSource: ReceiveChannel<TelecomCallAction>,
     ) {
+        // Endpoint requests run beside the loop, since they may wait for their endpoint.
+        val endpoints = EndpointSwitcher(callId, _calls, { requestEndpointChange(it) })
+        try {
+            consumeActions(callId, flags, actionSource) { action ->
+                endpoints.request(this, action)
+            }
+        } finally {
+            endpoints.cancel()
+            // A request still queued behind a disconnect is never received.
+            generateSequence { actionSource.tryReceive().getOrNull() }.forEach { it.drop() }
+        }
+    }
+
+    private suspend fun CallControlScope.consumeActions(
+        callId: String,
+        flags: CallActionFlags,
+        actionSource: ReceiveChannel<TelecomCallAction>,
+        requestEndpoint: (TelecomCallAction.RequestEndpoint) -> Unit,
+    ) {
         for (action in actionSource) {
             when (action) {
                 // A failed answer disconnects the call, so stop consuming like a disconnect.
@@ -316,6 +335,8 @@ internal class CoreTelecomCallRepository(
                     // queued behind the disconnect.
                     return
                 }
+
+                is TelecomCallAction.RequestEndpoint -> requestEndpoint(action)
 
                 is TelecomCallAction.Hold -> when (val result = setInactive()) {
                     is CallControlResult.Success -> onIsCallInactive(callId)()

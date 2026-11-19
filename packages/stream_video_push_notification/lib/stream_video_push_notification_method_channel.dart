@@ -105,6 +105,21 @@ class MethodChannelStreamVideoPushNotification
     });
   }
 
+  @override
+  Future<bool> requestAudioEndpoint(
+    String cid,
+    TelecomAudioEndpoint endpoint, {
+    String? name,
+  }) async {
+    if (!CurrentPlatform.isAndroid) return false;
+
+    final routed = await methodChannel.invokeMethod<bool>(
+      'requestAudioEndpoint',
+      {'cid': cid, 'type': endpoint.wireName, 'name': ?name},
+    );
+    return routed ?? false;
+  }
+
   /// End an Incoming/Outgoing call.
   /// On iOS, using Callkit(update a history into the Phone app).
   /// On Android, Nothing(only callback event listener).
