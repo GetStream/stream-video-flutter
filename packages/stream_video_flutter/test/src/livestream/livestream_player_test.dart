@@ -146,6 +146,7 @@ void main() {
             .widget<StreamLivestreamTile>(
               find.byType(StreamLivestreamTile),
             )
+            .props
             .isFullscreen,
         isTrue,
       );
