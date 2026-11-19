@@ -5,15 +5,20 @@ import android.os.Looper
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.StandardMethodCodec
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import java.nio.ByteBuffer
 import org.robolectric.Shadows.shadowOf
 
-/** Forgets the plugin's process-wide instance, so each test attaches with its own context. */
+/**
+ * Forgets the plugin's and the ringing components' process-wide instances, so each test starts
+ * with its own context, as a fresh process would.
+ */
 internal fun resetPlugin() {
     StreamVideoPushNotificationPlugin::class.java.getDeclaredField("instance").apply {
         isAccessible = true
         set(null, null)
     }
+    RingingComponents.reset()
 }
 
 /**

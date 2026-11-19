@@ -8,6 +8,7 @@
 - `isAcceptedOnThisDevice` is no longer exported.
 - [Android] Unused Kotlin API of the plugin is removed: `StreamVideoPushNotificationPlugin.showIncomingNotification`, `showMissCallNotification`, `startCall`, `endCall`, `endAllCalls` and `sendEventCustom`; `IncomingCallBroadcastReceiver.getIntentHeldByCell` and `getIntentUnHeldByCell`; `Utils.backToForeground`, `pxToDp` and `getScreenHeight`; `Data.isOnHold`, `audioRoute` and `isMuted`; and the `ACTION_CALL_AUDIO_STATE_CHANGE`, `ACTION_CALL_HELD`, `ACTION_CALL_UNHELD`, `EXTRA_CALL_APP_NAME` and `EXTRA_CALL_ONGOING_CALL_NOTIFICATION_CHANNEL_NAME` constants. The method channel no longer handles `showIncomingCallSilently`, which did nothing.
 - [Android] The plugin's call model and the helpers that stored it are removed: the `Data` class and the top-level `addCall`, `removeCall`, `removeAllCalls`, `getDataActiveCalls`, `getDataActiveCallsForFlutter`, `putString` and `remove`. `putStrings` and `getString` are internal. Active calls stored by an earlier version are still read.
+- [Android] `IncomingCallNotificationService.startServiceWithAction` and `IncomingCallBroadcastReceiver.getIntent` are removed.
 - [iOS] The public `Call` class is removed. Nothing public returned it, but native code that named the type no longer compiles.
 - [iOS] `StreamVideoCallkitManager` and `EventCallbackHandler` are no longer public. `StreamVideoPushNotificationPlugin.showIncomingCall`, `startOutgoingCall` and `activeCalls` remain the way to reach CallKit from native code. For the manager's other public members, use instead:
   - `showIncomingCall(_:fromPushKit:completion:)`: `StreamVideoPushNotificationPlugin.showIncomingCall(data:fromPushKit:completion:)`.
@@ -18,6 +19,7 @@
   - `initCallkitProvider`: none needed; the plugin sets up its provider when it registers.
 - [iOS] Only what an app calls from native code stays public: `CallData`, `VoIPPushRegistryHandler.shared` with `registerForPushNotifications()` and its `PKPushRegistryDelegate` methods, and the plugin's static `showIncomingCall`, `startOutgoingCall`, `activeCalls` and `setDevicePushTokenVoIP`. The native `StreamVideoPushConfiguration`, `StreamVideoIncomingCallConstants`, `VoIPPushRegistryHandler.initChannel` and `initData`, and the plugin's `sharedInstance` and instance VoIP token methods are internal: the plugin sets them up itself, and Dart receives the events.
 - [iOS] `VoIPPushRegistryHandler` no longer conforms to `UNUserNotificationCenterDelegate`, whose methods it never implemented. An app that set `UNUserNotificationCenter.current().delegate = VoIPPushRegistryHandler.shared` no longer compiles; remove that line, or set a delegate of its own.
+- [Android] `IncomingCallBroadcastReceiver.silenceEvents` is removed. Silence ringing events from Dart with `StreamVideoPushNotificationPlatform.silenceEvents()` and `unsilenceEvents()`, as before.
 
 ### ⚠️ Deprecated
 
@@ -59,6 +61,8 @@
 - [iOS] CallKit no longer offers to merge calls, and a merge it asks for is refused. A merge used to be accepted although the calls stayed apart, so CallKit showed a conference that did not exist.
 - [iOS] A call reported with only some CallKit options, from a VoIP push before Dart first sent its configuration or from native code, no longer offers Hold & Accept or a keypad. A missing option takes the default the SDK sends from Dart: no holding, no DTMF, one call group.
 - A mute from the CallKit screen applies to the call it was made on.
+- [Android] A decline or accept from the incoming call notification or the full-screen screen in a process no Flutter engine has attached to, such as after the app was killed, now cancels the incoming notification and closes the full-screen screen. The decline still does not reach the backend there, since no Dart code runs to send it.
+- [Android] Accepting or starting a call no longer starts a background service, which Android 8 and later refuse for an app in the background and which then skipped the rest of the accept.
 - [Android] `StreamVideoPushNotificationPlatform.isMuted` answers the mute state Telecom reports for the call instead of always `true`. It answers `false` when the Telecom integration does not hold the call, which includes every call while the integration is off (the default below Android 17), and `muteCall` does not change it.
 - [iOS] Taking a call off hold no longer marks it unmuted, so muting or unmuting from the app afterwards reaches the CallKit screen.
 - [iOS] Answering one of two ringing calls from CallKit no longer reports the other one as accepted in `activeCalls`.

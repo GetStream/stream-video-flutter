@@ -4,7 +4,12 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 
+/**
+ * An invisible activity that carries out a call action, such as an accept from a notification or
+ * the full-screen screen, and brings the app to the foreground.
+ */
 class TransparentActivity : Activity() {
 
     companion object {
@@ -41,9 +46,9 @@ class TransparentActivity : Activity() {
             return
         }
 
-        val broadcastIntent = IncomingCallBroadcastReceiver.getIntent(this, action, data)
-        broadcastIntent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND)
-        sendBroadcast(broadcastIntent)
+        if (data != null) {
+            RingingComponents.get(this).controller.handle(action, data)
+        }
 
         val activityIntent = AppUtils.getAppIntent(this, action, data)
         startActivity(activityIntent)

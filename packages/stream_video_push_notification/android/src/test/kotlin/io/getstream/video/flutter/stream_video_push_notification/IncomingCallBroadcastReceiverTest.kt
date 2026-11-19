@@ -12,7 +12,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
+import io.getstream.video.flutter.stream_video_push_notification.core.PrefsCallStore
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
@@ -21,6 +23,7 @@ import java.io.File
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -52,7 +55,7 @@ class IncomingCallBroadcastReceiverTest {
     @Before
     fun attachPlugin() {
         resetPlugin()
-        IncomingCallBroadcastReceiver.silenceEvents = false
+        RingingComponents.silenceEvents = false
         dart = FakeDartSide(context)
         // A spy: the real Telecom code runs, and is off at this SDK level.
         mockkObject(StreamTelecomManager)
@@ -63,7 +66,7 @@ class IncomingCallBroadcastReceiverTest {
         ringingService?.destroy()
         ringingService = null
         unmockkObject(StreamTelecomManager)
-        IncomingCallBroadcastReceiver.silenceEvents = false
+        RingingComponents.silenceEvents = false
         resetPlugin()
     }
 
@@ -137,14 +140,14 @@ class IncomingCallBroadcastReceiverTest {
     }
 
     @Test
-    fun `accepting starts the ringing service, reports it and marks the call accepted`() {
+    fun `accepting clears the ring, reports it and marks the call accepted, starting no service`() {
         incoming()
 
         receive(IncomingCallBroadcastReceiver.getIntentAccept(context, data().toBundle()))
 
-        val started = shadowOf(context).nextStartedService
-        assertEquals(IncomingCallNotificationService::class.java.name, started.component?.className)
-        assertEquals(IncomingCallConstants.ACTION_CALL_ACCEPT, started.action)
+        assertNull(shadowOf(context).nextStartedService)
+        assertEquals(emptyList<Int>(), shownNotificationIds())
+        assertTrue(fullScreenActivityWasToldToClose())
         assertEquals(IncomingCallConstants.ACTION_CALL_ACCEPT, eventNames().last())
         assertEquals(true, activeCalls().single()["isAccepted"])
         verify { StreamTelecomManager.answer(any(), CALL_ID) }
@@ -265,11 +268,10 @@ class IncomingCallBroadcastReceiverTest {
     }
 
     @Test
-    fun `starting an outgoing call starts the service, reports it and stores it accepted`() {
+    fun `starting an outgoing call reports it and stores it accepted, starting no service`() {
         receive(IncomingCallBroadcastReceiver.getIntentStart(context, data().toBundle()))
 
-        val started = shadowOf(context).nextStartedService
-        assertEquals(IncomingCallConstants.ACTION_CALL_START, started.action)
+        assertNull(shadowOf(context).nextStartedService)
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_START), eventNames())
         assertEquals(true, activeCalls().single()["isAccepted"])
         verify { StreamTelecomManager.registerOutgoingCall(any(), match { it.id == CALL_ID }) }
@@ -290,13 +292,37 @@ class IncomingCallBroadcastReceiverTest {
 
     @Test
     fun `while events are silenced nothing reaches Dart and the rest still happens`() {
-        IncomingCallBroadcastReceiver.silenceEvents = true
+        RingingComponents.silenceEvents = true
 
         incoming()
 
         assertEquals(emptyList<Any?>(), eventNames())
         assertEquals(listOf(CALL_ID.hashCode()), shownNotificationIds())
         assertEquals(listOf(CALL_ID), activeCalls().map { it["id"] })
+    }
+
+    @Test
+    fun `a decline in a new process with no Flutter engine clears the ring shown before`() {
+        incoming()
+        assertEquals(listOf(CALL_ID.hashCode()), shownNotificationIds())
+        // The process dies; the notification stays. A new one starts for the decline action.
+        resetPlugin()
+
+        receive(IncomingCallBroadcastReceiver.getIntentDecline(context, data().toBundle()))
+
+        assertEquals(emptyList<Int>(), shownNotificationIds())
+        assertTrue(fullScreenActivityWasToldToClose())
+        assertEquals(emptyList<RingingCall>(), PrefsCallStore(context).all())
+    }
+
+    @Test
+    fun `an incoming broadcast from native code is shown in a process with no Flutter engine`() {
+        resetPlugin()
+
+        incoming()
+
+        assertEquals(listOf(CALL_ID.hashCode()), shownNotificationIds())
+        assertEquals(listOf(CALL_ID), PrefsCallStore(context).all().map { it.id })
     }
 
     @Test
