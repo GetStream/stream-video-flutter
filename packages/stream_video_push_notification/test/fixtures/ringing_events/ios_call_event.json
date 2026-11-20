@@ -18,10 +18,6 @@
     "supportsDTMF": false,
     "supportsHolding": true,
     "includesCallsInRecents": true,
-    "ringtonePath": "ring.caf",
-    "configureAudioSession": true,
-    "audioSessionMode": "",
-    "audioSessionPreferredSampleRate": 44100.0,
-    "audioSessionPreferredIOBufferDuration": 0.005
+    "ringtonePath": "ring.caf"
   }
 }

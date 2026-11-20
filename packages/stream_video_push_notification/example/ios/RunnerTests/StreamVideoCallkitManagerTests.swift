@@ -20,7 +20,8 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
     private var savedRecentsSuppressedFor: CallData?
     private var session: FakeAudioSession!
     private var gate: FakeAudioEngineGate!
-    private var savedReconfigureDelay: DispatchTimeInterval = .never
+    private var savedTransactions: CallKitTransactionRequester!
+    private var callController: RecordingCallController!
     private var savedGracePeriod: CallEndGracePeriod!
     private var backgroundTasks: FakeBackgroundTasks!
     private var received: [[String: Any]] = []
@@ -34,7 +35,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         savedAudio = manager.audio
         savedProvider = manager.sharedProvider
         savedRecentsSuppressedFor = manager.recentsSuppressedFor
-        savedReconfigureDelay = manager.reconfigureAfterAnswerDelay
+        savedTransactions = manager.transactions
         savedGracePeriod = manager.callEndGracePeriod
 
         backgroundTasks = FakeBackgroundTasks()
@@ -46,8 +47,10 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         manager.store = CallKitCallStore()
         session = FakeAudioSession()
         gate = FakeAudioEngineGate()
-        manager.audio = CallKitAudioSessionCoordinator(session: session, gate: gate)
-        manager.reconfigureAfterAnswerDelay = .milliseconds(20)
+        manager.audio = CallKitAudioSessionCoordinator(
+            session: session, gate: gate, persistedRingingConfiguration: { nil })
+        callController = RecordingCallController()
+        manager.transactions = CallKitTransactionRequester(callController: callController)
         received = []
     }
 
@@ -65,7 +68,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         }
         manager.sharedProvider = savedProvider
         manager.recentsSuppressedFor = savedRecentsSuppressedFor
-        manager.reconfigureAfterAnswerDelay = savedReconfigureDelay
+        manager.transactions = savedTransactions
         manager.callEndGracePeriod = savedGracePeriod
         super.tearDown()
     }
@@ -433,7 +436,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         (received.last?["body"] as? [String: Any])?["isActive"] as? Bool
     }
 
-    func testTheFirstActivationConfiguresTheSessionAndReportsItActive() {
+    func testTheFirstActivationReportsTheSessionActiveAndLeavesItAsItIs() {
         listen()
         let call = track(id: "answered")
         answer(call)
@@ -445,7 +448,7 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
             receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION])
         XCTAssertEqual(receivedIsActive, true)
         XCTAssertEqual(call.phase, .active)
-        XCTAssertFalse(session.calls.isEmpty)
+        XCTAssertTrue(session.calls.isEmpty)
         XCTAssertEqual(gate.updates, [.init(available: true, callKitSessionActive: true)])
     }
 
@@ -500,53 +503,53 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
             ])
     }
 
-    /// Waits until the reconfiguration scheduled after an answer has had its turn.
-    private func waitPastTheReconfigureAfterAnswer() {
-        let waited = expectation(description: "past the reconfigure")
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) { waited.fulfill() }
-        wait(for: [waited], timeout: 1)
+    func testAnsweringARingFromCallKitAppliesTheRingingConfiguration() {
+        manager.audio.ringingConfiguration = ["appleAudioCategory": "playAndRecord"]
+        let call = track(id: "answered")
+
+        manager.provider(provider, perform: CXAnswerCallAction(call: call.identity.callKitUUID))
+
+        XCTAssertEqual(session.calls, ["playAndRecord - -"])
     }
 
-    func testTheAnsweredCallIsConfiguredAgainShortlyAfterTheAnswer() {
+    func testAnsweringARingTheAppJoinedKeepsItsSession() {
+        session.category = .playAndRecord
+        let call = track(id: "answered")
+        _ = manager.store.connected(uuid: call.identity.callKitUUID)
+
+        manager.provider(provider, perform: CXAnswerCallAction(call: call.identity.callKitUUID))
+
+        XCTAssertTrue(session.calls.isEmpty)
+    }
+
+    func testStartingAnOutgoingCallKeepsASessionThatCanRecord() {
+        session.category = .playAndRecord
+        let uuid = UUID()
+        manager.store.registerPendingOutgoing(CallData(args: ["id": "outgoing"]), uuid: uuid)
+
+        manager.provider(
+            provider,
+            perform: CXStartCallAction(call: uuid, handle: CXHandle(type: .generic, value: "x")))
+
+        XCTAssertTrue(session.calls.isEmpty)
+    }
+
+    func testDartConnectingARingAcceptedInTheAppAnswersItInCallKit() {
+        let call = track(id: "ringing")
+
+        manager.connectedCall(call.options)
+
+        XCTAssertEqual(callController.answeredUUIDs, [call.identity.callKitUUID])
+    }
+
+    func testDartConnectingARingCallKitAnsweredDoesNotAnswerItAgain() {
         let call = track(id: "answered")
         manager.provider(provider, perform: CXAnswerCallAction(call: call.identity.callKitUUID))
-        let configuredOnAnswer = session.calls
 
-        waitPastTheReconfigureAfterAnswer()
+        manager.connectedCall(call.options)
 
-        XCTAssertFalse(configuredOnAnswer.isEmpty)
-        XCTAssertEqual(session.calls, configuredOnAnswer + configuredOnAnswer)
-    }
-
-    func testOnlyTheLastAnsweredCallIsConfiguredAgainAfterItsAnswer() {
-        let first = UUID()
-        _ = manager.store.incomingReported(
-            CallData(args: ["id": "first", "audioSessionMode": "videoChat"]), uuid: first)
-        let second = UUID()
-        _ = manager.store.incomingReported(
-            CallData(args: ["id": "second", "audioSessionMode": "gameChat"]), uuid: second)
-        manager.provider(provider, perform: CXAnswerCallAction(call: first))
-        manager.provider(provider, perform: CXAnswerCallAction(call: second))
-        let configuredOnAnswers = session.calls.count
-
-        waitPastTheReconfigureAfterAnswer()
-
-        let reconfigured = Array(session.calls.dropFirst(configuredOnAnswers))
-        XCTAssertTrue(reconfigured.contains("mode \(AVAudioSession.Mode.gameChat.rawValue)"))
-        XCTAssertFalse(
-            reconfigured.contains("mode \(AVAudioSession.Mode.videoChat.rawValue)"),
-            "the first call's options were applied again after the second was answered")
-    }
-
-    func testACallThatEndedBeforeTheReconfigureAfterItsAnswerIsNotConfiguredAgain() {
-        let call = track(id: "answered")
-        manager.provider(provider, perform: CXAnswerCallAction(call: call.identity.callKitUUID))
-        end(call.identity.callKitUUID)
-        let configured = session.calls
-
-        waitPastTheReconfigureAfterAnswer()
-
-        XCTAssertEqual(session.calls, configured)
+        XCTAssertTrue(callController.answeredUUIDs.isEmpty)
+        XCTAssertNotNil(call.connectedAt)
     }
 
     func testEndingTheLastCallAllowsTheAudioEngine() {
@@ -1050,5 +1053,20 @@ final class CallEndGracePeriodTests: XCTestCase {
 
         XCTAssertEqual(tasks.begun, 2)
         XCTAssertTrue(grace.isRunning)
+    }
+}
+
+/// Fulfils every request, and records the calls answered through it.
+final class RecordingCallController: CallKitCallControlling {
+    var callUUIDs: [UUID] = []
+    private(set) var answeredUUIDs: [UUID] = []
+
+    func request(_ transaction: CXTransaction, completion: @escaping (Error?) -> Void) {
+        for action in transaction.actions {
+            if let answer = action as? CXAnswerCallAction {
+                answeredUUIDs.append(answer.callUUID)
+            }
+        }
+        completion(nil)
     }
 }

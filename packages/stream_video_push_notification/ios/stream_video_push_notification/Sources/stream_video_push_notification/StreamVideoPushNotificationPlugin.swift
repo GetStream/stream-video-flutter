@@ -43,7 +43,10 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
                 }
 
                 // Kept for the cold-start VoIP push path, where no Dart code has run yet.
-                StreamVideoPushConfiguration(args: arguments).persist()
+                let configuration = StreamVideoPushConfiguration(args: arguments)
+                configuration.persist()
+                callKitManager.audio.ringingConfiguration =
+                    configuration.ringingAudioConfiguration
 
                 VoIPPushRegistryHandler.shared.initData(data: arguments)
                 callKitManager.initCallkitProvider(CallData(args: arguments))

@@ -58,6 +58,9 @@ void main() {
     when(() => call.callCid).thenReturn(StreamCallCid(cid: 'default:1'));
     when(() => call.state).thenAnswer((_) => state);
     when(
+      () => call.audioConfigurationPolicy,
+    ).thenReturn(const AudioConfigurationPolicy.broadcaster());
+    when(
       () => call.leave(reason: any(named: 'reason')),
     ).thenAnswer((_) async => const Result.success(none));
   });

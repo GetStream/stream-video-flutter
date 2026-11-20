@@ -13,14 +13,16 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     /// Every call the plugin tracks.
     var store = CallKitCallStore()
 
-    let transactions = CallKitTransactionRequester()
+    /// Asks CallKit to start, answer, mute, hold or end calls. Tests replace it with one on a
+    /// fake call controller.
+    var transactions = CallKitTransactionRequester() {
+        didSet { observeEndRefusals() }
+    }
 
     /// Configures the audio session and tells WebRTC when it may use it.
     var audio = CallKitAudioSessionCoordinator() {
         didSet { observeEngineStartFailures() }
     }
-    /// How long after answering the answered call's audio session options are applied again.
-    var reconfigureAfterAnswerDelay: DispatchTimeInterval = .milliseconds(1200)
 
     /// Brings a call's audio back after another app's call held it. Made on first use, the
     /// first audio session activation at the latest, so its observers are installed only once a
@@ -42,10 +44,14 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
     private override init() {
         super.init()
+        observeEndRefusals()
+        observeEngineStartFailures()
+    }
+
+    private func observeEndRefusals() {
         transactions.onEndRefused = { [weak self] uuid in
             self?.clearCallAfterRefusedEnd(uuid)
         }
-        observeEngineStartFailures()
     }
 
     private func observeEngineStartFailures() {
@@ -92,7 +98,6 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             return
         }
 
-        self.configureAudioSession(data)
         provider.reportNewIncomingCall(with: uuid, update: callUpdate) { error in
             if let error = error {
                 self.sendIncomingCallFailedEvent(data, error)
@@ -100,7 +105,6 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
                 return
             }
 
-            self.configureAudioSession(data)
             self.apply(self.store.incomingReported(data, uuid: uuid))
             self.endCallNotExist(data)
             completion?()
@@ -215,7 +219,9 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             return
         }
         apply(effects)
-        if call.direction == .incoming {
+        // Only a ring the app accepted is answered here. CallKit answered one taken from its
+        // screen already, and a second answer would send Dart a second accept.
+        if call.direction == .incoming && call.phase == .ringing {
             transactions.answer(uuid: uuid)
         }
     }

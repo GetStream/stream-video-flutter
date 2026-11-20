@@ -88,6 +88,8 @@
 
 ### ✅ Added
 
+- `StreamVideoOptions.ringingAudioConfigurationPolicy`, the audio configuration policy of ringing calls, incoming and outgoing. It falls back to `audioConfigurationPolicy` when null, the default. A call's own policy, from `CallPreferences.audioConfigurationPolicy` or `Call.setAudioConfigurationPolicy`, still wins. On iOS the push notification package applies it to the audio session when CallKit answers a call the app has not joined yet, such as one answered from the CallKit screen, or when the session's category cannot record.
+- `Call.audioConfigurationPolicy`, the audio configuration policy in effect for the call.
 - `PushNotificationManager.setCallAudioOutputDeviceByCid`, which `Call.setAudioOutputDevice` calls once WebRTC uses the device, so a push manager can route the system call's audio there too. The output passed to `join` goes there when the join applies it; a rejoin or an SFU migration after that does not send it again.
 - `ActionCallDismissed` and `CallDismissReason`: the end of a call's ring that the SDK asked for, with why it ended (accepted in the app, cancelled by the caller, answered on another device, missed). Android only. `disposeAfterResolvingRinging` releases on it like on the other ring-ending events.
 - `ActionCallToggleHold.callCid`, the cid of the held call, which the push package sends on Android.

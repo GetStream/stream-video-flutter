@@ -96,7 +96,7 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertTrue(call.options.isAccepted)
         XCTAssertTrue(store.answeredCall === call)
 
-        XCTAssertTrue(store.audioSessionActivated().effects.isEmpty)
+        XCTAssertTrue(store.audioSessionActivated().isEmpty)
         XCTAssertEqual(call.phase, .active)
 
         let date = Date()
@@ -444,15 +444,15 @@ final class CallKitCallStoreTests: XCTestCase {
         store.registerPendingOutgoing(options("outgoing"), uuid: uuid)
         let call = store.startPerformed(uuid: uuid)!.call
         _ = store.connected(uuid: uuid)
-        XCTAssertTrue(store.audioSessionActivated().isFirst)
-        XCTAssertFalse(store.audioSessionActivated().isFirst)
+        _ = store.audioSessionActivated()
+        XCTAssertTrue(call.hasActivatedAudioSession)
 
         let outcome = store.endPerformed(uuid: uuid)
 
         XCTAssertEqual(names(outcome.effects), [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
         XCTAssertNil(store.outgoingCall)
         XCTAssertEqual(call.phase, .ended(nil))
-        XCTAssertTrue(store.audioSessionActivated().isFirst)
+        XCTAssertFalse(store.hasOngoingCall)
     }
 
     func testARingAfterAnEndedOutgoingCallTimesOutAndIsDeclined() {
@@ -539,7 +539,6 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertEqual(call.phase, .ended(.remoteEnded))
         XCTAssertTrue(store.calls.isEmpty)
         XCTAssertFalse(store.hasOngoingCall)
-        XCTAssertTrue(store.audioSessionActivated().isFirst)
     }
 
     func testAnActivationAfterAnOutgoingCallEndedDoesNotReportIt() {
@@ -548,7 +547,7 @@ final class CallKitCallStoreTests: XCTestCase {
         let call = store.startPerformed(uuid: uuid)!.call
         _ = store.endPerformed(uuid: uuid)
 
-        XCTAssertTrue(store.audioSessionActivated().effects.isEmpty)
+        XCTAssertTrue(store.audioSessionActivated().isEmpty)
         XCTAssertEqual(call.phase, .ended(nil))
     }
 
@@ -560,10 +559,8 @@ final class CallKitCallStoreTests: XCTestCase {
         store.registerPendingOutgoing(options("outgoing"), uuid: uuid)
         let outgoing = store.startPerformed(uuid: uuid)!.call
 
-        let activation = store.audioSessionActivated()
-        XCTAssertTrue(activation.isFirst)
-        XCTAssertTrue(activation.options === outgoing.options)
-        guard case .reportStartedConnecting(let reported, _)? = activation.effects.first else {
+        let effects = store.audioSessionActivated()
+        guard case .reportStartedConnecting(let reported, _)? = effects.first else {
             return XCTFail("the new outgoing call is not reported")
         }
         XCTAssertEqual(reported, uuid)
@@ -620,7 +617,7 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertTrue(store.outgoingCall === call)
 
         let activation = Date()
-        guard case .reportStartedConnecting(let reported, let at)? = store.audioSessionActivated(at: activation).effects.first
+        guard case .reportStartedConnecting(let reported, let at)? = store.audioSessionActivated(at: activation).first
         else {
             return XCTFail("starting to connect is not reported to CallKit")
         }
