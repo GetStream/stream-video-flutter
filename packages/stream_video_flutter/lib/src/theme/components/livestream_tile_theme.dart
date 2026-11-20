@@ -58,7 +58,9 @@ class StreamLivestreamTileThemeData with _$StreamLivestreamTileThemeData {
 
 /// Visual properties of a [StreamLivestreamTile].
 ///
-/// Anything left null falls back to the design-system tokens.
+/// Anything left null falls back to the tile's defaults: the design-system
+/// tokens for spacing and colours, `small` buttons, every indicator shown and
+/// the speakerphone toggle hidden.
 @themeGen
 @immutable
 class StreamLivestreamTileStyle with _$StreamLivestreamTileStyle {
@@ -87,6 +89,10 @@ class StreamLivestreamTileStyle with _$StreamLivestreamTileStyle {
   final double? trailingSpacing;
 
   /// Size of the speakerphone and fullscreen buttons.
+  ///
+  /// The default toolbar insets and [trailingSpacing] assume `small`
+  /// buttons, whose tap targets add the rest of the spacing. Set them too
+  /// when picking another size.
   final StreamButtonSize? buttonSize;
 
   /// Whether the toolbar shows [StreamLiveIndicator].
