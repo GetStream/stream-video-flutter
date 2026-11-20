@@ -1,4 +1,4 @@
-// ignore_for_file: strict_raw_type, deprecated_member_use_from_same_package
+// ignore_for_file: strict_raw_type
 
 import 'dart:async';
 
@@ -6,27 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../stream_video_flutter.dart';
-
-typedef LivestreamEndedBuilder =
-    Widget Function(
-      BuildContext context,
-      Call call,
-      CallState callState,
-    );
-
-typedef LivestreamBackstageBuilder =
-    Widget Function(
-      BuildContext context,
-      Call call,
-      CallState callState,
-    );
-
-typedef LivestreamControlsBuilder =
-    Widget Function(
-      BuildContext context,
-      Call call,
-      CallState callState,
-    );
 
 typedef LivestreamEndedWidgetBuilder =
     Widget Function(
@@ -59,9 +38,11 @@ enum LivestreamJoinBehaviour {
 
 /// Creates a widget that allows a user to view a livestream.
 ///
-/// By default, the widget has call controls and other elements including:
-/// play/pause the stream, live/backstage indicator, participant count,
-/// call duration, mute/unmute call, expand/contract livestream.
+/// The call duration sits in the app bar. The video is shown in a
+/// [StreamLivestreamTile], whose toolbar shows whether the call is live, the
+/// viewer count and a fullscreen button, plus a speakerphone toggle when one
+/// is asked for. Before the call goes live and after it ends, a status card
+/// takes the video's place.
 class LivestreamPlayer extends StatefulWidget {
   /// Creates a livestream player
   ///
@@ -76,7 +57,7 @@ class LivestreamPlayer extends StatefulWidget {
   /// disconnected. By default, it uses the [StreamUserAvatar] widget
   ///
   /// * [livestreamHostsUnavailableBuilder] allows you to build a custom widget when
-  /// a livestream is connected but no hosts have video enabled.
+  /// a livestream is connected but no host is in it.
   ///
   /// * [livestreamNotConnectedBuilder] allows you to build a custom widget when
   /// the livestream is not connected. Provides connection state information.
@@ -89,17 +70,14 @@ class LivestreamPlayer extends StatefulWidget {
     required this.call,
     this.joinBehaviour = LivestreamJoinBehaviour.autoJoinAsap,
     this.connectOptions,
-    this.showParticipantCount = true,
+    this.showParticipantCount,
+    this.includeAnonymousParticipants = true,
+    this.showLiveIndicator,
+    this.showSpeakerphoneToggle,
     this.showRecordingsWhenEnded = true,
     this.backButtonBuilder,
-    @Deprecated('Use livestreamEndedWidgetBuilder instead.')
-    this.livestreamEndedBuilder,
     this.livestreamEndedWidgetBuilder,
-    @Deprecated('Use livestreamBackstageWidgetBuilder instead.')
-    this.livestreamBackstageBuilder,
     this.livestreamBackstageWidgetBuilder,
-    @Deprecated('Use livestreamControlsWidgetBuilder instead.')
-    this.livestreamControlsBuilder,
     this.livestreamControlsWidgetBuilder,
     this.videoPlaceholderBuilder,
     this.videoRendererBuilder,
@@ -116,7 +94,7 @@ class LivestreamPlayer extends StatefulWidget {
     this.showMultipleHosts = false,
     this.layoutMode = ParticipantLayoutMode.grid,
     this.screenShareMode = LivestreamScreenShareMode.spotlight,
-    this.videoFit = VideoFit.contain,
+    this.videoFit = VideoFit.adaptive,
     this.fullscreenVideoFit = VideoFit.adaptive,
     this.pictureInPictureConfiguration = const PictureInPictureConfiguration(),
   });
@@ -131,10 +109,27 @@ class LivestreamPlayer extends StatefulWidget {
   /// If null, defaults to disabling camera and microphone.
   final CallConnectOptions? connectOptions;
 
-  /// Boolean to display participant count.
+  /// Whether the toolbar shows the viewer count.
+  ///
+  /// Falls back to [StreamLivestreamTileStyle.showSpectatorsIndicator], then
+  /// true.
+  final bool? showParticipantCount;
+
+  /// Whether anonymous viewers are part of the participant count.
   ///
   /// Defaults to true.
-  final bool showParticipantCount;
+  final bool includeAnonymousParticipants;
+
+  /// Whether the toolbar shows whether the call is live.
+  ///
+  /// Falls back to [StreamLivestreamTileStyle.showLiveIndicator], then true.
+  final bool? showLiveIndicator;
+
+  /// Whether the toolbar shows the speakerphone toggle.
+  ///
+  /// Falls back to [StreamLivestreamTileStyle.showSpeakerphoneToggle], then
+  /// false.
+  final bool? showSpeakerphoneToggle;
 
   /// Boolean to display list of recordings when the livestream has ended.
   ///
@@ -147,37 +142,25 @@ class LivestreamPlayer extends StatefulWidget {
   /// Defaults to false.
   final bool startInFullscreenMode;
 
-  /// [WidgetBuilder] used to build an action button on the top left side of
-  /// the screen.
+  /// [WidgetBuilder] used to build a back or close button.
+  ///
+  /// It is shown at the start of the app bar, which fullscreen hides.
   final WidgetBuilder? backButtonBuilder;
 
   /// The builder used to create a custom widget when the livestream has ended.
   ///
-  /// Recommend to use [livestreamEndedWidgetBuilder] and listen to the partialState of the call.
-  @Deprecated('Use livestreamEndedWidgetBuilder instead.')
-  final LivestreamEndedBuilder? livestreamEndedBuilder;
-
-  /// The builder used to create a custom widget when the livestream has ended.
+  /// It replaces the whole screen, app bar and back button included.
   final LivestreamEndedWidgetBuilder? livestreamEndedWidgetBuilder;
 
   /// The builder used to create a custom widget when the livestream is in backstage mode.
   ///
-  /// Recommend to use [livestreamBackstageWidgetBuilder] and listen to the partialState of the call.
-  @Deprecated('Use livestreamBackstageWidgetBuilder instead.')
-  final LivestreamBackstageBuilder? livestreamBackstageBuilder;
-
-  /// The builder used to create a custom widget when the livestream is in backstage mode.
+  /// It replaces the whole screen, app bar and back button included.
   final LivestreamBackstageWidgetBuilder? livestreamBackstageWidgetBuilder;
 
   /// The builder used to create custom controls for the livestream player.
-  /// This allows customization of the control UI elements displayed during the livestream.
   ///
-  /// Recommend to use [livestreamControlsWidgetBuilder] and listen to the partialState of the call.
-  @Deprecated('Use livestreamControlsWidgetBuilder instead.')
-  final LivestreamControlsBuilder? livestreamControlsBuilder;
-
-  /// The builder used to create custom controls for the livestream player.
-  /// This allows customization of the control UI elements displayed during the livestream.
+  /// The controls replace the tile's toolbar and are laid over the video,
+  /// in fullscreen too.
   final LivestreamControlsWidgetBuilder? livestreamControlsWidgetBuilder;
 
   /// Builder function used to build a video placeholder.
@@ -186,8 +169,8 @@ class LivestreamPlayer extends StatefulWidget {
   /// Builder function used to build a video renderer.
   final VideoRendererBuilder? videoRendererBuilder;
 
-  /// Builder function used to create a custom widget when a livestream is connected
-  /// but no hosts have video enabled.
+  /// Builder function used to create a custom widget when a livestream is
+  /// connected but no host is in it.
   final LivestreamHostsUnavailableBuilder? livestreamHostsUnavailableBuilder;
 
   /// Builder function used to create a custom widget when the livestream is not connected.
@@ -203,8 +186,11 @@ class LivestreamPlayer extends StatefulWidget {
   final LivestreamHostsParticipantBuilder? livestreamHostsParticipantBuilder;
 
   /// Function used to select the hosts from all the call participants.
-  /// If null, participants that have video enabled will be treated as hosts.
-  /// If [showMultipleHosts] is false, only the first streaming participant will be shown.
+  ///
+  /// If null, the participants with video enabled are the hosts. While none
+  /// has video, the participants with the `host` role and the call's creator
+  /// are, and their tiles show their avatar.
+  /// If [showMultipleHosts] is false, only the first host is shown.
   final LivestreamHostsParticipantsFilter? livestreamHostsParticipantsFilter;
 
   /// The action to perform when the call is disconnected. By default, it pops the current route.
@@ -214,6 +200,10 @@ class LivestreamPlayer extends StatefulWidget {
   final FutureOr<void> Function(String)? onRecordingTapped;
 
   /// The action to perform when the fullscreen button is tapped.
+  ///
+  /// It replaces the player's own toggle, so the player stays in the mode it
+  /// started in: [fullscreenVideoFit] then only applies with
+  /// [startInFullscreenMode].
   final VoidCallback? onFullscreenTapped;
 
   /// Denotes if the livestream allows multiple hosts.
@@ -231,10 +221,11 @@ class LivestreamPlayer extends StatefulWidget {
   /// The screen share mode used to display the screen share host.
   final LivestreamScreenShareMode screenShareMode;
 
-  /// Denotes if the video fits the width (contain) or expands to
-  /// the whole size (cover) while the player is not in fullscreen mode.
+  /// How the video is fitted while the player is not in fullscreen mode.
   ///
-  /// Defaults to [VideoFit.contain].
+  /// Defaults to [VideoFit.adaptive]: the video fills the tile when it shares
+  /// the tile's orientation, and is letterboxed when it does not.
+  /// Pass [VideoFit.contain] to always show the whole video.
   final VideoFit videoFit;
 
   /// How the video is fitted while the player is in fullscreen mode.
@@ -273,10 +264,6 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   /// Represents a call.
   Call get call => widget.call;
 
-  /// Holds information about the call.
-  @Deprecated(PartialStateDeprecationMessage.callState)
-  late CallState _callState;
-
   /// Controls the visibility of diagnostic data.
   bool _isStatsVisible = false;
 
@@ -292,9 +279,6 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   void initState() {
     super.initState();
 
-    //Remove once partial state deprecation is complete.
-    _callState = call.state.value;
-
     _fullscreen = widget.startInFullscreenMode;
 
     if (widget.joinBehaviour != LivestreamJoinBehaviour.manualJoin) {
@@ -302,20 +286,6 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     }
 
     _leaveOnDisconnect();
-
-    // Only listen to call state if any of the builders that depend on it are provided.
-    // Remove once partial state deprecation is complete.
-    if (widget.livestreamEndedBuilder != null ||
-        widget.livestreamBackstageBuilder != null ||
-        widget.livestreamControlsBuilder != null) {
-      _compositeSubscription.add(
-        widget.call.state.listen((callState) {
-          setState(() {
-            _callState = callState;
-          });
-        }),
-      );
-    }
   }
 
   void _joinWhenPossible() {
@@ -433,13 +403,22 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
 
   @override
   Widget build(BuildContext context) {
-    // The controls repaint every second as the duration ticks; the boundary
+    // The duration badge repaints every second as it ticks; the boundary
     // keeps that from repainting the screen the player is embedded in.
     return RepaintBoundary(child: _buildPlayer(context));
   }
 
-  static ({bool isBackstage, bool hasEnded}) _playerData(CallState state) =>
-      (isBackstage: state.isBackstage, hasEnded: state.endedAt != null);
+  // A host ending the call disconnects the viewers before `endedAt` is
+  // known, so that disconnect counts as ended too.
+  static ({bool isBackstage, bool hasEnded}) _playerData(CallState state) => (
+    isBackstage: state.isBackstage,
+    hasEnded:
+        state.endedAt != null ||
+        switch (state.status) {
+          CallStatusDisconnected(reason: DisconnectReasonEnded()) => true,
+          _ => false,
+        },
+  );
 
   Widget _buildPlayer(BuildContext context) {
     if (_popPending) {
@@ -457,106 +436,171 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
       call: call,
       selector: _playerData,
       builder: (context, data) {
-        final isBackstage = data.isBackstage;
-        final hasEnded = data.hasEnded;
-
-        if (hasEnded) {
+        if (data.hasEnded) {
           return widget.livestreamEndedWidgetBuilder?.call(context, call) ??
-              widget.livestreamEndedBuilder?.call(context, call, _callState) ??
-              LivestreamEndedContent(
-                call: call,
-                showRecordings: widget.showRecordingsWhenEnded,
-                onRecordingTapped: widget.onRecordingTapped,
+              _layout(
+                context,
+                body: LivestreamEndedContent(
+                  call: call,
+                  showRecordings: widget.showRecordingsWhenEnded,
+                  onRecordingTapped: widget.onRecordingTapped,
+                ),
               );
         }
 
-        if (isBackstage) {
+        if (data.isBackstage) {
           return widget.livestreamBackstageWidgetBuilder?.call(context, call) ??
-              widget.livestreamBackstageBuilder?.call(
+              _layout(
                 context,
-                call,
-                _callState,
-              ) ??
-              LivestreamBackstageContent(call: widget.call);
+                body: LivestreamBackstageContent(call: widget.call),
+              );
         }
 
-        return GestureDetector(
-          onDoubleTap: () {
-            if (widget.allowDiagnostics) {
-              setState(() {
-                _isStatsVisible = !_isStatsVisible;
-              });
-            }
-          },
-          child: Scaffold(
-            body: Stack(
-              children: [
-                LivestreamContent(
-                  call: call,
-                  callState: _callState,
-                  backButtonBuilder: widget.backButtonBuilder,
-                  videoPlaceholderBuilder: widget.videoPlaceholderBuilder,
-                  videoRendererBuilder: widget.videoRendererBuilder,
-                  livestreamHostsUnavailableBuilder:
-                      widget.livestreamHostsUnavailableBuilder,
-                  livestreamNotConnectedBuilder:
-                      widget.livestreamNotConnectedBuilder,
-                  livestreamFastReconnectingOverlayBuilder:
-                      widget.livestreamFastReconnectingOverlayBuilder,
-                  livestreamHostsParticipantBuilder:
-                      widget.livestreamHostsParticipantBuilder,
-                  livestreamHostsParticipantsFilter:
-                      widget.livestreamHostsParticipantsFilter,
-                  displayDiagnostics: _isStatsVisible,
-                  videoFit: _fullscreen
-                      ? widget.fullscreenVideoFit
-                      : widget.videoFit,
-                  showMultipleHosts: widget.showMultipleHosts,
-                  layoutMode: widget.layoutMode,
-                  screenShareMode: widget.screenShareMode,
-                  pictureInPictureConfiguration:
-                      widget.pictureInPictureConfiguration,
-                ),
-                widget.livestreamControlsWidgetBuilder?.call(context, call) ??
-                    widget.livestreamControlsBuilder?.call(
-                      context,
-                      call,
-                      _callState,
-                    ) ??
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      // Repaints once a second, so it doesn't repaint the
-                      // video content underneath with it.
-                      child: RepaintBoundary(
-                        child: StreamBuilder<Duration>(
-                          stream: call.callDurationStream,
-                          builder: (context, snapshot) {
-                            final duration = snapshot.data ?? Duration.zero;
-
-                            return LivestreamInfo(
-                              call: call,
-                              fullscreen: _fullscreen,
-                              onFullscreenTapped: () {
-                                if (widget.onFullscreenTapped != null) {
-                                  widget.onFullscreenTapped?.call();
-                                } else {
-                                  setState(() {
-                                    _fullscreen = !_fullscreen;
-                                  });
-                                }
-                              },
-                              duration: duration,
-                              showParticipantCount: widget.showParticipantCount,
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-              ],
-            ),
-          ),
+        return _layout(
+          context,
+          body: _liveTile(context),
+          fullscreen: _fullscreen,
         );
       },
+    );
+  }
+
+  /// The live video in the livestream tile, or under the custom controls
+  /// when [LivestreamPlayer.livestreamControlsWidgetBuilder] builds them.
+  Widget _liveTile(BuildContext context) {
+    Widget content = LivestreamContent(
+      call: call,
+      videoPlaceholderBuilder: widget.videoPlaceholderBuilder,
+      videoRendererBuilder: widget.videoRendererBuilder,
+      livestreamHostsUnavailableBuilder:
+          widget.livestreamHostsUnavailableBuilder,
+      livestreamNotConnectedBuilder: widget.livestreamNotConnectedBuilder,
+      livestreamFastReconnectingOverlayBuilder:
+          widget.livestreamFastReconnectingOverlayBuilder,
+      livestreamHostsParticipantBuilder:
+          widget.livestreamHostsParticipantBuilder,
+      livestreamHostsParticipantsFilter:
+          widget.livestreamHostsParticipantsFilter,
+      displayDiagnostics: _isStatsVisible,
+      videoFit: _fullscreen ? widget.fullscreenVideoFit : widget.videoFit,
+      showMultipleHosts: widget.showMultipleHosts,
+      layoutMode: widget.layoutMode,
+      screenShareMode: widget.screenShareMode,
+      pictureInPictureConfiguration: widget.pictureInPictureConfiguration,
+    );
+
+    if (_fullscreen) {
+      // Edge to edge, so the video's corners are square.
+      final tileTheme = StreamParticipantTileTheme.of(context);
+      content = StreamParticipantTileTheme(
+        data: tileTheme.copyWith(
+          style: (tileTheme.style ?? const StreamParticipantTileStyle())
+              .copyWith(borderRadius: BorderRadius.zero),
+        ),
+        child: content,
+      );
+    }
+
+    final controls = widget.livestreamControlsWidgetBuilder?.call(
+      context,
+      call,
+    );
+
+    return GestureDetector(
+      onDoubleTap: () {
+        if (widget.allowDiagnostics) {
+          setState(() {
+            _isStatsVisible = !_isStatsVisible;
+          });
+        }
+      },
+      child: controls != null
+          // Custom controls take the toolbar's place over the video.
+          ? Stack(
+              children: [
+                SizedBox.expand(child: content),
+                controls,
+              ],
+            )
+          : StreamLivestreamTile(
+              call: call,
+              style: _fullscreen ? _fullscreenTileStyle(context) : null,
+              isFullscreen: _fullscreen,
+              showLiveIndicator: widget.showLiveIndicator,
+              showSpectatorsIndicator: widget.showParticipantCount,
+              includeAnonymousParticipants: widget.includeAnonymousParticipants,
+              showSpeakerphoneToggle: widget.showSpeakerphoneToggle,
+              onFullscreenTapped: () {
+                if (widget.onFullscreenTapped != null) {
+                  widget.onFullscreenTapped?.call();
+                } else {
+                  setState(() {
+                    _fullscreen = !_fullscreen;
+                  });
+                }
+              },
+              child: content,
+            ),
+    );
+  }
+
+  /// Insets the toolbar by `md` at the start and `md - xs` at the end when
+  /// the tile fills the screen, unless the theme sets its own padding. The
+  /// fullscreen button's tap target adds the other `xs` at the end.
+  StreamLivestreamTileStyle? _fullscreenTileStyle(BuildContext context) {
+    final themed = StreamLivestreamTileTheme.of(context).style?.toolbarPadding;
+    if (themed != null) return null;
+
+    final spacing = context.streamSpacing;
+    return StreamLivestreamTileStyle(
+      toolbarPadding: EdgeInsetsDirectional.only(
+        start: spacing.md,
+        end: spacing.md - spacing.xs,
+      ),
+    );
+  }
+
+  /// The screen around [body]: the back button and the call duration at the
+  /// top. In [fullscreen], [body] fills the screen on its own, and back leaves
+  /// fullscreen before it leaves the screen.
+  Widget _layout(
+    BuildContext context, {
+    required Widget body,
+    bool fullscreen = false,
+  }) {
+    final colorScheme = context.streamColorScheme;
+    final spacing = context.streamSpacing;
+
+    if (fullscreen) {
+      return PopScope(
+        // Back leaves fullscreen first when the player toggles it itself.
+        canPop: widget.onFullscreenTapped != null,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) setState(() => _fullscreen = false);
+        },
+        child: Scaffold(
+          backgroundColor: colorScheme.backgroundApp,
+          body: body,
+        ),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: colorScheme.backgroundApp,
+      appBar: CallAppBar(
+        call: call,
+        showBackButton: false,
+        showLeaveCallAction: false,
+        leading: widget.backButtonBuilder?.call(context),
+        // Repaints once a second, so it doesn't repaint the video with it.
+        title: RepaintBoundary(child: StreamCallDurationBadge(call: call)),
+      ),
+      // The larger of the safe area and the side spacing, not both.
+      body: SafeArea(
+        top: false,
+        minimum: EdgeInsets.symmetric(horizontal: spacing.xs),
+        child: body,
+      ),
     );
   }
 
@@ -588,7 +632,11 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
           );
 
       final result = await call.join(connectOptions: connectOptions);
-      _logger.v(() => '[connect] completed: $result');
+      if (result case Failure(:final error)) {
+        _logger.w(() => '[connect] failed: $error');
+      } else {
+        _logger.v(() => '[connect] completed: $result');
+      }
     } catch (e) {
       _logger.v(() => '[connect] failed: $e');
       await _leave();

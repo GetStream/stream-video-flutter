@@ -2,6 +2,9 @@
 
 ### ✅ Added
 
+- Added `livestreamEndedTitle` and `livestreamEndedSubtitle` to the localizations, in English and Dutch.
+- Added `livestreamEnterFullscreen` and `livestreamExitFullscreen` to the localizations, in English and Dutch.
+- Added `includeAnonymousParticipants`, `showLiveIndicator` and `showSpeakerphoneToggle` to `LivestreamPlayer`.
 - Added `StreamLivestreamTile`, the livestream's video with its live, viewer count and fullscreen toolbar and an optional speakerphone toggle, used by both host and viewers, with `StreamLivestreamTileThemeData` on `StreamVideoTheme` and a `livestreamTile` builder in `streamVideoComponentBuilders`.
 - Added `type` and `size` to `LivestreamSpeakerphoneOption`.
 - Added `StreamLiveIndicator` and `StreamSpectatorsIndicator`, the livestream's LIVE pill and viewer count, with `StreamLiveIndicatorThemeData` and `StreamSpectatorsIndicatorThemeData` on `StreamVideoTheme`.
@@ -216,6 +219,12 @@
 
 ### 🔄 Changed
 
+- `LivestreamPlayer` follows the new design: the video sits in a `StreamLivestreamTile` under a `CallAppBar` with the call duration, fullscreen fills the screen, and the ended, backstage and waiting states are drawn on the tile's surface.
+- `LivestreamPlayer.videoFit` and `LivestreamContent.videoFit` default to `VideoFit.adaptive`. Pass `VideoFit.contain` to keep the previous fit.
+- `LivestreamPlayer` shows the ended screen when the call disconnects because it ended, if `onCallDisconnected` keeps it on screen.
+- The ended screen shows `livestreamEndedTitle` and `livestreamEndedSubtitle`; `livestreamEndedStatus` is no longer shown.
+- Back leaves the `LivestreamPlayer`'s fullscreen before it leaves the screen.
+- `LivestreamPlayer` shows the hosts' avatars while none of them has video; `livestreamHostsUnavailableBuilder` now only shows while no host is in the call.
 - On a folded window, `showStreamModalDialog` goes to the trailing half by default, and `StreamAdaptiveMenuAnchor`'s sheet to the half its button is in.
 - On a window folded down the middle, `StreamLobbyView` puts the preview and the rest of the lobby on either side of the fold, and `CallControlBar` splits its centre controls between its two sides.
 - `StreamCallContent` keeps showing the participants during a reconnect, and after one fails until the call has left, with a `StreamCallConnectionBanner` above them instead of the centred "Reconnecting" text.
@@ -305,6 +314,9 @@
 
 ### ⚠️ Deprecated
 
+- Deprecated `LivestreamInfo`; use `StreamLivestreamTile` instead.
+- Deprecated the `StreamLivestreamThemeData` colours, text styles, icon themes and `playPauseIconSize`.
+- Deprecated `StreamColorTheme.livestreamBackground`.
 - `StreamIncomingOutgoingCallThemeData`, `StreamIncomingOutgoingCallTheme` and `StreamVideoTheme.incomingCallTheme` / `outgoingCallTheme` are deprecated in favour of `StreamIncomingCallThemeData` and `StreamOutgoingCallThemeData`. The ringing screens are built on the design system now and no longer read them, so a theme set through them has no effect. The old pair also shared one inherited widget, so the two screens could never be themed apart.
 
 - `ParticipantLayoutMode.spotlight` is `speakerTop` now, and `pictureInPicture` is `speakerOneToOne`. `dart fix --apply` migrates both.
@@ -319,6 +331,11 @@
 
 ### ⚠️ Breaking
 
+- `LivestreamPlayer.backButtonBuilder` sits at the start of the app bar, and fullscreen hides it.
+- `LivestreamPlayer.livestreamControlsWidgetBuilder`'s controls cover the tile only; the call duration sits in the app bar above it.
+- `LivestreamPlayer.showParticipantCount` is nullable and falls back to `StreamLivestreamTileStyle.showSpectatorsIndicator`.
+- Removed `LivestreamPlayer.livestreamEndedBuilder`, `livestreamBackstageBuilder` and `livestreamControlsBuilder` with their typedefs, and `LivestreamContent.callState`. Use `livestreamEndedWidgetBuilder`, `livestreamBackstageWidgetBuilder` and `livestreamControlsWidgetBuilder` instead.
+- `LivestreamEndedContent`, `LivestreamBackstageContent` and `LivestreamContent` no longer bring their own `Scaffold`.
 - `isMobileLandscape` and `isMobilePortrait` are removed.
 - `StreamScreenSize` is `small` for any window shorter than 480, and `StreamScreenSize.fromSize` buckets a size by both axes.
 - `StreamCallContent.callFastReconnectingOverlayBuilder`, `CallFastReconnectingOverlayBuilder` and `CallFastReconnectingProperties` are removed; use `callConnectionBannerBuilder`, which is drawn for every reconnect and gets the call status through `CallConnectionBannerProperties`. `CallNotConnectedProperties.isMigrating` and `isReconnecting` are removed, since `callNotConnectedBuilder` is only used before the call first connects.

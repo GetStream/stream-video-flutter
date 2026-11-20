@@ -363,16 +363,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           fontWeight: FontWeight.bold,
         ),
       ),
+      // Only the deprecated LivestreamInfo reads these.
       livestreamTheme: StreamLivestreamThemeData(
-        playIconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
-        pauseIconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
-        playPauseIconSize: 64,
         liveButtonColor: colorTheme.accentPrimary,
-        backstageButtonColor: colorTheme.accentError,
         callStateButtonTextStyle: const TextStyle(
           color: Colors.white,
         ),
@@ -526,7 +519,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the speaker layouts, where one participant holds the stage.
   final StreamCallParticipantsSpotlightThemeData callParticipantsSpotlightTheme;
 
-  /// Theme for the outgoing call widget.
+  /// Theme for the livestream player.
   final StreamLivestreamThemeData livestreamTheme;
 
   /// Theme for the incoming ringing screen.

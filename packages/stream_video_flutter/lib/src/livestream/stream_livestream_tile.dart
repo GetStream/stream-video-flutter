@@ -171,7 +171,9 @@ class DefaultStreamLivestreamTile extends StatelessWidget {
           start: 0,
           end: 0,
           bottom: 0,
-          child: _toolbar(context, resolved),
+          // Clear of the home indicator and notches when the tile fills
+          // the screen; inline, the padding is already used up above it.
+          child: SafeArea(top: false, child: _toolbar(context, resolved)),
         ),
       ],
     );

@@ -281,6 +281,8 @@ void main() {
       final bare = tester.getSize(find.byType(StreamCallDurationBadge)).width;
 
       when(() => callState.isE2eeEnabled).thenReturn(true);
+      // A fresh badge, which reads the state again.
+      await tester.pumpWidget(const SizedBox());
       await pump(tester);
       final withIcon = tester
           .getSize(find.byType(StreamCallDurationBadge))

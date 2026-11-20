@@ -3,8 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../stream_video_flutter.dart';
 import '../l10n/localization_extension.dart';
+import 'livestream_status_card.dart';
 
+/// The livestream tile's ended state: a status card, with the call's
+/// recordings below it when [showRecordings] is true.
 class LivestreamEndedContent extends StatefulWidget {
+  /// Creates a [LivestreamEndedContent].
   const LivestreamEndedContent({
     super.key,
     required this.call,
@@ -12,8 +16,15 @@ class LivestreamEndedContent extends StatefulWidget {
     this.onRecordingTapped,
   });
 
+  /// The livestream that ended.
   final Call call;
+
+  /// Whether the call's recordings are listed.
+  ///
+  /// Defaults to true.
   final bool showRecordings;
+
+  /// Called with a recording's URL when it is tapped.
   final FutureOr<void> Function(String)? onRecordingTapped;
 
   @override
@@ -21,61 +32,113 @@ class LivestreamEndedContent extends StatefulWidget {
 }
 
 class _LivestreamEndedContentState extends State<LivestreamEndedContent> {
+  static final _logger = taggedLogger(tag: 'SV:LivestreamEnded');
+
+  late var _recordings = widget.call.listRecordings();
+
+  void _retry() => setState(() => _recordings = widget.call.listRecordings());
+
   @override
   Widget build(BuildContext context) {
-    final theme = StreamVideoTheme.of(context);
-    final liveTheme = theme.livestreamTheme;
     final translations = context.translations;
 
-    return Scaffold(
-      backgroundColor: theme.colorTheme.livestreamBackground,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              translations.livestreamEndedStatus,
-              style: liveTheme.liveEndedTextStyle,
+    return LivestreamStatusCard(
+      title: translations.livestreamEndedTitle,
+      subtitle: translations.livestreamEndedSubtitle,
+      children: [
+        if (widget.showRecordings)
+          FutureBuilder(
+            future: _recordings,
+            builder: (context, snapshot) {
+              if (snapshot.data case Failure(:final error)) {
+                _logger.w(() => '[recordings] failed: $error');
+                return _RecordingsFailed(onRetry: _retry);
+              }
+
+              final recordings = snapshot.data?.getDataOrNull();
+              if (recordings == null || recordings.isEmpty) {
+                return const SizedBox.shrink();
+              }
+
+              return _Recordings(
+                urls: [for (final recording in recordings) recording.url],
+                onRecordingTapped: widget.onRecordingTapped,
+              );
+            },
+          ),
+      ],
+    );
+  }
+}
+
+class _Recordings extends StatelessWidget {
+  const _Recordings({required this.urls, required this.onRecordingTapped});
+
+  final List<String> urls;
+  final FutureOr<void> Function(String)? onRecordingTapped;
+
+  @override
+  Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
+
+    return Padding(
+      padding: EdgeInsets.only(top: spacing.md),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: spacing.xxs,
+        children: [
+          Text(
+            context.translations.livestreamEndedWatchRecordings,
+            style: textTheme.captionDefault.copyWith(
+              color: colorScheme.textSecondary,
             ),
-            if (widget.showRecordings)
-              FutureBuilder(
-                future: widget.call.listRecordings(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData && snapshot.data!.isSuccess) {
-                    final recordings = snapshot.requireData.getDataOrNull();
+          ),
+          for (final url in urls)
+            StreamButton(
+              type: StreamButtonType.ghost,
+              size: StreamButtonSize.small,
+              onPressed: onRecordingTapped == null
+                  ? null
+                  : () => onRecordingTapped!(url),
+              child: Text(url, maxLines: 1, overflow: TextOverflow.ellipsis),
+            ),
+        ],
+      ),
+    );
+  }
+}
 
-                    if (recordings == null || recordings.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
+class _RecordingsFailed extends StatelessWidget {
+  const _RecordingsFailed({required this.onRetry});
 
-                    return Column(
-                      children: [
-                        Text(translations.livestreamEndedWatchRecordings),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: recordings.length,
-                          itemBuilder: (context, index) {
-                            final recording = recordings[index];
-                            return ListTile(
-                              title: Text(
-                                recording.url,
-                                style: liveTheme.liveEndedRecordingsTextStyle,
-                              ),
-                              onTap: () {
-                                widget.onRecordingTapped?.call(recording.url);
-                              },
-                            );
-                          },
-                        ),
-                      ],
-                    );
-                  }
+  final VoidCallback onRetry;
 
-                  return const SizedBox.shrink();
-                },
-              ),
-          ],
-        ),
+  @override
+  Widget build(BuildContext context) {
+    final spacing = context.streamSpacing;
+    final translations = context.translations;
+
+    return Padding(
+      padding: EdgeInsets.only(top: spacing.md),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: spacing.xxs,
+        children: [
+          Text(
+            translations.recordingsErrorTitle,
+            style: context.streamTextTheme.captionDefault.copyWith(
+              color: context.streamColorScheme.textSecondary,
+            ),
+          ),
+          StreamButton(
+            type: StreamButtonType.ghost,
+            size: StreamButtonSize.small,
+            onPressed: onRetry,
+            child: Text(translations.recordingsRetry),
+          ),
+        ],
       ),
     );
   }

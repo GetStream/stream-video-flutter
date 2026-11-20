@@ -101,13 +101,14 @@ void main() {
         home: LivestreamPlayer(
           call: call,
           joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+          showSpeakerphoneToggle: true,
         ),
       ),
     );
     await tester.pump();
 
     expect(find.byType(LivestreamContent), findsOneWidget);
-    expect(find.byType(LivestreamInfo), findsOneWidget);
+    expect(find.byType(StreamLivestreamTile), findsOneWidget);
     expect(find.byType(LivestreamSpeakerphoneOption), findsOneWidget);
   });
 }
