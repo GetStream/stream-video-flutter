@@ -184,6 +184,14 @@ void main() {
       expect(find.text('5'), findsOneWidget);
     });
 
+    testWidgets('reads the count out as viewers', (tester) async {
+      final semantics = tester.ensureSemantics();
+      await pump(tester, StreamSpectatorsIndicator(call: call));
+
+      expect(find.bySemanticsLabel('5 viewers'), findsOneWidget);
+      semantics.dispose();
+    });
+
     testWidgets('leaves anonymous viewers out when asked', (tester) async {
       await pump(
         tester,
