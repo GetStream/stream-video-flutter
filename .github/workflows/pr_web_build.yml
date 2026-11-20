@@ -1,0 +1,164 @@
+name: PR Web Build
+
+# Deploys the dogfooding web app of a pull request labeled `build` to
+# https://flutter.getstream.io/video/pr/<number>/ and comments the link on the
+# pull request. Every push to the pull request deploys again.
+#
+# The build is removed when the label is removed or the pull request closes.
+#
+# Fork pull requests are skipped: their runs get no identity token to deploy
+# with.
+
+on:
+  pull_request:
+    types: [labeled, unlabeled, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+
+env:
+  PR_NUMBER: ${{ github.event.pull_request.number }}
+  WEB_PATH: video/pr/${{ github.event.pull_request.number }}
+  COMMENT_MARKER: "<!-- pr-web-build -->"
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Any label change starts this workflow, so a `labeled` run only builds
+    # when the label added is `build`.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.action != 'closed' &&
+      github.event.action != 'unlabeled' &&
+      contains(github.event.pull_request.labels.*.name, 'build') &&
+      (github.event.action != 'labeled' || github.event.label.name == 'build')
+    # Set on the jobs rather than the workflow, so a run that skips both jobs
+    # (another label added) leaves a running deploy alone.
+    concurrency:
+      group: pr-web-build-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    environment:
+      name: flutter-web
+      url: https://flutter.getstream.io/${{ env.WEB_PATH }}/
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup Flutter
+        uses: ./.github/actions/setup-flutter
+
+      # The host serves a demo's index.html for unknown paths under /video/ and
+      # /video/beta/ only, so a pull request build keeps its routes after a `#`.
+      - name: Build
+        working-directory: dogfooding
+        run: >-
+          flutter build web --release --wasm
+          --base-href "/$WEB_PATH/"
+          --dart-define=WEB_FLAVOR=beta
+          --dart-define=WEB_HASH_URLS=true
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: projects/675676272957/locations/global/workloadIdentityPools/github-actions/providers/github-flutter
+          service_account: flutter-web-deployer@stream-gcp-2026-v2.iam.gserviceaccount.com
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v3
+
+      # index.html is uploaded last, after the files it loads, and is never
+      # stored by the browser.
+      - name: Deploy
+        run: |
+          gcloud storage rsync dogfooding/build/web "gs://stream-flutter-web/$WEB_PATH" \
+            --recursive --delete-unmatched-destination-objects \
+            --exclude='^index\.html$' \
+            --cache-control="public, max-age=60"
+          gcloud storage cp dogfooding/build/web/index.html "gs://stream-flutter-web/$WEB_PATH/index.html" \
+            --cache-control="no-store"
+
+      - name: Comment the link
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const sha = context.payload.pull_request.head.sha.slice(0, 7);
+            const marker = process.env.COMMENT_MARKER;
+            const body = [
+              marker,
+              `**Web build:** https://flutter.getstream.io/${process.env.WEB_PATH}/`,
+              '',
+              `Built from ${sha}. Updates on every push while the \`build\` label is set.`,
+            ].join('\n');
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number, per_page: 100,
+            });
+            const existing = comments.find((c) => c.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
+  cleanup:
+    name: Remove Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      ((github.event.action == 'closed' && contains(github.event.pull_request.labels.*.name, 'build')) ||
+      (github.event.action == 'unlabeled' && github.event.label.name == 'build'))
+    # Shares the deploy's group, so it stops a deploy that is still running.
+    concurrency:
+      group: pr-web-build-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    # The identity provider only accepts runs in this environment.
+    environment:
+      name: flutter-web
+    permissions:
+      id-token: write
+      pull-requests: write
+    steps:
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: projects/675676272957/locations/global/workloadIdentityPools/github-actions/providers/github-flutter
+          service_account: flutter-web-deployer@stream-gcp-2026-v2.iam.gserviceaccount.com
+
+      - name: Setup gcloud
+        uses: google-github-actions/setup-gcloud@v3
+
+      # Syncing an empty folder deletes every object of the build, and passes
+      # when there is none.
+      - name: Remove
+        run: |
+          mkdir empty
+          gcloud storage rsync empty "gs://stream-flutter-web/$WEB_PATH" \
+            --recursive --delete-unmatched-destination-objects
+
+      - name: Update the comment
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const marker = process.env.COMMENT_MARKER;
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number, per_page: 100,
+            });
+            const existing = comments.find((c) => c.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner, repo, comment_id: existing.id,
+                body: `${marker}\n**Web build:** removed.`,
+              });
+            }
