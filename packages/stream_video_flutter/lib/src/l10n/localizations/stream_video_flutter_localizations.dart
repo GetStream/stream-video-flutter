@@ -305,6 +305,18 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'Backstage'**
   String get livestreamBackstage;
 
+  /// Tooltip of the livestream button that fills the screen with the video
+  ///
+  /// In en, this message translates to:
+  /// **'Full screen'**
+  String get livestreamEnterFullscreen;
+
+  /// Tooltip of the livestream button that leaves fullscreen
+  ///
+  /// In en, this message translates to:
+  /// **'Exit full screen'**
+  String get livestreamExitFullscreen;
+
   /// The badge text shown when the call mode is live
   ///
   /// In en, this message translates to:

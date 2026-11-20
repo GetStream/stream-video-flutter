@@ -1,0 +1,422 @@
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart' hide Finder;
+
+import '../../test_utils/test_wrapper.dart';
+import '../mocks.dart';
+
+void main() {
+  late MockCall call;
+
+  setUp(() {
+    final state = MockCallState();
+    when(() => state.isBackstage).thenReturn(false);
+    when(() => state.participantCount).thenReturn(1);
+    when(() => state.anonymousParticipantCount).thenReturn(0);
+
+    call = MockCall();
+    when(() => call.state).thenAnswer(
+      (_) => MutableStateEmitter<CallState>(state, sync: true),
+    );
+    when(() => call.partialState<bool>(any())).thenAnswer((invocation) {
+      final CallStateSelector<bool> selector =
+          invocation.positionalArguments[0];
+      return Stream.value(selector(state));
+    });
+    when(() => call.partialState<int>(any())).thenAnswer((invocation) {
+      final CallStateSelector<int> selector = invocation.positionalArguments[0];
+      return Stream.value(selector(state));
+    });
+  });
+
+  Future<void> pump(WidgetTester tester, StreamLivestreamTile tile) async {
+    await tester.pumpWidget(
+      TestWrapper(child: SizedBox(width: 280, height: 482, child: tile)),
+    );
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('shows both indicators over its child', (tester) async {
+    await pump(
+      tester,
+      StreamLivestreamTile(
+        call: call,
+        showSpeakerphoneToggle: false,
+        child: const Text('video'),
+      ),
+    );
+
+    expect(find.text('video'), findsOneWidget);
+    expect(find.byType(StreamLiveIndicator), findsOneWidget);
+    expect(find.byType(StreamSpectatorsIndicator), findsOneWidget);
+  });
+
+  testWidgets('leaves the fullscreen button out without a callback', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      StreamLivestreamTile(
+        call: call,
+        showSpeakerphoneToggle: false,
+        child: const SizedBox(),
+      ),
+    );
+
+    expect(find.byType(StreamButton), findsNothing);
+  });
+
+  testWidgets('the fullscreen button calls back', (tester) async {
+    var taps = 0;
+    await pump(
+      tester,
+      StreamLivestreamTile(
+        call: call,
+        showSpeakerphoneToggle: false,
+        onFullscreenTapped: () => taps++,
+        child: const SizedBox(),
+      ),
+    );
+
+    await tester.tap(find.byType(StreamButton));
+    expect(taps, 1);
+  });
+
+  group('toolbar layout', () {
+    // Each button's 48 tap target pads its 32 visual by 8 on every side.
+    const tapPadding = 8.0;
+
+    Future<void> pumpDirected(
+      WidgetTester tester,
+      TextDirection direction,
+    ) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          child: Directionality(
+            textDirection: direction,
+            child: SizedBox(
+              width: 280,
+              height: 482,
+              child: StreamLivestreamTile(
+                call: call,
+                showSpeakerphoneToggle: false,
+                onFullscreenTapped: () {},
+                child: const SizedBox(),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('holds the indicators and button 8 from the edges', (
+      tester,
+    ) async {
+      final spacing = const StreamSpacing().xs;
+      await pumpDirected(tester, TextDirection.ltr);
+
+      final tile = tester.getRect(find.byType(StreamLivestreamTile));
+      final indicator = tester.getRect(find.byType(StreamLiveIndicator));
+      final button = tester.getRect(find.byType(StreamButton));
+      expect(indicator.left - tile.left, spacing);
+      expect(tile.right - (button.right - tapPadding), spacing);
+      expect(tile.bottom - (button.bottom - tapPadding), spacing);
+    });
+
+    testWidgets('spaces the indicators like the buttons', (tester) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          child: SizedBox(
+            width: 280,
+            height: 482,
+            child: StreamLivestreamTile(
+              call: call,
+              showSpeakerphoneToggle: false,
+              onFullscreenTapped: () {},
+              child: const SizedBox(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final live = tester.getRect(find.byType(StreamLiveIndicator));
+      final viewers = tester.getRect(find.byType(StreamSpectatorsIndicator));
+      expect(viewers.left - live.right, 2 * tapPadding);
+    });
+
+    testWidgets('mirrors right to left', (tester) async {
+      final spacing = const StreamSpacing().xs;
+      await pumpDirected(tester, TextDirection.rtl);
+
+      final tile = tester.getRect(find.byType(StreamLivestreamTile));
+      final indicator = tester.getRect(find.byType(StreamLiveIndicator));
+      final button = tester.getRect(find.byType(StreamButton));
+      expect(tile.right - indicator.right, spacing);
+      expect(button.left + tapPadding - tile.left, spacing);
+    });
+  });
+
+  testWidgets('hides the indicators when asked', (tester) async {
+    await pump(
+      tester,
+      StreamLivestreamTile(
+        call: call,
+        showLiveIndicator: false,
+        showSpectatorsIndicator: false,
+        showSpeakerphoneToggle: false,
+        child: const SizedBox(),
+      ),
+    );
+
+    expect(find.byType(StreamLiveIndicator), findsNothing);
+    expect(find.byType(StreamSpectatorsIndicator), findsNothing);
+  });
+
+  testWidgets('holds the pills 8 from the bottom without any button', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      StreamLivestreamTile(
+        call: call,
+        showSpeakerphoneToggle: false,
+        child: const SizedBox(),
+      ),
+    );
+
+    final tile = tester.getRect(find.byType(StreamLivestreamTile));
+    final indicator = tester.getRect(find.byType(StreamLiveIndicator));
+    expect(tile.bottom - indicator.bottom, const StreamSpacing().xs);
+  });
+
+  testWidgets('shrinks the indicators instead of overflowing', (
+    tester,
+  ) async {
+    final state = MockCallState();
+    when(() => state.isBackstage).thenReturn(true);
+    when(() => state.participantCount).thenReturn(1234567);
+    when(() => state.anonymousParticipantCount).thenReturn(0);
+    when(() => call.partialState<bool>(any())).thenAnswer((invocation) {
+      final CallStateSelector<bool> selector =
+          invocation.positionalArguments[0];
+      return Stream.value(selector(state));
+    });
+    when(() => call.partialState<int>(any())).thenAnswer((invocation) {
+      final CallStateSelector<int> selector = invocation.positionalArguments[0];
+      return Stream.value(selector(state));
+    });
+
+    await tester.pumpWidget(
+      TestWrapper(
+        child: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(1.5)),
+          child: SizedBox(
+            width: 200,
+            height: 300,
+            child: StreamLivestreamTile(
+              call: call,
+              showSpeakerphoneToggle: false,
+              onFullscreenTapped: () {},
+              child: const SizedBox(),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets(
+    'swaps the glyph and tooltip in fullscreen',
+    (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        StreamLivestreamTile(
+          call: call,
+          showSpeakerphoneToggle: false,
+          onFullscreenTapped: () {},
+          child: const SizedBox(),
+        ),
+      );
+      expect(find.byIcon(const StreamIcons().fullscreen), findsOneWidget);
+      expect(find.byTooltip('Full screen'), findsOneWidget);
+
+      await pump(
+        tester,
+        StreamLivestreamTile(
+          call: call,
+          isFullscreen: true,
+          showSpeakerphoneToggle: false,
+          onFullscreenTapped: () {},
+          child: const SizedBox(),
+        ),
+      );
+      expect(find.byIcon(const StreamIcons().fullscreenExit), findsOneWidget);
+      expect(find.byTooltip('Exit full screen'), findsOneWidget);
+    },
+  );
+
+  testWidgets('the style hides parts of the toolbar, the props win', (
+    tester,
+  ) async {
+    await pump(
+      tester,
+      StreamLivestreamTile(
+        call: call,
+        showSpectatorsIndicator: true,
+        style: const StreamLivestreamTileStyle(
+          showLiveIndicator: false,
+          showSpectatorsIndicator: false,
+          showSpeakerphoneToggle: false,
+        ),
+        child: const SizedBox(),
+      ),
+    );
+
+    expect(find.byType(StreamLiveIndicator), findsNothing);
+    expect(find.byType(StreamSpectatorsIndicator), findsOneWidget);
+    expect(find.byType(LivestreamSpeakerphoneOption), findsNothing);
+  });
+
+  group('speakerphone toggle', () {
+    const webrtcMethods = MethodChannel('FlutterWebRTC.Method');
+    const webrtcEvents = EventChannel('FlutterWebRTC.Event');
+
+    setUp(() {
+      // The toggle only shows where playout can be paused.
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        ..setMockMethodCallHandler(webrtcMethods, (_) async => null)
+        ..setMockStreamHandler(
+          webrtcEvents,
+          MockStreamHandler.inline(onListen: (_, _) {}),
+        );
+    });
+
+    tearDown(() {
+      CurrentPlatform.debugCurrentPlatformOverride = null;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        ..setMockMethodCallHandler(webrtcMethods, null)
+        ..setMockStreamHandler(webrtcEvents, null);
+    });
+
+    testWidgets('is hidden by default', (tester) async {
+      await pump(
+        tester,
+        StreamLivestreamTile(call: call, child: const SizedBox()),
+      );
+
+      expect(find.byType(LivestreamSpeakerphoneOption), findsNothing);
+    });
+
+    testWidgets('shows when the props ask for it', (tester) async {
+      await pump(
+        tester,
+        StreamLivestreamTile(
+          call: call,
+          showSpeakerphoneToggle: true,
+          child: const SizedBox(),
+        ),
+      );
+
+      expect(find.byType(LivestreamSpeakerphoneOption), findsOneWidget);
+    });
+
+    testWidgets('shows when the style asks for it', (tester) async {
+      await pump(
+        tester,
+        StreamLivestreamTile(
+          call: call,
+          style: const StreamLivestreamTileStyle(showSpeakerphoneToggle: true),
+          child: const SizedBox(),
+        ),
+      );
+
+      expect(find.byType(LivestreamSpeakerphoneOption), findsOneWidget);
+    });
+  });
+
+  testWidgets('the widget style beats the local theme', (tester) async {
+    await pump(
+      tester,
+      StreamLivestreamTile(
+        call: call,
+        showSpeakerphoneToggle: false,
+        style: const StreamLivestreamTileStyle(leadingSpacing: 4),
+        child: const SizedBox(),
+      ),
+    );
+    final defaultGap =
+        tester.getRect(find.byType(StreamSpectatorsIndicator)).left -
+        tester.getRect(find.byType(StreamLiveIndicator)).right;
+    expect(defaultGap, 4);
+
+    await tester.pumpWidget(
+      TestWrapper(
+        child: SizedBox(
+          width: 280,
+          height: 482,
+          child: StreamLivestreamTileTheme(
+            data: const StreamLivestreamTileThemeData(
+              style: StreamLivestreamTileStyle(
+                leadingSpacing: 10,
+                showLiveIndicator: true,
+              ),
+            ),
+            child: StreamLivestreamTile(
+              call: call,
+              showSpeakerphoneToggle: false,
+              style: const StreamLivestreamTileStyle(leadingSpacing: 6),
+              child: const SizedBox(),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final gap =
+        tester.getRect(find.byType(StreamSpectatorsIndicator)).left -
+        tester.getRect(find.byType(StreamLiveIndicator)).right;
+    expect(gap, 6);
+  });
+
+  testWidgets('renders the builder registered on the component factory', (
+    tester,
+  ) async {
+    StreamLivestreamTileProps? receivedProps;
+
+    await tester.pumpWidget(
+      StreamComponentFactory(
+        builders: StreamComponentBuilders(
+          extensions: streamVideoComponentBuilders(
+            livestreamTile: (context, props) {
+              receivedProps = props;
+              return const Text('custom tile');
+            },
+          ),
+        ),
+        child: TestWrapper(
+          child: StreamLivestreamTile(
+            call: call,
+            isFullscreen: true,
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('custom tile'), findsOneWidget);
+    expect(find.byType(DefaultStreamLivestreamTile), findsNothing);
+    expect(receivedProps?.isFullscreen, isTrue);
+  });
+}

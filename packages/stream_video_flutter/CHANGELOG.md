@@ -2,6 +2,8 @@
 
 ### ✅ Added
 
+- Added `StreamLivestreamTile`, the livestream's video with its live, viewer count and fullscreen toolbar and an optional speakerphone toggle, used by both host and viewers, with `StreamLivestreamTileThemeData` on `StreamVideoTheme` and a `livestreamTile` builder in `streamVideoComponentBuilders`.
+- Added `type` and `size` to `LivestreamSpeakerphoneOption`.
 - Added `StreamLiveIndicator` and `StreamSpectatorsIndicator`, the livestream's LIVE pill and viewer count, with `StreamLiveIndicatorThemeData` and `StreamSpectatorsIndicatorThemeData` on `StreamVideoTheme`.
 - Added `StreamMediaDevicesController.supportsAudioOutputSelection`; `audioOutputs` is empty where it is false.
 - Added `anchorPoint` to `showStreamModalDialog`, which picks the half of a folded window the dialog goes to.
@@ -353,7 +355,7 @@
 - The lobby's card listing who is already in the call is gone, and `StreamLobbyParticipantsView` with it. `StreamLobbyParticipantsButton` replaces it: a badge with the number waiting, opening the list on tap.
 - The lobby's hardcoded English moved into the localizations, so the heading, subheading and join button follow the app's locale. Pass `title`, `subtitle` or `joinButtonLabel` to override them.
 
-- Every icon the SDK draws now resolves from the design system's icon set through `context.streamIcons`, instead of from Material. A microphone is `voiceFill` / `voiceOffFill`, a camera `videoFill` / `videoOffFill`, hanging up `phoneDownFill`, answering `phoneFill`, screen sharing `presentDesktopFill`, captions `captionFill`, recording `recordingFill` / `recordingStopFill`. The one exception is the livestream fullscreen toggle, whose cross-fade needs two distinct glyphs where the design system ships only `fullscreenFill`.
+- Every icon the SDK draws now resolves from the design system's icon set through `context.streamIcons`, instead of from Material. A microphone is `voiceFill` / `voiceOffFill`, a camera `videoFill` / `videoOffFill`, hanging up `phoneDownFill`, answering `phoneFill`, screen sharing `presentDesktopFill`, captions `captionFill`, recording `recordingFill` / `recordingStopFill`.
 - The `IconData` parameters on the control widgets — `enabledMicrophoneIcon`, `disabledCameraIcon`, `icon` on `StreamLeaveCallButton` and the rest — are now nullable and default to null, resolving from `context.streamIcons` at build time. Passing an icon still works; the defaults could not stay in the constructor because reading the theme needs a context.
 - This package's own three-icon `StreamIcons` class and its bundled font are removed. It was never exported from the barrel, and its `grid`, `spotlight` and `fullscreen` are covered by `context.streamIcons.gridFill`, `.speakerLeftFill` and `.fullscreenFill`.
 - The dead colour parameters on `StreamMicrophoneButton`, `StreamCameraButton`, `StreamRecordingButton`, `StreamClosedCaptionsButton` and `StreamScreenShareButton` (`enabled*IconColor`, `disabled*IconColor`, `enabled*BackgroundColor`, `disabled*BackgroundColor`) are removed. They stopped having any effect when those widgets moved onto `StreamButton`, so dropping them changes nothing at runtime. Run `dart fix --apply`.
