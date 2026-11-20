@@ -79,7 +79,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _getOrCreateCall({List<String> memberIds = const []}) async {
-    var callId = _callIdController.text;
+    var callId = _callIdController.text.trim();
+
+    // A full cid such as `livestream:<id>` picks the call type as well. The
+    // type ends at the first colon; `livestream:` alone starts a new one.
+    StreamCallType? callType;
+    final colon = callId.indexOf(':');
+    if (colon > 0) {
+      callType = StreamCallType.fromString(callId.substring(0, colon));
+      callId = callId.substring(colon + 1);
+    }
 
     // Always generate a new call id for ringing
     if (callId.isEmpty || memberIds.isNotEmpty) {
@@ -91,7 +100,10 @@ class _HomeScreenState extends State<HomeScreen> {
       final encryptionKey = invited?.callId == callId ? invited?.key : null;
       unawaited(
         context.push<void>(
-          JoinRoute(callId: callId).locationFor(encryptionKey: encryptionKey),
+          JoinRoute(callId: callId).locationFor(
+            callType: callType,
+            encryptionKey: encryptionKey,
+          ),
         ),
       );
       return;
@@ -99,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     unawaited(showLoadingIndicator(context));
 
-    final call = makeAppCall(callId);
+    final call = makeAppCall(callId, callType: callType);
 
     try {
       final result = await call.getOrCreate(
