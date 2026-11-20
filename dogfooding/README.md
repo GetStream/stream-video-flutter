@@ -113,7 +113,7 @@ The app should now start on your connected device or simulator.
 
 Web builds take no `--flavor`; pass `--dart-define=WEB_FLAVOR=<flavor>` instead. Without it a web build behaves like `beta`. CI deploys `prod` to [flutter.getstream.io/video](https://flutter.getstream.io/video/) on release and `beta` to [flutter.getstream.io/video/beta](https://flutter.getstream.io/video/beta/) on every push to `v2`.
 
-A pull request labeled `build` is deployed to `flutter.getstream.io/video/pr/<number>/` as a `beta` build, and again on every push. The link is posted as a comment on the pull request. These builds pass `--dart-define=WEB_HASH_URLS=true`, which keeps the route after a `#` (`/video/pr/<number>/#/join/<id>`). The build is removed when the label is removed or the pull request closes.
+A pull request labeled `build` is deployed to `flutter.getstream.io/video/pr/<number>/` as a `beta` build, and again on every push. The link is posted as a comment on the pull request. These builds pass `--dart-define=WEB_HASH_URLS=true`, which keeps the route after a `#` (`/video/pr/<number>/#/join/<id>`). The build is removed when the label is removed or the pull request closes, or 30 days after its last deploy.
 
 ### 6. Important notes
 

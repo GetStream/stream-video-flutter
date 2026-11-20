@@ -329,3 +329,19 @@ jobs:
             --cache-control="public, max-age=60"
           gcloud storage cp dogfooding/build/web/index.html gs://stream-flutter-web/${{ env.WEB_PATH }}/index.html \
             --cache-control="no-store"
+
+      # PR Web Build removes a build with its pull request; this removes the
+      # ones left behind. Every deploy uploads index.html again, so its date is
+      # the build's last deploy.
+      - name: Remove pull request builds older than 30 days
+        run: |
+          cutoff=$(date -u -d '30 days ago' +%s)
+          # The listing fails when there is no pull request build.
+          builds=$(gcloud storage ls --long 'gs://stream-flutter-web/video/pr/*/index.html' 2>/dev/null || true)
+          while read -r _ updated url; do
+            [[ $url == gs://*/index.html ]] || continue
+            if (( $(date -u -d "$updated" +%s) < cutoff )); then
+              echo "Removing ${url%index.html}, last deployed $updated"
+              gcloud storage rm --recursive "${url%index.html}"
+            fi
+          done <<< "$builds"
