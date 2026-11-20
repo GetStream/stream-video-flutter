@@ -424,7 +424,11 @@ class _BlurToggleState extends State<_BlurToggle> {
     return Tooltip(
       message: _enabled ? 'Disable background blur' : 'Enable background blur',
       child: CallFeatureButton(
-        icon: Icon(context.streamIcons.blurFill),
+        icon: Icon(
+          _enabled
+              ? context.streamIcons.blurFill
+              : context.streamIcons.blurOffFill,
+        ),
         selected: _enabled,
         onPressed: () {
           final enabling = !_enabled;
