@@ -119,6 +119,7 @@ class LivestreamPlayer extends StatefulWidget {
     this.videoFit = VideoFit.contain,
     this.fullscreenVideoFit = VideoFit.adaptive,
     this.pictureInPictureConfiguration = const PictureInPictureConfiguration(),
+    this.leaveCallOnDispose = true,
   });
 
   /// The livestream call to display.
@@ -126,6 +127,17 @@ class LivestreamPlayer extends StatefulWidget {
 
   /// Defines the behavior for automatically joining the livestream.
   final LivestreamJoinBehaviour joinBehaviour;
+
+  /// Whether the player leaves the call when it is disposed, for example
+  /// when its route is popped with the back button.
+  ///
+  /// It only applies to a call this player joined itself, through
+  /// [joinBehaviour]. A call joined by the app, before the player was shown or
+  /// with [LivestreamJoinBehaviour.manualJoin], is left to the app.
+  ///
+  /// Set it to `false` when the livestream should keep playing after the
+  /// player is gone, such as in an in-app picture-in-picture overlay.
+  final bool leaveCallOnDispose;
 
   /// Options used when joining the livestream.
   /// If null, defaults to disabling camera and microphone.
@@ -267,6 +279,10 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
 
   /// Set once the auto-join has fired, so it fires only once per player.
   bool _connectStarted = false;
+
+  /// The call this player joined itself, which it leaves on dispose. Null
+  /// when the app joined the call, or nothing was joined.
+  Call? _joinedCall;
 
   final CompositeSubscription _compositeSubscription = CompositeSubscription();
 
@@ -421,7 +437,31 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   @override
   void dispose() {
     _compositeSubscription.dispose();
+
+    final joinedCall = _joinedCall;
+    if (widget.leaveCallOnDispose && joinedCall != null) {
+      unawaited(_leaveOnDispose(joinedCall));
+    }
+
     super.dispose();
+  }
+
+  /// Leaves [call] once the player is gone, so the livestream does not keep
+  /// playing behind a closed screen.
+  Future<void> _leaveOnDispose(Call call) async {
+    if (call.state.value.status.isDisconnected) return;
+
+    _logger.d(() => '[dispose] leaving call: ${call.callCid}');
+    try {
+      final result = await call.leave(
+        reason: const DisconnectReason.left(initiator: LeaveInitiator.app),
+      );
+      if (result is Failure) {
+        _logger.e(() => '[dispose] leave failed: $result');
+      }
+    } catch (e, stk) {
+      _logger.e(() => '[dispose] leave failed: $e\n$stk');
+    }
   }
 
   @override
@@ -587,6 +627,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
             microphone: TrackOption.disabled(),
           );
 
+      _joinedCall = call;
       final result = await call.join(connectOptions: connectOptions);
       _logger.v(() => '[connect] completed: $result');
     } catch (e) {

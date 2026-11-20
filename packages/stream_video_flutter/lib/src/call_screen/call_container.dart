@@ -23,10 +23,20 @@ class StreamCallContainer extends StatefulWidget {
     this.outgoingCallWidgetBuilder,
     this.callContentWidgetBuilder,
     this.pictureInPictureConfiguration = const PictureInPictureConfiguration(),
+    this.leaveCallOnDispose = true,
   });
 
   /// Represents a call.
   final Call call;
+
+  /// Whether the container leaves the call it joined when it is disposed,
+  /// for example when its route is popped with the back button.
+  ///
+  /// Set it to `false` when the call should keep running after the
+  /// container is gone, such as a call shown in an in-app
+  /// picture-in-picture overlay. The app is then responsible for calling
+  /// [Call.leave].
+  final bool leaveCallOnDispose;
 
   /// Options used while connecting to the call.
   final CallConnectOptions? callConnectOptions;
@@ -78,6 +88,11 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
   /// Whether the call is over and this container still owes its route a pop.
   var _popPending = false;
 
+  /// The call this container joined, which it leaves on dispose. It stays the
+  /// first call when [StreamCallContainer.call] changes, since only that one
+  /// was joined here.
+  Call? _joinedCall;
+
   @override
   void initState() {
     super.initState();
@@ -104,7 +119,31 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
   void dispose() {
     _callStatusSubscription?.cancel();
     _callStatusSubscription = null;
+
+    final joinedCall = _joinedCall;
+    if (widget.leaveCallOnDispose && joinedCall != null) {
+      unawaited(_leaveOnDispose(joinedCall));
+    }
+
     super.dispose();
+  }
+
+  /// Leaves [call] once the container is gone, so the call does not keep
+  /// publishing audio and video behind a closed screen.
+  Future<void> _leaveOnDispose(Call call) async {
+    if (call.state.value.status.isDisconnected) return;
+
+    _logger.d(() => '[dispose] leaving call: ${call.callCid}');
+    try {
+      final result = await call.leave(
+        reason: const DisconnectReason.left(initiator: LeaveInitiator.app),
+      );
+      if (result is Failure) {
+        _logger.e(() => '[dispose] leave failed: $result');
+      }
+    } catch (e, stk) {
+      _logger.e(() => '[dispose] leave failed: $e\n$stk');
+    }
   }
 
   void _listenToCallStatus() {
@@ -164,6 +203,7 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
     try {
       _logger.d(() => '[connect] no args');
 
+      _joinedCall = call;
       final result = await call.join(connectOptions: widget.callConnectOptions);
       _logger.v(() => '[connect] completed: $result');
     } catch (e) {

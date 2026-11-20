@@ -316,6 +316,7 @@
 
 ### ⚠️ Breaking
 
+- `StreamCallContainer` leaves the call it joined when it is disposed, for example when the back button pops its route. Before, the call stayed joined and kept publishing audio and video behind the closed screen. `LivestreamPlayer` does the same for a call it joined itself through an auto-join `joinBehaviour`; a call the app joined is still the app's to leave. Both match the Swift and JS SDKs. To keep the call running after the widget is gone, for example in an in-app picture-in-picture overlay, pass `leaveCallOnDispose: false` and call `Call.leave` yourself.
 - `isMobileLandscape` and `isMobilePortrait` are removed.
 - `StreamScreenSize` is `small` for any window shorter than 480, and `StreamScreenSize.fromSize` buckets a size by both axes.
 - `StreamCallContent.callFastReconnectingOverlayBuilder`, `CallFastReconnectingOverlayBuilder` and `CallFastReconnectingProperties` are removed; use `callConnectionBannerBuilder`, which is drawn for every reconnect and gets the call status through `CallConnectionBannerProperties`. `CallNotConnectedProperties.isMigrating` and `isReconnecting` are removed, since `callNotConnectedBuilder` is only used before the call first connects.
