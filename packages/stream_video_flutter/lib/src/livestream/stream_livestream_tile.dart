@@ -103,6 +103,8 @@ class StreamLivestreamTileProps {
   final bool? showSpectatorsIndicator;
 
   /// Whether anonymous viewers are part of the spectators count.
+  ///
+  /// Defaults to true.
   final bool includeAnonymousParticipants;
 
   /// Whether the toolbar shows [LivestreamSpeakerphoneOption].

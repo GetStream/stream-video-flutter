@@ -126,7 +126,7 @@ class StreamVideoFlutterLocalizationsNl
   String get livestreamEnterFullscreen => 'Volledig scherm';
 
   @override
-  String get livestreamExitFullscreen => 'Volledig scherm sluiten';
+  String get livestreamExitFullscreen => 'Volledig scherm afsluiten';
 
   @override
   String get livestreamLive => 'Live';
