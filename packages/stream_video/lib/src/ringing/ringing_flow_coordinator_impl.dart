@@ -361,11 +361,11 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
     );
   }
 
-  /// Ends the native call for [cid] after the user answered it but the call
+  /// Leaves the native call for [cid] after the user answered it but the call
   /// could not be set up, so they are not left on an answered call screen with
   /// nothing behind it.
   Future<void> _endUnjoinableNativeCall(String cid) async {
-    await _pushNotificationManager()?.endCallByCid(cid);
+    await _pushNotificationManager()?.onCallLeft(cid);
   }
 
   /// Consumes and accepts the call the user answered on the native call
@@ -595,9 +595,9 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
               'dismissing incoming call UI: $cid',
         );
 
-        // Silently, as the ringing flow is already resolved and the native end
-        // must not be reported back as a decline/ended action.
-        await _pushNotificationManager()?.endCallByCid(cid, silent: true);
+        // The ringing flow is already resolved, so the native end must not be
+        // reported back as a decline/ended action.
+        await _pushNotificationManager()?.onRingEnded(cid);
 
         _cancelIncomingAutoRejectTimerByCid(cid);
         await _resolveStaleIncomingCall(cid, ringingState);

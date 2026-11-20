@@ -266,8 +266,11 @@ void main() {
 
     test('after a teardown that threw', () async {
       final call = await joinWithEndCallThrowing();
+      // Stubbed on the state itself: a stub through the host's getter
+      // would make the getter throw instead.
+      final hostState = harness.streamVideo.state;
       when(
-        () => harness.streamVideo.state.removeActiveCall(any()),
+        () => hostState.removeActiveCall(any()),
       ).thenThrow(StateError('teardown failed'));
 
       await expectLater(call.end(), throwsStateError);
@@ -397,8 +400,11 @@ void main() {
   test('dispose still closes the streams when the leave throws', () async {
     final call = harness.buildCall();
     await call.join();
+    // Stubbed on the state itself: a stub through the host's getter
+    // would make the getter throw instead.
+    final hostState = harness.streamVideo.state;
     when(
-      () => harness.streamVideo.state.removeActiveCall(any()),
+      () => hostState.removeActiveCall(any()),
     ).thenThrow(StateError('teardown failed'));
     final done = streamsDone(call);
 

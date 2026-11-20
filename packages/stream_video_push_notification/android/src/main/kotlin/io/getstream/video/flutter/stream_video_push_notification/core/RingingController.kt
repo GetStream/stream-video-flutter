@@ -196,15 +196,18 @@ internal class RingingController(
     }
 
     /**
-     * Ends the ring of the stored calls with [callCid], or of every stored call when [callCid] is
-     * null, for [reason]: clears it, reports it as dismissed with the reason and forgets the call.
+     * Ends the ring of the stored calls with [callCid] that are still ringing, or of every such
+     * call when [callCid] is null, for [reason]: clears it and reports it as dismissed with the
+     * reason. A call already accepted has no ring and is left alone.
      *
-     * For [DismissReason.ACCEPTED] the call stays in Telecom, answered whatever `isAccepted` says.
-     * For the other reasons Telecom disconnects it: as remote for a cancel and for an answer on
-     * another device, as missed for a missed call.
+     * For [DismissReason.ACCEPTED] the call goes on: Telecom answers it, and it stays stored as
+     * accepted, as an accept from the notification leaves it, so `activeCalls` lists it and
+     * ending it later ends its Telecom call. For the other reasons the call is forgotten and
+     * Telecom disconnects it: as remote for a cancel and for an answer on another device, as
+     * missed for a missed call.
      */
     fun dismissRingingCall(callCid: String?, reason: DismissReason) {
-        val calls = callCid?.let { store.byCallCid(it) } ?: store.all()
+        val calls = (callCid?.let { store.byCallCid(it) } ?: store.all()).filterNot { it.isAccepted }
 
         calls.forEach { call ->
             if (reason == DismissReason.ACCEPTED) step { telecom.answer(call.id) }
@@ -217,7 +220,11 @@ internal class RingingController(
         val data = CallPayloadMapper.toBundle(call)
         notifications.clearIncomingNotification(data, false)
         report(IncomingCallConstants.ACTION_CALL_DISMISSED, data, "reason" to reason.wireName)
-        store.remove(call.id)
+        if (reason == DismissReason.ACCEPTED) {
+            store.add(call.copy(isAccepted = true))
+        } else {
+            store.remove(call.id)
+        }
         when (reason) {
             DismissReason.ACCEPTED -> Unit
             DismissReason.REMOTE_CANCELLED -> telecom.disconnect(call.id, DisconnectCause.REMOTE)

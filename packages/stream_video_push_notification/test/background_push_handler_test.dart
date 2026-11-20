@@ -1,3 +1,6 @@
+// The backend events are mocked, and they override `==`.
+// ignore_for_file: avoid_implementing_value_types
+
 import 'dart:async';
 
 import 'package:fake_async/fake_async.dart';
@@ -30,8 +33,10 @@ class MockStreamVideo extends Mock implements StreamVideo {
 class MockPushNotificationManager extends Mock
     implements PushNotificationManager {}
 
-// ignore: avoid_implementing_value_types
 class MockRejectedEvent extends Mock implements StreamCallRejectedEvent {}
+
+class MockCountEvent extends Mock
+    implements StreamCallSessionParticipantCountUpdatedEvent {}
 
 void _ignore(RingingEvent _) {}
 
@@ -39,6 +44,17 @@ void _ignore(RingingEvent _) {}
 StreamCallRejectedEvent _rejected(String callCid) {
   final event = MockRejectedEvent();
   when(() => event.callCid).thenReturn(StreamCallCid(cid: callCid));
+  return event;
+}
+
+/// The participant count of [callCid], with [byRole] in the call.
+StreamCallSessionParticipantCountUpdatedEvent _participants(
+  String callCid,
+  Map<String, int> byRole,
+) {
+  final event = MockCountEvent();
+  when(() => event.callCid).thenReturn(StreamCallCid(cid: callCid));
+  when(() => event.participantsCountByRole).thenReturn(byRole);
   return event;
 }
 
@@ -857,6 +873,32 @@ void main() {
 
           verify(() => client.dispose()).called(1);
           expect(onDisposeCalled, isTrue);
+        }),
+      );
+
+      test(
+        'releases once nobody is left in the call, which the client leaves',
+        onFakeTime((async) {
+          run(async, handle(createStreamVideo: factoryReturning(client)));
+
+          coordinatorEvents.add(_participants('default:call-a', const {}));
+          pastTheGrace(async);
+
+          verify(() => client.dispose()).called(1);
+        }),
+      );
+
+      test(
+        'keeps the session while someone is in the call',
+        onFakeTime((async) {
+          run(async, handle(createStreamVideo: factoryReturning(client)));
+
+          coordinatorEvents.add(
+            _participants('default:call-a', const {'user': 1}),
+          );
+          pastTheGrace(async);
+
+          verifyNever(() => client.dispose());
         }),
       );
 

@@ -313,13 +313,20 @@ class BackgroundPushRouter {
     }
   }
 
-  /// Notes a backend event that may have ended a ring [session] waits on.
+  /// Notes a backend event that may have ended a ring [session] waits on,
+  /// among them a call nobody is left in, whose ring the client leaves.
   void _onBackendEvent(BackgroundSession session, StreamVideoEvent event) {
     final callCid = switch (event) {
       StreamCallRejectedEvent(:final callCid) ||
       StreamCallEndedEvent(:final callCid) ||
       StreamCallMissedEvent(:final callCid) ||
       StreamCallAcceptedEvent(:final callCid) => callCid,
+      StreamCallSessionParticipantCountUpdatedEvent(
+        :final callCid,
+        :final participantsCountByRole,
+      )
+          when participantsCountByRole.values.fold(0, (a, b) => a + b) == 0 =>
+        callCid,
       _ => null,
     };
     if (callCid == null) return;

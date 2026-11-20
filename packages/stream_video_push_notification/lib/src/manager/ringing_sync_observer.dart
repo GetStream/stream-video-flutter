@@ -5,35 +5,15 @@ import 'package:meta/meta.dart';
 import 'package:stream_video/stream_video.dart';
 
 import 'native_call_controller.dart';
-import 'ringing_event_broadcaster.dart';
 
 const _idRinging = 2;
-const _idCallEnded = 3;
-const _idCallAccepted = 4;
-const _idCallRejected = 6;
-const _idCallParticipantCount = 7;
-const _idActiveCall = 8;
 
-/// Decides whether a `call.accepted` event for the current user describes an acceptance that
-/// happened on this device.
-@visibleForTesting
-bool isAcceptedOnThisDevice({
-  required bool acceptedLocally,
-  required Call? activeCall,
-}) {
-  if (acceptedLocally) return true;
-  return activeCall?.state.value.status is CallStatusActive;
-}
-
-/// Keeps the native call UI in step with what the SDK knows about a ringing
-/// call: ends or dismisses it when the backend says the call ended, was
-/// rejected, lost its last participant or was accepted on another device,
-/// ends it when the app leaves the call, mirrors a native mute onto the
-/// call's microphone, and on Android leaves a call Telecom holds.
+/// Applies what the native call UI reports and core does not handle itself:
+/// opens the coordinator connection when a call rings, mirrors a native mute
+/// onto the call's microphone, and on Android leaves a call Telecom holds.
 ///
-/// The backend subscriptions live only while a call rings: they start with
-/// the incoming event (or at start-up when the native side still shows a
-/// call) and stop with the user's answer. Nothing is observed after
+/// Core ends the native call whenever it leaves a call, and dismisses its
+/// ring when the user accepts it in the app. Nothing is observed after
 /// [dispose].
 @internal
 class RingingSyncObserver {
@@ -41,88 +21,27 @@ class RingingSyncObserver {
     required this._streamVideo,
     required this._client,
     required this._controller,
-    required this._broadcaster,
     required this._ringingEvents,
   });
 
   final StreamVideo _streamVideo;
   final CoordinatorClient _client;
   final NativeCallController _controller;
-  final RingingEventBroadcaster _broadcaster;
   final Stream<RingingEvent> _ringingEvents;
 
   final _logger = taggedLogger(tag: 'SV:PNSync');
 
   final Subscriptions _subscriptions = Subscriptions();
 
-  /// The calls the app is in, as of the last state change.
-  List<Call> _currentActiveCalls = [];
-
-  /// The rings the backend subscriptions follow: their uuids, lowercased,
-  /// mapped to their call cids. An end of another native call, such as an
-  /// outgoing one, leaves the subscriptions running.
-  final Map<String, String?> _rings = {};
-
-  /// The uuids of the rings answered while the start-up probe of the native
-  /// calls runs, which its result may still list. Null once it returned.
-  Set<String>? _answeredDuringStartUp = {};
-
   bool _disposed = false;
 
   /// Starts observing. Called once, on mobile only.
   void start() {
-    _subscriptions.add(
-      _idActiveCall,
-      _streamVideo.state.activeCalls.listen(_onActiveCallsChanged),
-    );
-
-    // If there are active calls (for iOS) when connecting, subscribe to events as if the call was incoming.
-    _controller
-        .activeCalls()
-        .then((calls) {
-          final answered = _answeredDuringStartUp ?? const {};
-          _answeredDuringStartUp = null;
-          final rings = calls.where(
-            (call) => !answered.contains(call.uuid?.toLowerCase()),
-          );
-          if (rings.isNotEmpty && !_disposed) {
-            for (final ring in rings) {
-              if (ring.uuid case final uuid?) {
-                _rings[uuid.toLowerCase()] = ring.callCid;
-              }
-            }
-            _subscribeToEvents();
-          }
-        })
-        .catchError((Object e) {
-          _answeredDuringStartUp = null;
-          _logger.w(() => '[start] Could not read the native calls: $e');
-        });
-
     _subscriptions.add(_idRinging, _ringingEvents.listen(_onRingingEvent));
   }
 
-  /// Ends the native call of every call the app left.
-  Future<void> _onActiveCallsChanged(List<Call> calls) async {
-    _logger.d(
-      () =>
-          '[activeCall] Active calls changed to [${calls.map((c) => c.callCid).join(', ')}]',
-    );
-
-    for (final previousCall in _currentActiveCalls) {
-      if (calls.any((c) => c.callCid == previousCall.callCid)) continue;
-      _logger.d(
-        () => '[activeCall] Stopping previous call: ${previousCall.callCid}',
-      );
-      await _controller.endCallByCid(previousCall.callCid.value);
-      if (_disposed) return;
-    }
-
-    _currentActiveCalls = calls;
-  }
-
-  /// Starts the backend subscriptions on a ring and stops them with the
-  /// user's answer; mirrors a native mute, and leaves a call Telecom holds on
+  /// Opens the connection on a ring, so the backend's events about it
+  /// arrive; mirrors a native mute, and leaves a call Telecom holds on
   /// Android.
   void _onRingingEvent(RingingEvent event) {
     switch (event) {
@@ -130,53 +49,13 @@ class RingingSyncObserver {
         _onToggleMute(event);
       case ActionCallToggleHold():
         if (CurrentPlatform.isAndroid) _onToggleHold(event);
-      case ActionCallIncoming(:final data):
+      case ActionCallIncoming():
         if (!_client.isConnected) {
           _client.openConnection();
         }
-        if (data.uuid case final uuid?) {
-          _rings[uuid.toLowerCase()] = data.callCid;
-        }
-        _subscribeToEvents();
-      case ActionCallAccept(:final data) ||
-          ActionCallDecline(:final data) ||
-          ActionCallTimeout(:final data) ||
-          ActionCallEnded(:final data) ||
-          ActionCallDismissed(:final data):
-        _onRingAnswered(data.uuid?.toLowerCase());
       default:
         break;
     }
-  }
-
-  /// Stops the backend subscriptions once no ring they follow is left. An
-  /// event without a uuid, or for a ring the observer did not see start,
-  /// stops them as before; one for another call while a ring is followed does
-  /// not.
-  void _onRingAnswered(String? uuid) {
-    if (uuid != null) _answeredDuringStartUp?.add(uuid);
-    if (uuid != null && _rings.isNotEmpty) {
-      if (!_rings.containsKey(uuid)) return;
-      _rings.remove(uuid);
-      if (_rings.isNotEmpty) return;
-    }
-    _rings.clear();
-    _subscriptions.cancel(_idCallAccepted);
-    _subscriptions.cancel(_idCallEnded);
-    _subscriptions.cancel(_idCallRejected);
-    _subscriptions.cancel(_idCallParticipantCount);
-  }
-
-  /// Stops following the rings of `cid`, which the backend ended or this
-  /// device accepted. Called before the native call is ended or dismissed with
-  /// its events suppressed, since the suppressed end would otherwise be what
-  /// answers the ring.
-  void _onRingEndedHere(String cid) {
-    final uuids = [
-      for (final MapEntry(:key, :value) in _rings.entries)
-        if (value == cid) key,
-    ];
-    uuids.forEach(_onRingAnswered);
   }
 
   /// Applies a CallKit mute to the call it names, found through the cid the
@@ -279,113 +158,6 @@ class RingingSyncObserver {
     } catch (e, stk) {
       _logger.e(() => '[onCallEvent] Leaving held $cid failed: $e\n$stk');
     }
-  }
-
-  void _subscribeToEvents() {
-    _subscriptions.add(
-      _idCallEnded,
-      _client.events.on<StreamCallEndedEvent>((event) {
-        _logger.d(
-          () => '[subscribeToEvents] Call ended event: ${event.callCid}',
-        );
-        _onRingEndedHere(event.callCid.toString());
-        _broadcaster.suppressEvent();
-        _controller.endCallByCid(event.callCid.toString());
-      }),
-    );
-
-    _subscriptions.add(
-      _idCallParticipantCount,
-      _client.events.on<StreamCallSessionParticipantCountUpdatedEvent>((
-        event,
-      ) async {
-        final roleCounts = event.participantsCountByRole.values.map((v) => v);
-
-        final totalCount = roleCounts.isEmpty
-            ? 0
-            : roleCounts.reduce((a, b) => a + b);
-
-        _logger.d(
-          () =>
-              '[subscribeToEvents] Participant count updated event: ${event.callCid}, count: $totalCount',
-        );
-        if (totalCount == 0) {
-          _logger.v(
-            () =>
-                '[subscribeToEvents] No participants left, ending call: ${event.callCid}',
-          );
-
-          _onRingEndedHere(event.callCid.toString());
-          _broadcaster.suppressEvent();
-          await _controller.endCallByCid(event.callCid.toString());
-        }
-      }),
-    );
-
-    _subscriptions.add(
-      _idCallRejected,
-      _client.events.on<StreamCallRejectedEvent>((event) async {
-        _logger.d(
-          () =>
-              '[subscribeToEvents] Call rejected event: ${event.callCid}, rejected by: ${event.rejectedByUserId}',
-        );
-        if (event.rejectedByUserId == event.metadata.details.createdBy.id ||
-            event.rejectedByUserId == _streamVideo.currentUser.id) {
-          _logger.v(
-            () =>
-                '[subscribeToEvents] Call rejected by the current user or call owner, ending call: ${event.callCid}',
-          );
-
-          _onRingEndedHere(event.callCid.toString());
-          _broadcaster.suppressEvent();
-          await _controller.endCallByCid(event.callCid.toString());
-        }
-      }),
-    );
-
-    _subscriptions.add(
-      _idCallAccepted,
-      _client.events.on<StreamCallAcceptedEvent>((event) async {
-        _logger.d(
-          () =>
-              '[subscribeToEvents] Call accepted event: ${event.callCid}, accepted by: ${event.acceptedByUserId}',
-        );
-        if (event.acceptedByUserId != _streamVideo.currentUser.id) return;
-
-        final activeCall = _streamVideo.activeCalls.firstWhereOrNull(
-          (call) => call.callCid == event.callCid,
-        );
-
-        final acceptedOnThisDevice = isAcceptedOnThisDevice(
-          acceptedLocally: _streamVideo.ringing.isCallAcceptedOnThisDevice(
-            event.callCid.toString(),
-          ),
-          activeCall: activeCall,
-        );
-
-        // End the CallKit call on this device if the call was accepted on another device
-        if (!acceptedOnThisDevice) {
-          _logger.v(
-            () =>
-                '[subscribeToEvents] Call accepted on other device, ending call: ${event.callCid}',
-          );
-          await _controller.endCallByCid(event.callCid.toString());
-        }
-        // If the call was accepted on this device, end the Ringing call silently
-        // (useful if the call was accepted via the app instead of the CallKit UI)
-        else {
-          _logger.v(
-            () =>
-                '[subscribeToEvents] Call accepted on the same device, ending CallKit silently: ${event.callCid}',
-          );
-
-          // The call is live on this device from here on, so only the ringing UI goes away.
-          _onRingEndedHere(event.callCid.toString());
-          _broadcaster.suppressEvent();
-          await _controller.dismissRingingCallByCid(event.callCid.toString());
-        }
-      }),
-    );
   }
 
   /// Stops observing.

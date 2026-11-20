@@ -163,29 +163,100 @@ class NativeCallController {
   /// registered with the Telecom stack so in-call controls on a watch, headset
   /// or car head unit keep working, and every reason is reported with the
   /// dismissal; see [StreamVideoPushNotificationPlatform.dismissRingingCall].
-  /// On iOS this ends the call, since CallKit has nothing else to dismiss.
+  /// On iOS this ends the call silently, since CallKit has nothing else to
+  /// dismiss and the end is not the user declining or hanging up.
   Future<void> dismissRingingCallByCid(
     String cid, {
     CallDismissReason reason = CallDismissReason.accepted,
   }) {
-    if (CurrentPlatform.isIos) return endCallByCid(cid);
+    if (CurrentPlatform.isIos) return endCallByCid(cid, silent: true);
     return _resolvedPlatform.dismissRingingCall(cid, reason: reason);
   }
 
-  /// Ends the native calls of [cid], see [resolveCallsToEnd]. With [silent],
-  /// the native events the end produces are suppressed.
+  /// Ends the ring of [cid], which is over before the user answered it on
+  /// this device, without its end being reported as the user declining it.
+  ///
+  /// Ends nothing when the native side shows no ring of [cid], since the
+  /// sweep [resolveCallsToEnd] falls back to would reach other calls, or when
+  /// the user answered it on the native call screen: the client that takes it
+  /// over owns it. Mobile only.
+  Future<void> ringEnded(String cid) async {
+    if (!CurrentPlatform.isMobile) return;
+
+    final active = await activeCalls();
+    if (!_showsUnansweredRing(active, cid)) return;
+
+    await _end(active, cid, silent: true);
+  }
+
+  /// Ends the native call of [cid], a call the user answered on this device
+  /// and is done with, its end reported as usual. Ends nothing when the
+  /// native side lists no call of [cid], such as a call that never rang:
+  /// every call the native side holds is listed, so the sweep
+  /// [resolveCallsToEnd] falls back to would only reach other calls. Mobile
+  /// only.
+  Future<void> callLeft(String cid) async {
+    if (!CurrentPlatform.isMobile) return;
+
+    final active = await activeCalls();
+    if (!active.any((call) => call.callCid == cid)) return;
+
+    await _end(active, cid, silent: false);
+  }
+
+  /// Dismisses the ring of [cid], which the user accepted in the app, when
+  /// the native side still shows it unanswered; the call goes on. Mobile
+  /// only.
+  Future<void> callAccepted(String cid) async {
+    if (!CurrentPlatform.isMobile) return;
+
+    final active = await activeCalls();
+    if (!_showsUnansweredRing(active, cid)) return;
+
+    // As [dismissRingingCallByCid] does, with the calls already read.
+    if (CurrentPlatform.isIos) return _end(active, cid, silent: true);
+    await _resolvedPlatform.dismissRingingCall(cid);
+  }
+
+  /// Whether [active] has a call of [cid] and none of them is answered.
+  bool _showsUnansweredRing(List<CallData> active, String cid) {
+    final calls = active.where((call) => call.callCid == cid);
+    return calls.isNotEmpty && !calls.any((call) => call.isAccepted);
+  }
+
+  /// Ends the native calls of [cid], see [resolveCallsToEnd]. Mobile only.
+  ///
+  /// With [silent], the reports of their end that carry [cid] are
+  /// suppressed, while events of other calls still arrive, and nothing is
+  /// ended when the native side lists no call of [cid]: the sweep that
+  /// [resolveCallsToEnd] falls back to would also reach calls that only the
+  /// Android Telecom stack still holds, such as an accepted call whose ring
+  /// was dismissed.
   Future<void> endCallByCid(String cid, {bool silent = false}) async {
+    if (!CurrentPlatform.isMobile) return;
+
+    final active = await activeCalls();
+    if (silent && !active.any((call) => call.callCid == cid)) return;
+
+    await _end(active, cid, silent: silent);
+  }
+
+  /// Ends the native calls of [cid] among [active], see [resolveCallsToEnd].
+  Future<void> _end(
+    List<CallData> active,
+    String cid, {
+    required bool silent,
+  }) async {
     _audioOutputs.remove(cid);
-    final decision = resolveCallsToEnd(await activeCalls(), cid);
+    final decision = resolveCallsToEnd(active, cid);
+    if (silent) _broadcaster.suppressCallEnd(cid);
 
     if (decision.endAll) {
-      if (silent) _broadcaster.suppressEvent();
       await endAllCalls();
       return;
     }
 
     for (final call in decision.calls) {
-      if (silent) _broadcaster.suppressEvent();
       await endCall(call.uuid!);
     }
   }
