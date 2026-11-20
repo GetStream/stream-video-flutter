@@ -207,6 +207,67 @@ void main() {
       expect(received, isEmpty);
     });
 
+    test(
+      'silent lets the events of another call and an incoming ring through',
+      () async {
+        platform.active = const [
+          CallData(uuid: 'u1', callCid: 'default:c1'),
+          CallData(uuid: 'u2', callCid: 'default:c2'),
+        ];
+
+        await controller.endCallByCid('default:c1', silent: true);
+        platform.emit(
+          const ActionCallDecline(
+            data: CallData(uuid: 'u2', callCid: 'default:c2'),
+          ),
+        );
+        platform.emit(
+          const ActionCallIncoming(
+            data: CallData(uuid: 'u3', callCid: 'default:c1'),
+          ),
+        );
+        await pumpEventQueue();
+
+        expect(received, hasLength(2));
+      },
+    );
+
+    for (final active in <List<CallData>>[
+      const [],
+      const [CallData(uuid: 'u2', callCid: 'default:other')],
+    ]) {
+      test(
+        'silent ends nothing when no native call has the cid '
+        '(${active.length} other)',
+        () async {
+          CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+          platform.active = active;
+
+          await controller.endCallByCid('default:c1', silent: true);
+
+          expect(platform.calls, ['activeCalls']);
+        },
+      );
+    }
+
+    test('without silent an empty native list is swept', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      platform.active = const [];
+
+      await controller.endCallByCid('default:c1');
+
+      expect(platform.calls, ['activeCalls', 'endAllCalls']);
+    });
+
+    test('does nothing off mobile', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.web;
+      platform.active = const [CallData(uuid: 'u1', callCid: 'default:c1')];
+
+      await controller.endCallByCid('default:c1');
+
+      expect(platform.calls, isEmpty);
+    });
+
     test('without silent the native events come through', () async {
       platform.active = const [CallData(uuid: 'u1', callCid: 'default:c1')];
 
@@ -222,6 +283,170 @@ void main() {
     });
   });
 
+  group('ringEnded', () {
+    test('ends the ring without reporting a decline', () async {
+      platform.active = const [CallData(uuid: 'u1', callCid: 'default:c1')];
+
+      await controller.ringEnded('default:c1');
+      platform.emit(
+        const ActionCallDecline(
+          data: CallData(uuid: 'u1', callCid: 'default:c1'),
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(platform.calls, ['activeCalls', 'endAllCalls']);
+      expect(received, isEmpty);
+    });
+
+    test('ends only the ring of the cid', () async {
+      platform.active = const [
+        CallData(uuid: 'u1', callCid: 'default:c1'),
+        CallData(uuid: 'u2', callCid: 'default:other'),
+      ];
+
+      await controller.ringEnded('default:c1');
+
+      expect(platform.calls, ['activeCalls', 'endCall:u1']);
+    });
+
+    test(
+      'keeps a ring the user answered on the native call screen, for the '
+      'client that takes it over',
+      () async {
+        platform.active = const [
+          CallData(uuid: 'u1', callCid: 'default:c1', isAccepted: true),
+        ];
+
+        await controller.ringEnded('default:c1');
+
+        expect(platform.calls, ['activeCalls']);
+      },
+    );
+
+    test(
+      'ends nothing when the native side shows no ring of the cid, so a '
+      'call only Telecom holds is not swept',
+      () async {
+        CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+        platform.active = const [];
+
+        await controller.ringEnded('default:c1');
+
+        expect(platform.calls, ['activeCalls']);
+      },
+    );
+
+    test('does nothing off mobile', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.web;
+      platform.active = const [CallData(uuid: 'u1', callCid: 'default:c1')];
+
+      await controller.ringEnded('default:c1');
+
+      expect(platform.calls, isEmpty);
+    });
+  });
+
+  group('callLeft', () {
+    test('ends the call, accepted or not', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      platform.active = const [
+        CallData(uuid: 'u1', callCid: 'default:c1', isAccepted: true),
+        CallData(uuid: 'u2', callCid: 'default:other'),
+      ];
+
+      await controller.callLeft('default:c1');
+
+      expect(platform.calls, ['activeCalls', 'endCall:u1']);
+    });
+
+    for (final active in <List<CallData>>[
+      const [],
+      const [CallData(uuid: 'u2', callCid: 'default:other')],
+    ]) {
+      test(
+        'ends nothing when no native call has the cid '
+        '(${active.length} other)',
+        () async {
+          CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+          platform.active = active;
+
+          await controller.callLeft('default:c1');
+
+          expect(platform.calls, ['activeCalls']);
+        },
+      );
+    }
+
+    test('lets the report of the end through', () async {
+      platform.active = const [CallData(uuid: 'u1', callCid: 'default:c1')];
+
+      await controller.callLeft('default:c1');
+      platform.emit(
+        const ActionCallEnded(
+          data: CallData(uuid: 'u1', callCid: 'default:c1'),
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(received, hasLength(1));
+    });
+  });
+
+  group('callAccepted', () {
+    setUp(() {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+    });
+
+    test('dismisses a ring the native side still shows unanswered', () async {
+      platform.active = const [CallData(uuid: 'u1', callCid: 'default:c1')];
+
+      await controller.callAccepted('default:c1');
+
+      expect(platform.calls, [
+        'activeCalls',
+        'dismissRingingCall:default:c1:accepted',
+      ]);
+    });
+
+    test('leaves a ring answered on the native call screen alone', () async {
+      platform.active = const [
+        CallData(uuid: 'u1', callCid: 'default:c1'),
+        CallData(uuid: 'u2', callCid: 'default:c1', isAccepted: true),
+      ];
+
+      await controller.callAccepted('default:c1');
+
+      expect(platform.calls, ['activeCalls']);
+    });
+
+    test('does nothing when the native side shows no ring of it', () async {
+      platform.active = const [
+        CallData(uuid: 'u2', callCid: 'default:other'),
+      ];
+
+      await controller.callAccepted('default:c1');
+
+      expect(platform.calls, ['activeCalls']);
+    });
+
+    test('on iOS ends the ring without reporting a decline', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
+      platform.active = const [CallData(uuid: 'u1', callCid: 'default:c1')];
+
+      await controller.callAccepted('default:c1');
+      platform.emit(
+        const ActionCallDecline(
+          data: CallData(uuid: 'u1', callCid: 'default:c1'),
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(platform.calls, ['activeCalls', 'endAllCalls']);
+      expect(received, isEmpty);
+    });
+  });
+
   group('dismissRingingCallByCid', () {
     test('on iOS ends the call, since CallKit is the ring', () async {
       platform.active = const [CallData(uuid: 'u1', callCid: 'default:c1')];
@@ -229,6 +454,20 @@ void main() {
       await controller.dismissRingingCallByCid('default:c1');
 
       expect(platform.calls, ['activeCalls', 'endAllCalls']);
+    });
+
+    test('on iOS the end is not reported as a decline', () async {
+      platform.active = const [CallData(uuid: 'u1', callCid: 'default:c1')];
+
+      await controller.dismissRingingCallByCid('default:c1');
+      platform.emit(
+        const ActionCallDecline(
+          data: CallData(uuid: 'u1', callCid: 'default:c1'),
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(received, isEmpty);
     });
 
     test('on Android dismisses the ring and keeps the Telecom call', () async {

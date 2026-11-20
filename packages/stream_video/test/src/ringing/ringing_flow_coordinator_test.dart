@@ -170,6 +170,9 @@ void main() {
     when(
       () => push.endCallByCid(any(), silent: any(named: 'silent')),
     ).thenAnswer((_) async {});
+    when(() => push.onRingEnded(any())).thenAnswer((_) async {});
+    when(() => push.onCallLeft(any())).thenAnswer((_) async {});
+    when(() => push.onCallAccepted(any())).thenAnswer((_) async {});
     when(
       () => push.showIncomingCall(
         uuid: any(named: 'uuid'),
@@ -363,7 +366,7 @@ void main() {
       incoming();
       await pumpEventQueue();
 
-      verify(() => push.endCallByCid(cid, silent: true)).called(1);
+      verify(() => push.onRingEnded(cid)).called(1);
     });
 
     test('is ended silently when the call already ended', () async {
@@ -375,7 +378,7 @@ void main() {
       incoming();
       await pumpEventQueue();
 
-      verify(() => push.endCallByCid(cid, silent: true)).called(1);
+      verify(() => push.onRingEnded(cid)).called(1);
     });
 
     test('is kept when this device already accepted it', () async {
@@ -387,9 +390,8 @@ void main() {
       incoming();
       await pumpEventQueue();
 
-      verifyNever(
-        () => push.endCallByCid(any(), silent: any(named: 'silent')),
-      );
+      verifyNever(() => push.onRingEnded(any()));
+      verifyNever(() => push.onCallLeft(any()));
     });
 
     test('is kept when it was accepted on the native call screen', () async {
@@ -400,9 +402,8 @@ void main() {
       incoming();
       await pumpEventQueue();
 
-      verifyNever(
-        () => push.endCallByCid(any(), silent: any(named: 'silent')),
-      );
+      verifyNever(() => push.onRingEnded(any()));
+      verifyNever(() => push.onCallLeft(any()));
     });
 
     test('is verified once while a verification is in flight', () async {
@@ -630,7 +631,7 @@ void main() {
           ),
           () => fixture.client.getCall(callCid: callCid),
           () => fixture.client.acceptCall(cid: callCid),
-          () => push.endCallByCid(cid),
+          () => push.onCallLeft(cid),
         ]);
       },
     );
@@ -647,7 +648,7 @@ void main() {
       await pumpEventQueue();
 
       verify(() => fixture.client.acceptCall(cid: callCid)).called(1);
-      verify(() => push.endCallByCid(cid)).called(1);
+      verify(() => push.onCallLeft(cid)).called(1);
       verifyNever(
         () => fixture.client.connectUser(
           any(),
@@ -670,7 +671,7 @@ void main() {
       expect(handed, isNotNull);
       // A refused join is retried, so it is reached at least once.
       verifyJoined().called(greaterThanOrEqualTo(1));
-      verifyNever(() => push.endCallByCid(cid));
+      verifyNever(() => push.onCallLeft(cid));
     });
 
     test('consumeAndAcceptActiveCall leaves joining to the app', () async {
@@ -713,7 +714,7 @@ void main() {
         final accepted = await ringing().consumeAndAcceptActiveCall();
 
         expect(accepted, isFalse);
-        verify(() => push.endCallByCid(cid)).called(1);
+        verify(() => push.onCallLeft(cid)).called(1);
         verifyNever(() => fixture.client.getCall(callCid: callCid));
         verifyNever(() => fixture.client.acceptCall(cid: any(named: 'cid')));
       },
@@ -740,7 +741,7 @@ void main() {
 
       verify(() => fixture.client.getCall(callCid: callCid)).called(1);
       verify(() => fixture.client.acceptCall(cid: callCid)).called(1);
-      verifyNever(() => push.endCallByCid(cid));
+      verifyNever(() => push.onCallLeft(cid));
     });
 
     test('an accept on Android while the app is detached is ignored', () async {

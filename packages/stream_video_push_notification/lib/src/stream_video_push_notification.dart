@@ -42,7 +42,6 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       streamVideo: streamVideo,
       client: client,
       controller: _controller,
-      broadcaster: _broadcaster,
       ringingEvents: onCallEvent,
     )..start();
 
@@ -203,8 +202,9 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   /// Not [endCallByCid]: on Android, dismissing as accepted leaves the call
   /// registered with the Telecom stack so in-call controls on a watch, headset
   /// or car head unit keep working, and every dismissal is reported as an
-  /// [ActionCallDismissed] with its reason. On iOS this ends the call, since
-  /// CallKit is the ring.
+  /// [ActionCallDismissed] with its reason. On iOS this ends the call
+  /// silently, since CallKit is the ring and the end is not the user
+  /// declining or hanging up.
   Future<void> dismissRingingCallByCid(
     String cid, {
     CallDismissReason reason = CallDismissReason.accepted,
@@ -213,6 +213,15 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   @override
   Future<void> endCallByCid(String cid, {bool silent = false}) =>
       _controller.endCallByCid(cid, silent: silent);
+
+  @override
+  Future<void> onRingEnded(String cid) => _controller.ringEnded(cid);
+
+  @override
+  Future<void> onCallLeft(String cid) => _controller.callLeft(cid);
+
+  @override
+  Future<void> onCallAccepted(String cid) => _controller.callAccepted(cid);
 
   @override
   Future<void> setCallMutedByCid(String cid, bool isMuted) =>

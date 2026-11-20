@@ -40,6 +40,7 @@ void main() {
       onAccepted: (_) async => calls.add('accepted'),
       onRejected: (_) async => calls.add('rejected'),
       onRingActivity: () => calls.add('ringActivity'),
+      onNoParticipantsLeft: () async => calls.add('noParticipantsLeft'),
     );
   }
 
@@ -99,15 +100,44 @@ void main() {
     expect(calls, ['ringActivity']);
   });
 
-  StreamCallSessionParticipantCountUpdatedEvent countEvent() {
+  StreamCallSessionParticipantCountUpdatedEvent countEvent({
+    Map<String, int> byRole = const {'user': 3, 'host': 1},
+  }) {
     return StreamCallSessionParticipantCountUpdatedEvent(
       cid,
       createdAt: DateTime.now(),
       sessionId: 'session',
-      participantsCountByRole: const {'user': 3, 'host': 1},
+      participantsCountByRole: byRole,
       anonymousParticipantCount: 2,
     );
   }
+
+  test(
+    'no participants left before the call is joined reaches its hook',
+    () async {
+      setUpRouter(CallStatus.incoming());
+
+      await router.route(countEvent(byRole: const {}));
+      await router.route(countEvent(byRole: const {'user': 0}));
+
+      expect(stateManager.callState.participantCount, 0);
+      expect(calls, ['noParticipantsLeft', 'noParticipantsLeft']);
+    },
+  );
+
+  test('participants still in the call reach no hook', () async {
+    setUpRouter(CallStatus.incoming());
+
+    await router.route(countEvent());
+
+    expect(calls, isEmpty);
+  });
+
+  test('no participants left once connected reaches no hook', () async {
+    await router.route(countEvent(byRole: const {}));
+
+    expect(calls, isEmpty);
+  });
 
   test('the participant count applies before the call is joined', () async {
     setUpRouter(CallStatus.idle());

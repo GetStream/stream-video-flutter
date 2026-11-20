@@ -105,10 +105,40 @@ abstract class PushNotificationManager {
   /// Ends the call.
   ///
   /// [cid] is the call id for the call.
-  /// When [silent] is `true`, the resulting native events (decline/ended) are
-  /// suppressed. Use it when the ringing flow is already resolved and ending
-  /// the native call must not trigger the decline/ended handling again.
+  /// When [silent] is `true`, the reports that the native calls of [cid]
+  /// ended (decline, ended, timeout, dismissed) are suppressed, while events
+  /// of other calls still arrive, and nothing is ended when the native side
+  /// lists no call of [cid]. Use it when the ringing flow is already resolved
+  /// and ending the native call must not trigger the decline/ended handling
+  /// again.
   Future<void> endCallByCid(String cid, {bool silent = false});
+
+  /// Tells the native call UI that the ring of [cid] is over before the user
+  /// answered it on this device: the backend ended the call, the caller
+  /// cancelled, the user answered or declined it elsewhere, or the app
+  /// rejected or dropped the ring.
+  ///
+  /// The native ring ends without its end being reported as the user
+  /// declining it. A ring the user answered on the native call screen stays,
+  /// for the client that takes it over. By default this keeps a ring that
+  /// [activeCalls] lists as accepted, and otherwise calls [endCallByCid]
+  /// silently.
+  Future<void> onRingEnded(String cid) async {
+    final calls = await activeCalls();
+    if (calls.any((call) => call.callCid == cid && call.isAccepted)) return;
+
+    await endCallByCid(cid, silent: true);
+  }
+
+  /// Tells the native call UI that this device is done with [cid], a call
+  /// the user answered here, whether it was joined or not. By default this
+  /// calls [endCallByCid].
+  Future<void> onCallLeft(String cid) => endCallByCid(cid);
+
+  /// Tells the native call UI that the user accepted [cid] in the app on
+  /// this device. A ring the native side still shows unanswered goes away
+  /// while the call goes on. Does nothing by default.
+  Future<void> onCallAccepted(String cid) async {}
 
   /// Ends all ongoing calls.
   Future<void> endAllCalls();

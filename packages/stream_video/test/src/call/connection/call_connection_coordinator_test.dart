@@ -38,8 +38,11 @@ void main() {
     () async {
       final call = harness.buildCall();
       await call.join();
+      // Stubbed on the state itself: a stub through the host's getter
+      // would make the getter throw instead.
+      final hostState = harness.streamVideo.state;
       when(
-        () => harness.streamVideo.state.removeActiveCall(any()),
+        () => hostState.removeActiveCall(any()),
       ).thenThrow(StateError('teardown failed'));
 
       await expectLater(call.leave(), throwsStateError);
@@ -65,12 +68,13 @@ void main() {
       when(
         harness.streamVideo.isAudioProcessorConfigured,
       ).thenThrow(StateError('teardown failed'));
-      clearInteractions(harness.streamVideo.state);
+      final hostState = harness.streamVideo.state;
+      clearInteractions(hostState);
 
       await expectLater(call.leave(), throwsStateError);
 
       verify(
-        () => harness.streamVideo.state.removeActiveCall(call),
+        () => hostState.removeActiveCall(call),
       ).called(greaterThan(0));
     },
   );
@@ -84,8 +88,11 @@ void main() {
       ).thenAnswer((_) async => const Result.success(none));
       final call = harness.buildCall();
       await call.join();
+      // Stubbed on the state itself: a stub through the host's getter
+      // would make the getter throw instead.
+      final hostState = harness.streamVideo.state;
       when(
-        () => harness.streamVideo.state.removeActiveCall(any()),
+        () => hostState.removeActiveCall(any()),
       ).thenThrow(StateError('teardown failed'));
 
       await expectLater(call.end(), throwsStateError);

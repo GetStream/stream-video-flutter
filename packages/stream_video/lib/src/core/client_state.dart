@@ -70,6 +70,10 @@ abstract class ClientState {
   @internal
   void clearCallAcceptedOnThisDevice(StreamCallCid callCid, Call call);
 
+  /// The call that accepted [callCid] on this device, if one did.
+  @internal
+  Call? callAcceptedOnThisDevice(StreamCallCid callCid);
+
   /// Drops the [Call] cached for [callCid]'s ringing flow, if it is still
   /// [call]. A newer instance for the same cid is left alone.
   @internal
@@ -141,6 +145,10 @@ class MutableClientState implements ClientState {
     _logger.v(() => '[markCallAccepted] cid: $callCid');
     locallyAcceptedCalls[callCid.value] = call;
   }
+
+  @override
+  Call? callAcceptedOnThisDevice(StreamCallCid callCid) =>
+      locallyAcceptedCalls[callCid.value];
 
   @override
   void clearCallAcceptedOnThisDevice(StreamCallCid callCid, Call call) {

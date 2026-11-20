@@ -292,9 +292,35 @@ class RingingControllerTest {
         verify(exactly = 0) { telecom.answer("b") }
         verify(exactly = 0) { telecom.disconnect(any(), any()) }
         verify { ringTimer.cancel("a") }
-        assertEquals(listOf("b"), store.all().map { it.id })
+        assertEquals(true, store.byId("a")?.isAccepted)
+        assertEquals(false, store.byId("b")?.isAccepted)
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_DISMISSED), eventNames())
         assertEquals("accepted", events.single().second["reason"])
+    }
+
+    @Test
+    fun `a call dismissed as accepted ends in Telecom when it is ended`() {
+        store.add(RingingCall(id = "a", extra = mapOf("callCid" to "default:a")))
+        controller.dismissRingingCall("default:a", DismissReason.ACCEPTED)
+
+        controller.endCall("a")
+
+        verify { telecom.disconnect("a", DisconnectCause.LOCAL) }
+        assertNull(store.byId("a"))
+        assertEquals(IncomingCallConstants.ACTION_CALL_ENDED, eventNames().last())
+    }
+
+    @Test
+    fun `dismissing leaves a call already accepted alone`() {
+        store.add(RingingCall(id = "a", extra = mapOf("callCid" to "default:a"), isAccepted = true))
+
+        controller.dismissRingingCall("default:a", DismissReason.ACCEPTED)
+        controller.dismissRingingCall("default:a", DismissReason.REMOTE_CANCELLED)
+
+        verify(exactly = 0) { telecom.answer(any()) }
+        verify(exactly = 0) { telecom.disconnect(any(), any()) }
+        assertEquals(emptyList<String>(), eventNames())
+        assertEquals(true, store.byId("a")?.isAccepted)
     }
 
     @Test
@@ -326,7 +352,7 @@ class RingingControllerTest {
 
         verify { telecom.answer("a") }
         verify { telecom.answer("b") }
-        assertEquals(emptyList<RingingCall>(), store.all())
+        assertEquals(listOf(true, true), store.all().map { it.isAccepted })
     }
 
     @Test
