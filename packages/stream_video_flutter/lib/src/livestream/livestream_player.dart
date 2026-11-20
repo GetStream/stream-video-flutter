@@ -40,8 +40,9 @@ enum LivestreamJoinBehaviour {
 ///
 /// The call duration sits in the app bar. The video is shown in a
 /// [StreamLivestreamTile], whose toolbar shows whether the call is live, the
-/// viewer count, a speakerphone toggle and a fullscreen button. Before the
-/// call goes live and after it ends, a status card takes the video's place.
+/// viewer count and a fullscreen button, plus a speakerphone toggle when one
+/// is asked for. Before the call goes live and after it ends, a status card
+/// takes the video's place.
 class LivestreamPlayer extends StatefulWidget {
   /// Creates a livestream player
   ///
@@ -126,7 +127,7 @@ class LivestreamPlayer extends StatefulWidget {
   /// Whether the toolbar shows the speakerphone toggle.
   ///
   /// Falls back to [StreamLivestreamTileStyle.showSpeakerphoneToggle], then
-  /// true.
+  /// false.
   final bool? showSpeakerphoneToggle;
 
   /// Boolean to display list of recordings when the livestream has ended.

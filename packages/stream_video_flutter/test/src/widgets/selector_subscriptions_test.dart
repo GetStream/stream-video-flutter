@@ -101,6 +101,7 @@ void main() {
         home: LivestreamPlayer(
           call: call,
           joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+          showSpeakerphoneToggle: true,
         ),
       ),
     );
