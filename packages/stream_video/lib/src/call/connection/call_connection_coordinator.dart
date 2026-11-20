@@ -415,6 +415,11 @@ class CallConnectionCoordinator {
       return failureWithError('ongoing connect failed: $status');
     }
 
+    // Before the call is marked active, which can leave the call the user is
+    // in. An incoming ring does not replace anything until it is accepted.
+    final unanswered = await _awaitIncomingAccepted();
+    if (unanswered != null) return _settleJoin(unanswered);
+
     if (_call._host.state.activeCalls.value.any(
       (call) => call.callCid == _call.callCid,
     )) {
@@ -465,7 +470,41 @@ class CallConnectionCoordinator {
             .storeIn(_idConnect, _cancelables)
             .valueOrDefault(const JoinCancelled());
 
-    // The join's leave decision; the reconnect loop makes its own.
+    return _settleJoin(outcome);
+  }
+
+  /// Waits for the user to accept the call when it is an incoming ring that
+  /// is not accepted yet.
+  ///
+  /// Accepting is what replaces the call the user is in or cancels their own
+  /// outgoing ring (see `RingingFlowCoordinatorImpl.prepareToAccept`), so the
+  /// ring is not marked active before then. Returns `null` once accepted, or
+  /// at once when the call is not such a ring, and otherwise the outcome the
+  /// join ends with.
+  Future<JoinOutcome?> _awaitIncomingAccepted() async {
+    final status = _call.state.value.status;
+    if (status is! CallStatusIncoming || status.acceptedByMe) return null;
+
+    _call._logger.d(
+      () => '[join] waiting for the incoming ring to be accepted',
+    );
+    // Cancelable like the join after it, so a leave ends the wait at once.
+    final result = await _awaitAnswer()
+        .asCancelable()
+        .storeIn(_idConnect, _cancelables)
+        .valueOrCancellation();
+    if (result == null || _isLeftOrLeaving) return const JoinCancelled();
+
+    if (result is Failure) {
+      return JoinRingUnanswered(result.videoError, result.stackTrace);
+    }
+
+    return null;
+  }
+
+  /// The join's leave decision on [outcome]; the reconnect loop makes its
+  /// own.
+  Future<Result<None>> _settleJoin(JoinOutcome outcome) async {
     switch (outcome) {
       case JoinSucceeded():
         _call._logger.v(() => '[join] finished');

@@ -211,6 +211,157 @@ void main() {
           expect(ringingCall.state.value.status, isA<CallStatusIncoming>());
         },
       );
+
+      // An app can open the incoming call's screen as the ring arrives, and
+      // the screen joins it while it still rings, before the user answers.
+      group('an incoming ring joined before it is accepted', () {
+        late MockCall currentCall;
+        late Call ringingCall;
+
+        setUp(() {
+          currentCall = MockCall();
+          when(() => currentCall.callCid).thenReturn(
+            StreamCallCid.from(
+              id: 'current-call',
+              type: StreamCallType.defaultType(),
+            ),
+          );
+          when(
+            () => currentCall.leave(reason: any(named: 'reason')),
+          ).thenAnswer((_) async => const Result.success(none));
+          when(
+            () => currentCall.reject(
+              reason: any(named: 'reason'),
+              initiator: any(named: 'initiator'),
+            ),
+          ).thenAnswer((_) async => const Result.success(none));
+
+          final ringingCallCid = StreamCallCid.from(
+            id: 'ringing-call',
+            type: StreamCallType.defaultType(),
+          );
+
+          ringingCall = Call.fromRinging(
+            data: CallRingingData(
+              callCid: ringingCallCid,
+              ringing: true,
+              metadata: CallMetadata(
+                cid: ringingCallCid,
+                details: createTestCallDetails(createdByUserId: 'other-user'),
+                settings: const CallSettings(),
+                session: const CallSessionData(),
+                users: const {},
+                members: const {},
+              ),
+            ),
+            coordinatorClient: mockCoordinatorClient,
+            streamVideo: streamVideo,
+            networkMonitor: InternetConnection.createInstance(),
+          );
+        });
+
+        test('does not replace the call the user is in', () async {
+          await streamVideo.state.setActiveCall(currentCall);
+
+          final joining = ringingCall.join();
+          await pumpEventQueue();
+
+          expect(streamVideo.activeCalls, [currentCall]);
+          expect(ringingCall.isActiveCall, isFalse);
+          verifyNever(() => currentCall.leave(reason: any(named: 'reason')));
+
+          // Declining the ring leaves the call alone as well.
+          await ringingCall.reject(reason: CallRejectReason.decline());
+
+          expect(await joining, isA<Failure>());
+          expect(streamVideo.activeCalls, [currentCall]);
+          verifyNever(() => currentCall.leave(reason: any(named: 'reason')));
+        });
+
+        test("does not cancel the user's own outgoing ring", () async {
+          // The user's outgoing ring is active from the moment it is joined,
+          // while it waits for the callee to answer.
+          await streamVideo.state.setActiveCall(currentCall);
+          await streamVideo.state.setOutgoingCall(currentCall);
+
+          final joining = ringingCall.join();
+          await pumpEventQueue();
+
+          expect(streamVideo.activeCalls, [currentCall]);
+          expect(streamVideo.state.outgoingCall.value, currentCall);
+          verifyNever(() => currentCall.leave(reason: any(named: 'reason')));
+          verifyNever(
+            () => currentCall.reject(
+              reason: any(named: 'reason'),
+              initiator: any(named: 'initiator'),
+            ),
+          );
+
+          await ringingCall.reject(reason: CallRejectReason.decline());
+
+          expect(await joining, isA<Failure>());
+          expect(streamVideo.activeCalls, [currentCall]);
+          expect(streamVideo.state.outgoingCall.value, currentCall);
+          verifyNever(
+            () => currentCall.reject(
+              reason: any(named: 'reason'),
+              initiator: any(named: 'initiator'),
+            ),
+          );
+        });
+
+        test('replaces the call the user is in once accepted', () async {
+          await streamVideo.state.setActiveCall(currentCall);
+
+          final activeCalls = <List<Call>>[];
+          final subscription = streamVideo.state.activeCalls.listen(
+            activeCalls.add,
+          );
+          addTearDown(subscription.cancel);
+
+          final joining = ringingCall.join(maxJoinRetries: 1);
+          await pumpEventQueue();
+
+          verifyNever(() => currentCall.leave(reason: any(named: 'reason')));
+
+          await ringingCall.accept();
+          // The join itself fails here, as the test coordinator cannot join.
+          await joining;
+
+          verify(
+            () => currentCall.leave(
+              reason: any(
+                named: 'reason',
+                that: isA<DisconnectReasonReplaced>(),
+              ),
+            ),
+          ).called(1);
+          // The accepted call took the active slot before its join failed.
+          expect(activeCalls, contains(equals([ringingCall])));
+        });
+
+        test(
+          "cancels the user's own outgoing ring once accepted",
+          () async {
+            await streamVideo.state.setActiveCall(currentCall);
+            await streamVideo.state.setOutgoingCall(currentCall);
+
+            final joining = ringingCall.join(maxJoinRetries: 1);
+            await pumpEventQueue();
+
+            await ringingCall.accept();
+            await joining;
+
+            verify(
+              () => currentCall.reject(
+                reason: CallRejectReason.cancel(),
+                initiator: LeaveInitiator.app,
+              ),
+            ).called(1);
+            expect(streamVideo.state.outgoingCall.value, isNull);
+          },
+        );
+      });
     });
 
     group('when allowMultipleActiveCalls is true', () {
