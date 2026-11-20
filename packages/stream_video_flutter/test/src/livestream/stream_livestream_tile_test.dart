@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart' hide Finder;
@@ -283,6 +284,64 @@ void main() {
     expect(find.byType(StreamLiveIndicator), findsNothing);
     expect(find.byType(StreamSpectatorsIndicator), findsOneWidget);
     expect(find.byType(LivestreamSpeakerphoneOption), findsNothing);
+  });
+
+  group('speakerphone toggle', () {
+    const webrtcMethods = MethodChannel('FlutterWebRTC.Method');
+    const webrtcEvents = EventChannel('FlutterWebRTC.Event');
+
+    setUp(() {
+      // The toggle only shows where playout can be paused.
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        ..setMockMethodCallHandler(webrtcMethods, (_) async => null)
+        ..setMockStreamHandler(
+          webrtcEvents,
+          MockStreamHandler.inline(onListen: (_, _) {}),
+        );
+    });
+
+    tearDown(() {
+      CurrentPlatform.debugCurrentPlatformOverride = null;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        ..setMockMethodCallHandler(webrtcMethods, null)
+        ..setMockStreamHandler(webrtcEvents, null);
+    });
+
+    testWidgets('is hidden by default', (tester) async {
+      await pump(
+        tester,
+        StreamLivestreamTile(call: call, child: const SizedBox()),
+      );
+
+      expect(find.byType(LivestreamSpeakerphoneOption), findsNothing);
+    });
+
+    testWidgets('shows when the props ask for it', (tester) async {
+      await pump(
+        tester,
+        StreamLivestreamTile(
+          call: call,
+          showSpeakerphoneToggle: true,
+          child: const SizedBox(),
+        ),
+      );
+
+      expect(find.byType(LivestreamSpeakerphoneOption), findsOneWidget);
+    });
+
+    testWidgets('shows when the style asks for it', (tester) async {
+      await pump(
+        tester,
+        StreamLivestreamTile(
+          call: call,
+          style: const StreamLivestreamTileStyle(showSpeakerphoneToggle: true),
+          child: const SizedBox(),
+        ),
+      );
+
+      expect(find.byType(LivestreamSpeakerphoneOption), findsOneWidget);
+    });
   });
 
   testWidgets('the widget style beats the local theme', (tester) async {

@@ -4,7 +4,8 @@ import '../../stream_video_flutter.dart';
 import '../l10n/localization_extension.dart';
 
 /// The livestream's video with its toolbar: whether the stream is live, how
-/// many people watch it, a speakerphone toggle and a fullscreen button.
+/// many people watch it and a fullscreen button, plus a speakerphone toggle
+/// when one is asked for.
 ///
 /// Used by both the host and the viewers. [StreamLivestreamTileProps.child]
 /// is what the tile shows, typically [StreamLivestreamHosts] or a
@@ -107,7 +108,7 @@ class StreamLivestreamTileProps {
   /// Whether the toolbar shows [LivestreamSpeakerphoneOption].
   ///
   /// Falls back to [StreamLivestreamTileStyle.showSpeakerphoneToggle], then
-  /// true.
+  /// false.
   final bool? showSpeakerphoneToggle;
 
   /// Overrides for this tile's appearance.
@@ -290,5 +291,5 @@ class _StreamLivestreamTileStyleDefaults extends StreamLivestreamTileStyle {
   bool get showSpectatorsIndicator => _style?.showSpectatorsIndicator ?? true;
 
   @override
-  bool get showSpeakerphoneToggle => _style?.showSpeakerphoneToggle ?? true;
+  bool get showSpeakerphoneToggle => _style?.showSpeakerphoneToggle ?? false;
 }
