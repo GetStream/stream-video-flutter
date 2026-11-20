@@ -191,10 +191,17 @@ class CoordinatorConnection {
   /// With no connect started since the last disconnect, it only unregisters
   /// the push device, if asked to and not done yet. Returns the failure of
   /// closing the socket, if it failed.
-  Future<Result<None>> disconnect({bool unregisterPushDevice = true}) {
-    return _lock.synchronized(
-      () => _disconnect(unregisterPushDevice: unregisterPushDevice),
-    );
+  ///
+  /// [beforeDisconnect] runs first, inside the same turn, so a connect asked
+  /// for meanwhile still runs after this disconnect.
+  Future<Result<None>> disconnect({
+    bool unregisterPushDevice = true,
+    Future<void> Function()? beforeDisconnect,
+  }) {
+    return _lock.synchronized(() async {
+      await beforeDisconnect?.call();
+      return _disconnect(unregisterPushDevice: unregisterPushDevice);
+    });
   }
 
   Future<Result<None>> _disconnect({required bool unregisterPushDevice}) async {

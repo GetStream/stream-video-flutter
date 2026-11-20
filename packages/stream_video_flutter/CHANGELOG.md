@@ -406,11 +406,40 @@
 - `StreamLobbyView` is restyled onto the design system — its typography, spacing and icons come from `StreamTheme`, and the close action is a ghost `StreamButton` instead of a Material `IconButton`.
 - Requires `stream_core_flutter` 0.5.0 for the button styles, error badge and theme accessors the components above use.
 
-## Upcoming (minor)
+## 1.8.0
+
+### ✅ Added
+
+- Added `StreamLobbyVideo.initialMicrophoneEnabled` and `initialCameraEnabled` to override the call's `micDefaultOn` and `cameraDefaultOn` in the preview.
+- Added `Call.setAudioConfigurationPolicy` to set a call's audio policy before joining. Pass `null` to fall back to `StreamVideoOptions.audioConfigurationPolicy`. Stop lobby preview tracks before changing it.
+- Added `CallPreferences.withAudioConfigurationPolicy`, which returns a copy with a different audio policy.
+- `StreamVideoEffectsManager.unregisterAllFilters()` to release native effect processors.
+
+### 🔄 Changed
+
+- `Call.setAudioBitrateProfile` now always allows switching back to `voiceStandard`, and setting the current profile no longer restarts the microphone.
+- Leaving `musicHighQuality` restores noise cancellation only if it was on before. Joining with `musicHighQuality` no longer turns it on for `autoOn` call types.
+- `AudioConfigurationPolicy` values now compare by value.
+- `ActionCallToggleGroup.callUUIDToGroupWith` is now nullable (null when CallKit ungroups the call).
+- `StreamVideo.connect()` now respects `StreamVideoOptions.includeUserDetailsForAutoConnect` when `includeUserDetails` isn't passed.
+- Improved the edge quality and performance of background filters.
 
 ### 🐞 Fixed
 
 - [iOS] A participant's video or screen share no longer stays blank after returning from picture-in-picture.
+- `StreamLobbyVideo` now stops camera and microphone tracks that finish starting after the preview is removed.
+- [iOS] Stereo playout now follows the call's audio policy (`HiFiAudioPolicy`, `ViewerAudioPolicy`) and no longer carries over from an earlier HiFi call.
+- Fixed an audio bitrate profile set before joining being ignored, or lost after a reconnect.
+- `StreamVideo.disconnect()` now leaves all active calls first, so they no longer keep publishing after disconnect.
+- Accepting a call from the native ringing screen on a cold start no longer overwrites the user's name when `includeUserDetailsForAutoConnect` is `false`.
+- Fixed stability issues in background blur and virtual background filters on Android and iOS.
+- Unrecognized ringing events are now ignored.
+- [Android] Fixed a `NoSuchMethodError` crash on Android 5 and 6 (API 21–23).
+- [iOS] `setCallConnected` and `endCall` now respect `configureAudioSession: false`, and `setCallConnected` no longer answers outgoing calls.
+- [iOS] Fixed an outgoing call losing its options and `ActionCallStart` data when another call changed state while it was starting.
+- [iOS] CallKit mute, hold, group and DTMF events now report the call's uuid unchanged instead of uppercased.
+- [iOS] Fixed a held or resumed call toggling between held and active.
+- [iOS] Fixed an error when decoding `ActionCallToggleGroup` after ungrouping a CallKit call.
 
 ## 1.7.2
 

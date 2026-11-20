@@ -158,10 +158,18 @@ class RtcManager extends Disposable {
   TransceiverManager get transceiversManager => _publisher.transceiversManager;
 
   /// Acquires local tracks. A session without a publisher acquires none.
-  late final _trackAcquirer = LocalTrackAcquirer(
-    pcFactory: pcFactory,
-    publisherId: publisher == null ? null : publisherId,
-  );
+  ///
+  /// Its default microphone constraints are seeded from the call state, so a
+  /// bitrate profile chosen before joining, or before a reconnect built this
+  /// manager, applies to the microphone.
+  late final _trackAcquirer =
+      LocalTrackAcquirer(
+          pcFactory: pcFactory,
+          publisherId: publisher == null ? null : publisherId,
+        )
+        ..defaultAudioConstraints = AudioConstraints.forBitrateProfile(
+          stateManager.callState.audioBitrateProfile,
+        );
 
   /// The publish options from the SFU, one or more per track type.
   List<SfuPublishOptions> get publishOptions => _publisher.publishOptions;

@@ -13,6 +13,7 @@ import '../utils/call_encryption.dart';
 import '../utils/e2ee.dart';
 import '../utils/random_words.dart';
 import '../widgets/lobby_encryption.dart';
+import '../widgets/lobby_hifi_audio.dart';
 import '../widgets/minimum_top_inset.dart';
 import '../widgets/user_actions_avatar.dart';
 
@@ -100,10 +101,22 @@ class _LobbyScreenState extends State<LobbyScreen> {
   /// encryption manager from then on.
   bool _joining = false;
 
+  /// The lobby's controller, kept here so the HiFi switch can close the
+  /// preview tracks and open them again on the call's new factory.
+  late StreamLobbyController _lobbyController;
+
+  /// Whether the call is joined with the HiFi audio policy. Off by default.
+  bool _hiFiAudioEnabled = false;
+
+  /// Whether the HiFi policy is being changed. Join and the switch are inert
+  /// meanwhile, since the preview tracks are closed and not yet reopened.
+  bool _changingHiFiAudio = false;
+
   @override
   void initState() {
     super.initState();
     _videoEffectsManager = StreamVideoEffectsManager(widget.call);
+    _lobbyController = StreamLobbyController(call: widget.call);
 
     // An invite that carries a key is an invite to an encrypted call, so the
     // user has nothing to fill in. For a call that does not exist yet, it also
@@ -118,7 +131,19 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 
   @override
+  void didUpdateWidget(LobbyScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // A controller is only good for the call it was made for.
+    if (widget.call != oldWidget.call) {
+      _lobbyController.dispose();
+      _lobbyController = StreamLobbyController(call: widget.call);
+    }
+  }
+
+  @override
   void dispose() {
+    // Leaves the tracks running when the lobby handed them to the call.
+    _lobbyController.dispose();
     _encryptionKeyController.dispose();
     if (!_joining) unawaited(widget.call.clearE2EEManager());
     super.dispose();
@@ -130,7 +155,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
   /// Returns false without joining when any of that fails, which leaves the
   /// lobby on screen with its preview running.
   Future<bool> _joinCallPressed(CallConnectOptions options) async {
-    if (_creatingCall) return false;
+    if (_creatingCall || _changingHiFiAudio) return false;
 
     // The button is disabled in this state, so this only catches a join that
     // came from somewhere else — a deep link, or a host driving the view.
@@ -220,6 +245,69 @@ class _LobbyScreenState extends State<LobbyScreen> {
     } finally {
       if (mounted) setState(() => _creatingCall = false);
     }
+  }
+
+  Future<void> _toggleHiFiAudio(bool enabled) async {
+    // Once a join has the tracks, closing them would join with stopped ones.
+    if (_changingHiFiAudio ||
+        _creatingCall ||
+        _lobbyController.tracksHandedOver) {
+      return;
+    }
+    setState(() => _changingHiFiAudio = true);
+
+    // Changing the policy discards the factory the preview tracks run on, so
+    // they are closed first and opened again on the new factory, in the state
+    // the user left them.
+    final controller = _lobbyController;
+    final microphoneEnabled = controller.microphoneEnabled;
+    final cameraEnabled = controller.cameraEnabled;
+
+    var applied = false;
+    try {
+      await Future.wait([
+        controller.setMicrophoneEnabled(enabled: false),
+        controller.setCameraEnabled(enabled: false),
+      ]);
+      if (!mounted) return;
+
+      applied = _applyHiFiAudio(enabled: enabled);
+
+      if (microphoneEnabled) {
+        unawaited(controller.setMicrophoneEnabled(enabled: true));
+      }
+      if (cameraEnabled) {
+        unawaited(controller.setCameraEnabled(enabled: true));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          if (applied) _hiFiAudioEnabled = enabled;
+          _changingHiFiAudio = false;
+        });
+      }
+    }
+
+    if (!applied) {
+      _showError('Could not change the audio policy for this call.');
+    }
+  }
+
+  /// HiFi bypasses voice processing, which on iOS turns on stereo playout and
+  /// keeps Bluetooth headphones on A2DP instead of the mono hands-free profile.
+  ///
+  /// Returns whether the policy was applied.
+  bool _applyHiFiAudio({required bool enabled}) {
+    final result = widget.call.setAudioConfigurationPolicy(
+      enabled ? const AudioConfigurationPolicy.hiFi() : null,
+    );
+    if (result is Failure) {
+      _logger.w(
+        () => 'Failed to set the audio policy: ${result.videoError.message}',
+      );
+      return false;
+    }
+    return true;
   }
 
   /// Records the encryption mode to create the call with.
@@ -315,31 +403,57 @@ class _LobbyScreenState extends State<LobbyScreen> {
                 // encryption manager: every frame would arrive undecryptable.
                 final blocked = willBeEncrypted && !_encryptionSupported;
 
-                return StreamLobbyView(
-                  call: widget.call,
+                return StreamLobbyView.withController(
+                  controller: _lobbyController,
                   actions: actions,
                   title: Text('Set up your call', style: textTheme.headingLg),
                   joinButtonLabel: const Text('Start a test call'),
-                  joinEnabled: !needsKey && !blocked && !_creatingCall,
-                  footer: LobbyEncryption(
-                    call: widget.call,
-                    callExists: _callExists,
-                    supported: _encryptionSupported,
-                    encryptionEnabled: _encryptionEnabled,
-                    encryptionKey: _encryptionKey,
-                    busy: _creatingCall,
-                    keyController: _encryptionKeyController,
-                    onEncryptionToggled: _toggleEncryption,
-                    onEncryptionKeyChanged: (value) {
-                      final next = value.trim();
-                      final wasEmpty = _encryptionKey.isEmpty;
-                      _encryptionKey = next;
-                      // Only the join button and the hint depend on the key, and
-                      // only on whether there is one at all.
-                      if (wasEmpty != next.isEmpty) setState(() {});
-                    },
-                    onGenerateKey: () =>
-                        setState(() => _setEncryptionKey(getRandomWords())),
+                  joinEnabled:
+                      !needsKey &&
+                      !blocked &&
+                      !_creatingCall &&
+                      !_changingHiFiAudio,
+                  footer: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: spacing.sm,
+                    children: [
+                      LobbyEncryption(
+                        call: widget.call,
+                        callExists: _callExists,
+                        supported: _encryptionSupported,
+                        encryptionEnabled: _encryptionEnabled,
+                        encryptionKey: _encryptionKey,
+                        busy: _creatingCall,
+                        keyController: _encryptionKeyController,
+                        onEncryptionToggled: _toggleEncryption,
+                        onEncryptionKeyChanged: (value) {
+                          final next = value.trim();
+                          final wasEmpty = _encryptionKey.isEmpty;
+                          _encryptionKey = next;
+                          // Only the join button and the hint depend on the key, and
+                          // only on whether there is one at all.
+                          if (wasEmpty != next.isEmpty) setState(() {});
+                        },
+                        onGenerateKey: () =>
+                            setState(() => _setEncryptionKey(getRandomWords())),
+                      ),
+                      // Inert while a device is still opening: that track
+                      // would land on the factory the policy change discards.
+                      ListenableBuilder(
+                        listenable: _lobbyController,
+                        builder: (context, _) => LobbyHiFiAudio(
+                          enabled: _hiFiAudioEnabled,
+                          onChanged:
+                              _changingHiFiAudio ||
+                                  _creatingCall ||
+                                  _lobbyController.tracksHandedOver ||
+                                  _lobbyController.isOpeningMicrophone ||
+                                  _lobbyController.isOpeningCamera
+                              ? null
+                              : _toggleHiFiAudio,
+                        ),
+                      ),
+                    ],
                   ),
                   onJoinCallPressed: _joinCallPressed,
                 );
