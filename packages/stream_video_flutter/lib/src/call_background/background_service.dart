@@ -241,11 +241,9 @@ class StreamBackgroundService {
         options: options,
       );
 
-      // The call's own policy wins over the client-wide one, the same way the
-      // audio configuration is resolved when the call is joined.
-      final audioPolicy =
-          call.state.value.preferences.audioConfigurationPolicy ??
-          streamVideo.options.audioConfigurationPolicy;
+      // The policy the call's audio is configured with, so a ringing call
+      // runs in the service its ringing policy asks for.
+      final audioPolicy = call.audioConfigurationPolicy;
       final serviceKind = audioPolicy.androidCallServiceKind;
 
       final result = await StreamVideoFlutterBackground.startService(

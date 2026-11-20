@@ -19,20 +19,6 @@ final class CallKitMappingTests: XCTestCase {
         XCTAssertEqual(manager.getHandleType(nil), .generic)
     }
 
-    func testAudioSessionModes() {
-        XCTAssertEqual(manager.getAudioSessionMode("gameChat"), .gameChat)
-        XCTAssertEqual(manager.getAudioSessionMode("measurement"), .measurement)
-        XCTAssertEqual(manager.getAudioSessionMode("moviePlayback"), .moviePlayback)
-        XCTAssertEqual(manager.getAudioSessionMode("spokenAudio"), .spokenAudio)
-        XCTAssertEqual(manager.getAudioSessionMode("videoChat"), .videoChat)
-        XCTAssertEqual(manager.getAudioSessionMode("videoRecording"), .videoRecording)
-        XCTAssertEqual(manager.getAudioSessionMode("voiceChat"), .voiceChat)
-        XCTAssertEqual(manager.getAudioSessionMode("voicePrompt"), .voicePrompt)
-        XCTAssertEqual(manager.getAudioSessionMode(""), .default)
-        XCTAssertEqual(manager.getAudioSessionMode("somethingElse"), .default)
-        XCTAssertEqual(manager.getAudioSessionMode(nil), .default)
-    }
-
     func testIncomingCallErrorCodesMatchTheDartReasonNames() {
         func error(_ code: CXErrorCodeIncomingCallError.Code) -> Error {
             NSError(domain: CXErrorDomainIncomingCall, code: code.rawValue)

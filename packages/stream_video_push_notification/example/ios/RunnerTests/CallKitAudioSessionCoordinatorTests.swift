@@ -3,26 +3,40 @@ import XCTest
 
 @testable import stream_video_push_notification
 
-/// Records what the coordinator sets on the audio session.
+/// Records the configurations the coordinator applies to the audio session.
 final class FakeAudioSession: AudioSessionConfiguring {
-    private(set) var calls: [String] = []
+    /// Every configuration applied, in order.
+    private(set) var applied: [[String: Any]] = []
 
-    func setCategory(
-        _ category: AVAudioSession.Category, options: AVAudioSession.CategoryOptions
-    ) throws {
-        calls.append("category \(category.rawValue)")
+    /// The category the session reports; an applied configuration's category replaces it.
+    var category: AVAudioSession.Category = .soloAmbient
+
+    /// Applying a configuration with one of these categories throws.
+    var refusedCategories: Set<String> = []
+
+    /// `applied`, described so tests can compare them.
+    var calls: [String] { applied.map(Self.describe) }
+
+    func apply(_ configuration: [String: Any]) throws {
+        let name = configuration["appleAudioCategory"] as? String
+        if let name = name, refusedCategories.contains(name) {
+            throw NSError(domain: "FakeAudioSession", code: 1)
+        }
+        applied.append(configuration)
+        switch name {
+        case "playAndRecord": category = .playAndRecord
+        case "record": category = .record
+        case "playback": category = .playback
+        default: break
+        }
     }
 
-    func setMode(_ mode: AVAudioSession.Mode) throws {
-        calls.append("mode \(mode.rawValue)")
-    }
-
-    func setPreferredSampleRate(_ sampleRate: Double) throws {
-        calls.append("sampleRate \(sampleRate)")
-    }
-
-    func setPreferredIOBufferDuration(_ duration: TimeInterval) throws {
-        calls.append("ioBufferDuration \(duration)")
+    static func describe(_ configuration: [String: Any]) -> String {
+        let category = configuration["appleAudioCategory"] as? String ?? "-"
+        let mode = configuration["appleAudioMode"] as? String ?? "-"
+        let options = (configuration["appleAudioCategoryOptions"] as? [String])?.joined(
+            separator: ",") ?? "-"
+        return "\(category) \(mode) \(options)"
     }
 }
 
@@ -56,7 +70,8 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
         super.setUp()
         session = FakeAudioSession()
         gate = FakeAudioEngineGate()
-        coordinator = CallKitAudioSessionCoordinator(session: session, gate: gate)
+        coordinator = CallKitAudioSessionCoordinator(
+            session: session, gate: gate, persistedRingingConfiguration: { nil })
         store = CallKitCallStore()
     }
 
@@ -87,31 +102,32 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
         }
     }
 
-    /// Activates the audio session and says whether that configured it.
-    private func activationConfigures() -> Bool {
-        let before = session.calls.count
-        _ = coordinator.didActivate(store)
-        return session.calls.count > before
+    /// A ringing call answered from the CallKit screen, before the app joined it.
+    private func ringingCall() -> CallKitCall {
+        let uuid = UUID()
+        _ = store.incomingReported(CallData(args: ["id": "ringing"]), uuid: uuid)
+        return store.call(forCallKit: uuid)!
     }
+
+    private let broadcaster: [String: Any] = [
+        "appleAudioCategory": "playAndRecord",
+        "appleAudioCategoryOptions": ["mixWithOthers", "allowBluetooth"],
+        "appleAudioMode": "voiceChat",
+    ]
 
     private let audioEvent = StreamVideoIncomingCallConstants.ACTION_CALL_TOGGLE_AUDIO_SESSION
 
     // MARK: - Activation
 
-    func testTheFirstActivationStartsTheCallConfiguresTheSessionAndAllowsTheEngine() {
+    func testTheFirstActivationStartsTheCallAndAllowsTheEngineWithoutConfiguring() {
         let call = outgoingCall()
-        var configuredWhenTheEngineWasAllowed: [String] = []
-        gate.onUpdate = { [session] in configuredWhenTheEngineWasAllowed = session!.calls }
 
         let effects = coordinator.didActivate(store)
 
         XCTAssertEqual(
             kinds(effects),
             ["reportStartedConnecting", "postAudioInterruptionEnded", "send \(audioEvent) true"])
-        XCTAssertFalse(session.calls.isEmpty)
-        XCTAssertEqual(
-            configuredWhenTheEngineWasAllowed, session.calls,
-            "the session is configured before WebRTC may start its engine")
+        XCTAssertTrue(session.calls.isEmpty, "the start or the answer configured the session")
         XCTAssertEqual(gate.updates, [.init(available: true, callKitSessionActive: true)])
         XCTAssertTrue(call.hasActivatedAudioSession)
         XCTAssertEqual(call.phase, .active)
@@ -121,31 +137,12 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
         _ = answeredCall()
         _ = coordinator.didActivate(store)
 
-        let configuredBefore = session.calls.count
         let effects = coordinator.didActivate(store)
 
         XCTAssertEqual(
             kinds(effects), ["postAudioInterruptionEnded", "send \(audioEvent) true"])
-        XCTAssertEqual(session.calls.count, configuredBefore)
+        XCTAssertTrue(session.calls.isEmpty)
         XCTAssertEqual(gate.updates.last, .init(available: true, callKitSessionActive: true))
-    }
-
-    func testAConnectedCallIsNotTreatedAsAFirstActivationOnceActivated() {
-        let call = answeredCall()
-        _ = store.connected(uuid: call.identity.callKitUUID)
-        _ = coordinator.didActivate(store)
-
-        XCTAssertFalse(activationConfigures())
-    }
-
-    func testANewCallAfterAnEndedAnsweredOneGetsAFirstActivation() {
-        let first = answeredCall()
-        _ = coordinator.didActivate(store)
-        _ = store.endPerformed(uuid: first.identity.callKitUUID)
-
-        answeredCall()
-
-        XCTAssertTrue(activationConfigures())
     }
 
     func testANewCallAfterAnEndedOutgoingOneGetsAFirstActivation() {
@@ -155,39 +152,22 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
         XCTAssertNil(store.outgoingCall)
 
         let call = answeredCall()
+        _ = coordinator.didActivate(store)
 
-        XCTAssertTrue(activationConfigures())
         XCTAssertTrue(call.hasActivatedAudioSession)
+        XCTAssertEqual(call.phase, .active)
     }
 
     func testAnsweringASecondCallGivesItAFirstActivationOfItsOwn() {
-        // Only the call answered last counts, so the first one's activation does not.
         let first = answeredCall()
         _ = coordinator.didActivate(store)
 
         let second = answeredCall()
+        _ = coordinator.didActivate(store)
 
-        XCTAssertTrue(activationConfigures())
         XCTAssertTrue(second.hasActivatedAudioSession)
+        XCTAssertEqual(second.phase, .active)
         XCTAssertTrue(first.hasActivatedAudioSession)
-    }
-
-    func testTheFirstActivationConfiguresWithTheActivatedCallsOptions() {
-        answeredCall(["audioSessionMode": "videoChat"])
-        store.lastOptions = CallData(args: ["id": "last", "audioSessionMode": "voiceChat"])
-
-        _ = coordinator.didActivate(store)
-
-        XCTAssertTrue(session.calls.contains("mode \(AVAudioSession.Mode.videoChat.rawValue)"))
-        XCTAssertFalse(session.calls.contains("mode \(AVAudioSession.Mode.voiceChat.rawValue)"))
-    }
-
-    func testAnActivationWithNoLiveCallConfiguresWithTheLastOptions() {
-        store.lastOptions = CallData(args: ["id": "last", "audioSessionMode": "voiceChat"])
-
-        _ = coordinator.didActivate(store)
-
-        XCTAssertTrue(session.calls.contains("mode \(AVAudioSession.Mode.voiceChat.rawValue)"))
     }
 
     func testANewOutgoingCallDuringAHeldAnsweredCallGetsAFirstActivationOfItsOwn() {
@@ -216,7 +196,6 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
             kinds(effects), ["postAudioInterruptionEnded", "send \(audioEvent) true"],
             "an ended call is not reported as connecting")
         XCTAssertEqual(outgoing.phase, .ended(nil))
-        XCTAssertFalse(session.calls.isEmpty, "the session gets the last options or the defaults")
         XCTAssertEqual(gate.updates, [.init(available: true, callKitSessionActive: true)])
     }
 
@@ -286,43 +265,112 @@ final class CallKitAudioSessionCoordinatorTests: XCTestCase {
 
     // MARK: - Session
 
-    func testConfiguringAppliesTheOptions() {
-        let options = CallData(args: [
-            "ios": [
-                "audioSessionMode": "voiceChat",
-                "audioSessionPreferredSampleRate": 48000.0,
-                "audioSessionPreferredIOBufferDuration": 0.01,
-            ]
-        ])
+    func testAnsweringARingTheAppHasNotJoinedAppliesTheRingingConfiguration() {
+        coordinator.ringingConfiguration = broadcaster
 
-        coordinator.configure(options)
+        coordinator.answering(ringingCall())
 
-        XCTAssertEqual(
-            session.calls,
-            [
-                "category \(AVAudioSession.Category.playAndRecord.rawValue)",
-                "mode \(AVAudioSession.Mode.voiceChat.rawValue)",
-                "sampleRate 48000.0",
-                "ioBufferDuration 0.01",
-            ])
+        XCTAssertEqual(session.calls, [FakeAudioSession.describe(broadcaster)])
     }
 
-    func testConfiguringWithoutOptionsAppliesTheDefaults() {
-        coordinator.configure(nil)
+    func testAnsweringARingTheAppJoinedKeepsASessionThatCanRecord() {
+        coordinator.ringingConfiguration = broadcaster
+        session.category = .playAndRecord
+        let call = ringingCall()
+        _ = store.connected(uuid: call.identity.callKitUUID)
 
-        XCTAssertEqual(
-            session.calls,
-            [
-                "category \(AVAudioSession.Category.playAndRecord.rawValue)",
-                "mode \(AVAudioSession.Mode.default.rawValue)",
-                "sampleRate 44100.0",
-                "ioBufferDuration 0.005",
-            ])
+        coordinator.answering(call)
+
+        XCTAssertTrue(session.calls.isEmpty, "the call's own configuration was replaced")
     }
 
-    func testConfiguringIsSkippedWhenTheOptionsSaySo() {
-        coordinator.configure(CallData(args: ["ios": ["configureAudioSession": false]]))
+    func testAnsweringARingTheAppJoinedConfiguresASessionThatCannotRecord() {
+        coordinator.ringingConfiguration = broadcaster
+        session.category = .playback
+        let call = ringingCall()
+        _ = store.connected(uuid: call.identity.callKitUUID)
+
+        coordinator.answering(call)
+
+        XCTAssertEqual(session.calls, [FakeAudioSession.describe(broadcaster)])
+    }
+
+    func testStartingAnOutgoingCallKeepsASessionThatCanRecord() {
+        session.category = .playAndRecord
+
+        coordinator.starting()
 
         XCTAssertTrue(session.calls.isEmpty)
+    }
+
+    func testStartingAnOutgoingCallConfiguresASessionThatCannotRecord() {
+        coordinator.ringingConfiguration = broadcaster
+
+        coordinator.starting()
+
+        XCTAssertEqual(session.calls, [FakeAudioSession.describe(broadcaster)])
+    }
+
+    func testARingingConfigurationThatCannotRecordIsAppliedWithPlayAndRecord() {
+        coordinator.ringingConfiguration = [
+            "appleAudioCategory": "playback",
+            "appleAudioCategoryOptions": ["mixWithOthers"],
+            "appleAudioMode": "spokenAudio",
+        ]
+
+        coordinator.applyRingingConfiguration()
+
+        XCTAssertEqual(session.calls, ["playAndRecord spokenAudio mixWithOthers"])
+    }
+
+    func testARingingConfigurationWithoutACategoryIsAppliedWithPlayAndRecord() {
+        coordinator.ringingConfiguration = ["appleAudioMode": "videoChat"]
+
+        coordinator.applyRingingConfiguration()
+
+        XCTAssertEqual(session.calls, ["playAndRecord videoChat -"])
+    }
+
+    func testWithoutARingingConfigurationTheDefaultOneIsApplied() {
+        coordinator.applyRingingConfiguration()
+
+        XCTAssertEqual(
+            session.calls,
+            [FakeAudioSession.describe(CallKitAudioSessionCoordinator.defaultConfiguration)])
+    }
+
+    func testTheRingingConfigurationFallsBackToThePersistedOne() {
+        coordinator = CallKitAudioSessionCoordinator(
+            session: session, gate: gate, persistedRingingConfiguration: { [broadcaster] in
+                broadcaster
+            })
+
+        coordinator.applyRingingConfiguration()
+
+        XCTAssertEqual(session.calls, [FakeAudioSession.describe(broadcaster)])
+    }
+
+    func testTheRingingConfigurationDartSentWinsOverThePersistedOne() {
+        coordinator = CallKitAudioSessionCoordinator(
+            session: session, gate: gate,
+            persistedRingingConfiguration: { ["appleAudioMode": "gameChat"] })
+        coordinator.ringingConfiguration = broadcaster
+
+        coordinator.applyRingingConfiguration()
+
+        XCTAssertEqual(session.calls, [FakeAudioSession.describe(broadcaster)])
+    }
+
+    func testARefusedRingingConfigurationFallsBackToTheDefaultOne() {
+        coordinator.ringingConfiguration = [
+            "appleAudioCategory": "record", "appleAudioMode": "moviePlayback",
+        ]
+        session.refusedCategories = ["record"]
+
+        coordinator.applyRingingConfiguration()
+
+        XCTAssertEqual(
+            session.calls,
+            [FakeAudioSession.describe(CallKitAudioSessionCoordinator.defaultConfiguration)])
     }
 }

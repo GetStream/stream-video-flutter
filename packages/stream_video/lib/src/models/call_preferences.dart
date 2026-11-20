@@ -72,7 +72,9 @@ abstract class CallPreferences {
 
   /// Per-call audio configuration override. When non-null, the per-call
   /// native peer-connection factory is built with this policy instead of
-  /// the client-level default `StreamVideoOptions.audioConfigurationPolicy`.
+  /// the client-level default: `StreamVideoOptions.ringingAudioConfigurationPolicy`
+  /// for a ringing call, `StreamVideoOptions.audioConfigurationPolicy`
+  /// otherwise.
   AudioConfigurationPolicy? get audioConfigurationPolicy;
 
   /// How long `Call.participantsStream` holds participant updates back, as a
@@ -223,9 +225,11 @@ class DefaultCallPreferences implements CallPreferences {
 
   /// Per-call audio configuration override. When non-null, the per-call
   /// native peer-connection factory is built with this policy instead of
-  /// the client-level default `StreamVideoOptions.audioConfigurationPolicy`.
+  /// the client-level default: `StreamVideoOptions.ringingAudioConfigurationPolicy`
+  /// for a ringing call, `StreamVideoOptions.audioConfigurationPolicy`
+  /// otherwise.
   ///
-  /// Defaults to null (falls back to `StreamVideoOptions.audioConfigurationPolicy`).
+  /// Defaults to null (falls back to the client-level default).
   @override
   final AudioConfigurationPolicy? audioConfigurationPolicy;
 
@@ -248,7 +252,8 @@ class DefaultCallPreferences implements CallPreferences {
 extension CallPreferencesAudioPolicy on CallPreferences {
   /// These preferences with [policy] as the audio configuration policy and
   /// every other value unchanged. Pass null to fall back to the client-level
-  /// default, `StreamVideoOptions.audioConfigurationPolicy`.
+  /// default: `StreamVideoOptions.ringingAudioConfigurationPolicy` for a
+  /// ringing call, `StreamVideoOptions.audioConfigurationPolicy` otherwise.
   ///
   /// Works for any [CallPreferences] implementation. Changing the policy
   /// repeatedly does not nest copies, and setting it back to the original

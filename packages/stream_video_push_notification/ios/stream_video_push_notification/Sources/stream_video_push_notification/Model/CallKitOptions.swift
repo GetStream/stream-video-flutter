@@ -1,6 +1,6 @@
 import Foundation
 
-/// The CallKit and audio session options `CallData` and `StreamVideoPushConfiguration` both
+/// The CallKit options `CallData` and `StreamVideoPushConfiguration` both
 /// carry, read from the `ios` sub-map Dart sends or, when there is none, from the top level.
 ///
 /// A missing `supportsHolding`, `supportsDTMF` or `maximumCallGroups` takes the default the SDK
@@ -17,10 +17,6 @@ struct CallKitOptions {
     var supportsHolding: Bool
     var includesCallsInRecents: Bool
     var ringtonePath: String
-    var configureAudioSession: Bool
-    var audioSessionMode: String
-    var audioSessionPreferredSampleRate: Double
-    var audioSessionPreferredIOBufferDuration: Double
 
     /// `defaultIconName` is used when no `iconName` is given.
     init(args: [String: Any?], defaultIconName: String) {
@@ -40,11 +36,5 @@ struct CallKitOptions {
         self.supportsHolding = source["supportsHolding"] as? Bool ?? false
         self.includesCallsInRecents = source["includesCallsInRecents"] as? Bool ?? true
         self.ringtonePath = source["ringtonePath"] as? String ?? ""
-        self.configureAudioSession = source["configureAudioSession"] as? Bool ?? true
-        self.audioSessionMode = source["audioSessionMode"] as? String ?? ""
-        self.audioSessionPreferredSampleRate =
-            source["audioSessionPreferredSampleRate"] as? Double ?? 44100.0
-        self.audioSessionPreferredIOBufferDuration =
-            source["audioSessionPreferredIOBufferDuration"] as? Double ?? 0.005
     }
 }

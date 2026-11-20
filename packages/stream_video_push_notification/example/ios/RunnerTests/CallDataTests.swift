@@ -58,10 +58,6 @@ final class CallDataTests: XCTestCase {
         XCTAssertFalse(data.supportsHolding)
         XCTAssertTrue(data.includesCallsInRecents)
         XCTAssertEqual(data.ringtonePath, "")
-        XCTAssertTrue(data.configureAudioSession)
-        XCTAssertEqual(data.audioSessionMode, "")
-        XCTAssertEqual(data.audioSessionPreferredSampleRate, 44100.0)
-        XCTAssertEqual(data.audioSessionPreferredIOBufferDuration, 0.005)
     }
 
     func testReadsTheIOSOptionsFromTheIOSSubMap() {
@@ -74,9 +70,6 @@ final class CallDataTests: XCTestCase {
             "supportsHolding": true,
             "includesCallsInRecents": false,
             "ringtonePath": "ring.caf",
-            "configureAudioSession": false,
-            "audioSessionMode": "voiceChat",
-            "audioSessionPreferredSampleRate": 48000.0,
         ]
 
         let data = CallData(args: args)
@@ -88,9 +81,6 @@ final class CallDataTests: XCTestCase {
         XCTAssertTrue(data.supportsHolding)
         XCTAssertFalse(data.includesCallsInRecents)
         XCTAssertEqual(data.ringtonePath, "ring.caf")
-        XCTAssertFalse(data.configureAudioSession)
-        XCTAssertEqual(data.audioSessionMode, "voiceChat")
-        XCTAssertEqual(data.audioSessionPreferredSampleRate, 48000.0)
         // Not in the sub-map: the defaults, not the top level.
         XCTAssertFalse(data.supportsDTMF)
     }
@@ -99,13 +89,11 @@ final class CallDataTests: XCTestCase {
         var args = base
         args["iconName"] = "FlatIcon"
         args["supportsHolding"] = true
-        args["audioSessionMode"] = "videoChat"
 
         let data = CallData(args: args)
 
         XCTAssertEqual(data.iconName, "FlatIcon")
         XCTAssertTrue(data.supportsHolding)
-        XCTAssertEqual(data.audioSessionMode, "videoChat")
     }
 
     func testTheIOSSubMapWinsOverTopLevelKeys() {

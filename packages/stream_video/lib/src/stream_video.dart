@@ -1075,6 +1075,7 @@ class StreamVideoOptions {
     this.clientEventsReportingEnabled = true,
     this.ringStatePolling = const RingStatePollingSettings(),
     this.audioConfigurationPolicy = const BroadcasterAudioPolicy(),
+    this.ringingAudioConfigurationPolicy,
   });
 
   final String coordinatorRpcUrl;
@@ -1144,5 +1145,45 @@ class StreamVideoOptions {
   /// Defaults to [BroadcasterAudioPolicy].
   /// Once set it will be applied for all calls.
   /// To change the audio configuration policy after initial setup, use [RtcMediaDeviceNotifier.reinitializeAudioConfiguration].
+  ///
+  /// A ringing call uses [ringingAudioConfigurationPolicy] instead, when set.
   final AudioConfigurationPolicy audioConfigurationPolicy;
+
+  /// The audio configuration policy of ringing calls, incoming and outgoing.
+  /// Falls back to [audioConfigurationPolicy] when null, the default.
+  ///
+  /// Set it when ringing calls need a different policy than the rest, for
+  /// example an app whose [audioConfigurationPolicy] is
+  /// [AudioConfigurationPolicy.viewer] for livestreams and whose ringing
+  /// calls are voice calls:
+  ///
+  /// ```dart
+  /// StreamVideoOptions(
+  ///   audioConfigurationPolicy: const AudioConfigurationPolicy.viewer(),
+  ///   ringingAudioConfigurationPolicy:
+  ///       const AudioConfigurationPolicy.broadcaster(),
+  /// )
+  /// ```
+  ///
+  /// A call's own policy, from `CallPreferences.audioConfigurationPolicy` or
+  /// `Call.setAudioConfigurationPolicy`, still wins over it.
+  ///
+  /// A call takes its policy when its peer connection factory is built, and
+  /// keeps it. A call whose factory a lobby preview built before it rang
+  /// keeps the policy it had then; `Call.setAudioConfigurationPolicy` sets
+  /// another one before the join.
+  ///
+  /// On iOS the push notification package applies it to the audio session
+  /// when CallKit answers a call the app has not joined yet, such as one
+  /// answered from the CallKit screen, and when CallKit answers or starts
+  /// another call while the session's category cannot record, since CallKit
+  /// activates the session only for a category that can. A policy whose
+  /// category cannot record is applied with `playAndRecord` there. The
+  /// package reads it once, when the client is created.
+  final AudioConfigurationPolicy? ringingAudioConfigurationPolicy;
+
+  /// The policy of a ringing call that sets none of its own:
+  /// [ringingAudioConfigurationPolicy], else [audioConfigurationPolicy].
+  AudioConfigurationPolicy get resolvedRingingAudioConfigurationPolicy =>
+      ringingAudioConfigurationPolicy ?? audioConfigurationPolicy;
 }
