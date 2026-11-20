@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
 import '../../../native/native_platform_events.dart';
+import '../../../native/native_webrtc_capabilities.dart';
 import '../desktop_capturer.dart';
 import 'data_packet_cryptor_impl.dart';
 import 'desktop_capturer_impl.dart';
@@ -157,3 +158,14 @@ WebRtcPlatformEvents get platformEvents => NativeWebRtcPlatformEvents.instance;
 
 DataPacketCryptorFactory get dataPacketCryptorFactory =>
     DataPacketCryptorFactoryImpl.instance;
+
+/// What the WebRTC implementation on this platform can do.
+WebRtcCapabilities get webRtcCapabilities {
+  WebRtcCapabilities? override;
+  assert(() {
+    // ignore: invalid_use_of_visible_for_testing_member, the override's reader
+    override = debugWebRtcCapabilitiesOverride;
+    return true;
+  }());
+  return override ?? nativeWebRtcCapabilities;
+}

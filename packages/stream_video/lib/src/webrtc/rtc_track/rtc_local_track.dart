@@ -363,9 +363,11 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
   Future<RtcLocalCameraTrack> flipCamera() async {
     streamLog.i(_cameraTag, () => 'Flipping camera');
 
-    if (CurrentPlatform.isWeb) {
-      streamLog.w(_cameraTag, () => 'Flipping camera is not supported on web');
-      throw UnsupportedError('Flipping camera is not supported on web');
+    if (!rtc.webRtcCapabilities.supportsCameraSwitch) {
+      streamLog.w(_cameraTag, () => 'Flipping camera is not supported');
+      throw UnsupportedError(
+        'Flipping camera is not supported on this platform',
+      );
     }
 
     // Use the native switchCamera method.
@@ -461,7 +463,7 @@ extension RtcLocalAudioTrackHardwareExt on RtcLocalAudioTrack {
 
     final updatedConstraints = mediaConstraints.copyWith(deviceId: device.id);
 
-    if (CurrentPlatform.isWeb) {
+    if (!rtc.webRtcCapabilities.switchesAudioInputInPlace) {
       // recreate the track with new deviceId.
       return recreate(transceivers, mediaConstraints: updatedConstraints);
     }
@@ -482,8 +484,8 @@ extension RtcLocalScreenShareTrackExt on RtcLocalScreenShareTrack {
       return true;
     }
 
-    // On web we always get a new media track and deviceId is `null`.
-    if (CurrentPlatform.isWeb) {
+    // Every request opens a new capture, so it never matches the running one.
+    if (!rtc.webRtcCapabilities.reusesScreenShareCapture) {
       return false;
     }
 
