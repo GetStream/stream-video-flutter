@@ -9,7 +9,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart'
-    hide CurrentPlatform;
+    hide CurrentPlatform, StreamUserAvatar;
 import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart' hide User;
 
@@ -513,6 +513,44 @@ class _CallScreenState extends State<CallScreen>
     ),
   );
 
+  /// The app bar on a large screen: the current user on the left, and the
+  /// participant count, duration and latency on the right.
+  PreferredSizeWidget _largeAppBar(BuildContext context, Call call) {
+    final spacing = context.streamSpacing;
+    final currentUser = locator.get<UserAuthController>().currentUser;
+
+    // A control's 40 visible box sits inside a 48 tap target, so the bar's
+    // padding leaves it 16 from the edge. Avatars and badges have no tap
+    // target around them, so they take the missing 4 here.
+    final edgeInset = spacing.xxs;
+
+    return CallAppBar(
+      call: call,
+      showLeaveCallAction: false,
+      leading: currentUser == null
+          ? null
+          : Padding(
+              padding: EdgeInsetsDirectional.only(start: edgeInset),
+              child: _CurrentUserLabel(user: currentUser),
+            ),
+      title: const SizedBox.shrink(),
+      actions: [
+        Padding(
+          padding: EdgeInsetsDirectional.only(end: edgeInset),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: spacing.xs,
+            children: [
+              StreamCallParticipantsBadge(call: call),
+              StreamCallDurationBadge(call: call),
+              StreamCallLatencyBadge(call: call),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   /// The call's control bar, laid out per screen size.
   Widget _callControls(BuildContext context, Call call) {
     final moreButton = _moreMenu(call, context.streamIcons.moreVerticalFill);
@@ -763,6 +801,8 @@ class _CallScreenState extends State<CallScreen>
                 // has two ways to hang up a few hundred pixels apart.
                 final isCompact = !context.streamScreenSize.isLarge;
 
+                if (!isCompact) return _largeAppBar(context, call);
+
                 return CallAppBar(
                   call: call,
                   showLeaveCallAction: isCompact,
@@ -795,6 +835,39 @@ class _CallScreenState extends State<CallScreen>
           },
         ),
       ),
+    );
+  }
+}
+
+/// The current user's avatar and name, for the app bar on a large screen.
+class _CurrentUserLabel extends StatelessWidget {
+  const _CurrentUserLabel({required this.user});
+
+  final UserInfo user;
+
+  @override
+  Widget build(BuildContext context) {
+    final name = user.name.isNotEmpty ? user.name : user.id;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: context.streamSpacing.sm,
+      children: [
+        StreamAvatarTheme(
+          data: const StreamAvatarThemeData(size: StreamAvatarSize.lg),
+          child: StreamUserAvatar(user: user),
+        ),
+        Flexible(
+          child: Text(
+            name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.streamTextTheme.bodyEmphasis.copyWith(
+              color: context.streamColorScheme.textPrimary,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

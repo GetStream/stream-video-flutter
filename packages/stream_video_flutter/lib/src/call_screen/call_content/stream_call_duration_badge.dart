@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../stream_video_flutter.dart';
 import '../../l10n/localization_extension.dart';
 import '../../l10n/localizations/stream_video_flutter_localizations.dart';
+import 'stream_call_badge_style_defaults.dart';
 
 /// How long a call has been running, with whatever is worth flagging about it
 /// leading the time.
@@ -280,51 +281,40 @@ class _StreamCallDurationBadgeStyleDefaults
   final BuildContext _context;
   final StreamCallDurationBadgeStyle? _style;
 
-  late final StreamSpacing _spacing = _context.streamSpacing;
+  late final _badge = StreamCallBadgeStyleDefaults(_context);
   late final StreamColorScheme _colorScheme = _context.streamColorScheme;
 
   @override
-  EdgeInsetsGeometry get padding =>
-      _style?.padding ??
-      EdgeInsets.symmetric(
-        horizontal: _spacing.xs,
-        // 6 around a 20 icon is the design's 32 tall pill.
-        vertical: _spacing.xxs + _spacing.xxxs,
-      );
+  EdgeInsetsGeometry get padding => _style?.padding ?? _badge.padding;
 
   @override
-  double get contentHeight => _style?.contentHeight ?? indicatorSize;
+  double get contentHeight => _style?.contentHeight ?? _badge.contentHeight;
 
   @override
-  double get spacing => _style?.spacing ?? _spacing.xs;
+  double get spacing => _style?.spacing ?? _badge.spacing;
 
   @override
-  double get indicatorSpacing => _style?.indicatorSpacing ?? _spacing.xxxs;
+  double get indicatorSpacing =>
+      _style?.indicatorSpacing ?? _context.streamSpacing.xxxs;
 
   @override
-  double get indicatorSize => _style?.indicatorSize ?? 20;
+  double get indicatorSize => _style?.indicatorSize ?? _badge.iconSize;
 
   @override
   Color get backgroundColor =>
-      _style?.backgroundColor ?? _colorScheme.backgroundSurface;
+      _style?.backgroundColor ?? _badge.backgroundColor;
 
   @override
   BorderRadiusGeometry get borderRadius =>
-      _style?.borderRadius ?? BorderRadius.all(_context.streamRadius.xxxl);
+      _style?.borderRadius ?? _badge.borderRadius;
 
-  // `height: 1` so the digits centre against the indicators rather than sitting
-  // in the 20pt line box `bodyEmphasis` carries, and tabular figures so the
-  // pill holds still as the seconds tick — a proportional `1` is narrower than
-  // a `9`. A style of the caller's merges onto both, so naming a size or a
-  // colour does not drop them.
+  // The time not yet elapsed is the tertiary colour; [elapsedTextColor] picks
+  // out the rest.
   @override
-  TextStyle get textStyle => _context.streamTextTheme.bodyEmphasis
-      .copyWith(
-        color: _colorScheme.textTertiary,
-        height: 1,
-        fontFeatures: const [FontFeature.tabularFigures()],
-      )
-      .merge(_style?.textStyle);
+  TextStyle get textStyle => _badge.resolveTextStyle(
+    color: _colorScheme.textTertiary,
+    override: _style?.textStyle,
+  );
 
   @override
   Color get elapsedTextColor =>

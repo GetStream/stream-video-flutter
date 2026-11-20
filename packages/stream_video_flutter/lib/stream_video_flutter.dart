@@ -62,6 +62,8 @@ export 'src/call_screen/call_content/picture_in_picture/stream_picture_in_pictur
 export 'src/call_screen/call_content/picture_in_picture/stream_picture_in_picture_ui_kit_view.dart';
 export 'src/call_screen/call_content/stream_call_connection_banner.dart';
 export 'src/call_screen/call_content/stream_call_duration_badge.dart';
+export 'src/call_screen/call_content/stream_call_latency_badge.dart';
+export 'src/call_screen/call_content/stream_call_participants_badge.dart';
 export 'src/call_screen/common/ringing_call_background.dart';
 export 'src/call_screen/incoming_call/incoming_call_content.dart';
 export 'src/call_screen/lobby_actions.dart';
@@ -99,7 +101,7 @@ export 'src/settings_window/recordings_settings.dart';
 export 'src/settings_window/transcription_language_label.dart';
 export 'src/settings_window/video_effect.dart';
 export 'src/theme/themes.dart';
-export 'src/utils/device_segmentation.dart';
+export 'src/utils/device_segmentation.dart' hide isDesktopOrWeb;
 export 'src/utils/present_icon.dart';
 export 'src/utils/screen_size.dart';
 export 'src/widgets/design_system_candidates/stream_adaptive_menu_anchor.dart';
