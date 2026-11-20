@@ -559,7 +559,8 @@ class _CallScreenState extends State<CallScreen>
         leading: [
           _settingsButton(call),
           if (!kIsProd) _feedbackButton(call),
-          _layoutToggle(),
+          // The livestream tile has one layout.
+          if (!_isLivestream) _layoutToggle(),
           if (!kIsProd)
             DeveloperOptionsMenu(
               call: call,

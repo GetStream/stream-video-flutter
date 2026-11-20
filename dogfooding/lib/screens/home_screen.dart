@@ -81,15 +81,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _getOrCreateCall({List<String> memberIds = const []}) async {
     var callId = _callIdController.text.trim();
 
-    // A full cid such as `livestream:<id>` picks the call type as well. A call
-    // id cannot contain a colon, so one always means a cid.
+    // A full cid such as `livestream:<id>` picks the call type as well. The
+    // type ends at the first colon; `livestream:` alone starts a new one.
     StreamCallType? callType;
-    if (callId.split(':') case [
-      final type,
-      final id,
-    ] when type.isNotEmpty && id.isNotEmpty) {
-      callType = StreamCallType.fromString(type);
-      callId = id;
+    final colon = callId.indexOf(':');
+    if (colon > 0) {
+      callType = StreamCallType.fromString(callId.substring(0, colon));
+      callId = callId.substring(colon + 1);
     }
 
     // Always generate a new call id for ringing

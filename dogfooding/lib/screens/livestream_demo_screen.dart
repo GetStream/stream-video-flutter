@@ -92,7 +92,7 @@ class _LivestreamDemoScreenState extends State<LivestreamDemoScreen> {
                 initiator: LeaveInitiator.app,
               ),
             )
-            .then((_) => streamVideo?.dispose()),
+            .whenComplete(() => streamVideo?.dispose()),
       );
     }
     super.dispose();

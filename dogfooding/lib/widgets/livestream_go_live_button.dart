@@ -26,27 +26,29 @@ class _LivestreamGoLiveButtonState extends State<LivestreamGoLiveButton> {
   Future<void> _toggle({required bool goLive}) async {
     setState(() => _busy = true);
     final messenger = ScaffoldMessenger.maybeOf(context);
-    final Result<Object?> result;
+    String? error;
     try {
-      result = goLive
+      final result = goLive
           ? await widget.call.goLive()
           : await widget.call.stopLive();
+      if (result case final Failure failure) {
+        error = failure.videoError.message;
+      }
+    } catch (e) {
+      error = '$e';
     } finally {
       if (mounted) setState(() => _busy = false);
     }
-    if (!mounted) return;
+    if (!mounted || error == null) return;
 
-    if (result case final Failure failure) {
-      messenger?.showSnackBar(
-        SnackBar(
-          content: Text(
-            "Couldn't ${goLive ? 'go live' : 'stop the livestream'}: "
-            '${failure.videoError.message}',
-          ),
-          behavior: SnackBarBehavior.floating,
+    messenger?.showSnackBar(
+      SnackBar(
+        content: Text(
+          "Couldn't ${goLive ? 'go live' : 'stop the livestream'}: $error",
         ),
-      );
-    }
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
