@@ -53,6 +53,7 @@ void main() {
     return StreamLivestreamTile(
       call: it,
       onFullscreenTapped: () {},
+      showSpeakerphoneToggle: true,
       child: StreamParticipantTile(
         call: it,
         participant: host(video: video),
