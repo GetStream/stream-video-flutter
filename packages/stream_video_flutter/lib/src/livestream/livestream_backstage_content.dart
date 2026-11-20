@@ -5,12 +5,16 @@ import '../../stream_video_flutter.dart';
 import '../l10n/localization_extension.dart';
 import 'livestream_status_card.dart';
 
+/// The livestream tile's backstage state: a status card with the time left
+/// until the call starts and how many viewers joined early.
 class LivestreamBackstageContent extends StatefulWidget {
+  /// Creates a [LivestreamBackstageContent].
   const LivestreamBackstageContent({
     super.key,
     required this.call,
   });
 
+  /// The livestream in backstage.
   final Call call;
 
   @override

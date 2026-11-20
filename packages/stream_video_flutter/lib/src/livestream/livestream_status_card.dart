@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import '../../stream_video_flutter.dart';
 
 /// The livestream tile's surface with a centred message, for the states that
-/// have no video to show: ended, backstage, connecting and no host video.
+/// have no video to show: ended, backstage, connecting and no host in the
+/// call.
 @internal
 class LivestreamStatusCard extends StatelessWidget {
   /// Creates a [LivestreamStatusCard].

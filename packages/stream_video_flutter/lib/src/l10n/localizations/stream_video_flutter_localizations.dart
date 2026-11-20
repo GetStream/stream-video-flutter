@@ -281,7 +281,7 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'{count, plural, zero{No participants have} one{One participant has} other{{count} participants have}} joined early'**
   String livestreamBackstageParticipants(num count);
 
-  /// Label shown when the livestream has already ended.
+  /// No longer shown; the ended screen uses livestreamEndedTitle and livestreamEndedSubtitle.
   ///
   /// In en, this message translates to:
   /// **'The livestream has ended.'**

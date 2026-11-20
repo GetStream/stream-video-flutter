@@ -71,8 +71,8 @@ class LivestreamNotConnectedProperties {
 
 /// The video renderer widget associated with [LivestreamPlayer].
 ///
-/// This widget also contains a diagnostic widget that can be used by
-/// double-tapping the whole widget.
+/// It shows call diagnostics over the video while [displayDiagnostics] is
+/// true.
 ///
 /// Additionally, there is an action button meant for a back/close action
 /// implemented in this widget.
@@ -96,8 +96,7 @@ class LivestreamContent extends StatefulWidget {
   /// * [livestreamNotConnectedBuilder] allows you to build a custom widget when
   /// the livestream is not connected. Provides connection state information.
   ///
-  /// * [displayDiagnostics] displays call diagnostics when the widget is
-  /// double-tapped.
+  /// * [displayDiagnostics] displays call diagnostics over the video.
   ///
   /// * [videoFit] is how the video is fitted, by orientation by default.
   const LivestreamContent({
@@ -156,7 +155,7 @@ class LivestreamContent extends StatefulWidget {
   /// If [showMultipleHosts] is false, only the first host is shown.
   final LivestreamHostsParticipantsFilter? livestreamHostsParticipantsFilter;
 
-  /// Boolean to allow a user to double-tap a call to see diagnostic data.
+  /// Whether call diagnostics are shown over the video.
   ///
   /// Defaults to false.
   final bool displayDiagnostics;
