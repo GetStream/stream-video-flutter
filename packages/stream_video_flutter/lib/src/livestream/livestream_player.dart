@@ -503,84 +503,91 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
               );
         }
 
-        Widget content = LivestreamContent(
-          call: call,
-          videoPlaceholderBuilder: widget.videoPlaceholderBuilder,
-          videoRendererBuilder: widget.videoRendererBuilder,
-          livestreamHostsUnavailableBuilder:
-              widget.livestreamHostsUnavailableBuilder,
-          livestreamNotConnectedBuilder: widget.livestreamNotConnectedBuilder,
-          livestreamFastReconnectingOverlayBuilder:
-              widget.livestreamFastReconnectingOverlayBuilder,
-          livestreamHostsParticipantBuilder:
-              widget.livestreamHostsParticipantBuilder,
-          livestreamHostsParticipantsFilter:
-              widget.livestreamHostsParticipantsFilter,
-          displayDiagnostics: _isStatsVisible,
-          videoFit: _fullscreen ? widget.fullscreenVideoFit : widget.videoFit,
-          showMultipleHosts: widget.showMultipleHosts,
-          layoutMode: widget.layoutMode,
-          screenShareMode: widget.screenShareMode,
-          pictureInPictureConfiguration: widget.pictureInPictureConfiguration,
-        );
-
-        if (_fullscreen) {
-          // Edge to edge, so the video's corners are square.
-          final tileTheme = StreamParticipantTileTheme.of(context);
-          content = StreamParticipantTileTheme(
-            data: tileTheme.copyWith(
-              style: (tileTheme.style ?? const StreamParticipantTileStyle())
-                  .copyWith(borderRadius: BorderRadius.zero),
-            ),
-            child: content,
-          );
-        }
-
-        final controls = widget.livestreamControlsWidgetBuilder?.call(
+        return _layout(
           context,
-          call,
+          body: _liveTile(context),
+          fullscreen: _fullscreen,
         );
-
-        final tile = GestureDetector(
-          onDoubleTap: () {
-            if (widget.allowDiagnostics) {
-              setState(() {
-                _isStatsVisible = !_isStatsVisible;
-              });
-            }
-          },
-          child: controls != null
-              // Custom controls take the toolbar's place over the video.
-              ? Stack(
-                  children: [
-                    SizedBox.expand(child: content),
-                    controls,
-                  ],
-                )
-              : StreamLivestreamTile(
-                  call: call,
-                  style: _fullscreen ? _fullscreenTileStyle(context) : null,
-                  isFullscreen: _fullscreen,
-                  showLiveIndicator: widget.showLiveIndicator,
-                  showSpectatorsIndicator: widget.showParticipantCount,
-                  includeAnonymousParticipants:
-                      widget.includeAnonymousParticipants,
-                  showSpeakerphoneToggle: widget.showSpeakerphoneToggle,
-                  onFullscreenTapped: () {
-                    if (widget.onFullscreenTapped != null) {
-                      widget.onFullscreenTapped?.call();
-                    } else {
-                      setState(() {
-                        _fullscreen = !_fullscreen;
-                      });
-                    }
-                  },
-                  child: content,
-                ),
-        );
-
-        return _layout(context, body: tile, fullscreen: _fullscreen);
       },
+    );
+  }
+
+  /// The live video in the livestream tile, or under the custom controls
+  /// when [LivestreamPlayer.livestreamControlsWidgetBuilder] builds them.
+  Widget _liveTile(BuildContext context) {
+    Widget content = LivestreamContent(
+      call: call,
+      videoPlaceholderBuilder: widget.videoPlaceholderBuilder,
+      videoRendererBuilder: widget.videoRendererBuilder,
+      livestreamHostsUnavailableBuilder:
+          widget.livestreamHostsUnavailableBuilder,
+      livestreamNotConnectedBuilder: widget.livestreamNotConnectedBuilder,
+      livestreamFastReconnectingOverlayBuilder:
+          widget.livestreamFastReconnectingOverlayBuilder,
+      livestreamHostsParticipantBuilder:
+          widget.livestreamHostsParticipantBuilder,
+      livestreamHostsParticipantsFilter:
+          widget.livestreamHostsParticipantsFilter,
+      displayDiagnostics: _isStatsVisible,
+      videoFit: _fullscreen ? widget.fullscreenVideoFit : widget.videoFit,
+      showMultipleHosts: widget.showMultipleHosts,
+      layoutMode: widget.layoutMode,
+      screenShareMode: widget.screenShareMode,
+      pictureInPictureConfiguration: widget.pictureInPictureConfiguration,
+    );
+
+    if (_fullscreen) {
+      // Edge to edge, so the video's corners are square.
+      final tileTheme = StreamParticipantTileTheme.of(context);
+      content = StreamParticipantTileTheme(
+        data: tileTheme.copyWith(
+          style: (tileTheme.style ?? const StreamParticipantTileStyle())
+              .copyWith(borderRadius: BorderRadius.zero),
+        ),
+        child: content,
+      );
+    }
+
+    final controls = widget.livestreamControlsWidgetBuilder?.call(
+      context,
+      call,
+    );
+
+    return GestureDetector(
+      onDoubleTap: () {
+        if (widget.allowDiagnostics) {
+          setState(() {
+            _isStatsVisible = !_isStatsVisible;
+          });
+        }
+      },
+      child: controls != null
+          // Custom controls take the toolbar's place over the video.
+          ? Stack(
+              children: [
+                SizedBox.expand(child: content),
+                controls,
+              ],
+            )
+          : StreamLivestreamTile(
+              call: call,
+              style: _fullscreen ? _fullscreenTileStyle(context) : null,
+              isFullscreen: _fullscreen,
+              showLiveIndicator: widget.showLiveIndicator,
+              showSpectatorsIndicator: widget.showParticipantCount,
+              includeAnonymousParticipants: widget.includeAnonymousParticipants,
+              showSpeakerphoneToggle: widget.showSpeakerphoneToggle,
+              onFullscreenTapped: () {
+                if (widget.onFullscreenTapped != null) {
+                  widget.onFullscreenTapped?.call();
+                } else {
+                  setState(() {
+                    _fullscreen = !_fullscreen;
+                  });
+                }
+              },
+              child: content,
+            ),
     );
   }
 
