@@ -137,6 +137,7 @@ void main() {
         muteVideoWhenInBackground: () => false,
         muteAudioWhenInBackground: () => false,
         onMicrophoneMuted: (_) async {},
+        onAudioOutputDeviceSet: (_) async {},
         logger: taggedLogger(tag: 'test'),
       );
     });
@@ -166,5 +167,21 @@ void main() {
       expect(media.connectOptions.microphone.isEnabled, isFalse);
       expect(media.connectOptions.camera.isEnabled, isFalse);
     });
+
+    test(
+      'keeps the camera and its facing when an override only changes the mic',
+      () async {
+        media.applyRingingSettings(_defaultsOn);
+        media.setConnectOptions(
+          media.connectOptions.copyWith(microphone: TrackOption.disabled()),
+        );
+
+        await media.applyJoinSettings(_defaultsOn);
+
+        expect(media.connectOptions.microphone.isEnabled, isFalse);
+        expect(media.connectOptions.camera.isEnabled, isTrue);
+        expect(media.connectOptions.cameraFacingMode, FacingMode.environment);
+      },
+    );
   });
 }
