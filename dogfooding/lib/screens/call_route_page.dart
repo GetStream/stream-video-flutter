@@ -109,6 +109,8 @@ class _CallRoutePageState extends State<CallRoutePage> {
         setState(() {
           _call = existing;
           _inCall = true;
+          // A joined call already knows its capabilities.
+          _isLivestreamViewer = _watchesOnly(existing);
         });
         return;
       }
@@ -179,7 +181,7 @@ class _CallRoutePageState extends State<CallRoutePage> {
     final message = switch (reason) {
       DisconnectReasonLeft() => null,
       DisconnectReasonFailure(:final error) =>
-        "Couldn't join the livestream: ${error.message}",
+        'The livestream disconnected: ${error.message}',
       DisconnectReasonReconnectionFailed() =>
         "Couldn't restore the connection to the livestream.",
       DisconnectReasonUnsupportedNetwork() =>
