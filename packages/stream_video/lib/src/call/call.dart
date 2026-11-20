@@ -325,6 +325,8 @@ class Call {
     muteAudioWhenInBackground: () => _host.options.muteAudioWhenInBackground,
     onMicrophoneMuted: (muted) async =>
         _host.pushNotificationManager?.setCallMutedByCid(callCid.value, muted),
+    onAudioOutputDeviceSet: (device) async => _host.pushNotificationManager
+        ?.setCallAudioOutputDeviceByCid(callCid.value, device),
     logger: _logger,
   );
 
@@ -1237,6 +1239,7 @@ class Call {
           data,
           ringing: ringing,
           notify: notify,
+          video: video,
         );
         _ringing.startRingStatePollingIfNeeded(data.metadata);
 
@@ -1346,6 +1349,7 @@ class Call {
         _stateManager.updateFromCallCreatedData(
           data.data,
           ringing: ringing,
+          video: video,
           callConnectOptions: connectOptions,
         );
 

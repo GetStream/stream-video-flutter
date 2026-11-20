@@ -51,6 +51,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     CallReceivedData data, {
     bool ringing = false,
     bool notify = false,
+    bool video = false,
   }) {
     _logWithState(
       'lifecycleCallReceived',
@@ -65,6 +66,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
 
     state = state.copyWith(
       status: data.toCallStatus(state: state, ringing: ringing),
+      isRingingWithVideo: ringing ? video : null,
       isBackstage: data.metadata.details.backstage,
       isRecording: data.metadata.details.recording,
       isTranscribing: data.metadata.details.transcribing,
@@ -104,6 +106,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
     CallCreatedData data, {
     required CallConnectOptions callConnectOptions,
     bool ringing = false,
+    bool video = false,
   }) {
     _logWithState('lifecycleCallCreated', 'ringing: $ringing');
 
@@ -113,6 +116,7 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
       status: data.toCallStatus(state: newState, ringing: ringing),
       callParticipants: data.metadata.toCallParticipants(newState),
       isRingingFlow: ringing,
+      isRingingWithVideo: ringing ? video : null,
       audioOutputDevice: callConnectOptions.audioOutputDevice,
       audioInputDevice: callConnectOptions.audioInputDevice,
       videoInputDevice: callConnectOptions.videoInputDevice,

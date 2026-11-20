@@ -18,12 +18,12 @@ enum Event {
   actionCallDecline,
   actionCallEnded,
   actionCallTimeout,
+  actionCallDismissed,
   actionCallConnected,
   actionCallCallback,
   actionCallToggleHold,
   actionCallToggleMute,
   actionCallToggleDtmf,
-  actionCallToggleGroup,
   actionCallToggleAudioSession,
   actionCallCustom;
 
@@ -61,6 +61,8 @@ extension EventX on Event {
         return 'io.getstream.video.ACTION_CALL_ENDED';
       case Event.actionCallTimeout:
         return 'io.getstream.video.ACTION_CALL_TIMEOUT';
+      case Event.actionCallDismissed:
+        return 'io.getstream.video.ACTION_CALL_DISMISSED';
       case Event.actionCallConnected:
         return 'io.getstream.video.ACTION_CALL_CONNECTED';
       case Event.actionCallCallback:
@@ -71,8 +73,6 @@ extension EventX on Event {
         return 'io.getstream.video.ACTION_CALL_TOGGLE_MUTE';
       case Event.actionCallToggleDtmf:
         return 'io.getstream.video.ACTION_CALL_TOGGLE_DTMF';
-      case Event.actionCallToggleGroup:
-        return 'io.getstream.video.ACTION_CALL_TOGGLE_GROUP';
       case Event.actionCallToggleAudioSession:
         return 'io.getstream.video.ACTION_CALL_TOGGLE_AUDIO_SESSION';
       case Event.actionCallCustom:

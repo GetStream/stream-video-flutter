@@ -4,12 +4,17 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 /// A [StreamTextInput] drawn as a Material [TextFormField], for designs whose
 /// Material theme styles the field.
 class MaterialStreamTextInput extends StatelessWidget {
-  const MaterialStreamTextInput({required this.props, this.filled, super.key});
+  const MaterialStreamTextInput({
+    required this.props,
+    this.outlined = false,
+    super.key,
+  });
 
   final StreamTextInputProps props;
 
-  /// Whether the field has a fill, or null to leave it to the theme.
-  final bool? filled;
+  /// Whether the field is drawn with an outline instead of the theme's
+  /// default border.
+  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +44,7 @@ class MaterialStreamTextInput extends StatelessWidget {
       onFieldSubmitted: props.onSubmitted,
       onTap: props.onTap,
       decoration: InputDecoration(
-        filled: filled,
+        border: outlined ? const OutlineInputBorder() : null,
         labelText: props.labelText,
         hintText: props.hintText,
         helperText: error ? null : props.helperText,

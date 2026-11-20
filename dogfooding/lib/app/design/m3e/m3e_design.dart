@@ -176,7 +176,7 @@ class M3EDesign extends AppDesignSpec {
       ),
     ),
     textInput: (context, props) =>
-        MaterialStreamTextInput(props: props, filled: true),
+        MaterialStreamTextInput(props: props, outlined: true),
     progressBar: (context, props) => LinearProgressIndicatorM3E(
       value: props.value,
       activeColor: props.fillColor,

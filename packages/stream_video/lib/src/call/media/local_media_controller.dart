@@ -48,6 +48,7 @@ class LocalMediaController {
     required this._muteVideoWhenInBackground,
     required this._muteAudioWhenInBackground,
     required this._onMicrophoneMuted,
+    required this._onAudioOutputDeviceSet,
     required this._logger,
   });
 
@@ -60,6 +61,10 @@ class LocalMediaController {
   final bool Function() _muteVideoWhenInBackground;
   final bool Function() _muteAudioWhenInBackground;
   final Future<void> Function(bool muted) _onMicrophoneMuted;
+
+  /// Mirrors an output WebRTC now uses into the system call, whose route can
+  /// win over WebRTC's. Not awaited.
+  final Future<void> Function(RtcMediaDevice device) _onAudioOutputDeviceSet;
   final TaggedLogger _logger;
 
   final _multitaskingCameraLock = Lock();
@@ -91,6 +96,11 @@ class LocalMediaController {
   /// The session that started applying the options. While it is the call's
   /// session, they can only change through the device methods.
   CallSession? _optionsAppliedBy;
+
+  /// Whether the connect options' audio output went to the system route on
+  /// join. A rejoin or a migration applies it again to WebRTC only: the
+  /// system may have moved the route since, to a car or a headset.
+  bool _audioOutputRoutedOnJoin = false;
 
   CallState get _state => _stateManager.callState;
 
@@ -394,7 +404,10 @@ class LocalMediaController {
       // Picking the input can change the route, which drops the speaker
       // override. The session configuration is unchanged by now, so this only
       // overrides the port again.
-      await setAudioOutputDevice(_connectOptions.audioOutputDevice!);
+      await _setAudioOutputDevice(
+        _connectOptions.audioOutputDevice!,
+        routeSystem: false,
+      );
     }
 
     _logger.v(() => '[applyConnectOptions] finished');
@@ -403,8 +416,12 @@ class LocalMediaController {
   /// Applies the connect options' audio output, or on iOS when none is set,
   /// the audio session the call settings ask for.
   Future<void> _applyAudioOutputOption() async {
-    if (_connectOptions.audioOutputDevice != null) {
-      await setAudioOutputDevice(_connectOptions.audioOutputDevice!);
+    if (_connectOptions.audioOutputDevice case final device?) {
+      final result = await _setAudioOutputDevice(
+        device,
+        routeSystem: !_audioOutputRoutedOnJoin,
+      );
+      if (result.isSuccess) _audioOutputRoutedOnJoin = true;
     } else if (CurrentPlatform.isIos) {
       // Under a policy that defaults to the speaker, keeps the loudspeaker
       // as the built-in output while headphones are connected, so
@@ -649,22 +666,92 @@ class LocalMediaController {
           );
           break;
         case AudioRouteChangedEvent _:
-          if (!CurrentPlatform.isIos) break;
-
-          final device = event.device;
-          if (_state.audioOutputDevice?.id.equalsIgnoreCase(device.id) ??
-              false) {
-            break;
-          }
-
-          _connectOptions = connectOptions.copyWith(audioOutputDevice: device);
-          _stateManager.participantSetAudioOutputDevice(device: device);
-          _stateManager.audioOutputSelectedByUser = false;
+          onAudioRouteChanged(event);
           break;
         default:
           return;
       }
     });
+  }
+
+  /// Whether [setAudioOutputDevice] is applying an output. The system
+  /// re-routes while it does, which says nothing about where audio ends up.
+  ///
+  /// Best effort: the WebRTC plugin delivers route changes asynchronously, so
+  /// the ones an output change causes usually arrive after it returned, when
+  /// this is false again. One that names the other built-in output then puts
+  /// the selection back once more, and the last one names the output that
+  /// was set, so the selection still ends up where the user put it.
+  bool _isSettingAudioOutput = false;
+
+  /// Follows an iOS audio route change, unless the system moved audio between
+  /// the speaker and the receiver on its own and the user had chosen one of
+  /// them: that output is put back instead. While an output is being set, the
+  /// system's own re-routing is ignored.
+  @visibleForTesting
+  void onAudioRouteChanged(AudioRouteChangedEvent event) {
+    if (!CurrentPlatform.isIos) return;
+
+    final device = event.device;
+    final selected = _state.audioOutputDevice;
+    _logger.d(
+      () =>
+          '[onAudioRouteChanged] route: ${device.id}, reason: '
+          '${event.reason.name}, selected: ${selected?.id}, '
+          'byUser: ${_stateManager.audioOutputSelectedByUser}',
+    );
+    if (selected?.id.equalsIgnoreCase(device.id) ?? false) {
+      return;
+    }
+
+    if (event.reason.isSystemReconfiguration) {
+      if (_isSettingAudioOutput) return;
+      if (_stateManager.audioOutputSelectedByUser &&
+          selected != null &&
+          _isBuiltInOutput(selected) &&
+          _isBuiltInOutput(device)) {
+        unawaited(_putBackSelectedOutput(selected, route: device));
+        return;
+      }
+    }
+
+    _followAudioRoute(device);
+  }
+
+  static bool _isBuiltInOutput(RtcMediaDevice device) =>
+      device.isBuiltInSpeaker || device.isBuiltInEarpiece;
+
+  /// Puts [selected], the output the user chose, back, and follows [route]
+  /// when that fails, unless another output was selected in the meantime.
+  Future<void> _putBackSelectedOutput(
+    RtcMediaDevice selected, {
+    required RtcMediaDevice route,
+  }) async {
+    final result = await _session()?.applyCurrentAudioOutputDevice();
+    if (result is Success) return;
+
+    final current = _state.audioOutputDevice;
+    if (!(current?.id.equalsIgnoreCase(selected.id) ?? false)) {
+      _logger.d(
+        () =>
+            '[onAudioRouteChanged] chosen output not put back, but '
+            '${current?.id} was selected since; keeping it',
+      );
+      return;
+    }
+
+    _logger.w(
+      () =>
+          '[onAudioRouteChanged] chosen output not put back, following '
+          '${route.id}',
+    );
+    _followAudioRoute(route);
+  }
+
+  void _followAudioRoute(RtcMediaDevice device) {
+    _connectOptions = connectOptions.copyWith(audioOutputDevice: device);
+    _stateManager.participantSetAudioOutputDevice(device: device);
+    _stateManager.audioOutputSelectedByUser = false;
   }
 
   Future<Result<None>> setCameraPosition(CameraPosition cameraPosition) async {
@@ -1119,16 +1206,45 @@ class LocalMediaController {
     }
   }
 
-  Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) async {
-    final result =
-        await _session()?.setAudioOutputDevice(device) ??
-        failureWithError('Session is null');
+  Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) =>
+      _setAudioOutputDevice(device, routeSystem: true);
+
+  /// Switches WebRTC to [device] and, with [routeSystem], asks the system
+  /// route to follow.
+  Future<Result<None>> _setAudioOutputDevice(
+    RtcMediaDevice device, {
+    required bool routeSystem,
+  }) async {
+    _isSettingAudioOutput = true;
+    final Result<None> result;
+    try {
+      result =
+          await _session()?.setAudioOutputDevice(device) ??
+          failureWithError('Session is null');
+    } finally {
+      _isSettingAudioOutput = false;
+    }
 
     if (result.isSuccess) {
       _connectOptions = connectOptions.copyWith(audioOutputDevice: device);
 
       _stateManager.participantSetAudioOutputDevice(device: device);
       _stateManager.audioOutputSelectedByUser = true;
+
+      // Not awaited: the system can wait seconds for the output to appear,
+      // and this also runs while joining.
+      if (routeSystem) {
+        unawaited(
+          _onAudioOutputDeviceSet(device).catchError((
+            Object e,
+            StackTrace stk,
+          ) {
+            _logger.w(
+              () => '[setAudioOutputDevice] system route failed: $e\n$stk',
+            );
+          }),
+        );
+      }
     }
 
     return result;

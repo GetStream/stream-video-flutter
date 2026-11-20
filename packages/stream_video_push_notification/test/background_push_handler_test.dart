@@ -340,6 +340,39 @@ void main() {
     );
 
     test(
+      'releases once the ring is dismissed natively',
+      onFakeTime((async) {
+        run(async, handle(createStreamVideo: factoryReturning(client)));
+
+        onRingingEvent!(
+          const ActionCallDismissed(
+            data: CallData(uuid: 'u', callCid: 'default:call-a'),
+            reason: CallDismissReason.answeredElsewhere,
+          ),
+        );
+        pastTheGrace(async);
+
+        verify(() => client.dispose()).called(1);
+      }),
+    );
+
+    test(
+      'a native timeout does not release, so the client can reject the call',
+      onFakeTime((async) {
+        run(async, handle(createStreamVideo: factoryReturning(client)));
+
+        onRingingEvent!(
+          const ActionCallTimeout(
+            data: CallData(uuid: 'u', callCid: 'default:call-a'),
+          ),
+        );
+        pastTheGrace(async);
+
+        verifyNever(() => client.dispose());
+      }),
+    );
+
+    test(
       'ignores ringing events that are not a resolution',
       onFakeTime((async) {
         run(async, handle(createStreamVideo: factoryReturning(client)));

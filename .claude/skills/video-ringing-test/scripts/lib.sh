@@ -88,7 +88,8 @@ RING_COORDINATOR="${RING_COORDINATOR:-https://video.stream-io-api.com}"
 # lag seconds behind reality, so anything timing-sensitive must assert on a
 # native tag or a dumpsys probe instead.
 RING_LOG_TAGS="StreamTelecomManager:V StreamTelecomRepo:V IncomingCallService:V \
-IncomingCallReceiver:V IncomingCallNotification:V flutter:V"
+IncomingCallReceiver:V IncomingCallNotification:V TelecomIntegration:V RingingController:V \
+flutter:V"
 
 start_logcat() {
   stop_logcat

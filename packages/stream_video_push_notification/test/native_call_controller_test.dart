@@ -55,8 +55,10 @@ class _RecordingPlatform extends StreamVideoPushNotificationPlatform {
   Future<void> endCall(String id) async => calls.add('endCall:$id');
 
   @override
-  Future<void> dismissRingingCall(String cid) async =>
-      calls.add('dismissRingingCall:$cid');
+  Future<void> dismissRingingCall(
+    String cid, {
+    CallDismissReason reason = CallDismissReason.accepted,
+  }) async => calls.add('dismissRingingCall:$cid:${reason.name}');
 
   @override
   Future<void> muteCall(String id, {bool isMuted = true}) async =>
@@ -73,6 +75,18 @@ class _RecordingPlatform extends StreamVideoPushNotificationPlatform {
   @override
   Future<void> reportCallEnded(String uuid, CallEndedReason reason) async =>
       calls.add('reportCallEnded:$uuid:${reason.name}');
+
+  bool routed = true;
+
+  @override
+  Future<bool> requestAudioEndpoint(
+    String cid,
+    TelecomAudioEndpoint endpoint, {
+    String? name,
+  }) async {
+    calls.add('requestAudioEndpoint:$cid:${endpoint.name}:$name');
+    return routed;
+  }
 }
 
 const _configuration = StreamVideoPushConfiguration(
@@ -112,10 +126,12 @@ void main() {
         avatar: 'ada.png',
         callerName: 'Ada',
         hasVideo: false,
+        ringTimeout: const Duration(seconds: 45),
       );
 
       expect(platform.calls, ['showIncomingCall']);
       final params = platform.lastParams!;
+      expect(params.duration, 45000);
       expect(params.id, 'u1');
       expect(params.extra, {'callCid': 'default:c1'});
       expect(params.callerName, 'Ada');
@@ -220,7 +236,20 @@ void main() {
 
       await controller.dismissRingingCallByCid('default:c1');
 
-      expect(platform.calls, ['dismissRingingCall:default:c1']);
+      expect(platform.calls, ['dismissRingingCall:default:c1:accepted']);
+    });
+
+    test('on Android passes the reason', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+
+      await controller.dismissRingingCallByCid(
+        'default:c1',
+        reason: CallDismissReason.answeredElsewhere,
+      );
+
+      expect(platform.calls, [
+        'dismissRingingCall:default:c1:answeredElsewhere',
+      ]);
     });
   });
 
@@ -249,6 +278,106 @@ void main() {
       platform.active = const [CallData(uuid: 'u1', callCid: 'default:c1')];
 
       await controller.setCallMutedByCid('default:c1', true);
+
+      expect(platform.calls, isEmpty);
+    });
+  });
+
+  group('setCallAudioOutputDeviceByCid', () {
+    const speaker = RtcMediaDevice(
+      id: 'speaker',
+      label: 'Speaker',
+      kind: RtcMediaDeviceKind.audioOutput,
+    );
+
+    test('asks Telecom for the endpoint of the device on Android', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+
+      await controller.setCallAudioOutputDeviceByCid('default:c1', speaker);
+
+      expect(platform.calls, [
+        'requestAudioEndpoint:default:c1:speaker:Speaker',
+      ]);
+    });
+
+    test('completes when Telecom does not route the call', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      platform.routed = false;
+
+      await expectLater(
+        controller.setCallAudioOutputDeviceByCid('default:c1', speaker),
+        completes,
+      );
+    });
+
+    test('names the Bluetooth headset by its label', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+
+      await controller.setCallAudioOutputDeviceByCid(
+        'default:c1',
+        const RtcMediaDevice(
+          id: 'bluetooth',
+          label: 'Car',
+          groupId: 'bluetooth',
+          kind: RtcMediaDeviceKind.audioOutput,
+        ),
+      );
+
+      expect(platform.calls, [
+        'requestAudioEndpoint:default:c1:bluetooth:Car',
+      ]);
+    });
+
+    test(
+      'asks again once an outgoing call started later is registered',
+      () async {
+        CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+        platform.routed = false;
+        await controller.setCallAudioOutputDeviceByCid('default:c1', speaker);
+        platform.calls.clear();
+
+        await controller.startOutgoingCall(uuid: 'u1', callCid: 'default:c1');
+        await pumpEventQueue();
+
+        expect(platform.calls, [
+          'startCall',
+          'requestAudioEndpoint:default:c1:speaker:Speaker',
+        ]);
+      },
+    );
+
+    test('asks nothing again for a call that ended', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      await controller.setCallAudioOutputDeviceByCid('default:c1', speaker);
+      await controller.endCallByCid('default:c1');
+      platform.calls.clear();
+
+      await controller.startOutgoingCall(uuid: 'u1', callCid: 'default:c1');
+      await pumpEventQueue();
+
+      expect(platform.calls, ['startCall']);
+    });
+
+    test('asks nothing for a device Telecom has no endpoint for', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+
+      await controller.setCallAudioOutputDeviceByCid(
+        'default:c1',
+        const RtcMediaDevice(
+          id: '7',
+          label: 'USB',
+          groupId: '22',
+          kind: RtcMediaDeviceKind.audioOutput,
+        ),
+      );
+
+      expect(platform.calls, isEmpty);
+    });
+
+    test('does nothing off Android', () async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
+
+      await controller.setCallAudioOutputDeviceByCid('default:c1', speaker);
 
       expect(platform.calls, isEmpty);
     });

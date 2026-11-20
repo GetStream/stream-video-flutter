@@ -1,3 +1,4 @@
+import Flutter
 import XCTest
 
 @testable import stream_video_push_notification
@@ -18,7 +19,7 @@ final class VoIPPayloadTests: XCTestCase {
         configuration: StreamVideoPushConfiguration? = nil,
         persistedIconName: String? = nil
     ) -> CallData {
-        StreamVideoPKDelegateManager.callData(
+        VoIPPushRegistryHandler.callData(
             fromVoIPPayload: payload,
             configuration: configuration,
             persistedIconName: persistedIconName,
@@ -75,13 +76,18 @@ final class VoIPPayloadTests: XCTestCase {
 
     func testTheConfigurationSuppliesTheCallKitOptions() {
         let configuration = StreamVideoPushConfiguration(args: [
-            "ios": ["iconName": "CallIcon", "supportsHolding": false, "ringtonePath": "ring.caf"],
+            "ios": [
+                "iconName": "CallIcon", "supportsHolding": true, "supportsDTMF": true,
+                "maximumCallGroups": 2, "ringtonePath": "ring.caf",
+            ],
         ])
 
         let data = callData(payload, configuration: configuration)
 
         XCTAssertEqual(data.iconName, "CallIcon")
-        XCTAssertFalse(data.supportsHolding)
+        XCTAssertTrue(data.supportsHolding)
+        XCTAssertTrue(data.supportsDTMF)
+        XCTAssertEqual(data.maximumCallGroups, 2)
         XCTAssertEqual(data.ringtonePath, "ring.caf")
     }
 
@@ -89,7 +95,8 @@ final class VoIPPayloadTests: XCTestCase {
         let data = callData(payload)
 
         XCTAssertEqual(data.iconName, "AppLogo")
-        XCTAssertTrue(data.supportsHolding)
+        XCTAssertFalse(data.supportsHolding)
+        XCTAssertEqual(data.maximumCallGroups, 1)
     }
 
     func testThePersistedIconNameWinsOverTheConfiguration() {
@@ -99,5 +106,14 @@ final class VoIPPayloadTests: XCTestCase {
             callData(payload, configuration: configuration, persistedIconName: "SavedIcon").iconName,
             "SavedIcon")
         XCTAssertEqual(callData(payload, persistedIconName: "SavedIcon").iconName, "SavedIcon")
+    }
+}
+
+/// Pins that an `AppDelegate` written against the old name still compiles and reaches the same
+/// handler. Its use of the deprecated name is the point, so the warnings here are expected.
+final class StreamVideoPKDelegateManagerAliasTests: XCTestCase {
+
+    func testTheOldNameIsTheSameHandler() {
+        XCTAssertTrue(StreamVideoPKDelegateManager.shared === VoIPPushRegistryHandler.shared)
     }
 }

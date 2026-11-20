@@ -30,15 +30,13 @@ const _swiftSources =
     'ios/stream_video_push_notification/Sources/stream_video_push_notification';
 const _swiftConstants = '$_swiftSources/StreamVideoIncomingCallConstants.swift';
 const _swiftMethodHandlers = [
-  '$_swiftSources/StreamVideoPushNotificationPlugin.swift',
-  '$_swiftSources/StreamVideoCallkitManager.swift',
+  '$_swiftSources/Plugin/PushCommand.swift',
 ];
 
 const _kotlinSources =
     'android/src/main/kotlin/io/getstream/video/flutter/stream_video_push_notification';
 const _kotlinConstants = '$_kotlinSources/IncomingCallConstants.kt';
-const _kotlinMethodHandler =
-    '$_kotlinSources/StreamVideoPushNotificationPlugin.kt';
+const _kotlinMethodHandler = '$_kotlinSources/channel/PushMethodCallHandler.kt';
 
 // The contract.
 
@@ -77,20 +75,13 @@ const _androidOnlyMethods = {
   'ensureFullScreenIntentPermission',
   'requestNotificationPermission',
   'canUseFullScreenIntent',
-};
-
-/// Cases the iOS switch has beyond what Dart invokes there. The first two
-/// answer `true` and do nothing; Dart never sends them to iOS.
-const _iosExtraHandledMethods = {
-  'showMissCallNotification',
-  'requestNotificationPermission',
+  'requestAudioEndpoint',
 };
 
 /// Cases the Android switch has beyond what Dart invokes there.
-/// `showIncomingCallSilently` has no Dart caller; `getDevicePushTokenVoIP`
-/// answers an empty string and Dart short-circuits before asking.
+/// `getDevicePushTokenVoIP` answers an empty string and Dart short-circuits
+/// before asking.
 const _androidExtraHandledMethods = {
-  'showIncomingCallSilently',
   'getDevicePushTokenVoIP',
 };
 
@@ -99,23 +90,19 @@ const _iosOnlyEvents = {
   Event.actionDidUpdateDevicePushTokenVoip,
   Event.actionCallIncomingFailed,
   Event.actionCallToggleDtmf,
-  Event.actionCallToggleGroup,
   Event.actionCallToggleAudioSession,
 };
 
 /// Events only the Android plugin declares.
 const _androidOnlyEvents = {
   Event.actionCallCallback,
+  Event.actionCallDismissed,
 };
 
 /// `ACTION_*` constants the Android plugin declares for its own intents, which
-/// never reach the event channel: the two hold-by-cell intents have no sender,
-/// the audio-state one is unused, and the ringing one starts the foreground
-/// service.
+/// never reach the event channel: `ACTION_CALL_RINGING` starts the ringing
+/// foreground service.
 const _androidInternalActions = {
-  'io.getstream.video.ACTION_CALL_AUDIO_STATE_CHANGE',
-  'io.getstream.video.ACTION_CALL_HELD',
-  'io.getstream.video.ACTION_CALL_UNHELD',
   'io.getstream.video.ACTION_CALL_RINGING',
 };
 
@@ -149,13 +136,21 @@ Set<String> _swiftHandledMethods(String path) {
       .toSet();
 }
 
-/// The `"name" ->` branches of the `when (call.method)` in the Kotlin plugin.
+/// The `"name" ->` branches of the `when (call.method)` in the Kotlin method handler.
 Set<String> _kotlinHandledMethods() {
   final source = _read(_kotlinMethodHandler);
   final start = source.indexOf('when (call.method)');
-  expect(start, isNot(-1), reason: 'no `when (call.method)` in the plugin');
+  expect(
+    start,
+    isNot(-1),
+    reason: 'no `when (call.method)` in $_kotlinMethodHandler',
+  );
   final end = source.indexOf('else ->', start);
-  expect(end, isNot(-1), reason: 'no `else ->` after the when in the plugin');
+  expect(
+    end,
+    isNot(-1),
+    reason: 'no `else ->` after the when in $_kotlinMethodHandler',
+  );
   return RegExp(r'"([A-Za-z]+)"\s*->')
       .allMatches(source.substring(start, end))
       .map((match) => match.group(1)!)
@@ -207,7 +202,6 @@ void main() {
         equals({
           ..._sharedMethods,
           ..._iosOnlyMethods,
-          ..._iosExtraHandledMethods,
         }),
         reason:
             'the iOS method switch changed; update the contract sets at the '

@@ -27,6 +27,9 @@ import android.os.PowerManager
 import android.text.TextUtils
 import android.util.Log
 import androidx.core.content.ContextCompat
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
+import io.getstream.video.flutter.stream_video_push_notification.notification.CallImageLoader
+import io.getstream.video.flutter.stream_video_push_notification.notification.IncomingCallNotificationBuilder
 
 class IncomingCallActivity : Activity() {
 
@@ -65,6 +68,7 @@ class IncomingCallActivity : Activity() {
     }
 
     private var endedIncomingCallBroadcastReceiver = EndedIncomingCallBroadcastReceiver()
+    private var isEndedReceiverRegistered = false
 
     private lateinit var ivBackground: ImageView
     private lateinit var llBackgroundAnimation: RippleRelativeLayout
@@ -86,6 +90,11 @@ class IncomingCallActivity : Activity() {
     @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val data = intent.extras?.getBundle(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
+        if (data == null) {
+            finish()
+            return
+        }
         requestedOrientation = if (!Utils.isTablet(this@IncomingCallActivity)) {
             ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         } else {
@@ -104,7 +113,7 @@ class IncomingCallActivity : Activity() {
         transparentStatusAndNavigation()
         setContentView(R.layout.activity_incoming_call)
         initView()
-        incomingData(intent)
+        incomingData(data)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(
                 endedIncomingCallBroadcastReceiver,
@@ -117,6 +126,7 @@ class IncomingCallActivity : Activity() {
                 IntentFilter("${packageName}.${ACTION_ENDED_CALL_INCOMING}")
             )
         }
+        isEndedReceiverRegistered = true
     }
 
     private fun wakeLockRequest(duration: Long) {
@@ -173,13 +183,10 @@ class IncomingCallActivity : Activity() {
         }
     }
 
-    private fun incomingData(intent: Intent) {
-        val data = intent.extras?.getBundle(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
-        if (data == null) finish()
-
+    private fun incomingData(data: Bundle) {
         val showFullScreenOnLockScreen =
-            data?.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_SHOW_FULL_LOCKED_SCREEN, true)
-        if (showFullScreenOnLockScreen == true) {
+            data.getBoolean(IncomingCallConstants.EXTRA_CALL_IS_SHOW_FULL_LOCKED_SCREEN, true)
+        if (showFullScreenOnLockScreen) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
                 setShowWhenLocked(true)
             } else {
@@ -191,60 +198,46 @@ class IncomingCallActivity : Activity() {
         // the one the layout gives it, and the design does not paint the
         // caller's name, the handle and the action labels the same.
         val textColor = parseColorOrNull(
-            data?.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_TEXT_COLOR)
+            data.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_TEXT_COLOR)
         )
-        val showCallHandle = data?.getBoolean(IncomingCallConstants.EXTRA_CALL_SHOW_CALL_HANDLE, false)
-        tvCallerName.text = data?.getString(IncomingCallConstants.EXTRA_CALL_NAME_CALLER, "")
-        tvNumber.text = data?.getString(IncomingCallConstants.EXTRA_CALL_HANDLE, "")
-        tvNumber.visibility = if (showCallHandle == true) View.VISIBLE else View.INVISIBLE
+        val showCallHandle = data.getBoolean(IncomingCallConstants.EXTRA_CALL_SHOW_CALL_HANDLE, false)
+        tvCallerName.text = data.getString(IncomingCallConstants.EXTRA_CALL_NAME_CALLER, "")
+        tvNumber.text = data.getString(IncomingCallConstants.EXTRA_CALL_HANDLE, "")
+        tvNumber.visibility = if (showCallHandle) View.VISIBLE else View.INVISIBLE
 
         if (textColor != null) {
             tvCallerName.setTextColor(textColor)
             tvNumber.setTextColor(textColor)
         }
 
-        val showLogo = data?.getBoolean(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_SHOW_LOGO, false)
-        ivLogo.visibility = if (showLogo == true) View.VISIBLE else View.INVISIBLE
-        var logoUrl = data?.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_LOGO_URL, "")
-        if (!logoUrl.isNullOrEmpty()) {
-            if (!logoUrl.startsWith("http://", true) && !logoUrl.startsWith("https://", true)) {
-                logoUrl = String.format("file:///android_asset/flutter_assets/%s", logoUrl)
-            }
-            val headers =
-                data?.getSerializable(IncomingCallConstants.EXTRA_CALL_HEADERS) as HashMap<String, Any?>
-            ImageLoaderProvider.loadImage(this@IncomingCallActivity, logoUrl, headers, R.drawable.transparent, ivLogo)
-        }
+        val showLogo = data.getBoolean(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_SHOW_LOGO, false)
+        ivLogo.visibility = if (showLogo) View.VISIBLE else View.INVISIBLE
+        val headers = CallImageLoader.headers(data)
+        CallImageLoader.resolve(
+            data.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_LOGO_URL, ""),
+        )?.let { CallImageLoader.loadInto(ivLogo, it, headers, R.drawable.transparent) }
 
-        var defaultAvatar = data?.getString(IncomingCallConstants.EXTRA_CALL_DEFAULT_AVATAR, "")
-        var avatarUrl = data?.getString(IncomingCallConstants.EXTRA_CALL_AVATAR, "")
-
-        if(avatarUrl.isNullOrEmpty() && !defaultAvatar.isNullOrEmpty()) {
-            avatarUrl = defaultAvatar
-        }
-
-        if (!avatarUrl.isNullOrEmpty()) {
+        CallImageLoader.avatarUrl(
+            data.getString(IncomingCallConstants.EXTRA_CALL_AVATAR, ""),
+            data.getString(IncomingCallConstants.EXTRA_CALL_DEFAULT_AVATAR, ""),
+        )?.let {
             ivAvatar.visibility = View.VISIBLE
-            if (!avatarUrl.startsWith("http://", true) && !avatarUrl.startsWith("https://", true)) {
-                avatarUrl = String.format("file:///android_asset/flutter_assets/%s", avatarUrl)
-            }
-            val headers =
-                data?.getSerializable(IncomingCallConstants.EXTRA_CALL_HEADERS) as HashMap<String, Any?>
-            ImageLoaderProvider.loadImage(this@IncomingCallActivity, avatarUrl, headers, R.drawable.ic_default_avatar, ivAvatar)
+            CallImageLoader.loadInto(ivAvatar, it, headers, R.drawable.ic_default_avatar)
         }
 
-        val callType = data?.getInt(IncomingCallConstants.EXTRA_CALL_TYPE, 0) ?: 0
+        val callType = data.getInt(IncomingCallConstants.EXTRA_CALL_TYPE, 0)
         if (callType > 0) {
             ivAcceptCall.setImageResource(R.drawable.ic_video)
         }
-        val duration = data?.getLong(IncomingCallConstants.EXTRA_CALL_DURATION, 0L) ?: 0L
+        val duration = data.getLong(IncomingCallConstants.EXTRA_CALL_DURATION, 0L)
         wakeLockRequest(duration)
 
         finishTimeout(data, duration)
 
-        val textAccept = data?.getString(IncomingCallConstants.EXTRA_CALL_TEXT_ACCEPT, "")
+        val textAccept = data.getString(IncomingCallConstants.EXTRA_CALL_TEXT_ACCEPT, "")
         tvAccept.text =
             if (TextUtils.isEmpty(textAccept)) getString(R.string.text_accept) else textAccept
-        val textDecline = data?.getString(IncomingCallConstants.EXTRA_CALL_TEXT_DECLINE, "")
+        val textDecline = data.getString(IncomingCallConstants.EXTRA_CALL_TEXT_DECLINE, "")
         tvDecline.text =
             if (TextUtils.isEmpty(textDecline)) getString(R.string.text_decline) else textDecline
 
@@ -254,29 +247,18 @@ class IncomingCallActivity : Activity() {
         }
 
         val backgroundColor = parseColorOrNull(
-            data?.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_COLOR)
+            data.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_COLOR)
         ) ?: ContextCompat.getColor(this, R.color.incoming_call_background)
         ivBackground.setBackgroundColor(backgroundColor)
-        var backgroundUrl = data?.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_URL, "")
-        if (!backgroundUrl.isNullOrEmpty()) {
-            if (!backgroundUrl.startsWith("http://", true) && !backgroundUrl.startsWith(
-                    "https://",
-                    true
-                )
-            ) {
-                backgroundUrl =
-                    String.format("file:///android_asset/flutter_assets/%s", backgroundUrl)
-            }
-            val headers =
-                data?.getSerializable(IncomingCallConstants.EXTRA_CALL_HEADERS) as HashMap<String, Any?>
-            ImageLoaderProvider.loadImage(this@IncomingCallActivity, backgroundUrl, headers, R.drawable.transparent, ivBackground)
-        }
+        CallImageLoader.resolve(
+            data.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_URL, ""),
+        )?.let { CallImageLoader.loadInto(ivBackground, it, headers, R.drawable.transparent) }
     }
 
     private fun finishTimeout(data: Bundle?, duration: Long) {
         val currentSystemTime = System.currentTimeMillis()
         val timeStartCall =
-            data?.getLong(IncomingCallNotificationManager.EXTRA_TIME_START_CALL, currentSystemTime)
+            data?.getLong(IncomingCallNotificationBuilder.EXTRA_TIME_START_CALL, currentSystemTime)
                 ?: currentSystemTime
 
         val timeOut = duration - abs(currentSystemTime - timeStartCall)
@@ -328,12 +310,11 @@ class IncomingCallActivity : Activity() {
     private fun onAcceptClick() {
         val data = intent.extras?.getBundle(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
 
-        IncomingCallNotificationService.startServiceWithAction(
-            this@IncomingCallActivity,
-            IncomingCallConstants.ACTION_CALL_ACCEPT,
-            data
-        )
-
+        // The ring and its timeout stop here. On the lock screen the trampoline, which runs the
+        // accept and brings the app forward, may only start once the keyguard is dismissed.
+        if (data != null) {
+            RingingComponents.get(this).controller.stopRinging(data)
+        }
         val acceptIntent =
             TransparentActivity.getIntent(this, IncomingCallConstants.ACTION_CALL_ACCEPT, data)
         startActivity(acceptIntent)
@@ -351,10 +332,9 @@ class IncomingCallActivity : Activity() {
 
     private fun onDeclineClick() {
         val data = intent.extras?.getBundle(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
-
-        val intent =
-            IncomingCallBroadcastReceiver.getIntentDecline(this@IncomingCallActivity, data)
-        sendBroadcast(intent)
+        if (data != null) {
+            RingingComponents.get(this).controller.onDecline(data)
+        }
         finishTask()
     }
 
@@ -375,7 +355,10 @@ class IncomingCallActivity : Activity() {
     override fun onDestroy() {
         wakeLock?.release()
         wakeLock = null
-        unregisterReceiver(endedIncomingCallBroadcastReceiver)
+        if (isEndedReceiverRegistered) {
+            unregisterReceiver(endedIncomingCallBroadcastReceiver)
+            isEndedReceiverRegistered = false
+        }
         super.onDestroy()
     }
 

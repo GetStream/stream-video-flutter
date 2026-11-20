@@ -1,10 +1,8 @@
 package io.getstream.video.flutter.stream_video_push_notification
 
 import android.content.Context
-import android.content.Intent
 import android.content.res.Resources
 import com.fasterxml.jackson.databind.ObjectMapper
-import java.lang.ref.WeakReference
 
 
 class Utils {
@@ -27,18 +25,8 @@ class Utils {
         }
 
         @JvmStatic
-        fun pxToDp(px: Float): Float {
-            return px / Resources.getSystem().displayMetrics.density
-        }
-
-        @JvmStatic
         fun getScreenWidth(): Int {
             return Resources.getSystem().displayMetrics.widthPixels
-        }
-
-        @JvmStatic
-        fun getScreenHeight(): Int {
-            return Resources.getSystem().displayMetrics.heightPixels
         }
 
         fun getNavigationBarHeight(context: Context): Int {
@@ -58,21 +46,6 @@ class Utils {
             return if (id > 0) {
                 resources.getDimensionPixelSize(id)
             } else 0
-        }
-
-        fun backToForeground(context: Context) {
-            val packageName = context.packageName
-            val intent = context.packageManager.getLaunchIntentForPackage(packageName)?.cloneFilter()
-            intent?.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
-            intent?.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
-        }
-
-        fun <T, C : MutableCollection<WeakReference<T>>> C.reapCollection(): C {
-            this.removeAll {
-                it.get() == null
-            }
-            return this
         }
 
         fun isTablet(context: Context): Boolean {

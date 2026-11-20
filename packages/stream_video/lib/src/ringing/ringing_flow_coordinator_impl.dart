@@ -727,13 +727,12 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
     }
   }
 
-  /// ActionCallEnded event is sent by native side of stream_video_push_notification package when the call is ended.
-  /// On iOS this is connected to CallKit and should end active call or reject incoming call.
-  /// On Android this is connected to push notification being dismissed.
-  /// When app is terminated it can be send even when accepting the call. That's why we only handle
-  /// it on iOS, unless the event carries [CallData.endedBySystem]: a hang-up reported by the
-  /// Android Telecom stack (paired watch, headset, car head unit) is unambiguous and has to be
-  /// applied, otherwise the call keeps running after the system has already ended it.
+  /// Handles the [ActionCallEnded] the native side sends when a call ends.
+  ///
+  /// On iOS it ends the active call or rejects the incoming one. On Android it
+  /// is handled only with [CallData.endedBySystem], a hang-up the Telecom stack
+  /// reported from a paired watch, headset or car head unit; the other Android
+  /// ends follow a step the SDK itself asked for.
   Future<void> _onCallEnded(ActionCallEnded event) async {
     if (CurrentPlatform.isAndroid && !event.data.endedBySystem) return;
 
@@ -856,12 +855,12 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
       return false;
     }
 
-    final callRingingState = await getCallRingingState(
+    final (:state, :ringTimeout) = await _fetchRinging(
       callType: callType,
       id: callId,
     );
 
-    switch (callRingingState) {
+    switch (state) {
       case CallRingingState.ringing:
         unawaited(
           manager.showIncomingCall(
@@ -872,6 +871,7 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
                 : createdByName,
             callCid: callCid,
             hasVideo: hasVideo != 'false',
+            ringTimeout: ringTimeout,
           ),
         );
         return true;
@@ -888,6 +888,14 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
   Future<CallRingingState> getCallRingingState({
     required StreamCallType callType,
     required String id,
+  }) async => (await _fetchRinging(callType: callType, id: id)).state;
+
+  /// The current user's ringing state for the call, with how long its ring
+  /// lasts before the client rejects it, when positive;
+  /// [CallRingingState.ended] and no timeout when the call cannot be fetched.
+  Future<({CallRingingState state, Duration? ringTimeout})> _fetchRinging({
+    required StreamCallType callType,
+    required String id,
   }) async {
     final callResult = await _client.getCall(
       callCid: StreamCallCid.from(type: callType, id: id),
@@ -899,14 +907,18 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
     return callResult.foldResult(
       failure: (failure) {
         _logger.e(() => '[getCallRingingState] failed: $failure');
-        return CallRingingState.ended;
+        return (state: CallRingingState.ended, ringTimeout: null);
       },
       success: (success) {
-        final state = success.data.metadata.ringingStateFor(
-          _state.currentUser.id,
-        );
+        final metadata = success.data.metadata;
+        final state = metadata.ringingStateFor(_state.currentUser.id);
         _logger.d(() => '[getCallRingingState] state: $state');
-        return state;
+        final timeout = metadata.settings.ring.autoRejectTimeout;
+        return (
+          state: state,
+          // A ring without a positive timeout keeps the platform's default.
+          ringTimeout: timeout > Duration.zero ? timeout : null,
+        );
       },
     );
   }

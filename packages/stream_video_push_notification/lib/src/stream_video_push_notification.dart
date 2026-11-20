@@ -7,6 +7,7 @@ import 'manager/push_device_registrar.dart';
 import 'manager/push_token_source.dart';
 import 'manager/ringing_event_broadcaster.dart';
 import 'manager/ringing_sync_observer.dart';
+import 'outgoing_call_reporter.dart';
 
 /// Implementation of [PushNotificationManager] for Stream Video.
 ///
@@ -44,6 +45,17 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       broadcaster: _broadcaster,
       ringingEvents: onCallEvent,
     )..start();
+
+    if (CurrentPlatform.isIos &&
+        (pushConfiguration.ios?.reportOutgoingCalls ?? false)) {
+      _outgoingCallReporter = OutgoingCallReporter(
+        manager: this,
+        outgoingCalls: streamVideo.state.outgoingCall,
+        isActive: (call) => streamVideo.state.activeCalls.value.any(
+          (active) => identical(active, call),
+        ),
+      );
+    }
   }
 
   /// Preferences key of the last APNs token registered.
@@ -95,6 +107,9 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   /// mobile, where there is a native call UI.
   RingingSyncObserver? _observer;
 
+  /// Set when [IOSPushConfiguration.reportOutgoingCalls] is on, on iOS.
+  OutgoingCallReporter? _outgoingCallReporter;
+
   /// The one broadcaster of this process's ringing events; see
   /// [RingingEventBroadcaster.shared].
   final _broadcaster = RingingEventBroadcaster.shared;
@@ -122,6 +137,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     String? handle,
     String? callerName,
     bool hasVideo = true,
+    Duration? ringTimeout,
   }) {
     return _controller.showIncomingCall(
       uuid: uuid,
@@ -130,6 +146,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       handle: handle,
       callerName: callerName,
       hasVideo: hasVideo,
+      ringTimeout: ringTimeout,
     );
   }
 
@@ -180,14 +197,18 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   @override
   Future<void> endCall(String uuid) => _controller.endCall(uuid);
 
-  /// Dismisses the ringing UI of a call that the user accepted and is now in.
+  /// Ends the ring of the calls with [cid] for [reason], by default because
+  /// the user accepted the call and is now in it.
   ///
-  /// Not [endCallByCid]: on Android, ending disconnects the call from the
-  /// Telecom stack, while dismissing leaves it registered so in-call controls
-  /// on a watch, headset or car head unit keep working. On iOS the two are the
-  /// same, since CallKit is the ring.
-  Future<void> dismissRingingCallByCid(String cid) =>
-      _controller.dismissRingingCallByCid(cid);
+  /// Not [endCallByCid]: on Android, dismissing as accepted leaves the call
+  /// registered with the Telecom stack so in-call controls on a watch, headset
+  /// or car head unit keep working, and every dismissal is reported as an
+  /// [ActionCallDismissed] with its reason. On iOS this ends the call, since
+  /// CallKit is the ring.
+  Future<void> dismissRingingCallByCid(
+    String cid, {
+    CallDismissReason reason = CallDismissReason.accepted,
+  }) => _controller.dismissRingingCallByCid(cid, reason: reason);
 
   @override
   Future<void> endCallByCid(String cid, {bool silent = false}) =>
@@ -196,6 +217,12 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   @override
   Future<void> setCallMutedByCid(String cid, bool isMuted) =>
       _controller.setCallMutedByCid(cid, isMuted);
+
+  @override
+  Future<void> setCallAudioOutputDeviceByCid(
+    String cid,
+    RtcMediaDevice device,
+  ) => _controller.setCallAudioOutputDeviceByCid(cid, device);
 
   @override
   Future<String?> getDevicePushTokenVoIP() async {
@@ -208,6 +235,12 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
     return null;
   }
 
+  /// Holds or resumes the call in the system call UI.
+  ///
+  /// On iOS through CallKit. On Android through Telecom, for a call the
+  /// Telecom integration has registered, and nothing without the integration.
+  /// On Android the SDK leaves a call Telecom holds, so a hold there ends the
+  /// call, unless `StreamVideoOptions.allowMultipleActiveCalls` is on.
   @override
   Future<void> holdCall(String uuid, {bool isOnHold = true}) =>
       _controller.holdCall(uuid, isOnHold: isOnHold);
@@ -234,6 +267,8 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   Future<void> dispose() async {
     _observer?.dispose();
     await _registrar.dispose();
+    await _outgoingCallReporter?.dispose();
+    _outgoingCallReporter = null;
   }
 
   static Future<void> ensureFullScreenIntentPermission() {
@@ -263,13 +298,10 @@ const _defaultPushConfiguration = StreamVideoPushConfiguration(
     supportsVideo: true,
     maximumCallGroups: 1,
     audioSessionMode: 'default',
-    audioSessionActive: true,
     audioSessionPreferredSampleRate: 44100,
     audioSessionPreferredIOBufferDuration: 0.005,
-    supportsDTMF: true,
+    supportsDTMF: false,
     supportsHolding: false,
-    supportsGrouping: false,
-    supportsUngrouping: false,
     ringtonePath: 'system_ringtone_default',
   ),
 );
