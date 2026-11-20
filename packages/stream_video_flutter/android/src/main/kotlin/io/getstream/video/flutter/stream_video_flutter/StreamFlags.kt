@@ -1,3 +1,0 @@
-package io.getstream.video.flutter.stream_video_flutter
-
-const val STREAM_FLUTTER_BACKGROUND_ENGINE_ID = "stream_flutter_background_engine"
