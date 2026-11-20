@@ -23,6 +23,7 @@ export 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart'
 export 'open_api/video/coordinator/api.dart' hide RecordingType, Role, User;
 export 'open_api/video/coordinator_aliases.dart';
 export 'open_api/video/coordinator_legacy_enums.dart';
+export 'src/audio/platform_audio_controller.dart';
 export 'src/audio_processing/audio_processor.dart';
 export 'src/audio_processing/audio_recognition.dart';
 export 'src/audio_processing/speaking_while_muted_recognition.dart';

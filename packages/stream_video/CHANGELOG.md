@@ -2,7 +2,8 @@
 
 ### ⚠️ Breaking
 
-- `RtcMediaDeviceNotifier.handleCallInterruptionCallbacks` no longer takes the deprecated `androidAudioAttributesUsageType` and `androidAudioAttributesContentType`.
+- The app-wide audio members of `RtcMediaDeviceNotifier` moved to the new `PlatformAudioController`: `handleCallInterruptionCallbacks`, `nativeWebRtcEventsStream`, `speechActivityStream`, `triggeriOSAudioRouteSelectionUI`, `isAudioPlayoutPauseSupported`, `isAudioPlayoutPaused`, `audioPlayoutPausedChanges`, `pauseAudioPlayout`, `resumeAudioPlayout`, `resumeWebAudioPlayback`, `regainAndroidAudioFocus` and `reinitializeAudioConfiguration`; use `PlatformAudioController.instance`.
+- `PlatformAudioController.handleCallInterruptionCallbacks` no longer takes the deprecated `androidAudioAttributesUsageType` and `androidAudioAttributesContentType`.
 - `ScreenSharingStoppedEvent` carries a `trackId` instead of a `data` map, and `ScreenSharingStartedEvent` has no `data`.
 - `PushNotificationManager` has a new method, `setCallAudioOutputDeviceByCid`. A class that `implements` it has to add it; one that `extends` it inherits a no-op.
 - `RingingEvent` has a new subtype, `ActionCallDismissed`, so an exhaustive `switch` over ringing events needs a case for it. `disposeAfterResolvingRinging` no longer disposes on `ActionCallTimeout`, which iOS sends when CallKit's ring times out and Android now sends when a ring times out natively, so the client's own ring timeout can still reject the call.

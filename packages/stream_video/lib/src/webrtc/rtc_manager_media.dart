@@ -225,7 +225,7 @@ extension RtcManagerTrackHelper on RtcManager {
   /// participant as not sharing.
   void _awaitBroadcastStart(RtcLocalScreenShareTrack track) {
     _pendingBroadcastTrack = track;
-    _pendingBroadcastSubscription = RtcMediaDeviceNotifier.instance
+    _pendingBroadcastSubscription = PlatformAudioController.instance
         .nativeWebRtcEventsStream()
         .where(
           (it) =>
