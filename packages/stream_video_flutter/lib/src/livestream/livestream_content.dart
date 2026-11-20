@@ -256,10 +256,7 @@ class _LivestreamContentState extends State<LivestreamContent> {
 
   @override
   Widget build(BuildContext context) {
-    final translations = context.translations;
-
-    final pipEnabled =
-        widget.pictureInPictureConfiguration.enablePictureInPicture;
+    final backButtonBuilder = widget.backButtonBuilder;
 
     // Status stays on the raw state so a disconnect is acted on at once; the
     // participants come through the throttled stream.
@@ -270,94 +267,19 @@ class _LivestreamContentState extends State<LivestreamContent> {
         return CallParticipantsBuilder(
           call: call,
           builder: (context, participants) {
-            late Widget bodyWidget;
-            if (status.isConnected ||
+            final isLive =
+                status.isConnected ||
                 status.isFastReconnecting ||
-                status.isMigrating) {
-              final streamingParticipants =
-                  widget.livestreamHostsParticipantsFilter?.call(
-                    participants,
-                  ) ??
-                  _defaultStreamingParticipantsFilter(participants);
-
-              if (streamingParticipants.isEmpty) {
-                bodyWidget =
-                    widget.livestreamHostsUnavailableBuilder?.call(
-                      context,
-                      LivestreamHostsUnavailableProperties(call),
-                    ) ??
-                    LivestreamStatusCard(
-                      title: translations.livestreamHostNotAvailable,
-                    );
-              } else {
-                bodyWidget = Stack(
-                  children: [
-                    if (CurrentPlatform.isIos && pipEnabled)
-                      SizedBox(
-                        height: 600,
-                        width: 300,
-                        child: StreamPictureInPictureUiKitView(
-                          call: call,
-                          pictureInPictureConfiguration:
-                              widget.pictureInPictureConfiguration,
-                        ),
-                      ),
-                    if (CurrentPlatform.isAndroid && pipEnabled)
-                      StreamPictureInPictureAndroidView(
-                        call: call,
-                        configuration: widget.pictureInPictureConfiguration,
-                      ),
-                    widget.livestreamHostsParticipantBuilder?.call(
-                          context,
-                          LivestreamHostsParticipantProperties(
-                            call: call,
-                            hosts: streamingParticipants,
-                          ),
-                        ) ??
-                        _defaultHostsParticipantBuilder(
-                          context,
-                          LivestreamHostsParticipantProperties(
-                            call: call,
-                            hosts: streamingParticipants,
-                          ),
-                        ),
-                    if (status.isFastReconnecting)
-                      widget.livestreamFastReconnectingOverlayBuilder?.call(
-                            context,
-                            LivestreamFastReconnectingProperties(call),
-                          ) ??
-                          PositionedDirectional(
-                            top: context.streamSpacing.md,
-                            start: context.streamSpacing.md,
-                            child: StreamLoadingSpinner(),
-                          ),
-                  ],
-                );
-              }
-            } else {
-              final isMigrating = status.isMigrating;
-              final isReconnecting = status.isReconnecting;
-              final statusText = isReconnecting
-                  ? translations.callConnectionReconnecting
-                  : translations.callConnectionConnecting;
-
-              bodyWidget =
-                  widget.livestreamNotConnectedBuilder?.call(
-                    context,
-                    LivestreamNotConnectedProperties(
-                      call,
-                      isMigrating: isMigrating,
-                      isReconnecting: isReconnecting,
-                    ),
-                  ) ??
-                  LivestreamStatusCard(title: statusText);
-            }
+                status.isMigrating;
 
             return Stack(
               fit: StackFit.expand,
               children: [
-                bodyWidget,
-                if (widget.backButtonBuilder case final backButtonBuilder?)
+                if (isLive)
+                  _liveBody(context, status, participants)
+                else
+                  _notConnectedBody(context, status),
+                if (backButtonBuilder != null)
                   PositionedDirectional(
                     top: 0,
                     start: 0,
@@ -371,5 +293,89 @@ class _LivestreamContentState extends State<LivestreamContent> {
         );
       },
     );
+  }
+
+  /// The hosts' video while the call is connected, or a status card while no
+  /// host is in it.
+  Widget _liveBody(
+    BuildContext context,
+    CallStatus status,
+    List<CallParticipantState> participants,
+  ) {
+    final hosts =
+        widget.livestreamHostsParticipantsFilter?.call(participants) ??
+        _defaultStreamingParticipantsFilter(participants);
+
+    if (hosts.isEmpty) {
+      return widget.livestreamHostsUnavailableBuilder?.call(
+            context,
+            LivestreamHostsUnavailableProperties(call),
+          ) ??
+          LivestreamStatusCard(
+            title: context.translations.livestreamHostNotAvailable,
+          );
+    }
+
+    final pipEnabled =
+        widget.pictureInPictureConfiguration.enablePictureInPicture;
+    final hostsProperties = LivestreamHostsParticipantProperties(
+      call: call,
+      hosts: hosts,
+    );
+
+    return Stack(
+      children: [
+        if (CurrentPlatform.isIos && pipEnabled)
+          SizedBox(
+            height: 600,
+            width: 300,
+            child: StreamPictureInPictureUiKitView(
+              call: call,
+              pictureInPictureConfiguration:
+                  widget.pictureInPictureConfiguration,
+            ),
+          ),
+        if (CurrentPlatform.isAndroid && pipEnabled)
+          StreamPictureInPictureAndroidView(
+            call: call,
+            configuration: widget.pictureInPictureConfiguration,
+          ),
+        widget.livestreamHostsParticipantBuilder?.call(
+              context,
+              hostsProperties,
+            ) ??
+            _defaultHostsParticipantBuilder(context, hostsProperties),
+        if (status.isFastReconnecting)
+          widget.livestreamFastReconnectingOverlayBuilder?.call(
+                context,
+                LivestreamFastReconnectingProperties(call),
+              ) ??
+              PositionedDirectional(
+                top: context.streamSpacing.md,
+                start: context.streamSpacing.md,
+                child: StreamLoadingSpinner(),
+              ),
+      ],
+    );
+  }
+
+  /// A status card while the call connects or reconnects.
+  Widget _notConnectedBody(BuildContext context, CallStatus status) {
+    final translations = context.translations;
+    final isReconnecting = status.isReconnecting;
+
+    return widget.livestreamNotConnectedBuilder?.call(
+          context,
+          LivestreamNotConnectedProperties(
+            call,
+            isMigrating: status.isMigrating,
+            isReconnecting: isReconnecting,
+          ),
+        ) ??
+        LivestreamStatusCard(
+          title: isReconnecting
+              ? translations.callConnectionReconnecting
+              : translations.callConnectionConnecting,
+        );
   }
 }
