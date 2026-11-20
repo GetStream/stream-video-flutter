@@ -2467,8 +2467,10 @@ class CallConnectionCoordinator {
       await _cancelUnansweredRing();
     }
 
-    // Read before the disconnect moves the phase on and drops the accept.
-    final unjoined = _phase.value is ConnectionIdle;
+    // Read before the disconnect moves the phase on and drops the accept. A
+    // join still waiting for the ring to be answered has not joined either.
+    final unjoined =
+        _phase.value is ConnectionIdle || _phase.value is ConnectionJoining;
     final acceptedHere = identical(
       _call._host.state.callAcceptedOnThisDevice(_call.callCid),
       _call,

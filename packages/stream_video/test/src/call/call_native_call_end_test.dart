@@ -132,6 +132,23 @@ void main() {
     });
 
     test(
+      'a ring whose join waits for the answer tells its ring is over',
+      () async {
+        final call = ringingCall();
+        // An incoming-call screen that joins as soon as the call rings: the
+        // join waits for the user to answer.
+        final joining = call.join();
+        await pumpEventQueue();
+
+        await call.leave();
+        await joining;
+
+        verify(() => manager.onRingEnded(cid)).called(1);
+        verifyNever(() => manager.onCallLeft(any()));
+      },
+    );
+
+    test(
       'a ring accepted elsewhere and not joined here tells its ring is over',
       () async {
         final call = ringingCall(acceptedByMe: true);
