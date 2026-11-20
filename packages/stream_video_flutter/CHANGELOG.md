@@ -223,7 +223,9 @@
 - [Android] A call runs in the foreground service of the audio policy it uses, `Call.audioConfigurationPolicy`, so a ringing call follows `StreamVideoOptions.ringingAudioConfigurationPolicy`. An app whose `audioConfigurationPolicy` is `AudioConfigurationPolicy.viewer` and whose ringing policy is `AudioConfigurationPolicy.broadcaster` rings its calls in the `phoneCall` service rather than the `mediaPlayback` one.
 - `LivestreamPlayer` follows the new design: the video sits in a `StreamLivestreamTile` under a `CallAppBar` with the call duration, fullscreen fills the screen, and the ended, backstage and waiting states are drawn on the tile's surface.
 - `LivestreamPlayer.videoFit` and `LivestreamContent.videoFit` default to `VideoFit.adaptive`. Pass `VideoFit.contain` to keep the previous fit.
-- `LivestreamPlayer` shows the ended screen when the call disconnects because it ended.
+- `LivestreamPlayer` shows the ended screen when the call disconnects because it ended, if `onCallDisconnected` keeps it on screen.
+- The ended screen shows `livestreamEndedTitle` and `livestreamEndedSubtitle`; `livestreamEndedStatus` is no longer shown.
+- Back leaves the `LivestreamPlayer`'s fullscreen before it leaves the screen.
 - `LivestreamPlayer` shows the hosts' avatars while none of them has video; `livestreamHostsUnavailableBuilder` now only shows while no host is in the call.
 - On a folded window, `showStreamModalDialog` goes to the trailing half by default, and `StreamAdaptiveMenuAnchor`'s sheet to the half its button is in.
 - On a window folded down the middle, `StreamLobbyView` puts the preview and the rest of the lobby on either side of the fold, and `CallControlBar` splits its centre controls between its two sides.
@@ -317,7 +319,7 @@
 ### ⚠️ Deprecated
 
 - Deprecated `LivestreamInfo`; use `StreamLivestreamTile` instead.
-- Deprecated the `StreamLivestreamThemeData` colours, text styles and icon themes.
+- Deprecated the `StreamLivestreamThemeData` colours, text styles, icon themes and `playPauseIconSize`.
 - Deprecated `StreamColorTheme.livestreamBackground`.
 - `StreamIncomingOutgoingCallThemeData`, `StreamIncomingOutgoingCallTheme` and `StreamVideoTheme.incomingCallTheme` / `outgoingCallTheme` are deprecated in favour of `StreamIncomingCallThemeData` and `StreamOutgoingCallThemeData`. The ringing screens are built on the design system now and no longer read them, so a theme set through them has no effect. The old pair also shared one inherited widget, so the two screens could never be themed apart.
 
@@ -335,6 +337,8 @@
 
 - `StreamCallContainer` ends its call when it is disposed, for example when the back button pops its route. Before, the call stayed joined and kept publishing audio and video behind the closed screen. The container joins the call it is given, so it ends that call even when the app joined it first; an incoming call the user has not accepted is rejected as declined, since a leave would not tell the server. `LivestreamPlayer` does the same only for a call it joined itself through an auto-join `joinBehaviour`, as the Swift and JS players do; a call the app joined, or started joining, is still the app's to leave. A left call cannot be joined again, so anything that disposes the widget and builds a new one for the same call now ends the call: a page without keep-alive in a `PageView` or `TabBarView`, an `AnimatedSwitcher`, a parent that changes type, or `pushReplacement` to another screen with the same call. Keep the widget mounted or give it a `GlobalKey`. To keep the call running after the widget is gone, for example in an in-app picture-in-picture overlay, or to run your own cleanup before the leave, pass `leaveCallOnDispose: false` and call `Call.leave` yourself.
 - `LivestreamPlayer.backButtonBuilder` sits at the start of the app bar, and fullscreen hides it.
+- `LivestreamPlayer.livestreamControlsWidgetBuilder`'s controls cover the tile only; the call duration sits in the app bar above it.
+- `LivestreamPlayer.showParticipantCount` is nullable and falls back to `StreamLivestreamTileStyle.showSpectatorsIndicator`.
 - Removed `LivestreamPlayer.livestreamEndedBuilder`, `livestreamBackstageBuilder` and `livestreamControlsBuilder` with their typedefs, and `LivestreamContent.callState`. Use `livestreamEndedWidgetBuilder`, `livestreamBackstageWidgetBuilder` and `livestreamControlsWidgetBuilder` instead.
 - `LivestreamEndedContent`, `LivestreamBackstageContent` and `LivestreamContent` no longer bring their own `Scaffold`.
 - `isMobileLandscape` and `isMobilePortrait` are removed.
