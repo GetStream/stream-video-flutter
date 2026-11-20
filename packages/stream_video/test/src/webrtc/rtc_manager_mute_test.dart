@@ -9,6 +9,7 @@ import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../test_helpers.dart';
+import '../call/fixtures/call_test_helpers.dart';
 import '../call/fixtures/data.dart';
 import 'fixtures/rtc_manager_fakes.dart';
 
@@ -76,7 +77,9 @@ void main() {
       publisher: null,
       subscriber: _MockTracedPeerConnection(),
       publishOptions: [],
-      stateManager: MockCallStateNotifier(),
+      // A real call state: the manager seeds its microphone constraints
+      // from the call's audio bitrate profile.
+      stateManager: createTestCallStateManager(),
       host: streamVideo,
       pcFactory: pcFactory,
     );
@@ -442,6 +445,26 @@ void main() {
         // detection is disarmed for the rest of the mute.
         verify(() => pcFactory.setAppleAdmMicrophoneMuted(true)).called(2);
       });
+
+      test(
+        'changing to the constraints a live track already uses leaves it '
+        'running',
+        () async {
+          final mediaTrack = _FakeMediaStreamTrack(kind: 'audio');
+          final track = addAudioTrack(
+            mediaTrack: mediaTrack,
+            mediaStream: _FakeMediaStream(),
+          );
+
+          await rtcManager.changeDefaultAudioConstraints(
+            const AudioConstraints(),
+          );
+
+          expect(mediaTrack.stopCallCount, 0);
+          expect(mediaTrack.enabled, isTrue);
+          expect(rtcManager.tracks[track.trackId], same(track));
+        },
+      );
 
       test(
         'changing audio constraints leaves an already-muted track muted',

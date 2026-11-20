@@ -1,5 +1,6 @@
 package io.getstream.video.flutter.stream_video_push_notification
 
+import android.app.AlarmManager
 import android.app.Application
 import android.app.Notification
 import android.app.NotificationManager
@@ -11,18 +12,18 @@ import android.telecom.DisconnectCause
 import androidx.test.core.app.ApplicationProvider
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.flutter.plugin.common.BinaryMessenger
-import io.flutter.plugin.common.MethodCall
-import io.flutter.plugin.common.StandardMethodCodec
-import io.getstream.video.flutter.stream_video_push_notification.telecom.StreamTelecomManager
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
+import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
+import io.getstream.video.flutter.stream_video_push_notification.core.PrefsCallStore
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
+import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
+import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
 import io.mockk.verify
 import java.io.File
-import java.nio.ByteBuffer
+import java.time.Duration
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -49,27 +50,26 @@ class IncomingCallBroadcastReceiverTest {
         get() = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     private lateinit var dart: FakeDartSide
+    private lateinit var telecom: TelecomIntegration
     private var ringingService: ServiceController<IncomingCallNotificationService>? = null
 
     @Before
     fun attachPlugin() {
-        resetPlugin()
-        IncomingCallBroadcastReceiver.silenceEvents = false
+        RingingComponents.reset()
+        RingingComponents.silenceEvents = false
+        telecom = mockTelecom()
         dart = FakeDartSide(context)
-        // A spy: the real Telecom code runs, and is off at this SDK level.
-        mockkObject(StreamTelecomManager)
     }
 
     @After
     fun detachPlugin() {
         ringingService?.destroy()
         ringingService = null
-        unmockkObject(StreamTelecomManager)
-        IncomingCallBroadcastReceiver.silenceEvents = false
-        resetPlugin()
+        RingingComponents.silenceEvents = false
+        RingingComponents.reset()
     }
 
-    private fun data(vararg extraTopLevel: Pair<String, Any?>) = Data(
+    private fun data(vararg extraTopLevel: Pair<String, Any?>) = CallPayloadMapper.fromArgs(
         mapOf(
             "id" to CALL_ID,
             "callerName" to "Ada",
@@ -88,6 +88,8 @@ class IncomingCallBroadcastReceiverTest {
             *extraTopLevel,
         ),
     )
+
+    private fun RingingCall.toBundle() = CallPayloadMapper.toBundle(this)
 
     /** Delivers [intent] to a receiver created now, as the system creates one per broadcast. */
     private fun receive(intent: Intent) {
@@ -126,7 +128,7 @@ class IncomingCallBroadcastReceiverTest {
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_INCOMING), eventNames())
         assertEquals(listOf(CALL_ID), activeCalls().map { it["id"] })
         assertEquals(false, activeCalls().single()["isAccepted"])
-        verify { StreamTelecomManager.registerIncomingCall(any(), match { it.id == CALL_ID }) }
+        verify { telecom.registerIncomingCall(match { it.id == CALL_ID }) }
     }
 
     @Test
@@ -137,17 +139,17 @@ class IncomingCallBroadcastReceiverTest {
     }
 
     @Test
-    fun `accepting starts the ringing service, reports it and marks the call accepted`() {
+    fun `accepting clears the ring, reports it and marks the call accepted, starting no service`() {
         incoming()
 
         receive(IncomingCallBroadcastReceiver.getIntentAccept(context, data().toBundle()))
 
-        val started = shadowOf(context).nextStartedService
-        assertEquals(IncomingCallNotificationService::class.java.name, started.component?.className)
-        assertEquals(IncomingCallConstants.ACTION_CALL_ACCEPT, started.action)
+        assertNull(shadowOf(context).nextStartedService)
+        assertEquals(emptyList<Int>(), shownNotificationIds())
+        assertTrue(fullScreenActivityWasToldToClose())
         assertEquals(IncomingCallConstants.ACTION_CALL_ACCEPT, eventNames().last())
         assertEquals(true, activeCalls().single()["isAccepted"])
-        verify { StreamTelecomManager.answer(any(), CALL_ID) }
+        verify { telecom.answer(CALL_ID) }
     }
 
     @Test
@@ -162,7 +164,7 @@ class IncomingCallBroadcastReceiverTest {
         assertTrue(fullScreenActivityWasToldToClose())
         assertEquals(IncomingCallConstants.ACTION_CALL_DECLINE, eventNames().last())
         assertEquals(emptyList<Any?>(), activeCalls())
-        verify { StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.REJECTED) }
+        verify { telecom.disconnect(CALL_ID, DisconnectCause.REJECTED) }
     }
 
     @Test
@@ -177,25 +179,32 @@ class IncomingCallBroadcastReceiverTest {
         assertTrue(fullScreenActivityWasToldToClose())
         assertEquals(IncomingCallConstants.ACTION_CALL_ENDED, eventNames().last())
         assertEquals(emptyList<Any?>(), activeCalls())
-        verify { StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.LOCAL) }
+        verify { telecom.disconnect(CALL_ID, DisconnectCause.LOCAL) }
     }
 
     @Test
-    fun `ending with keepSystemCall clears the ring but keeps the Telecom call`() {
+    fun `an unanswered ring times out natively after its duration`() {
         incoming()
 
-        receive(
-            IncomingCallBroadcastReceiver.getIntentEnded(
-                context,
-                data().toBundle(),
-                keepSystemCall = true,
-            ),
-        )
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(15_000))
 
+        assertEquals(IncomingCallConstants.ACTION_CALL_TIMEOUT, eventNames().last())
         assertEquals(emptyList<Int>(), shownNotificationIds())
-        assertEquals(IncomingCallConstants.ACTION_CALL_ENDED, eventNames().last())
         assertEquals(emptyList<Any?>(), activeCalls())
-        verify(exactly = 0) { StreamTelecomManager.disconnect(any(), any(), any()) }
+        verify { telecom.disconnect(CALL_ID, DisconnectCause.MISSED) }
+    }
+
+    @Test
+    fun `an accepted ring does not time out`() {
+        incoming()
+        receive(IncomingCallBroadcastReceiver.getIntentAccept(context, data().toBundle()))
+
+        shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(15_000))
+
+        assertEquals(IncomingCallConstants.ACTION_CALL_ACCEPT, eventNames().last())
+        assertEquals(true, activeCalls().single()["isAccepted"])
+        val alarms = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        assertNull(shadowOf(alarms).nextScheduledAlarm)
     }
 
     @Test
@@ -221,7 +230,7 @@ class IncomingCallBroadcastReceiverTest {
         assertTrue(ringingServiceWasStopped())
         assertEquals(IncomingCallConstants.ACTION_CALL_TIMEOUT, eventNames().last())
         assertEquals(emptyList<Any?>(), activeCalls())
-        verify { StreamTelecomManager.disconnect(any(), CALL_ID, DisconnectCause.MISSED) }
+        verify { telecom.disconnect(CALL_ID, DisconnectCause.MISSED) }
     }
 
     @Test
@@ -247,14 +256,6 @@ class IncomingCallBroadcastReceiverTest {
     }
 
     @Test
-    fun `connected is reported and activates the Telecom call`() {
-        receive(IncomingCallBroadcastReceiver.getIntentConnected(context, data().toBundle()))
-
-        assertEquals(listOf(IncomingCallConstants.ACTION_CALL_CONNECTED), eventNames())
-        verify { StreamTelecomManager.activate(any(), CALL_ID) }
-    }
-
-    @Test
     fun `a call back clears the missed-call notification and is reported`() {
         notifications.notify(MISSED_ID, Notification())
 
@@ -265,14 +266,13 @@ class IncomingCallBroadcastReceiverTest {
     }
 
     @Test
-    fun `starting an outgoing call starts the service, reports it and stores it accepted`() {
+    fun `starting an outgoing call reports it and stores it accepted, starting no service`() {
         receive(IncomingCallBroadcastReceiver.getIntentStart(context, data().toBundle()))
 
-        val started = shadowOf(context).nextStartedService
-        assertEquals(IncomingCallConstants.ACTION_CALL_START, started.action)
+        assertNull(shadowOf(context).nextStartedService)
         assertEquals(listOf(IncomingCallConstants.ACTION_CALL_START), eventNames())
         assertEquals(true, activeCalls().single()["isAccepted"])
-        verify { StreamTelecomManager.registerOutgoingCall(any(), match { it.id == CALL_ID }) }
+        verify { telecom.registerOutgoingCall(match { it.id == CALL_ID }) }
     }
 
     @Test
@@ -290,7 +290,7 @@ class IncomingCallBroadcastReceiverTest {
 
     @Test
     fun `while events are silenced nothing reaches Dart and the rest still happens`() {
-        IncomingCallBroadcastReceiver.silenceEvents = true
+        RingingComponents.silenceEvents = true
 
         incoming()
 
@@ -300,22 +300,47 @@ class IncomingCallBroadcastReceiverTest {
     }
 
     @Test
-    fun `a bundle without the keys reaches Dart with the receiver's own defaults`() {
-        // Current behaviour, pinned: here `isImportant` defaults to true and `duration` to 0,
-        // while Data defaults them to false and 30000.
+    fun `a decline in a new process with no Flutter engine clears the ring shown before`() {
+        incoming()
+        assertEquals(listOf(CALL_ID.hashCode()), shownNotificationIds())
+        // The process dies; the notification stays. A new one starts for the decline action.
+        resetPlugin()
+
+        receive(IncomingCallBroadcastReceiver.getIntentDecline(context, data().toBundle()))
+
+        assertEquals(emptyList<Int>(), shownNotificationIds())
+        assertTrue(fullScreenActivityWasToldToClose())
+        assertEquals(emptyList<RingingCall>(), PrefsCallStore(context).all())
+    }
+
+    @Test
+    fun `an incoming broadcast from native code is shown in a process with no Flutter engine`() {
+        resetPlugin()
+
+        incoming()
+
+        assertEquals(listOf(CALL_ID.hashCode()), shownNotificationIds())
+        assertEquals(listOf(CALL_ID), PrefsCallStore(context).all().map { it.id })
+    }
+
+    @Test
+    fun `a bundle without the keys reaches Dart with the call defaults, not separate receiver ones`() {
         receive(IncomingCallBroadcastReceiver.getIntentDecline(context, Bundle()))
 
         val body = lastEventBody()
         assertEquals("", body["id"])
         assertEquals(0, body["type"])
-        assertEquals(0L, body["duration"])
+        assertEquals(30000L, body["duration"])
+        assertEquals(emptyMap<String, Any?>(), body["extra"])
         @Suppress("UNCHECKED_CAST")
         val android = body["android"] as Map<String, Any?>
-        assertEquals(true, android["isImportant"])
+        assertEquals(false, android["isImportant"])
         @Suppress("UNCHECKED_CAST")
         val missed = android["missedCallNotification"] as Map<String, Any?>
         assertEquals(0, missed["id"])
-        assertEquals(false, missed["showNotification"])
+        assertEquals(true, missed["showNotification"])
+        assertEquals(true, missed["showCallbackButton"])
+        assertEquals(1, missed["count"])
     }
 
     private fun fullScreenActivityWasToldToClose() = shadowOf(context).broadcastIntents.any {
@@ -344,14 +369,6 @@ class IncomingCallBroadcastReceiverTest {
         )
     }
 
-    /** Forgets the plugin's process-wide instance, so each test attaches with its own context. */
-    private fun resetPlugin() {
-        StreamVideoPushNotificationPlugin::class.java.getDeclaredField("instance").apply {
-            isAccessible = true
-            set(null, null)
-        }
-    }
-
     private companion object {
         const val CALL_ID = "call-uuid"
         const val OTHER_CALL_ID = "other-call-uuid"
@@ -359,58 +376,5 @@ class IncomingCallBroadcastReceiverTest {
 
         /** Shared with the Dart tests, relative to the module directory the tests run in. */
         val FIXTURES = File("../test/fixtures/ringing_events")
-    }
-}
-
-/**
- * Stands in for one Flutter engine on the other end of the plugin's channels: it attaches the
- * plugin, listens on the event channel the way the Dart side does, and decodes what arrives.
- */
-private class FakeDartSide(context: Context) : BinaryMessenger {
-
-    private val handlers = mutableMapOf<String, BinaryMessenger.BinaryMessageHandler>()
-    private val events = mutableListOf<Map<String, Any?>>()
-
-    init {
-        StreamVideoPushNotificationPlugin.initSharedInstance(context, this)
-        handlers.getValue(EVENTS).onMessage(encode(MethodCall("listen", null))) {}
-    }
-
-    override fun send(channel: String, message: ByteBuffer?) = send(channel, message, null)
-
-    override fun send(channel: String, message: ByteBuffer?, callback: BinaryMessenger.BinaryReply?) {
-        if (channel == EVENTS && message != null) {
-            message.rewind()
-            @Suppress("UNCHECKED_CAST")
-            events += codec.decodeEnvelope(message) as Map<String, Any?>
-        }
-        callback?.reply(null)
-    }
-
-    override fun setMessageHandler(channel: String, handler: BinaryMessenger.BinaryMessageHandler?) {
-        if (handler == null) handlers.remove(channel) else handlers[channel] = handler
-    }
-
-    /** The events received so far, each a map of `event` and `body`. */
-    fun receivedEvents(): List<Map<String, Any?>> {
-        shadowOf(Looper.getMainLooper()).idle()
-        return events.toList()
-    }
-
-    /** Calls [method] on the plugin's method channel and returns what it answered. */
-    fun invoke(method: String, arguments: Any? = null): Any? {
-        var answer: ByteBuffer? = null
-        handlers.getValue(METHODS).onMessage(encode(MethodCall(method, arguments))) { answer = it }
-        val reply = answer ?: error("the plugin did not answer $method")
-        reply.rewind()
-        return codec.decodeEnvelope(reply)
-    }
-
-    private fun encode(call: MethodCall) = codec.encodeMethodCall(call).also { it.rewind() }
-
-    private companion object {
-        const val EVENTS = "stream_video_push_notification_events"
-        const val METHODS = "stream_video_push_notification"
-        val codec: StandardMethodCodec = StandardMethodCodec.INSTANCE
     }
 }

@@ -2,6 +2,10 @@
 
 ### ⚠️ Breaking
 
+- `PushNotificationManager` has a new method, `setCallAudioOutputDeviceByCid`. A class that `implements` it has to add it; one that `extends` it inherits a no-op.
+- `RingingEvent` has a new subtype, `ActionCallDismissed`, so an exhaustive `switch` over ringing events needs a case for it. `disposeAfterResolvingRinging` no longer disposes on `ActionCallTimeout`, which iOS sends when CallKit's ring times out and Android now sends when a ring times out natively, so the client's own ring timeout can still reject the call.
+- `PushNotificationManager.showIncomingCall` takes a `ringTimeout`, so a custom implementation has to add it. `handleRingingFlowNotifications` passes the call's `autoRejectTimeout`.
+- `ActionCallToggleGroup` is removed. It was never sent: CallKit is never offered a merge of calls, and refuses a merge it attempts anyway.
 - Test mocks that implement `StreamVideo` get a `subtype_of_sealed_class` warning, because `StreamVideo` implements the `@sealed` `CallHost`; add `// ignore: subtype_of_sealed_class` to them.
 - The deprecated `observeCoreCallKitEvents`, `observeCall*CallKitEvent` and `handleVoipPushNotification` methods are removed; use `observeCoreRingingEvents`, `observeCall*RingingEvent` and `handleRingingFlowNotifications` on `StreamVideo.ringing`.
 - `StreamVideo.create` no longer sets up logging; call `StreamVideo.configureLogging` for such a client.
@@ -84,6 +88,11 @@
 
 ### ✅ Added
 
+- `PushNotificationManager.setCallAudioOutputDeviceByCid`, which `Call.setAudioOutputDevice` calls once WebRTC uses the device, so a push manager can route the system call's audio there too. The output passed to `join` goes there when the join applies it; a rejoin or an SFU migration after that does not send it again.
+- `ActionCallDismissed` and `CallDismissReason`: the end of a call's ring that the SDK asked for, with why it ended (accepted in the app, cancelled by the caller, answered on another device, missed). Android only. `disposeAfterResolvingRinging` releases on it like on the other ring-ending events.
+- `ActionCallToggleHold.callCid`, the cid of the held call, which the push package sends on Android.
+- `CallState.isRingingWithVideo`: whether the ring the current user started asked the callees for video, the `video` argument of `Call.getOrCreate` or `Call.get` with `ringing: true`.
+- `AudioRouteChangedEvent.reason`, an `AudioRouteChangeReason` that says why an iOS audio route changed: iOS's `AVAudioSessionRouteChangeReason`, or `unknown` when the WebRTC plugin does not report it.
 - `CallData.fromJson`, which builds the call data of a ringing event or an active native call from the map the push plugins send.
 - `VideoLifecycleState`, the type of `ClientState.appLifecycleState`, is exported.
 - `StreamVideo.ready` completes once the client has started up: audio configured, environment collected and, with `autoConnect`, the connect attempted.
@@ -136,6 +145,7 @@
 
 ### 🐞 Fixed
 
+- [iOS] When the user chose the speaker or the receiver and the system moves audio between the two on its own, such as after a CallKit hold, the chosen output is put back instead of being replaced by the system's choice. A route to any other device, such as Bluetooth or AirPlay, is followed, and so is the system's route when the chosen output cannot be put back.
 - A muted microphone or camera is announced to the SFU as muted.
 - Joining a call retries sooner when the SFU connection closes before the join response.
 - On iOS, a call that defaults to the loudspeaker now starts on it, instead of switching to it after the microphone is already recording.
@@ -205,16 +215,27 @@
 - An incoming ring joined before the user accepts it, by a call screen opened as it rings say, no longer replaces the call the user is in or cancels their own outgoing ring when `allowMultipleActiveCalls` is false. The call becomes the active call once accepted, and accepting is what replaces the other one.
 - Declining a ring in the app no longer rejects it a second time when the native call screen reports its end as a decline.
 
-## Upcoming (minor)
+## 1.8.0
+
+### ✅ Added
+
+- Added `Call.setAudioConfigurationPolicy` to set a call's audio policy before joining. Pass `null` to fall back to `StreamVideoOptions.audioConfigurationPolicy`. Stop lobby preview tracks before changing it.
+- Added `CallPreferences.withAudioConfigurationPolicy`, which returns a copy with a different audio policy.
 
 ### 🔄 Changed
 
-- `ActionCallToggleGroup.callUUIDToGroupWith` is now nullable. It is null when CallKit ungroups the call.
-- `StreamVideo.connect()` now sends user details according to `StreamVideoOptions.includeUserDetailsForAutoConnect` when `includeUserDetails` isn't passed, instead of always sending them.
+- `Call.setAudioBitrateProfile` now always allows switching back to `voiceStandard`, and setting the current profile no longer restarts the microphone.
+- Leaving `musicHighQuality` restores noise cancellation only if it was on before. Joining with `musicHighQuality` no longer turns it on for `autoOn` call types.
+- `AudioConfigurationPolicy` values now compare by value.
+- `ActionCallToggleGroup.callUUIDToGroupWith` is now nullable (null when CallKit ungroups the call).
+- `StreamVideo.connect()` now respects `StreamVideoOptions.includeUserDetailsForAutoConnect` when `includeUserDetails` isn't passed.
 
 ### 🐞 Fixed
 
-- Accepting a call from the native ringing screen on a cold start no longer sends user details when `includeUserDetailsForAutoConnect` is `false`. It used to overwrite the user's name set on the server with an empty one.
+- [iOS] Stereo playout now follows the call's audio policy (`HiFiAudioPolicy`, `ViewerAudioPolicy`) and no longer carries over from an earlier HiFi call.
+- Fixed an audio bitrate profile set before joining being ignored, or lost after a reconnect.
+- `StreamVideo.disconnect()` now leaves all active calls first, so they no longer keep publishing after disconnect.
+- Accepting a call from the native ringing screen on a cold start no longer overwrites the user's name when `includeUserDetailsForAutoConnect` is `false`.
 
 ## 1.7.2
 

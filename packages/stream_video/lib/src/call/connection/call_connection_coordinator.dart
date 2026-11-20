@@ -1214,12 +1214,25 @@ class CallConnectionCoordinator {
     if (_call._host.isAudioProcessorConfigured() &&
         joinResult.data.metadata.settings.audio.noiseCancellation?.mode ==
             FeatureActivationMode.autoOn) {
-      // AutoOn will enable noise cancellation if the device has sufficient processing power
-      unawaited(
-        _call.startAudioProcessing(
-          requireAdvancedAudioProcessingSupport: true,
-        ),
-      );
+      if (_call._stateManager.callState.audioBitrateProfile ==
+          SfuAudioBitrateProfile.musicHighQuality) {
+        // Music keeps noise cancellation off. On the first join, leaving
+        // music starts it, as autoOn would have; this overrides the `false`
+        // recorded when music was chosen before joining. On a rejoin or
+        // migration, what was recorded before music stands.
+        if (_reconnectStrategy == SfuReconnectionStrategy.unspecified) {
+          _call._logger.d(() => '[joinCall] autoOn deferred (music profile)');
+          _call._audioProcessingBeforeMusic = true;
+          _call._audioProcessingRestoreIsAutoOn = true;
+        }
+      } else {
+        // AutoOn will enable noise cancellation if the device has sufficient processing power
+        unawaited(
+          _call.startAudioProcessing(
+            requireAdvancedAudioProcessingSupport: true,
+          ),
+        );
+      }
     }
 
     _call._logger.v(() => '[joinCall] completed: $joined');
@@ -1272,6 +1285,15 @@ class CallConnectionCoordinator {
     _call._subscriptions.cancel(_idSessionStats);
     _call._subscriptions.cancel(_idSessionEvents);
 
+    if (_isLeftOrLeaving) {
+      _call._logger.w(() => '[startSession] rejected (call was left)');
+      return failureWithError('call was left');
+    }
+
+    await _call._applyStereoPlayoutPreference();
+
+    // Checked again: the call can be left while the stereo request is
+    // pending, and a torn-down session must not be started.
     if (_isLeftOrLeaving) {
       _call._logger.w(() => '[startSession] rejected (call was left)');
       return failureWithError('call was left');
@@ -2381,9 +2403,7 @@ class CallConnectionCoordinator {
       } catch (e, stk) {
         _call._logger.e(() => '[dispose] leave failed: $e\n$stk');
       }
-      if (_phase.value is ConnectionLeaving) {
-        await _phase.firstWhere((phase) => phase is ConnectionDisconnected);
-      }
+      await _awaitDisconnected();
     }
     await _phase.close();
   }
@@ -2546,9 +2566,12 @@ class CallConnectionCoordinator {
     }
 
     // A leave that is already disconnecting wins: the call is on its way out,
-    // and this instance no longer holds a session to end it from.
+    // and this instance no longer holds a session to end it from. It waits
+    // for that leave to finish, so it never returns while the call is still
+    // publishing.
     if (_isLeftOrLeaving) {
       _call._logger.v(() => '[end] rejected (already leaving)');
+      await _awaitDisconnected();
       return const Result.success(none);
     }
 
@@ -2592,9 +2615,7 @@ class CallConnectionCoordinator {
     }
 
     // A remote leave its own `call.ended` started may still be tearing down.
-    if (_phase.value is ConnectionLeaving) {
-      await _phase.firstWhere((phase) => phase is ConnectionDisconnected);
-    }
+    await _awaitDisconnected();
 
     _call._logger.v(() => '[end] completed: $result');
     return result;
@@ -2612,6 +2633,13 @@ class CallConnectionCoordinator {
         code == ClientEventStandardCode.requestTimeout;
   }
 
+  /// Waits for a disconnect in progress to reach [ConnectionDisconnected].
+  /// Returns at once when the call is not leaving.
+  Future<void> _awaitDisconnected() async {
+    if (_phase.value is! ConnectionLeaving) return;
+    await _phase.firstWhere((phase) => phase is ConnectionDisconnected);
+  }
+
   /// Moves to [ConnectionDisconnected] and reports the call disconnected for
   /// [reason].
   void _settleDisconnected(DisconnectReason? reason) {
@@ -2623,16 +2651,20 @@ class CallConnectionCoordinator {
   ///
   /// Moves to [ConnectionLeaving], which stops in-flight join and reconnect
   /// work at its next check, sends the SFU leave message, and runs [_clear].
-  /// Returns `true` when the cleanup ran; `false` if it was short-circuited
-  /// because a disconnect was already in flight or the call had left. A
-  /// [remote] disconnect runs even though the status already says
-  /// disconnected, since that status is what started it.
+  /// Returns `true` when the cleanup ran; `false` if the call had left or
+  /// another disconnect was already in flight. In the latter case it first
+  /// waits for that disconnect to finish, so the caller never returns while
+  /// the call is still publishing. A [remote] disconnect runs even though the
+  /// status already says disconnected, since that status is what started it.
   Future<bool> _disconnect({
     required String sfuLeaveReason,
     bool remote = false,
   }) async {
     if (_phase.value is ConnectionLeaving) {
-      _call._logger.i(() => '[disconnect] rejected (already disconnecting)');
+      _call._logger.i(
+        () => '[disconnect] waiting for the in-flight disconnect',
+      );
+      await _awaitDisconnected();
       return false;
     }
 
@@ -2734,6 +2766,8 @@ class CallConnectionCoordinator {
           );
         }
       }
+
+      _call._resetStereoPlayoutPreference();
 
       if (_session != null) {
         await _session!.dispose().catchError((Object e) {

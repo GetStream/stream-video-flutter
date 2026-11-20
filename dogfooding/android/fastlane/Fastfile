@@ -15,7 +15,7 @@ platform :android do
 
     previous_build_number = google_play_track_version_codes(
       track: "internal",
-      json_key: "firebase-service-account.json",
+      json_key: "google-play-service-account.json",
     )[0]
 
     current_build_number = previous_build_number + 1

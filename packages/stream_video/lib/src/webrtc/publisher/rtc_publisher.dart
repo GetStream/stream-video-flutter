@@ -179,11 +179,14 @@ class RtcPublisher {
       // Checked once this recapture's turn starts: a recapture still running
       // has disabled the capture it replaces, and a track muted meanwhile
       // stays muted.
+      // A track already capturing with these constraints is left alone, so
+      // re-requesting the current profile does not restart the microphone.
       final recaptured = await recapture(
         trackId,
         tag: '[restartLiveAudioTracks]',
         constraintsFor: (_) => _defaultAudioConstraints(),
-        skipIf: (current) => !current.mediaTrack.enabled,
+        skipIf: (current) =>
+            !current.mediaTrack.enabled || !_hasStaleAudioConstraints(current),
       );
 
       // The old capture is stopped, so the microphone is reported muted.
@@ -203,6 +206,19 @@ class RtcPublisher {
     } catch (e, stk) {
       _logger.e(
         () => '[restartLiveAudioTracks] ADM reconcile failed: $e\n$stk',
+      );
+    }
+
+    // Profiles can share constraints (voiceStandard and voiceHighQuality),
+    // so a track left running still needs the profile's sender bitrate.
+    try {
+      await _updateAudioPublishOptions(
+        SfuTrackType.audio,
+        RtcTrackPublishOptions(audioBitrateProfile: _audioBitrateProfile()),
+      );
+    } catch (e, stk) {
+      _logger.e(
+        () => '[restartLiveAudioTracks] audio bitrate update failed: $e\n$stk',
       );
     }
   }

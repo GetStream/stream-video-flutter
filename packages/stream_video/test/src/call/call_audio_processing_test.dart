@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -441,6 +442,31 @@ void main() {
     // ---------------------------------------------------------------
     // Auto-on noise cancellation on join
     // ---------------------------------------------------------------
+    group('setAudioConfigurationPolicy', () {
+      test('is rejected while a join is pending', () async {
+        final call = createTestCall(
+          networkMonitor: setupMockInternetConnection(
+            statusStream: internetStatusController,
+          ),
+          coordinatorClient: coordinatorClient,
+          sessionFactory: setupMockSessionFactory(callSession: callSession),
+          streamVideo: mockStreamVideo,
+        );
+
+        // join() records itself as pending before its first await, while the
+        // status has not moved on yet.
+        final join = call.join();
+        final result = call.setAudioConfigurationPolicy(
+          const AudioConfigurationPolicy.hiFi(),
+        );
+
+        expect(result.isFailure, isTrue);
+        expect(call.state.value.preferences.audioConfigurationPolicy, isNull);
+
+        await join;
+      });
+    });
+
     group('auto-on noise cancellation on join', () {
       test(
         'starts audio processing when call settings have autoOn mode',
@@ -509,6 +535,203 @@ void main() {
           verify(
             () => mockStreamVideo.setAudioProcessingEnabled(true),
           ).called(1);
+        },
+      );
+
+      test(
+        'defers autoOn while the microphone uses musicHighQuality, and '
+        'starts it when leaving music',
+        () async {
+          const settings = CallSettings(
+            audio: StreamAudioSettings(
+              hifiAudioEnabled: true,
+              noiseCancellation: StreamNoiceCancellingSettings(
+                mode: FeatureActivationMode.autoOn,
+              ),
+            ),
+          );
+
+          when(
+            () => coordinatorClient.joinCall(
+              callCid: any(named: 'callCid'),
+              create: any(named: 'create'),
+              migratingFrom: any(named: 'migratingFrom'),
+              migratingFromList: any(named: 'migratingFromList'),
+              video: any(named: 'video'),
+              membersLimit: any(named: 'membersLimit'),
+              e2ee: any(named: 'e2ee'),
+            ),
+          ).thenAnswer(
+            (_) async => Result.success(
+              _joinedWithSettings(
+                settings,
+                ownCapabilities: [CallPermission.enableNoiseCancellation],
+              ),
+            ),
+          );
+
+          when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(true);
+          when(
+            () => mockPermissionsManager.hasPermission(
+              CallPermission.enableNoiseCancellation,
+            ),
+          ).thenReturn(true);
+          when(
+            mockStreamVideo.deviceSupportsAdvancedAudioProcessing,
+          ).thenAnswer((_) async => const Result.success(true));
+          when(
+            () => mockStreamVideo.setAudioProcessingEnabled(any()),
+          ).thenAnswer((_) async => const Result.success(none));
+          when(
+            callSession.notifyNoiseCancellationStarted,
+          ).thenAnswer((_) async => const Result.success(none));
+
+          final call = createTestCall(
+            networkMonitor: setupMockInternetConnection(
+              statusStream: internetStatusController,
+            ),
+            coordinatorClient: coordinatorClient,
+            sessionFactory: setupMockSessionFactory(callSession: callSession),
+            streamVideo: mockStreamVideo,
+            permissionManager: mockPermissionsManager,
+            stateManager: CallStateNotifier(
+              createTestCallState(
+                currentUserId: SampleCallData.defaultUserInfo.id,
+              ).copyWith(settings: settings),
+            ),
+          );
+
+          // Chosen before joining, while noise cancellation is still off.
+          expect(
+            call
+                .setAudioBitrateProfile(SfuAudioBitrateProfile.musicHighQuality)
+                .isSuccess,
+            isTrue,
+          );
+
+          await call.join();
+          await Future<void>.delayed(Duration.zero);
+
+          verifyNever(() => mockStreamVideo.setAudioProcessingEnabled(true));
+
+          call.setAudioBitrateProfile(SfuAudioBitrateProfile.voiceStandard);
+          await Future<void>.delayed(Duration.zero);
+
+          // The deferred start keeps autoOn's device-capability check.
+          verify(
+            mockStreamVideo.deviceSupportsAdvancedAudioProcessing,
+          ).called(1);
+          verify(
+            () => mockStreamVideo.setAudioProcessingEnabled(true),
+          ).called(1);
+        },
+      );
+
+      test(
+        'a rejoin in musicHighQuality keeps noise cancellation off when it '
+        'was off before music',
+        () async {
+          const settings = CallSettings(
+            audio: StreamAudioSettings(
+              hifiAudioEnabled: true,
+              noiseCancellation: StreamNoiceCancellingSettings(
+                mode: FeatureActivationMode.autoOn,
+              ),
+            ),
+          );
+
+          when(
+            () => coordinatorClient.joinCall(
+              callCid: any(named: 'callCid'),
+              create: any(named: 'create'),
+              migratingFrom: any(named: 'migratingFrom'),
+              migratingFromList: any(named: 'migratingFromList'),
+              video: any(named: 'video'),
+              membersLimit: any(named: 'membersLimit'),
+              e2ee: any(named: 'e2ee'),
+            ),
+          ).thenAnswer(
+            (_) async => Result.success(
+              _joinedWithSettings(
+                settings,
+                ownCapabilities: [CallPermission.enableNoiseCancellation],
+              ),
+            ),
+          );
+          // Fast reconnect fails, so the reconnect falls back to a rejoin.
+          when(
+            () => callSession.fastReconnect(
+              reconnectDetails: any(named: 'reconnectDetails'),
+              capabilities: any(named: 'capabilities'),
+              unifiedSessionId: any(named: 'unifiedSessionId'),
+            ),
+          ).thenAnswer(
+            (_) async => const Result.failure(
+              VideoError(message: 'fast reconnect failed'),
+            ),
+          );
+
+          when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(true);
+          when(
+            () => mockPermissionsManager.hasPermission(
+              CallPermission.enableNoiseCancellation,
+            ),
+          ).thenReturn(true);
+          when(
+            mockStreamVideo.deviceSupportsAdvancedAudioProcessing,
+          ).thenAnswer((_) async => const Result.success(true));
+          when(
+            () => mockStreamVideo.setAudioProcessingEnabled(any()),
+          ).thenAnswer((_) async => const Result.success(none));
+          when(
+            callSession.notifyNoiseCancellationStarted,
+          ).thenAnswer((_) async => const Result.success(none));
+          when(
+            callSession.notifyNoiseCancellationStopped,
+          ).thenAnswer((_) async => const Result.success(none));
+
+          final call = createTestCall(
+            networkMonitor: setupMockInternetConnection(
+              statusStream: internetStatusController,
+            ),
+            coordinatorClient: coordinatorClient,
+            sessionFactory: setupMockSessionFactory(callSession: callSession),
+            streamVideo: mockStreamVideo,
+            permissionManager: mockPermissionsManager,
+          );
+
+          await call.join();
+          await Future<void>.delayed(Duration.zero);
+          // autoOn started it; the user turns it off, then switches to music.
+          await call.stopAudioProcessing();
+          call.setAudioBitrateProfile(SfuAudioBitrateProfile.musicHighQuality);
+          await Future<void>.delayed(Duration.zero);
+          clearInteractions(mockStreamVideo);
+          clearInteractions(coordinatorClient);
+
+          internetStatusController.add(InternetStatus.disconnected);
+          await Future<void>.delayed(Duration.zero);
+          internetStatusController.add(InternetStatus.connected);
+
+          // The rejoin runs after a 3-second stability window.
+          await _waitForMockCall(
+            () => coordinatorClient.joinCall(
+              callCid: any(named: 'callCid'),
+              create: any(named: 'create'),
+              migratingFrom: any(named: 'migratingFrom'),
+              migratingFromList: any(named: 'migratingFromList'),
+              video: any(named: 'video'),
+              membersLimit: any(named: 'membersLimit'),
+              e2ee: any(named: 'e2ee'),
+            ),
+            timeout: const Duration(seconds: 5),
+          );
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+
+          call.setAudioBitrateProfile(SfuAudioBitrateProfile.voiceStandard);
+          await Future<void>.delayed(Duration.zero);
+
+          verifyNever(() => mockStreamVideo.setAudioProcessingEnabled(true));
         },
       );
 
@@ -930,7 +1153,7 @@ void main() {
       );
 
       test(
-        'starts audio processing when switching away from musicHighQuality',
+        'restores audio processing when switching away from musicHighQuality',
         () async {
           const hifiSettings = CallSettings(
             audio: StreamAudioSettings(hifiAudioEnabled: true),
@@ -962,10 +1185,13 @@ void main() {
             ),
           ).thenReturn(true);
           when(
-            () => mockStreamVideo.setAudioProcessingEnabled(true),
+            () => mockStreamVideo.setAudioProcessingEnabled(any()),
           ).thenAnswer((_) async => const Result.success(none));
           when(
             callSession.notifyNoiseCancellationStarted,
+          ).thenAnswer((_) async => const Result.success(none));
+          when(
+            callSession.notifyNoiseCancellationStopped,
           ).thenAnswer((_) async => const Result.success(none));
 
           final call = createTestCall(
@@ -979,6 +1205,10 @@ void main() {
           );
 
           await call.join();
+          await call.startAudioProcessing();
+
+          call.setAudioBitrateProfile(SfuAudioBitrateProfile.musicHighQuality);
+          await Future<void>.delayed(Duration.zero);
 
           final result = call.setAudioBitrateProfile(
             SfuAudioBitrateProfile.voiceStandard,
@@ -987,9 +1217,10 @@ void main() {
           expect(result.isSuccess, isTrue);
           await Future<void>.delayed(Duration.zero);
 
+          // Once to start it, once to restore it after music.
           verify(
             () => mockStreamVideo.setAudioProcessingEnabled(true),
-          ).called(1);
+          ).called(2);
         },
       );
 

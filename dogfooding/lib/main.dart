@@ -11,6 +11,13 @@ import 'package:marionette_flutter/marionette_flutter.dart';
 import 'app/app.dart';
 import 'app/design/m3e/m3e_design.dart';
 
+/// Whether a web build keeps the route after a `#`, set with
+/// `--dart-define=WEB_HASH_URLS=true`.
+///
+/// For hosts that do not serve the app's `index.html` for its routes.
+// ignore: do_not_use_environment
+const bool _kWebHashUrls = bool.fromEnvironment('WEB_HASH_URLS');
+
 Future<void> main() async {
   // Needed to initialize the plugin bindings.
   //
@@ -36,7 +43,7 @@ Future<void> main() async {
   await M3EDesign.loadDeviceAccent();
 
   // Web URLs carry the route as a path (`/join/<id>`) rather than after a `#`.
-  usePathUrlStrategy();
+  if (!_kWebHashUrls) usePathUrlStrategy();
 
   runApp(const StreamDogFoodingApp());
 }

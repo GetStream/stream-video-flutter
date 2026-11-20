@@ -604,7 +604,37 @@ class StreamVideo extends Disposable implements CallHost {
   /// Disconnects the user from the Stream Video service, and unregisters the
   /// push device. The user ends up disconnected even when a step fails; the
   /// result reports a failure to close the connection.
-  Future<Result<None>> disconnect() => _connection.disconnect();
+  ///
+  /// Leaves every active call first, so none keeps publishing audio and
+  /// video after the user is gone. This also happens when the connection has
+  /// already dropped.
+  Future<Result<None>> disconnect() {
+    // Inside the connection's turn, so connects and disconnects still run in
+    // the order they were called.
+    return _connection.disconnect(beforeDisconnect: _leaveAllCalls);
+  }
+
+  /// Leaves every active call that has not been left yet. A call that fails
+  /// to leave is logged and does not stop the others.
+  Future<void> _leaveAllCalls() async {
+    for (final call in [..._state.activeCalls.value]) {
+      if (call.state.value.status.isDisconnected) continue;
+
+      _logger.i(() => '[disconnect] leaving call: ${call.callCid}');
+      try {
+        final result = await call.leave();
+        if (result is Failure) {
+          _logger.e(
+            () => '[disconnect] leaving call ${call.callCid} failed: $result',
+          );
+        }
+      } catch (e, stk) {
+        _logger.e(
+          () => '[disconnect] leaving call ${call.callCid} failed: $e\n$stk',
+        );
+      }
+    }
+  }
 
   @override
   Future<void> dispose() async {
@@ -901,7 +931,11 @@ class StreamVideo extends Disposable implements CallHost {
   );
 
   /// Disposes this client a second after the ringing flow resolves — once the
-  /// user has answered, declined, or let the call time out.
+  /// user has answered or declined, or the ring ended or was dismissed.
+  ///
+  /// A native ring timeout ([ActionCallTimeout], from either platform) does
+  /// not dispose it: the client's own ring timeout rejects the call, and that
+  /// ends the ring.
   ///
   /// [disposingCallback] runs first, for whatever the caller set up alongside
   /// the client.
@@ -915,8 +949,8 @@ class StreamVideo extends Disposable implements CallHost {
     return ringing.onRingingEvent((event) {
       if (event is ActionCallAccept ||
           event is ActionCallDecline ||
-          event is ActionCallTimeout ||
-          event is ActionCallEnded) {
+          event is ActionCallEnded ||
+          event is ActionCallDismissed) {
         // Delay the callback to ensure the call is fully resolved.
         Future<void>.delayed(const Duration(seconds: 1), () {
           disposingCallback?.call();

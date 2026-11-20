@@ -37,10 +37,6 @@ on:
 env:
   MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
   CREDENTIAL_FILE_CONTENT: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
-  MATCH_GIT_BASIC_AUTHORIZATION: ${{ secrets.MATCH_GIT_BASIC_AUTHORIZATION }}
-  APP_STORE_CONNECT_API_KEY_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY_ID }}
-  APP_STORE_CONNECT_API_KEY_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ISSUER_ID }}
-  APP_STORE_CONNECT_API_KEY_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY_KEY }}
   APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
   FASTLANE_APPLE_ID: ${{ secrets.FASTLANE_APPLE_ID }}
   FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 120
@@ -60,10 +56,16 @@ jobs:
     timeout-minutes: 60
     if: ${{ github.event_name == 'push' || (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'stream-video-v')) || inputs.build_ios == true }}
     steps:
-      - name: Install Bot SSH Key
-        uses: webfactory/ssh-agent@v0.10.0
+      - name: 🔑 Mint Certificates Token
+        id: certs-token
+        uses: actions/create-github-app-token@v3
         with:
-          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
+          # fastlane match only reads the certificates.
+          owner: GetStream
+          repositories: ios-certificates
+          permission-contents: read
 
       - name: Checkout code
         uses: actions/checkout@v7
@@ -85,6 +87,7 @@ jobs:
 
       - name: Prepare environment
         run: |
+          mkdir -p ~/.ssh
           echo "${{ env.APPSTORE_API_KEY }}" | base64 --decode > ~/.ssh/appstore_api_key
 
       - name: Setup Ruby and Gems
@@ -105,7 +108,12 @@ jobs:
           echo "FLAVOR=$FLAVOR" >> $GITHUB_ENV
 
       - name: Build and Distribute
+        env:
+          CERTS_TOKEN: ${{ steps.certs-token.outputs.token }}
         run: |
+          # match clones the certificates over HTTPS with this basic-auth header.
+          export MATCH_GIT_BASIC_AUTHORIZATION="$(printf 'x-access-token:%s' "$CERTS_TOKEN" | base64 | tr -d '\n')"
+          echo "::add-mask::$MATCH_GIT_BASIC_AUTHORIZATION"
           cd dogfooding/ios
           bundle exec fastlane ios build_and_deploy flavor:${{ env.FLAVOR }}
 
@@ -115,10 +123,16 @@ jobs:
     timeout-minutes: 60
     if: ${{ github.event_name == 'push' || (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'stream-video-v')) || inputs.build_macos == true }}
     steps:
-      - name: Install Bot SSH Key
-        uses: webfactory/ssh-agent@v0.10.0
+      - name: 🔑 Mint Certificates Token
+        id: certs-token
+        uses: actions/create-github-app-token@v3
         with:
-          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
+          # fastlane match only reads the certificates.
+          owner: GetStream
+          repositories: ios-certificates
+          permission-contents: read
 
       - name: Checkout code
         uses: actions/checkout@v7
@@ -156,7 +170,12 @@ jobs:
           echo "FLAVOR=$FLAVOR" >> $GITHUB_ENV
 
       - name: Build and Distribute
+        env:
+          CERTS_TOKEN: ${{ steps.certs-token.outputs.token }}
         run: |
+          # match clones the certificates over HTTPS with this basic-auth header.
+          export MATCH_GIT_BASIC_AUTHORIZATION="$(printf 'x-access-token:%s' "$CERTS_TOKEN" | base64 | tr -d '\n')"
+          echo "::add-mask::$MATCH_GIT_BASIC_AUTHORIZATION"
           cd dogfooding/macos
           bundle exec fastlane mac build_and_deploy flavor:${{ env.FLAVOR }}
 
@@ -179,7 +198,7 @@ jobs:
 
       - name: Prepare environment
         run: |
-          echo "${{ env.CREDENTIAL_FILE_CONTENT }}" | base64 --decode | jq > dogfooding/android/firebase-service-account.json
+          echo "${{ env.CREDENTIAL_FILE_CONTENT }}" | base64 --decode | jq > dogfooding/android/google-play-service-account.json
 
       - name: Setup Ruby and Gems
         uses: ruby/setup-ruby@v1
@@ -293,8 +312,8 @@ jobs:
       - name: Setup gcloud
         uses: google-github-actions/setup-gcloud@v3
 
-      # The prod path holds the beta build in its beta/ folder, so the prod
-      # sync leaves that folder alone.
+      # The prod path holds the beta build in its beta/ folder and the pull
+      # request builds in pr/, so the prod sync leaves those folders alone.
       #
       # index.html is also served for every app route (`/join/<id>`), and a
       # revalidation of such a route comes back as an empty 200. It is uploaded
@@ -303,7 +322,23 @@ jobs:
         run: |
           gcloud storage rsync dogfooding/build/web gs://stream-flutter-web/${{ env.WEB_PATH }} \
             --recursive --delete-unmatched-destination-objects \
-            --exclude='^beta/|^index\.html$' \
+            --exclude='^beta/|^pr/|^index\.html$' \
             --cache-control="public, max-age=60"
           gcloud storage cp dogfooding/build/web/index.html gs://stream-flutter-web/${{ env.WEB_PATH }}/index.html \
             --cache-control="no-store"
+
+      # PR Web Build removes a build with its pull request; this removes the
+      # ones left behind. Every deploy uploads index.html again, so its date is
+      # the build's last deploy.
+      - name: Remove pull request builds older than 30 days
+        run: |
+          cutoff=$(date -u -d '30 days ago' +%s)
+          # The listing fails when there is no pull request build.
+          builds=$(gcloud storage ls --long 'gs://stream-flutter-web/video/pr/*/index.html' 2>/dev/null || true)
+          while read -r _ updated url; do
+            [[ $url == gs://*/index.html ]] || continue
+            if (( $(date -u -d "$updated" +%s) < cutoff )); then
+              echo "Removing ${url%index.html}, last deployed $updated"
+              gcloud storage rm --recursive "${url%index.html}"
+            fi
+          done <<< "$builds"

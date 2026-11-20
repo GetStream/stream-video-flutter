@@ -102,6 +102,45 @@ class ActionCallEnded extends RingingEvent {
   List<Object?> get props => [data];
 }
 
+/// Why the SDK dismissed the ring of a call: accepted in the app, or ended
+/// elsewhere than on this device's ringing UI. See [ActionCallDismissed].
+enum CallDismissReason {
+  /// The user accepted the call on this device, outside the native ringing
+  /// UI, so only the ring ends.
+  accepted,
+
+  /// The caller cancelled the call.
+  remoteCancelled,
+
+  /// The user answered the call on another device.
+  answeredElsewhere,
+
+  /// The call rang out unanswered.
+  missed;
+
+  /// The reason named [name], or null for a missing or unknown one.
+  static CallDismissReason? fromName(String? name) => values.asNameMap()[name];
+}
+
+/// Represents the end of a call's ring that the SDK asked for, with its
+/// [reason].
+///
+/// Note: This event is only available on Android.
+class ActionCallDismissed extends RingingEvent {
+  /// Creates an [ActionCallDismissed] event instance with the specified
+  /// [data] and [reason].
+  const ActionCallDismissed({required this.data, this.reason});
+
+  /// The call data associated with the call whose ring ended.
+  final CallData data;
+
+  /// Why the ring ended; null when the native side sent no known reason.
+  final CallDismissReason? reason;
+
+  @override
+  List<Object?> get props => [data, reason];
+}
+
 /// Represents a call timeout event.
 ///
 /// This event is triggered when a call times out. This can happen when a user
@@ -147,13 +186,15 @@ class ActionCallConnected extends RingingEvent {
 
 /// Represents a call toggle hold event.
 ///
-/// Note: This event is only available on iOS.
+/// Sent by CallKit on iOS, and by Telecom on Android while the Telecom
+/// integration is on.
 class ActionCallToggleHold extends RingingEvent {
   /// Creates an [ActionCallToggleHold] event instance with the specified [uuid]
   /// and [isOnHold] flag.
   const ActionCallToggleHold({
     required this.uuid,
     required this.isOnHold,
+    this.callCid,
   });
 
   /// The unique identifier for the call.
@@ -162,8 +203,12 @@ class ActionCallToggleHold extends RingingEvent {
   /// Indicates whether the call is on hold.
   final bool isOnHold;
 
+  /// The cid of the call, on Android. Null on iOS, and for a call registered
+  /// with Telecom without a cid.
+  final String? callCid;
+
   @override
-  List<Object?> get props => [uuid, isOnHold];
+  List<Object?> get props => [uuid, isOnHold, callCid];
 }
 
 /// Represents a call toggle mute event.
@@ -208,29 +253,12 @@ class ActionCallToggleDtmf extends RingingEvent {
   List<Object?> get props => [uuid, digits];
 }
 
-/// Represents a call toggle group event.
-///
-/// Note: This event is only available on iOS.
-class ActionCallToggleGroup extends RingingEvent {
-  /// Creates an [ActionCallToggleGroup] event instance with the specified
-  /// [uuid] and [callUUIDToGroupWith].
-  const ActionCallToggleGroup({
-    required this.uuid,
-    required this.callUUIDToGroupWith,
-  });
-
-  /// The unique identifier for the call.
-  final String uuid;
-
-  /// The unique identifier for the call to group with, or null when the call
-  /// is ungrouped.
-  final String? callUUIDToGroupWith;
-
-  @override
-  List<Object?> get props => [uuid, callUUIDToGroupWith];
-}
-
 /// Represents a call toggle audio session event.
+///
+/// Sent when CallKit activates the app's audio session, as when a call starts,
+/// is answered or resumes, and when it deactivates it, except while the call
+/// is on hold. The SDK keeps the call's audio engine in step with these
+/// changes.
 ///
 /// Note: This event is only available on iOS.
 class ActionCallToggleAudioSession extends RingingEvent {

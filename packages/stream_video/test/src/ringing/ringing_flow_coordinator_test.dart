@@ -177,6 +177,7 @@ void main() {
         handle: any(named: 'handle'),
         callerName: any(named: 'callerName'),
         hasVideo: any(named: 'hasVideo'),
+        ringTimeout: any(named: 'ringTimeout'),
       ),
     ).thenAnswer((_) async {});
     when(
@@ -504,6 +505,41 @@ void main() {
           callCid: cid,
           handle: caller,
           callerName: 'Caller',
+          ringTimeout: any(named: 'ringTimeout'),
+        ),
+      ).called(1);
+    });
+
+    test('rings for as long as the call rings before rejecting', () async {
+      getCallReturns(metadata(autoRejectTimeout: const Duration(seconds: 45)));
+
+      await ringing().handleRingingFlowNotifications(pushOf('call.ring'));
+
+      verify(
+        () => push.showIncomingCall(
+          uuid: any(named: 'uuid'),
+          callCid: cid,
+          handle: any(named: 'handle'),
+          callerName: any(named: 'callerName'),
+          hasVideo: any(named: 'hasVideo'),
+          ringTimeout: const Duration(seconds: 45),
+        ),
+      ).called(1);
+    });
+
+    test('rings for the platform default without a positive timeout', () async {
+      getCallReturns(metadata(autoRejectTimeout: Duration.zero));
+
+      await ringing().handleRingingFlowNotifications(pushOf('call.ring'));
+
+      verify(
+        () => push.showIncomingCall(
+          uuid: any(named: 'uuid'),
+          callCid: cid,
+          handle: any(named: 'handle'),
+          callerName: any(named: 'callerName'),
+          hasVideo: any(named: 'hasVideo'),
+          ringTimeout: null,
         ),
       ).called(1);
     });
@@ -527,6 +563,7 @@ void main() {
           handle: any(named: 'handle'),
           callerName: any(named: 'callerName'),
           hasVideo: any(named: 'hasVideo'),
+          ringTimeout: any(named: 'ringTimeout'),
         ),
       );
     });

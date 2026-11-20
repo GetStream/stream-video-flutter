@@ -65,7 +65,42 @@ Nothing about ringing depends on it. `CallsManager.addCall` requires only `MANAG
 Jetpack Telecom checks the Bluetooth grant before every use and falls back cleanly. Without it, only
 the active Bluetooth device is surfaced and its name falls back to a generic default.
 
-Outgoing calls are registered when you call `startOutgoingCall`; the SDK does not call it for you.
+On Android, outgoing calls are registered with Telecom when you call `startOutgoingCall`; the SDK
+does not call it for you there. On iOS it can, with `reportOutgoingCalls`, below.
+
+When Telecom puts a call on hold, for example because the user answered a phone call with
+**Hold and answer** or pressed hold on a watch, the SDK leaves the call, as the native Android SDK
+does: Telecom does not resume the call when the phone call ends, so it would stay silent. A hold
+asked for with `holdCall` ends the call the same way. With `allowMultipleActiveCalls` on, the SDK
+does not leave the call, since Telecom also holds the call in progress when the user answers
+another of the app's calls.
+
+Telecom owns the audio route of a call registered with it. `Call.setAudioOutputDevice` asks Telecom
+for the matching endpoint (earpiece, speaker, wired headset or Bluetooth) as well as switching WebRTC
+to the device, so the output picker works the same way with the integration on. The output passed
+to `join` is asked for once; a rejoin or migration leaves Telecom's route as it is, since the
+system may have moved it to a headset or a car.
+
+### iOS outgoing calls
+
+By default only incoming calls go through CallKit. To report the ringing calls the current user
+starts as outgoing CallKit calls too, turn on `reportOutgoingCalls`:
+
+```dart
+StreamVideoPushNotificationManager.create(
+  // ...
+  pushConfiguration: const StreamVideoPushConfiguration(
+    ios: IOSPushConfiguration(reportOutgoingCalls: true),
+  ),
+);
+```
+
+The caller then gets what a phone call gets: the green call indicator instead of the orange
+microphone one, the proximity sensor turning the screen off at the ear, and the call on the lock
+screen. The CallKit call is marked connected when the call connects and ends with it; ending it
+from CallKit while it still rings cancels the ring.
+
+Leave it off if your app already calls `startOutgoingCall` itself, or CallKit shows two calls.
 
 ### iOS call history
 

@@ -91,24 +91,33 @@ class MethodChannelStreamVideoPushNotification
     });
   }
 
-  /// Get Callkit Mic Status (muted/unmuted).
-  /// On iOS, using Callkit(update call ui).
-  /// On Android, Nothing(only callback event listener).
   @override
   Future<bool> isMuted(String id) async {
     return (await methodChannel.invokeMethod('isMuted', {'id': id})) as bool? ??
         false;
   }
 
-  /// Hold an Ongoing call.
-  /// On iOS, using Callkit(update the ongoing call ui).
-  /// On Android, Nothing(only callback event listener).
   @override
   Future<void> holdCall(String id, {bool isOnHold = true}) async {
     await methodChannel.invokeMethod('holdCall', {
       'id': id,
       'isOnHold': isOnHold,
     });
+  }
+
+  @override
+  Future<bool> requestAudioEndpoint(
+    String cid,
+    TelecomAudioEndpoint endpoint, {
+    String? name,
+  }) async {
+    if (!CurrentPlatform.isAndroid) return false;
+
+    final routed = await methodChannel.invokeMethod<bool>(
+      'requestAudioEndpoint',
+      {'cid': cid, 'type': endpoint.wireName, 'name': ?name},
+    );
+    return routed ?? false;
   }
 
   /// End an Incoming/Outgoing call.
@@ -133,10 +142,15 @@ class MethodChannelStreamVideoPushNotification
     await methodChannel.invokeMethod('endAllCalls');
   }
 
-  /// Dismiss the ringing UI without ending the call.
   @override
-  Future<void> dismissRingingCall(String cid) async {
-    await methodChannel.invokeMethod('dismissRingingCall', {'id': cid});
+  Future<void> dismissRingingCall(
+    String cid, {
+    CallDismissReason reason = CallDismissReason.accepted,
+  }) async {
+    await methodChannel.invokeMethod('dismissRingingCall', {
+      'id': cid,
+      'reason': reason.name,
+    });
   }
 
   @override
@@ -250,6 +264,10 @@ class MethodChannelStreamVideoPushNotification
         Event.actionCallDecline => ActionCallDecline(data: callData),
         Event.actionCallEnded => ActionCallEnded(data: callData),
         Event.actionCallTimeout => ActionCallTimeout(data: callData),
+        Event.actionCallDismissed => ActionCallDismissed(
+          data: callData,
+          reason: CallDismissReason.fromName(body['reason'] as String?),
+        ),
         Event.actionCallCallback => ActionCallCallback(data: callData),
         Event.actionCallConnected => ActionCallConnected(data: callData),
         Event.actionDidUpdateDevicePushTokenVoip =>
@@ -259,6 +277,7 @@ class MethodChannelStreamVideoPushNotification
         Event.actionCallToggleHold => ActionCallToggleHold(
           uuid: body['id'] as String,
           isOnHold: body['isOnHold'] as bool,
+          callCid: body['callCid'] as String?,
         ),
         Event.actionCallToggleMute => ActionCallToggleMute(
           uuid: body['id'] as String,
@@ -267,10 +286,6 @@ class MethodChannelStreamVideoPushNotification
         Event.actionCallToggleDtmf => ActionCallToggleDtmf(
           uuid: body['id'] as String,
           digits: body['digits'] as String,
-        ),
-        Event.actionCallToggleGroup => ActionCallToggleGroup(
-          uuid: body['id'] as String,
-          callUUIDToGroupWith: body['callUUIDToGroupWith'] as String?,
         ),
         Event.actionCallToggleAudioSession => ActionCallToggleAudioSession(
           isActive: body['isActive'] as bool,

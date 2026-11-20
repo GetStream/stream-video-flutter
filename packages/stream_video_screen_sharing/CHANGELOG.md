@@ -1,3 +1,7 @@
+## 1.8.0
+
+- Sync version with `stream_video_flutter` 1.8.0
+
 ## 1.7.2
 
 - Sync version with `stream_video_flutter` 1.7.2
