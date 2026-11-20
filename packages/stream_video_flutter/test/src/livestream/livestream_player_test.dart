@@ -174,6 +174,31 @@ void main() {
       expect(screen.right - rtl.right, ltr.left - screen.left);
     });
 
+    testWidgets('gives a toolbar back button a floating toolbar scope', (
+      tester,
+    ) async {
+      StreamSurfaceStyle? surface;
+      await pumpPlayer(
+        tester,
+        startInFullscreenMode: true,
+        backButtonBuilder: (context) {
+          surface = StreamToolbarScope.maybeOf(context);
+          return StreamToolbarButton.icon(
+            key: const ValueKey('back'),
+            icon: Icon(context.streamIcons.xmark),
+            onPressed: () {},
+          );
+        },
+      );
+
+      expect(tester.takeException(), isNull);
+      expect(surface, StreamSurfaceStyle.floating);
+      expect(
+        tester.getSize(find.byKey(const ValueKey('back'))).width,
+        lessThan(100),
+      );
+    });
+
     testWidgets('onFullscreenTapped is called once and does not toggle', (
       tester,
     ) async {

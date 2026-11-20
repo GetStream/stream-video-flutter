@@ -574,7 +574,12 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
                 child: SafeArea(
                   child: Padding(
                     padding: EdgeInsets.all(spacing.xs),
-                    child: backButtonBuilder(context),
+                    // Floats over the video, as the app bar's slot would
+                    // outside fullscreen, so toolbar buttons work here too.
+                    child: StreamToolbarScope(
+                      surfaceStyle: StreamSurfaceStyle.floating,
+                      child: Builder(builder: backButtonBuilder),
+                    ),
                   ),
                 ),
               ),
