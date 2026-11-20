@@ -70,7 +70,7 @@ class LivestreamPlayer extends StatefulWidget {
     required this.call,
     this.joinBehaviour = LivestreamJoinBehaviour.autoJoinAsap,
     this.connectOptions,
-    this.showParticipantCount = true,
+    this.showParticipantCount,
     this.includeAnonymousParticipants = true,
     this.showLiveIndicator,
     this.showSpeakerphoneToggle,
@@ -109,10 +109,11 @@ class LivestreamPlayer extends StatefulWidget {
   /// If null, defaults to disabling camera and microphone.
   final CallConnectOptions? connectOptions;
 
-  /// Boolean to display participant count.
+  /// Whether the toolbar shows the viewer count.
   ///
-  /// Defaults to true.
-  final bool showParticipantCount;
+  /// Falls back to [StreamLivestreamTileStyle.showSpectatorsIndicator], then
+  /// true.
+  final bool? showParticipantCount;
 
   /// Whether anonymous viewers are part of the participant count.
   ///
@@ -147,9 +148,13 @@ class LivestreamPlayer extends StatefulWidget {
   final WidgetBuilder? backButtonBuilder;
 
   /// The builder used to create a custom widget when the livestream has ended.
+  ///
+  /// It replaces the whole screen, app bar and back button included.
   final LivestreamEndedWidgetBuilder? livestreamEndedWidgetBuilder;
 
   /// The builder used to create a custom widget when the livestream is in backstage mode.
+  ///
+  /// It replaces the whole screen, app bar and back button included.
   final LivestreamBackstageWidgetBuilder? livestreamBackstageWidgetBuilder;
 
   /// The builder used to create custom controls for the livestream player.
@@ -532,9 +537,9 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     );
   }
 
-  /// Insets the toolbar by `md` on both sides when the tile fills the
-  /// screen, unless the theme sets its own padding. The end inset is `xs`
-  /// because the fullscreen button's tap target adds the other 8.
+  /// Insets the toolbar by `md` at the start and `md - xs` at the end when
+  /// the tile fills the screen, unless the theme sets its own padding. The
+  /// fullscreen button's tap target adds the other `xs` at the end.
   StreamLivestreamTileStyle? _fullscreenTileStyle(BuildContext context) {
     final themed = StreamLivestreamTileTheme.of(context).style?.toolbarPadding;
     if (themed != null) return null;
@@ -549,7 +554,8 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   }
 
   /// The screen around [body]: the back button and the call duration at the
-  /// top. In [fullscreen], [body] fills the screen on its own.
+  /// top. In [fullscreen], [body] fills the screen on its own, and back leaves
+  /// fullscreen before it leaves the screen.
   Widget _layout(
     BuildContext context, {
     required Widget body,
@@ -559,9 +565,16 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     final spacing = context.streamSpacing;
 
     if (fullscreen) {
-      return Scaffold(
-        backgroundColor: colorScheme.backgroundApp,
-        body: body,
+      return PopScope(
+        // Back leaves fullscreen first when the player toggles it itself.
+        canPop: widget.onFullscreenTapped != null,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) setState(() => _fullscreen = false);
+        },
+        child: Scaffold(
+          backgroundColor: colorScheme.backgroundApp,
+          body: body,
+        ),
       );
     }
 

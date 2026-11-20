@@ -155,6 +155,43 @@ void main() {
       expect(find.byKey(const ValueKey('back')), findsOneWidget);
     });
 
+    testWidgets('back leaves fullscreen before it leaves the screen', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        TestWrapper(
+          child: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => LivestreamPlayer(
+                    call: FakeLivestreamCall(liveCall),
+                    joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+                    startInFullscreenMode: true,
+                  ),
+                ),
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      expect(find.byType(CallAppBar), findsNothing);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LivestreamPlayer), findsOneWidget);
+      expect(find.byType(CallAppBar), findsOneWidget);
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LivestreamPlayer), findsNothing);
+    });
+
     testWidgets('onFullscreenTapped is called once and does not toggle', (
       tester,
     ) async {
@@ -196,6 +233,45 @@ void main() {
       final button = tester.getRect(fullscreenButton());
       expect(screen.right - indicator.right, spacing);
       expect(button.left + tapPadding - screen.left, spacing);
+    });
+  });
+
+  group('toolbar toggles', () {
+    testWidgets('the tile theme hides the viewer count', (tester) async {
+      await pumpWidget(
+        tester,
+        StreamLivestreamTileTheme(
+          data: const StreamLivestreamTileThemeData(
+            style: StreamLivestreamTileStyle(showSpectatorsIndicator: false),
+          ),
+          child: LivestreamPlayer(
+            call: FakeLivestreamCall(liveCall),
+            joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+          ),
+        ),
+      );
+
+      expect(find.byType(StreamSpectatorsIndicator), findsNothing);
+    });
+
+    testWidgets('showParticipantCount wins over the tile theme', (
+      tester,
+    ) async {
+      await pumpWidget(
+        tester,
+        StreamLivestreamTileTheme(
+          data: const StreamLivestreamTileThemeData(
+            style: StreamLivestreamTileStyle(showSpectatorsIndicator: false),
+          ),
+          child: LivestreamPlayer(
+            call: FakeLivestreamCall(liveCall),
+            joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+            showParticipantCount: true,
+          ),
+        ),
+      );
+
+      expect(find.byType(StreamSpectatorsIndicator), findsOneWidget);
     });
   });
 
