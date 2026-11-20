@@ -1,5 +1,10 @@
 [Unreleased]
 
+* **Breaking:** platform events are typed; listen to `platformEvents`. `eventStream` is no longer exported.
+* **Breaking:** `handleCallInterruptionCallbacks` is removed; call `platformEvents.enableInterruptionEvents` and listen to `platformEvents.onInterruption`.
+* **Breaking:** `NativePeerConnectionFactory.create` takes a `PeerConnectionFactoryOptions` instead of a map.
+* `WebRTC.initialize` accepts a `PeerConnectionFactoryOptions` as `factoryOptions`.
+* The Android and Apple audio configuration types moved to `stream_webrtc_interface`; this package still exports them.
 * **Breaking:** depends on `stream_dart_webrtc` and `stream_webrtc_interface` instead of `dart_webrtc` and `webrtc_interface`. The re-exported types now come from `stream_webrtc_interface`, so they no longer match `package:webrtc_interface` types.
 * Licensed under the Stream licence; the code from upstream keeps its MIT licence (see `LICENSE`).
 * [iOS/macOS] Added `FlutterWebRTCPlugin.audioEngineControl`, for an app that activates the audio session itself, such as through CallKit. `setAudioEngineAvailable:` stops and restarts the audio engine of every peer-connection factory, including ones built later, and `audioEngineStartFailedHandler` is called when the engine cannot be started again. `FlutterWebRTCAudioEngineAvailabilityNotification` and `FlutterWebRTCAudioEngineStartFailedNotification` do the same for code that does not link the plugin.

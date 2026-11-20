@@ -2,6 +2,8 @@
 
 ### ⚠️ Breaking
 
+- `RtcMediaDeviceNotifier.handleCallInterruptionCallbacks` no longer takes the deprecated `androidAudioAttributesUsageType` and `androidAudioAttributesContentType`.
+- `ScreenSharingStoppedEvent` carries a `trackId` instead of a `data` map, and `ScreenSharingStartedEvent` has no `data`.
 - `PushNotificationManager` has a new method, `setCallAudioOutputDeviceByCid`. A class that `implements` it has to add it; one that `extends` it inherits a no-op.
 - `RingingEvent` has a new subtype, `ActionCallDismissed`, so an exhaustive `switch` over ringing events needs a case for it. `disposeAfterResolvingRinging` no longer disposes on `ActionCallTimeout`, which iOS sends when CallKit's ring times out and Android now sends when a ring times out natively, so the client's own ring timeout can still reject the call.
 - `PushNotificationManager.showIncomingCall` takes a `ringTimeout`, so a custom implementation has to add it. `handleRingingFlowNotifications` passes the call's `autoRejectTimeout`.
@@ -88,6 +90,7 @@
 
 ### ✅ Added
 
+- `AudioConfigurationPolicy.toFactoryOptions` returns the settings a peer connection factory is built with under the policy.
 - `PushNotificationManager.setCallAudioOutputDeviceByCid`, which `Call.setAudioOutputDevice` calls once WebRTC uses the device, so a push manager can route the system call's audio there too. The output passed to `join` goes there when the join applies it; a rejoin or an SFU migration after that does not send it again.
 - `ActionCallDismissed` and `CallDismissReason`: the end of a call's ring that the SDK asked for, with why it ended (accepted in the app, cancelled by the caller, answered on another device, missed). Android only. `disposeAfterResolvingRinging` releases on it like on the other ring-ending events.
 - `ActionCallToggleHold.callCid`, the cid of the held call, which the push package sends on Android.
