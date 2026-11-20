@@ -265,83 +265,17 @@ jobs:
           workingDir: dogfooding
           compileToWasm: true
 
+  # Builds through the shared workflow in stream-core-flutter, which also
+  # removes pull request builds last deployed over 30 days ago.
   build_and_deploy_web_hosted:
     name: Build and Deploy Dogfooding Web (flutter.getstream.io)
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    environment:
-      name: flutter-web
-      url: https://flutter.getstream.io/${{ steps.flavor.outputs.web_path }}/
+    if: ${{ github.event_name == 'push' || (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'stream-video-v')) || inputs.build_web == true }}
     permissions:
       contents: read
       id-token: write
-    if: ${{ github.event_name == 'push' || (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'stream-video-v')) || inputs.build_web == true }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Set build flavor to Env
-        id: flavor
-        run: |
-          if [[ ${{ github.event_name == 'workflow_dispatch' }} == true ]]; then
-            FLAVOR=${{ inputs.flavor }}
-          elif [[ ${{ github.event_name == 'release' }} == true ]]; then
-            FLAVOR=prod
-          else
-            FLAVOR=beta
-          fi
-          if [[ $FLAVOR == prod ]]; then
-            WEB_PATH=video
-          else
-            WEB_PATH=video/beta
-          fi
-          echo "FLAVOR=$FLAVOR" >> "$GITHUB_ENV"
-          echo "WEB_PATH=$WEB_PATH" >> "$GITHUB_ENV"
-          echo "web_path=$WEB_PATH" >> "$GITHUB_OUTPUT"
-
-      - name: Setup Flutter
-        uses: ./.github/actions/setup-flutter
-
-      - name: Build
-        working-directory: dogfooding
-        run: flutter build web --release --wasm --base-href /${{ env.WEB_PATH }}/ --dart-define=WEB_FLAVOR=${{ env.FLAVOR }}
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v3
-        with:
-          workload_identity_provider: projects/675676272957/locations/global/workloadIdentityPools/github-actions/providers/github-flutter
-          service_account: flutter-web-deployer@stream-gcp-2026-v2.iam.gserviceaccount.com
-
-      - name: Setup gcloud
-        uses: google-github-actions/setup-gcloud@v3
-
-      # The prod path holds the beta build in its beta/ folder and the pull
-      # request builds in pr/, so the prod sync leaves those folders alone.
-      #
-      # index.html is also served for every app route (`/join/<id>`), and a
-      # revalidation of such a route comes back as an empty 200. It is uploaded
-      # last and never stored by the browser, so there is nothing to revalidate.
-      - name: Deploy
-        run: |
-          gcloud storage rsync dogfooding/build/web gs://stream-flutter-web/${{ env.WEB_PATH }} \
-            --recursive --delete-unmatched-destination-objects \
-            --exclude='^beta/|^pr/|^index\.html$' \
-            --cache-control="public, max-age=60"
-          gcloud storage cp dogfooding/build/web/index.html gs://stream-flutter-web/${{ env.WEB_PATH }}/index.html \
-            --cache-control="no-store"
-
-      # PR Web Build removes a build with its pull request; this removes the
-      # ones left behind. Every deploy uploads index.html again, so its date is
-      # the build's last deploy.
-      - name: Remove pull request builds older than 30 days
-        run: |
-          cutoff=$(date -u -d '30 days ago' +%s)
-          # The listing fails when there is no pull request build.
-          builds=$(gcloud storage ls --long 'gs://stream-flutter-web/video/pr/*/index.html' 2>/dev/null || true)
-          while read -r _ updated url; do
-            [[ $url == gs://*/index.html ]] || continue
-            if (( $(date -u -d "$updated" +%s) < cutoff )); then
-              echo "Removing ${url%index.html}, last deployed $updated"
-              gcloud storage rm --recursive "${url%index.html}"
-            fi
-          done <<< "$builds"
+    uses: GetStream/stream-core-flutter/.github/workflows/web_deploy.yml@ci/shared-web-deploy
+    with:
+      app: video
+      flavor: ${{ github.event_name == 'release' && 'prod' || inputs.flavor || 'beta' }}
+      working-directory: dogfooding
+      flutter-version: "3.47.8"

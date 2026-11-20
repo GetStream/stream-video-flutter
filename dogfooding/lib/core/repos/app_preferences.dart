@@ -25,17 +25,28 @@ class AppPreferences {
   static const String _kAccentColorPref = 'accent_color';
   static const String _kDesignPref = 'design';
 
-  /// On web, every path of the origin shares one browser storage (`/video`,
-  /// `/video/beta`, `/chat`), so each build keeps its keys under its own
-  /// prefix.
-  static String get _webPrefix => kIsProd ? 'video' : 'video_beta';
+  /// The prefix of every key on web, set with
+  /// `--dart-define=WEB_STORAGE_PREFIX=<prefix>`.
+  ///
+  /// Every path of the origin shares one browser storage (`/video`,
+  /// `/video/beta`, `/video/pr/<number>`, `/chat`), so each build keeps its
+  /// keys under its own prefix. The deploy workflows set it; a local build
+  /// without it takes the prefix of its flavor.
+  // ignore: do_not_use_environment
+  static const String _kWebStoragePrefix = String.fromEnvironment(
+    'WEB_STORAGE_PREFIX',
+  );
 
-  static String _key(String name) => kIsWeb ? '${_webPrefix}_$name' : name;
+  static String get _webPrefix => _kWebStoragePrefix.isNotEmpty
+      ? _kWebStoragePrefix
+      : (kIsProd ? 'video_' : 'video_beta_');
+
+  static String _key(String name) => kIsWeb ? '$_webPrefix$name' : name;
 
   /// The login belongs to an environment, so on web it is stored per
   /// environment too (`video_pronto_api_key`).
   String _authKey(String name) =>
-      kIsWeb ? '${_webPrefix}_${environment.name}_$name' : name;
+      kIsWeb ? '$_webPrefix${environment.name}_$name' : name;
 
   UserCredentials? get userCredentials {
     final jsonString = _prefs.getString(_authKey(_kUserCredentialsPref));
