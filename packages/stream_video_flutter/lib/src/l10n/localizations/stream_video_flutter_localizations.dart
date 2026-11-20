@@ -1000,6 +1000,12 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'Try Again'**
   String get recordingsRetry;
+
+  /// Read out by screen readers for the livestream's viewer count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 viewer} other{{count} viewers}}'**
+  String livestreamViewerCount(int count);
 }
 
 class _StreamVideoFlutterLocalizationsDelegate

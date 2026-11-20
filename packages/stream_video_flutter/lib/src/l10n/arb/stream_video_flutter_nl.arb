@@ -148,5 +148,6 @@
   "recordingsEmptyDescription": "Opnames van dit gesprek verschijnen hier zodra ze klaar zijn.",
   "recordingsErrorTitle": "Opnames laden mislukt",
   "recordingsErrorDescription": "Controleer je verbinding en probeer het opnieuw.",
-  "recordingsRetry": "Opnieuw proberen"
+  "recordingsRetry": "Opnieuw proberen",
+  "livestreamViewerCount": "{count, plural, one{1 kijker} other{{count} kijkers}}"
 }
