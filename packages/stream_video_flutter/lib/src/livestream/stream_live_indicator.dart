@@ -6,7 +6,8 @@ import '../l10n/localization_extension.dart';
 /// A pill telling whether a livestream is live or still in backstage.
 ///
 /// While the call is live it shows a dot and "LIVE" on the accent colour;
-/// in backstage it shows "BACKSTAGE" on a neutral surface.
+/// in backstage it shows "BACKSTAGE" on a neutral surface. The translated
+/// label is shown in upper case.
 class StreamLiveIndicator extends StatelessWidget {
   /// Creates a [StreamLiveIndicator].
   const StreamLiveIndicator({
@@ -109,6 +110,7 @@ class _StreamLiveIndicatorStyleDefaults extends StreamLiveIndicatorStyle {
   @override
   double get spacing => _style?.spacing ?? _spacing.xs;
 
+  // The design's dot is 8, the `xs` spacing token.
   @override
   double get dotSize => _style?.dotSize ?? _spacing.xs;
 

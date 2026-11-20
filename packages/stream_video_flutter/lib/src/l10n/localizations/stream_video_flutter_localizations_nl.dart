@@ -524,4 +524,15 @@ class StreamVideoFlutterLocalizationsNl
 
   @override
   String get recordingsRetry => 'Opnieuw proberen';
+
+  @override
+  String livestreamViewerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count kijkers',
+      one: '1 kijker',
+    );
+    return '$_temp0';
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
+import '../l10n/localization_extension.dart';
 
 /// A pill showing how many people are watching a livestream.
 class StreamSpectatorsIndicator extends StatelessWidget {
@@ -58,12 +59,16 @@ class StreamSpectatorsIndicator extends StatelessWidget {
                 selector: includeAnonymousParticipants
                     ? _allViewers
                     : _namedViewers,
-                builder: (context, count) => Text(
-                  '$count',
-                  maxLines: 1,
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
-                  style: resolved.textStyle,
+                builder: (context, count) => Semantics(
+                  label: context.translations.livestreamViewerCount(count),
+                  excludeSemantics: true,
+                  child: Text(
+                    '$count',
+                    maxLines: 1,
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    style: resolved.textStyle,
+                  ),
                 ),
               ),
             ),
@@ -100,7 +105,7 @@ class _StreamSpectatorsIndicatorStyleDefaults
   double get spacing => _style?.spacing ?? _spacing.xs;
 
   @override
-  double get iconSize => _style?.iconSize ?? 20;
+  double get iconSize => _style?.iconSize ?? 20.0;
 
   @override
   BorderRadiusGeometry get borderRadius =>
