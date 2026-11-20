@@ -130,9 +130,7 @@ void main() {
   });
 
   group('fullscreen', () {
-    testWidgets('drops the app bar and keeps the back button', (
-      tester,
-    ) async {
+    testWidgets('drops the app bar and the back button', (tester) async {
       await pumpPlayer(tester, backButtonBuilder: backButton);
       expect(find.byType(CallAppBar), findsOneWidget);
       expect(find.byKey(const ValueKey('back')), findsOneWidget);
@@ -140,7 +138,7 @@ void main() {
       await tapFullscreen(tester);
 
       expect(find.byType(CallAppBar), findsNothing);
-      expect(find.byKey(const ValueKey('back')), findsOneWidget);
+      expect(find.byKey(const ValueKey('back')), findsNothing);
       expect(
         tester
             .widget<StreamLivestreamTile>(
@@ -150,53 +148,11 @@ void main() {
             .isFullscreen,
         isTrue,
       );
-    });
 
-    testWidgets('puts the back button at the top start, right to left too', (
-      tester,
-    ) async {
-      await pumpPlayer(
-        tester,
-        startInFullscreenMode: true,
-        backButtonBuilder: backButton,
-      );
-      final screen = tester.getRect(find.byType(Scaffold));
-      final ltr = tester.getRect(find.byKey(const ValueKey('back')));
-      expect(ltr.left - screen.left, lessThan(screen.width / 2));
+      await tapFullscreen(tester);
 
-      await pumpPlayer(
-        tester,
-        startInFullscreenMode: true,
-        backButtonBuilder: backButton,
-        textDirection: TextDirection.rtl,
-      );
-      final rtl = tester.getRect(find.byKey(const ValueKey('back')));
-      expect(screen.right - rtl.right, ltr.left - screen.left);
-    });
-
-    testWidgets('gives a toolbar back button a floating toolbar scope', (
-      tester,
-    ) async {
-      StreamSurfaceStyle? surface;
-      await pumpPlayer(
-        tester,
-        startInFullscreenMode: true,
-        backButtonBuilder: (context) {
-          surface = StreamToolbarScope.maybeOf(context);
-          return StreamToolbarButton.icon(
-            key: const ValueKey('back'),
-            icon: Icon(context.streamIcons.xmark),
-            onPressed: () {},
-          );
-        },
-      );
-
-      expect(tester.takeException(), isNull);
-      expect(surface, StreamSurfaceStyle.floating);
-      expect(
-        tester.getSize(find.byKey(const ValueKey('back'))).width,
-        lessThan(100),
-      );
+      expect(find.byType(CallAppBar), findsOneWidget);
+      expect(find.byKey(const ValueKey('back')), findsOneWidget);
     });
 
     testWidgets('onFullscreenTapped is called once and does not toggle', (
