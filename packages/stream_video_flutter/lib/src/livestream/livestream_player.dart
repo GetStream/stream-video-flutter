@@ -143,8 +143,7 @@ class LivestreamPlayer extends StatefulWidget {
 
   /// [WidgetBuilder] used to build a back or close button.
   ///
-  /// It is shown at the start of the app bar, and over the top start corner
-  /// of the video in fullscreen.
+  /// It is shown at the start of the app bar, which fullscreen hides.
   final WidgetBuilder? backButtonBuilder;
 
   /// The builder used to create a custom widget when the livestream has ended.
@@ -550,8 +549,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   }
 
   /// The screen around [body]: the back button and the call duration at the
-  /// top. In [fullscreen], [body] fills the screen with the back button over
-  /// its top start corner.
+  /// top. In [fullscreen], [body] fills the screen on its own.
   Widget _layout(
     BuildContext context, {
     required Widget body,
@@ -563,28 +561,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     if (fullscreen) {
       return Scaffold(
         backgroundColor: colorScheme.backgroundApp,
-        body: Stack(
-          fit: StackFit.expand,
-          children: [
-            body,
-            if (widget.backButtonBuilder case final backButtonBuilder?)
-              PositionedDirectional(
-                top: 0,
-                start: 0,
-                child: SafeArea(
-                  child: Padding(
-                    padding: EdgeInsets.all(spacing.xs),
-                    // Floats over the video, as the app bar's slot would
-                    // outside fullscreen, so toolbar buttons work here too.
-                    child: StreamToolbarScope(
-                      surfaceStyle: StreamSurfaceStyle.floating,
-                      child: Builder(builder: backButtonBuilder),
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
+        body: body,
       );
     }
 
