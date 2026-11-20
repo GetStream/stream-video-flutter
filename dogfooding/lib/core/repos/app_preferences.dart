@@ -30,7 +30,7 @@ class AppPreferences {
   ///
   /// Every path of the origin shares one browser storage (`/video`,
   /// `/video/beta`, `/video/pr/<number>`, `/chat`), so each build keeps its
-  /// keys under its own prefix. The deploy workflows set it; a local build
+  /// keys under its own prefix. The deploy jobs set it; a local build
   /// without it takes the prefix of its flavor.
   // ignore: do_not_use_environment
   static const String _kWebStoragePrefix = String.fromEnvironment(
