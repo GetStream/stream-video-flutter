@@ -243,3 +243,95 @@ class DefaultCallPreferences implements CallPreferences {
   @override
   final CallEncryptionKeyResolver? encryptionKeyResolver;
 }
+
+/// Single-field changes to any [CallPreferences].
+extension CallPreferencesAudioPolicy on CallPreferences {
+  /// These preferences with [policy] as the audio configuration policy and
+  /// every other value unchanged. Pass null to fall back to the client-level
+  /// default, `StreamVideoOptions.audioConfigurationPolicy`.
+  ///
+  /// Works for any [CallPreferences] implementation. Changing the policy
+  /// repeatedly does not nest copies, and setting it back to the original
+  /// policy returns the original preferences.
+  ///
+  /// To apply it to a call before joining, prefer
+  /// `Call.setAudioConfigurationPolicy`, which also checks the call's status.
+  CallPreferences withAudioConfigurationPolicy(
+    AudioConfigurationPolicy? policy,
+  ) {
+    final self = this;
+    final base = self is _AudioPolicyCallPreferences ? self.base : self;
+    if (policy == base.audioConfigurationPolicy) return base;
+
+    return _AudioPolicyCallPreferences(
+      base: base,
+      audioConfigurationPolicy: policy,
+    );
+  }
+}
+
+/// [base] with its audio configuration policy replaced by
+/// [audioConfigurationPolicy]; see
+/// [CallPreferencesAudioPolicy.withAudioConfigurationPolicy].
+///
+/// It `implements` [CallPreferences], so adding a member to the interface
+/// fails to compile until it is forwarded here too.
+class _AudioPolicyCallPreferences implements CallPreferences {
+  const _AudioPolicyCallPreferences({
+    required this.base,
+    required this.audioConfigurationPolicy,
+  });
+
+  final CallPreferences base;
+
+  @override
+  final AudioConfigurationPolicy? audioConfigurationPolicy;
+
+  @override
+  Duration get connectTimeout => base.connectTimeout;
+
+  @override
+  Duration get reconnectTimeout => base.reconnectTimeout;
+
+  @override
+  Duration get networkAvailabilityTimeout => base.networkAvailabilityTimeout;
+
+  @override
+  int get maxIceFailuresWithoutConnect => base.maxIceFailuresWithoutConnect;
+
+  @override
+  Duration get reactionAutoDismissTime => base.reactionAutoDismissTime;
+
+  @override
+  Duration get callStatsReportingInterval => base.callStatsReportingInterval;
+
+  @override
+  bool get dropIfAloneInRingingFlow => base.dropIfAloneInRingingFlow;
+
+  @override
+  ClientPublishOptions? get clientPublishOptions => base.clientPublishOptions;
+
+  @override
+  int get closedCaptionsVisibilityDurationMs =>
+      base.closedCaptionsVisibilityDurationMs;
+
+  @override
+  int get closedCaptionsVisibleCaptions => base.closedCaptionsVisibleCaptions;
+
+  @override
+  VideoModerationConfig get videoModerationConfig => base.videoModerationConfig;
+
+  @override
+  ParticipantsThrottleIntervalResolver?
+  get participantsThrottleIntervalResolver =>
+      base.participantsThrottleIntervalResolver;
+
+  @override
+  CallEncryptionKeyResolver? get encryptionKeyResolver =>
+      base.encryptionKeyResolver;
+
+  @override
+  String toString() =>
+      'CallPreferences(audioConfigurationPolicy: $audioConfigurationPolicy, '
+      'base: $base)';
+}

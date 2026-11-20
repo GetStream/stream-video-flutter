@@ -92,17 +92,17 @@
 - `unregisterDevice` deletes the registered push token from the backend even when the current token cannot be read.
 - A registration still in flight when `unregisterDevice` runs no longer stores its token.
 
-## Upcoming (minor)
+## 1.8.0
 
 ### 🐞 Fixed
 
-- A ringing event the package does not recognise is now ignored.
-- [iOS] `setCallConnected` and `endCall` keep the call's options, so `configureAudioSession: false` is respected after the call connects and the plugin no longer reconfigures the audio session set up by WebRTC.
-- [iOS] `setCallConnected` no longer answers an outgoing call, which reconfigured the audio session and emitted an accept event for the app's own call.
-- [iOS] An outgoing call keeps its own options and `ActionCallStart` data when another call is started, shown, connected or ended while it is starting.
-- [iOS] CallKit mute, hold, group and DTMF events report the call's uuid as it was started or shown with, instead of uppercased, so it matches the uuid in the call's other events.
-- [iOS] Holding or resuming a call no longer requests the same hold again, which left the call switching between held and active until it ended.
-- [iOS] Ungrouping a CallKit call no longer throws while the `ActionCallToggleGroup` event is decoded. The event now arrives with a null `callUUIDToGroupWith`.
+- Unrecognized ringing events are now ignored.
+- [Android] Fixed a `NoSuchMethodError` crash on Android 5 and 6 (API 21–23).
+- [iOS] `setCallConnected` and `endCall` now respect `configureAudioSession: false`, and `setCallConnected` no longer answers outgoing calls.
+- [iOS] Fixed an outgoing call losing its options and `ActionCallStart` data when another call changed state while it was starting.
+- [iOS] CallKit mute, hold, group and DTMF events now report the call's uuid unchanged instead of uppercased.
+- [iOS] Fixed a held or resumed call toggling between held and active.
+- [iOS] Fixed an error when decoding `ActionCallToggleGroup` after ungrouping a CallKit call.
 
 ## 1.7.2
 

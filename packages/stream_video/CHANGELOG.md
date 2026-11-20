@@ -213,16 +213,27 @@
 - On iOS, a later start of a broadcast screen share no longer publishes its track again.
 - A join or fast reconnect fails when the device makes no generic SDP offer, instead of joining with an empty one.
 
-## Upcoming (minor)
+## 1.8.0
+
+### ✅ Added
+
+- Added `Call.setAudioConfigurationPolicy` to set a call's audio policy before joining. Pass `null` to fall back to `StreamVideoOptions.audioConfigurationPolicy`. Stop lobby preview tracks before changing it.
+- Added `CallPreferences.withAudioConfigurationPolicy`, which returns a copy with a different audio policy.
 
 ### 🔄 Changed
 
-- `ActionCallToggleGroup.callUUIDToGroupWith` is now nullable. It is null when CallKit ungroups the call.
-- `StreamVideo.connect()` now sends user details according to `StreamVideoOptions.includeUserDetailsForAutoConnect` when `includeUserDetails` isn't passed, instead of always sending them.
+- `Call.setAudioBitrateProfile` now always allows switching back to `voiceStandard`, and setting the current profile no longer restarts the microphone.
+- Leaving `musicHighQuality` restores noise cancellation only if it was on before. Joining with `musicHighQuality` no longer turns it on for `autoOn` call types.
+- `AudioConfigurationPolicy` values now compare by value.
+- `ActionCallToggleGroup.callUUIDToGroupWith` is now nullable (null when CallKit ungroups the call).
+- `StreamVideo.connect()` now respects `StreamVideoOptions.includeUserDetailsForAutoConnect` when `includeUserDetails` isn't passed.
 
 ### 🐞 Fixed
 
-- Accepting a call from the native ringing screen on a cold start no longer sends user details when `includeUserDetailsForAutoConnect` is `false`. It used to overwrite the user's name set on the server with an empty one.
+- [iOS] Stereo playout now follows the call's audio policy (`HiFiAudioPolicy`, `ViewerAudioPolicy`) and no longer carries over from an earlier HiFi call.
+- Fixed an audio bitrate profile set before joining being ignored, or lost after a reconnect.
+- `StreamVideo.disconnect()` now leaves all active calls first, so they no longer keep publishing after disconnect.
+- Accepting a call from the native ringing screen on a cold start no longer overwrites the user's name when `includeUserDetailsForAutoConnect` is `false`.
 
 ## 1.7.2
 

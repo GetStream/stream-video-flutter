@@ -4,7 +4,7 @@
 
 - Video filters on iOS follow the orientation of the app's window scene, including after it moves to another display.
 
-## Upcoming (minor)
+## 1.8.0
 
 ### ✅ Added
 
