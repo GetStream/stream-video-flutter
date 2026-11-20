@@ -50,8 +50,11 @@ void main() {
       () async {
         final mic = await publishMic(stopTrackOnMute: false);
 
-        await fixture.manager.changeDefaultAudioConstraints(_newConstraints);
+        final result = await fixture.manager.changeDefaultAudioConstraints(
+          _newConstraints,
+        );
 
+        expect(result.isSuccess, isTrue);
         // The source was stopped and acquired again.
         expect(fakeMediaOf(mic).stopped, isTrue);
         expect(platform.callsOf('getUserMedia'), hasLength(1));
@@ -87,8 +90,11 @@ void main() {
       await fixture.manager.muteTrack(trackId: mic.trackId);
       muteEvents.clear();
 
-      await fixture.manager.changeDefaultAudioConstraints(_newConstraints);
+      final result = await fixture.manager.changeDefaultAudioConstraints(
+        _newConstraints,
+      );
 
+      expect(result.isSuccess, isTrue);
       expect(muteEvents, isEmpty);
       expect(platform.callsOf('getUserMedia'), isEmpty);
       expect(stored(mic.trackId).mediaTrack.enabled, isFalse);
@@ -101,14 +107,17 @@ void main() {
     });
 
     test(
-      'a failed recapture reports the microphone muted, and unmuting '
+      'a failed recapture fails, reports the microphone muted, and unmuting '
       'captures it with the new constraints',
       () async {
         final mic = await publishMic(stopTrackOnMute: false);
         platform.getUserMediaError = PlatformException(code: 'denied');
 
-        await fixture.manager.changeDefaultAudioConstraints(_newConstraints);
+        final result = await fixture.manager.changeDefaultAudioConstraints(
+          _newConstraints,
+        );
 
+        expect(result.isFailure, isTrue);
         expect(muteEvents, [(mic.trackId, true)]);
         expect(stored(mic.trackId).stopTrackOnMute, isFalse);
 
@@ -134,8 +143,9 @@ void main() {
         await fixture.manager.unpublishTrack(trackId: mic.trackId);
         final again = await publishMic(stopTrackOnMute: true);
         platform.getUserMediaGate!.complete();
-        await changing;
+        final result = await changing;
 
+        expect(result.isSuccess, isTrue);
         expect(muteEvents, isEmpty);
         expect(stored(mic.trackId).mediaTrack, same(again.mediaTrack));
         expect(stored(mic.trackId).mediaTrack.enabled, isTrue);

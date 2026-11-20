@@ -165,13 +165,15 @@ class RtcPublisher {
   ///
   /// A muted track is left muted: it picks the constraints up when it is
   /// unmuted. Nothing is muted or unmuted along the way, except a track that
-  /// cannot be captured again, which is reported muted. Never throws.
-  Future<void> restartLiveAudioTracks() async {
+  /// cannot be captured again, which is reported muted and makes this fail.
+  /// Never throws.
+  Future<Result<None>> restartLiveAudioTracks() async {
     final trackIds = [
       for (final track in tracks.values)
         if (track.trackType == SfuTrackType.audio) track.trackId,
     ];
 
+    var result = const Result<None>.success(none);
     for (final trackId in trackIds) {
       final track = tracks[trackId];
       if (track == null) continue;
@@ -190,10 +192,11 @@ class RtcPublisher {
       // Unmuting captures it again, with the new constraints. A microphone
       // published again meanwhile is live, and is left alone.
       final held = tracks[trackId];
-      if (recaptured.isFailure &&
+      if (recaptured is Failure &&
           held != null &&
           identical(held.mediaTrack, track.mediaTrack)) {
         onLocalTrackMuted?.call(held, true);
+        if (result.isSuccess) result = recaptured;
       }
     }
 
@@ -205,6 +208,8 @@ class RtcPublisher {
         () => '[restartLiveAudioTracks] ADM reconcile failed: $e\n$stk',
       );
     }
+
+    return result;
   }
 
   /// Stops the local track of [trackId], its clones and media stream, and
