@@ -5,7 +5,10 @@ import '../../stream_video_flutter.dart';
 import '../l10n/localization_extension.dart';
 import 'livestream_status_card.dart';
 
+/// The livestream tile's ended state: a status card, with the call's
+/// recordings below it when [showRecordings] is true.
 class LivestreamEndedContent extends StatefulWidget {
+  /// Creates a [LivestreamEndedContent].
   const LivestreamEndedContent({
     super.key,
     required this.call,
@@ -13,8 +16,15 @@ class LivestreamEndedContent extends StatefulWidget {
     this.onRecordingTapped,
   });
 
+  /// The livestream that ended.
   final Call call;
+
+  /// Whether the call's recordings are listed.
+  ///
+  /// Defaults to true.
   final bool showRecordings;
+
+  /// Called with a recording's URL when it is tapped.
   final FutureOr<void> Function(String)? onRecordingTapped;
 
   @override

@@ -519,7 +519,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the speaker layouts, where one participant holds the stage.
   final StreamCallParticipantsSpotlightThemeData callParticipantsSpotlightTheme;
 
-  /// Theme for the outgoing call widget.
+  /// Theme for the livestream player.
   final StreamLivestreamThemeData livestreamTheme;
 
   /// Theme for the incoming ringing screen.
