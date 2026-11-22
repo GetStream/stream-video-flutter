@@ -101,13 +101,9 @@ extension StreamVideoCallkitManager {
         action.fulfill()
     }
 
+    /// CallKit gave up waiting for `action`, which is failed. It names no call, so nothing is
+    /// sent to Dart.
     func provider(_ provider: CXProvider, timedOutPerforming action: CXAction) {
-        // Looked up by the action's own uuid, which never names a call, so this always fails.
-        guard store.call(forCallKit: action.uuid) != nil else {
-            action.fail()
-            return
-        }
-        sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_TIMEOUT, store.lastOptions?.toJSON())
-        action.fulfill()
+        action.fail()
     }
 }

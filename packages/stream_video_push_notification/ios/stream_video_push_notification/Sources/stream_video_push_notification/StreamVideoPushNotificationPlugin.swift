@@ -67,31 +67,33 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
         sharedInstance?.setDevicePushTokenVoIP(deviceToken: deviceToken)
     }
 
+    /// Asks CallKit to start `data` as an outgoing call. `fromPushKit` no longer changes
+    /// anything: Dart ends and connects each call by its own id.
     @objc public static func startOutgoingCall(
         data: CallData,
         fromPushKit: Bool
     ) {
-        StreamVideoCallkitManager.shared.startCall(data, fromPushKit: fromPushKit)
+        StreamVideoCallkitManager.shared.startCall(data)
     }
 
+    /// Reports an incoming call to CallKit. `fromPushKit` no longer changes anything: Dart ends
+    /// and connects each call by its own id.
     @objc public static func showIncomingCall(
         data: CallData,
         fromPushKit: Bool
     ) {
-        StreamVideoCallkitManager.shared.showIncomingCall(
-            data, fromPushKit: fromPushKit)
+        StreamVideoCallkitManager.shared.showIncomingCall(data)
     }
 
     /// Reports an incoming call to CallKit, and runs `completion` once CallKit accepted or
     /// refused it, or straight away when it could not be reported. An app with its own PushKit
-    /// delegate can call PushKit's completion from it.
+    /// delegate can call PushKit's completion from it. `fromPushKit` no longer changes anything.
     @objc public static func showIncomingCall(
         data: CallData,
         fromPushKit: Bool,
         completion: @escaping () -> Void
     ) {
-        StreamVideoCallkitManager.shared.showIncomingCall(
-            data, fromPushKit: fromPushKit, completion: completion)
+        StreamVideoCallkitManager.shared.showIncomingCall(data, completion: completion)
     }
 
     @objc public static func activeCalls() -> [[String: Any]]? {

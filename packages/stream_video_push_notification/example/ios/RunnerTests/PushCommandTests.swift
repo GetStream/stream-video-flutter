@@ -253,19 +253,6 @@ final class PushCommandTests: XCTestCase {
         XCTAssertNotNil(tokenReply as? String)
     }
 
-    func testEndAllCallsFromDartKeepsTheManagersPushKitFlag() {
-        // Dart's endAllCalls goes to the call controller, unlike the native endAllCalls(),
-        // which also clears the flag.
-        let manager = StreamVideoCallkitManager.shared
-        let saved = manager.store.isFromPushKit
-        defer { manager.store.isFromPushKit = saved }
-        manager.store.isFromPushKit = true
-
-        manager.handle(.endAllCalls) { _ in }
-
-        XCTAssertTrue(manager.store.isFromPushKit)
-    }
-
     func testSilenceEventsFromDartSilencesTheSink() {
         let sink = StreamVideoCallkitManager.shared.eventSink
         let saved = sink.isSilenced
