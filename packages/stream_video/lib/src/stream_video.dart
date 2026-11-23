@@ -1075,6 +1075,7 @@ class StreamVideoOptions {
     this.clientEventsReportingEnabled = true,
     this.ringStatePolling = const RingStatePollingSettings(),
     this.audioConfigurationPolicy = const BroadcasterAudioPolicy(),
+    this.ringingAudioConfigurationPolicy,
   });
 
   final String coordinatorRpcUrl;
@@ -1144,5 +1145,43 @@ class StreamVideoOptions {
   /// Defaults to [BroadcasterAudioPolicy].
   /// Once set it will be applied for all calls.
   /// To change the audio configuration policy after initial setup, use [RtcMediaDeviceNotifier.reinitializeAudioConfiguration].
+  ///
+  /// A ringing call uses [ringingAudioConfigurationPolicy] instead, when set.
   final AudioConfigurationPolicy audioConfigurationPolicy;
+
+  /// The audio configuration policy of ringing calls, incoming and outgoing.
+  ///
+  /// Null, the default, falls back to [audioConfigurationPolicy]. Consider
+  /// setting it when ringing calls need a different policy than the rest, for
+  /// example in an app whose [audioConfigurationPolicy] is
+  /// [AudioConfigurationPolicy.viewer] for livestreams and whose ringing
+  /// calls are voice calls:
+  ///
+  /// ```dart
+  /// StreamVideoOptions(
+  ///   audioConfigurationPolicy: const AudioConfigurationPolicy.viewer(),
+  ///   ringingAudioConfigurationPolicy:
+  ///       const AudioConfigurationPolicy.broadcaster(),
+  /// )
+  /// ```
+  ///
+  /// A call's own policy, from [CallPreferences.audioConfigurationPolicy] or
+  /// [Call.setAudioConfigurationPolicy], still wins over it.
+  ///
+  /// A call keeps the policy it had when it first set up its media, at the
+  /// join or for a lobby preview. A call previewed before it rang keeps the
+  /// policy it had then; [Call.setAudioConfigurationPolicy] gives it another
+  /// before the join.
+  ///
+  /// On iOS, with the push notification package, a call answered from the
+  /// CallKit screen before the app joins it gets this policy's audio settings
+  /// from the start, with recording allowed even for a policy that does not
+  /// record, such as [AudioConfigurationPolicy.viewer], since CallKit needs
+  /// it. The package reads the policy when the client is created.
+  final AudioConfigurationPolicy? ringingAudioConfigurationPolicy;
+
+  /// The policy of a ringing call that sets none of its own:
+  /// [ringingAudioConfigurationPolicy], else [audioConfigurationPolicy].
+  AudioConfigurationPolicy get resolvedRingingAudioConfigurationPolicy =>
+      ringingAudioConfigurationPolicy ?? audioConfigurationPolicy;
 }

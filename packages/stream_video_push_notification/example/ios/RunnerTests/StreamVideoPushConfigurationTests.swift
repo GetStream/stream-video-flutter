@@ -28,8 +28,26 @@ final class StreamVideoPushConfigurationTests: XCTestCase {
         XCTAssertFalse(configuration.supportsDTMF)
         XCTAssertTrue(configuration.includesCallsInRecents)
         XCTAssertEqual(configuration.ringtonePath, "")
-        XCTAssertTrue(configuration.configureAudioSession)
+        XCTAssertNil(configuration.ringingAudioConfiguration)
         XCTAssertEqual(configuration.headers.count, 0)
+    }
+
+    func testTheRingingAudioConfigurationIsReadAndPersisted() {
+        let audio: [String: Any] = [
+            "appleAudioCategory": "playAndRecord",
+            "appleAudioCategoryOptions": ["mixWithOthers", "allowBluetooth"],
+            "appleAudioMode": "voiceChat",
+        ]
+        StreamVideoPushConfiguration(args: [
+            "ios": ["iconName": "CallIcon", "ringingAudioConfiguration": audio]
+        ]).persist()
+
+        let loaded = StreamVideoPushConfiguration.loadPersisted()?.ringingAudioConfiguration
+
+        XCTAssertEqual(loaded?["appleAudioCategory"] as? String, "playAndRecord")
+        XCTAssertEqual(
+            loaded?["appleAudioCategoryOptions"] as? [String], ["mixWithOthers", "allowBluetooth"])
+        XCTAssertEqual(loaded?["appleAudioMode"] as? String, "voiceChat")
     }
 
     func testReadsTheIOSSubMapAndTheHeaders() {
@@ -99,17 +117,26 @@ final class StreamVideoPushConfigurationTests: XCTestCase {
     }
 
     func testAConfigurationStoredWithAKeyNoLongerReadStillLoads() {
-        // Stored by an earlier version, which also wrote `audioSessionActive`.
+        // Stored by an earlier version, which also wrote `audioSessionActive` and the audio
+        // session options.
         UserDefaults.standard.set(
-            ["ios": ["iconName": "CallIcon", "audioSessionActive": false]],
+            [
+                "ios": [
+                    "iconName": "CallIcon", "audioSessionActive": false,
+                    "configureAudioSession": false, "audioSessionMode": "voiceChat",
+                ]
+            ],
             forKey: persistedKey)
 
         let loaded = StreamVideoPushConfiguration.loadPersisted()
 
         XCTAssertEqual(loaded?.iconName, "CallIcon")
+        XCTAssertNil(loaded?.ringingAudioConfiguration)
         let ios = loaded?.toJSON()["ios"] as? [String: Any]
         XCTAssertNotNil(ios)
         XCTAssertNil(ios?["audioSessionActive"])
+        XCTAssertNil(ios?["configureAudioSession"])
+        XCTAssertNil(ios?["audioSessionMode"])
     }
 
     func testPersistSurvivesANullHeaderValue() {

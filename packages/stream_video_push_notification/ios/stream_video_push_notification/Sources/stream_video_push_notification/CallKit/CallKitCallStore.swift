@@ -13,16 +13,6 @@ enum CallKitEffect {
     case postAudioInterruptionEnded
 }
 
-/// What an audio session activation resolves to.
-struct CallKitAudioActivation {
-    /// Whether it is the first activation for a call, so the session is configured.
-    let isFirst: Bool
-    /// The options to configure the session with: the first call awaiting its first activation's,
-    /// else `lastOptions`.
-    let options: CallData?
-    let effects: [CallKitEffect]
-}
-
 /// What CallKit's end action resolves to.
 struct CallKitEndOutcome {
     /// Whether the action is fulfilled; it fails for a call the store does not track.
@@ -362,28 +352,23 @@ final class CallKitCallStore {
 
     /// CallKit activated the audio session.
     ///
-    /// It is the first activation when the answered or the outgoing call has not had one yet, or
-    /// neither is live. Each call having its first activation starts connecting, and an outgoing
-    /// one is reported to CallKit as connecting; a call activated before, such as a held one, is
-    /// left as it is. Afterwards every live call counts as activated, and a resumed call is
-    /// marked activated.
-    func audioSessionActivated(at date: Date = Date()) -> CallKitAudioActivation {
-        let awaiting = callsAwaitingFirstActivation
-        let activation = CallKitAudioActivation(
-            isFirst: callsUsingAudio.isEmpty || !awaiting.isEmpty,
-            options: awaiting.first?.options ?? lastOptions,
-            effects: awaiting.compactMap { call in
-                call.move(to: .active)
-                guard call.direction == .outgoing else { return nil }
-                return .reportStartedConnecting(call.identity.callKitUUID, date)
-            })
+    /// Each answered or outgoing call having its first activation starts connecting, and an
+    /// outgoing one is reported to CallKit as connecting; a call activated before, such as a held
+    /// one, is left as it is. Afterwards every live call counts as activated, and a resumed call
+    /// is marked activated.
+    func audioSessionActivated(at date: Date = Date()) -> [CallKitEffect] {
+        let effects: [CallKitEffect] = callsAwaitingFirstActivation.compactMap { call in
+            call.move(to: .active)
+            guard call.direction == .outgoing else { return nil }
+            return .reportStartedConnecting(call.identity.callKitUUID, date)
+        }
         for call in callsUsingAudio {
             call.hasActivatedAudioSession = true
             if call.phase.isResumed {
                 call.move(to: .resumed(activated: true))
             }
         }
-        return activation
+        return effects
     }
 
     /// The app reported the call CallKit knows as `uuid` connected. Nil for a call the store does
