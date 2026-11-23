@@ -124,8 +124,8 @@ class CallRingingController {
     return const Result.success(none);
   }
 
-  /// Tells the native call UI that the user accepted this call, so its ring
-  /// goes away while the call goes on.
+  // Tells the native call UI that the user accepted this call, so its ring
+  // goes away while the call goes on.
   Future<void> _dismissNativeRing() async {
     try {
       await _pushNotificationManager()?.onCallAccepted(_callCid.value);

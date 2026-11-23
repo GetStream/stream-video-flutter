@@ -2411,12 +2411,12 @@ class CallConnectionCoordinator {
     }
   }
 
-  /// Tells the native call UI that this call was left, unless another
-  /// instance holds the same call joined or accepted it on this device.
-  ///
-  /// A call this instance never joined has a native call only while it
-  /// rings: unless this instance accepted it, its ring is over. A call this
-  /// instance joined or accepted is left.
+  // Tells the native call UI that this call was left, unless another
+  // instance holds the same call joined or accepted it on this device.
+  //
+  // A call this instance never joined has a native call only while it
+  // rings: unless this instance accepted it, its ring is over. A call this
+  // instance joined or accepted is left.
   Future<void> _endNativeCall({
     required bool unjoined,
     required bool acceptedHere,

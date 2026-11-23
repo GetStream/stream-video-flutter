@@ -42,8 +42,8 @@ class CallCoordinatorEventRouter {
   /// accept or reject hook runs.
   final void Function() _onRingActivity;
 
-  /// Called when the participant count of a call not joined yet drops to
-  /// zero, after its state took the count.
+  // Called when the participant count of a call not joined yet drops to
+  // zero, after its state took the count.
   final Future<void> Function() _onNoParticipantsLeft;
 
   /// Routes [event], which the caller has already matched to this call.

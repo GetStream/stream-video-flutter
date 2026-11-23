@@ -151,7 +151,7 @@ class _RingingEventSuppression {
   final Set<Type> eventTypes;
   final String? valueKey;
 
-  /// The cid the event has to carry; null for an event that carries none.
+  // The cid the event has to carry; null for an event that carries none.
   final String? callCid;
   final DateTime timestamp;
   final Duration window;

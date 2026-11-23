@@ -107,10 +107,9 @@ abstract class PushNotificationManager {
   /// [cid] is the call id for the call.
   /// When [silent] is `true`, the reports that the native calls of [cid]
   /// ended (decline, ended, timeout, dismissed) are suppressed, while events
-  /// of other calls still arrive, and nothing is ended when the native side
-  /// lists no call of [cid]. Use it when the ringing flow is already resolved
-  /// and ending the native call must not trigger the decline/ended handling
-  /// again.
+  /// of other calls still arrive. Use it when the ringing flow is already
+  /// resolved and ending the native call must not trigger the decline/ended
+  /// handling again.
   Future<void> endCallByCid(String cid, {bool silent = false});
 
   /// Tells the native call UI that the ring of [cid] is over before the user
@@ -131,8 +130,7 @@ abstract class PushNotificationManager {
   }
 
   /// Tells the native call UI that this device is done with [cid], a call
-  /// the user answered here, whether it was joined or not. By default this
-  /// calls [endCallByCid].
+  /// this device joined or accepted. By default this calls [endCallByCid].
   Future<void> onCallLeft(String cid) => endCallByCid(cid);
 
   /// Tells the native call UI that the user accepted [cid] in the app on

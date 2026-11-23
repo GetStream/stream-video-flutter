@@ -218,7 +218,7 @@ class NativeCallController {
     await _resolvedPlatform.dismissRingingCall(cid);
   }
 
-  /// Whether [active] has a call of [cid] and none of them is answered.
+  // Whether [active] has a call of [cid] and none of them is answered.
   bool _showsUnansweredRing(List<CallData> active, String cid) {
     final calls = active.where((call) => call.callCid == cid);
     return calls.isNotEmpty && !calls.any((call) => call.isAccepted);
@@ -241,7 +241,7 @@ class NativeCallController {
     await _end(active, cid, silent: silent);
   }
 
-  /// Ends the native calls of [cid] among [active], see [resolveCallsToEnd].
+  // Ends the native calls of [cid] among [active], see [resolveCallsToEnd].
   Future<void> _end(
     List<CallData> active,
     String cid, {
