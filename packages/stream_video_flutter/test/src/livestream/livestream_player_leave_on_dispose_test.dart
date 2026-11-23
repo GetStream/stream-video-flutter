@@ -158,4 +158,23 @@ void main() {
     );
     verifyNever(() => call.leave(reason: any(named: 'reason')));
   });
+
+  // An app that starts `call.join()` without awaiting it and then shows the
+  // player hands it a call that is still connecting.
+  for (final (name, status) in [
+    ('connecting', CallStatus.connecting()),
+    ('reconnecting', CallStatus.reconnecting(1)),
+  ]) {
+    testWidgets('leaves a call the app is $name to the app', (tester) async {
+      when(() => callState.status).thenReturn(status);
+
+      await pumpPlayerRoute(tester);
+      await popPlayer(tester);
+
+      verifyNever(
+        () => call.join(connectOptions: any(named: 'connectOptions')),
+      );
+      verifyNever(() => call.leave(reason: any(named: 'reason')));
+    });
+  }
 }

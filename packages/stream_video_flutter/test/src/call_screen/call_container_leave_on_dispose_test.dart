@@ -24,7 +24,7 @@ void main() {
     final state = MockStateEmitter<CallState>();
     final callState = MockCallState();
 
-    when(() => callState.status).thenReturn(status ?? CallStatus.connected());
+    when(() => callState.status).thenReturn(status ?? CallStatus.idle());
     when(() => state.value).thenReturn(callState);
     when(() => call.state).thenAnswer((_) => state);
     when(() => call.callCid).thenReturn(StreamCallCid(cid: 'default:test'));
@@ -36,6 +36,12 @@ void main() {
     ).thenAnswer((_) async => const Result.success(none));
     when(
       () => call.leave(reason: any(named: 'reason')),
+    ).thenAnswer((_) async => const Result.success(none));
+    when(
+      () => call.reject(
+        reason: any(named: 'reason'),
+        initiator: any(named: 'initiator'),
+      ),
     ).thenAnswer((_) async => const Result.success(none));
 
     return call;
@@ -137,4 +143,95 @@ void main() {
     verify(() => joined.leave(reason: leftByApp)).called(1);
     verifyNever(() => later.leave(reason: any(named: 'reason')));
   });
+
+  // Deliberately unlike LivestreamPlayer: the ringing flow joins a call right
+  // after an accept, so the container is often built on a call that is
+  // already connected, and backing out of that screen should still end it.
+  testWidgets('leaves a call that was already connected when it was built', (
+    tester,
+  ) async {
+    final call = stubbedCall(status: CallStatus.connected());
+    shown = ValueNotifier<Call>(call);
+    await pumpContainerRoute(tester);
+
+    await popContainer(tester);
+
+    verify(() => call.leave(reason: leftByApp)).called(1);
+  });
+
+  testWidgets('rejects an incoming call the user has not accepted', (
+    tester,
+  ) async {
+    // Ringing, not yet accepted.
+    final call = stubbedCall(status: CallStatus.incoming());
+    shown = ValueNotifier<Call>(call);
+    await pumpContainerRoute(tester);
+
+    await popContainer(tester);
+
+    verify(
+      () => call.reject(
+        reason: CallRejectReason.decline(),
+        initiator: LeaveInitiator.app,
+      ),
+    ).called(1);
+    verifyNever(() => call.leave(reason: any(named: 'reason')));
+  });
+
+  testWidgets('leaves an incoming call the user has accepted', (tester) async {
+    final call = stubbedCall(status: CallStatus.incoming(acceptedByMe: true));
+    shown = ValueNotifier<Call>(call);
+    await pumpContainerRoute(tester);
+
+    await popContainer(tester);
+
+    verify(() => call.leave(reason: leftByApp)).called(1);
+    verifyNever(
+      () => call.reject(
+        reason: any(named: 'reason'),
+        initiator: any(named: 'initiator'),
+      ),
+    );
+  });
+
+  // Moving under a GlobalKey deactivates and reactivates the state instead of
+  // disposing it, which is what keeps reparenting from ending the call.
+  testWidgets(
+    'keeps the call when it moves to a new parent under a GlobalKey',
+    (
+      tester,
+    ) async {
+      final call = stubbedCall();
+      final containerKey = GlobalKey();
+      final wrapped = ValueNotifier<bool>(false);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ValueListenableBuilder<bool>(
+              valueListenable: wrapped,
+              builder: (_, wrap, _) {
+                final container = StreamCallContainer(
+                  key: containerKey,
+                  call: call,
+                  callContentWidgetBuilder: (_, _) => const Text('call'),
+                );
+                return wrap
+                    ? Padding(padding: EdgeInsets.zero, child: container)
+                    : container;
+              },
+            ),
+          ),
+        ),
+      );
+
+      wrapped.value = true;
+      await tester.pumpAndSettle();
+
+      verify(
+        () => call.join(connectOptions: any(named: 'connectOptions')),
+      ).called(1);
+      verifyNever(() => call.leave(reason: any(named: 'reason')));
+    },
+  );
 }

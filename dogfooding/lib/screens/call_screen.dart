@@ -637,6 +637,9 @@ class _CallScreenState extends State<CallScreen>
         body: StreamCallContainer(
           call: widget.call,
           callConnectOptions: widget.connectOptions,
+          // This screen leaves the call on dispose itself, after releasing
+          // the video filters, which has to happen before the leave.
+          leaveCallOnDispose: false,
           onCancelCallTap: () async {
             await widget.call.reject(reason: CallRejectReason.cancel());
           },

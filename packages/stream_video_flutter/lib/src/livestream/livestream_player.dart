@@ -132,8 +132,15 @@ class LivestreamPlayer extends StatefulWidget {
   /// when its route is popped with the back button.
   ///
   /// It only applies to a call this player joined itself, through
-  /// [joinBehaviour]. A call joined by the app, before the player was shown or
-  /// with [LivestreamJoinBehaviour.manualJoin], is left to the app.
+  /// [joinBehaviour]. A call the app joined, or started joining, before the
+  /// player was shown, or joined with [LivestreamJoinBehaviour.manualJoin], is
+  /// left to the app.
+  ///
+  /// A left call cannot be joined again, so anything that disposes the player
+  /// and builds a new one for the same call ends the livestream, for example
+  /// a page without keep-alive or an `AnimatedSwitcher`. Keep the player
+  /// mounted, give it a `GlobalKey` when it moves in the tree, or set this to
+  /// `false`.
   ///
   /// Set it to `false` when the livestream should keep playing after the
   /// player is gone, such as in an in-app picture-in-picture overlay.
@@ -611,10 +618,11 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     unawaited(_joinSubscription?.cancel());
     _joinSubscription = null;
 
-    // A player mounted on a call that is already joined has nothing
-    // to join.
-    if (call.state.value.status.isConnected) {
-      _logger.d(() => '[connect] skipped, call already connected');
+    // A player mounted on a call the app already joined, or is joining, has
+    // nothing to join, and leaves that call to the app.
+    final status = call.state.value.status;
+    if (status.isConnecting || status.isJoining || status.isAlreadyJoined) {
+      _logger.d(() => '[connect] skipped, call already joined: $status');
       return;
     }
 
