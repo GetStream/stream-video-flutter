@@ -200,7 +200,12 @@ class Call {
       sdpPolicy: sdpPolicy,
       preferences: preferences,
       rtcMediaDeviceNotifier: rtcMediaDeviceNotifier,
-    ).also((it) => it._stateManager.lifecycleCallRinging(data));
+    ).also((it) {
+      it._stateManager.lifecycleCallRinging(data);
+      // The call is not fetched before the incoming screen shows, so seed the
+      // camera and microphone the join will turn on from the ring's settings.
+      it._media.applyRingingSettings(data.metadata.settings);
+    });
   }
 
   factory Call._internal({
