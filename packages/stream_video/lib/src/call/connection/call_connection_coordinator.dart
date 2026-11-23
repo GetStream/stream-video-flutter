@@ -2483,8 +2483,10 @@ class CallConnectionCoordinator {
         remote: remote,
       );
     } catch (_) {
-      // A teardown that throws still leaves the call.
+      // A teardown that throws still leaves the call, and a later leave does
+      // not disconnect again, so the native call is ended here.
       _settleDisconnected(reason);
+      await _endNativeCall(unjoined: unjoined, acceptedHere: acceptedHere);
       rethrow;
     }
 

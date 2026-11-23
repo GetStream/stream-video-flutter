@@ -215,6 +215,21 @@ void main() {
       verify(() => manager.onCallLeft(cid)).called(1);
     });
 
+    test('a teardown that throws still tells the call was left', () async {
+      final call = harness.buildCall();
+      await call.join();
+      // Stubbed on the state itself: a stub through the host's getter
+      // would make the getter throw instead.
+      final hostState = harness.streamVideo.state;
+      when(
+        () => hostState.removeActiveCall(any()),
+      ).thenThrow(StateError('teardown failed'));
+
+      await expectLater(call.leave(), throwsStateError);
+
+      verify(() => manager.onCallLeft(cid)).called(1);
+    });
+
     test('a native call UI that fails still leaves the call', () async {
       when(
         () => manager.onRingEnded(any()),
