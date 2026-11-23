@@ -23,10 +23,32 @@ class StreamCallContainer extends StatefulWidget {
     this.outgoingCallWidgetBuilder,
     this.callContentWidgetBuilder,
     this.pictureInPictureConfiguration = const PictureInPictureConfiguration(),
+    this.leaveCallOnDispose = true,
   });
 
   /// Represents a call.
   final Call call;
+
+  /// Whether the container ends its call when it is disposed, for example
+  /// when its route is popped with the back button.
+  ///
+  /// The container always joins [call] when it is first built, so this is the
+  /// call it was given then, including one the app had already joined, such
+  /// as a ringing call joined after an accept. An incoming call the user has
+  /// not accepted is rejected; any other call is left.
+  ///
+  /// A left call cannot be joined again. Anything that disposes the container
+  /// and builds a new one for the same call ends the call: a page without
+  /// keep-alive in a `PageView` or `TabBarView`, an `AnimatedSwitcher`, a
+  /// parent that changes type, or `pushReplacement` to another screen with
+  /// the same call. Keep the container mounted, give it a `GlobalKey` when it
+  /// moves in the tree, or set this to `false`.
+  ///
+  /// Set it to `false` also when the call should keep running after the
+  /// container is gone, such as a call shown in an in-app
+  /// picture-in-picture overlay. The app is then responsible for calling
+  /// [Call.leave].
+  final bool leaveCallOnDispose;
 
   /// Options used while connecting to the call.
   final CallConnectOptions? callConnectOptions;
@@ -78,6 +100,11 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
   /// Whether the call is over and this container still owes its route a pop.
   var _popPending = false;
 
+  /// The call this container joined, which it leaves on dispose. It stays the
+  /// first call when [StreamCallContainer.call] changes, since only that one
+  /// was joined here.
+  Call? _joinedCall;
+
   @override
   void initState() {
     super.initState();
@@ -104,7 +131,69 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
   void dispose() {
     _callStatusSubscription?.cancel();
     _callStatusSubscription = null;
+
+    final joinedCall = _joinedCall;
+    if (widget.leaveCallOnDispose && joinedCall != null) {
+      unawaited(_leaveOnDispose(joinedCall));
+    }
+
     super.dispose();
+  }
+
+  Future<void> _connect() async {
+    try {
+      _logger.d(() => '[connect] no args');
+
+      // Recorded even when the app joined the call first, as the ringing flow
+      // does after an accept: backing out of the screen should still end it.
+      _joinedCall = call;
+      final result = await call.join(connectOptions: widget.callConnectOptions);
+      _logger.v(() => '[connect] completed: $result');
+
+      if (result is Failure && result.error is CallLeftException) {
+        _logger.w(
+          () =>
+              '[connect] the call was already left and cannot be joined '
+              'again. A StreamCallContainer that is disposed leaves its call, '
+              'so one remounted without a GlobalKey cannot rejoin it; keep it '
+              'mounted, or pass leaveCallOnDispose: false.',
+        );
+      }
+    } catch (e) {
+      _logger.v(() => '[connect] failed: $e');
+      await _leave();
+    }
+  }
+
+  /// Ends [call] once the container is gone, so the call does not keep
+  /// publishing audio and video behind a closed screen.
+  ///
+  /// An incoming call the user has not accepted is rejected rather than left:
+  /// a leave does not tell the server, so the caller would keep ringing.
+  Future<void> _leaveOnDispose(Call call) async {
+    final status = call.state.value.status;
+    if (status.isDisconnected) return;
+
+    try {
+      final Result<None> result;
+      if (status is CallStatusIncoming && !status.acceptedByMe) {
+        _logger.d(() => '[dispose] rejecting call: ${call.callCid}');
+        result = await call.reject(
+          reason: CallRejectReason.decline(),
+          initiator: LeaveInitiator.app,
+        );
+      } else {
+        _logger.d(() => '[dispose] leaving call: ${call.callCid}');
+        result = await call.leave(
+          reason: const DisconnectReason.left(initiator: LeaveInitiator.app),
+        );
+      }
+      if (result is Failure) {
+        _logger.e(() => '[dispose] leave failed: $result');
+      }
+    } catch (e, stk) {
+      _logger.e(() => '[dispose] leave failed: $e\n$stk');
+    }
   }
 
   void _listenToCallStatus() {
@@ -138,40 +227,6 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final status = _callStatus;
-    _logger.v(() => '[build] status: $status');
-
-    if (_popPending) {
-      if (ModalRoute.of(context)?.isCurrent ?? false) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) unawaited(_leave());
-        });
-      }
-    }
-
-    if (status is CallStatusIncoming && !status.acceptedByMe) {
-      return _buildIncomingCall();
-    }
-    if (status is CallStatusOutgoing && !status.acceptedByCallee) {
-      return _buildOutgoingCall();
-    }
-    return _buildCallContent();
-  }
-
-  Future<void> _connect() async {
-    try {
-      _logger.d(() => '[connect] no args');
-
-      final result = await call.join(connectOptions: widget.callConnectOptions);
-      _logger.v(() => '[connect] completed: $result');
-    } catch (e) {
-      _logger.v(() => '[connect] failed: $e');
-      await _leave();
-    }
-  }
-
   Future<void> _leave() async {
     _logger.d(() => '[leave] no args');
     if (!mounted) {
@@ -194,6 +249,28 @@ class _StreamCallContainerState extends State<StreamCallContainer> {
     _popPending = false;
     final popped = await Navigator.maybePop(context);
     _logger.v(() => '[leave] popped: $popped');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final status = _callStatus;
+    _logger.v(() => '[build] status: $status');
+
+    if (_popPending) {
+      if (ModalRoute.of(context)?.isCurrent ?? false) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) unawaited(_leave());
+        });
+      }
+    }
+
+    if (status is CallStatusIncoming && !status.acceptedByMe) {
+      return _buildIncomingCall();
+    }
+    if (status is CallStatusOutgoing && !status.acceptedByCallee) {
+      return _buildOutgoingCall();
+    }
+    return _buildCallContent();
   }
 
   Widget _buildIncomingCall() {

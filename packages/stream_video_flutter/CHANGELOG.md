@@ -213,6 +213,7 @@
 
 ### 🔄 Changed
 
+- [Android] A call runs in the foreground service of the audio policy it uses, `Call.audioConfigurationPolicy`, so a ringing call follows `StreamVideoOptions.ringingAudioConfigurationPolicy`. An app whose `audioConfigurationPolicy` is `AudioConfigurationPolicy.viewer` and whose ringing policy is `AudioConfigurationPolicy.broadcaster` rings its calls in the `phoneCall` service rather than the `mediaPlayback` one.
 - On a folded window, `showStreamModalDialog` goes to the trailing half by default, and `StreamAdaptiveMenuAnchor`'s sheet to the half its button is in.
 - On a window folded down the middle, `StreamLobbyView` puts the preview and the rest of the lobby on either side of the fold, and `CallControlBar` splits its centre controls between its two sides.
 - `StreamCallContent` keeps showing the participants during a reconnect, and after one fails until the call has left, with a `StreamCallConnectionBanner` above them instead of the centred "Reconnecting" text.
@@ -299,6 +300,7 @@
 - [iOS] A participant's video no longer stays black after returning from picture-in-picture.
 - [Android] The picture-in-picture window now takes the aspect ratio of the video it shows, within Android's 2.39:1 limit, and reshapes when that video's size or orientation changes. It used to be 9:16 or 16:9 depending on how the phone was held. It still falls back to that when the video's size isn't known yet or a custom `callPictureInPictureWidgetBuilder` is set.
 - [Android] The picture-in-picture window animates in from the tile of the participant it shows, instead of showing the app's icon until the app draws in the small window.
+- The incoming call screen shows the microphone and camera as on when the call settings turn them on, as the call then joins. It used to show them off. Toggling the microphone there no longer makes the join turn the camera off and switch it to the front camera.
 
 ### ⚠️ Deprecated
 
@@ -316,6 +318,7 @@
 
 ### ⚠️ Breaking
 
+- `StreamCallContainer` ends its call when it is disposed, for example when the back button pops its route. Before, the call stayed joined and kept publishing audio and video behind the closed screen. The container joins the call it is given, so it ends that call even when the app joined it first; an incoming call the user has not accepted is rejected as declined, since a leave would not tell the server. `LivestreamPlayer` does the same only for a call it joined itself through an auto-join `joinBehaviour`, as the Swift and JS players do; a call the app joined, or started joining, is still the app's to leave. A left call cannot be joined again, so anything that disposes the widget and builds a new one for the same call now ends the call: a page without keep-alive in a `PageView` or `TabBarView`, an `AnimatedSwitcher`, a parent that changes type, or `pushReplacement` to another screen with the same call. Keep the widget mounted or give it a `GlobalKey`. To keep the call running after the widget is gone, for example in an in-app picture-in-picture overlay, or to run your own cleanup before the leave, pass `leaveCallOnDispose: false` and call `Call.leave` yourself.
 - `isMobileLandscape` and `isMobilePortrait` are removed.
 - `StreamScreenSize` is `small` for any window shorter than 480, and `StreamScreenSize.fromSize` buckets a size by both axes.
 - `StreamCallContent.callFastReconnectingOverlayBuilder`, `CallFastReconnectingOverlayBuilder` and `CallFastReconnectingProperties` are removed; use `callConnectionBannerBuilder`, which is drawn for every reconnect and gets the call status through `CallConnectionBannerProperties`. `CallNotConnectedProperties.isMigrating` and `isReconnecting` are removed, since `callNotConnectedBuilder` is only used before the call first connects.
@@ -405,11 +408,40 @@
 - `StreamLobbyView` is restyled onto the design system — its typography, spacing and icons come from `StreamTheme`, and the close action is a ghost `StreamButton` instead of a Material `IconButton`.
 - Requires `stream_core_flutter` 0.5.0 for the button styles, error badge and theme accessors the components above use.
 
-## Upcoming (minor)
+## 1.8.0
+
+### ✅ Added
+
+- Added `StreamLobbyVideo.initialMicrophoneEnabled` and `initialCameraEnabled` to override the call's `micDefaultOn` and `cameraDefaultOn` in the preview.
+- Added `Call.setAudioConfigurationPolicy` to set a call's audio policy before joining. Pass `null` to fall back to `StreamVideoOptions.audioConfigurationPolicy`. Stop lobby preview tracks before changing it.
+- Added `CallPreferences.withAudioConfigurationPolicy`, which returns a copy with a different audio policy.
+- `StreamVideoEffectsManager.unregisterAllFilters()` to release native effect processors.
+
+### 🔄 Changed
+
+- `Call.setAudioBitrateProfile` now always allows switching back to `voiceStandard`, and setting the current profile no longer restarts the microphone.
+- Leaving `musicHighQuality` restores noise cancellation only if it was on before. Joining with `musicHighQuality` no longer turns it on for `autoOn` call types.
+- `AudioConfigurationPolicy` values now compare by value.
+- `ActionCallToggleGroup.callUUIDToGroupWith` is now nullable (null when CallKit ungroups the call).
+- `StreamVideo.connect()` now respects `StreamVideoOptions.includeUserDetailsForAutoConnect` when `includeUserDetails` isn't passed.
+- Improved the edge quality and performance of background filters.
 
 ### 🐞 Fixed
 
 - [iOS] A participant's video or screen share no longer stays blank after returning from picture-in-picture.
+- `StreamLobbyVideo` now stops camera and microphone tracks that finish starting after the preview is removed.
+- [iOS] Stereo playout now follows the call's audio policy (`HiFiAudioPolicy`, `ViewerAudioPolicy`) and no longer carries over from an earlier HiFi call.
+- Fixed an audio bitrate profile set before joining being ignored, or lost after a reconnect.
+- `StreamVideo.disconnect()` now leaves all active calls first, so they no longer keep publishing after disconnect.
+- Accepting a call from the native ringing screen on a cold start no longer overwrites the user's name when `includeUserDetailsForAutoConnect` is `false`.
+- Fixed stability issues in background blur and virtual background filters on Android and iOS.
+- Unrecognized ringing events are now ignored.
+- [Android] Fixed a `NoSuchMethodError` crash on Android 5 and 6 (API 21–23).
+- [iOS] `setCallConnected` and `endCall` now respect `configureAudioSession: false`, and `setCallConnected` no longer answers outgoing calls.
+- [iOS] Fixed an outgoing call losing its options and `ActionCallStart` data when another call changed state while it was starting.
+- [iOS] CallKit mute, hold, group and DTMF events now report the call's uuid unchanged instead of uppercased.
+- [iOS] Fixed a held or resumed call toggling between held and active.
+- [iOS] Fixed an error when decoding `ActionCallToggleGroup` after ungrouping a CallKit call.
 
 ## 1.7.2
 

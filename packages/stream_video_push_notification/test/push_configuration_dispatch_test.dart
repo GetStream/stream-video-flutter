@@ -19,6 +19,12 @@ class _MockCoordinatorClient extends Mock implements CoordinatorClient {}
 
 // ignore: subtype_of_sealed_class
 class _MockStreamVideo extends Mock implements StreamVideo {
+  _MockStreamVideo([StreamVideoOptions? options])
+    : options = options ?? StreamVideoOptions();
+
+  @override
+  final StreamVideoOptions options;
+
   @override
   Future<void> dispose() {
     return Future.value();
@@ -28,15 +34,16 @@ class _MockStreamVideo extends Mock implements StreamVideo {
 /// Runs the real `create` path and returns the map the platform was given.
 Map<String, dynamic> _dispatch(
   _CapturingPlatform platform,
-  StreamVideoPushConfiguration? configuration,
-) {
+  StreamVideoPushConfiguration? configuration, {
+  StreamVideoOptions? options,
+}) {
   final provider = StreamVideoPushNotificationManager.create(
     iosPushProvider: const StreamVideoPushProvider.apn(name: 'apn'),
     androidPushProvider: const StreamVideoPushProvider.firebase(name: 'fcm'),
     pushConfiguration: configuration,
   );
 
-  provider(_MockCoordinatorClient(), _MockStreamVideo());
+  provider(_MockCoordinatorClient(), _MockStreamVideo(options));
   return platform.initCalls.last;
 }
 
@@ -147,6 +154,81 @@ void main() {
 
       expect(ios['supportsHolding'], isTrue);
       expect(ios['supportsDTMF'], isTrue);
+    });
+
+    test('by default set no audio session options of their own', () {
+      final ios = iosOf(_dispatch(platform, null));
+
+      expect(ios['audioSessionMode'], isNull);
+      expect(ios['audioSessionPreferredSampleRate'], isNull);
+      expect(ios['audioSessionPreferredIOBufferDuration'], isNull);
+      expect(ios['configureAudioSession'], isNull);
+    });
+  });
+
+  group('when the client is created', () {
+    Map<String, dynamic> audioOf(Map<String, dynamic> configuration) =>
+        (configuration['ios']
+                as Map<String, dynamic>)['ringingAudioConfiguration']
+            as Map<String, dynamic>;
+
+    test("sends the client policy's Apple configuration as the ringing one "
+        'when no ringing policy is set', () {
+      final audio = audioOf(
+        _dispatch(
+          platform,
+          null,
+          options: StreamVideoOptions(
+            audioConfigurationPolicy: const AudioConfigurationPolicy.viewer(),
+          ),
+        ),
+      );
+
+      // The viewer policy defaults to the loudspeaker.
+      expect(
+        audio,
+        const AudioConfigurationPolicy.viewer()
+            .getAppleConfiguration(defaultToSpeaker: true)
+            .toMap(),
+      );
+    });
+
+    test("sends the ringing policy's Apple configuration when one is set", () {
+      final audio = audioOf(
+        _dispatch(
+          platform,
+          null,
+          options: StreamVideoOptions(
+            audioConfigurationPolicy: const AudioConfigurationPolicy.viewer(),
+            ringingAudioConfigurationPolicy:
+                const AudioConfigurationPolicy.broadcaster(),
+          ),
+        ),
+      );
+
+      expect(audio, {
+        'appleAudioCategory': 'playAndRecord',
+        'appleAudioCategoryOptions': [
+          'mixWithOthers',
+          'allowBluetooth',
+          'allowBluetoothA2DP',
+          'allowAirPlay',
+        ],
+        'appleAudioMode': 'voiceChat',
+      });
+    });
+
+    test('sends the ringing configuration next to the other iOS options', () {
+      final configuration = _dispatch(
+        platform,
+        const StreamVideoPushConfiguration(
+          ios: IOSPushConfiguration(iconName: 'CallIcon'),
+        ),
+      );
+
+      final ios = configuration['ios'] as Map<String, dynamic>;
+      expect(ios['iconName'], 'CallIcon');
+      expect(ios['ringingAudioConfiguration'], isNotNull);
     });
   });
 }

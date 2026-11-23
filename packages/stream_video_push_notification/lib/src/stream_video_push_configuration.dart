@@ -203,11 +203,27 @@ class IOSPushConfiguration {
     this.maximumCallGroups,
     @Deprecated('Has no effect. Calls cannot be merged in CallKit.')
     this.maximumCallsPerCallGroup,
+    @Deprecated(
+      'Has no effect. The audio session follows '
+      'StreamVideoOptions.ringingAudioConfigurationPolicy.',
+    )
     this.audioSessionMode,
     @Deprecated('Has no effect. CallKit activates the audio session.')
     this.audioSessionActive,
+    @Deprecated(
+      'Has no effect. The audio session follows '
+      'StreamVideoOptions.ringingAudioConfigurationPolicy.',
+    )
     this.audioSessionPreferredSampleRate,
+    @Deprecated(
+      'Has no effect. The audio session follows '
+      'StreamVideoOptions.ringingAudioConfigurationPolicy.',
+    )
     this.audioSessionPreferredIOBufferDuration,
+    @Deprecated(
+      'Has no effect. The audio session follows '
+      'StreamVideoOptions.ringingAudioConfigurationPolicy.',
+    )
     this.configureAudioSession,
     this.supportsDTMF,
     this.supportsHolding,
@@ -254,14 +270,41 @@ class IOSPushConfiguration {
   /// Has no effect: CallKit is never offered a merge of calls.
   @Deprecated('Has no effect. Calls cannot be merged in CallKit.')
   final int? maximumCallsPerCallGroup;
+
+  /// Has no effect: CallKit calls configure the audio session with
+  /// [StreamVideoOptions.ringingAudioConfigurationPolicy].
+  @Deprecated(
+    'Has no effect. The audio session follows '
+    'StreamVideoOptions.ringingAudioConfigurationPolicy.',
+  )
   final String? audioSessionMode;
 
   /// Has no effect: CallKit activates the audio session when it needs it.
   @Deprecated('Has no effect. CallKit activates the audio session.')
   final bool? audioSessionActive;
 
+  /// Has no effect: CallKit calls configure the audio session with
+  /// [StreamVideoOptions.ringingAudioConfigurationPolicy].
+  @Deprecated(
+    'Has no effect. The audio session follows '
+    'StreamVideoOptions.ringingAudioConfigurationPolicy.',
+  )
   final double? audioSessionPreferredSampleRate;
+
+  /// Has no effect: CallKit calls configure the audio session with
+  /// [StreamVideoOptions.ringingAudioConfigurationPolicy].
+  @Deprecated(
+    'Has no effect. The audio session follows '
+    'StreamVideoOptions.ringingAudioConfigurationPolicy.',
+  )
   final double? audioSessionPreferredIOBufferDuration;
+
+  /// Has no effect: CallKit calls configure the audio session with
+  /// [StreamVideoOptions.ringingAudioConfigurationPolicy].
+  @Deprecated(
+    'Has no effect. The audio session follows '
+    'StreamVideoOptions.ringingAudioConfigurationPolicy.',
+  )
   final bool? configureAudioSession;
 
   /// Whether CallKit's call screen offers a keypad. Off by default.
@@ -310,11 +353,27 @@ class IOSPushConfiguration {
     int? maximumCallGroups,
     @Deprecated('Has no effect. Calls cannot be merged in CallKit.')
     int? maximumCallsPerCallGroup,
+    @Deprecated(
+      'Has no effect. The audio session follows '
+      'StreamVideoOptions.ringingAudioConfigurationPolicy.',
+    )
     String? audioSessionMode,
     @Deprecated('Has no effect. CallKit activates the audio session.')
     bool? audioSessionActive,
+    @Deprecated(
+      'Has no effect. The audio session follows '
+      'StreamVideoOptions.ringingAudioConfigurationPolicy.',
+    )
     double? audioSessionPreferredSampleRate,
+    @Deprecated(
+      'Has no effect. The audio session follows '
+      'StreamVideoOptions.ringingAudioConfigurationPolicy.',
+    )
     double? audioSessionPreferredIOBufferDuration,
+    @Deprecated(
+      'Has no effect. The audio session follows '
+      'StreamVideoOptions.ringingAudioConfigurationPolicy.',
+    )
     bool? configureAudioSession,
     bool? supportsDTMF,
     bool? supportsHolding,

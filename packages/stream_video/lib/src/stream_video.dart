@@ -604,7 +604,37 @@ class StreamVideo extends Disposable implements CallHost {
   /// Disconnects the user from the Stream Video service, and unregisters the
   /// push device. The user ends up disconnected even when a step fails; the
   /// result reports a failure to close the connection.
-  Future<Result<None>> disconnect() => _connection.disconnect();
+  ///
+  /// Leaves every active call first, so none keeps publishing audio and
+  /// video after the user is gone. This also happens when the connection has
+  /// already dropped.
+  Future<Result<None>> disconnect() {
+    // Inside the connection's turn, so connects and disconnects still run in
+    // the order they were called.
+    return _connection.disconnect(beforeDisconnect: _leaveAllCalls);
+  }
+
+  /// Leaves every active call that has not been left yet. A call that fails
+  /// to leave is logged and does not stop the others.
+  Future<void> _leaveAllCalls() async {
+    for (final call in [..._state.activeCalls.value]) {
+      if (call.state.value.status.isDisconnected) continue;
+
+      _logger.i(() => '[disconnect] leaving call: ${call.callCid}');
+      try {
+        final result = await call.leave();
+        if (result is Failure) {
+          _logger.e(
+            () => '[disconnect] leaving call ${call.callCid} failed: $result',
+          );
+        }
+      } catch (e, stk) {
+        _logger.e(
+          () => '[disconnect] leaving call ${call.callCid} failed: $e\n$stk',
+        );
+      }
+    }
+  }
 
   @override
   Future<void> dispose() async {
@@ -1045,6 +1075,7 @@ class StreamVideoOptions {
     this.clientEventsReportingEnabled = true,
     this.ringStatePolling = const RingStatePollingSettings(),
     this.audioConfigurationPolicy = const BroadcasterAudioPolicy(),
+    this.ringingAudioConfigurationPolicy,
   });
 
   final String coordinatorRpcUrl;
@@ -1114,5 +1145,43 @@ class StreamVideoOptions {
   /// Defaults to [BroadcasterAudioPolicy].
   /// Once set it will be applied for all calls.
   /// To change the audio configuration policy after initial setup, use [RtcMediaDeviceNotifier.reinitializeAudioConfiguration].
+  ///
+  /// A ringing call uses [ringingAudioConfigurationPolicy] instead, when set.
   final AudioConfigurationPolicy audioConfigurationPolicy;
+
+  /// The audio configuration policy of ringing calls, incoming and outgoing.
+  ///
+  /// Null, the default, falls back to [audioConfigurationPolicy]. Consider
+  /// setting it when ringing calls need a different policy than the rest, for
+  /// example in an app whose [audioConfigurationPolicy] is
+  /// [AudioConfigurationPolicy.viewer] for livestreams and whose ringing
+  /// calls are voice calls:
+  ///
+  /// ```dart
+  /// StreamVideoOptions(
+  ///   audioConfigurationPolicy: const AudioConfigurationPolicy.viewer(),
+  ///   ringingAudioConfigurationPolicy:
+  ///       const AudioConfigurationPolicy.broadcaster(),
+  /// )
+  /// ```
+  ///
+  /// A call's own policy, from [CallPreferences.audioConfigurationPolicy] or
+  /// [Call.setAudioConfigurationPolicy], still wins over it.
+  ///
+  /// A call keeps the policy it had when it first set up its media, at the
+  /// join or for a lobby preview. A call previewed before it rang keeps the
+  /// policy it had then; [Call.setAudioConfigurationPolicy] gives it another
+  /// before the join.
+  ///
+  /// On iOS, with the push notification package, a call answered from the
+  /// CallKit screen before the app joins it gets this policy's audio settings
+  /// from the start, with recording allowed even for a policy that does not
+  /// record, such as [AudioConfigurationPolicy.viewer], since CallKit needs
+  /// it. The package reads the policy when the client is created.
+  final AudioConfigurationPolicy? ringingAudioConfigurationPolicy;
+
+  /// The policy of a ringing call that sets none of its own:
+  /// [ringingAudioConfigurationPolicy], else [audioConfigurationPolicy].
+  AudioConfigurationPolicy get resolvedRingingAudioConfigurationPolicy =>
+      ringingAudioConfigurationPolicy ?? audioConfigurationPolicy;
 }

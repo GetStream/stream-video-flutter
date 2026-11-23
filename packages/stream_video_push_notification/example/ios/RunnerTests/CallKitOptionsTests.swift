@@ -2,8 +2,8 @@ import XCTest
 
 @testable import stream_video_push_notification
 
-/// Pins the one parser `CallData` and `StreamVideoPushConfiguration` share for their CallKit and
-/// audio session options.
+/// Pins the one parser `CallData` and `StreamVideoPushConfiguration` share for their CallKit
+/// options.
 final class CallKitOptionsTests: XCTestCase {
 
     private let ios: [String: Any] = [
@@ -16,10 +16,6 @@ final class CallKitOptionsTests: XCTestCase {
         "supportsHolding": true,
         "includesCallsInRecents": false,
         "ringtonePath": "ring.caf",
-        "configureAudioSession": false,
-        "audioSessionMode": "voiceChat",
-        "audioSessionPreferredSampleRate": 48000.0,
-        "audioSessionPreferredIOBufferDuration": 0.01,
     ]
 
     private func assertMatchesIOS(_ options: CallKitOptions, line: UInt = #line) {
@@ -32,10 +28,6 @@ final class CallKitOptionsTests: XCTestCase {
         XCTAssertTrue(options.supportsHolding, line: line)
         XCTAssertFalse(options.includesCallsInRecents, line: line)
         XCTAssertEqual(options.ringtonePath, "ring.caf", line: line)
-        XCTAssertFalse(options.configureAudioSession, line: line)
-        XCTAssertEqual(options.audioSessionMode, "voiceChat", line: line)
-        XCTAssertEqual(options.audioSessionPreferredSampleRate, 48000.0, line: line)
-        XCTAssertEqual(options.audioSessionPreferredIOBufferDuration, 0.01, line: line)
     }
 
     func testReadsEveryOptionFromTheIOSSubMap() {

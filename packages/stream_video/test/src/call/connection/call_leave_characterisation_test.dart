@@ -481,8 +481,8 @@ void main() {
   });
 
   test(
-    'a leave while another is tearing down short-circuits, and so does every '
-    'leave after it',
+    'a leave while another is tearing down waits for it, and the teardown '
+    'runs once however many leaves overlap',
     () async {
       final call = harness.buildCall();
       await call.join();
@@ -491,12 +491,16 @@ void main() {
 
       final first = call.leave();
       await pumpEventQueue();
-      await call.leave();
+      var secondDone = false;
+      final second = call.leave().whenComplete(() => secondDone = true);
       final third = call.leave();
       await pumpEventQueue();
 
+      // Still tearing down, so the overlapping leave has not returned.
+      expect(secondDone, isFalse);
+
       disposeGate.complete();
-      await Future.wait([first, third]);
+      await Future.wait([first, second, third]);
 
       verify(
         () => harness.session.leave(reason: any(named: 'reason')),
@@ -824,7 +828,8 @@ void main() {
     });
 
     test(
-      'while a leave is disconnecting, does not end on the server',
+      'while a leave is disconnecting, waits for it and does not end on '
+      'the server',
       () async {
         final call = harness.buildCall();
         await call.join();
@@ -835,10 +840,16 @@ void main() {
 
         final leave = call.leave();
         await pumpEventQueue();
-        final end = await call.end();
+        var endDone = false;
+        final pendingEnd = call.end().whenComplete(() => endDone = true);
+        await pumpEventQueue();
+
+        // Still tearing down, so the end has not returned.
+        expect(endDone, isFalse);
 
         disposeGate.complete();
         await leave;
+        final end = await pendingEnd;
 
         expect(end.isSuccess, isTrue);
         verifyNever(() => harness.permissionsManager.endCall());

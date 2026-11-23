@@ -20,12 +20,12 @@ extension StreamVideoCallkitManager {
             action.fail()
             return
         }
-        guard let (call, effects) = store.startPerformed(uuid: action.callUUID) else {
+        guard let (_, effects) = store.startPerformed(uuid: action.callUUID) else {
             NSLog("startCall: no call data for \(action.callUUID), failing the start action")
             action.fail()
             return
         }
-        configureAudioSession(call.options)
+        audio.starting()
         apply(effects)
         action.fulfill()
     }
@@ -35,16 +35,7 @@ extension StreamVideoCallkitManager {
             action.fail()
             return
         }
-        configureAudioSession(call.options)
-        // Applies the call's options again shortly after answering, unless by then it has ended
-        // or another call was answered.
-        DispatchQueue.main.asyncAfter(deadline: .now() + reconfigureAfterAnswerDelay) {
-            [weak self] in
-            guard let self = self, self.store.answeredCall === call, !call.phase.isEnded else {
-                return
-            }
-            self.configureAudioSession(call.options)
-        }
+        audio.answering(call)
         apply(effects)
         action.fulfill()
     }
@@ -110,13 +101,9 @@ extension StreamVideoCallkitManager {
         action.fulfill()
     }
 
+    /// CallKit gave up waiting for `action`, which is failed. It names no call, so nothing is
+    /// sent to Dart.
     func provider(_ provider: CXProvider, timedOutPerforming action: CXAction) {
-        // Looked up by the action's own uuid, which never names a call, so this always fails.
-        guard store.call(forCallKit: action.uuid) != nil else {
-            action.fail()
-            return
-        }
-        sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_TIMEOUT, store.lastOptions?.toJSON())
-        action.fulfill()
+        action.fail()
     }
 }

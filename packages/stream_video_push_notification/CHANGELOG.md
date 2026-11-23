@@ -17,7 +17,7 @@
 - [Android] `IncomingCallBroadcastReceiver.getIntentConnected` is removed. Report a call connected with `setCallConnected` from Dart.
 - [iOS] The public `Call` class is removed. Nothing public returned it, but native code that named the type no longer compiles.
 - [iOS] `StreamVideoCallkitManager` and `EventCallbackHandler` are no longer public. `StreamVideoPushNotificationPlugin.showIncomingCall`, `startOutgoingCall` and `activeCalls` remain the way to reach CallKit from native code. For the manager's other public members, use instead:
-  - `showIncomingCall(_:fromPushKit:completion:)`: `StreamVideoPushNotificationPlugin.showIncomingCall(data:fromPushKit:completion:)`.
+  - `showIncomingCall(_:fromPushKit:completion:)`: `StreamVideoPushNotificationPlugin.showIncomingCall(data:completion:)`.
   - `startCall` and `activeCalls`: the plugin's `startOutgoingCall` and `activeCalls`.
   - `getAcceptedCall()`: the plugin's `activeCalls()`, where the accepted call has `accepted: true`.
   - `endCall`, `endAllCalls`, `connectedCall`, `muteCall`, `holdCall` and `saveEndCall`: from Dart, `StreamVideoPushNotificationManager`'s `endCall` or `endCallByCid`, `endAllCalls`, `setCallConnected`, `muteCall` or `setCallMutedByCid`, `holdCall` and `reportCallEnded`. Natively, a `CXEndCallAction`, `CXSetMutedCallAction` or `CXSetHeldCallAction` through your own `CXCallController` reaches the plugin's provider as well.
@@ -26,12 +26,15 @@
 - [iOS] Only what an app calls from native code stays public: `CallData`, `VoIPPushRegistryHandler.shared` with `registerForPushNotifications()` and its `PKPushRegistryDelegate` methods, and the plugin's static `showIncomingCall`, `startOutgoingCall`, `activeCalls` and `setDevicePushTokenVoIP`. The native `StreamVideoPushConfiguration`, `StreamVideoIncomingCallConstants`, `VoIPPushRegistryHandler.initChannel` and `initData`, and the plugin's `sharedInstance` and instance VoIP token methods are internal: the plugin sets them up itself, and Dart receives the events.
 - [iOS] `VoIPPushRegistryHandler` no longer conforms to `UNUserNotificationCenterDelegate`, whose methods it never implemented. An app that set `UNUserNotificationCenter.current().delegate = VoIPPushRegistryHandler.shared` no longer compiles; remove that line, or set a delegate of its own.
 - [Android] `IncomingCallBroadcastReceiver.silenceEvents` is removed. Silence ringing events from Dart with `StreamVideoPushNotificationPlatform.silenceEvents()` and `unsilenceEvents()`, as before.
+- [iOS] A `CXStartCallAction` an app requests through its own `CXCallController` is failed. Start outgoing calls with `StreamVideoPushNotificationPlugin.startOutgoingCall(data:)`, which registers them with the plugin first.
 
 ### ⚠️ Deprecated
 
 - [iOS] `StreamVideoPKDelegateManager` is renamed `VoIPPushRegistryHandler`. The old name still works as a deprecated alias with the same members, so an `AppDelegate` that calls `StreamVideoPKDelegateManager.shared.registerForPushNotifications()` compiles and rings unchanged, with a deprecation warning.
 - `IOSPushConfiguration.audioSessionActive` and `IOSParams.audioSessionActive`, and on iOS `CallData.audioSessionActive`, have no effect: CallKit activates the audio session. `dart fix --apply` removes the Dart arguments.
 - `supportsGrouping`, `supportsUngrouping` and `maximumCallsPerCallGroup` on `IOSPushConfiguration` and `IOSParams`, and on iOS on `CallData`, have no effect: CallKit is never offered a merge of calls. `dart fix --apply` removes them.
+- `configureAudioSession`, `audioSessionMode`, `audioSessionPreferredSampleRate` and `audioSessionPreferredIOBufferDuration` on `IOSPushConfiguration` and `IOSParams`, and on iOS on `CallData`, have no effect: CallKit calls use the audio settings of `StreamVideoOptions.ringingAudioConfigurationPolicy`. `dart fix --apply` removes the Dart arguments.
+- [iOS] `StreamVideoPushNotificationPlugin.showIncomingCall(data:fromPushKit:)` and `startOutgoingCall(data:fromPushKit:)`: `fromPushKit` is ignored. Use `showIncomingCall(data:)` and `startOutgoingCall(data:)`.
 
 ### 🔄 Changed
 
@@ -49,8 +52,13 @@
 - `IOSPushConfiguration.supportsDTMF` is off by default. The SDK sends no DTMF tones, so CallKit's keypad did nothing. An app that sends the digits itself from `ActionCallToggleDtmf` turns it on.
 - [iOS] `ActionCallToggleGroup` is no longer sent, and `stream_video` removes it.
 - [iOS] `ActionCallAccept` and `ActionCallDecline` carry the call CallKit answered or ended, instead of the options last given to the plugin, which could belong to another call or be empty.
-- [iOS] Answering a call from CallKit applies that call's audio session options, and again 1.2 s later, instead of the options last given to the plugin, which could belong to another call. The second pass is skipped once the call has ended or another call was answered.
-- [iOS] Only the first activation of a call's audio session applies its audio session options and reports an outgoing call as connecting. A later activation, such as a resume from hold, leaves the session as it is. Every activation now sends `ActionCallToggleAudioSession`, including after the call connected.
+- [iOS] `endCall` ends only the call its id names: a call the plugin reported or started, by its id or the uuid CallKit knows it by, or an outgoing call CallKit has not started yet. Any other id, or none, is logged and ignored.
+- [iOS] `setCallConnected` connects only the call its id names, a call the plugin reported or started. Any other id, or none, is logged and ignored.
+- [iOS] `endCall` sends no event itself. `ActionCallEnded` or `ActionCallDecline` is sent once CallKit ends the call.
+- [iOS] An end CallKit performs for a call the plugin does not track sends `ActionCallTimeout` or `ActionCallEnded` with only the id CallKit knows the call by.
+- [iOS] CallKit calls use the audio settings of `StreamVideoOptions.ringingAudioConfigurationPolicy`, which falls back to `audioConfigurationPolicy`: the settings `stream_video` applies when the call joins, in place of the plugin's own fixed ones. A call answered from the CallKit screen gets them before Dart runs, after a VoIP push too. A policy that does not record, such as `AudioConfigurationPolicy.viewer`, is applied with recording allowed, which CallKit needs.
+- [iOS] The plugin applies those settings only to a call answered from the CallKit screen before the app joins it. A call accepted in the app and an outgoing call keep the settings `stream_video` gave them.
+- [iOS] Only the first activation of a call's audio session reports an outgoing call as connecting. Every activation sends `ActionCallToggleAudioSession`, including after the call connected.
 - [iOS] The plugin tells `stream_webrtc_flutter` when CallKit activates or deactivates the audio session, and when no call is left, so WebRTC's audio engine runs only while the app owns the session. It calls `FlutterWebRTCPlugin.audioEngineControl`, which reaches every registration of the WebRTC plugin, one per Flutter engine. The plugin now links `stream_webrtc_flutter` natively and needs `stream_webrtc_flutter` 5.0.0.
 - [Android] The full-screen incoming call activity follows the redesigned ringing screen: the app surface instead of the blue `#0955fa`, a 104dp avatar, 64dp accept and decline buttons centred 80dp apart above the bottom, and the design system's `#00A46E` and `#D90D10` in place of the Material green and red. An app that sets `IncomingCallNotificationParams` keeps whatever it set.
 - [Android] `IncomingCallNotificationParams.fullScreenTextColor` no longer defaults to white. Left unset, the caller's name, the handle under it and the action labels each take the colour the design gives them rather than all four being painted the same. Setting it still paints all four.
@@ -63,12 +71,15 @@
 
 - `StreamVideoPushNotificationPlatform.requestAudioEndpoint` and `TelecomAudioEndpoint`: on Android, asks Telecom to route the audio of a call it holds to the earpiece, the speaker, a wired headset or a Bluetooth headset, the one with the given `name` among several, and answers whether it did. Always `false` on iOS.
 - `StreamVideoPushNotificationManager.dismissRingingCallByCid` takes a `CallDismissReason`. On Android, for a reason other than `accepted` the call is disconnected from Telecom, as remote for a cancel or an answer on another device and as missed for a missed call; `accepted`, the default, keeps the call registered as before.
-- [iOS] `StreamVideoPushNotificationPlugin.showIncomingCall(data:fromPushKit:completion:)` runs `completion` once CallKit accepted or refused the call, for an app with its own PushKit delegate that calls PushKit's completion from it.
+- [iOS] `StreamVideoPushNotificationPlugin.showIncomingCall(data:completion:)` runs `completion` once CallKit accepted or refused the call, for an app with its own PushKit delegate that calls PushKit's completion from it.
 - Added `StreamVideoPushHandler.handleBackgroundMessage`, which simplifies the ringing setup by running a Stream ringing push through its whole background lifecycle from your Firebase background handler: it builds the client through the factory you give it, observes the ringing events a background isolate can act on, and disposes the client — along with whatever that factory set up — once the user has answered, declined, or let the call time out, or the ring has ended without them, such as when the caller cancels it. It replaces the setup and teardown each integration had to write by hand.
 - [iOS] Added `IOSPushConfiguration.reportOutgoingCalls`, off by default. When on, a ringing call the current user starts is reported to CallKit as an outgoing call, which gives the caller the green call indicator, the proximity sensor and the call on the lock screen. It is a video call in CallKit when the ring asked the callees for video. The CallKit call is marked connected when the call connects and ends with it; ending it from CallKit while it still rings cancels the ring. A ring that arrives while the outgoing call still rings times out and is declined as it would be with no call; once the outgoing call connects, it does not time out and ending it is reported as `ActionCallEnded`. If CallKit refuses to start the call, for example because another call of the app is up, the call goes on without CallKit and the refusal is logged. Leave it off if your app already calls `startOutgoingCall` itself.
 
 ### 🐞 Fixed
 
+- [iOS] A call answered from CallKit with `configureAudioSession: false` had no audio in either direction.
+- [iOS] `setCallConnected` for a call answered from CallKit no longer asks CallKit to answer it again, which sent a second `ActionCallAccept`. A call accepted in the app is still answered in CallKit.
+- [iOS] `endCall` or `setCallConnected` with an id that is neither a call the plugin knows nor a uuid no longer crashes the app, and neither does `endCall` after a VoIP push whose call id was not a uuid.
 - [Android] While the Telecom integration holds a call, `Call.setAudioOutputDevice` also asks Telecom for the matching endpoint. Telecom owns the audio route of a call it holds, and from Android 17, where the integration is on by default, it kept its own route: picking the speaker left the audio on the earpiece. An endpoint Telecom does not offer yet is waited for up to two seconds, a newer pick replaces one still waiting, and an output Telecom has no endpoint for is left to WebRTC alone. Among several Bluetooth headsets, the one with the picked device's name is asked for. An outgoing call started with `startOutgoingCall` after joining gets the call's output once Telecom holds it. A rejoin or an SFU migration applies the output to WebRTC again but leaves Telecom's route alone, which may have moved to a car or a headset since.
 - [Android] While the Telecom integration is on, a call that Telecom fails to answer on Android 14 and later is disconnected in Telecom. It used to be logged as a failed registration and was not disconnected.
 - [Android] An incoming call shown from a ringing push rings natively for the call's `autoRejectTimeout`, after which the client rejects it, instead of a fixed 30 seconds. `StreamVideoPushNotificationManager.showIncomingCall` takes it as `ringTimeout`; on iOS it applies to a call shown through it, not to one CallKit shows from a VoIP push.
@@ -99,17 +110,17 @@
 - `unregisterDevice` deletes the registered push token from the backend even when the current token cannot be read.
 - A registration still in flight when `unregisterDevice` runs no longer stores its token.
 
-## Upcoming (minor)
+## 1.8.0
 
 ### 🐞 Fixed
 
-- A ringing event the package does not recognise is now ignored.
-- [iOS] `setCallConnected` and `endCall` keep the call's options, so `configureAudioSession: false` is respected after the call connects and the plugin no longer reconfigures the audio session set up by WebRTC.
-- [iOS] `setCallConnected` no longer answers an outgoing call, which reconfigured the audio session and emitted an accept event for the app's own call.
-- [iOS] An outgoing call keeps its own options and `ActionCallStart` data when another call is started, shown, connected or ended while it is starting.
-- [iOS] CallKit mute, hold, group and DTMF events report the call's uuid as it was started or shown with, instead of uppercased, so it matches the uuid in the call's other events.
-- [iOS] Holding or resuming a call no longer requests the same hold again, which left the call switching between held and active until it ended.
-- [iOS] Ungrouping a CallKit call no longer throws while the `ActionCallToggleGroup` event is decoded. The event now arrives with a null `callUUIDToGroupWith`.
+- Unrecognized ringing events are now ignored.
+- [Android] Fixed a `NoSuchMethodError` crash on Android 5 and 6 (API 21–23).
+- [iOS] `setCallConnected` and `endCall` now respect `configureAudioSession: false`, and `setCallConnected` no longer answers outgoing calls.
+- [iOS] Fixed an outgoing call losing its options and `ActionCallStart` data when another call changed state while it was starting.
+- [iOS] CallKit mute, hold, group and DTMF events now report the call's uuid unchanged instead of uppercased.
+- [iOS] Fixed a held or resumed call toggling between held and active.
+- [iOS] Fixed an error when decoding `ActionCallToggleGroup` after ungrouping a CallKit call.
 
 ## 1.7.2
 

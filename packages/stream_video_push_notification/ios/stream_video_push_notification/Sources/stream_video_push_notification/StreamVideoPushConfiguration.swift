@@ -10,15 +10,15 @@ final class StreamVideoPushConfiguration: NSObject {
     var useComplexHandle: Bool
     var supportsVideo: Bool
     var maximumCallGroups: Int
-    var audioSessionMode: String
-    var audioSessionPreferredSampleRate: Double
-    var audioSessionPreferredIOBufferDuration: Double
-    var configureAudioSession: Bool
 
     var supportsDTMF: Bool
     var supportsHolding: Bool
     var ringtonePath: String
     var includesCallsInRecents: Bool
+
+    /// The `AppleAudioConfiguration` map of `StreamVideoOptions.ringingAudioConfigurationPolicy`,
+    /// which CallKit calls configure the audio session with. Nil until Dart sends one.
+    var ringingAudioConfiguration: [String: Any]?
 
     /// The default CallKit options: no holding, no keypad and one call group, as the SDK sends
     /// from Dart.
@@ -51,10 +51,10 @@ final class StreamVideoPushConfiguration: NSObject {
         self.supportsHolding = options.supportsHolding
         self.includesCallsInRecents = options.includesCallsInRecents
         self.ringtonePath = options.ringtonePath
-        self.configureAudioSession = options.configureAudioSession
-        self.audioSessionMode = options.audioSessionMode
-        self.audioSessionPreferredSampleRate = options.audioSessionPreferredSampleRate
-        self.audioSessionPreferredIOBufferDuration = options.audioSessionPreferredIOBufferDuration
+        let ios = args["ios"] as? [String: Any]
+        self.ringingAudioConfiguration =
+            (ios ?? [:])["ringingAudioConfiguration"] as? [String: Any]
+            ?? args["ringingAudioConfiguration"] as? [String: Any]
     }
 
     // MARK: - Persistence
@@ -95,21 +95,20 @@ final class StreamVideoPushConfiguration: NSObject {
     }
 
     func toJSON() -> [String: Any] {
-        let ios: [String: Any] = [
+        var ios: [String: Any] = [
             "iconName": iconName,
             "handleType": handleType,
             "useComplexHandle": useComplexHandle,
             "supportsVideo": supportsVideo,
             "maximumCallGroups": maximumCallGroups,
-            "audioSessionMode": audioSessionMode,
-            "audioSessionPreferredSampleRate": audioSessionPreferredSampleRate,
-            "audioSessionPreferredIOBufferDuration": audioSessionPreferredIOBufferDuration,
-            "configureAudioSession": configureAudioSession,
             "supportsDTMF": supportsDTMF,
             "supportsHolding": supportsHolding,
             "ringtonePath": ringtonePath,
             "includesCallsInRecents": includesCallsInRecents,
         ]
+        if let ringingAudioConfiguration = ringingAudioConfiguration {
+            ios["ringingAudioConfiguration"] = ringingAudioConfiguration
+        }
 
         let result: [String: Any] = [
             "headers": headers,

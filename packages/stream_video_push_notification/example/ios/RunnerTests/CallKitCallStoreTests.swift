@@ -96,7 +96,7 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertTrue(call.options.isAccepted)
         XCTAssertTrue(store.answeredCall === call)
 
-        XCTAssertTrue(store.audioSessionActivated().effects.isEmpty)
+        XCTAssertTrue(store.audioSessionActivated().isEmpty)
         XCTAssertEqual(call.phase, .active)
 
         let date = Date()
@@ -130,36 +130,6 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertNil(store.connected(uuid: UUID()))
     }
 
-    // MARK: - Shown from PushKit
-
-    func testAPushKitCallSetsTheFlagAndTheLastOptions() {
-        let pushed = options("pushed")
-
-        store.showRequested(pushed, fromPushKit: true)
-        ring("pushed")
-
-        XCTAssertTrue(store.isFromPushKit)
-        XCTAssertTrue(store.lastOptions === pushed)
-    }
-
-    func testShowingFromTheAppClearsThePushKitFlagAndKeepsTheLastOptions() {
-        let pushed = options("pushed")
-        store.showRequested(pushed, fromPushKit: true)
-
-        store.showRequested(options("from-the-app"), fromPushKit: false)
-
-        XCTAssertFalse(store.isFromPushKit)
-        XCTAssertTrue(store.lastOptions === pushed)
-    }
-
-    func testEndingAllCallsNativelyClearsThePushKitFlag() {
-        store.showRequested(options("pushed"), fromPushKit: true)
-
-        store.allCallsEndRequested()
-
-        XCTAssertFalse(store.isFromPushKit)
-    }
-
     // MARK: - Declined from the CallKit UI
 
     func testDeclinedIncomingCall() {
@@ -173,14 +143,18 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertTrue(store.calls.isEmpty)
     }
 
-    func testAnUntrackedEndFailsAndCarriesTheLastOptions() {
-        store.lastOptions = options("last")
+    func testAnUntrackedEndFailsAndCarriesOnlyItsOwnId() {
+        _ = ring("another")
+        let uuid = UUID()
 
-        let end = store.endPerformed(uuid: UUID())
+        let end = store.endPerformed(uuid: uuid)
 
         XCTAssertFalse(end.fulfills)
         XCTAssertEqual(names(end.effects), [StreamVideoIncomingCallConstants.ACTION_CALL_TIMEOUT])
-        XCTAssertEqual(sentIds(end.effects), ["last"])
+        guard case .send(_, let body)? = end.effects.first else {
+            return XCTFail("no event is sent")
+        }
+        XCTAssertEqual(body as? [String: String], ["id": uuid.uuidString.lowercased()])
     }
 
     // MARK: - The ring times out
@@ -252,11 +226,10 @@ final class CallKitCallStoreTests: XCTestCase {
     func testEachTransitionCarriesItsOwnCallsOptions() {
         let first = ring("first")
         let second = ring("second")
-        store.lastOptions = second.options
 
         XCTAssertEqual(sentIds(store.answerPerformed(uuid: first.identity.callKitUUID)?.effects), ["first"])
         XCTAssertTrue(first.options.isAccepted)
-        XCTAssertFalse(second.options.isAccepted, "the last options belong to another call")
+        XCTAssertFalse(second.options.isAccepted)
         XCTAssertEqual(
             sentIds(store.endPerformed(uuid: first.identity.callKitUUID).effects), ["first"])
     }
@@ -395,27 +368,9 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertFalse(store.hasOngoingCall)
     }
 
-    func testAnsweringMarksTheLastOptionsAcceptedOnlyWhenTheyNameTheAnsweredCall() {
-        let call = ring("a")
-        let sameCall = options("A")
-        store.lastOptions = sameCall
-
-        _ = store.answerPerformed(uuid: call.identity.callKitUUID)
-
-        XCTAssertTrue(sameCall.isAccepted)
-
-        let other = ring("b")
-        let otherLast = options("c")
-        store.lastOptions = otherLast
-        _ = store.answerPerformed(uuid: other.identity.callKitUUID)
-
-        XCTAssertFalse(otherLast.isAccepted)
-    }
-
     func testAnsweringOneOfTwoRingsReportsOnlyThatOneAsAccepted() {
         let answered = ring("answered")
         let ringing = ring("ringing")
-        store.lastOptions = ringing.options
 
         _ = store.answerPerformed(uuid: answered.identity.callKitUUID)
 
@@ -444,15 +399,15 @@ final class CallKitCallStoreTests: XCTestCase {
         store.registerPendingOutgoing(options("outgoing"), uuid: uuid)
         let call = store.startPerformed(uuid: uuid)!.call
         _ = store.connected(uuid: uuid)
-        XCTAssertTrue(store.audioSessionActivated().isFirst)
-        XCTAssertFalse(store.audioSessionActivated().isFirst)
+        _ = store.audioSessionActivated()
+        XCTAssertTrue(call.hasActivatedAudioSession)
 
         let outcome = store.endPerformed(uuid: uuid)
 
         XCTAssertEqual(names(outcome.effects), [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
         XCTAssertNil(store.outgoingCall)
         XCTAssertEqual(call.phase, .ended(nil))
-        XCTAssertTrue(store.audioSessionActivated().isFirst)
+        XCTAssertFalse(store.hasOngoingCall)
     }
 
     func testARingAfterAnEndedOutgoingCallTimesOutAndIsDeclined() {
@@ -504,19 +459,16 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertEqual(names(outcome.effects), [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
     }
 
-    func testAStartCallKitRefusedIsNotTakenForThePushKitCall() {
+    func testAStartCallKitRefusedNamesNoCallToEndAndCannotBePerformed() {
         let refused = options(UUID().uuidString)
         let uuid = UUID(uuidString: refused.uuid)!
         store.registerPendingOutgoing(refused, uuid: uuid)
+        _ = ring("ringing")
+
         store.startRefused(uuid: uuid, options: refused)
-        store.showRequested(options("pushkit"), fromPushKit: true)
-        _ = ring("pushkit")
 
-        XCTAssertTrue(store.wasRefusedToStart(appId: refused.uuid.uppercased()))
-        XCTAssertFalse(store.actsOnPushKitCall(forAppId: refused.uuid))
-
-        store.reset()
-        XCTAssertFalse(store.wasRefusedToStart(appId: refused.uuid))
+        XCTAssertNil(store.callKitUUID(endingDartId: refused.uuid))
+        XCTAssertNil(store.startPerformed(uuid: uuid))
     }
 
     func testAResetForgetsTheOutgoingCall() {
@@ -539,7 +491,6 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertEqual(call.phase, .ended(.remoteEnded))
         XCTAssertTrue(store.calls.isEmpty)
         XCTAssertFalse(store.hasOngoingCall)
-        XCTAssertTrue(store.audioSessionActivated().isFirst)
     }
 
     func testAnActivationAfterAnOutgoingCallEndedDoesNotReportIt() {
@@ -548,7 +499,7 @@ final class CallKitCallStoreTests: XCTestCase {
         let call = store.startPerformed(uuid: uuid)!.call
         _ = store.endPerformed(uuid: uuid)
 
-        XCTAssertTrue(store.audioSessionActivated().effects.isEmpty)
+        XCTAssertTrue(store.audioSessionActivated().isEmpty)
         XCTAssertEqual(call.phase, .ended(nil))
     }
 
@@ -560,10 +511,8 @@ final class CallKitCallStoreTests: XCTestCase {
         store.registerPendingOutgoing(options("outgoing"), uuid: uuid)
         let outgoing = store.startPerformed(uuid: uuid)!.call
 
-        let activation = store.audioSessionActivated()
-        XCTAssertTrue(activation.isFirst)
-        XCTAssertTrue(activation.options === outgoing.options)
-        guard case .reportStartedConnecting(let reported, _)? = activation.effects.first else {
+        let effects = store.audioSessionActivated()
+        guard case .reportStartedConnecting(let reported, _)? = effects.first else {
             return XCTFail("the new outgoing call is not reported")
         }
         XCTAssertEqual(reported, uuid)
@@ -591,25 +540,38 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertNil(store.outgoingCall)
     }
 
-    func testDuringAPushKitRingOnlyAnotherTrackedCallKeepsItsOwnEndAndConnection() {
+    // MARK: - The call Dart asks to end
+
+    func testDartEndsATrackedCallByItsAppIdOrItsCallKitUUID() {
         let outgoing = startOutgoing("outgoing")
-        store.showRequested(options("pushkit"), fromPushKit: true)
-        _ = ring("pushkit")
+        let ringing = ring("Ringing")
+        let uuid = outgoing.identity.callKitUUID
 
-        XCTAssertFalse(store.actsOnPushKitCall(forAppId: "outgoing"))
-        XCTAssertFalse(store.actsOnPushKitCall(forAppId: outgoing.identity.callKitUUID.uuidString))
-        XCTAssertTrue(store.actsOnPushKitCall(forAppId: "pushkit"))
-        XCTAssertTrue(store.actsOnPushKitCall(forAppId: "unknown"))
-        XCTAssertTrue(store.actsOnPushKitCall(forAppId: nil))
+        XCTAssertEqual(store.callKitUUID(endingDartId: "outgoing"), uuid)
+        XCTAssertEqual(store.callKitUUID(endingDartId: uuid.uuidString.lowercased()), uuid)
+        XCTAssertEqual(
+            store.callKitUUID(endingDartId: "ringing"),
+            ringing.identity.callKitUUID)
+    }
 
-        store.isFromPushKit = false
-        XCTAssertFalse(store.actsOnPushKitCall(forAppId: "pushkit"))
+    func testDartEndsAnOutgoingCallCallKitHasNotStartedYet() {
+        let uuid = UUID()
+        store.registerPendingOutgoing(options(uuid.uuidString), uuid: uuid)
+
+        XCTAssertEqual(store.callKitUUID(endingDartId: uuid.uuidString), uuid)
+    }
+
+    func testAnIdNamingNoCallEndsNothing() {
+        _ = ring("ringing")
+
+        XCTAssertNil(store.callKitUUID(endingDartId: "unknown"))
+        XCTAssertNil(store.callKitUUID(endingDartId: UUID().uuidString))
+        XCTAssertNil(store.callKitUUID(endingDartId: ""))
     }
 
     func testOutgoingCall() {
         let uuid = UUID()
         let started = options(uuid.uuidString)
-        store.startRequested(started, fromPushKit: false)
         store.registerPendingOutgoing(started, uuid: uuid)
 
         let start = store.startPerformed(uuid: uuid)
@@ -620,7 +582,7 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertTrue(store.outgoingCall === call)
 
         let activation = Date()
-        guard case .reportStartedConnecting(let reported, let at)? = store.audioSessionActivated(at: activation).effects.first
+        guard case .reportStartedConnecting(let reported, let at)? = store.audioSessionActivated(at: activation).first
         else {
             return XCTFail("starting to connect is not reported to CallKit")
         }
@@ -632,11 +594,8 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertNotNil(call.connectedAt)
     }
 
-    func testAStartUsesThePendingOptionsThenTheLastOnesThenFails() {
+    func testAStartUsesThePendingOptionsElseFails() {
         XCTAssertNil(store.startPerformed(uuid: UUID()))
-
-        store.lastOptions = options("last")
-        XCTAssertEqual(store.startPerformed(uuid: UUID())?.call.options.uuid, "last")
 
         let uuid = UUID()
         store.registerPendingOutgoing(options("pending"), uuid: uuid)
@@ -659,18 +618,6 @@ final class CallKitCallStoreTests: XCTestCase {
 
     // MARK: - What Dart reads back
 
-    func testOptionsForArgsPreferTheLastOptionsThenTheTrackedCall() {
-        let uuid = UUID()
-        _ = store.incomingReported(options(uuid.uuidString), uuid: uuid)
-        store.lastOptions = options("last")
-
-        XCTAssertTrue(store.options(for: ["id": "LAST"]) === store.lastOptions)
-        XCTAssertTrue(
-            store.options(for: ["id": uuid.uuidString]) === store.call(forCallKit: uuid)!.options)
-        XCTAssertEqual(store.options(for: ["id": "other", "callerName": "Ada"]).callerName, "Ada")
-        XCTAssertEqual(store.options(for: ["callerName": "Ada"]).uuid, "")
-    }
-
     func testActiveCallsKeepTheirShape() {
         let tracked = UUID()
         _ = store.incomingReported(options(tracked.uuidString), uuid: tracked)
@@ -688,11 +635,14 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertEqual(calls[1] as? [String: String], ["id": untracked.uuidString.lowercased()])
     }
 
-    func testAResetForgetsEveryCallAndThePendingOutgoingOnes() {
+    func testAResetForgetsEveryCallThePendingOutgoingOnesAndTheReRegistrations() {
         let answered = ring("answered")
         _ = store.answerPerformed(uuid: answered.identity.callKitUUID)
         let pending = UUID()
         store.registerPendingOutgoing(options("pending"), uuid: pending)
+        let held = ring("held")
+        let reRegistration = UUID()
+        store.reRegistrationRequested(held, as: reRegistration)
 
         store.reset()
 
@@ -700,6 +650,7 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertEqual(answered.phase, .ended(nil))
         XCTAssertNil(store.answeredCall)
         XCTAssertNil(store.startPerformed(uuid: pending))
+        XCTAssertFalse(store.isReRegistrationUUID(reRegistration))
     }
 }
 

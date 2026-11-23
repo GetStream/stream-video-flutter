@@ -43,7 +43,10 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
                 }
 
                 // Kept for the cold-start VoIP push path, where no Dart code has run yet.
-                StreamVideoPushConfiguration(args: arguments).persist()
+                let configuration = StreamVideoPushConfiguration(args: arguments)
+                configuration.persist()
+                callKitManager.audio.ringingConfiguration =
+                    configuration.ringingAudioConfiguration
 
                 VoIPPushRegistryHandler.shared.initData(data: arguments)
                 callKitManager.initCallkitProvider(CallData(args: arguments))
@@ -64,19 +67,32 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
         sharedInstance?.setDevicePushTokenVoIP(deviceToken: deviceToken)
     }
 
+    /// Asks CallKit to start `data` as an outgoing call.
+    @objc public static func startOutgoingCall(data: CallData) {
+        StreamVideoCallkitManager.shared.startCall(data)
+    }
+
+    /// Asks CallKit to start `data` as an outgoing call. `fromPushKit` is ignored.
+    @available(*, deprecated, renamed: "startOutgoingCall(data:)", message: "fromPushKit is ignored.")
     @objc public static func startOutgoingCall(
         data: CallData,
         fromPushKit: Bool
     ) {
-        StreamVideoCallkitManager.shared.startCall(data, fromPushKit: fromPushKit)
+        startOutgoingCall(data: data)
     }
 
+    /// Reports an incoming call to CallKit.
+    @objc public static func showIncomingCall(data: CallData) {
+        StreamVideoCallkitManager.shared.showIncomingCall(data)
+    }
+
+    /// Reports an incoming call to CallKit. `fromPushKit` is ignored.
+    @available(*, deprecated, renamed: "showIncomingCall(data:)", message: "fromPushKit is ignored.")
     @objc public static func showIncomingCall(
         data: CallData,
         fromPushKit: Bool
     ) {
-        StreamVideoCallkitManager.shared.showIncomingCall(
-            data, fromPushKit: fromPushKit)
+        showIncomingCall(data: data)
     }
 
     /// Reports an incoming call to CallKit, and runs `completion` once CallKit accepted or
@@ -84,11 +100,9 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
     /// delegate can call PushKit's completion from it.
     @objc public static func showIncomingCall(
         data: CallData,
-        fromPushKit: Bool,
         completion: @escaping () -> Void
     ) {
-        StreamVideoCallkitManager.shared.showIncomingCall(
-            data, fromPushKit: fromPushKit, completion: completion)
+        StreamVideoCallkitManager.shared.showIncomingCall(data, completion: completion)
     }
 
     @objc public static func activeCalls() -> [[String: Any]]? {

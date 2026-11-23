@@ -13,16 +13,6 @@ enum CallKitEffect {
     case postAudioInterruptionEnded
 }
 
-/// What an audio session activation resolves to.
-struct CallKitAudioActivation {
-    /// Whether it is the first activation for a call, so the session is configured.
-    let isFirst: Bool
-    /// The options to configure the session with: the first call awaiting its first activation's,
-    /// else `lastOptions`.
-    let options: CallData?
-    let effects: [CallKitEffect]
-}
-
 /// What CallKit's end action resolves to.
 struct CallKitEndOutcome {
     /// Whether the action is fulfilled; it fails for a call the store does not track.
@@ -40,22 +30,9 @@ final class CallKitCallStore {
 
     /// The options of outgoing calls whose start action CallKit has not performed yet.
     private var pendingOutgoingOptions: [UUID: CallData] = [:]
-    /// The app ids of outgoing calls CallKit refused to start, lowercased.
-    private var refusedOutgoingIds: Set<String> = []
 
     /// Every uuid a call was asked to be registered again as.
     private var reRegistrationUUIDs: Set<UUID> = []
-
-    /// The options of the call the plugin was last asked about: the call last shown or started,
-    /// by Dart or from PushKit, or the call Dart last asked to end or connect while
-    /// `isFromPushKit` was false. Events use them where no tracked call matches.
-    var lastOptions: CallData?
-
-    /// Whether the call last shown or started came from PushKit, with no request from Dart to
-    /// end or connect a call since and no native end of all calls. While true, Dart's requests
-    /// to end or connect a call act on `lastOptions`, unless the id they name is another tracked
-    /// call: see `actsOnPushKitCall(forAppId:)`.
-    var isFromPushKit = false
 
     /// The call CallKit last answered, until it ends.
     ///
@@ -130,33 +107,16 @@ final class CallKitCallStore {
         call(forCallKit: uuid)?.identity.reportedId ?? uuid.uuidString.lowercased()
     }
 
-    /// Whether Dart's `endCall` or `callConnected` for the call `id` names acts on the call
-    /// PushKit showed, `lastOptions`.
-    ///
-    /// True while `isFromPushKit` is, unless `id` names a tracked call other than the PushKit
-    /// one: a call the app started or showed itself keeps its own end and connection while a
-    /// VoIP push rings.
-    func actsOnPushKitCall(forAppId id: String?) -> Bool {
-        guard isFromPushKit else { return false }
-        if let id = id, refusedOutgoingIds.contains(id.lowercased()) { return false }
-        guard let id = id, let named = call(forAppId: id) else { return true }
-        guard let pushKitId = lastOptions?.uuid else { return false }
-        return named === call(forAppId: pushKitId)
-    }
-
-    /// The options of the call `args` names: the last options when they name it, else the
-    /// tracked call's, else a call built from `args`.
-    func options(for args: [String: Any]) -> CallData {
-        guard let id = args["id"] as? String else {
-            return CallData(args: args)
-        }
-        if let lastOptions = lastOptions, lastOptions.uuid.lowercased() == id.lowercased() {
-            return lastOptions
-        }
+    /// The uuid CallKit knows the call Dart names as `id` by, for Dart's request to end it: the
+    /// tracked call's, else `id` itself when it is the uuid of an outgoing call CallKit has not
+    /// started yet. Nil when `id` names neither.
+    func callKitUUID(endingDartId id: String) -> UUID? {
         if let call = call(forAppId: id) {
-            return call.options
+            return call.identity.callKitUUID
         }
-        return CallData(args: args)
+        guard let uuid = UUID(uuidString: id), pendingOutgoingOptions[uuid] != nil
+        else { return nil }
+        return uuid
     }
 
     /// The `activeCalls` payload for the calls CallKit knows, in its order. A uuid a tracked call
@@ -177,22 +137,6 @@ final class CallKitCallStore {
 
     // MARK: - Calls the plugin is asked for
 
-    /// The app or a push asked to show `options` as an incoming call.
-    func showRequested(_ options: CallData, fromPushKit: Bool) {
-        isFromPushKit = fromPushKit
-        if fromPushKit {
-            lastOptions = options
-        }
-    }
-
-    /// The app or a push asked to start `options` as an outgoing call.
-    ///
-    /// Starting records what showing does today. It has its own name so callers say which they
-    /// mean, and a difference between the two lands in one place.
-    func startRequested(_ options: CallData, fromPushKit: Bool) {
-        showRequested(options, fromPushKit: fromPushKit)
-    }
-
     func registerPendingOutgoing(_ options: CallData, uuid: UUID) {
         if pendingOutgoingOptions[uuid] == nil {
             pendingOutgoingOptions[uuid] = options
@@ -206,16 +150,10 @@ final class CallKitCallStore {
         }
     }
 
-    /// CallKit refused to start `options` as `uuid`. Dart's later `endCall` and `callConnected`
-    /// for the call act on nothing, rather than on a call PushKit showed meanwhile.
+    /// CallKit refused to start `options` as `uuid`. The call is never tracked, so Dart's later
+    /// `endCall` and `callConnected` for it act on nothing.
     func startRefused(uuid: UUID, options: CallData) {
         dropPendingOutgoing(uuid: uuid, ifStill: options)
-        refusedOutgoingIds.insert(options.uuid.lowercased())
-    }
-
-    /// Whether CallKit refused to start the outgoing call `appId` names.
-    func wasRefusedToStart(appId: String) -> Bool {
-        refusedOutgoingIds.contains(appId.lowercased())
     }
 
     // MARK: - Transitions
@@ -243,10 +181,10 @@ final class CallKitCallStore {
         return [.send(event: StreamVideoIncomingCallConstants.ACTION_CALL_TIMEOUT, body: options.toJSON())]
     }
 
-    /// CallKit performed the start action for `uuid`. Nil when there are no options to start it
-    /// with.
+    /// CallKit performed the start action for `uuid`. Nil when the plugin did not ask CallKit to
+    /// start it, so there are no options to start it with.
     func startPerformed(uuid: UUID) -> (call: CallKitCall, effects: [CallKitEffect])? {
-        guard let options = pendingOutgoingOptions.removeValue(forKey: uuid) ?? lastOptions else {
+        guard let options = pendingOutgoingOptions.removeValue(forKey: uuid) else {
             return nil
         }
         let call = CallKitCall(
@@ -259,14 +197,11 @@ final class CallKitCallStore {
 
     /// CallKit performed the answer action for `uuid`. Nil for a call the store does not track.
     ///
-    /// Marks the call's options accepted, and the last options too when they name this call.
+    /// Marks the call's options accepted.
     @discardableResult
     func answerPerformed(uuid: UUID) -> (call: CallKitCall, effects: [CallKitEffect])? {
         guard let call = call(forCallKit: uuid) else { return nil }
         call.reportsConnection = true
-        if let last = lastOptions, last.uuid.lowercased() == call.identity.appId.lowercased() {
-            last.isAccepted = true
-        }
         call.options.isAccepted = true
         call.move(to: .answering)
         lastAnsweredCall = call
@@ -274,6 +209,8 @@ final class CallKitCallStore {
     }
 
     /// CallKit performed the end action for `uuid`.
+    ///
+    /// For a call the store does not track, the event carries only the id CallKit knows it by.
     func endPerformed(uuid: UUID) -> CallKitEndOutcome {
         let noActiveCall = answeredCall == nil && connectedOutgoingCall == nil
         guard let call = call(forCallKit: uuid) else {
@@ -282,7 +219,8 @@ final class CallKitCallStore {
                 ? StreamVideoIncomingCallConstants.ACTION_CALL_TIMEOUT
                 : StreamVideoIncomingCallConstants.ACTION_CALL_ENDED
             return CallKitEndOutcome(
-                fulfills: false, effects: [.send(event: event, body: lastOptions?.toJSON())])
+                fulfills: false,
+                effects: [.send(event: event, body: ["id": reportedId(for: uuid)])])
         }
         call.move(to: .ended(nil))
         remove(call)
@@ -362,28 +300,23 @@ final class CallKitCallStore {
 
     /// CallKit activated the audio session.
     ///
-    /// It is the first activation when the answered or the outgoing call has not had one yet, or
-    /// neither is live. Each call having its first activation starts connecting, and an outgoing
-    /// one is reported to CallKit as connecting; a call activated before, such as a held one, is
-    /// left as it is. Afterwards every live call counts as activated, and a resumed call is
-    /// marked activated.
-    func audioSessionActivated(at date: Date = Date()) -> CallKitAudioActivation {
-        let awaiting = callsAwaitingFirstActivation
-        let activation = CallKitAudioActivation(
-            isFirst: callsUsingAudio.isEmpty || !awaiting.isEmpty,
-            options: awaiting.first?.options ?? lastOptions,
-            effects: awaiting.compactMap { call in
-                call.move(to: .active)
-                guard call.direction == .outgoing else { return nil }
-                return .reportStartedConnecting(call.identity.callKitUUID, date)
-            })
+    /// Each answered or outgoing call having its first activation starts connecting, and an
+    /// outgoing one is reported to CallKit as connecting; a call activated before, such as a held
+    /// one, is left as it is. Afterwards every live call counts as activated, and a resumed call
+    /// is marked activated.
+    func audioSessionActivated(at date: Date = Date()) -> [CallKitEffect] {
+        let effects: [CallKitEffect] = callsAwaitingFirstActivation.compactMap { call in
+            call.move(to: .active)
+            guard call.direction == .outgoing else { return nil }
+            return .reportStartedConnecting(call.identity.callKitUUID, date)
+        }
         for call in callsUsingAudio {
             call.hasActivatedAudioSession = true
             if call.phase.isResumed {
                 call.move(to: .resumed(activated: true))
             }
         }
-        return activation
+        return effects
     }
 
     /// The app reported the call CallKit knows as `uuid` connected. Nil for a call the store does
@@ -402,17 +335,14 @@ final class CallKitCallStore {
         call(forCallKit: uuid)?.move(to: .ended(reason))
     }
 
-    /// The app ended all calls natively.
-    func allCallsEndRequested() {
-        isFromPushKit = false
-    }
-
-    /// CallKit reset the provider: every tracked call and pending outgoing call is gone.
+    /// CallKit reset the provider: every tracked call, pending outgoing call and re-registration
+    /// is gone.
     func reset() {
         calls.forEach { $0.move(to: .ended(nil)) }
         calls.removeAll()
         pendingOutgoingOptions.removeAll()
-        refusedOutgoingIds.removeAll()
+        reRegistrationUUIDs.removeAll()
+        lastAnsweredCall = nil
     }
 
     func remove(_ call: CallKitCall) {

@@ -110,6 +110,27 @@ void main() {
     });
 
     test(
+      'tells the native call UI the ring is over when it is left while its join awaits an answer',
+      () async {
+        ring();
+        final ringing = streamVideo.state.incomingCall.value!;
+
+        final joining = ringing.join();
+        await pumpEventQueue();
+        expect(ringing.isActiveCall, isFalse);
+
+        await ringing.leave();
+
+        expect(await joining, isA<Failure>());
+        verify(() => mockPushManager.onRingEnded(cid)).called(1);
+        verifyNever(
+          () =>
+              mockPushManager.endCallByCid(any(), silent: any(named: 'silent')),
+        );
+      },
+    );
+
+    test(
       'tells the native call UI the ring of a ringing call is over',
       () async {
         ring();

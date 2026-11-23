@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
@@ -102,6 +104,124 @@ void main() {
         ).called(greaterThan(0));
       },
     );
+
+    test(
+      'a concurrent leave waits for the in-flight cleanup to finish',
+      () async {
+        final disposeGate = Completer<void>();
+        when(callSession.dispose).thenAnswer((_) => disposeGate.future);
+
+        final call = createTestCall(
+          networkMonitor: setupMockInternetConnection(
+            statusStream: internetStatusController,
+          ),
+          coordinatorClient: coordinatorClient,
+          sessionFactory: setupMockSessionFactory(
+            callSession: callSession,
+          ),
+          streamVideo: mockStreamVideo,
+        );
+
+        await call.join();
+
+        var firstDone = false;
+        var secondDone = false;
+        var thirdDone = false;
+        final first = call.leave().whenComplete(() => firstDone = true);
+        await pumpEventQueue();
+        final second = call.leave().whenComplete(() => secondDone = true);
+        await pumpEventQueue();
+        final third = call.leave().whenComplete(() => thirdDone = true);
+        await pumpEventQueue();
+
+        // The first leave is blocked in session dispose; nobody may return.
+        expect(firstDone, isFalse);
+        expect(secondDone, isFalse);
+        expect(thirdDone, isFalse);
+        expect(call.state.value.status.isDisconnected, isFalse);
+
+        disposeGate.complete();
+        final results = await Future.wait([first, second, third]);
+
+        expect(results.every((r) => r.isSuccess), isTrue);
+        expect(call.state.value.status.isDisconnected, isTrue);
+        // Only the first leave ran the cleanup.
+        verify(callSession.dispose).called(1);
+      },
+    );
+
+    test('a leave during end waits for the end cleanup to finish', () async {
+      final disposeGate = Completer<void>();
+      when(callSession.dispose).thenAnswer((_) => disposeGate.future);
+      final permissionsManager = MockPermissionsManager();
+      when(
+        permissionsManager.endCall,
+      ).thenAnswer((_) async => const Result.success(none));
+
+      final call = createTestCall(
+        networkMonitor: setupMockInternetConnection(
+          statusStream: internetStatusController,
+        ),
+        coordinatorClient: coordinatorClient,
+        sessionFactory: setupMockSessionFactory(
+          callSession: callSession,
+        ),
+        streamVideo: mockStreamVideo,
+        permissionManager: permissionsManager,
+      );
+
+      await call.join();
+
+      final end = call.end();
+      await pumpEventQueue();
+      var leaveDone = false;
+      final leave = call.leave().whenComplete(() => leaveDone = true);
+      await pumpEventQueue();
+
+      expect(leaveDone, isFalse);
+
+      disposeGate.complete();
+      await end;
+      expect((await leave).isSuccess, isTrue);
+      verify(callSession.dispose).called(1);
+    });
+
+    test('an end during leave waits and skips the server request', () async {
+      final disposeGate = Completer<void>();
+      when(callSession.dispose).thenAnswer((_) => disposeGate.future);
+      final permissionsManager = MockPermissionsManager();
+      when(
+        permissionsManager.endCall,
+      ).thenAnswer((_) async => const Result.success(none));
+
+      final call = createTestCall(
+        networkMonitor: setupMockInternetConnection(
+          statusStream: internetStatusController,
+        ),
+        coordinatorClient: coordinatorClient,
+        sessionFactory: setupMockSessionFactory(
+          callSession: callSession,
+        ),
+        streamVideo: mockStreamVideo,
+        permissionManager: permissionsManager,
+      );
+
+      await call.join();
+
+      final leave = call.leave();
+      await pumpEventQueue();
+      var endDone = false;
+      final end = call.end().whenComplete(() => endDone = true);
+      await pumpEventQueue();
+
+      expect(endDone, isFalse);
+
+      disposeGate.complete();
+      await leave;
+      expect((await end).isSuccess, isTrue);
+      verifyNever(permissionsManager.endCall);
+      verify(callSession.dispose).called(1);
+    });
 
     test('should return success when already disconnected', () async {
       // Arrange - join and then leave to get into disconnected state

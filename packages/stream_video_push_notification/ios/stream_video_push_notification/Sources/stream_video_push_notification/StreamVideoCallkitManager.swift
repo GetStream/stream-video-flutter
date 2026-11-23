@@ -13,14 +13,16 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     /// Every call the plugin tracks.
     var store = CallKitCallStore()
 
-    let transactions = CallKitTransactionRequester()
+    /// Asks CallKit to start, answer, mute, hold or end calls. Tests replace it with one on a
+    /// fake call controller.
+    var transactions = CallKitTransactionRequester() {
+        didSet { observeEndRefusals() }
+    }
 
     /// Configures the audio session and tells WebRTC when it may use it.
     var audio = CallKitAudioSessionCoordinator() {
         didSet { observeEngineStartFailures() }
     }
-    /// How long after answering the answered call's audio session options are applied again.
-    var reconfigureAfterAnswerDelay: DispatchTimeInterval = .milliseconds(1200)
 
     /// Brings a call's audio back after another app's call held it. Made on first use, the
     /// first audio session activation at the latest, so its observers are installed only once a
@@ -42,10 +44,14 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
 
     private override init() {
         super.init()
+        observeEndRefusals()
+        observeEngineStartFailures()
+    }
+
+    private func observeEndRefusals() {
         transactions.onEndRefused = { [weak self] uuid in
             self?.clearCallAfterRefusedEnd(uuid)
         }
-        observeEngineStartFailures()
     }
 
     private func observeEngineStartFailures() {
@@ -54,29 +60,11 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
     }
 
-    func getAcceptedCall() -> CallData? {
-        let data = store.lastOptions
-        let answeredId = store.answeredCall?.identity.appId
-        NSLog("Call data ids \(String(describing: data?.uuid)) \(String(describing: answeredId))")
-        if data?.uuid.lowercased() == answeredId?.lowercased() {
-            return data
-        }
-        return nil
-    }
-
-    func showIncomingCall(_ data: CallData, fromPushKit: Bool) {
-        showIncomingCall(data, fromPushKit: fromPushKit, completion: nil)
-    }
-
     /// Reports an incoming call to CallKit.
     ///
     /// `completion` runs once CallKit has accepted or refused the call, or straight away when the
     /// call could not be reported at all.
-    func showIncomingCall(
-        _ data: CallData, fromPushKit: Bool, completion: (() -> Void)?
-    ) {
-        store.showRequested(data, fromPushKit: fromPushKit)
-
+    func showIncomingCall(_ data: CallData, completion: (() -> Void)? = nil) {
         let callUpdate = self.callUpdate(data)
 
         initCallkitProvider(data)
@@ -92,7 +80,6 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
             return
         }
 
-        self.configureAudioSession(data)
         provider.reportNewIncomingCall(with: uuid, update: callUpdate) { error in
             if let error = error {
                 self.sendIncomingCallFailedEvent(data, error)
@@ -100,15 +87,13 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
                 return
             }
 
-            self.configureAudioSession(data)
             self.apply(self.store.incomingReported(data, uuid: uuid))
             self.endCallNotExist(data)
             completion?()
         }
     }
 
-    func startCall(_ data: CallData, fromPushKit: Bool) {
-        store.startRequested(data, fromPushKit: fromPushKit)
+    func startCall(_ data: CallData) {
         initCallkitProvider(data)
         requestStart(data)
     }
@@ -185,37 +170,36 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
     }
 
-    func endCall(_ data: CallData) {
-        let uuid: UUID
-        let sentEnded = store.actsOnPushKitCall(forAppId: data.uuid)
-        if sentEnded {
-            uuid = store.callKitUUID(forAppId: store.lastOptions!.uuid)!
-            store.isFromPushKit = false
-            self.sendEvent(StreamVideoIncomingCallConstants.ACTION_CALL_ENDED, data.toJSON())
-        } else {
-            uuid = store.callKitUUID(forAppId: data.uuid)!
+    /// Asks CallKit to end the call Dart names as `id`: a tracked call, or an outgoing call
+    /// CallKit has not started yet. Any other id is logged and ignored.
+    func endCall(_ id: String) {
+        guard let uuid = store.callKitUUID(endingDartId: id) else {
+            NSLog("[StreamCallKit] endCall for \(id), which names no call, ignored")
+            return
         }
         if let call = store.call(forCallKit: uuid), case .reRegistering = call.phase {
             // CallKit already took the call as ended, so an end action would be refused.
-            endReRegisteringCall(call, reason: nil, notifyDart: !sentEnded)
+            endReRegisteringCall(call, reason: nil, notifyDart: true)
             return
         }
         transactions.end(uuid: uuid)
     }
 
-    func connectedCall(_ data: CallData) {
-        let uuid: UUID
-        if store.actsOnPushKitCall(forAppId: data.uuid) {
-            uuid = store.callKitUUID(forAppId: store.lastOptions!.uuid)!
-            store.isFromPushKit = false
-        } else {
-            uuid = store.callKitUUID(forAppId: data.uuid)!
+    /// Reports the tracked call Dart names as `id` connected, and answers it when it still
+    /// rings. Any other id is logged and ignored.
+    func connectedCall(_ id: String) {
+        guard let tracked = store.call(forAppId: id) else {
+            NSLog("[StreamCallKit] callConnected for \(id), which names no tracked call, ignored")
+            return
         }
+        let uuid = tracked.identity.callKitUUID
         guard let (call, effects) = store.connected(uuid: uuid) else {
             return
         }
         apply(effects)
-        if call.direction == .incoming {
+        // Only a ring the app accepted is answered here. CallKit answered one taken from its
+        // screen already, and a second answer would send Dart a second accept.
+        if call.direction == .incoming && call.phase == .ringing {
             transactions.answer(uuid: uuid)
         }
     }
@@ -225,7 +209,6 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
     }
 
     func endAllCalls() {
-        store.allCallsEndRequested()
         transactions.endAll()
     }
 

@@ -19,10 +19,47 @@ import Foundation
     @objc public var supportsHolding: Bool
     @objc public var includesCallsInRecents: Bool
     @objc public var ringtonePath: String
-    @objc public var configureAudioSession: Bool
-    @objc public var audioSessionMode: String
-    @objc public var audioSessionPreferredSampleRate: Double
-    @objc public var audioSessionPreferredIOBufferDuration: Double
+
+    /// Always true: CallKit calls use the audio settings of
+    /// `StreamVideoOptions.ringingAudioConfigurationPolicy`.
+    @available(
+        *, deprecated,
+        message: "Has no effect. The audio session follows StreamVideoOptions.ringingAudioConfigurationPolicy."
+    )
+    @objc public var configureAudioSession: Bool {
+        get { true }
+        set {}
+    }
+
+    /// Always empty: the mode comes from `StreamVideoOptions.ringingAudioConfigurationPolicy`.
+    @available(
+        *, deprecated,
+        message: "Has no effect. The audio session follows StreamVideoOptions.ringingAudioConfigurationPolicy."
+    )
+    @objc public var audioSessionMode: String {
+        get { "" }
+        set {}
+    }
+
+    /// Always 0: no preferred sample rate is set.
+    @available(
+        *, deprecated,
+        message: "Has no effect. The audio session follows StreamVideoOptions.ringingAudioConfigurationPolicy."
+    )
+    @objc public var audioSessionPreferredSampleRate: Double {
+        get { 0 }
+        set {}
+    }
+
+    /// Always 0: no preferred IO buffer duration is set.
+    @available(
+        *, deprecated,
+        message: "Has no effect. The audio session follows StreamVideoOptions.ringingAudioConfigurationPolicy."
+    )
+    @objc public var audioSessionPreferredIOBufferDuration: Double {
+        get { 0 }
+        set {}
+    }
 
     /// Always true: CallKit activates the audio session when it needs it.
     @available(*, deprecated, message: "Has no effect. CallKit activates the audio session.")
@@ -89,10 +126,6 @@ import Foundation
         self.supportsHolding = options.supportsHolding
         self.includesCallsInRecents = options.includesCallsInRecents
         self.ringtonePath = options.ringtonePath
-        self.configureAudioSession = options.configureAudioSession
-        self.audioSessionMode = options.audioSessionMode
-        self.audioSessionPreferredSampleRate = options.audioSessionPreferredSampleRate
-        self.audioSessionPreferredIOBufferDuration = options.audioSessionPreferredIOBufferDuration
     }
 
     open func toJSON() -> [String: Any] {
@@ -106,10 +139,6 @@ import Foundation
             "supportsHolding": supportsHolding,
             "includesCallsInRecents": includesCallsInRecents,
             "ringtonePath": ringtonePath,
-            "configureAudioSession": configureAudioSession,
-            "audioSessionMode": audioSessionMode,
-            "audioSessionPreferredSampleRate": audioSessionPreferredSampleRate,
-            "audioSessionPreferredIOBufferDuration": audioSessionPreferredIOBufferDuration,
         ]
         let map: [String: Any] = [
             "uuid": uuid,
