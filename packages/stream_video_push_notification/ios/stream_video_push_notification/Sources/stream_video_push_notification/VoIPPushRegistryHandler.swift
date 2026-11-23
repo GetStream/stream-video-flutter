@@ -85,10 +85,7 @@ public class VoIPPushRegistryHandler: NSObject, PKPushRegistryDelegate {
             persistedIconName: UserDefaults.standard.string(forKey: "callKit_iconName"))
 
         // Show call incoming notification.
-        StreamVideoPushNotificationPlugin.showIncomingCall(
-            data: data,
-            fromPushKit: true
-        )
+        StreamVideoPushNotificationPlugin.showIncomingCall(data: data)
 
         completion()
     }

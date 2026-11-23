@@ -10,20 +10,16 @@ extension StreamVideoCallkitManager {
     func handle(_ command: PushCommand, result: @escaping FlutterResult) {
         switch command {
         case .showIncomingCall(let data):
-            store.lastOptions = data
-            showIncomingCall(data, fromPushKit: false)
+            showIncomingCall(data)
             result(true)
         case .startCall(let data):
-            store.lastOptions = data
-            self.startCall(data, fromPushKit: false)
+            self.startCall(data)
             result(true)
         case .endCall(let args):
-            if let id = args?["id"] as? String, store.wasRefusedToStart(appId: id) {
-                NSLog("[StreamCallKit] endCall for \(id), which CallKit refused to start, ignored")
-            } else if store.actsOnPushKitCall(forAppId: args?["id"] as? String) {
-                self.endCall(store.lastOptions!)
-            } else if let args = args {
-                self.endCall(optionsKeepingThePushKitCall(for: args))
+            if let id = args?["id"] as? String {
+                self.endCall(id)
+            } else {
+                NSLog("[StreamCallKit] endCall without a call id, ignored")
             }
             result(true)
         case .muteCall(let callId, let isMuted):
@@ -39,19 +35,16 @@ extension StreamVideoCallkitManager {
             self.holdCall(callId, onHold: onHold)
             result(true)
         case .callConnected(let args):
-            if let id = args?["id"] as? String, store.wasRefusedToStart(appId: id) {
-                NSLog("[StreamCallKit] callConnected for \(id), which CallKit refused to start, ignored")
-            } else if store.actsOnPushKitCall(forAppId: args?["id"] as? String) {
-                self.connectedCall(store.lastOptions!)
-            } else if let args = args {
-                self.connectedCall(optionsKeepingThePushKitCall(for: args))
+            if let id = args?["id"] as? String {
+                self.connectedCall(id)
+            } else {
+                NSLog("[StreamCallKit] callConnected without a call id, ignored")
             }
             result(true)
         case .activeCalls:
             result(self.activeCalls())
         case .endAllCalls:
-            // Unlike the native `endAllCalls()`, this keeps `isFromPushKit`.
-            transactions.endAll()
+            self.endAllCalls()
             result(true)
         case .silenceEvents(let silence):
             self.eventSink.isSilenced = silence
@@ -65,15 +58,5 @@ extension StreamVideoCallkitManager {
             // The plugin answers the first two before the manager sees a call.
             result(FlutterMethodNotImplemented)
         }
-    }
-
-    /// The options of the call `args` names. They become the last options, unless those are
-    /// the call PushKit showed, which Dart may still end or connect by another id.
-    private func optionsKeepingThePushKitCall(for args: [String: Any]) -> CallData {
-        let options = store.options(for: args)
-        if !store.isFromPushKit {
-            store.lastOptions = options
-        }
-        return options
     }
 }

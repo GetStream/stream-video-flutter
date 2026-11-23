@@ -89,8 +89,7 @@ final class PushCommandTests: XCTestCase {
         XCTAssertEqual(args?["id"] as? String, "call-uuid")
     }
 
-    func testEndCallWithArgumentsThatAreNotAMapStillEndsAPushKitCall() {
-        // The manager ends the PushKit call whatever the arguments are, as long as there are some.
+    func testEndCallWithArgumentsThatAreNotAMapHasNoId() {
         guard case .endCall(let args) = command("endCall", "call-uuid") else {
             return XCTFail("not endCall")
         }
@@ -108,7 +107,7 @@ final class PushCommandTests: XCTestCase {
         XCTAssertEqual(args?["id"] as? String, "call-uuid")
     }
 
-    func testCallConnectedWithArgumentsThatAreNotAMapStillConnectsAPushKitCall() {
+    func testCallConnectedWithArgumentsThatAreNotAMapHasNoId() {
         guard case .callConnected(let args) = command("callConnected", "call-uuid") else {
             return XCTFail("not callConnected")
         }
@@ -251,19 +250,6 @@ final class PushCommandTests: XCTestCase {
 
         XCTAssertEqual((initDataReply as? FlutterError)?.code, "INVALID_ARGUMENT")
         XCTAssertNotNil(tokenReply as? String)
-    }
-
-    func testEndAllCallsFromDartKeepsTheManagersPushKitFlag() {
-        // Dart's endAllCalls goes to the call controller, unlike the native endAllCalls(),
-        // which also clears the flag.
-        let manager = StreamVideoCallkitManager.shared
-        let saved = manager.store.isFromPushKit
-        defer { manager.store.isFromPushKit = saved }
-        manager.store.isFromPushKit = true
-
-        manager.handle(.endAllCalls) { _ in }
-
-        XCTAssertTrue(manager.store.isFromPushKit)
     }
 
     func testSilenceEventsFromDartSilencesTheSink() {
