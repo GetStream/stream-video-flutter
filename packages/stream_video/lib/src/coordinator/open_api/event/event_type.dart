@@ -52,6 +52,7 @@ enum EventType {
   callDeleted('call.deleted'),
   callUserFeedbackSubmitted('call.user_feedback_submitted'),
   callTranscriptionReady('call.transcription_ready'),
+  callStatsReportReady('call.stats_report_ready'),
   ingressStarted('ingress.started'),
   ingressStopped('ingress.stopped'),
   ingressError('ingress.error'),

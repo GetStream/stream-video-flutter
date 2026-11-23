@@ -688,6 +688,7 @@ class CallSession extends Disposable with _CallSessionMedia {
   void leave({String? reason}) {
     _logger.d(() => '[leave] reason: $reason');
     _isLeavingOrClosed = true;
+    rtcManager?.stopRecovery();
     _tracer.trace(TraceTag.callLeave, reason);
     sfuWS.leave(sessionId: sessionId, reason: reason);
   }

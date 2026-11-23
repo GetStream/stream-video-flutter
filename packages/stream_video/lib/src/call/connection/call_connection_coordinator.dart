@@ -365,7 +365,7 @@ class CallConnectionCoordinator {
 
   /// The answer to a join on a call that is left or leaving.
   Result<None> _rejectJoinOfLeftCall() {
-    _call._logger.w(() => '[join] rejected (call was left)');
+    _call._logger.d(() => '[join] rejected (call was left)');
     return const Result.failure(CallLeftException());
   }
 
@@ -514,7 +514,7 @@ class CallConnectionCoordinator {
         _call._logger.v(() => '[join] finished');
         return const Result.success(none);
       case JoinCancelled():
-        _call._logger.w(() => '[join] cancelled (call was left)');
+        _call._logger.d(() => '[join] cancelled (call was left)');
         // The cause says why: a local leave, or a remote end or rejection.
         final status = _call.state.value.status;
         return failureWithError(
@@ -753,7 +753,7 @@ class CallConnectionCoordinator {
         _call.state.value.status is CallStatusIncoming;
     final result = await _awaitAnswer();
     if (result == null || _isLeftOrLeaving) {
-      _call._logger.w(() => '[join] rejected (call was left)');
+      _call._logger.d(() => '[join] rejected (call was left)');
       return const JoinCancelled();
     }
 
@@ -1071,7 +1071,7 @@ class CallConnectionCoordinator {
       );
 
       if (_isLeftOrLeaving) {
-        _call._logger.w(() => '[joinIfNeeded] rejected (call was left)');
+        _call._logger.d(() => '[joinIfNeeded] rejected (call was left)');
         return failureWithError('call was left');
       }
 
@@ -1119,7 +1119,7 @@ class CallConnectionCoordinator {
     );
 
     if (_isLeftOrLeaving) {
-      _call._logger.w(() => '[joinCall] rejected (call was left)');
+      _call._logger.d(() => '[joinCall] rejected (call was left)');
       return failureWithError('call was left');
     }
 
@@ -1290,7 +1290,7 @@ class CallConnectionCoordinator {
     _call._subscriptions.cancel(_idSessionEvents);
 
     if (_isLeftOrLeaving) {
-      _call._logger.w(() => '[startSession] rejected (call was left)');
+      _call._logger.d(() => '[startSession] rejected (call was left)');
       return failureWithError('call was left');
     }
 
@@ -1299,7 +1299,7 @@ class CallConnectionCoordinator {
     // Checked again: the call can be left while the stereo request is
     // pending, and a torn-down session must not be started.
     if (_isLeftOrLeaving) {
-      _call._logger.w(() => '[startSession] rejected (call was left)');
+      _call._logger.d(() => '[startSession] rejected (call was left)');
       return failureWithError('call was left');
     }
 
@@ -1370,7 +1370,7 @@ class CallConnectionCoordinator {
     }
 
     if (_isLeftOrLeaving) {
-      _call._logger.w(() => '[startSession] rejected (call was left)');
+      _call._logger.d(() => '[startSession] rejected (call was left)');
       return failureWithError('call was left');
     }
 
@@ -1714,7 +1714,7 @@ class CallConnectionCoordinator {
     CallSession? source,
   }) async {
     if (_isLeftOrLeaving) {
-      _call._logger.w(() => '[reconnect] rejected (call was left)');
+      _call._logger.d(() => '[reconnect] rejected (call was left)');
       return;
     }
 
@@ -1868,7 +1868,7 @@ class CallConnectionCoordinator {
           : Duration.zero;
 
       if (_isLeftOrLeaving) {
-        _call._logger.w(() => '[reconnect] rejected (call was left)');
+        _call._logger.d(() => '[reconnect] rejected (call was left)');
         return;
       }
 
@@ -2045,7 +2045,7 @@ class CallConnectionCoordinator {
               'strategy': _reconnectStrategy.name,
             });
           case JoinCancelled():
-            _call._logger.w(() => '[reconnect] cancelled (call was left)');
+            _call._logger.d(() => '[reconnect] cancelled (call was left)');
             return;
           case JoinGiveUp(:final error) || JoinRingUnanswered(:final error):
             _call._logger.e(() => '[reconnect] giving up: $error');
@@ -2236,7 +2236,7 @@ class CallConnectionCoordinator {
     }
 
     if (migrationResult == null) {
-      _call._logger.w(() => '[reconnectMigrate] cancelled (call was left)');
+      _call._logger.d(() => '[reconnectMigrate] cancelled (call was left)');
       return const JoinCancelled();
     }
 

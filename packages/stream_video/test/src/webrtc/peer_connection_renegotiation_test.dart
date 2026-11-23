@@ -758,6 +758,53 @@ void main() {
         });
       },
     );
+
+    test('stopRecovery cancels a pending ICE-Disconnected restart', () {
+      fakeAsync((async) {
+        final pc = _FakeRtcPeerConnection();
+        final sp = _build(pc: pc, type: StreamPeerType.publisher);
+
+        pc.stubbedIceConnectionState =
+            rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected;
+        pc.capturedOnIceConnectionState!(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected,
+        );
+
+        sp.stopRecovery();
+
+        async.elapse(const Duration(seconds: 10));
+        expect(pc.restartIceCallCount, 0);
+        expect(sp.iceRestartTimeout, isNull);
+      });
+    });
+
+    test('after stopRecovery, a drop or failure restarts nothing', () {
+      fakeAsync((async) {
+        final pc = _FakeRtcPeerConnection();
+        final sp = _build(pc: pc, type: StreamPeerType.publisher)
+          ..stopRecovery();
+
+        pc.stubbedIceConnectionState =
+            rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected;
+        pc.capturedOnIceConnectionState!(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected,
+        );
+        expect(
+          sp.iceRestartTimeout,
+          isNull,
+          reason: 'a leaving session schedules no restart',
+        );
+
+        pc.stubbedIceConnectionState =
+            rtc.RTCIceConnectionState.RTCIceConnectionStateFailed;
+        pc.capturedOnIceConnectionState!(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateFailed,
+        );
+
+        async.elapse(const Duration(seconds: 10));
+        expect(pc.restartIceCallCount, 0);
+      });
+    });
   });
 
   group('StreamPeerConnection before ICE has connected', () {
@@ -863,6 +910,40 @@ void main() {
 
         async.elapse(const Duration(seconds: 10));
         expect(calls, 0);
+      });
+    });
+
+    test('after stopRecovery, a drop, failure or missing candidates asks for '
+        'nothing', () {
+      fakeAsync((async) {
+        final pc = _FakeRtcPeerConnection();
+        final sp = _build(
+          pc: pc,
+          type: StreamPeerType.publisher,
+          iceConnected: false,
+        )..stopRecovery();
+
+        var calls = 0;
+        sp.onReconnectionNeeded = (_, _, _) => calls++;
+
+        pc.stubbedIceConnectionState =
+            rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected;
+        pc.capturedOnIceConnectionState!(
+          rtc.RTCIceConnectionState.RTCIceConnectionStateDisconnected,
+        );
+        pc.capturedOnIceGatheringState!(
+          rtc.RTCIceGatheringState.RTCIceGatheringStateGathering,
+        );
+        pc.capturedOnIceGatheringState!(
+          rtc.RTCIceGatheringState.RTCIceGatheringStateComplete,
+        );
+        pc.capturedOnConnectionState!(
+          rtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed,
+        );
+
+        async.elapse(const Duration(seconds: 10));
+        expect(calls, 0);
+        expect(pc.restartIceCallCount, 0);
       });
     });
 

@@ -327,6 +327,8 @@ void main() {
           ),
       EventType.callTranscriptionReady:
           isA<StreamCallTranscriptionReadyEvent>(),
+      EventType.callStatsReportReady: isA<StreamCallStatsReportReadyEvent>()
+          .having((it) => it.sessionId, 'sessionId', 'session-1'),
       EventType.ingressStarted: isA<StreamCallIngressStartedEvent>(),
       EventType.ingressStopped: isA<StreamCallIngressStoppedEvent>(),
       EventType.ingressError: isA<StreamCallIngressErrorEvent>(),
@@ -447,5 +449,14 @@ Map<String, Object?> _eventJson(EventType type) {
     'ingress_stream_id': 'ingress-1',
     'publisher_type': 'rtmp',
     'error': 'an error',
+    'counts': {
+      'live_sessions': 0,
+      'participants': 2,
+      'peak_concurrent_sessions': 2,
+      'peak_concurrent_users': 2,
+      'publishers': 2,
+      'sessions': 2,
+      'sfus_used': 1,
+    },
   };
 }

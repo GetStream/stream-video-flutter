@@ -156,6 +156,18 @@ class StreamPeerConnection extends Disposable {
     }
   }
 
+  bool _recoveryStopped = false;
+
+  /// Stops restarting ICE and asking for reconnects for good, because the
+  /// session is leaving. The connection drops while it is torn down, and a
+  /// recovery could only race the teardown.
+  void stopRecovery() {
+    _logger.v(() => '[stopRecovery] #$type');
+    _recoveryStopped = true;
+    iceRestartTimeout?.cancel();
+    iceRestartTimeout = null;
+  }
+
   /// {@macro onStreamAdded}
   OnStreamAdded? onStreamAdded;
 
@@ -193,6 +205,8 @@ class StreamPeerConnection extends Disposable {
       () => '[_tryRestartIce] #$type; isReconnecting: $_isReconnecting',
     );
 
+    if (_recoveryStopped) return;
+
     // Skip automatic ICE restart if a reconnect is in progress.
     if (_isReconnecting) {
       _logger.i(
@@ -202,7 +216,7 @@ class StreamPeerConnection extends Disposable {
     }
 
     restartIce().then((result) {
-      if (result is! Failure) return;
+      if (result is! Failure || _recoveryStopped) return;
 
       // A fast reconnect that started while the restart was in flight
       // restarts ICE itself.
@@ -614,6 +628,7 @@ class StreamPeerConnection extends Disposable {
       case rtc.RTCIceGatheringState.RTCIceGatheringStateComplete:
         _iceGatheringComplete = true;
         if (_localCandidatesGathered > 0 || _iceHasEverConnected) return;
+        if (_recoveryStopped) return;
 
         _logger.w(
           () => '[onIceGatheringState] #$type; no local candidates gathered',
@@ -639,6 +654,13 @@ class StreamPeerConnection extends Disposable {
     if (isConnected && !_iceHasEverConnected) {
       _iceHasEverConnected = true;
       onIceConnected?.call(this);
+    }
+
+    if (_recoveryStopped) {
+      _logger.v(
+        () => '[onIceConnectionState] #$type; $state ignored, leaving',
+      );
+      return;
     }
 
     if (!_iceHasEverConnected && _onIceStateBeforeConnected(state)) return;
@@ -720,7 +742,11 @@ class StreamPeerConnection extends Disposable {
   void _onConnectionState(rtc.RTCPeerConnectionState state) {
     onConnectionStateUpdated?.call(state);
 
-    if (state == rtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
+    if (state == rtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed &&
+        _recoveryStopped) {
+      _logger.v(() => '[onConnectionState] state: $state, leaving');
+    } else if (state ==
+        rtc.RTCPeerConnectionState.RTCPeerConnectionStateFailed) {
       _logger.w(() => '[onConnectionState] state: $state');
       if (!_iceHasEverConnected) {
         // The failure is reported here; the disconnected watchdog would
