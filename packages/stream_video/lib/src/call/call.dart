@@ -385,11 +385,9 @@ class Call {
             : options.audioConfigurationPolicy);
   }
 
-  /// The audio policy in effect for this call.
-  ///
-  /// Once the call's peer connection factory exists, the policy it was built
-  /// with, which stays fixed for its lifetime. Before that,
-  /// [_preferredAudioConfigurationPolicy].
+  // The audio policy in effect for this call: once the call's peer connection
+  // factory exists, the policy it was built with, which stays fixed for its
+  // lifetime; before that, _preferredAudioConfigurationPolicy.
   AudioConfigurationPolicy get _audioConfigurationPolicy =>
       _pcFactory?.resolvedAudioConfigurationPolicy ??
       _preferredAudioConfigurationPolicy;
