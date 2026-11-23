@@ -104,6 +104,25 @@ void main() {
       expect((await ringing.join()).getErrorOrNull(), isA<CallLeftException>());
     });
 
+    test(
+      'ends the native call of a ring left while its join awaits an answer',
+      () async {
+        ring();
+        final ringing = streamVideo.state.incomingCall.value!;
+
+        final joining = ringing.join();
+        await pumpEventQueue();
+        expect(ringing.isActiveCall, isFalse);
+
+        await ringing.leave();
+
+        expect(await joining, isA<Failure>());
+        verify(
+          () => mockPushManager.endCallByCid(cid, silent: true),
+        ).called(1);
+      },
+    );
+
     test('ends the native call of a ringing call', () async {
       ring();
       final ringing = streamVideo.state.incomingCall.value!;

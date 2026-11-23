@@ -212,6 +212,8 @@
 - On iOS, a broadcast screen share cancelled before it starts no longer keeps its track running.
 - On iOS, a later start of a broadcast screen share no longer publishes its track again.
 - A join or fast reconnect fails when the device makes no generic SDP offer, instead of joining with an empty one.
+- An incoming ring is marked active only once accepted, so joining it while it rings, as `StreamCallContainer` does when it opens, no longer replaces the active call or cancels your outgoing ring. Until then it is not in `StreamVideo.activeCalls`, so anything keyed off them, such as the Android ongoing-call service, starts on accept.
+- Declining a ring in the app no longer rejects it a second time when the native call screen reports its end as a decline.
 - An incoming call reports the microphone and camera its call settings turn on in `connectOptions` before it is joined. They used to read as off until the join, which then turned them on. Changing only the microphone through `setConnectOptions` before the join no longer turns the camera off and switches it to the front camera when the call settings turn it on and face it back.
 
 ## 1.8.0
