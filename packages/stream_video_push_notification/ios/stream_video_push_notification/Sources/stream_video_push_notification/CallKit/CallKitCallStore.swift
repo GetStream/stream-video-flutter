@@ -109,13 +109,12 @@ final class CallKitCallStore {
 
     /// The uuid CallKit knows the call Dart names as `id` by, for Dart's request to end it: the
     /// tracked call's, else `id` itself when it is the uuid of an outgoing call CallKit has not
-    /// started yet or of a call in `systemCallUUIDs`. Nil when `id` names none of them.
-    func callKitUUID(endingDartId id: String, systemCallUUIDs: [UUID]) -> UUID? {
+    /// started yet. Nil when `id` names neither.
+    func callKitUUID(endingDartId id: String) -> UUID? {
         if let call = call(forAppId: id) {
             return call.identity.callKitUUID
         }
-        guard let uuid = UUID(uuidString: id),
-            pendingOutgoingOptions[uuid] != nil || systemCallUUIDs.contains(uuid)
+        guard let uuid = UUID(uuidString: id), pendingOutgoingOptions[uuid] != nil
         else { return nil }
         return uuid
     }

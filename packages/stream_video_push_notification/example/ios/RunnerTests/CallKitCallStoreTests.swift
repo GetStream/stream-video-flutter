@@ -459,7 +459,7 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertEqual(names(outcome.effects), [StreamVideoIncomingCallConstants.ACTION_CALL_ENDED])
     }
 
-    func testAStartCallKitRefusedNamesNoCallToEnd() {
+    func testAStartCallKitRefusedNamesNoCallToEndAndCannotBePerformed() {
         let refused = options(UUID().uuidString)
         let uuid = UUID(uuidString: refused.uuid)!
         store.registerPendingOutgoing(refused, uuid: uuid)
@@ -467,7 +467,7 @@ final class CallKitCallStoreTests: XCTestCase {
 
         store.startRefused(uuid: uuid, options: refused)
 
-        XCTAssertNil(store.callKitUUID(endingDartId: refused.uuid, systemCallUUIDs: []))
+        XCTAssertNil(store.callKitUUID(endingDartId: refused.uuid))
         XCTAssertNil(store.startPerformed(uuid: uuid))
     }
 
@@ -547,11 +547,10 @@ final class CallKitCallStoreTests: XCTestCase {
         let ringing = ring("Ringing")
         let uuid = outgoing.identity.callKitUUID
 
-        XCTAssertEqual(store.callKitUUID(endingDartId: "outgoing", systemCallUUIDs: []), uuid)
+        XCTAssertEqual(store.callKitUUID(endingDartId: "outgoing"), uuid)
+        XCTAssertEqual(store.callKitUUID(endingDartId: uuid.uuidString.lowercased()), uuid)
         XCTAssertEqual(
-            store.callKitUUID(endingDartId: uuid.uuidString.lowercased(), systemCallUUIDs: []), uuid)
-        XCTAssertEqual(
-            store.callKitUUID(endingDartId: "ringing", systemCallUUIDs: []),
+            store.callKitUUID(endingDartId: "ringing"),
             ringing.identity.callKitUUID)
     }
 
@@ -559,22 +558,15 @@ final class CallKitCallStoreTests: XCTestCase {
         let uuid = UUID()
         store.registerPendingOutgoing(options(uuid.uuidString), uuid: uuid)
 
-        XCTAssertEqual(store.callKitUUID(endingDartId: uuid.uuidString, systemCallUUIDs: []), uuid)
+        XCTAssertEqual(store.callKitUUID(endingDartId: uuid.uuidString), uuid)
     }
 
-    func testDartEndsACallCallKitKnowsThatIsNotTracked() {
-        let uuid = UUID()
+    func testAnIdNamingNoCallEndsNothing() {
+        _ = ring("ringing")
 
-        XCTAssertEqual(
-            store.callKitUUID(endingDartId: uuid.uuidString, systemCallUUIDs: [uuid]), uuid)
-    }
-
-    func testAnIdNamingNoCallEndsNothingRatherThanTheRing() {
-        _ = ring("pushkit")
-
-        XCTAssertNil(store.callKitUUID(endingDartId: "unknown", systemCallUUIDs: [UUID()]))
-        XCTAssertNil(store.callKitUUID(endingDartId: UUID().uuidString, systemCallUUIDs: [UUID()]))
-        XCTAssertNil(store.callKitUUID(endingDartId: "", systemCallUUIDs: []))
+        XCTAssertNil(store.callKitUUID(endingDartId: "unknown"))
+        XCTAssertNil(store.callKitUUID(endingDartId: UUID().uuidString))
+        XCTAssertNil(store.callKitUUID(endingDartId: ""))
     }
 
     func testOutgoingCall() {

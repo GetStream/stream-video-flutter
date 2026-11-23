@@ -170,16 +170,10 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
     }
 
-    /// Asks CallKit to end the call Dart names as `id`: a tracked call, an outgoing call CallKit
-    /// has not started yet, or a call CallKit lists. Any other id is logged and ignored.
-    ///
-    /// The end action of a call CallKit lists but the store does not track is failed by
-    /// `endPerformed`, as before; only the request is made here.
+    /// Asks CallKit to end the call Dart names as `id`: a tracked call, or an outgoing call
+    /// CallKit has not started yet. Any other id is logged and ignored.
     func endCall(_ id: String) {
-        guard
-            let uuid = store.callKitUUID(
-                endingDartId: id, systemCallUUIDs: transactions.systemCallUUIDs)
-        else {
+        guard let uuid = store.callKitUUID(endingDartId: id) else {
             NSLog("[StreamCallKit] endCall for \(id), which names no call, ignored")
             return
         }

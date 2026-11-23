@@ -67,30 +67,39 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
         sharedInstance?.setDevicePushTokenVoIP(deviceToken: deviceToken)
     }
 
-    /// Asks CallKit to start `data` as an outgoing call. `fromPushKit` no longer changes
-    /// anything: Dart ends and connects each call by its own id.
+    /// Asks CallKit to start `data` as an outgoing call.
+    @objc public static func startOutgoingCall(data: CallData) {
+        StreamVideoCallkitManager.shared.startCall(data)
+    }
+
+    /// Asks CallKit to start `data` as an outgoing call. `fromPushKit` is ignored.
+    @available(*, deprecated, renamed: "startOutgoingCall(data:)", message: "fromPushKit is ignored.")
     @objc public static func startOutgoingCall(
         data: CallData,
         fromPushKit: Bool
     ) {
-        StreamVideoCallkitManager.shared.startCall(data)
+        startOutgoingCall(data: data)
     }
 
-    /// Reports an incoming call to CallKit. `fromPushKit` no longer changes anything: Dart ends
-    /// and connects each call by its own id.
+    /// Reports an incoming call to CallKit.
+    @objc public static func showIncomingCall(data: CallData) {
+        StreamVideoCallkitManager.shared.showIncomingCall(data)
+    }
+
+    /// Reports an incoming call to CallKit. `fromPushKit` is ignored.
+    @available(*, deprecated, renamed: "showIncomingCall(data:)", message: "fromPushKit is ignored.")
     @objc public static func showIncomingCall(
         data: CallData,
         fromPushKit: Bool
     ) {
-        StreamVideoCallkitManager.shared.showIncomingCall(data)
+        showIncomingCall(data: data)
     }
 
     /// Reports an incoming call to CallKit, and runs `completion` once CallKit accepted or
     /// refused it, or straight away when it could not be reported. An app with its own PushKit
-    /// delegate can call PushKit's completion from it. `fromPushKit` no longer changes anything.
+    /// delegate can call PushKit's completion from it.
     @objc public static func showIncomingCall(
         data: CallData,
-        fromPushKit: Bool,
         completion: @escaping () -> Void
     ) {
         StreamVideoCallkitManager.shared.showIncomingCall(data, completion: completion)
