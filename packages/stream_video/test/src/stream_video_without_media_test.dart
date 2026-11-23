@@ -45,6 +45,9 @@ void main() {
     when(
       () => push.endCallByCid(any(), silent: any(named: 'silent')),
     ).thenAnswer((_) async {});
+    when(() => push.onRingEnded(any())).thenAnswer((_) async {});
+    when(() => push.onCallLeft(any())).thenAnswer((_) async {});
+    when(() => push.onCallAccepted(any())).thenAnswer((_) async {});
   });
 
   tearDown(() async {

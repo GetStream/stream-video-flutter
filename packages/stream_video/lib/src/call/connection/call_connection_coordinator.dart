@@ -493,12 +493,9 @@ class CallConnectionCoordinator {
         .asCancelable()
         .storeIn(_idConnect, _cancelables)
         .valueOrCancellation();
-    if (result == null || _isLeftOrLeaving) {
-      // The ring was never active, so leaving it does not end its native
-      // call the way removing an active call does.
-      await _endNativeCallUnlessTakenOver();
-      return const JoinCancelled();
-    }
+    // The leave that ended the wait tells the native call UI its ring is
+    // over.
+    if (result == null || _isLeftOrLeaving) return const JoinCancelled();
 
     if (result is Failure) {
       return JoinRingUnanswered(result.videoError, result.stackTrace);
@@ -2441,10 +2438,9 @@ class CallConnectionCoordinator {
   /// Releases what a call that never joined holds, and drops this instance
   /// from the client's ringing, incoming, outgoing and watched calls.
   ///
-  /// A call that is still ringing is reported disconnected, and its native
-  /// call ends unless another instance has joined the same call or the user
-  /// answered it on the native call screen. An unanswered outgoing ring is
-  /// cancelled first.
+  /// A call that is still ringing is reported disconnected, and the native
+  /// call UI is told as on a leave, see [_endNativeCall]. An unanswered
+  /// outgoing ring is cancelled first.
   Future<void> _releaseUnjoined() async {
     _cancelables.cancelAll();
     await _call.dynascaleManager.dispose();
@@ -2456,7 +2452,13 @@ class CallConnectionCoordinator {
     if (status is CallStatusIncoming || status is CallStatusOutgoing) {
       await _cancelUnansweredRing();
       _call._stateManager.lifecycleCallDisconnected(reason: _disposed);
-      await _endNativeCallUnlessTakenOver();
+      await _endNativeCall(
+        unjoined: true,
+        acceptedHere: identical(
+          client.state.callAcceptedOnThisDevice(_call.callCid),
+          _call,
+        ),
+      );
     }
 
     _call._ringing.release();
@@ -2469,42 +2471,38 @@ class CallConnectionCoordinator {
     }
   }
 
-  // Ends the native call of a ring this instance is letting go of, unless
-  // another instance has joined the same call or the user answered it on the
-  // native call screen.
-  Future<void> _endNativeCallUnlessTakenOver() async {
+  // Tells the native call UI that this call was left, unless another
+  // instance holds the same call joined or accepted it on this device.
+  //
+  // A call this instance never joined has a native call only while it
+  // rings: unless this instance accepted it, its ring is over. A call this
+  // instance joined or accepted is left.
+  Future<void> _endNativeCall({
+    required bool unjoined,
+    required bool acceptedHere,
+  }) async {
     final client = _call._host;
+    final manager = client.pushNotificationManager;
+    if (manager == null) return;
+    if (unjoined && !_call.state.value.isRingingFlow) return;
+
     final joinedElsewhere = client.state.activeCalls.value.any(
-      (call) => call.callCid == _call.callCid,
+      (call) => !identical(call, _call) && call.callCid == _call.callCid,
     );
-    if (joinedElsewhere || await _answeredNatively()) return;
+    if (joinedElsewhere) return;
 
-    try {
-      await client.pushNotificationManager?.endCallByCid(
-        _call.callCid.value,
-        silent: true,
-      );
-    } catch (e, stk) {
-      _call._logger.e(
-        () => '[release] ending the native call failed: $e\n$stk',
-      );
-    }
-  }
+    final accepted = client.state.callAcceptedOnThisDevice(_call.callCid);
+    if (accepted != null && !identical(accepted, _call)) return;
 
-  /// Whether the user answered this call on the native call screen, so a
-  /// client elsewhere, such as the app's in another isolate, takes it over.
-  Future<bool> _answeredNatively() async {
+    final cid = _call.callCid.value;
     try {
-      final calls =
-          await _call._host.pushNotificationManager?.activeCalls() ?? const [];
-      return calls.any(
-        (call) => call.callCid == _call.callCid.value && call.isAccepted,
-      );
+      if (unjoined && !acceptedHere) {
+        await manager.onRingEnded(cid);
+      } else {
+        await manager.onCallLeft(cid);
+      }
     } catch (e, stk) {
-      _call._logger.e(
-        () => '[dispose] reading the native calls failed: $e\n$stk',
-      );
-      return false;
+      _call._logger.e(() => '[leave] ending the native call failed: $e\n$stk');
     }
   }
 
@@ -2529,6 +2527,15 @@ class CallConnectionCoordinator {
       await _cancelUnansweredRing();
     }
 
+    // Read before the disconnect moves the phase on and drops the accept. A
+    // join still waiting for the ring to be answered has not joined either.
+    final unjoined =
+        _phase.value is ConnectionIdle || _phase.value is ConnectionJoining;
+    final acceptedHere = identical(
+      _call._host.state.callAcceptedOnThisDevice(_call.callCid),
+      _call,
+    );
+
     final bool didDisconnect;
     try {
       didDisconnect = await _disconnect(
@@ -2536,12 +2543,17 @@ class CallConnectionCoordinator {
         remote: remote,
       );
     } catch (_) {
-      // A teardown that throws still leaves the call.
+      // A teardown that throws still leaves the call, and a later leave does
+      // not disconnect again, so the native call is ended here.
       _settleDisconnected(reason);
+      await _endNativeCall(unjoined: unjoined, acceptedHere: acceptedHere);
       rethrow;
     }
 
-    if (didDisconnect) _settleDisconnected(reason);
+    if (didDisconnect) {
+      _settleDisconnected(reason);
+      await _endNativeCall(unjoined: unjoined, acceptedHere: acceptedHere);
+    }
 
     _call._logger.v(() => '[leave] finished');
     return const Result.success(none);

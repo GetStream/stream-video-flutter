@@ -14,6 +14,7 @@ import '../../models/call_metadata.dart';
 import '../../models/call_status.dart';
 import '../../models/disconnect_reason.dart';
 import '../../models/leave_initiator.dart';
+import '../../push_notification/push_notification_manager.dart';
 import '../../ring_state_polling_settings.dart';
 import '../../utils/none.dart';
 import '../../utils/result.dart';
@@ -36,6 +37,7 @@ class CallRingingController {
     required this._stateManager,
     required this._coordinatorClient,
     required this._clientState,
+    required this._pushNotificationManager,
     required this._prepareToAccept,
     required this._pollingSettings,
     required this._trace,
@@ -47,6 +49,7 @@ class CallRingingController {
   final CallStateNotifier _stateManager;
   final CoordinatorClient _coordinatorClient;
   final ClientState _clientState;
+  final PushNotificationManager? Function() _pushNotificationManager;
 
   /// Clears the way for accepting: other calls this one replaces. `null`
   /// when there is nothing to clear.
@@ -102,22 +105,33 @@ class CallRingingController {
       _accepting = false;
     }
 
-    if (result is Failure && _acceptReachedServer) {
+    if (result is Failure && !_acceptReachedServer) {
+      // Revert the optimistic acceptance so the user can retry or reject.
+      _stateManager.lifecycleCallAccepted(accepted: false);
+      _clientState.clearCallAcceptedOnThisDevice(_callCid, _call);
+      return result;
+    }
+
+    if (result is Failure) {
       // The response failed, a timeout say, but the server's echo of the
       // accept arrived first, so it took effect. Reverting would take that
       // echo for an accept from elsewhere and end the call here. An echo
       // that arrives only after the failure still does.
       _logger.w(() => '[accept] response failed, but accepted: $result');
-      return const Result.success(none);
     }
 
-    if (result is Failure) {
-      // Revert the optimistic acceptance so the user can retry or reject.
-      _stateManager.lifecycleCallAccepted(accepted: false);
-      _clientState.clearCallAcceptedOnThisDevice(_callCid, _call);
-    }
+    await _dismissNativeRing();
+    return const Result.success(none);
+  }
 
-    return result;
+  // Tells the native call UI that the user accepted this call, so its ring
+  // goes away while the call goes on.
+  Future<void> _dismissNativeRing() async {
+    try {
+      await _pushNotificationManager()?.onCallAccepted(_callCid.value);
+    } catch (e, stk) {
+      _logger.e(() => '[accept] dismissing the native ring failed: $e\n$stk');
+    }
   }
 
   /// Rejects the incoming call, then leaves it.
@@ -179,6 +193,20 @@ class CallRingingController {
     }
 
     _stateManager.coordinatorCallRejected(event);
+  }
+
+  /// Follows a participant count of zero for a call not joined yet. A ring
+  /// the current user has not answered ends once nobody is left in the call,
+  /// such as when a caller who had joined hangs up. Leaving ends its native
+  /// call.
+  Future<void> onNoParticipantsLeft() async {
+    final status = _stateManager.callState.status;
+    if (_rejecting || status is! CallStatusIncoming || status.acceptedByMe) {
+      return;
+    }
+
+    _logger.i(() => '[onNoParticipantsLeft] leaving the unanswered ring');
+    await _call.leave(reason: DisconnectReason.lastParticipantLeft());
   }
 
   /// Whether [userId] answering is the current user answering this ring

@@ -60,6 +60,11 @@ void main() {
       when(
         () => mockPushManager.endCallByCid(any(), silent: any(named: 'silent')),
       ).thenAnswer((_) async {});
+      when(() => mockPushManager.onRingEnded(any())).thenAnswer((_) async {});
+      when(() => mockPushManager.onCallLeft(any())).thenAnswer((_) async {});
+      when(
+        () => mockPushManager.onCallAccepted(any()),
+      ).thenAnswer((_) async {});
       when(mockPushManager.dispose).thenAnswer((_) async {});
       when(mockPushManager.activeCalls).thenAnswer((_) async => []);
 
@@ -105,7 +110,7 @@ void main() {
     });
 
     test(
-      'ends the native call of a ring left while its join awaits an answer',
+      'tells the native call UI the ring is over when it is left while its join awaits an answer',
       () async {
         ring();
         final ringing = streamVideo.state.incomingCall.value!;
@@ -117,21 +122,26 @@ void main() {
         await ringing.leave();
 
         expect(await joining, isA<Failure>());
-        verify(
-          () => mockPushManager.endCallByCid(cid, silent: true),
-        ).called(1);
+        verify(() => mockPushManager.onRingEnded(cid)).called(1);
+        verifyNever(
+          () =>
+              mockPushManager.endCallByCid(any(), silent: any(named: 'silent')),
+        );
       },
     );
 
-    test('ends the native call of a ringing call', () async {
-      ring();
-      final ringing = streamVideo.state.incomingCall.value!;
+    test(
+      'tells the native call UI the ring of a ringing call is over',
+      () async {
+        ring();
+        final ringing = streamVideo.state.incomingCall.value!;
 
-      await streamVideo.dispose();
+        await streamVideo.dispose();
 
-      verify(() => mockPushManager.endCallByCid(cid, silent: true)).called(1);
-      expect(ringing.state.value.status, isA<CallStatusDisconnected>());
-    });
+        verify(() => mockPushManager.onRingEnded(cid)).called(1);
+        expect(ringing.state.value.status, isA<CallStatusDisconnected>());
+      },
+    );
 
     test(
       'leaves the native call alone when another instance joined the call',
@@ -146,60 +156,11 @@ void main() {
 
         await ringing.dispose();
 
-        verifyNever(
-          () =>
-              mockPushManager.endCallByCid(any(), silent: any(named: 'silent')),
-        );
+        verifyNever(() => mockPushManager.onRingEnded(any()));
+        verifyNever(() => mockPushManager.onCallLeft(any()));
         expect(ringing.state.value.status, isA<CallStatusDisconnected>());
       },
     );
-
-    test(
-      'leaves the native call alone when the user answered it there',
-      () async {
-        ring();
-        // The app's own client, in another isolate, takes an answered call
-        // over.
-        when(mockPushManager.activeCalls).thenAnswer(
-          (_) async => [
-            const CallData(uuid: 'uuid', callCid: cid, isAccepted: true),
-          ],
-        );
-
-        await streamVideo.dispose();
-
-        verifyNever(
-          () =>
-              mockPushManager.endCallByCid(any(), silent: any(named: 'silent')),
-        );
-      },
-    );
-
-    test('ends the native call of a ring answered for another call', () async {
-      ring();
-      when(mockPushManager.activeCalls).thenAnswer(
-        (_) async => [
-          const CallData(
-            uuid: 'uuid',
-            callCid: 'default:other-call',
-            isAccepted: true,
-          ),
-        ],
-      );
-
-      await streamVideo.dispose();
-
-      verify(() => mockPushManager.endCallByCid(cid, silent: true)).called(1);
-    });
-
-    test('ends the native call when the native calls cannot be read', () async {
-      ring();
-      when(mockPushManager.activeCalls).thenThrow(StateError('channel'));
-
-      await streamVideo.dispose();
-
-      verify(() => mockPushManager.endCallByCid(cid, silent: true)).called(1);
-    });
 
     test('disposes an outgoing and a watched call', () async {
       final outgoing = streamVideo.makeCall(

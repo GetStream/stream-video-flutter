@@ -86,13 +86,62 @@ void main() {
     expect(other, hasLength(1));
   });
 
-  test('suppresses all events within window', () async {
-    broadcaster.suppressEvent(window: const Duration(milliseconds: 50));
+  group('suppressing a call end', () {
+    CallData call(String cid) => CallData(uuid: 'uuid-$cid', callCid: cid);
 
-    platform.emit(ActionCallIncoming(data: _callData()));
-    await pumpEventQueue();
+    test('drops every report that the call ended', () async {
+      broadcaster.suppressCallEnd('default:1');
 
-    expect(events, isEmpty);
+      platform.emit(ActionCallDecline(data: call('default:1')));
+      platform.emit(ActionCallEnded(data: call('default:1')));
+      platform.emit(ActionCallTimeout(data: call('default:1')));
+      platform.emit(
+        ActionCallDismissed(
+          data: call('default:1'),
+          reason: CallDismissReason.accepted,
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(events, isEmpty);
+    });
+
+    test('lets the end of another call through', () async {
+      broadcaster.suppressCallEnd('default:1');
+
+      platform.emit(ActionCallEnded(data: call('default:2')));
+      platform.emit(const ActionCallEnded(data: CallData(uuid: 'no-cid')));
+      await pumpEventQueue();
+
+      expect(events, [
+        ActionCallEnded(data: call('default:2')),
+        const ActionCallEnded(data: CallData(uuid: 'no-cid')),
+      ]);
+    });
+
+    test('lets events that are not an end through', () async {
+      broadcaster.suppressCallEnd('default:1');
+
+      platform.emit(ActionCallIncoming(data: call('default:1')));
+      platform.emit(ActionCallAccept(data: call('default:1')));
+      platform.emit(const ActionCallToggleMute(uuid: 'uuid-1', isMuted: true));
+      await pumpEventQueue();
+
+      expect(events, hasLength(3));
+    });
+
+    test('expires after its window', () async {
+      broadcaster.suppressCallEnd(
+        'default:1',
+        window: const Duration(milliseconds: 20),
+      );
+
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      platform.emit(ActionCallEnded(data: call('default:1')));
+      await pumpEventQueue();
+
+      expect(events, [ActionCallEnded(data: call('default:1'))]);
+    });
   });
 
   test('suppresses a specific event type and value', () async {

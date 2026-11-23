@@ -20,6 +20,7 @@ class CallCoordinatorEventRouter {
     required this._onAccepted,
     required this._onRejected,
     required this._onRingActivity,
+    required this._onNoParticipantsLeft,
   });
 
   final CallStateNotifier _stateManager;
@@ -40,6 +41,10 @@ class CallCoordinatorEventRouter {
   /// Called when someone accepts, rejects or misses the call, before the
   /// accept or reject hook runs.
   final void Function() _onRingActivity;
+
+  // Called when the participant count of a call not joined yet drops to
+  // zero, after its state took the count.
+  final Future<void> Function() _onNoParticipantsLeft;
 
   /// Routes [event], which the caller has already matched to this call.
   Future<void> route(StreamCallEvent event) async {
@@ -97,13 +102,16 @@ class CallCoordinatorEventRouter {
       case StreamCallSessionParticipantCountUpdatedEvent _:
         if (_stateManager.callState.status.isAlreadyJoined) return;
 
-        return _stateManager.setParticipantsCount(
-          totalCount: event.participantsCountByRole.values.fold(
-            0,
-            (a, b) => a + b,
-          ),
+        final totalCount = event.participantsCountByRole.values.fold(
+          0,
+          (a, b) => a + b,
+        );
+        _stateManager.setParticipantsCount(
+          totalCount: totalCount,
           anonymousCount: event.anonymousParticipantCount,
         );
+        if (totalCount == 0) await _onNoParticipantsLeft();
+        return;
       case StreamCallMemberAddedEvent _:
         return _stateManager.coordinatorCallMemberAdded(event);
       case StreamCallMemberRemovedEvent _:

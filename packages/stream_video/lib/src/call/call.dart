@@ -336,6 +336,7 @@ class Call {
     stateManager: _stateManager,
     coordinatorClient: _coordinatorClient,
     clientState: _host.state,
+    pushNotificationManager: () => _host.pushNotificationManager,
     prepareToAccept: () => _host.prepareToAccept(this),
     pollingSettings: () => _host.options.ringStatePolling,
     trace: (tag, data) => _session?.trace(tag, data),
@@ -752,6 +753,7 @@ class Call {
     onAccepted: _ringing.onCallAccepted,
     onRejected: _ringing.onCallRejected,
     onRingActivity: _ringing.onRingActivity,
+    onNoParticipantsLeft: _ringing.onNoParticipantsLeft,
   );
 
   OnCallPermissionRequest? onPermissionRequest;

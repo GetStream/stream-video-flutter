@@ -52,6 +52,11 @@ void main() {
       when(
         () => mockPushManager.endCallByCid(any(), silent: any(named: 'silent')),
       ).thenAnswer((_) async {});
+      when(() => mockPushManager.onRingEnded(any())).thenAnswer((_) async {});
+      when(() => mockPushManager.onCallLeft(any())).thenAnswer((_) async {});
+      when(
+        () => mockPushManager.onCallAccepted(any()),
+      ).thenAnswer((_) async {});
 
       streamVideo = StreamVideo.create(
         'test-api-key',
@@ -136,7 +141,7 @@ void main() {
 
       await streamVideo.ringing.verifyDisplayedIncomingCalls();
 
-      verify(() => mockPushManager.endCallByCid(cid)).called(1);
+      verify(() => mockPushManager.onCallLeft(cid)).called(1);
     });
 
     test('hands the accepted call to onCallAccepted', () async {
@@ -557,6 +562,11 @@ void main() {
       when(
         () => mockPushManager.endCallByCid(any(), silent: any(named: 'silent')),
       ).thenAnswer((_) async {});
+      when(() => mockPushManager.onRingEnded(any())).thenAnswer((_) async {});
+      when(() => mockPushManager.onCallLeft(any())).thenAnswer((_) async {});
+      when(
+        () => mockPushManager.onCallAccepted(any()),
+      ).thenAnswer((_) async {});
       when(() => mockPushManager.activeCalls()).thenAnswer(
         (_) async => [
           const CallData(uuid: uuid, callCid: cid, isAccepted: true),
@@ -622,9 +632,8 @@ void main() {
 
       expect(result, isTrue);
       expect(handed, same(call));
-      verifyNever(
-        () => mockPushManager.endCallByCid(any(), silent: any(named: 'silent')),
-      );
+      verifyNever(() => mockPushManager.onRingEnded(any()));
+      verifyNever(() => mockPushManager.onCallLeft(any()));
     });
 
     test(
@@ -670,10 +679,8 @@ void main() {
 
         expect(result, isTrue);
         expect(handed, same(call));
-        verifyNever(
-          () =>
-              mockPushManager.endCallByCid(any(), silent: any(named: 'silent')),
-        );
+        verifyNever(() => mockPushManager.onRingEnded(any()));
+        verifyNever(() => mockPushManager.onCallLeft(any()));
         // Still exactly the one accept the first flow sent.
         verify(
           () => mockCoordinatorClient.acceptCall(cid: any(named: 'cid')),

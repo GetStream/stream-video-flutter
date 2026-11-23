@@ -81,6 +81,11 @@ void main() {
       when(
         () => mockPushManager.endCallByCid(any(), silent: any(named: 'silent')),
       ).thenAnswer((_) async {});
+      when(() => mockPushManager.onRingEnded(any())).thenAnswer((_) async {});
+      when(() => mockPushManager.onCallLeft(any())).thenAnswer((_) async {});
+      when(
+        () => mockPushManager.onCallAccepted(any()),
+      ).thenAnswer((_) async {});
       when(mockPushManager.dispose).thenAnswer((_) async {});
 
       // `thenAnswer`, not `thenReturn`: a SharedEmitter is a Stream, which

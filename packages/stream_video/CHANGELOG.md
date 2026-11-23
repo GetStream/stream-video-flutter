@@ -3,6 +3,7 @@
 ### ⚠️ Breaking
 
 - `PushNotificationManager` has a new method, `setCallAudioOutputDeviceByCid`. A class that `implements` it has to add it; one that `extends` it inherits a no-op.
+- `PushNotificationManager` has three new methods that a call uses to tell the native call UI what happened: `onRingEnded` when its ring is over before the user answered it on this device, `onCallLeft` when a call this device joined or accepted is left, and `onCallAccepted` when the user accepts it in the app. A class that `implements` it has to add them; one that `extends` it inherits `onRingEnded` and `onCallLeft` calling `endCallByCid`, silently for `onRingEnded`, and an `onCallAccepted` that does nothing.
 - `RingingEvent` has a new subtype, `ActionCallDismissed`, so an exhaustive `switch` over ringing events needs a case for it. `disposeAfterResolvingRinging` no longer disposes on `ActionCallTimeout`, which iOS sends when CallKit's ring times out and Android now sends when a ring times out natively, so the client's own ring timeout can still reject the call.
 - `PushNotificationManager.showIncomingCall` takes a `ringTimeout`, so a custom implementation has to add it. `handleRingingFlowNotifications` passes the call's `autoRejectTimeout`.
 - `ActionCallToggleGroup` is removed. It was never sent: CallKit is never offered a merge of calls, and refuses a merge it attempts anyway.
@@ -137,6 +138,9 @@
 - `StreamVideo.disconnect()` leaves the user disconnected even when unregistering the push device fails, or when the connection had dropped and was reconnecting.
 - `StreamVideo.disconnect()` also unregisters the push device when the user never connected.
 - Leaving or disposing an outgoing call you created while it still rings cancels the ring.
+- Leaving a call tells the native call UI, the CallKit call on iOS or the notification and Telecom call on Android, unless another `Call` for the same call is joined or accepted it on this device: `PushNotificationManager.onRingEnded` for a ring this `Call` neither joined nor accepted, `onCallLeft` otherwise.
+- A ring the current user has not answered is left once nobody is left in its call, such as when a caller who had joined hangs up.
+- Accepting a call calls `PushNotificationManager.onCallAccepted`, so the native ring goes away while the call goes on.
 - With `closedCaptionsVisibilityDurationMs` at 0 or less, closed captions are now shown and stay until newer ones replace them, instead of never being shown.
 - A `call.rejected` event now settles a ring by the same rules as the push and ring-state checks (`RingingSnapshot`), so the paths can no longer disagree. These cases change:
   - A callee hangs up once every other member has rejected, even if the caller isn't a member of the call.

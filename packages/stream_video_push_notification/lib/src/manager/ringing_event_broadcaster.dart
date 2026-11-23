@@ -43,24 +43,47 @@ final class RingingEventBroadcaster {
     return _controller!.stream;
   }
 
-  /// Suppresses upcoming Ringing events.
-  ///
-  /// - If [eventType] is null, all events are suppressed.
-  /// - If [valueKey] is provided, it must match the event value to suppress.
+  /// Suppresses the upcoming events of [eventType] whose value matches
+  /// [valueKey]: the mute or hold state they carry, or none for other events.
   void suppressEvent({
-    Type? eventType,
+    required Type eventType,
     String? valueKey,
     Duration window = _ringingEventSuppressionWindow,
   }) {
     _suppressions.add(
       _RingingEventSuppression(
-        eventType: eventType,
+        eventTypes: {eventType},
         valueKey: valueKey,
         timestamp: DateTime.now(),
         window: window,
       ),
     );
   }
+
+  /// Suppresses the upcoming reports that a native call of [callCid] ended:
+  /// [ActionCallDecline], [ActionCallEnded], [ActionCallTimeout] and
+  /// [ActionCallDismissed] carrying that cid. Events of other calls, and
+  /// events that are not about an end, still go through.
+  void suppressCallEnd(
+    String callCid, {
+    Duration window = _ringingEventSuppressionWindow,
+  }) {
+    _suppressions.add(
+      _RingingEventSuppression(
+        eventTypes: _callEndTypes,
+        callCid: callCid,
+        timestamp: DateTime.now(),
+        window: window,
+      ),
+    );
+  }
+
+  static const _callEndTypes = {
+    ActionCallDecline,
+    ActionCallEnded,
+    ActionCallTimeout,
+    ActionCallDismissed,
+  };
 
   StreamSubscription<RingingEvent?>? _eventSubscription;
 
@@ -88,12 +111,23 @@ final class RingingEventBroadcaster {
     }
 
     final valueKey = _eventValueKey(event);
+    final callCid = _eventCallCid(event);
     return _suppressions.any(
       (suppression) =>
-          suppression.eventType == null ||
-          (event.runtimeType == suppression.eventType &&
-              suppression.valueKey == valueKey),
+          suppression.eventTypes.contains(event.runtimeType) &&
+          suppression.valueKey == valueKey &&
+          suppression.callCid == callCid,
     );
+  }
+
+  String? _eventCallCid(RingingEvent event) {
+    return switch (event) {
+      ActionCallDecline(:final data) ||
+      ActionCallEnded(:final data) ||
+      ActionCallTimeout(:final data) ||
+      ActionCallDismissed(:final data) => data.callCid,
+      _ => null,
+    };
   }
 
   String? _eventValueKey(RingingEvent event) {
@@ -107,14 +141,18 @@ final class RingingEventBroadcaster {
 
 class _RingingEventSuppression {
   const _RingingEventSuppression({
-    required this.eventType,
-    required this.valueKey,
+    required this.eventTypes,
+    this.valueKey,
+    this.callCid,
     required this.timestamp,
     required this.window,
   });
 
-  final Type? eventType;
+  final Set<Type> eventTypes;
   final String? valueKey;
+
+  // The cid the event has to carry; null for an event that carries none.
+  final String? callCid;
   final DateTime timestamp;
   final Duration window;
 
