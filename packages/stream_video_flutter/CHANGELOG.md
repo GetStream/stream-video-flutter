@@ -299,6 +299,7 @@
 - [iOS] A participant's video no longer stays black after returning from picture-in-picture.
 - [Android] The picture-in-picture window now takes the aspect ratio of the video it shows, within Android's 2.39:1 limit, and reshapes when that video's size or orientation changes. It used to be 9:16 or 16:9 depending on how the phone was held. It still falls back to that when the video's size isn't known yet or a custom `callPictureInPictureWidgetBuilder` is set.
 - [Android] The picture-in-picture window animates in from the tile of the participant it shows, instead of showing the app's icon until the app draws in the small window.
+- The incoming call screen shows the microphone and camera as on when the call settings turn them on, as the call then joins. It used to show them off. Toggling the microphone there no longer makes the join turn the camera off and switch it to the front camera.
 
 ### ⚠️ Deprecated
 
@@ -316,6 +317,7 @@
 
 ### ⚠️ Breaking
 
+- `StreamCallContainer` ends its call when it is disposed, for example when the back button pops its route. Before, the call stayed joined and kept publishing audio and video behind the closed screen. The container joins the call it is given, so it ends that call even when the app joined it first; an incoming call the user has not accepted is rejected as declined, since a leave would not tell the server. `LivestreamPlayer` does the same only for a call it joined itself through an auto-join `joinBehaviour`, as the Swift and JS players do; a call the app joined, or started joining, is still the app's to leave. A left call cannot be joined again, so anything that disposes the widget and builds a new one for the same call now ends the call: a page without keep-alive in a `PageView` or `TabBarView`, an `AnimatedSwitcher`, a parent that changes type, or `pushReplacement` to another screen with the same call. Keep the widget mounted or give it a `GlobalKey`. To keep the call running after the widget is gone, for example in an in-app picture-in-picture overlay, or to run your own cleanup before the leave, pass `leaveCallOnDispose: false` and call `Call.leave` yourself.
 - `isMobileLandscape` and `isMobilePortrait` are removed.
 - `StreamScreenSize` is `small` for any window shorter than 480, and `StreamScreenSize.fromSize` buckets a size by both axes.
 - `StreamCallContent.callFastReconnectingOverlayBuilder`, `CallFastReconnectingOverlayBuilder` and `CallFastReconnectingProperties` are removed; use `callConnectionBannerBuilder`, which is drawn for every reconnect and gets the call status through `CallConnectionBannerProperties`. `CallNotConnectedProperties.isMigrating` and `isReconnecting` are removed, since `callNotConnectedBuilder` is only used before the call first connects.
