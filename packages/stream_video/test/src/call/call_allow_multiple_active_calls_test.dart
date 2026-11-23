@@ -310,6 +310,19 @@ void main() {
           );
         });
 
+        test('leaves the call the user is in alone when left', () async {
+          await streamVideo.state.setActiveCall(currentCall);
+
+          final joining = ringingCall.join();
+          await pumpEventQueue();
+
+          await ringingCall.leave();
+
+          expect(await joining, isA<Failure>());
+          expect(streamVideo.activeCalls, [currentCall]);
+          verifyNever(() => currentCall.leave(reason: any(named: 'reason')));
+        });
+
         test('replaces the call the user is in once accepted', () async {
           await streamVideo.state.setActiveCall(currentCall);
 

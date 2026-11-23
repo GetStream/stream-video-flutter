@@ -951,8 +951,8 @@ class RingingFlowCoordinatorImpl implements RingingFlowCoordinator {
     );
   }
 
-  /// The call this client already holds for the ring of [cid], made by
-  /// consuming a ringing event; `null` when there is none.
+  // The call this client already holds for the ring of [cid], made by
+  // consuming a ringing event; `null` when there is none.
   Call? _cachedRingingCall(String cid) {
     final call = _state.ringingCalls[cid] ?? _state.incomingCall.value;
     return call?.callCid.value == cid ? call : null;

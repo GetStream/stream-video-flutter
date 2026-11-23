@@ -473,14 +473,14 @@ class CallConnectionCoordinator {
     return _settleJoin(outcome);
   }
 
-  /// Waits for the user to accept the call when it is an incoming ring that
-  /// is not accepted yet.
-  ///
-  /// Accepting is what replaces the call the user is in or cancels their own
-  /// outgoing ring (see `RingingFlowCoordinatorImpl.prepareToAccept`), so the
-  /// ring is not marked active before then. Returns `null` once accepted, or
-  /// at once when the call is not such a ring, and otherwise the outcome the
-  /// join ends with.
+  // Waits for the user to accept the call when it is an incoming ring that
+  // is not accepted yet.
+  //
+  // Accepting is what replaces the call the user is in or cancels their own
+  // outgoing ring (see `RingingFlowCoordinatorImpl.prepareToAccept`), so the
+  // ring is not marked active before then. Returns `null` once accepted, or
+  // at once when the call is not such a ring, and otherwise the outcome the
+  // join ends with.
   Future<JoinOutcome?> _awaitIncomingAccepted() async {
     final status = _call.state.value.status;
     if (status is! CallStatusIncoming || status.acceptedByMe) return null;
@@ -493,7 +493,12 @@ class CallConnectionCoordinator {
         .asCancelable()
         .storeIn(_idConnect, _cancelables)
         .valueOrCancellation();
-    if (result == null || _isLeftOrLeaving) return const JoinCancelled();
+    if (result == null || _isLeftOrLeaving) {
+      // The ring was never active, so leaving it does not end its native
+      // call the way removing an active call does.
+      await _endNativeCallUnlessTakenOver();
+      return const JoinCancelled();
+    }
 
     if (result is Failure) {
       return JoinRingUnanswered(result.videoError, result.stackTrace);
@@ -502,8 +507,7 @@ class CallConnectionCoordinator {
     return null;
   }
 
-  /// The join's leave decision on [outcome]; the reconnect loop makes its
-  /// own.
+  // The join's leave decision on [outcome]; the reconnect loop makes its own.
   Future<Result<None>> _settleJoin(JoinOutcome outcome) async {
     switch (outcome) {
       case JoinSucceeded():
@@ -2452,21 +2456,7 @@ class CallConnectionCoordinator {
     if (status is CallStatusIncoming || status is CallStatusOutgoing) {
       await _cancelUnansweredRing();
       _call._stateManager.lifecycleCallDisconnected(reason: _disposed);
-      final joinedElsewhere = client.state.activeCalls.value.any(
-        (call) => call.callCid == _call.callCid,
-      );
-      if (!joinedElsewhere && !await _answeredNatively()) {
-        try {
-          await client.pushNotificationManager?.endCallByCid(
-            _call.callCid.value,
-            silent: true,
-          );
-        } catch (e, stk) {
-          _call._logger.e(
-            () => '[dispose] ending the native call failed: $e\n$stk',
-          );
-        }
-      }
+      await _endNativeCallUnlessTakenOver();
     }
 
     _call._ringing.release();
@@ -2476,6 +2466,28 @@ class CallConnectionCoordinator {
     }
     if (identical(client.state.incomingCall.value, _call)) {
       await client.state.setIncomingCall(null);
+    }
+  }
+
+  // Ends the native call of a ring this instance is letting go of, unless
+  // another instance has joined the same call or the user answered it on the
+  // native call screen.
+  Future<void> _endNativeCallUnlessTakenOver() async {
+    final client = _call._host;
+    final joinedElsewhere = client.state.activeCalls.value.any(
+      (call) => call.callCid == _call.callCid,
+    );
+    if (joinedElsewhere || await _answeredNatively()) return;
+
+    try {
+      await client.pushNotificationManager?.endCallByCid(
+        _call.callCid.value,
+        silent: true,
+      );
+    } catch (e, stk) {
+      _call._logger.e(
+        () => '[release] ending the native call failed: $e\n$stk',
+      );
     }
   }
 
