@@ -1,4 +1,3 @@
-import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/stream_video.dart';
 import '../stream_video_push_notification.dart';
@@ -81,10 +80,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       final configuration = _defaultPushConfiguration.merge(pushConfiguration);
 
       StreamVideoPushNotificationPlatform.instance.init(
-        StreamVideoPushNotificationManager.nativePushConfiguration(
-          configuration,
-          streamVideo.options,
-        ),
+        _nativePushConfiguration(configuration, streamVideo.options),
       );
 
       return StreamVideoPushNotificationManager._(
@@ -95,32 +91,6 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
         pushConfiguration: configuration,
         registerApnDeviceToken: registerApnDeviceToken,
       );
-    };
-  }
-
-  /// The push configuration native code gets: [configuration] with, under
-  /// `ios`, the Apple audio configuration of the ringing calls' policy (see
-  /// [StreamVideoOptions.ringingAudioConfigurationPolicy]).
-  ///
-  /// Native code keeps it, so a VoIP push that arrives before Dart runs has
-  /// it too, and applies it to the audio session when CallKit answers a call
-  /// the app has not joined yet.
-  @visibleForTesting
-  static Map<String, dynamic> nativePushConfiguration(
-    StreamVideoPushConfiguration configuration,
-    StreamVideoOptions options,
-  ) {
-    final json = configuration.toJson();
-    final policy = options.resolvedRingingAudioConfigurationPolicy;
-    final audioConfiguration = policy.getAppleConfiguration(
-      defaultToSpeaker: policy.defaultsToSpeaker,
-    );
-    return {
-      ...json,
-      'ios': <String, dynamic>{
-        ...?json['ios'] as Map<String, dynamic>?,
-        'ringingAudioConfiguration': audioConfiguration.toMap(),
-      },
     };
   }
 
@@ -334,3 +304,25 @@ const _defaultPushConfiguration = StreamVideoPushConfiguration(
     ringtonePath: 'system_ringtone_default',
   ),
 );
+
+// The push configuration native code gets: [configuration] with, under `ios`,
+// the Apple audio configuration of the ringing calls' policy. Native code
+// keeps it, so a VoIP push that arrives before Dart runs has it too, and
+// applies it when CallKit answers a call the app has not joined yet.
+Map<String, dynamic> _nativePushConfiguration(
+  StreamVideoPushConfiguration configuration,
+  StreamVideoOptions options,
+) {
+  final json = configuration.toJson();
+  final policy = options.resolvedRingingAudioConfigurationPolicy;
+  final audioConfiguration = policy.getAppleConfiguration(
+    defaultToSpeaker: policy.defaultsToSpeaker,
+  );
+  return {
+    ...json,
+    'ios': <String, dynamic>{
+      ...?json['ios'] as Map<String, dynamic>?,
+      'ringingAudioConfiguration': audioConfiguration.toMap(),
+    },
+  };
+}

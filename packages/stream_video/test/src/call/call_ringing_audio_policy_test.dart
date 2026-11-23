@@ -10,75 +10,33 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   setUpAll(registerMockFallbackValues);
 
-  /// A call whose client has [options], ringing when [ringing].
-  Call callWith(
-    StreamVideoOptions options, {
-    required bool ringing,
-    CallPreferences? preferences,
-  }) {
-    final host = setupMockCallHost();
-    when(() => host.options).thenReturn(options);
-    return createTestCall(
-      streamVideo: host,
-      stateManager: CallStateNotifier(
-        createTestCallState(
-          preferences: preferences,
-        ).copyWith(isRingingFlow: ringing),
-      ),
+  group('when the client sets a ringing policy', () {
+    final options = StreamVideoOptions(
+      audioConfigurationPolicy: const AudioConfigurationPolicy.viewer(),
+      ringingAudioConfigurationPolicy: const AudioConfigurationPolicy.hiFi(),
     );
-  }
 
-  final options = StreamVideoOptions(
-    audioConfigurationPolicy: const AudioConfigurationPolicy.viewer(),
-    ringingAudioConfigurationPolicy: const AudioConfigurationPolicy.hiFi(),
-  );
-
-  group('StreamVideoOptions.resolvedRingingAudioConfigurationPolicy', () {
-    test('is the ringing policy when set', () {
+    test('it is the resolved ringing policy', () {
       expect(
         options.resolvedRingingAudioConfigurationPolicy,
         isA<HiFiAudioPolicy>(),
       );
     });
 
-    test('falls back to the client policy', () {
-      final withoutRinging = StreamVideoOptions(
-        audioConfigurationPolicy: const AudioConfigurationPolicy.viewer(),
-      );
-
-      expect(
-        withoutRinging.resolvedRingingAudioConfigurationPolicy,
-        isA<ViewerAudioPolicy>(),
-      );
-    });
-  });
-
-  group('Call.audioConfigurationPolicy', () {
-    test('is the ringing policy for a ringing call', () {
-      final call = callWith(options, ringing: true);
+    test('a ringing call uses it', () {
+      final call = _callWith(options, ringing: true);
 
       expect(call.audioConfigurationPolicy, isA<HiFiAudioPolicy>());
     });
 
-    test('is the client policy for a call that does not ring', () {
-      final call = callWith(options, ringing: false);
+    test('a call that does not ring uses the client policy', () {
+      final call = _callWith(options, ringing: false);
 
       expect(call.audioConfigurationPolicy, isA<ViewerAudioPolicy>());
     });
 
-    test('is the client policy for a ringing call without a ringing one', () {
-      final call = callWith(
-        StreamVideoOptions(
-          audioConfigurationPolicy: const AudioConfigurationPolicy.viewer(),
-        ),
-        ringing: true,
-      );
-
-      expect(call.audioConfigurationPolicy, isA<ViewerAudioPolicy>());
-    });
-
-    test("is the call's own policy over the ringing one", () {
-      final call = callWith(
+    test("a ringing call's own policy wins over it", () {
+      final call = _callWith(
         options,
         ringing: true,
         preferences: DefaultCallPreferences(
@@ -90,17 +48,52 @@ void main() {
       expect(call.audioConfigurationPolicy, isA<BroadcasterAudioPolicy>());
     });
 
-    test('builds the pre-join factory of a ringing call with the ringing '
-        'policy', () async {
+    test('a ringing call builds its pre-join factory with it', () async {
       // Web has no per-call native factory, so no platform channel is needed.
       CurrentPlatform.debugCurrentPlatformOverride = PlatformType.web;
       addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
-      final call = callWith(options, ringing: true);
+      final call = _callWith(options, ringing: true);
 
       await call.ensureNativeFactory();
 
       expect(call.pcFactoryAudioConfigurationPolicy, isA<HiFiAudioPolicy>());
-      expect(call.audioConfigurationPolicy, isA<HiFiAudioPolicy>());
     });
   });
+
+  group('when the client sets no ringing policy', () {
+    final options = StreamVideoOptions(
+      audioConfigurationPolicy: const AudioConfigurationPolicy.viewer(),
+    );
+
+    test('the client policy is the resolved ringing policy', () {
+      expect(
+        options.resolvedRingingAudioConfigurationPolicy,
+        isA<ViewerAudioPolicy>(),
+      );
+    });
+
+    test('a ringing call uses the client policy', () {
+      final call = _callWith(options, ringing: true);
+
+      expect(call.audioConfigurationPolicy, isA<ViewerAudioPolicy>());
+    });
+  });
+}
+
+/// A call whose client has [options], ringing when [ringing].
+Call _callWith(
+  StreamVideoOptions options, {
+  required bool ringing,
+  CallPreferences? preferences,
+}) {
+  final host = setupMockCallHost();
+  when(() => host.options).thenReturn(options);
+  return createTestCall(
+    streamVideo: host,
+    stateManager: CallStateNotifier(
+      createTestCallState(
+        preferences: preferences,
+      ).copyWith(isRingingFlow: ringing),
+    ),
+  );
 }

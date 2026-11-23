@@ -18,15 +18,23 @@ void main() {
   /// What the client hands the service as the calls in progress.
   late void Function(List<Call>) reportActiveCalls;
 
+  /// The `serviceKind` of every service start the platform was asked for.
+  late List<Object?> startedServiceKinds;
+
   setUpAll(() => registerFallbackValue(const DisconnectReason.left()));
 
   setUp(() {
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
 
+    startedServiceKinds = [];
     platform = MethodChannelStreamVideoFlutter();
     StreamVideoFlutterPlatform.instance = platform;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(platform.methodChannel, (methodCall) async {
+          if (methodCall.method == 'startBackgroundService') {
+            final arguments = methodCall.arguments as Map<Object?, Object?>;
+            startedServiceKinds.add(arguments['serviceKind']);
+          }
           // Nothing is running yet, so a start goes through.
           if (methodCall.method == 'isBackgroundServiceRunning') return false;
           return true;
@@ -93,5 +101,54 @@ void main() {
         ),
       ),
     ).called(1);
+  });
+
+  group('when the call it manages starts', () {
+    // The service is one instance for the whole run and keeps managing the
+    // calls earlier tests reported, so each test's call has a cid of its own.
+    Future<void> startManaging(String cid) async {
+      when(() => call.callCid).thenReturn(StreamCallCid(cid: cid));
+      StreamBackgroundService.init(
+        streamVideo,
+        callNotificationOptionsBuilder: (_) => const NotificationOptions(),
+      );
+      reportActiveCalls([call]);
+      await pumpEventQueue();
+    }
+
+    test(
+      "runs a viewer call in the livestream viewer service, whatever the client's "
+      'policy',
+      () async {
+        when(() => streamVideo.options).thenReturn(
+          StreamVideoOptions(
+            audioConfigurationPolicy:
+                const AudioConfigurationPolicy.broadcaster(),
+          ),
+        );
+        when(
+          () => call.audioConfigurationPolicy,
+        ).thenReturn(const AudioConfigurationPolicy.viewer());
+
+        await startManaging('default:viewer');
+
+        expect(startedServiceKinds, [
+          AndroidCallServiceKind.livestreamViewer.name,
+        ]);
+      },
+    );
+
+    test("runs a broadcaster call in the call service, whatever the client's "
+        'policy', () async {
+      when(() => streamVideo.options).thenReturn(
+        StreamVideoOptions(
+          audioConfigurationPolicy: const AudioConfigurationPolicy.viewer(),
+        ),
+      );
+
+      await startManaging('default:broadcaster');
+
+      expect(startedServiceKinds, [AndroidCallServiceKind.call.name]);
+    });
   });
 }

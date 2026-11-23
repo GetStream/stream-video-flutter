@@ -1150,10 +1150,10 @@ class StreamVideoOptions {
   final AudioConfigurationPolicy audioConfigurationPolicy;
 
   /// The audio configuration policy of ringing calls, incoming and outgoing.
-  /// Falls back to [audioConfigurationPolicy] when null, the default.
   ///
-  /// Set it when ringing calls need a different policy than the rest, for
-  /// example an app whose [audioConfigurationPolicy] is
+  /// Null, the default, falls back to [audioConfigurationPolicy]. Consider
+  /// setting it when ringing calls need a different policy than the rest, for
+  /// example in an app whose [audioConfigurationPolicy] is
   /// [AudioConfigurationPolicy.viewer] for livestreams and whose ringing
   /// calls are voice calls:
   ///
@@ -1165,21 +1165,19 @@ class StreamVideoOptions {
   /// )
   /// ```
   ///
-  /// A call's own policy, from `CallPreferences.audioConfigurationPolicy` or
-  /// `Call.setAudioConfigurationPolicy`, still wins over it.
+  /// A call's own policy, from [CallPreferences.audioConfigurationPolicy] or
+  /// [Call.setAudioConfigurationPolicy], still wins over it.
   ///
-  /// A call takes its policy when its peer connection factory is built, and
-  /// keeps it. A call whose factory a lobby preview built before it rang
-  /// keeps the policy it had then; `Call.setAudioConfigurationPolicy` sets
-  /// another one before the join.
+  /// A call keeps the policy it had when it first set up its media, at the
+  /// join or for a lobby preview. A call previewed before it rang keeps the
+  /// policy it had then; [Call.setAudioConfigurationPolicy] gives it another
+  /// before the join.
   ///
-  /// On iOS the push notification package applies it to the audio session
-  /// when CallKit answers a call the app has not joined yet, such as one
-  /// answered from the CallKit screen, and when CallKit answers or starts
-  /// another call while the session's category cannot record, since CallKit
-  /// activates the session only for a category that can. A policy whose
-  /// category cannot record is applied with `playAndRecord` there. The
-  /// package reads it once, when the client is created.
+  /// On iOS, with the push notification package, a call answered from the
+  /// CallKit screen before the app joins it gets this policy's audio settings
+  /// from the start, with recording allowed even for a policy that does not
+  /// record, such as [AudioConfigurationPolicy.viewer], since CallKit needs
+  /// it. The package reads the policy when the client is created.
   final AudioConfigurationPolicy? ringingAudioConfigurationPolicy;
 
   /// The policy of a ringing call that sets none of its own:

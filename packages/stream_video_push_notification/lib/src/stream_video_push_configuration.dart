@@ -272,7 +272,7 @@ class IOSPushConfiguration {
   final int? maximumCallsPerCallGroup;
 
   /// Has no effect: CallKit calls configure the audio session with
-  /// `StreamVideoOptions.ringingAudioConfigurationPolicy`.
+  /// [StreamVideoOptions.ringingAudioConfigurationPolicy].
   @Deprecated(
     'Has no effect. The audio session follows '
     'StreamVideoOptions.ringingAudioConfigurationPolicy.',
@@ -284,7 +284,7 @@ class IOSPushConfiguration {
   final bool? audioSessionActive;
 
   /// Has no effect: CallKit calls configure the audio session with
-  /// `StreamVideoOptions.ringingAudioConfigurationPolicy`.
+  /// [StreamVideoOptions.ringingAudioConfigurationPolicy].
   @Deprecated(
     'Has no effect. The audio session follows '
     'StreamVideoOptions.ringingAudioConfigurationPolicy.',
@@ -292,7 +292,7 @@ class IOSPushConfiguration {
   final double? audioSessionPreferredSampleRate;
 
   /// Has no effect: CallKit calls configure the audio session with
-  /// `StreamVideoOptions.ringingAudioConfigurationPolicy`.
+  /// [StreamVideoOptions.ringingAudioConfigurationPolicy].
   @Deprecated(
     'Has no effect. The audio session follows '
     'StreamVideoOptions.ringingAudioConfigurationPolicy.',
@@ -300,7 +300,7 @@ class IOSPushConfiguration {
   final double? audioSessionPreferredIOBufferDuration;
 
   /// Has no effect: CallKit calls configure the audio session with
-  /// `StreamVideoOptions.ringingAudioConfigurationPolicy`.
+  /// [StreamVideoOptions.ringingAudioConfigurationPolicy].
   @Deprecated(
     'Has no effect. The audio session follows '
     'StreamVideoOptions.ringingAudioConfigurationPolicy.',

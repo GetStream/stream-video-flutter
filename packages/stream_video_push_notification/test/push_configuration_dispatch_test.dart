@@ -166,13 +166,14 @@ void main() {
     });
   });
 
-  group('the ringing audio configuration reaching the platform', () {
+  group('when the client is created', () {
     Map<String, dynamic> audioOf(Map<String, dynamic> configuration) =>
         (configuration['ios']
                 as Map<String, dynamic>)['ringingAudioConfiguration']
             as Map<String, dynamic>;
 
-    test("is the client policy's when no ringing policy is set", () {
+    test("sends the client policy's Apple configuration as the ringing one "
+        'when no ringing policy is set', () {
       final audio = audioOf(
         _dispatch(
           platform,
@@ -190,10 +191,9 @@ void main() {
             .getAppleConfiguration(defaultToSpeaker: true)
             .toMap(),
       );
-      expect(audio['appleAudioCategoryOptions'], contains('defaultToSpeaker'));
     });
 
-    test("is the ringing policy's when one is set", () {
+    test("sends the ringing policy's Apple configuration when one is set", () {
       final audio = audioOf(
         _dispatch(
           platform,
@@ -218,7 +218,7 @@ void main() {
       });
     });
 
-    test('keeps the iOS options next to it', () {
+    test('sends the ringing configuration next to the other iOS options', () {
       final configuration = _dispatch(
         platform,
         const StreamVideoPushConfiguration(

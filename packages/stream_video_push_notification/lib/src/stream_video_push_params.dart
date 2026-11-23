@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
+import 'package:stream_video/stream_video.dart' show StreamVideoOptions;
 
 import '../stream_video_push_notification.dart';
 import 'stream_video_push_configuration.dart';
@@ -337,7 +338,7 @@ class IOSParams {
   final int? maximumCallsPerCallGroup;
 
   /// Has no effect: CallKit calls configure the audio session with
-  /// `StreamVideoOptions.ringingAudioConfigurationPolicy`.
+  /// [StreamVideoOptions.ringingAudioConfigurationPolicy].
   @Deprecated(
     'Has no effect. The audio session follows '
     'StreamVideoOptions.ringingAudioConfigurationPolicy.',
@@ -349,7 +350,7 @@ class IOSParams {
   final bool? audioSessionActive;
 
   /// Has no effect: CallKit calls configure the audio session with
-  /// `StreamVideoOptions.ringingAudioConfigurationPolicy`.
+  /// [StreamVideoOptions.ringingAudioConfigurationPolicy].
   @Deprecated(
     'Has no effect. The audio session follows '
     'StreamVideoOptions.ringingAudioConfigurationPolicy.',
@@ -357,7 +358,7 @@ class IOSParams {
   final double? audioSessionPreferredSampleRate;
 
   /// Has no effect: CallKit calls configure the audio session with
-  /// `StreamVideoOptions.ringingAudioConfigurationPolicy`.
+  /// [StreamVideoOptions.ringingAudioConfigurationPolicy].
   @Deprecated(
     'Has no effect. The audio session follows '
     'StreamVideoOptions.ringingAudioConfigurationPolicy.',
@@ -365,7 +366,7 @@ class IOSParams {
   final double? audioSessionPreferredIOBufferDuration;
 
   /// Has no effect: CallKit calls configure the audio session with
-  /// `StreamVideoOptions.ringingAudioConfigurationPolicy`.
+  /// [StreamVideoOptions.ringingAudioConfigurationPolicy].
   @Deprecated(
     'Has no effect. The audio session follows '
     'StreamVideoOptions.ringingAudioConfigurationPolicy.',

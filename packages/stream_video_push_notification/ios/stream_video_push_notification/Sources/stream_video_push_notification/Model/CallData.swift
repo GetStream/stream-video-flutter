@@ -20,21 +20,21 @@ import Foundation
     @objc public var includesCallsInRecents: Bool
     @objc public var ringtonePath: String
 
-    /// Always true: CallKit calls configure the audio session with the ringing audio
-    /// configuration Dart sends.
+    /// Always true: CallKit calls use the audio settings of
+    /// `StreamVideoOptions.ringingAudioConfigurationPolicy`.
     @available(
         *, deprecated,
-        message: "Has no effect. The audio session follows the ringing audio configuration Dart sends."
+        message: "Has no effect. The audio session follows StreamVideoOptions.ringingAudioConfigurationPolicy."
     )
     @objc public var configureAudioSession: Bool {
         get { true }
         set {}
     }
 
-    /// Always empty: the mode comes from the ringing audio configuration Dart sends.
+    /// Always empty: the mode comes from `StreamVideoOptions.ringingAudioConfigurationPolicy`.
     @available(
         *, deprecated,
-        message: "Has no effect. The audio session follows the ringing audio configuration Dart sends."
+        message: "Has no effect. The audio session follows StreamVideoOptions.ringingAudioConfigurationPolicy."
     )
     @objc public var audioSessionMode: String {
         get { "" }
@@ -44,7 +44,7 @@ import Foundation
     /// Always 0: no preferred sample rate is set.
     @available(
         *, deprecated,
-        message: "Has no effect. The audio session follows the ringing audio configuration Dart sends."
+        message: "Has no effect. The audio session follows StreamVideoOptions.ringingAudioConfigurationPolicy."
     )
     @objc public var audioSessionPreferredSampleRate: Double {
         get { 0 }
@@ -54,7 +54,7 @@ import Foundation
     /// Always 0: no preferred IO buffer duration is set.
     @available(
         *, deprecated,
-        message: "Has no effect. The audio session follows the ringing audio configuration Dart sends."
+        message: "Has no effect. The audio session follows StreamVideoOptions.ringingAudioConfigurationPolicy."
     )
     @objc public var audioSessionPreferredIOBufferDuration: Double {
         get { 0 }

@@ -373,10 +373,9 @@ class Call {
   /// skipped on join, and so keeps autoOn's device-capability check.
   bool _audioProcessingRestoreIsAutoOn = false;
 
-  /// The audio policy set for this call: the one in its preferences, else
-  /// `StreamVideoOptions.ringingAudioConfigurationPolicy` for a ringing call,
-  /// else `StreamVideoOptions.audioConfigurationPolicy`. Used to build the
-  /// call's peer connection factory.
+  // The audio policy set for this call: the one in its preferences, else
+  // the client's ringing policy for a ringing call, else the client's policy.
+  // Used to build the call's peer connection factory.
   AudioConfigurationPolicy get _preferredAudioConfigurationPolicy {
     final callState = _stateManager.callState;
     final options = _host.options;
@@ -397,10 +396,11 @@ class Call {
 
   /// The audio policy in effect for this call.
   ///
-  /// The policy the call's peer connection factory was built with, once it
-  /// exists. Before that, the policy in the call's preferences, else
-  /// `StreamVideoOptions.ringingAudioConfigurationPolicy` for a ringing call,
-  /// else `StreamVideoOptions.audioConfigurationPolicy`.
+  /// Once the call has set up its media, at the join or for a lobby preview,
+  /// the policy it set it up with, which it keeps. Before that, the policy in
+  /// its [CallPreferences.audioConfigurationPolicy], else
+  /// [StreamVideoOptions.ringingAudioConfigurationPolicy] for a ringing call,
+  /// else [StreamVideoOptions.audioConfigurationPolicy].
   AudioConfigurationPolicy get audioConfigurationPolicy =>
       _audioConfigurationPolicy;
 
@@ -931,8 +931,8 @@ class Call {
 
   /// Sets the audio configuration policy for this call, keeping every other
   /// preference as it is. Pass null to fall back to the client default,
-  /// `StreamVideoOptions.ringingAudioConfigurationPolicy` for a ringing call
-  /// and `StreamVideoOptions.audioConfigurationPolicy` otherwise.
+  /// [StreamVideoOptions.ringingAudioConfigurationPolicy] for a ringing call
+  /// and [StreamVideoOptions.audioConfigurationPolicy] otherwise.
   ///
   /// Call this before [join]: the policy is applied when the call's peer
   /// connection factory is built. A factory built earlier by a lobby preview
