@@ -23,7 +23,7 @@ jobs:
   analyze:
     timeout-minutes: 15
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     permissions:
       contents: read
       pull-requests: read
@@ -73,7 +73,7 @@ jobs:
   build:
     timeout-minutes: 30
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
@@ -103,7 +103,7 @@ jobs:
     needs: [analyze, build]
     timeout-minutes: 5
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: Check results
         env:

@@ -39,7 +39,7 @@ jobs:
     timeout-minutes: 15
     if: github.event.pull_request.draft == false
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v7
