@@ -20,7 +20,7 @@ permissions:
 jobs:
   stream_video:
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
@@ -35,7 +35,7 @@ jobs:
 
   stream_video_flutter:
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
@@ -55,7 +55,7 @@ jobs:
 
   stream_video_push_notification:
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
@@ -74,7 +74,7 @@ jobs:
 
   stream_video_screen_sharing:
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
@@ -89,7 +89,7 @@ jobs:
 
   stream_video_noise_cancellation:
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7

@@ -77,7 +77,7 @@ jobs:
     # Goldens compare pixels, so this matches the image update_goldens.yml
     # renders them on.
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     permissions:
       contents: read
       pull-requests: read
@@ -174,7 +174,7 @@ jobs:
     if: needs.gate.outputs.should_run == 'true'
     timeout-minutes: 30
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
@@ -257,7 +257,7 @@ jobs:
     needs: [gate, analyze, complexity, build, coverage-skipped, ios-unit-tests]
     timeout-minutes: 5
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: Check results
         env:

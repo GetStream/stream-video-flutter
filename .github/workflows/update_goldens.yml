@@ -10,7 +10,7 @@ jobs:
     # Keep in sync with the analyze job in stream_video_flutter_workflow.yml,
     # which compares against the goldens rendered here.
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: 🔑 Mint CI Bot Token
         id: ci-bot-token
