@@ -228,16 +228,24 @@ class PlatformAudioController {
       );
     } catch (_) {
       // The callbacks set before stay in place, also for a later call still
-      // enabling that would restore these.
-      // ignore: cancel_subscriptions, kept as the callbacks in place
+      // enabling that would restore these. Callbacks a later call already
+      // replaced are cancelled.
       final previous = _restoreOnFailure.remove(subscription);
+      var kept = false;
       if (identical(_interruptionSubscription, subscription)) {
         _interruptionSubscription = previous;
+        kept = true;
       }
       for (final MapEntry(:key, :value) in [..._restoreOnFailure.entries]) {
-        if (identical(value, subscription)) _restoreOnFailure[key] = previous;
+        if (identical(value, subscription)) {
+          _restoreOnFailure[key] = previous;
+          kept = true;
+        }
       }
       await subscription.cancel();
+      if (!kept && !identical(_interruptionSubscription, previous)) {
+        await previous?.cancel();
+      }
       rethrow;
     }
 

@@ -365,6 +365,34 @@ void main() {
         expect(calls, ['first']);
       });
 
+      test('an earlier call that fails after a later one succeeded leaves '
+          'only the later callbacks subscribed', () async {
+        final calls = <String>[];
+        await controller.handleCallInterruptionCallbacks(
+          onInterruptionStart: () => calls.add('first'),
+        );
+        final earlier = Completer<void>();
+        events.enableGates.add(earlier);
+
+        final earlierCall = expectLater(
+          controller.handleCallInterruptionCallbacks(
+            onInterruptionStart: () => calls.add('earlier'),
+          ),
+          throwsStateError,
+        );
+        await controller.handleCallInterruptionCallbacks(
+          onInterruptionStart: () => calls.add('later'),
+        );
+        events.enableError = StateError('enable failed');
+        earlier.complete();
+        await earlierCall;
+
+        expect(events.listeners, 1);
+        events.interruptions.add(rtc.AudioInterruption.started);
+        await pumpEventQueue();
+        expect(calls, ['later']);
+      });
+
       test('two overlapping calls that both fail keep the callbacks set '
           'before', () async {
         final calls = <String>[];
@@ -488,8 +516,20 @@ class _FakePlatformEvents implements rtc.WebRtcPlatformEvents {
   /// When set, enabling fails with it.
   Error? enableError;
 
+  /// The subscriptions to [onInterruption] not cancelled yet.
+  int listeners = 0;
+
   @override
-  Stream<rtc.AudioInterruption> get onInterruption => interruptions.stream;
+  Stream<rtc.AudioInterruption> get onInterruption => Stream.multi((
+    controller,
+  ) {
+    listeners++;
+    final subscription = interruptions.stream.listen(controller.add);
+    controller.onCancel = () {
+      listeners--;
+      return subscription.cancel();
+    };
+  }, isBroadcast: true);
 
   @override
   Future<void> enableInterruptionEvents({
