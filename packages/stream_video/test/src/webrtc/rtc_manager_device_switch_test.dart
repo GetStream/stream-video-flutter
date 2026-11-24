@@ -444,6 +444,19 @@ void main() {
       expect(after.mediaConstraints.deviceId, 'usb-microphone');
     });
 
+    test('two switches to the same input at once switch it once', () async {
+      overrideWebRtcCapabilities(platform: PlatformType.android);
+      await publishMicrophone();
+
+      final results = await Future.wait([
+        fixture.manager.setAudioInputDevice(device: _otherMicrophone),
+        fixture.manager.setAudioInputDevice(device: _otherMicrophone),
+      ]);
+
+      expect(results.every((it) => it.isSuccess), isTrue);
+      expect(platform.callsOf('selectAudioInput'), hasLength(1));
+    });
+
     test('on web, captures the microphone again on the device', () async {
       overrideWebRtcCapabilities(platform: PlatformType.web);
       final microphone = await publishMicrophone();

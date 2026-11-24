@@ -73,24 +73,12 @@ extension RtcManagerTrackHelper on RtcManager {
 
     final Result<RtcLocalTrack> switched;
     try {
-      // Where the input is a property of the capture, it is captured again;
-      // elsewhere the platform switches the input of the capture.
-      switched = !rtc.webRtcCapabilities.switchesAudioInputInPlace
-          ? await _publisher.recapture(
-              track.trackId,
-              tag: '[setAudioInputDevice]',
-              constraintsFor: (current) => (current as RtcLocalAudioTrack)
-                  .mediaConstraints
-                  .copyWith(deviceId: device.id),
-            )
-          : await _publisher.updateHeldTrack(
-              track.trackId,
-              (current) => (current as RtcLocalAudioTrack).selectAudioInput(
-                const [],
-                device,
-              ),
-              tag: '[setAudioInputDevice]',
-            );
+      switched = await _audioInputSwitcher.switchPublished(
+        _publisher,
+        track.trackId,
+        device,
+        tag: '[setAudioInputDevice]',
+      );
     } finally {
       // Switching the input restarts capture, which drops the ADM mute.
       // Reconciled on failure too.
@@ -171,10 +159,9 @@ extension RtcManagerTrackHelper on RtcManager {
     bool enabled = true,
     ScreenShareConstraints? constraints,
   }) async {
-    if (rtc.webRtcCapabilities.supportsBroadcastExtension &&
-        enabled &&
+    if (enabled &&
         constraints is ScreenShareConstraints &&
-        constraints.useiOSBroadcastExtension) {
+        _screenShareSource.usesBroadcastExtension(constraints)) {
       return _startBroadcastShare(constraints);
     }
 

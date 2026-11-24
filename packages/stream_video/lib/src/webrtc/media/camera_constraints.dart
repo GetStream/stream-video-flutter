@@ -1,6 +1,5 @@
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
-
 import '../../../stream_video.dart';
+import 'device_id_constraint.dart';
 
 /// Options used when creating a video track that captures the camera.
 ///
@@ -36,15 +35,7 @@ class CameraConstraints extends VideoConstraints {
       'facingMode': facingMode.alias,
       'mirror': mirrorMode.name,
     };
-    if (deviceId != null) {
-      if (rtc.webRtcCapabilities.usesExactDeviceIdConstraints) {
-        constraints['deviceId'] = {'exact': deviceId};
-      } else {
-        constraints['optional'] = [
-          {'sourceId': deviceId},
-        ];
-      }
-    }
+    DeviceIdConstraint.forPlatform().addTo(constraints, deviceId: deviceId);
     if (maxFrameRate != null) {
       constraints['frameRate'] = {'max': maxFrameRate};
     }

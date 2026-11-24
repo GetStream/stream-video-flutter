@@ -12,11 +12,13 @@ import '../sfu/data/models/sfu_publish_options.dart';
 import '../sfu/data/models/sfu_video_sender.dart';
 import '../telemetry/rtc_session_telemetry.dart';
 import 'audio/adm_microphone_mute.dart';
+import 'audio/audio_input_switcher.dart';
 import 'audio/audio_session.dart';
 import 'audio/ios_audio_session.dart';
 import 'e2ee/remote_track_decryptor.dart';
 import 'media/capture_dimension.dart';
 import 'media/local_track_acquirer.dart';
+import 'media/screen_share_source.dart';
 import 'model/rtc_tracks_info.dart';
 import 'peer_connection.dart';
 import 'peer_connection_factory.dart';
@@ -461,6 +463,12 @@ class RtcManager extends Disposable {
   }
 
   late final AudioSession _audioSession = AudioSession.forPlatform();
+
+  late final AudioInputSwitcher _audioInputSwitcher =
+      AudioInputSwitcher.forPlatform();
+
+  late final ScreenShareSource _screenShareSource =
+      ScreenShareSource.forPlatform();
 
   /// Applies [policy]'s audio session configuration, asking for the
   /// loudspeaker as the built-in output when [speakerOn]. Does nothing on a

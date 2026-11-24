@@ -281,11 +281,14 @@ findings as inline comments.
   `sealed` / `final` / `base` modifiers: those are enforced per library, so the
   implementation could not live in its own file and nothing could mock it. A
   test mock in another package adds `// ignore: subtype_of_sealed_class`.
-- **Platform-specific behaviour sits behind an interface.** When only some
-  platforms have a capability, define an interface for it with one
-  implementation per platform that has it and a no-op for the rest, and pick
-  the implementation once, in a factory constructor. Callers hold the
-  interface and never branch on `CurrentPlatform` or a `…Supported` flag
-  themselves; a condition that is not about the platform (which track, which
-  device) stays inside the implementations. Example: `AdmMicrophoneMute`, with
-  `AppleAdmMicrophoneMute` and `NoAdmMicrophoneMute`.
+- **Platform-specific behaviour sits behind an interface.** When the same
+  platform difference would otherwise be checked in several places, or tangles
+  the code it sits in, define an interface for it with one implementation per
+  behaviour, and pick the implementation once, in a factory constructor that
+  reads `rtc.webRtcCapabilities` (or the platform). Callers hold the interface
+  instead of repeating `if (supported)`; a condition that is not about the
+  platform (which track, which device) stays inside the implementations.
+  Examples: `AdmMicrophoneMute` (`AppleAdmMicrophoneMute`,
+  `NoAdmMicrophoneMute`) and `AudioInputSwitcher`. A single, simple check may
+  read the capability directly, and so may a yes/no question such as
+  `supportsAudioOutputSelection`, to show a control or refuse a request.

@@ -3,6 +3,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../../stream_video.dart';
 import '../../exceptions/video_exception.dart';
+import '../audio/audio_input_switcher.dart';
 import '../rtc_media_device/device_enumeration_trigger.dart';
 
 const kLocalTrackIdPrefix = 'local';
@@ -465,19 +466,10 @@ extension RtcLocalAudioTrackHardwareExt on RtcLocalAudioTrack {
       return this;
     }
 
-    final updatedConstraints = mediaConstraints.copyWith(deviceId: device.id);
-
-    if (!rtc.webRtcCapabilities.switchesAudioInputInPlace) {
-      // recreate the track with new deviceId.
-      return recreate(transceivers, mediaConstraints: updatedConstraints);
-    }
-
-    try {
-      await rtc.Helper.selectAudioInput(device.id);
-      return copyWith(mediaConstraints: updatedConstraints);
-    } catch (e) {
-      streamLog.e(_audioTag, () => 'Error selecting audio input: $e');
-      rethrow;
-    }
+    return AudioInputSwitcher.forPlatform().switchTrack(
+      this,
+      transceivers,
+      device,
+    );
   }
 }

@@ -1,6 +1,5 @@
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
-
 import '../../../stream_video.dart';
+import 'device_id_constraint.dart';
 
 /// Options used when creating an AudioTrack.
 class AudioConstraints extends MediaConstraints {
@@ -57,11 +56,10 @@ class AudioConstraints extends MediaConstraints {
   @override
   Map<String, dynamic> toMap() {
     final constraints = <String, dynamic>{};
-
-    // An exact deviceId cannot be combined with optional parameters.
-    final exactDeviceId = rtc.webRtcCapabilities.usesExactDeviceIdConstraints;
-    if (!exactDeviceId || deviceId == null) {
-      constraints['optional'] = <Map<String, dynamic>>[
+    DeviceIdConstraint.forPlatform().addTo(
+      constraints,
+      deviceId: deviceId,
+      optional: [
         {'echoCancellation': echoCancellation},
         {'googDAEchoCancellation': echoCancellation},
         {'googEchoCancellation': echoCancellation},
@@ -74,18 +72,8 @@ class AudioConstraints extends MediaConstraints {
         {'googTypingNoiseDetection': typingNoiseDetection},
         {'DtlsSrtpKeyAgreement': true},
         {'channelCount': channelCount},
-      ];
-    }
-
-    if (deviceId != null) {
-      if (exactDeviceId) {
-        constraints['deviceId'] = {'exact': deviceId};
-      } else {
-        (constraints['optional'] as List).cast<Map<String, dynamic>>().add(
-          <String, dynamic>{'sourceId': deviceId},
-        );
-      }
-    }
+      ],
+    );
     return {
       'audio': constraints,
       'video': false,
