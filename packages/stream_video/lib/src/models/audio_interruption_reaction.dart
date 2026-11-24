@@ -3,6 +3,13 @@
 ///
 /// The interruption is reported on `CallState.isAudioInterrupted` whichever
 /// reaction is set.
+///
+/// On Android, the interruption comes from the call's audio focus: another
+/// app taking focus starts it, including only to duck the call's audio, such
+/// as for a navigation prompt, and the focus coming back ends it. An app that
+/// takes focus for good, such as a video player or another calling app, does
+/// not give it back, so the interruption lasts until the call ends, unless
+/// the app regains focus with `RtcMediaDeviceNotifier.regainAndroidAudioFocus`.
 enum AudioInterruptionReaction {
   /// The call changes nothing.
   none,
@@ -18,6 +25,7 @@ enum AudioInterruptionReaction {
   /// CallKit activates its audio session again, such as when the call comes
   /// off hold after a phone call. For a call not reported to CallKit, iOS does
   /// not always report the end; the microphone then stays off until the app
-  /// turns it on or the call ends.
+  /// turns it on or the call ends. On Android, the same happens when another
+  /// app takes the call's audio focus for good.
   muteMicrophone,
 }
