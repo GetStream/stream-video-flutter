@@ -216,6 +216,7 @@
 
 ### 🔄 Changed
 
+- `LivestreamInfo`'s fullscreen toggle uses the design system's `fullscreen` and `fullscreenExit` icons instead of Material's.
 - [Android] A call runs in the foreground service of the audio policy it uses, `Call.audioConfigurationPolicy`, so a ringing call follows `StreamVideoOptions.ringingAudioConfigurationPolicy`. An app whose `audioConfigurationPolicy` is `AudioConfigurationPolicy.viewer` and whose ringing policy is `AudioConfigurationPolicy.broadcaster` rings its calls in the `phoneCall` service rather than the `mediaPlayback` one.
 - On a folded window, `showStreamModalDialog` goes to the trailing half by default, and `StreamAdaptiveMenuAnchor`'s sheet to the half its button is in.
 - On a window folded down the middle, `StreamLobbyView` puts the preview and the rest of the lobby on either side of the fold, and `CallControlBar` splits its centre controls between its two sides.

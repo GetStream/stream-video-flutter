@@ -53,6 +53,21 @@ void main() {
     expect(find.byType(StreamSpectatorsIndicator), findsOneWidget);
   });
 
+  testWidgets(
+    'leaves the speakerphone toggle out where playout cannot pause',
+    (tester) async {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.linux;
+      addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+
+      await pump(
+        tester,
+        StreamLivestreamTile(call: call, child: const Text('video')),
+      );
+
+      expect(find.byType(LivestreamSpeakerphoneOption), findsNothing);
+    },
+  );
+
   testWidgets('leaves the fullscreen button out without a callback', (
     tester,
   ) async {
