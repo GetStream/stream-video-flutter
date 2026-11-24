@@ -2,6 +2,7 @@
 
 ### ⚠️ Breaking
 
+- `RtcMediaDeviceNotifier.handleCallInterruptionCallbacks` no longer takes `androidInterruptionSource`. On Android an interruption is now the call losing its audio focus, and the phone call state is no longer read, so the app does not need `READ_PHONE_STATE` for it. The call state also reports the app's own calls registered with Telecom, so the app's own incoming call was reported as an interruption of the call in progress, and a real interruption during such a call was dropped.
 - `PushNotificationManager` has a new method, `setCallAudioOutputDeviceByCid`. A class that `implements` it has to add it; one that `extends` it inherits a no-op.
 - `PushNotificationManager` has three new methods that a call uses to tell the native call UI what happened: `onRingEnded` when its ring is over before the user answered it on this device, `onCallLeft` when a call this device joined or accepted is left, and `onCallAccepted` when the user accepts it in the app. A class that `implements` it has to add them; one that `extends` it inherits `onRingEnded` and `onCallLeft` calling `endCallByCid`, silently for `onRingEnded`, and an `onCallAccepted` that does nothing.
 - `RingingEvent` has a new subtype, `ActionCallDismissed`, so an exhaustive `switch` over ringing events needs a case for it. `disposeAfterResolvingRinging` no longer disposes on `ActionCallTimeout`, which iOS sends when CallKit's ring times out and Android now sends when a ring times out natively, so the client's own ring timeout can still reject the call.

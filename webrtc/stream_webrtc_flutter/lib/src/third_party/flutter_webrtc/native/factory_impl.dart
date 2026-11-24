@@ -30,8 +30,6 @@ class RTCFactoryNative extends RTCFactory {
   Future<void> handleCallInterruptionCallbacks(
     void Function()? onInterruptionStart,
     void Function()? onInterruptionEnd, {
-    AndroidInterruptionSource androidInterruptionSource =
-        AndroidInterruptionSource.audioFocusAndTelephony,
     @Deprecated(
       'Audio focus is now handled in a way that does not require this parameter. It will be removed in the next major version.',
     )
@@ -47,13 +45,7 @@ class RTCFactoryNative extends RTCFactory {
       );
     }
 
-    await WebRTC.invokeMethod(
-      'handleCallInterruptionCallbacks',
-      <String, dynamic>{
-        if (Platform.isAndroid)
-          'androidInterruptionSource': androidInterruptionSource.name,
-      },
-    );
+    await WebRTC.invokeMethod('handleCallInterruptionCallbacks');
 
     final mediaDeviceNative = mediaDevices as MediaDeviceNative;
     mediaDeviceNative.onInterruptionStart = onInterruptionStart;
@@ -146,8 +138,6 @@ Future<void> setVideoEffects(
 Future<void> handleCallInterruptionCallbacks(
   void Function()? onInterruptionStart,
   void Function()? onInterruptionEnd, {
-  AndroidInterruptionSource androidInterruptionSource =
-      AndroidInterruptionSource.audioFocusAndTelephony,
   @Deprecated(
     'Audio focus is now handled in a way that does not require this parameter. It will be removed in the next major version.',
   )
@@ -161,7 +151,6 @@ Future<void> handleCallInterruptionCallbacks(
       .handleCallInterruptionCallbacks(
         onInterruptionStart,
         onInterruptionEnd,
-        androidInterruptionSource: androidInterruptionSource,
         androidAudioAttributesUsageType: androidAudioAttributesUsageType,
         androidAudioAttributesContentType: androidAudioAttributesContentType,
       );

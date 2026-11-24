@@ -15,7 +15,6 @@ Future<void> setVideoEffects(
 Future<void> handleCallInterruptionCallbacks(
   void Function()? onInterruptionStart,
   void Function()? onInterruptionEnd, {
-  Object? androidInterruptionSource,
   Object? androidAudioAttributesUsageType,
   Object? androidAudioAttributesContentType,
 }) {

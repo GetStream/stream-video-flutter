@@ -178,7 +178,6 @@ class RtcMediaDeviceNotifier {
   /// Allows to handle call interruption callbacks.
   /// [onInterruptionStart] is called when the call interruption begins.
   /// [onInterruptionEnd] is called when the call interruption ends.
-  /// [androidInterruptionSource] specifies the source of the interruption on Android.
   ///
   /// On iOS, interruptions can occur due to:
   /// - Incoming phone calls
@@ -186,13 +185,16 @@ class RtcMediaDeviceNotifier {
   /// - Alarm or timer sounds
   /// - Audio from other apps taking over (e.g., voice memo, navigation)
   ///
-  /// On Android, interruption sources depend on the [androidInterruptionSource]:
-  /// - With audioFocus:
-  ///   - Other media apps interrupting (e.g., Spotify)
-  ///   - Assistant voice prompts (e.g., Google Assistant)
-  ///   - Alarms and notifications
-  /// - With telephony:
-  ///   - Phone calls (requires READ_PHONE_STATE permission)
+  /// On Android, an interruption is the call losing the audio focus it holds
+  /// while its audio runs, for example to:
+  /// - Phone calls, once they ring audibly or are answered
+  /// - Other media apps (e.g., Spotify)
+  /// - Assistant voice prompts (e.g., Google Assistant)
+  /// - Alarms and notifications
+  ///
+  /// It ends when the focus comes back or the call's audio stops. With
+  /// `manageAudioFocus` off in the Android audio configuration the call holds
+  /// no focus, so no interruption is reported.
   ///
   /// This method allows you to pause the call, mute the audio, or perform any other
   /// necessary actions when interruptions occur.
@@ -202,8 +204,6 @@ class RtcMediaDeviceNotifier {
   Future<void> handleCallInterruptionCallbacks({
     void Function()? onInterruptionStart,
     void Function()? onInterruptionEnd,
-    rtc.AndroidInterruptionSource androidInterruptionSource =
-        rtc.AndroidInterruptionSource.audioFocusAndTelephony,
     @Deprecated(
       'Audio focus is now handled in a way that does not require this parameter. It will be removed in the next major version.',
     )
@@ -216,7 +216,6 @@ class RtcMediaDeviceNotifier {
     return rtc.handleCallInterruptionCallbacks(
       onInterruptionStart,
       onInterruptionEnd,
-      androidInterruptionSource: androidInterruptionSource,
     );
   }
 

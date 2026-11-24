@@ -502,7 +502,7 @@ assert_mic() {
 # run dies at "Lobby did not open" with a dialog on screen.
 grant_android_permissions() {
   local p missing=""
-  for p in RECORD_AUDIO CAMERA POST_NOTIFICATIONS READ_PHONE_STATE BLUETOOTH_CONNECT; do
+  for p in RECORD_AUDIO CAMERA POST_NOTIFICATIONS BLUETOOTH_CONNECT; do
     adb shell pm grant "$ANDROID_PKG" "android.permission.$p" >/dev/null 2>&1
   done
   # Verify the two that gate the call. Every later coordinate depends on no
