@@ -44,9 +44,10 @@ jobs:
         uses: dorny/paths-filter@v4
         id: filter
         with:
-          # On push, compare against the commit before the push instead of
-          # the default branch. Ignored on pull_request.
-          base: ${{ github.ref }}
+          token: ''
+          # PRs compare against their base branch; pushes against the commit
+          # before the push.
+          base: ${{ github.base_ref || github.ref }}
           filters: |
             relevant:
               - 'webrtc/**'

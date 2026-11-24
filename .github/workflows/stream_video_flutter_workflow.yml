@@ -45,6 +45,7 @@ jobs:
         id: filter
         with:
           token: ''
+          base: ${{ github.base_ref || github.ref }}
           filters: |
             relevant:
               - 'packages/**'
