@@ -44,6 +44,7 @@ jobs:
         uses: dorny/paths-filter@v4
         id: filter
         with:
+          token: ''
           filters: |
             relevant:
               - 'packages/**'
