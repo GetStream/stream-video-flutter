@@ -745,5 +745,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     }
     final popped = await Navigator.maybePop(context);
     _logger.v(() => '[leave] popped: $popped');
+    // Something above vetoed the pop; back handles fullscreen again.
+    if (!popped && mounted) setState(() => _closing = false);
   }
 }
