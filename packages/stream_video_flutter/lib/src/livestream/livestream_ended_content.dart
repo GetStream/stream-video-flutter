@@ -34,9 +34,19 @@ class LivestreamEndedContent extends StatefulWidget {
 class _LivestreamEndedContentState extends State<LivestreamEndedContent> {
   static final _logger = taggedLogger(tag: 'SV:LivestreamEnded');
 
-  late var _recordings = widget.call.listRecordings();
+  late var _recordings = _fetchRecordings();
 
-  void _retry() => setState(() => _recordings = widget.call.listRecordings());
+  void _retry() => setState(() => _recordings = _fetchRecordings());
+
+  /// Lists the call's recordings, logging a failure once per fetch.
+  Future<Result<List<CallRecording>>> _fetchRecordings() {
+    return widget.call.listRecordings().then((result) {
+      if (result case Failure(:final error)) {
+        _logger.w(() => '[recordings] failed: $error');
+      }
+      return result;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,8 +60,7 @@ class _LivestreamEndedContentState extends State<LivestreamEndedContent> {
           FutureBuilder(
             future: _recordings,
             builder: (context, snapshot) {
-              if (snapshot.data case Failure(:final error)) {
-                _logger.w(() => '[recordings] failed: $error');
+              if (snapshot.data is Failure) {
                 return _RecordingsFailed(onRetry: _retry);
               }
 
