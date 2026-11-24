@@ -2,7 +2,8 @@
 
 ### ⚠️ Breaking
 
-- `RtcMediaDeviceNotifier.handleCallInterruptionCallbacks` no longer takes `androidInterruptionSource`. On Android an interruption is now the call losing its audio focus, and the phone call state is no longer read, so the app does not need `READ_PHONE_STATE` for it. The call state also reports the app's own calls registered with Telecom, so the app's own incoming call was reported as an interruption of the call in progress, and a real interruption during such a call was dropped.
+- `RtcMediaDeviceNotifier.handleCallInterruptionCallbacks` is removed. Each call now handles interruptions of its audio itself: it reports them on `CallState.isAudioInterrupted` and reacts as `CallPreferences.audioInterruptionReaction` says, for example `AudioInterruptionReaction.muteMicrophone` for what the documented callbacks did. Don't call `handleCallInterruptionCallbacks` of `stream_webrtc_flutter` directly: the SDK registers it, and another registration replaces the SDK's. On Android an interruption is the call losing its audio focus, which a phone call also takes; the phone call state is no longer read, so the app does not need `READ_PHONE_STATE` for it. Android's phone call state also reports the app's own calls registered with Telecom, so the app's own incoming call was reported as an interruption of the call in progress, and a real interruption during such a call was dropped.
+- `CallPreferences` has a new getter, `audioInterruptionReaction`. If your app implements `CallPreferences` directly, add it to your implementation.
 - `PushNotificationManager` has a new method, `setCallAudioOutputDeviceByCid`. A class that `implements` it has to add it; one that `extends` it inherits a no-op.
 - `PushNotificationManager` has three new methods that a call uses to tell the native call UI what happened: `onRingEnded` when its ring is over before the user answered it on this device, `onCallLeft` when a call this device joined or accepted is left, and `onCallAccepted` when the user accepts it in the app. A class that `implements` it has to add them; one that `extends` it inherits `onRingEnded` and `onCallLeft` calling `endCallByCid`, silently for `onRingEnded`, and an `onCallAccepted` that does nothing.
 - `RingingEvent` has a new subtype, `ActionCallDismissed`, so an exhaustive `switch` over ringing events needs a case for it. `disposeAfterResolvingRinging` no longer disposes on `ActionCallTimeout`, which iOS sends when CallKit's ring times out and Android now sends when a ring times out natively, so the client's own ring timeout can still reject the call.
@@ -127,6 +128,8 @@
 - Added `DisconnectReasonUnsupportedNetwork`, the reason a call disconnects with when the network cannot carry WebRTC, so an app can tell the user their network blocks calls rather than that the connection dropped.
 - Added `CallPreferences.maxIceFailuresWithoutConnect`, how many reconnects for sessions in which ICE never connected end the call with `DisconnectReasonUnsupportedNetwork`. `DefaultCallPreferences` defaults it to 2. If your app implements `CallPreferences` directly, add the getter to your implementation.
 - Added `RetryConfig.rpcTimeout`, how long a coordinator request may wait to connect and then for its response (10 seconds by default).
+- Added `CallState.isAudioInterrupted`, whether the platform is interrupting the call's audio, such as for a phone call, an alarm or another app playing audio.
+- Added `CallPreferences.audioInterruptionReaction` and `AudioInterruptionReaction`, what a call does while its audio is interrupted: nothing (the default), or turn the microphone off and back on when the interruption ends, unless the app changed it meanwhile.
 
 ### 🔄 Changed
 

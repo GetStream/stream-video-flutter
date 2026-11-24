@@ -213,6 +213,9 @@ void main() {
     when(
       notifier.nativeWebRtcEventsStream,
     ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => notifier.audioInterruptions,
+    ).thenAnswer((_) => const Stream.empty());
     final fixture = buildFixture();
     addTearDown(fixture.dispose);
     when(
@@ -239,6 +242,7 @@ void main() {
     await pumpEventQueue();
 
     verify(() => notifier.webAudioPlaybackBlockedChanges).called(1);
+    verify(() => notifier.audioInterruptions).called(1);
     await call.leave();
   });
 

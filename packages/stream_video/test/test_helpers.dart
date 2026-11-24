@@ -23,6 +23,10 @@ class MockRtcMediaDeviceNotifier extends Mock
   /// call sites don't need to stub what `Call` subscribes to on init.
   @override
   Stream<bool> get webAudioPlaybackBlockedChanges => const Stream.empty();
+
+  /// Interruptions come only from tests that drive them.
+  @override
+  Stream<bool> get audioInterruptions => const Stream.empty();
 }
 
 /// The client a [Call] under test belongs to.

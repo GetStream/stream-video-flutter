@@ -108,6 +108,8 @@ class SpeechActivityEnded extends SpeechActivityEvent {
   const SpeechActivityEnded();
 }
 
+final _logger = taggedLogger(tag: 'SV:RtcMediaDeviceNotifier');
+
 class RtcMediaDeviceNotifier {
   RtcMediaDeviceNotifier._internal() {
     rtc.navigator.mediaDevices.ondevicechange = _onDeviceChange;
@@ -175,47 +177,42 @@ class RtcMediaDeviceNotifier {
     return _tracer.take();
   }
 
-  /// Allows to handle call interruption callbacks.
-  /// [onInterruptionStart] is called when the call interruption begins.
-  /// [onInterruptionEnd] is called when the call interruption ends.
+  /// Emits `true` when the platform starts interrupting the audio of the
+  /// call in progress and `false` when the interruption ends.
   ///
-  /// On iOS, interruptions can occur due to:
-  /// - Incoming phone calls
-  /// - Siri activation
-  /// - Alarm or timer sounds
-  /// - Audio from other apps taking over (e.g., voice memo, navigation)
+  /// On Android an interruption is the call losing the audio focus it holds
+  /// while its audio runs, and it ends when the focus comes back or the call's
+  /// audio stops. On iOS it is an audio session interruption. Empty on other
+  /// platforms.
   ///
-  /// On Android, an interruption is the call losing the audio focus it holds
-  /// while its audio runs, for example to:
-  /// - Phone calls, once they ring audibly or are answered
-  /// - Other media apps (e.g., Spotify)
-  /// - Assistant voice prompts (e.g., Google Assistant)
-  /// - Alarms and notifications
-  ///
-  /// It ends when the focus comes back or the call's audio stops. With
-  /// `manageAudioFocus` off in the Android audio configuration the call holds
-  /// no focus, so no interruption is reported.
-  ///
-  /// This method allows you to pause the call, mute the audio, or perform any other
-  /// necessary actions when interruptions occur.
-  ///
-  /// For more details on handling call interruptions, refer to the
-  /// [Stream Video documentation](https://getstream.io/video/docs/flutter/advanced/handling-system-audio-interruptions/).
-  Future<void> handleCallInterruptionCallbacks({
-    void Function()? onInterruptionStart,
-    void Function()? onInterruptionEnd,
-    @Deprecated(
-      'Audio focus is now handled in a way that does not require this parameter. It will be removed in the next major version.',
-    )
-    rtc.AndroidAudioAttributesUsageType? androidAudioAttributesUsageType,
-    @Deprecated(
-      'Audio focus is now handled in a way that does not require this parameter. It will be removed in the next major version.',
-    )
-    rtc.AndroidAudioAttributesContentType? androidAudioAttributesContentType,
-  }) {
-    return rtc.handleCallInterruptionCallbacks(
-      onInterruptionStart,
-      onInterruptionEnd,
+  /// The WebRTC plugin is told to report interruptions on the first listen,
+  /// and keeps reporting them. Consumed by [Call] to keep
+  /// [CallState.isAudioInterrupted] up to date; integrators observe
+  /// `call.state` instead.
+  @internal
+  Stream<bool> get audioInterruptions => _audioInterruptions.stream;
+
+  late final _audioInterruptions = StreamController<bool>.broadcast(
+    onListen: _reportAudioInterruptions,
+  );
+
+  bool _reportingAudioInterruptions = false;
+
+  void _reportAudioInterruptions() {
+    if (_reportingAudioInterruptions) return;
+    if (!CurrentPlatform.isAndroid && !CurrentPlatform.isIos) return;
+    _reportingAudioInterruptions = true;
+
+    unawaited(
+      rtc
+          .handleCallInterruptionCallbacks(
+            () => _audioInterruptions.add(true),
+            () => _audioInterruptions.add(false),
+          )
+          .catchError((Object e, StackTrace stk) {
+            _reportingAudioInterruptions = false;
+            _logger.e(() => '[audioInterruptions] not reported: $e\n$stk');
+          }),
     );
   }
 

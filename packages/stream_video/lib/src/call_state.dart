@@ -95,6 +95,7 @@ class CallState extends Equatable {
       custom: const {},
       isVideoModerated: false,
       isAudioSuspended: false,
+      isAudioInterrupted: false,
       isWebAudioPlaybackBlocked: false,
       isE2eeEnabled: false,
     );
@@ -141,6 +142,7 @@ class CallState extends Equatable {
     required this.custom,
     required this.isVideoModerated,
     required this.isAudioSuspended,
+    required this.isAudioInterrupted,
     required this.isWebAudioPlaybackBlocked,
     required this.isE2eeEnabled,
   });
@@ -193,6 +195,16 @@ class CallState extends Equatable {
 
   /// Whether audio tracks have been suspended for this call.
   final bool isAudioSuspended;
+
+  /// Whether the platform is interrupting this call's audio, such as for a
+  /// phone call, an alarm or another app playing audio.
+  ///
+  /// On Android, the call lost the audio focus it holds while its audio runs;
+  /// on iOS, the audio session was interrupted. Only an interruption that
+  /// starts while the call is joined, active and its audio not suspended is
+  /// reported; with several active calls, each of them reports it. What the
+  /// call does about it is set by `CallPreferences.audioInterruptionReaction`.
+  final bool isAudioInterrupted;
 
   /// Whether the browser's autoplay policy is blocking playback of remote
   /// audio. Playback resumes only once `Call.resumeWebAudioPlayback()` is
@@ -308,6 +320,7 @@ class CallState extends Equatable {
     Map<String, Object>? custom,
     bool? isVideoModerated,
     bool? isAudioSuspended,
+    bool? isAudioInterrupted,
     bool? isWebAudioPlaybackBlocked,
     bool? isE2eeEnabled,
   }) {
@@ -357,6 +370,7 @@ class CallState extends Equatable {
       custom: custom ?? this.custom,
       isVideoModerated: isVideoModerated ?? this.isVideoModerated,
       isAudioSuspended: isAudioSuspended ?? this.isAudioSuspended,
+      isAudioInterrupted: isAudioInterrupted ?? this.isAudioInterrupted,
       isWebAudioPlaybackBlocked:
           isWebAudioPlaybackBlocked ?? this.isWebAudioPlaybackBlocked,
       isE2eeEnabled: isE2eeEnabled ?? this.isE2eeEnabled,
@@ -459,6 +473,7 @@ class CallState extends Equatable {
     custom,
     isVideoModerated,
     isAudioSuspended,
+    isAudioInterrupted,
     isWebAudioPlaybackBlocked,
     isE2eeEnabled,
   ];
@@ -470,6 +485,7 @@ class CallState extends Equatable {
         ' sessionId: $sessionId, isRecording: $isRecording,'
         ' isVideoModerated: $isVideoModerated,'
         ' isAudioSuspended: $isAudioSuspended,'
+        ' isAudioInterrupted: $isAudioInterrupted,'
         ' isWebAudioPlaybackBlocked: $isWebAudioPlaybackBlocked,'
         ' isE2eeEnabled: $isE2eeEnabled,'
         ' settings: $settings, egress: $egress, '
