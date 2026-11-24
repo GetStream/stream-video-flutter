@@ -12,6 +12,7 @@
 * [Android] fix: the device stays in its audio mode, and holds no audio focus, while no call's audio runs. `handleCallInterruptionCallbacks` no longer requests focus or switches to the in-communication mode, and neither do `WebRTC.initialize` with an audio configuration or `selectAudioOutput` before a call; the call's audio mode and volume-key stream apply only while its audio runs, and the mode the device was in is put back after. Enabling interruption callbacks no longer pauses other apps' audio.
 * [Android] fix: an active interruption now ends once the call's audio stops and its audio focus is given up, instead of staying active with no end reported, since no focus gain can follow.
 * [Android] fix: `regainAndroidAudioFocus` requests audio focus again during a call, where it requested nothing, and ends the interruption only when the request is granted. It does nothing while no call's audio runs.
+* [Android] Added `Helper.setAndroidAudioFocusManaged`, to switch whether WebRTC manages audio focus while a call's audio runs, such as for a call Telecom holds and manages focus for. Switched off, the focus held for the call is given up, which ends an interruption a focus loss started, and the audio mode and routing stay; switched on, focus is requested again. The returned future completes before the switch applies. `manageAudioFocus` in `setAndroidAudioConfiguration` now does the same during a call, where it only applied to the next one. Focus requested during a call is now given up when the call's audio stops.
 
 [4.0.1] - 2026.10.22
 
