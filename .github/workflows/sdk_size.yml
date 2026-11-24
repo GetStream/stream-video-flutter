@@ -33,7 +33,7 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     timeout-minutes: 60
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
@@ -109,7 +109,7 @@ jobs:
       && !startsWith(github.head_ref, 'release/')
     timeout-minutes: 15
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     permissions:
       contents: read
       pull-requests: write
@@ -154,7 +154,7 @@ jobs:
           && startsWith(github.head_ref, 'release/')))
     timeout-minutes: 15
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     permissions:
       contents: read
       pull-requests: write
