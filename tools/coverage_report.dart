@@ -136,14 +136,23 @@ Map<String, Set<int>> _changedLines(String base) {
 
   final changed = <String, Set<int>>{};
   Set<int>? lines;
+  // File headers sit between `diff --git` and the first hunk. After that, a
+  // line starting with `+++ ` is an added line whose text starts with `++ `.
+  var inHeader = false;
   final hunk = RegExp(r'^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@');
   for (final line in const LineSplitter().convert(diff)) {
-    if (line.startsWith('+++ ')) {
+    if (line.startsWith('diff --git ')) {
+      inHeader = true;
+      lines = null;
+    } else if (inHeader && line.startsWith('+++ ')) {
       final path = line.substring(4);
       lines = path == '/dev/null'
           ? null
           : changed.putIfAbsent(path.substring(2), () => {});
-    } else if (lines != null) {
+    } else if (line.startsWith('@@')) {
+      inHeader = false;
+    }
+    if (!inHeader && lines != null) {
       final match = hunk.firstMatch(line);
       if (match == null) continue;
       final start = int.parse(match.group(1)!);
@@ -236,16 +245,18 @@ _BaseCoverage? _readTotal(String? path) {
   final file = File(path);
   if (!file.existsSync()) return null;
   try {
-    final json = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
-    return _BaseCoverage(
-      json['sha'] as String,
-      (json['coverage'] as num).toDouble(),
-      'cache',
-    );
+    if (jsonDecode(file.readAsStringSync()) case {
+      'sha': final String sha,
+      'coverage': final num coverage,
+    }) {
+      return _BaseCoverage(sha, coverage.toDouble(), 'cache');
+    }
   } on FormatException catch (e) {
     stderr.writeln('Ignoring unreadable ${file.path}: $e');
     return null;
   }
+  stderr.writeln('Ignoring ${file.path}: no sha and coverage in it');
+  return null;
 }
 
 /// The coverage Codecov stored for the newest commit on [base] that has one,
