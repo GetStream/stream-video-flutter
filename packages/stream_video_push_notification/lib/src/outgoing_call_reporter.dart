@@ -5,8 +5,9 @@ import 'package:meta/meta.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:uuid/uuid.dart';
 
-/// Reports each ringing call the current user starts to CallKit as an outgoing call, and keeps
-/// the CallKit call in step with the Stream call until either ends.
+/// Reports each ringing call the current user starts to the native call UI as an outgoing call,
+/// and keeps the native call in step with the Stream call until either ends: CallKit on iOS, the
+/// Telecom integration on Android. Below, "CallKit" stands for either.
 ///
 /// - The CallKit call starts once the call rings, that is once its status is
 ///   [CallStatusOutgoing]. A call that never rings is never reported.

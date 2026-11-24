@@ -7,9 +7,10 @@ import 'package:stream_video/stream_video.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification.dart';
 import 'package:stream_video_push_notification/stream_video_push_notification_platform_interface.dart';
 
-// Pins when the manager reports the app's outgoing calls to CallKit: only on
-// iOS with `reportOutgoingCalls` on, and no longer once it is disposed. What
-// the reporter does with a call is pinned in outgoing_call_reporter_test.dart.
+// Pins when the manager reports the app's outgoing calls to the native call
+// UI: only with the platform's `reportOutgoingCalls` on, and no longer once it
+// is disposed. What the reporter does with a call is pinned in
+// outgoing_call_reporter_test.dart.
 
 class _FakePushPlatform extends StreamVideoPushNotificationPlatform {
   @override
@@ -70,15 +71,31 @@ void main() {
   });
 
   StreamVideoPushNotificationManager createManager({
-    required bool reportOutgoingCalls,
+    bool ios = false,
+    bool android = false,
   }) {
     return StreamVideoPushNotificationManager.create(
       iosPushProvider: const StreamVideoPushProvider.apn(name: 'apn'),
       androidPushProvider: const StreamVideoPushProvider.firebase(name: 'fcm'),
       pushConfiguration: StreamVideoPushConfiguration(
-        ios: IOSPushConfiguration(reportOutgoingCalls: reportOutgoingCalls),
+        ios: IOSPushConfiguration(reportOutgoingCalls: ios),
+        android: AndroidPushConfiguration(reportOutgoingCalls: android),
       ),
     )(client, streamVideo);
+  }
+
+  /// Whether [manager] follows a call that rings out through its status.
+  Future<bool> follows(StreamVideoPushNotificationManager manager) async {
+    addTearDown(manager.dispose);
+    var followed = false;
+    final call = _MockCall();
+    when(() => call.partialState<CallStatus>(any())).thenAnswer((_) {
+      followed = true;
+      return const Stream.empty();
+    });
+    outgoingCall.value = call;
+    await pumpEventQueue();
+    return followed;
   }
 
   /// A call ringing out; the reporter follows it through its status.
@@ -91,45 +108,37 @@ void main() {
     return call;
   }
 
-  test(
-    'on iOS with reportOutgoingCalls the outgoing call is followed',
-    () async {
-      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
-      final manager = createManager(reportOutgoingCalls: true);
-      addTearDown(manager.dispose);
-
-      final call = ringOut();
-      await pumpEventQueue();
-
-      verify(() => call.partialState<CallStatus>(any())).called(1);
-    },
-  );
-
-  test('on iOS without reportOutgoingCalls it is not', () async {
+  test('on iOS with its reportOutgoingCalls the outgoing call is '
+      'followed', () async {
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
-    final manager = createManager(reportOutgoingCalls: false);
-    addTearDown(manager.dispose);
 
-    final call = ringOut();
-    await pumpEventQueue();
-
-    verifyNever(() => call.partialState<CallStatus>(any()));
+    expect(await follows(createManager(ios: true)), isTrue);
   });
 
-  test('on Android reportOutgoingCalls has no effect', () async {
+  test('on iOS without it, or with only the Android one, it is not', () async {
+    CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
+
+    expect(await follows(createManager()), isFalse);
+    expect(await follows(createManager(android: true)), isFalse);
+  });
+
+  test('on Android with its reportOutgoingCalls the outgoing call is '
+      'followed', () async {
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
-    final manager = createManager(reportOutgoingCalls: true);
-    addTearDown(manager.dispose);
 
-    final call = ringOut();
-    await pumpEventQueue();
+    expect(await follows(createManager(android: true)), isTrue);
+  });
 
-    verifyNever(() => call.partialState<CallStatus>(any()));
+  test('on Android without it, or with only the iOS one, it is not', () async {
+    CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+
+    expect(await follows(createManager()), isFalse);
+    expect(await follows(createManager(ios: true)), isFalse);
   });
 
   test('once the manager is disposed no outgoing call is followed', () async {
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
-    final manager = createManager(reportOutgoingCalls: true);
+    final manager = createManager(ios: true);
 
     await manager.dispose();
     final call = ringOut();

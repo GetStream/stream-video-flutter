@@ -69,6 +69,7 @@
 
 ### ✅ Added
 
+- [Android] `AndroidPushConfiguration.reportOutgoingCalls` registers the ringing calls the current user starts with Telecom as outgoing calls, as `IOSPushConfiguration.reportOutgoingCalls` reports them to CallKit. They then get Telecom's audio routes and audio focus management like incoming calls, and a Telecom hold leaves them. Off by default; leave it off if the app calls `startOutgoingCall` itself.
 - [Android] `StreamVideoPushNotificationManager.systemManagedCallCids` reports the calls the Telecom integration holds: those already held when the manager starts, such as a call answered while the app was not running, and every change after. The client uses it to leave the audio focus of those calls to Telecom.
 - `StreamVideoPushNotificationPlatform.requestAudioEndpoint` and `TelecomAudioEndpoint`: on Android, asks Telecom to route the audio of a call it holds to the earpiece, the speaker, a wired headset or a Bluetooth headset, the one with the given `name` among several, and answers whether it did. Always `false` on iOS.
 - `StreamVideoPushNotificationManager.dismissRingingCallByCid` takes a `CallDismissReason`. On Android, for a reason other than `accepted` the call is disconnected from Telecom, as remote for a cancel or an answer on another device and as missed for a missed call; `accepted`, the default, keeps the call registered as before.
