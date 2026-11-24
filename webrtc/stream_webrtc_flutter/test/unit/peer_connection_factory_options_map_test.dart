@@ -24,6 +24,21 @@ void main() {
       });
     });
 
+    test('carries the additional options under the typed fields', () {
+      expect(
+        peerConnectionFactoryOptionsMap(
+          const PeerConnectionFactoryOptions(
+            bypassVoiceProcessing: true,
+            additionalOptions: {
+              'forceSWCodec': true,
+              'bypassVoiceProcessing': false,
+            },
+          ),
+        ),
+        {'forceSWCodec': true, 'bypassVoiceProcessing': true},
+      );
+    });
+
     test('leaves out a configuration that is not set', () {
       expect(
         peerConnectionFactoryOptionsMap(const PeerConnectionFactoryOptions()),
@@ -65,6 +80,22 @@ void main() {
         optionsOf('createPeerConnectionFactory'),
         peerConnectionFactoryOptionsMap(options),
       );
+    });
+
+    test('NativePeerConnectionFactory.create sends the additional '
+        'options', () async {
+      await NativePeerConnectionFactory.create(
+        options: const PeerConnectionFactoryOptions(
+          additionalOptions: {
+            'networkIgnoreMask': ['vpn'],
+          },
+        ),
+      );
+
+      expect(optionsOf('createPeerConnectionFactory'), {
+        'networkIgnoreMask': ['vpn'],
+        'bypassVoiceProcessing': false,
+      });
     });
 
     test('NativePeerConnectionFactory.create defaults to voice processing '

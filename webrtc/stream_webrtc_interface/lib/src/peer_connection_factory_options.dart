@@ -13,6 +13,7 @@ class PeerConnectionFactoryOptions {
     this.bypassVoiceProcessing = false,
     this.androidAudioConfiguration,
     this.appleAudioConfiguration,
+    this.additionalOptions = const {},
   });
 
   /// Whether the audio device module skips echo cancellation, noise
@@ -27,10 +28,16 @@ class PeerConnectionFactoryOptions {
   /// platform's defaults.
   final AppleAudioConfiguration? appleAudioConfiguration;
 
+  /// Other options the platform reads when it builds a factory, such as
+  /// `forceSWCodec` or `networkIgnoreMask`, sent as they are. The fields
+  /// above win over an entry with the same key.
+  final Map<String, dynamic> additionalOptions;
+
   @override
   String toString() =>
       'PeerConnectionFactoryOptions('
       'bypassVoiceProcessing: $bypassVoiceProcessing, '
       'androidAudioConfiguration: ${androidAudioConfiguration?.toMap()}, '
-      'appleAudioConfiguration: ${appleAudioConfiguration?.toMap()})';
+      'appleAudioConfiguration: ${appleAudioConfiguration?.toMap()}, '
+      'additionalOptions: $additionalOptions)';
 }
