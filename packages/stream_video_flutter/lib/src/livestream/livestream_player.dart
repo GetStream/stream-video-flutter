@@ -536,17 +536,18 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
       pictureInPictureConfiguration: widget.pictureInPictureConfiguration,
     );
 
-    if (_fullscreen) {
-      // Edge to edge, so the video's corners are square.
-      final tileTheme = StreamParticipantTileTheme.of(context);
-      content = StreamParticipantTileTheme(
-        data: tileTheme.copyWith(
-          style: (tileTheme.style ?? const StreamParticipantTileStyle())
-              .copyWith(borderRadius: BorderRadius.zero),
-        ),
-        child: content,
-      );
-    }
+    // Wrapped in both modes, so toggling fullscreen keeps the video's
+    // elements. Edge to edge, the video's corners are square.
+    final tileTheme = StreamParticipantTileTheme.of(context);
+    content = StreamParticipantTileTheme(
+      data: _fullscreen
+          ? tileTheme.copyWith(
+              style: (tileTheme.style ?? const StreamParticipantTileStyle())
+                  .copyWith(borderRadius: BorderRadius.zero),
+            )
+          : tileTheme,
+      child: content,
+    );
 
     final controls = widget.livestreamControlsWidgetBuilder?.call(
       context,
@@ -610,6 +611,9 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   /// The screen around [body]: the back button and the call duration at the
   /// top. In [fullscreen], [body] fills the screen on its own, and back leaves
   /// fullscreen before it leaves the screen.
+  ///
+  /// Both modes build the same widgets around [body], so toggling fullscreen
+  /// keeps the video's elements.
   Widget _layout(
     BuildContext context, {
     required Widget body,
@@ -618,35 +622,39 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     final colorScheme = context.streamColorScheme;
     final spacing = context.streamSpacing;
 
-    if (fullscreen) {
-      return PopScope(
-        // Back leaves fullscreen first when the player toggles it itself.
-        canPop: widget.onFullscreenTapped != null,
-        onPopInvokedWithResult: (didPop, _) {
-          if (!didPop) setState(() => _fullscreen = false);
-        },
-        child: Scaffold(
-          backgroundColor: colorScheme.backgroundApp,
-          body: body,
+    return PopScope(
+      // Back leaves fullscreen first when the player toggles it itself.
+      canPop: !fullscreen || widget.onFullscreenTapped != null,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) setState(() => _fullscreen = false);
+      },
+      child: Scaffold(
+        backgroundColor: colorScheme.backgroundApp,
+        appBar: fullscreen
+            ? null
+            : CallAppBar(
+                call: call,
+                showBackButton: false,
+                showLeaveCallAction: false,
+                leading: widget.backButtonBuilder?.call(context),
+                // Repaints once a second, so it doesn't repaint the video
+                // with it.
+                title: RepaintBoundary(
+                  child: StreamCallDurationBadge(call: call),
+                ),
+              ),
+        // The larger of the safe area and the side spacing, not both. In
+        // fullscreen the body goes edge to edge.
+        body: SafeArea(
+          left: !fullscreen,
+          top: false,
+          right: !fullscreen,
+          bottom: !fullscreen,
+          minimum: fullscreen
+              ? EdgeInsets.zero
+              : EdgeInsets.symmetric(horizontal: spacing.xs),
+          child: body,
         ),
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: colorScheme.backgroundApp,
-      appBar: CallAppBar(
-        call: call,
-        showBackButton: false,
-        showLeaveCallAction: false,
-        leading: widget.backButtonBuilder?.call(context),
-        // Repaints once a second, so it doesn't repaint the video with it.
-        title: RepaintBoundary(child: StreamCallDurationBadge(call: call)),
-      ),
-      // The larger of the safe area and the side spacing, not both.
-      body: SafeArea(
-        top: false,
-        minimum: EdgeInsets.symmetric(horizontal: spacing.xs),
-        child: body,
       ),
     );
   }

@@ -155,6 +155,19 @@ void main() {
       expect(find.byKey(const ValueKey('back')), findsOneWidget);
     });
 
+    testWidgets('keeps the video content when it toggles', (tester) async {
+      await pumpPlayer(tester);
+      final inline = tester.state(find.byType(LivestreamContent));
+
+      await tapFullscreen(tester);
+
+      expect(tester.state(find.byType(LivestreamContent)), same(inline));
+
+      await tapFullscreen(tester);
+
+      expect(tester.state(find.byType(LivestreamContent)), same(inline));
+    });
+
     testWidgets('back leaves fullscreen before it leaves the screen', (
       tester,
     ) async {
