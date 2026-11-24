@@ -44,6 +44,8 @@ jobs:
         uses: dorny/paths-filter@v4
         id: filter
         with:
+          token: ''
+          base: ${{ github.base_ref || github.ref }}
           filters: |
             relevant:
               - 'packages/**'
