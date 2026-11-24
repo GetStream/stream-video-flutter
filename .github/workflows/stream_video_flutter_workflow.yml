@@ -129,6 +129,16 @@ jobs:
           name: lcov
           path: packages/*/coverage/lcov.info
           retention-days: 1
+      # Pull requests into main and v2 compare against this total.
+      - name: "Save Coverage Total"
+        if: github.event_name == 'push'
+        run: dart tools/coverage_report.dart --save-total coverage-total.json
+      - name: "Cache Coverage Total"
+        if: github.event_name == 'push'
+        uses: actions/cache/save@v5
+        with:
+          path: coverage-total.json
+          key: coverage-total-${{ github.ref_name }}-${{ github.sha }}
       - name: "Test dart fixes"
         run: melos run test:fixes
       - name: "Browser Test"
@@ -259,8 +269,42 @@ jobs:
           name: lcov
           path: packages
 
+      # A stacked PR compares against the trunk its stack starts from: main or
+      # v2, whichever the branch left most recently.
+      - name: Find Trunk
+        id: trunk
+        env:
+          BASE: ${{ github.base_ref }}
+        run: |
+          if [[ "$BASE" == main || "$BASE" == v2 ]]; then
+            trunk="$BASE"
+          else
+            main_ahead=$(git rev-list --count "$(git merge-base origin/main HEAD)..HEAD")
+            v2_ahead=$(git rev-list --count "$(git merge-base origin/v2 HEAD)..HEAD")
+            if (( v2_ahead < main_ahead )); then trunk=v2; else trunk=main; fi
+          fi
+          echo "name=$trunk" >> "$GITHUB_OUTPUT"
+          echo "merge-base=$(git merge-base "origin/$trunk" HEAD)" >> "$GITHUB_OUTPUT"
+
+      # Saved by the trunk's push runs. A stacked PR can't read v2's cache, and
+      # a miss falls back to Codecov.
+      - name: Restore Trunk Coverage
+        uses: actions/cache/restore@v5
+        with:
+          path: coverage-total.json
+          key: coverage-total-${{ steps.trunk.outputs.name }}-${{ steps.trunk.outputs.merge-base }}
+          restore-keys: coverage-total-${{ steps.trunk.outputs.name }}-
+
       - name: Report Coverage
-        run: dart tools/coverage_report.dart --base "origin/${{ github.base_ref }}" --output coverage.md
+        env:
+          BASE: ${{ github.base_ref }}
+          TRUNK: ${{ steps.trunk.outputs.name }}
+        run: |
+          dart tools/coverage_report.dart \
+            --base "origin/$BASE" \
+            --trunk "origin/$TRUNK" \
+            --base-total coverage-total.json \
+            --output coverage.md
 
       - name: Add Report to Summary
         if: ${{ !cancelled() && hashFiles('coverage.md') != '' }}

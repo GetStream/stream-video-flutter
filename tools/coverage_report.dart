@@ -4,36 +4,48 @@ import 'dart:convert';
 import 'dart:io';
 
 /// Reports the test coverage of a pull request's changed lines, and the
-/// coverage of the whole branch against its target branch.
+/// coverage of the whole branch against its trunk, `main` or `v2`.
 ///
 /// Reads the `lcov.info` of every package under `packages/`, drops the paths
 /// listed under `ignore:` in `codecov.yml`, and diffs `HEAD` against the merge
-/// base with the target branch. The target branch's coverage comes from
-/// Codecov, which stores it for every uploaded commit.
+/// base with `--base`, the pull request's target branch. `--trunk` defaults to
+/// `--base`; a stacked pull request passes the trunk its stack starts from.
+/// The trunk's coverage comes from `--base-total`, a file an earlier
+/// `--save-total` run on the trunk wrote, or else from Codecov, which stores it
+/// for every uploaded commit.
 ///
 /// Writes a markdown report to `--output`, and exits with 1 when the changed
-/// lines are covered less than the target branch as a whole.
+/// lines are covered less than the trunk as a whole.
 ///
 /// ```bash
-/// dart tools/coverage_report.dart --base origin/v2 --output coverage.md
+/// dart tools/coverage_report.dart --base origin/feat/x --trunk origin/v2 --base-total total.json --output coverage.md
+/// dart tools/coverage_report.dart --save-total total.json
 /// ```
 Future<void> main(List<String> args) async {
   final options = _parseArgs(args);
   final base = options['base'] ?? 'origin/main';
+  final trunk = options['trunk'] ?? base;
   final output = options['output'];
 
   final ignore = _readIgnoreGlobs(File('codecov.yml'));
   final coverage = _readCoverage(Directory('packages'), ignore);
-  final changed = _changedLines(base);
-
-  final patch = _patchCoverage(coverage, changed);
   final head = _totalCoverage(coverage);
-  final baseCoverage = await _baseCoverage(base);
+
+  if (options['save-total'] case final path?) {
+    _saveTotal(File(path), head);
+    return;
+  }
+
+  final changed = _changedLines(base);
+  final patch = _patchCoverage(coverage, changed);
+  final baseCoverage =
+      _readTotal(options['base-total']) ?? await _baseCoverage(trunk);
 
   final report = _report(
     patch: patch,
     head: head,
     base: baseCoverage,
+    trunk: trunk.replaceFirst('origin/', ''),
   );
   print(report.markdown);
   if (output != null) File(output).writeAsStringSync(report.markdown);
@@ -200,10 +212,40 @@ double? _totalCoverage(Map<String, Map<int, int>> coverage) {
 }
 
 class _BaseCoverage {
-  const _BaseCoverage(this.sha, this.percent);
+  const _BaseCoverage(this.sha, this.percent, this.source);
 
   final String sha;
   final double percent;
+  final String source;
+}
+
+/// Writes this commit's total coverage, for pull requests into its branch.
+void _saveTotal(File file, double? total) {
+  if (total == null) {
+    stderr.writeln('No coverage to save.');
+    exit(2);
+  }
+  final sha = _git(['rev-parse', 'HEAD']).trim();
+  file.writeAsStringSync(jsonEncode({'sha': sha, 'coverage': total}));
+  print('Saved ${total.toStringAsFixed(2)}% for $sha to ${file.path}');
+}
+
+/// The total a `--save-total` run wrote to [path], if there is one.
+_BaseCoverage? _readTotal(String? path) {
+  if (path == null) return null;
+  final file = File(path);
+  if (!file.existsSync()) return null;
+  try {
+    final json = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+    return _BaseCoverage(
+      json['sha'] as String,
+      (json['coverage'] as num).toDouble(),
+      'cache',
+    );
+  } on FormatException catch (e) {
+    stderr.writeln('Ignoring unreadable ${file.path}: $e');
+    return null;
+  }
 }
 
 /// The coverage Codecov stored for the newest commit on [base] that has one,
@@ -234,7 +276,7 @@ Future<_BaseCoverage?> _baseCoverage(String base) async {
         final totals = json['totals'] as Map<String, dynamic>?;
         final percent = totals?['coverage'] as num?;
         if (json['state'] == 'complete' && percent != null) {
-          return _BaseCoverage(sha, percent.toDouble());
+          return _BaseCoverage(sha, percent.toDouble(), 'Codecov');
         }
       } on Exception catch (e) {
         stderr.writeln('Codecov request for $sha failed: $e');
@@ -258,6 +300,7 @@ _Report _report({
   required _Patch patch,
   required double? head,
   required _BaseCoverage? base,
+  required String trunk,
 }) {
   String pct(double? value) =>
       value == null ? 'n/a' : '${value.toStringAsFixed(2)}%';
@@ -284,23 +327,23 @@ _Report _report({
     ..writeln('| This branch | ${pct(head)}$deltaText |')
     ..writeln(
       base == null
-          ? '| Target branch | unknown: Codecov has no coverage for it |'
-          : '| Target branch | ${pct(base.percent)} '
-                '(${base.sha.substring(0, 9)}) |',
+          ? '| `$trunk` | unknown: not in the cache or Codecov |'
+          : '| `$trunk` | ${pct(base.percent)} '
+                '(${base.sha.substring(0, 9)}, from ${base.source}) |',
     )
     ..writeln();
 
   if (patchPercent == null) {
     buffer.writeln('None of the changed lines is in the coverage report.');
   } else if (base == null) {
-    buffer.writeln('The target branch coverage is unknown, so nothing fails.');
+    buffer.writeln('The coverage of `$trunk` is unknown, so nothing fails.');
   } else if (passed) {
     buffer.writeln(
-      '✅ Changed lines are covered at least as well as the target branch.',
+      '✅ Changed lines are covered at least as well as `$trunk`.',
     );
   } else {
     buffer.writeln(
-      '❌ Changed lines are covered less than the target branch '
+      '❌ Changed lines are covered less than `$trunk` '
       '(${pct(base.percent)}).',
     );
   }
