@@ -78,6 +78,7 @@
 
 ### 🐞 Fixed
 
+- [iOS] When CallKit activates the audio session again, such as when a call comes off hold after a phone call, the ended interruption the plugin posts now reaches the WebRTC plugin, so the call learns its interruption ended. It was posted from the plugin's CallKit manager, which the WebRTC plugin does not listen to. It is now posted from the shared `AVAudioSession`, so other code that listens to that session's interruptions also gets it on each CallKit activation.
 - [Android] WebRTC no longer requests audio focus for a call the Telecom integration holds; Telecom manages the call's focus. Before, both did, and the app was told it lost focus when Telecom's own ringtone took it.
 - [iOS] A call answered from CallKit with `configureAudioSession: false` had no audio in either direction.
 - [iOS] `setCallConnected` for a call answered from CallKit no longer asks CallKit to answer it again, which sent a second `ActionCallAccept`. A call accepted in the app is still answered in CallKit.
