@@ -22,7 +22,8 @@ jobs:
     permissions:
       contents: write # create the GitHub Release
       id-token: write # OIDC auth to pub.dev
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     steps:
       - name: 📚 Checkout branch
         # Default GITHUB_TOKEN: this job never pushes to git (the release step
