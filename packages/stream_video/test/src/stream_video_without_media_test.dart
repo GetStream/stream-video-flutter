@@ -13,6 +13,7 @@ class _MockPushNotificationManager extends Mock
 class _MockRtcMediaDeviceNotifier extends Mock
     implements RtcMediaDeviceNotifier {}
 
+// ignore: subtype_of_sealed_class
 class _MockPlatformAudioController extends Mock
     implements PlatformAudioController {}
 

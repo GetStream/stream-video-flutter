@@ -50,6 +50,7 @@ class MockCallParticipantState extends Mock implements CallParticipantState {
 class MockRtcMediaDeviceNotifier extends Mock
     implements RtcMediaDeviceNotifier {}
 
+// ignore: subtype_of_sealed_class
 class MockPlatformAudioController extends Mock
     implements PlatformAudioController {}
 

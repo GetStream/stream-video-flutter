@@ -115,8 +115,12 @@ class SpeechActivityEnded extends SpeechActivityEvent {
 }
 
 /// The app-wide audio of the platform: playout pause, interruptions, the
-/// audio configuration, speech activity and the screen share and audio route
+/// audio configuration, speech activity, web autoplay recovery, Android audio
+/// focus, the iOS audio route picker, and the screen share and audio route
 /// events the WebRTC plugin reports.
+///
+/// Implemented by the SDK only.
+@sealed
 class PlatformAudioController {
   PlatformAudioController._internal() {
     // Routes remote audio playback traces (web only).
@@ -151,7 +155,7 @@ class PlatformAudioController {
     return _tracer.take();
   }
 
-  /// Whether the local user started or stopped speaking while the microphone
+  /// Emits when the local user starts or stops speaking while the microphone
   /// is muted.
   Stream<SpeechActivityEvent> get speechActivityStream =>
       platformEvents.onSpeechActivity.map(
@@ -168,10 +172,10 @@ class PlatformAudioController {
   @visibleForTesting
   rtc.WebRtcPlatformEvents platformEvents = rtc.platformEvents;
 
-  /// Allows to handle call interruption callbacks.
-  /// [onInterruptionStart] is called when the call interruption begins.
-  /// [onInterruptionEnd] is called when the call interruption ends.
-  /// [androidInterruptionSource] specifies the source of the interruption on Android.
+  /// Calls [onInterruptionStart] and [onInterruptionEnd] when the platform
+  /// reports an audio interruption. A later call replaces these callbacks; if
+  /// it throws, the earlier ones stay in place. [androidInterruptionSource]
+  /// picks what counts as an interruption on Android.
   ///
   /// On iOS, interruptions can occur due to:
   /// - Incoming phone calls
@@ -288,6 +292,9 @@ class PlatformAudioController {
     });
   }
 
+  /// Shows the iOS audio route picker, where the user picks the audio
+  /// output. The choice is reported as an [AudioRouteChangedEvent]. Throws on
+  /// other platforms.
   Future<void> triggeriOSAudioRouteSelectionUI() {
     return rtc.Helper.triggeriOSAudioRouteSelectionUI();
   }
@@ -381,9 +388,9 @@ class PlatformAudioController {
 
   /// Regains Android audio focus if it was lost.
   ///
-  /// On Android, audio focus may not come back on its own; call this (e.g.
-  /// when the app returns from the background) to receive
-  /// `onInterruptionEnd`.
+  /// Audio focus may not come back on its own; call this (e.g. when the app
+  /// returns from the background) to get the `onInterruptionEnd` callback of
+  /// [handleCallInterruptionCallbacks]. Throws on other platforms.
   Future<void> regainAndroidAudioFocus() {
     _tracer.trace(TraceTag.regainAndroidAudioFocus, null);
     return rtc.Helper.regainAndroidAudioFocus();

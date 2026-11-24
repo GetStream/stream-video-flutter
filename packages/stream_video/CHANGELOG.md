@@ -2,7 +2,7 @@
 
 ### ⚠️ Breaking
 
-- The app-wide audio members of `RtcMediaDeviceNotifier` moved to the new `PlatformAudioController`: `handleCallInterruptionCallbacks`, `nativeWebRtcEventsStream`, `speechActivityStream`, `triggeriOSAudioRouteSelectionUI`, `isAudioPlayoutPauseSupported`, `isAudioPlayoutPaused`, `audioPlayoutPausedChanges`, `pauseAudioPlayout`, `resumeAudioPlayout`, `resumeWebAudioPlayback`, `regainAndroidAudioFocus` and `reinitializeAudioConfiguration`; use `PlatformAudioController.instance`.
+- The app-wide audio members of `RtcMediaDeviceNotifier`, such as `pauseAudioPlayout`, `handleCallInterruptionCallbacks` and `reinitializeAudioConfiguration`, moved to `PlatformAudioController.instance`.
 - `ScreenSharingStoppedEvent` carries a `trackId` instead of a `data` map, and `ScreenSharingStartedEvent` has no `data`.
 - `PushNotificationManager` has a new method, `setCallAudioOutputDeviceByCid`. A class that `implements` it has to add it; one that `extends` it inherits a no-op.
 - `PushNotificationManager` has three new methods that a call uses to tell the native call UI what happened: `onRingEnded` when its ring is over before the user answered it on this device, `onCallLeft` when a call this device joined or accepted is left, and `onCallAccepted` when the user accepts it in the app. A class that `implements` it has to add them; one that `extends` it inherits `onRingEnded` and `onCallLeft` calling `endCallByCid`, silently for `onRingEnded`, and an `onCallAccepted` that does nothing.
