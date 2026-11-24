@@ -580,6 +580,42 @@ void main() {
 
         expect(calls, ['first']);
       });
+
+      test('two overlapping calls that both fail keep the callbacks set '
+          'before', () async {
+        final calls = <String>[];
+        await notifier.handleCallInterruptionCallbacks(
+          onInterruptionStart: () => calls.add('first'),
+        );
+        final earlier = Completer<void>();
+        final later = Completer<void>();
+        events
+          ..enableGates.addAll([earlier, later])
+          ..enableError = StateError('enable failed');
+
+        final earlierCall = expectLater(
+          notifier.handleCallInterruptionCallbacks(
+            onInterruptionStart: () => calls.add('earlier'),
+          ),
+          throwsStateError,
+        );
+        final laterCall = expectLater(
+          notifier.handleCallInterruptionCallbacks(
+            onInterruptionStart: () => calls.add('later'),
+          ),
+          throwsStateError,
+        );
+        // The earlier call fails first.
+        earlier.complete();
+        await pumpEventQueue();
+        later.complete();
+        await Future.wait([earlierCall, laterCall]);
+
+        events.interruptions.add(rtc.AudioInterruption.started);
+        await pumpEventQueue();
+
+        expect(calls, ['first']);
+      });
     });
   });
 

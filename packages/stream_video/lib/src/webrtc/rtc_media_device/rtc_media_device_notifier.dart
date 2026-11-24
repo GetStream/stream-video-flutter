@@ -238,7 +238,7 @@ class RtcMediaDeviceNotifier {
           onInterruptionEnd?.call();
       }
     });
-    final previous = _interruptionSubscription;
+    _restoreOnFailure[subscription] = _interruptionSubscription;
     _interruptionSubscription = subscription;
 
     try {
@@ -246,20 +246,34 @@ class RtcMediaDeviceNotifier {
         androidInterruptionSource: androidInterruptionSource,
       );
     } catch (_) {
-      // The callbacks set before stay in place.
+      // The callbacks set before stay in place, also for a later call still
+      // enabling that would restore these.
+      // ignore: cancel_subscriptions, kept as the callbacks in place
+      final previous = _restoreOnFailure.remove(subscription);
       if (identical(_interruptionSubscription, subscription)) {
         _interruptionSubscription = previous;
+      }
+      for (final MapEntry(:key, :value) in [..._restoreOnFailure.entries]) {
+        if (identical(value, subscription)) _restoreOnFailure[key] = previous;
       }
       await subscription.cancel();
       rethrow;
     }
 
+    final previous = _restoreOnFailure.remove(subscription);
     if (!identical(_interruptionSubscription, previous)) {
       await previous?.cancel();
     }
   }
 
   StreamSubscription<rtc.AudioInterruption>? _interruptionSubscription;
+
+  /// For each call still enabling, the subscription its failure restores.
+  final _restoreOnFailure =
+      <
+        StreamSubscription<rtc.AudioInterruption>,
+        StreamSubscription<rtc.AudioInterruption>?
+      >{};
 
   /// The screen share and audio route changes the platform reports.
   Stream<NativeWebRtcEvent> nativeWebRtcEventsStream() {
