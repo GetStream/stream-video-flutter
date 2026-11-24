@@ -2,7 +2,7 @@
 
 ### ⚠️ Breaking
 
-- The app-wide audio members of `RtcMediaDeviceNotifier`, such as `pauseAudioPlayout`, `handleCallInterruptionCallbacks` and `reinitializeAudioConfiguration`, moved to `PlatformAudioController.instance`.
+- The app-wide audio members of `RtcMediaDeviceNotifier` moved to `PlatformAudioController.instance`: `handleCallInterruptionCallbacks`, `nativeWebRtcEventsStream`, `speechActivityStream`, `triggeriOSAudioRouteSelectionUI`, `isAudioPlayoutPauseSupported`, `isAudioPlayoutPaused`, `audioPlayoutPausedChanges`, `pauseAudioPlayout`, `resumeAudioPlayout`, `resumeWebAudioPlayback`, `regainAndroidAudioFocus` and `reinitializeAudioConfiguration`.
 - `PlatformAudioController` is `@sealed`, so a test mock that implements it gets a `subtype_of_sealed_class` warning; add `// ignore: subtype_of_sealed_class` to it.
 - `ScreenSharingStoppedEvent` carries a `trackId` instead of a `data` map, and `ScreenSharingStartedEvent` has no `data`.
 - `PushNotificationManager` has a new method, `setCallAudioOutputDeviceByCid`. A class that `implements` it has to add it; one that `extends` it inherits a no-op.
