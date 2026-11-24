@@ -243,9 +243,12 @@ Flutter's defaults instead of the pinned theme, platform and locale.
 
 When the human author of a PR says it is ready for review, the agent may:
 
-1. Mark the PR ready for review, if it is still a draft.
-2. Add the `ready` label.
-3. Ask Jeffery, the review bot, for a review by commenting exactly:
+1. Check that the PR's branch has no unpushed commits, so Jeffery reviews the
+   latest head. Pushing them still waits for the author's yes, as under
+   Conventions.
+2. Mark the PR ready for review, if it is still a draft.
+3. Add the `ready` label.
+4. Ask Jeffery, the review bot, for a review by commenting exactly:
 
    ```text
    /jeffery review
