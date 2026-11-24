@@ -39,7 +39,7 @@ Future<void> main(List<String> args) async {
   final changed = _changedLines(base);
   final patch = _patchCoverage(coverage, changed);
   final baseCoverage =
-      _readTotal(options['base-total']) ?? await _baseCoverage(trunk);
+      _readTotal(options['base-total']) ?? await _baseCoverage(trunk, ignore);
 
   final report = _report(
     patch: patch,
@@ -261,7 +261,11 @@ _BaseCoverage? _readTotal(String? path) {
 
 /// The coverage Codecov stored for the newest commit on [base] that has one,
 /// starting at the merge base. Null when Codecov can't be reached or has none.
-Future<_BaseCoverage?> _baseCoverage(String base) async {
+///
+/// Sums Codecov's per-file totals without the [ignore] paths. Codecov applies
+/// the `codecov.yml` of the default branch, so its own total can include
+/// paths this branch's `codecov.yml` ignores.
+Future<_BaseCoverage?> _baseCoverage(String base, List<RegExp> ignore) async {
   final repository =
       Platform.environment['GITHUB_REPOSITORY'] ??
       'GetStream/stream-video-flutter';
@@ -272,22 +276,46 @@ Future<_BaseCoverage?> _baseCoverage(String base) async {
   );
 
   final client = HttpClient()..connectionTimeout = const Duration(seconds: 10);
+  Future<Object?> get(String path, [Map<String, String>? query]) async {
+    final uri = Uri.https('api.codecov.io', path, query);
+    final request = await client.getUrl(uri);
+    final response = await request.close();
+    final body = await response.transform(utf8.decoder).join();
+    return response.statusCode == 200 ? jsonDecode(body) : null;
+  }
+
   try {
     for (final sha in candidates) {
-      final uri = Uri.https(
-        'api.codecov.io',
-        '/api/v2/github/$owner/repos/$repo/commits/$sha/',
-      );
       try {
-        final request = await client.getUrl(uri);
-        final response = await request.close();
-        final body = await response.transform(utf8.decoder).join();
-        if (response.statusCode != 200) continue;
-        final json = jsonDecode(body) as Map<String, dynamic>;
-        final totals = json['totals'] as Map<String, dynamic>?;
-        final percent = totals?['coverage'] as num?;
-        if (json['state'] == 'complete' && percent != null) {
-          return _BaseCoverage(sha, percent.toDouble(), 'Codecov');
+        final commit = await get(
+          '/api/v2/github/$owner/repos/$repo/commits/$sha/',
+        );
+        if (commit case {'state': != 'complete'} || null) continue;
+
+        final report = await get(
+          '/api/v2/github/$owner/repos/$repo/report/',
+          {'sha': sha},
+        );
+        if (report case {'files': final List<Object?> files}) {
+          var lines = 0;
+          var hits = 0;
+          for (final file in files) {
+            if (file
+                case {
+                  'name': final String name,
+                  'totals': {
+                    'lines': final int fileLines,
+                    'hits': final int fileHits,
+                  },
+                }
+                when !ignore.any((glob) => glob.hasMatch(name))) {
+              lines += fileLines;
+              hits += fileHits;
+            }
+          }
+          if (lines > 0) {
+            return _BaseCoverage(sha, hits * 100 / lines, 'Codecov');
+          }
         }
       } on Exception catch (e) {
         stderr.writeln('Codecov request for $sha failed: $e');
