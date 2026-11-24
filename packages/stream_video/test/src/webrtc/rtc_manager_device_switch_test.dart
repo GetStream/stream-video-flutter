@@ -24,6 +24,12 @@ const _backCamera = {
   'label': 'Back Camera',
 };
 
+const _otherMicrophone = RtcMediaDevice(
+  id: 'usb-microphone',
+  label: 'USB Microphone',
+  kind: RtcMediaDeviceKind.audioInput,
+);
+
 const _otherCamera = RtcMediaDevice(
   id: 'usb-camera',
   label: 'USB Camera',
@@ -401,6 +407,58 @@ void main() {
       expect(result.isFailure, isTrue);
       expect(platform.callsOf('mediaStreamTrackSwitchCamera'), isEmpty);
       expect(stored(camera.trackId).mediaTrack, same(camera.mediaTrack));
+    });
+  });
+
+  group('setAudioInputDevice', () {
+    setUp(() {
+      fixture = RtcManagerFixture(
+        publishOptions: [publishOption(3, SfuTrackType.audio)],
+      );
+    });
+
+    Future<RtcLocalAudioTrack> publishMicrophone() async {
+      final result = await fixture.manager.publishAudioTrack(
+        track: fakeAudioTrack('mic'),
+      );
+      return result.getDataOrNull()!;
+    }
+
+    RtcLocalAudioTrack storedMicrophone(String trackId) {
+      return fixture.manager.tracks[trackId]! as RtcLocalAudioTrack;
+    }
+
+    test('switches the input of the running capture', () async {
+      overrideWebRtcCapabilities(platform: PlatformType.android);
+      final microphone = await publishMicrophone();
+
+      final result = await fixture.manager.setAudioInputDevice(
+        device: _otherMicrophone,
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect(platform.callsOf('selectAudioInput'), hasLength(1));
+      expect(platform.callsOf('getUserMedia'), isEmpty);
+      final after = storedMicrophone(microphone.trackId);
+      expect(after.mediaTrack, same(microphone.mediaTrack));
+      expect(after.mediaConstraints.deviceId, 'usb-microphone');
+    });
+
+    test('on web, captures the microphone again on the device', () async {
+      overrideWebRtcCapabilities(platform: PlatformType.web);
+      final microphone = await publishMicrophone();
+
+      final result = await fixture.manager.setAudioInputDevice(
+        device: _otherMicrophone,
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect(platform.callsOf('selectAudioInput'), isEmpty);
+      expect(platform.callsOf('getUserMedia'), hasLength(1));
+      expect(fakeMediaOf(microphone).stopped, isTrue);
+      final after = storedMicrophone(microphone.trackId);
+      expect(after.mediaTrack.id, isNot(microphone.mediaTrack.id));
+      expect(after.mediaConstraints.deviceId, 'usb-microphone');
     });
   });
 }

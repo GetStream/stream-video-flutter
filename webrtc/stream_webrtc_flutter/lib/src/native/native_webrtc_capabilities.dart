@@ -33,6 +33,5 @@ WebRtcCapabilities nativeWebRtcCapabilitiesFor({
     supportsScreenShareSourceSelection: isWindows || isMacOS || isLinux,
     omitsEarpieceFromEnumeration: isIOS,
     usesExactDeviceIdConstraints: false,
-    reusesScreenShareCapture: true,
   );
 }

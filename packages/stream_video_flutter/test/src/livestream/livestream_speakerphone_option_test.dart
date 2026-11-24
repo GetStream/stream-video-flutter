@@ -1,4 +1,4 @@
-// ignore_for_file: invalid_use_of_visible_for_testing_member
+// ignore_for_file: invalid_use_of_visible_for_testing_member, implementation_imports
 
 import 'dart:async';
 
@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'package:stream_webrtc_flutter/src/native/native_webrtc_capabilities.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../test_utils/test_wrapper.dart';
@@ -269,19 +270,13 @@ void main() {
   });
 }
 
-/// Native capabilities, with audio playout pause as given.
+/// Android's capabilities, with audio playout pause as given.
 rtc.WebRtcCapabilities _capabilities({required bool pauseSupported}) {
-  return rtc.WebRtcCapabilities(
-    supportsPerCallFactory: false,
-    supportsAudioPlayoutPause: pauseSupported,
-    supportsAudioOutputSelection: true,
-    supportsCameraSwitch: true,
-    switchesAudioInputInPlace: true,
-    selectsAudioOutputPerElement: false,
-    supportsBroadcastExtension: false,
-    supportsScreenShareSourceSelection: false,
-    omitsEarpieceFromEnumeration: false,
-    usesExactDeviceIdConstraints: false,
-    reusesScreenShareCapture: true,
-  );
+  return nativeWebRtcCapabilitiesFor(
+    isAndroid: true,
+    isIOS: false,
+    isMacOS: false,
+    isWindows: false,
+    isLinux: false,
+  ).copyWith(supportsAudioPlayoutPause: pauseSupported);
 }

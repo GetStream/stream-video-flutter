@@ -1,8 +1,10 @@
+import 'package:meta/meta.dart';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
 /// The capabilities of a browser that can, or cannot, route remote audio to
 /// an output the app picks.
-WebRtcCapabilities webRtcCapabilitiesFor({
+@visibleForTesting
+WebRtcCapabilities browserWebRtcCapabilitiesFor({
   required bool supportsAudioOutputSelection,
 }) {
   return WebRtcCapabilities(
@@ -16,6 +18,5 @@ WebRtcCapabilities webRtcCapabilitiesFor({
     supportsScreenShareSourceSelection: false,
     omitsEarpieceFromEnumeration: false,
     usesExactDeviceIdConstraints: true,
-    reusesScreenShareCapture: false,
   );
 }

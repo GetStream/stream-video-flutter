@@ -9,7 +9,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 /// The capabilities the WebRTC packages report on [platform].
 WebRtcCapabilities webRtcCapabilitiesOf(PlatformType platform) {
   if (platform == PlatformType.web) {
-    return webRtcCapabilitiesFor(supportsAudioOutputSelection: true);
+    return browserWebRtcCapabilitiesFor(supportsAudioOutputSelection: true);
   }
   return nativeWebRtcCapabilitiesFor(
     isAndroid: platform == PlatformType.android,

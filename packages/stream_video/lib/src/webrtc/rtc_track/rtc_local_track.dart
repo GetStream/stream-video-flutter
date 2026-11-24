@@ -363,8 +363,12 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
   Future<RtcLocalCameraTrack> flipCamera() async {
     streamLog.i(_cameraTag, () => 'Flipping camera');
 
-    if (!rtc.webRtcCapabilities.supportsCameraSwitch) {
-      streamLog.w(_cameraTag, () => 'Flipping camera is not supported');
+    final capabilities = rtc.webRtcCapabilities;
+    if (!capabilities.supportsCameraSwitch) {
+      streamLog.w(
+        _cameraTag,
+        () => 'Flipping camera is not supported by $capabilities',
+      );
       throw UnsupportedError(
         'Flipping camera is not supported on this platform',
       );
@@ -475,22 +479,5 @@ extension RtcLocalAudioTrackHardwareExt on RtcLocalAudioTrack {
       streamLog.e(_audioTag, () => 'Error selecting audio input: $e');
       rethrow;
     }
-  }
-}
-
-extension RtcLocalScreenShareTrackExt on RtcLocalScreenShareTrack {
-  bool compareScreenShareMode(MediaConstraints? constraints) {
-    if (constraints is! ScreenShareConstraints) {
-      return true;
-    }
-
-    // Every request opens a new capture, so it never matches the running one.
-    if (!rtc.webRtcCapabilities.reusesScreenShareCapture) {
-      return false;
-    }
-
-    return mediaConstraints.useiOSBroadcastExtension ==
-            constraints.useiOSBroadcastExtension &&
-        mediaConstraints.deviceId == constraints.deviceId;
   }
 }

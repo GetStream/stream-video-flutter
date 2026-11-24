@@ -17,7 +17,6 @@ class WebRtcCapabilities {
     required this.supportsScreenShareSourceSelection,
     required this.omitsEarpieceFromEnumeration,
     required this.usesExactDeviceIdConstraints,
-    required this.reusesScreenShareCapture,
   });
 
   /// Whether each call can build its own peer connection factory, with its
@@ -33,8 +32,8 @@ class WebRtcCapabilities {
   /// and is not WebKit, whose `setSinkId` exists but is not dependable.
   final bool supportsAudioOutputSelection;
 
-  /// Whether the camera can be switched between front and back on a running
-  /// capture. Not on web.
+  /// Whether the camera can be switched on a running capture: between front
+  /// and back on mobile, to the next camera on desktop. Not on web.
   final bool supportsCameraSwitch;
 
   /// Whether the microphone can be changed on a running capture. Not on web.
@@ -59,11 +58,6 @@ class WebRtcCapabilities {
   /// cannot be combined with the optional constraints. Web.
   final bool usesExactDeviceIdConstraints;
 
-  /// Whether a screen share request names its source, so a running share of
-  /// the same source can be kept. Not on web, where every request opens the
-  /// browser's picker.
-  final bool reusesScreenShareCapture;
-
   WebRtcCapabilities copyWith({
     bool? supportsPerCallFactory,
     bool? supportsAudioPlayoutPause,
@@ -75,7 +69,6 @@ class WebRtcCapabilities {
     bool? supportsScreenShareSourceSelection,
     bool? omitsEarpieceFromEnumeration,
     bool? usesExactDeviceIdConstraints,
-    bool? reusesScreenShareCapture,
   }) {
     return WebRtcCapabilities(
       supportsPerCallFactory:
@@ -98,8 +91,6 @@ class WebRtcCapabilities {
           omitsEarpieceFromEnumeration ?? this.omitsEarpieceFromEnumeration,
       usesExactDeviceIdConstraints:
           usesExactDeviceIdConstraints ?? this.usesExactDeviceIdConstraints,
-      reusesScreenShareCapture:
-          reusesScreenShareCapture ?? this.reusesScreenShareCapture,
     );
   }
 
@@ -116,7 +107,6 @@ class WebRtcCapabilities {
       'supportsScreenShareSourceSelection': supportsScreenShareSourceSelection,
       'omitsEarpieceFromEnumeration': omitsEarpieceFromEnumeration,
       'usesExactDeviceIdConstraints': usesExactDeviceIdConstraints,
-      'reusesScreenShareCapture': reusesScreenShareCapture,
     };
     final enabled = [
       for (final MapEntry(:key, :value) in flags.entries)
@@ -139,8 +129,7 @@ class WebRtcCapabilities {
           other.supportsScreenShareSourceSelection ==
               supportsScreenShareSourceSelection &&
           other.omitsEarpieceFromEnumeration == omitsEarpieceFromEnumeration &&
-          other.usesExactDeviceIdConstraints == usesExactDeviceIdConstraints &&
-          other.reusesScreenShareCapture == reusesScreenShareCapture;
+          other.usesExactDeviceIdConstraints == usesExactDeviceIdConstraints;
 
   @override
   int get hashCode => Object.hash(
@@ -154,7 +143,6 @@ class WebRtcCapabilities {
     supportsScreenShareSourceSelection,
     omitsEarpieceFromEnumeration,
     usesExactDeviceIdConstraints,
-    reusesScreenShareCapture,
   );
 }
 

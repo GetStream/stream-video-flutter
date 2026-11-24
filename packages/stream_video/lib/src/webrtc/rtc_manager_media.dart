@@ -2,8 +2,11 @@ part of 'rtc_manager.dart';
 
 extension RtcManagerTrackHelper on RtcManager {
   Future<Result<RtcLocalCameraTrack>> flipCamera() async {
-    if (!rtc.webRtcCapabilities.supportsCameraSwitch) {
-      _logger.e(() => '[switchCamera] rejected (not supported)');
+    final capabilities = rtc.webRtcCapabilities;
+    if (!capabilities.supportsCameraSwitch) {
+      _logger.e(
+        () => '[switchCamera] rejected (not supported by $capabilities)',
+      );
       return failureWithError('Not supported on this platform');
     }
 

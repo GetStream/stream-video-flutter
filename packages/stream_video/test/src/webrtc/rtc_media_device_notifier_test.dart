@@ -320,9 +320,7 @@ void main() {
     Exception? pauseError;
 
     setUp(() {
-      rtc.debugWebRtcCapabilitiesOverride = webRtcCapabilitiesOf(
-        PlatformType.android,
-      );
+      overrideWebRtcCapabilities(platform: PlatformType.android);
       nativeCalls.clear();
       pauseError = null;
       originalPause = notifier.nativePauseAudioPlayout;
@@ -370,7 +368,7 @@ void main() {
 
     for (final platform in [PlatformType.windows, PlatformType.linux]) {
       test('does nothing on ${platform.name}', () async {
-        rtc.debugWebRtcCapabilitiesOverride = webRtcCapabilitiesOf(platform);
+        overrideWebRtcCapabilities(platform: platform);
 
         expect(notifier.isAudioPlayoutPauseSupported, isFalse);
         await notifier.pauseAudioPlayout();

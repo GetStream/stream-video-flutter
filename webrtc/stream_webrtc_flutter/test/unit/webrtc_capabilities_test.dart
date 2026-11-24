@@ -9,7 +9,7 @@ enum _Platform { android, ios, macos, windows, linux, web }
 
 WebRtcCapabilities _capabilitiesOf(_Platform platform) {
   if (platform == _Platform.web) {
-    return webRtcCapabilitiesFor(supportsAudioOutputSelection: true);
+    return browserWebRtcCapabilitiesFor(supportsAudioOutputSelection: true);
   }
   return nativeWebRtcCapabilitiesFor(
     isAndroid: platform == _Platform.android,
@@ -64,10 +64,6 @@ void main() {
           (c) => c.usesExactDeviceIdConstraints,
           {_Platform.web},
         ),
-        'reusesScreenShareCapture': (
-          (c) => c.reusesScreenShareCapture,
-          _Platform.values.toSet()..remove(_Platform.web),
-        ),
       };
 
   for (final MapEntry(key: name, value: (read, platforms))
@@ -84,7 +80,7 @@ void main() {
 
   test('the browser reports audio output selection as probed', () {
     expect(
-      webRtcCapabilitiesFor(
+      browserWebRtcCapabilitiesFor(
         supportsAudioOutputSelection: false,
       ).supportsAudioOutputSelection,
       isFalse,
@@ -129,8 +125,6 @@ void main() {
           base.copyWith(omitsEarpieceFromEnumeration: v),
       'usesExactDeviceIdConstraints': (v) =>
           base.copyWith(usesExactDeviceIdConstraints: v),
-      'reusesScreenShareCapture': (v) =>
-          base.copyWith(reusesScreenShareCapture: v),
     };
 
     for (final MapEntry(key: name, value: flip) in flips.entries) {

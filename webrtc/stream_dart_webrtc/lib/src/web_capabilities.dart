@@ -19,11 +19,20 @@ WebRtcCapabilities get webRtcCapabilities {
   return override ?? _browserCapabilities;
 }
 
-final WebRtcCapabilities _browserCapabilities = webRtcCapabilitiesFor(
-  supportsAudioOutputSelection: supportsAudioOutputSelectionFor(
-    web.window.navigator.userAgent,
-  ),
+// ignore: invalid_use_of_visible_for_testing_member, the browser's own value
+final WebRtcCapabilities _browserCapabilities = browserWebRtcCapabilitiesFor(
+  supportsAudioOutputSelection: _probeAudioOutputSelection(),
 );
+
+/// Whether this browser supports audio output selection. False where the
+/// browser cannot be probed, such as outside a window.
+bool _probeAudioOutputSelection() {
+  try {
+    return supportsAudioOutputSelectionFor(web.window.navigator.userAgent);
+  } catch (_) {
+    return false;
+  }
+}
 
 /// Whether remote audio can be routed to a chosen output with `setSinkId`:
 /// false for a WebKit [userAgent], otherwise whether this browser's audio

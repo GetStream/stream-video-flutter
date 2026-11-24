@@ -239,6 +239,7 @@ void main() {
 
       setUp(() {
         CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+        overrideWebRtcCapabilities(platform: PlatformType.android);
         final messenger =
             TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
         for (final channel in ['thermal', 'thermal/events']) {
@@ -326,6 +327,7 @@ void main() {
 
     setUp(() {
       CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      overrideWebRtcCapabilities(platform: PlatformType.android);
       final messenger =
           TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
       for (final channel in ['thermal', 'thermal/events']) {
