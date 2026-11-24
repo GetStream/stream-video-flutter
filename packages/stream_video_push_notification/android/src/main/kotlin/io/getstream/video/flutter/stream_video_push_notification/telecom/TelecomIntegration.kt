@@ -54,6 +54,12 @@ internal class TelecomIntegration(
 
         /** A hold, mute or audio-route event to send to Dart. */
         fun onEvent(event: String, body: Map<String, Any?>)
+
+        /**
+         * The calls Telecom holds changed; [callCids] are the cids of every call it holds now.
+         * Telecom manages the audio focus of these calls.
+         */
+        fun onRegisteredCallsChanged(callCids: List<String>) {}
     }
 
     private val appContext: Context = context.applicationContext
@@ -94,6 +100,10 @@ internal class TelecomIntegration(
 
     /** Calls currently on hold, so hold events are only emitted on an actual transition. */
     private val heldCallIds: MutableSet<String> =
+        Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
+
+    /** Calls Telecom holds, from their registration until Telecom drops them. */
+    private val registeredCallIds: MutableSet<String> =
         Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
 
     /**
@@ -326,6 +336,23 @@ internal class TelecomIntegration(
      */
     fun isMuted(callId: String): Boolean = repository?.getCall(callId)?.isMuted ?: false
 
+    /** The cids of the calls Telecom holds now: registered, and not yet dropped. */
+    fun registeredCallCids(): List<String> =
+        registeredCallIds.mapNotNull { id ->
+            trackedCalls[id]?.callCid ?: run {
+                Log.w(TAG, "[registeredCallCids] $id has no cid; not reported")
+                null
+            }
+        }.distinct()
+
+    /**
+     * Reports the calls Telecom holds. The snapshot is taken when the report runs on the main
+     * thread, so reports of changes made on different threads arrive in order.
+     */
+    private fun reportRegisteredCalls() {
+        mainThread { listener?.onRegisteredCallsChanged(registeredCallCids()) }
+    }
+
     /**
      * Sends [action] to the call's Telecom scope, or queues it while the call is still
      * registering or its queue has not been replayed yet, so it never overtakes an action queued
@@ -414,7 +441,9 @@ internal class TelecomIntegration(
         connectedCallIds.remove(callId)
         outgoingCallIds.remove(callId)
         heldCallIds.remove(callId)
+        val wasRegistered = registeredCallIds.remove(callId)
         trackedCalls.remove(callId)
+        if (wasRegistered) reportRegisteredCalls()
     }
 
     /** Releases the Telecom registration, but only when no call is tracked or registered. */
@@ -437,7 +466,10 @@ internal class TelecomIntegration(
         connectedCallIds.clear()
         outgoingCallIds.clear()
         heldCallIds.clear()
+        val hadRegisteredCalls = registeredCallIds.isNotEmpty()
+        registeredCallIds.clear()
         trackedCalls.clear()
+        if (hadRegisteredCalls) reportRegisteredCalls()
     }
 
     private fun MutableList<TelecomCallAction>.dropAll() {
@@ -452,6 +484,8 @@ internal class TelecomIntegration(
 
         override fun onCallRegistered(callId: String, incoming: Boolean) {
             registeringCallIds.remove(callId)
+            registeredCallIds.add(callId)
+            reportRegisteredCalls()
             drainPendingActions(callId)
 
             Log.d(TAG, "[onCallRegistered] $callId registered with telecom, incoming=$incoming")

@@ -13,6 +13,7 @@
 * [Android] fix: an active interruption now ends once the call's audio stops and its audio focus is given up, instead of staying active with no end reported, since no focus gain can follow.
 * [Android] fix: `regainAndroidAudioFocus` requests audio focus again during a call, where it requested nothing, and ends the interruption only when the request is granted. It does nothing while no call's audio runs.
 * [Android] Added `Helper.setAndroidAudioFocusManaged`, to switch whether WebRTC manages audio focus while a call's audio runs, such as for a call Telecom holds and manages focus for. Switched off, the focus held for the call is given up, which ends an interruption a focus loss started, and the audio mode and routing stay; switched on, focus is requested again. The returned future completes before the switch applies. `manageAudioFocus` in `setAndroidAudioConfiguration` now does the same during a call, where it only applied to the next one. Focus requested during a call is now given up when the call's audio stops.
+* [Android] Added `Helper.setAndroidAudioFocusHandledBySystem`, to tell WebRTC that the system manages the audio focus of the call in progress, such as Telecom for a call it holds. While it does, WebRTC manages no focus and gives up the focus it holds, whatever its configuration says; after, the configuration applies again.
 
 [4.0.1] - 2026.10.22
 

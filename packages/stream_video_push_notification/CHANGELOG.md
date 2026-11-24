@@ -69,6 +69,7 @@
 
 ### ✅ Added
 
+- [Android] `StreamVideoPushNotificationManager.systemManagedCallCids` reports the calls the Telecom integration holds: those already held when the manager starts, such as a call answered while the app was not running, and every change after. The client uses it to leave the audio focus of those calls to Telecom.
 - `StreamVideoPushNotificationPlatform.requestAudioEndpoint` and `TelecomAudioEndpoint`: on Android, asks Telecom to route the audio of a call it holds to the earpiece, the speaker, a wired headset or a Bluetooth headset, the one with the given `name` among several, and answers whether it did. Always `false` on iOS.
 - `StreamVideoPushNotificationManager.dismissRingingCallByCid` takes a `CallDismissReason`. On Android, for a reason other than `accepted` the call is disconnected from Telecom, as remote for a cancel or an answer on another device and as missed for a missed call; `accepted`, the default, keeps the call registered as before.
 - [iOS] `StreamVideoPushNotificationPlugin.showIncomingCall(data:completion:)` runs `completion` once CallKit accepted or refused the call, for an app with its own PushKit delegate that calls PushKit's completion from it.
@@ -77,6 +78,7 @@
 
 ### 🐞 Fixed
 
+- [Android] WebRTC no longer requests audio focus for a call the Telecom integration holds; Telecom manages the call's focus. Before, both did, and the app was told it lost focus when Telecom's own ringtone took it.
 - [iOS] A call answered from CallKit with `configureAudioSession: false` had no audio in either direction.
 - [iOS] `setCallConnected` for a call answered from CallKit no longer asks CallKit to answer it again, which sent a second `ActionCallAccept`. A call accepted in the app is still answered in CallKit.
 - [iOS] `endCall` or `setCallConnected` with an id that is neither a call the plugin knows nor a uuid no longer crashes the app, and neither does `endCall` after a VoIP push whose call id was not a uuid.

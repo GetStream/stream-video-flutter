@@ -37,6 +37,7 @@ class TelecomIntegrationTest {
     private val repository = FakeTelecomCallRepository()
     private val reported = mutableListOf<String>()
     private val events = mutableListOf<Pair<String, Map<String, Any?>>>()
+    private val registeredCalls = mutableListOf<List<String>>()
 
     private val listener = object : TelecomIntegration.Listener {
         override fun onIncomingCallRegistered() {
@@ -53,6 +54,10 @@ class TelecomIntegrationTest {
 
         override fun onEvent(event: String, body: Map<String, Any?>) {
             events += event to body
+        }
+
+        override fun onRegisteredCallsChanged(callCids: List<String>) {
+            registeredCalls += callCids
         }
     }
 
@@ -288,6 +293,44 @@ class TelecomIntegrationTest {
             ),
             reported.filter { it.startsWith("disconnected") },
         )
+    }
+
+    @Test
+    fun `the calls Telecom holds are reported once registered and again once dropped`() {
+        val telecom = integration().apply { init(enabled()) }
+
+        telecom.registerIncomingCall(call)
+        assertEquals(emptyList<String>(), telecom.registeredCallCids())
+        assertEquals(emptyList<List<String>>(), registeredCalls)
+
+        repository.completeRegistration(CALL_ID)
+        assertEquals(listOf("default:abc"), telecom.registeredCallCids())
+
+        repository.disconnect(CALL_ID, TelecomEventSource.SYS)
+        assertEquals(emptyList<String>(), telecom.registeredCallCids())
+        assertEquals(listOf(listOf("default:abc"), emptyList()), registeredCalls)
+    }
+
+    @Test
+    fun `releasing Telecom reports that it holds no call`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        repository.completeRegistration(CALL_ID)
+
+        telecom.release()
+
+        assertEquals(emptyList<String>(), telecom.registeredCallCids())
+        assertEquals(emptyList<String>(), registeredCalls.last())
+    }
+
+    @Test
+    fun `a call that never registered is not reported as dropped`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+
+        repository.disconnect(CALL_ID, TelecomEventSource.APP)
+
+        assertEquals(emptyList<List<String>>(), registeredCalls)
     }
 
     @Test

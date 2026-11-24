@@ -527,14 +527,24 @@ class RtcMediaDeviceNotifier {
   /// which unmutes playout paused via [pauseAudioPlayout].
   Future<void> resumeWebAudioPlayback() => rtc_audio.resumeAudioPlayback();
 
-  /// Regains Android audio focus if it was lost.
-  ///
-  /// Note: On Android, audio focus may not be restored automatically.
-  /// To ensure you receive `onInterruptionEnd`, explicitly call
-  /// [resumeAudioPlayout] (e.g., when the app resumes from background).
+  /// Requests Android audio focus again for the call's audio after a loss.
+  /// A granted request ends the call's interruption, see
+  /// [CallState.isAudioInterrupted].
   Future<void> regainAndroidAudioFocus() {
     _tracer.trace(TraceTag.regainAndroidAudioFocus, null);
     return rtc.Helper.regainAndroidAudioFocus();
+  }
+
+  /// Tells WebRTC whether the system manages Android audio focus for the
+  /// call in progress, such as Telecom for a call it holds. WebRTC then
+  /// manages none, whatever the audio configuration says. Does nothing off
+  /// Android.
+  @internal
+  Future<void> setAndroidAudioFocusHandledBySystem({
+    required bool handledBySystem,
+  }) async {
+    if (!CurrentPlatform.isAndroid) return;
+    await rtc.Helper.setAndroidAudioFocusHandledBySystem(handledBySystem);
   }
 
   /// Refreshes the snapshot the implicit native peer-connection factory will

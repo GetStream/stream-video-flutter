@@ -91,6 +91,7 @@
 
 ### ✅ Added
 
+- Added `PushNotificationManager.systemManagedCallCids`, the calls whose audio focus the system manages, such as the calls Android's Telecom holds. While one of the active calls is among them, the client stops WebRTC from managing Android audio focus. It is empty by default.
 - `StreamVideoOptions.ringingAudioConfigurationPolicy`, the audio configuration policy of ringing calls, incoming and outgoing. It falls back to `audioConfigurationPolicy` when null, the default. A call's own policy, from `CallPreferences.audioConfigurationPolicy` or `Call.setAudioConfigurationPolicy`, still wins. With the push notification package on iOS, a call answered from the CallKit screen gets its audio settings from the start.
 - `StreamVideoOptions.resolvedRingingAudioConfigurationPolicy`, the policy a ringing call without one of its own uses: `ringingAudioConfigurationPolicy`, else `audioConfigurationPolicy`.
 - `Call.audioConfigurationPolicy`, the audio configuration policy in effect for the call.
