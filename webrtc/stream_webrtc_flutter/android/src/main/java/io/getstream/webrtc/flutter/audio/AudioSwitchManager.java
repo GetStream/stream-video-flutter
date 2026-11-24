@@ -9,6 +9,7 @@ import android.media.AudioManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -40,6 +41,13 @@ public class AudioSwitchManager {
     // WeakReference to avoid memory leaks with Activity
     @Nullable
     private WeakReference<Activity> activityRef;
+
+    /**
+     * Marks the posted runnables that start or stop the call's audio, so a start cancels a
+     * pending stop or start without also dropping other posted work, such as a device
+     * selection.
+     */
+    private static final Object LIFECYCLE_TOKEN = new Object();
 
     public boolean loggingEnabled;
     private boolean isActive = false;
@@ -176,8 +184,10 @@ public class AudioSwitchManager {
 
     public void start() {
         if (audioSwitch != null) {
-            handler.removeCallbacksAndMessages(null);
-            handler.postAtFrontOfQueue(() -> {
+            // Called again for each audio track a call sends, so it leaves other posted work
+            // in place.
+            handler.removeCallbacksAndMessages(LIFECYCLE_TOKEN);
+            postLifecycleAtFront(() -> {
                 if (!isActive) {
                     if (audioSwitch != null) {
                         modeBeforeCall = audioManager.getMode();
@@ -200,7 +210,7 @@ public class AudioSwitchManager {
     public void stop() {
         if (audioSwitch != null) {
             handler.removeCallbacksAndMessages(null);
-            handler.postAtFrontOfQueue(() -> {
+            postLifecycleAtFront(() -> {
                 if (isActive) {
                     Objects.requireNonNull(audioSwitch).deactivate();
                     isActive = false;
@@ -216,6 +226,12 @@ public class AudioSwitchManager {
                 }
             });
         }
+    }
+
+    private void postLifecycleAtFront(@NonNull Runnable runnable) {
+        Message message = Message.obtain(handler, runnable);
+        message.obj = LIFECYCLE_TOKEN;
+        handler.sendMessageAtFrontOfQueue(message);
     }
 
     public void setMicrophoneMute(boolean mute) {
