@@ -69,8 +69,13 @@ class CallAudioInterruptions {
 
   /// The call ended: no interruption applies to it any more, and nothing is
   /// turned back on.
-  Future<void> reset() {
+  ///
+  /// The interruption is cleared without waiting for an event in progress.
+  Future<void> reset() async {
+    // A call can end from inside an update of its state, such as the SFU
+    // ending the call, and setting the state again from inside one throws.
+    await Future<void>.value();
     _stateManager.rtcSetAudioInterrupted(isInterrupted: false);
-    return _lock.synchronized(() => _onEnded(restore: false));
+    await _lock.synchronized(() => _onEnded(restore: false));
   }
 }

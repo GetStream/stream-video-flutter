@@ -570,11 +570,13 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         XCTAssertEqual(call.phase, .ended(.remoteEnded))
     }
 
-    func testAnActivationPostsAnEndedInterruptionFromTheManager() {
+    func testAnActivationPostsAnEndedInterruptionFromTheSession() {
         answer(track(id: "answered"))
         var posted: [Notification] = []
+        // The WebRTC plugin only listens to interruptions the shared session sends.
         let observer = NotificationCenter.default.addObserver(
-            forName: AVAudioSession.interruptionNotification, object: manager, queue: nil
+            forName: AVAudioSession.interruptionNotification,
+            object: AVAudioSession.sharedInstance(), queue: nil
         ) { posted.append($0) }
         defer { NotificationCenter.default.removeObserver(observer) }
 

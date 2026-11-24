@@ -99,14 +99,54 @@ void main() {
     expect(interrupted(), isFalse);
   });
 
-  test('reset ends the interruption at once without restoring', () async {
+  test('reset ends the interruption without restoring', () async {
     await interruptions.onInterruption(interrupted: true);
 
-    final reset = interruptions.reset();
+    await interruptions.reset();
     expect(interrupted(), isFalse);
-    await reset;
     await interruptions.onInterruption(interrupted: false);
 
     expect(calls, ['started(mute: true)', 'ended(restore: false)']);
+  });
+
+  test('reset clears the interruption before a start in progress '
+      'finishes', () async {
+    pendingStart = Completer<void>();
+    final start = interruptions.onInterruption(interrupted: true);
+    await pumpEventQueue();
+    expect(interrupted(), isTrue);
+
+    final reset = interruptions.reset();
+    await pumpEventQueue();
+    expect(interrupted(), isFalse);
+
+    pendingStart!.complete();
+    await Future.wait([start, reset]);
+    expect(calls, ['started(mute: true)', 'ended(restore: false)']);
+  });
+
+  test('reset from inside an update of the call state does not throw, '
+      'as when the SFU ends the call', () async {
+    await interruptions.onInterruption(interrupted: true);
+
+    Future<void>? reset;
+    final sub = stateManager.callStateStream.listen((state) {
+      if (state.status is CallStatusDisconnected) {
+        reset ??= interruptions.reset();
+      }
+    });
+    addTearDown(sub.cancel);
+    // Until the listener has the current state, later states reach it
+    // asynchronously, outside the update.
+    await pumpEventQueue();
+
+    stateManager.state = stateManager.callState.copyWith(
+      status: CallStatus.disconnected(const DisconnectReason.ended()),
+    );
+    await pumpEventQueue();
+
+    expect(reset, isNotNull);
+    await expectLater(reset, completes);
+    expect(interrupted(), isFalse);
   });
 }

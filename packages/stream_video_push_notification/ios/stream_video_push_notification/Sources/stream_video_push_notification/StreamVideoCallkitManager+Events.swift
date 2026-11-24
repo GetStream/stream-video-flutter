@@ -1,3 +1,4 @@
+import AVFoundation
 import Foundation
 
 extension StreamVideoCallkitManager {
@@ -22,7 +23,9 @@ extension StreamVideoCallkitManager {
             case .reportConnected(let uuid, let date):
                 sharedProvider?.reportOutgoingCall(with: uuid, connectedAt: date)
             case .postAudioInterruptionEnded:
-                audio.postInterruptionEnded(object: self)
+                // Sent as the shared session's own: the WebRTC plugin only listens to
+                // interruptions that session sends, and WebRTC's audio session to any.
+                audio.postInterruptionEnded(object: AVAudioSession.sharedInstance())
             }
         }
     }
