@@ -28,7 +28,7 @@ jobs:
       contains(github.event.pull_request.labels.*.name, 'build') &&
       (github.event.action != 'labeled' || github.event.label.name == 'build')
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     timeout-minutes: 15
     # On the jobs rather than the workflow, so a run that skips both (another
     # label added) leaves a running deploy alone.
@@ -84,7 +84,7 @@ jobs:
       ((github.event.action == 'closed' && contains(github.event.pull_request.labels.*.name, 'build')) ||
       (github.event.action == 'unlabeled' && github.event.label.name == 'build'))
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     timeout-minutes: 5
     # Shares the deploy's group, so it stops a deploy that is still running.
     concurrency:
