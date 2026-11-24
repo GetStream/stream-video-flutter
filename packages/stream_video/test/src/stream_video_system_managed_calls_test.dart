@@ -69,11 +69,11 @@ void main() {
     return (fixture, call);
   }
 
-  test('sends nothing while no active call is system managed, so the '
-      "app's configuration stands", () async {
+  test('tells WebRTC at start that the system does not manage focus, so a '
+      'value an earlier client left does not stand', () async {
     await client();
 
-    expect(handledBySystem, isEmpty);
+    expect(handledBySystem, [false]);
   });
 
   test('tells WebRTC the system manages focus while an active call is '
@@ -82,15 +82,15 @@ void main() {
 
     systemManaged.add({'default:c1'});
     await pumpEventQueue();
-    expect(handledBySystem, isEmpty);
+    expect(handledBySystem, [false]);
 
     await fixture.streamVideo.state.setActiveCall(call);
     await pumpEventQueue();
-    expect(handledBySystem, [true]);
+    expect(handledBySystem, [false, true]);
 
     systemManaged.add(const {});
     await pumpEventQueue();
-    expect(handledBySystem, [true, false]);
+    expect(handledBySystem, [false, true, false]);
   });
 
   test('a system-managed call that is not active changes nothing', () async {
@@ -99,7 +99,7 @@ void main() {
     systemManaged.add({'default:other'});
     await pumpEventQueue();
 
-    expect(handledBySystem, isEmpty);
+    expect(handledBySystem, [false]);
   });
 
   test('does nothing off Android', () async {
