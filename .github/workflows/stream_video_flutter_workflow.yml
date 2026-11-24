@@ -56,6 +56,7 @@ jobs:
               - 'analysis_options.yaml'
               - 'all_lint_rules.yaml'
               - 'tools/*.dart'
+              - 'codecov.yml'
               - '.github/actions/setup-flutter/**'
               - '.github/actions/setup-melos/**'
               - '.github/actions/select-xcode/**'
@@ -121,6 +122,13 @@ jobs:
         with:
           use_oidc: true
           files: packages/*/coverage/lcov.info
+      - name: "Keep Coverage for the Report"
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: lcov
+          path: packages/*/coverage/lcov.info
+          retention-days: 1
       - name: "Test dart fixes"
         run: melos run test:fixes
       - name: "Browser Test"
@@ -224,37 +232,62 @@ jobs:
       - name: iOS Unit Tests
         run: melos run test:ios:push
 
-  # codecov/patch is a required check, but Codecov only reports it for a
-  # commit with an upload. When the gate skips the tests, an empty upload
-  # makes Codecov report it as passed.
-  coverage-skipped:
-    needs: gate
-    if: needs.gate.outputs.should_run != 'true' && github.event_name == 'pull_request' && github.event.pull_request.draft != true
+  # Reports the coverage of the lines a PR changes, and of the whole branch
+  # against the target branch, as a PR comment. Fails when the changed lines
+  # are covered less than the target branch. Codecov only stores the uploads.
+  coverage:
+    needs: [gate, analyze]
+    if: needs.gate.outputs.should_run == 'true' && github.event_name == 'pull_request'
     timeout-minutes: 5
     runs-on:
       group: github-public-ubuntu-static
     permissions:
       contents: read
-      pull-requests: read
-      # Codecov authenticates the empty upload with a GitHub OIDC token.
-      id-token: write
+      pull-requests: write
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
-
-      - name: Report Skipped Coverage
-        uses: codecov/codecov-action@v7
         with:
-          use_oidc: true
-          run_command: empty-upload
-          force: true
-          fail_ci_if_error: true
+          fetch-depth: 0
+
+      - name: Install Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Download Coverage
+        uses: actions/download-artifact@v8
+        with:
+          name: lcov
+          path: packages
+
+      - name: Report Coverage
+        run: dart tools/coverage_report.dart --base "origin/${{ github.base_ref }}" --output coverage.md
+
+      - name: Add Report to Summary
+        if: ${{ !cancelled() && hashFiles('coverage.md') != '' }}
+        run: cat coverage.md >> "$GITHUB_STEP_SUMMARY"
+
+      # A fork's token can't comment, so its report stays in the summary.
+      - name: Comment Report
+        if: ${{ !cancelled() && hashFiles('coverage.md') != '' && github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const body = require('fs').readFileSync('coverage.md', 'utf8');
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
+            const existing = comments.find((c) => c.user.type === 'Bot' && c.body.includes('<!-- coverage-report -->'));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
 
   # The one check to mark as required: it passes when every check above
   # passed or was skipped by the gate.
   sdk-verified:
     if: always()
-    needs: [gate, analyze, complexity, build, coverage-skipped, ios-unit-tests]
+    needs: [gate, analyze, complexity, build, coverage, ios-unit-tests]
     timeout-minutes: 5
     runs-on:
       group: github-public-ubuntu-static
