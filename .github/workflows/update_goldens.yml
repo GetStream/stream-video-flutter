@@ -7,7 +7,8 @@ permissions:
 
 jobs:
   update_goldens:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     steps:
       - name: 🔑 Mint CI Bot Token
         id: ci-bot-token
