@@ -227,30 +227,36 @@ class PlatformAudioController {
         androidInterruptionSource: androidInterruptionSource,
       );
     } catch (_) {
-      // The callbacks set before stay in place, also for a later call still
-      // enabling that would restore these. Callbacks a later call already
-      // replaced are cancelled.
-      final previous = _restoreOnFailure.remove(subscription);
-      var kept = false;
-      if (identical(_interruptionSubscription, subscription)) {
-        _interruptionSubscription = previous;
-        kept = true;
-      }
-      for (final MapEntry(:key, :value) in [..._restoreOnFailure.entries]) {
-        if (identical(value, subscription)) {
-          _restoreOnFailure[key] = previous;
-          kept = true;
-        }
-      }
-      await subscription.cancel();
-      if (!kept && !identical(_interruptionSubscription, previous)) {
-        await previous?.cancel();
-      }
+      await _dropFailedInterruptionCallbacks(subscription);
       rethrow;
     }
 
     final previous = _restoreOnFailure.remove(subscription);
     if (!identical(_interruptionSubscription, previous)) {
+      await previous?.cancel();
+    }
+  }
+
+  /// Cancels the callbacks of a call that failed to enable. The callbacks set
+  /// before it stay in place, also for a later call still enabling that would
+  /// restore these; callbacks a later call already replaced are cancelled.
+  Future<void> _dropFailedInterruptionCallbacks(
+    StreamSubscription<rtc.AudioInterruption> failed,
+  ) async {
+    final previous = _restoreOnFailure.remove(failed);
+    var kept = false;
+    if (identical(_interruptionSubscription, failed)) {
+      _interruptionSubscription = previous;
+      kept = true;
+    }
+    for (final MapEntry(:key, :value) in [..._restoreOnFailure.entries]) {
+      if (identical(value, failed)) {
+        _restoreOnFailure[key] = previous;
+        kept = true;
+      }
+    }
+    await failed.cancel();
+    if (!kept && !identical(_interruptionSubscription, previous)) {
       await previous?.cancel();
     }
   }
