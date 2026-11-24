@@ -11,6 +11,7 @@ import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
 import '../router/routes.dart';
 import '../utils/app_call.dart';
+import '../utils/call_encryption.dart';
 import '../utils/call_lookup.dart';
 import 'call_screen.dart';
 import 'lobby_screen.dart';
@@ -150,9 +151,11 @@ class _CallRoutePageState extends State<CallRoutePage> {
   }
 
   /// Whether [call] is a livestream this user only watches. Hosts, who can
-  /// publish video, go through the lobby to the call screen.
+  /// publish video, go through the lobby to the call screen, and so does an
+  /// encrypted livestream, since the lobby attaches its key.
   static bool _watchesOnly(Call call) {
     if (call.type != StreamCallType.liveStream()) return false;
+    if (isCallEncrypted(call.state.value.settings)) return false;
 
     final capabilities = call.state.value.ownCapabilities;
     return !capabilities.contains(CallPermission.sendVideo);
@@ -160,8 +163,8 @@ class _CallRoutePageState extends State<CallRoutePage> {
 
   @override
   void dispose() {
-    // The call screen leaves on its own; the player does not, so leaving
-    // this page any way at all (system back included) leaves the call.
+    // Leaving this page any way at all (system back included) leaves the
+    // call as the user, so the player is told not to leave it itself.
     if (_isLivestreamViewer) {
       unawaited(
         _call?.leave(
@@ -265,6 +268,7 @@ class _CallRoutePageState extends State<CallRoutePage> {
         call: call,
         onCallDisconnected: _onViewerDisconnected,
         // Closing the page leaves the call; see [dispose].
+        leaveCallOnDispose: false,
         backButtonBuilder: (context) => StreamToolbarButton.icon(
           icon: Icon(context.streamIcons.xmark),
           tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
