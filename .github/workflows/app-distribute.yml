@@ -112,7 +112,8 @@ jobs:
 
   build_and_deploy_android:
     name: Build and Distribute Dogfooding Android
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     timeout-minutes: 30
     if: ${{ github.event_name == 'push' || github.event_name == 'release'  || inputs.build_android == true }}
     steps:
@@ -168,7 +169,8 @@ jobs:
 
   build_and_deploy_web:
     name: Build and Deploy Dogfooding Web
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     timeout-minutes: 10
     permissions:
       contents: write

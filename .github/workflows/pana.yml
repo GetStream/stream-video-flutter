@@ -18,7 +18,8 @@ permissions:
 
 jobs:
   stream_video:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
@@ -29,7 +30,8 @@ jobs:
           min_score: 120 # Missing official support for WASM
 
   stream_video_flutter:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
@@ -40,7 +42,8 @@ jobs:
           min_score: 120 # Missing official support for WASM
 
   stream_video_push_notification:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
@@ -51,7 +54,8 @@ jobs:
           min_score: 130
 
   stream_video_screen_sharing:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
@@ -62,7 +66,8 @@ jobs:
           min_score: 140
 
   stream_video_noise_cancellation:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
