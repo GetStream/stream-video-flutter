@@ -467,8 +467,12 @@ class StreamVideo extends Disposable implements CallHost {
 
   /// Tells WebRTC that the system manages Android audio focus while one of
   /// the active calls is a call whose focus the system manages, such as one
-  /// Telecom holds, and that it no longer does once none is. Nothing is sent
-  /// until the first such call, so the app's own audio configuration stands.
+  /// Telecom holds, and that it no longer does once none is.
+  ///
+  /// The first value is sent too, so a client set up after another that
+  /// told WebRTC the system manages focus, such as before a Flutter engine
+  /// restart, does not leave it at that. Being told the system does not
+  /// manage it leaves the app's own audio configuration as it is.
   void _observeSystemManagedCalls() {
     final manager = pushNotificationManager;
     if (manager == null || !setsUpMedia || !CurrentPlatform.isAndroid) return;
@@ -481,7 +485,6 @@ class StreamVideo extends Disposable implements CallHost {
                   calls.any((call) => cids.contains(call.callCid.value)),
             )
             .distinct()
-            .skipWhile((systemManaged) => !systemManaged)
             .listen(_onSystemManagedCalls);
   }
 
