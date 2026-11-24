@@ -10,6 +10,7 @@ void main() {
   MockCall call({bool backstage = false, int viewers = 1}) {
     final state = MockCallState();
     when(() => state.isBackstage).thenReturn(backstage);
+    when(() => state.status).thenReturn(CallStatus.idle());
     when(() => state.participantCount).thenReturn(viewers);
     when(() => state.anonymousParticipantCount).thenReturn(0);
 

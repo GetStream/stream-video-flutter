@@ -24,10 +24,15 @@ class StreamSpectatorsIndicator extends StatelessWidget {
   /// Overrides the style from [StreamSpectatorsIndicatorTheme].
   final StreamSpectatorsIndicatorStyle? style;
 
-  static int _allViewers(CallState state) =>
-      state.participantCount + state.anonymousParticipantCount;
+  // Once joined, the participant count already includes the anonymous
+  // viewers; before that, it leaves them out.
+  static int _allViewers(CallState state) => state.status.isAlreadyJoined
+      ? state.participantCount
+      : state.participantCount + state.anonymousParticipantCount;
 
-  static int _namedViewers(CallState state) => state.participantCount;
+  static int _namedViewers(CallState state) => state.status.isAlreadyJoined
+      ? state.participantCount - state.anonymousParticipantCount
+      : state.participantCount;
 
   @override
   Widget build(BuildContext context) {
