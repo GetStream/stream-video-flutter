@@ -521,20 +521,64 @@ void main() {
       });
 
       test('of two overlapping calls, the last one wins', () async {
+        final first = Completer<void>();
+        final second = Completer<void>();
+        events.enableGates.addAll([first, second]);
         final calls = <String>[];
-        await Future.wait([
-          notifier.handleCallInterruptionCallbacks(
-            onInterruptionStart: () => calls.add('first'),
-          ),
-          notifier.handleCallInterruptionCallbacks(
-            onInterruptionStart: () => calls.add('second'),
-          ),
-        ]);
+
+        final firstCall = notifier.handleCallInterruptionCallbacks(
+          onInterruptionStart: () => calls.add('first'),
+        );
+        final secondCall = notifier.handleCallInterruptionCallbacks(
+          onInterruptionStart: () => calls.add('second'),
+        );
+        // The platform answers the second call first.
+        second.complete();
+        await pumpEventQueue();
+        first.complete();
+        await Future.wait([firstCall, secondCall]);
 
         events.interruptions.add(rtc.AudioInterruption.started);
         await pumpEventQueue();
 
         expect(calls, ['second']);
+      });
+
+      test('an interruption reported while enabling reaches the '
+          'callbacks', () async {
+        final enabling = Completer<void>();
+        events.enableGates.add(enabling);
+        final calls = <String>[];
+
+        final call = notifier.handleCallInterruptionCallbacks(
+          onInterruptionStart: () => calls.add('start'),
+        );
+        events.interruptions.add(rtc.AudioInterruption.started);
+        await pumpEventQueue();
+        enabling.complete();
+        await call;
+
+        expect(calls, ['start']);
+      });
+
+      test('a call that fails to enable keeps the callbacks set '
+          'before', () async {
+        final calls = <String>[];
+        await notifier.handleCallInterruptionCallbacks(
+          onInterruptionStart: () => calls.add('first'),
+        );
+        events.enableError = StateError('enable failed');
+
+        await expectLater(
+          notifier.handleCallInterruptionCallbacks(
+            onInterruptionStart: () => calls.add('second'),
+          ),
+          throwsStateError,
+        );
+        events.interruptions.add(rtc.AudioInterruption.started);
+        await pumpEventQueue();
+
+        expect(calls, ['first']);
       });
     });
   });
@@ -610,6 +654,12 @@ class _FakePlatformEvents implements rtc.WebRtcPlatformEvents {
   final interruptions = StreamController<rtc.AudioInterruption>.broadcast();
   final enabledWith = <rtc.AndroidInterruptionSource>[];
 
+  /// When not empty, each enable waits for the next of these.
+  final enableGates = <Completer<void>>[];
+
+  /// When set, enabling fails with it.
+  Error? enableError;
+
   @override
   Stream<rtc.AudioInterruption> get onInterruption => interruptions.stream;
 
@@ -619,6 +669,8 @@ class _FakePlatformEvents implements rtc.WebRtcPlatformEvents {
         rtc.AndroidInterruptionSource.audioFocusAndTelephony,
   }) async {
     enabledWith.add(androidInterruptionSource);
+    if (enableGates.isNotEmpty) await enableGates.removeAt(0).future;
+    if (enableError case final error?) throw error;
   }
 
   @override

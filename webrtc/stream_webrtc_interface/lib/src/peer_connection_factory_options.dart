@@ -19,8 +19,12 @@ class PeerConnectionFactoryOptions {
   /// suppression and gain control.
   final bool bypassVoiceProcessing;
 
+  /// The audio mode, focus and attributes Android uses. Null leaves the
+  /// platform's defaults.
   final AndroidAudioConfiguration? androidAudioConfiguration;
 
+  /// The audio session category, options and mode iOS uses. Null leaves the
+  /// platform's defaults.
   final AppleAudioConfiguration? appleAudioConfiguration;
 
   @override

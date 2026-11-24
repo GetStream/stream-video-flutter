@@ -225,14 +225,12 @@ class RtcMediaDeviceNotifier {
     rtc.AndroidInterruptionSource androidInterruptionSource =
         rtc.AndroidInterruptionSource.audioFocusAndTelephony,
   }) async {
-    await platformEvents.enableInterruptionEvents(
-      androidInterruptionSource: androidInterruptionSource,
-    );
-
-    final cancelPrevious = _interruptionSubscription?.cancel();
-    _interruptionSubscription = platformEvents.onInterruption.listen((
-      interruption,
-    ) {
+    // Listens before enabling, so an interruption reported while the platform
+    // starts reporting them is not missed. Only the subscription of the last
+    // call passes interruptions on.
+    StreamSubscription<rtc.AudioInterruption>? subscription;
+    subscription = platformEvents.onInterruption.listen((interruption) {
+      if (!identical(_interruptionSubscription, subscription)) return;
       switch (interruption) {
         case rtc.AudioInterruption.started:
           onInterruptionStart?.call();
@@ -240,7 +238,25 @@ class RtcMediaDeviceNotifier {
           onInterruptionEnd?.call();
       }
     });
-    await cancelPrevious;
+    final previous = _interruptionSubscription;
+    _interruptionSubscription = subscription;
+
+    try {
+      await platformEvents.enableInterruptionEvents(
+        androidInterruptionSource: androidInterruptionSource,
+      );
+    } catch (_) {
+      // The callbacks set before stay in place.
+      if (identical(_interruptionSubscription, subscription)) {
+        _interruptionSubscription = previous;
+      }
+      await subscription.cancel();
+      rethrow;
+    }
+
+    if (!identical(_interruptionSubscription, previous)) {
+      await previous?.cancel();
+    }
   }
 
   StreamSubscription<rtc.AudioInterruption>? _interruptionSubscription;

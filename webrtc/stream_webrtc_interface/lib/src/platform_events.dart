@@ -63,9 +63,17 @@ class AudioProcessingState {
     required this.voiceProcessingAGCEnabled,
   });
 
+  /// Whether remote audio plays out in stereo.
   final bool stereoPlayoutEnabled;
+
+  /// Whether the voice processing audio unit is in use.
   final bool voiceProcessingEnabled;
+
+  /// Whether voice processing (echo cancellation, noise suppression) is
+  /// bypassed.
   final bool voiceProcessingBypassed;
+
+  /// Whether automatic gain control is on.
   final bool voiceProcessingAGCEnabled;
 
   @override
@@ -139,8 +147,10 @@ abstract class WebRtcPlatformEvents {
   /// `stream_video_flutter`'s iOS plugin.
   Stream<void> get onScreenSharingStarted;
 
-  /// A screen share stopped outside the app's control. Android, iOS and
-  /// macOS.
+  /// A screen share stopped outside the app's control: on Android, from the
+  /// system UI; on macOS, a share started from the system content picker; on
+  /// iOS, the broadcast extension, posted by `stream_video_flutter`'s iOS
+  /// plugin.
   Stream<ScreenSharingStopped> get onScreenSharingStopped;
 
   /// Audio interruptions, reported once [enableInterruptionEvents] has run.
