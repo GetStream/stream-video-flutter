@@ -205,6 +205,42 @@ void main() {
       expect(find.byType(LivestreamPlayer), findsNothing);
     });
 
+    testWidgets('a disconnect in fullscreen still closes the screen', (
+      tester,
+    ) async {
+      final call = FakeLivestreamCall(liveCall);
+      when(
+        () => call.leave(reason: any(named: 'reason')),
+      ).thenAnswer((_) async => const Result.success(none));
+      await tester.pumpWidget(
+        TestWrapper(
+          child: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => LivestreamPlayer(
+                    call: call,
+                    joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+                    startInFullscreenMode: true,
+                  ),
+                ),
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      call.callState = liveCall.copyWith(
+        status: CallStatus.disconnected(DisconnectReason.reconnectionFailed()),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LivestreamPlayer), findsNothing);
+    });
+
     testWidgets('onFullscreenTapped is called once and does not toggle', (
       tester,
     ) async {

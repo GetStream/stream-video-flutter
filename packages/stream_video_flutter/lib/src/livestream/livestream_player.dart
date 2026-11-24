@@ -298,6 +298,10 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   /// pop. See [_popSelf].
   var _popPending = false;
 
+  /// Whether this player is closing its route itself, which the fullscreen
+  /// back handling must not hold back.
+  var _closing = false;
+
   @override
   void initState() {
     super.initState();
@@ -624,7 +628,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
 
     return PopScope(
       // Back leaves fullscreen first when the player toggles it itself.
-      canPop: !fullscreen || widget.onFullscreenTapped != null,
+      canPop: _closing || !fullscreen || widget.onFullscreenTapped != null,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) setState(() => _fullscreen = false);
       },
@@ -733,6 +737,12 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     }
 
     _popPending = false;
+    if (!_closing) {
+      // Rebuild the PopScope so it lets this pop through.
+      setState(() => _closing = true);
+      await WidgetsBinding.instance.endOfFrame;
+      if (!mounted) return;
+    }
     final popped = await Navigator.maybePop(context);
     _logger.v(() => '[leave] popped: $popped');
   }
