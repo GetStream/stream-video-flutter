@@ -139,6 +139,14 @@
   "@livestreamLive": {
     "description": "The badge text shown when the call mode is live"
   },
+  "livestreamLiveIndicatorLive": "LIVE",
+  "@livestreamLiveIndicatorLive": {
+    "description": "The live indicator's label while the livestream is live, written in upper case"
+  },
+  "livestreamLiveIndicatorBackstage": "BACKSTAGE",
+  "@livestreamLiveIndicatorBackstage": {
+    "description": "The live indicator's label while the livestream is in backstage, written in upper case"
+  },
   "lobbyMicrophoneSection": "Microphone",
   "@lobbyMicrophoneSection": {
     "description": "Heading of the microphone group in the lobby's device menu"

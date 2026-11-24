@@ -311,6 +311,18 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'Live'**
   String get livestreamLive;
 
+  /// The live indicator's label while the livestream is live, written in upper case
+  ///
+  /// In en, this message translates to:
+  /// **'LIVE'**
+  String get livestreamLiveIndicatorLive;
+
+  /// The live indicator's label while the livestream is in backstage, written in upper case
+  ///
+  /// In en, this message translates to:
+  /// **'BACKSTAGE'**
+  String get livestreamLiveIndicatorBackstage;
+
   /// Heading of the microphone group in the lobby's device menu
   ///
   /// In en, this message translates to:

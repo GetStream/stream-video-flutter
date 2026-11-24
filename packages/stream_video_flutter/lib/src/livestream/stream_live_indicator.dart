@@ -6,8 +6,7 @@ import '../l10n/localization_extension.dart';
 /// A pill telling whether a livestream is live or still in backstage.
 ///
 /// While the call is live it shows a dot and "LIVE" on the accent colour;
-/// in backstage it shows "BACKSTAGE" on a neutral surface. The translated
-/// label is shown in upper case.
+/// in backstage it shows "BACKSTAGE" on a neutral surface.
 class StreamLiveIndicator extends StatelessWidget {
   /// Creates a [StreamLiveIndicator].
   const StreamLiveIndicator({
@@ -41,8 +40,8 @@ class StreamLiveIndicator extends StatelessWidget {
             ? resolved.backstageForegroundColor
             : resolved.liveForegroundColor;
         final label = isBackstage
-            ? translations.livestreamBackstage
-            : translations.livestreamLive;
+            ? translations.livestreamLiveIndicatorBackstage
+            : translations.livestreamLiveIndicatorLive;
 
         return DecoratedBox(
           decoration: BoxDecoration(
@@ -70,7 +69,7 @@ class StreamLiveIndicator extends StatelessWidget {
                 // Shrinks with an ellipsis when the toolbar runs out of room.
                 Flexible(
                   child: Text(
-                    label.toUpperCase(),
+                    label,
                     maxLines: 1,
                     softWrap: false,
                     overflow: TextOverflow.ellipsis,

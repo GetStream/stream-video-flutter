@@ -34,6 +34,8 @@
   "livestreamHostNotAvailable": "De video van de host is niet beschikbaar.",
   "livestreamBackstage": "Backstage",
   "livestreamLive": "Live",
+  "livestreamLiveIndicatorLive": "LIVE",
+  "livestreamLiveIndicatorBackstage": "BACKSTAGE",
   "lobbyMicrophoneSection": "Microfoon",
   "lobbySpeakerSection": "Luidspreker",
   "lobbyCameraSection": "Camera",

@@ -126,6 +126,12 @@ class StreamVideoFlutterLocalizationsNl
   String get livestreamLive => 'Live';
 
   @override
+  String get livestreamLiveIndicatorLive => 'LIVE';
+
+  @override
+  String get livestreamLiveIndicatorBackstage => 'BACKSTAGE';
+
+  @override
   String get lobbyMicrophoneSection => 'Microfoon';
 
   @override
