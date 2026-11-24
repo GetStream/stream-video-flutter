@@ -206,6 +206,10 @@ public class AudioSwitchManager {
                 } else {
                     if (audioSwitch != null) {
                         modeBeforeCall = audioManager.getMode();
+                        // AudioSwitch requests focus as it activates, by its own flag, which a
+                        // switch posted since may not have updated yet, such as one a stop
+                        // dropped: the focus it took would then not be tracked.
+                        audioSwitch.setManageAudioFocus(focusManaged());
                         focusHolding.onStart(focusManaged());
                         isActivating = true;
                         try {
