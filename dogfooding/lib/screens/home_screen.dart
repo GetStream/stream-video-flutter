@@ -78,17 +78,34 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
-  Future<void> _getOrCreateCall({List<String> memberIds = const []}) async {
-    var callId = _callIdController.text.trim();
+  /// The call types the join field takes as a `<type>:<id>` prefix.
+  static const _prefixTypes = {
+    'default',
+    'livestream',
+    'audio_room',
+    'development',
+  };
 
-    // A full cid such as `livestream:<id>` picks the call type as well. The
-    // type ends at the first colon; `livestream:` alone starts a new one.
-    StreamCallType? callType;
-    final colon = callId.indexOf(':');
-    if (colon > 0) {
-      callType = StreamCallType.fromString(callId.substring(0, colon));
-      callId = callId.substring(colon + 1);
+  /// Splits a known call type off [input], such as `livestream:<id>`, where
+  /// `livestream:` alone starts a new one. Anything else is the call id as
+  /// typed, colons included.
+  static ({StreamCallType? callType, String callId}) _parseCallId(
+    String input,
+  ) {
+    final colon = input.indexOf(':');
+    final prefix = colon > 0 ? input.substring(0, colon) : null;
+    if (prefix == null || !_prefixTypes.contains(prefix)) {
+      return (callType: null, callId: input);
     }
+
+    return (
+      callType: StreamCallType.fromString(prefix),
+      callId: input.substring(colon + 1),
+    );
+  }
+
+  Future<void> _getOrCreateCall({List<String> memberIds = const []}) async {
+    var (:callType, :callId) = _parseCallId(_callIdController.text.trim());
 
     // Always generate a new call id for ringing
     if (callId.isEmpty || memberIds.isNotEmpty) {
@@ -111,7 +128,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     unawaited(showLoadingIndicator(context));
 
-    final call = makeAppCall(callId, callType: callType);
+    // Ringing always makes a default call.
+    final call = makeAppCall(callId);
 
     try {
       final result = await call.getOrCreate(
