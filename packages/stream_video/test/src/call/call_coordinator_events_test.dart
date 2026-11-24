@@ -256,7 +256,7 @@ void main() {
         await Future<void>.delayed(Duration.zero);
 
         // Verify counts are updated (sum of all roles + anonymous)
-        expect(setup.call.state.value.participantCount, equals(4)); // 3 + 1
+        expect(setup.call.state.value.participantCount, equals(6)); // 3 + 1 + 2
         expect(setup.call.state.value.anonymousParticipantCount, equals(2));
       },
     );

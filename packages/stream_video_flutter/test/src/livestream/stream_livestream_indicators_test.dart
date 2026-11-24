@@ -14,8 +14,8 @@ void main() {
     call = MockCall();
     callState = MockCallState();
     when(() => callState.isBackstage).thenReturn(false);
-    when(() => callState.status).thenReturn(CallStatus.idle());
-    when(() => callState.participantCount).thenReturn(3);
+    // The count includes the anonymous viewers.
+    when(() => callState.participantCount).thenReturn(5);
     when(() => callState.anonymousParticipantCount).thenReturn(2);
     when(() => call.state).thenAnswer(
       (_) => MutableStateEmitter<CallState>(callState, sync: true),
@@ -205,23 +205,10 @@ void main() {
       expect(find.text('3'), findsOneWidget);
     });
 
-    testWidgets('does not add anonymous viewers twice once joined', (
+    testWidgets('never shows a negative count of named viewers', (
       tester,
     ) async {
-      // After joining, the participant count already includes them.
-      when(() => callState.status).thenReturn(CallStatus.connected());
-      when(() => callState.participantCount).thenReturn(5);
-
-      await pump(tester, StreamSpectatorsIndicator(call: call));
-
-      expect(find.text('5'), findsOneWidget);
-    });
-
-    testWidgets('leaves anonymous viewers out once joined when asked', (
-      tester,
-    ) async {
-      when(() => callState.status).thenReturn(CallStatus.connected());
-      when(() => callState.participantCount).thenReturn(5);
+      when(() => callState.participantCount).thenReturn(1);
 
       await pump(
         tester,
@@ -231,7 +218,7 @@ void main() {
         ),
       );
 
-      expect(find.text('3'), findsOneWidget);
+      expect(find.text('0'), findsOneWidget);
     });
 
     testWidgets('uses the mobile tokens for gap, text and icon', (

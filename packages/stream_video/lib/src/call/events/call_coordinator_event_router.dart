@@ -102,15 +102,16 @@ class CallCoordinatorEventRouter {
       case StreamCallSessionParticipantCountUpdatedEvent _:
         if (_stateManager.callState.status.isAlreadyJoined) return;
 
-        final totalCount = event.participantsCountByRole.values.fold(
+        final namedCount = event.participantsCountByRole.values.fold(
           0,
           (a, b) => a + b,
         );
+        // The count by role leaves anonymous participants out.
         _stateManager.setParticipantsCount(
-          totalCount: totalCount,
+          totalCount: namedCount + event.anonymousParticipantCount,
           anonymousCount: event.anonymousParticipantCount,
         );
-        if (totalCount == 0) await _onNoParticipantsLeft();
+        if (namedCount == 0) await _onNoParticipantsLeft();
         return;
       case StreamCallMemberAddedEvent _:
         return _stateManager.coordinatorCallMemberAdded(event);

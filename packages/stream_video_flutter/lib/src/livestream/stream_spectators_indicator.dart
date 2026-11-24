@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
@@ -24,15 +26,12 @@ class StreamSpectatorsIndicator extends StatelessWidget {
   /// Overrides the style from [StreamSpectatorsIndicatorTheme].
   final StreamSpectatorsIndicatorStyle? style;
 
-  // Once joined, the participant count already includes the anonymous
-  // viewers; before that, it leaves them out.
-  static int _allViewers(CallState state) => state.status.isAlreadyJoined
-      ? state.participantCount
-      : state.participantCount + state.anonymousParticipantCount;
+  static int _allViewers(CallState state) => state.participantCount;
 
-  static int _namedViewers(CallState state) => state.status.isAlreadyJoined
-      ? state.participantCount - state.anonymousParticipantCount
-      : state.participantCount;
+  static int _namedViewers(CallState state) => math.max(
+    state.participantCount - state.anonymousParticipantCount,
+    0,
+  );
 
   @override
   Widget build(BuildContext context) {
