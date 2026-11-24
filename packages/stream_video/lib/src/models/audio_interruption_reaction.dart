@@ -14,8 +14,10 @@ enum AudioInterruptionReaction {
   /// `StreamVideoOptions.muteAudioWhenInBackground` set turns it back on when
   /// the app comes back.
   ///
-  /// iOS does not always report the end of an interruption, for example after
-  /// the user answered a phone call with Hold & Accept. The microphone then
-  /// stays off until the app turns it on or the call ends.
+  /// On iOS, a call CallKit holds is told the interruption ended whenever
+  /// CallKit activates its audio session again, such as when the call comes
+  /// off hold after a phone call. For a call not reported to CallKit, iOS does
+  /// not always report the end; the microphone then stays off until the app
+  /// turns it on or the call ends.
   muteMicrophone,
 }
