@@ -290,7 +290,7 @@ Future<_BaseCoverage?> _baseCoverage(String base, List<RegExp> ignore) async {
         final commit = await get(
           '/api/v2/github/$owner/repos/$repo/commits/$sha/',
         );
-        if (commit case {'state': != 'complete'} || null) continue;
+        if (commit is! Map || commit['state'] != 'complete') continue;
 
         final report = await get(
           '/api/v2/github/$owner/repos/$repo/report/',
@@ -300,17 +300,18 @@ Future<_BaseCoverage?> _baseCoverage(String base, List<RegExp> ignore) async {
           var lines = 0;
           var hits = 0;
           for (final file in files) {
-            if (file
-                case {
-                  'name': final String name,
-                  'totals': {
-                    'lines': final int fileLines,
-                    'hits': final int fileHits,
-                  },
-                }
-                when !ignore.any((glob) => glob.hasMatch(name))) {
+            if (file case {
+              'name': final String name,
+              'totals': {
+                'lines': final int fileLines,
+                'hits': final int fileHits,
+              },
+            }) {
+              if (ignore.any((glob) => glob.hasMatch(name))) continue;
               lines += fileLines;
               hits += fileHits;
+            } else {
+              stderr.writeln('Skipping a Codecov file entry for $sha: $file');
             }
           }
           if (lines > 0) {
