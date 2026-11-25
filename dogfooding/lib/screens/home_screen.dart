@@ -50,7 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
         await [
           Permission.camera,
           Permission.microphone,
-          if (CurrentPlatform.isAndroid) Permission.phone,
           Permission.notification,
         ].request();
       }();

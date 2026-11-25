@@ -102,23 +102,14 @@ class NativeWebRtcPlatformEvents implements WebRtcPlatformEvents {
       .whereType<AudioInterruption>();
 
   @override
-  Future<void> enableInterruptionEvents({
-    AndroidInterruptionSource androidInterruptionSource =
-        AndroidInterruptionSource.audioFocusAndTelephony,
-  }) async {
+  Future<void> enableInterruptionEvents() async {
     if (!Platform.isAndroid && !Platform.isIOS) {
       throw UnimplementedError(
         'Audio interruptions are only reported on Android and iOS',
       );
     }
 
-    await WebRTC.invokeMethod(
-      'handleCallInterruptionCallbacks',
-      <String, dynamic>{
-        if (Platform.isAndroid)
-          'androidInterruptionSource': androidInterruptionSource.name,
-      },
-    );
+    await WebRTC.invokeMethod('handleCallInterruptionCallbacks');
   }
 }
 

@@ -274,8 +274,6 @@ void main() {
         await controller.handleCallInterruptionCallbacks(
           onInterruptionStart: () => calls.add('start'),
           onInterruptionEnd: () => calls.add('end'),
-          androidInterruptionSource:
-              rtc.AndroidInterruptionSource.telephonyOnly,
         );
 
         events.interruptions
@@ -283,9 +281,7 @@ void main() {
           ..add(rtc.AudioInterruption.ended);
         await pumpEventQueue();
 
-        expect(events.enabledWith, [
-          rtc.AndroidInterruptionSource.telephonyOnly,
-        ]);
+        expect(events.enableCount, 1);
         expect(calls, ['start', 'end']);
       });
 
@@ -508,7 +504,9 @@ class _FakePlatformEvents implements rtc.WebRtcPlatformEvents {
   // Closed in the tests' tearDown.
   // ignore: close_sinks
   final interruptions = StreamController<rtc.AudioInterruption>.broadcast();
-  final enabledWith = <rtc.AndroidInterruptionSource>[];
+
+  /// How many times [enableInterruptionEvents] ran.
+  int enableCount = 0;
 
   /// When not empty, each enable waits for the next of these.
   final enableGates = <Completer<void>>[];
@@ -532,11 +530,8 @@ class _FakePlatformEvents implements rtc.WebRtcPlatformEvents {
   }, isBroadcast: true);
 
   @override
-  Future<void> enableInterruptionEvents({
-    rtc.AndroidInterruptionSource androidInterruptionSource =
-        rtc.AndroidInterruptionSource.audioFocusAndTelephony,
-  }) async {
-    enabledWith.add(androidInterruptionSource);
+  Future<void> enableInterruptionEvents() async {
+    enableCount++;
     if (enableGates.isNotEmpty) await enableGates.removeAt(0).future;
     if (enableError case final error?) throw error;
   }

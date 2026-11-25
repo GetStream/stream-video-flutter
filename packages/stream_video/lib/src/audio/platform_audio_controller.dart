@@ -174,8 +174,7 @@ class PlatformAudioController {
 
   /// Calls [onInterruptionStart] and [onInterruptionEnd] when the platform
   /// reports an audio interruption. A later call replaces these callbacks; if
-  /// it throws, the earlier ones stay in place. [androidInterruptionSource]
-  /// picks what counts as an interruption on Android.
+  /// it throws, the earlier ones stay in place.
   ///
   /// On iOS, interruptions can occur due to:
   /// - Incoming phone calls
@@ -183,13 +182,16 @@ class PlatformAudioController {
   /// - Alarm or timer sounds
   /// - Audio from other apps taking over (e.g., voice memo, navigation)
   ///
-  /// On Android, interruption sources depend on the [androidInterruptionSource]:
-  /// - With audioFocus:
-  ///   - Other media apps interrupting (e.g., Spotify)
-  ///   - Assistant voice prompts (e.g., Google Assistant)
-  ///   - Alarms and notifications
-  /// - With telephony:
-  ///   - Phone calls (requires READ_PHONE_STATE permission)
+  /// On Android, an interruption is the call losing the audio focus it holds
+  /// while its audio runs, for example to:
+  /// - Phone calls, once they ring audibly or are answered
+  /// - Other media apps (e.g., Spotify)
+  /// - Assistant voice prompts (e.g., Google Assistant)
+  /// - Alarms and notifications
+  ///
+  /// It ends when the focus comes back or the call's audio stops. With
+  /// `manageAudioFocus` off in the Android audio configuration the call holds
+  /// no focus, so no interruption is reported.
   ///
   /// This method allows you to pause the call, mute the audio, or perform any other
   /// necessary actions when interruptions occur.
@@ -199,8 +201,6 @@ class PlatformAudioController {
   Future<void> handleCallInterruptionCallbacks({
     void Function()? onInterruptionStart,
     void Function()? onInterruptionEnd,
-    rtc.AndroidInterruptionSource androidInterruptionSource =
-        rtc.AndroidInterruptionSource.audioFocusAndTelephony,
     @Deprecated('Has no effect; audio focus no longer needs it. Remove it.')
     rtc.AndroidAudioAttributesUsageType? androidAudioAttributesUsageType,
     @Deprecated('Has no effect; audio focus no longer needs it. Remove it.')
@@ -223,9 +223,7 @@ class PlatformAudioController {
     _interruptionSubscription = subscription;
 
     try {
-      await platformEvents.enableInterruptionEvents(
-        androidInterruptionSource: androidInterruptionSource,
-      );
+      await platformEvents.enableInterruptionEvents();
     } catch (_) {
       await _dropFailedInterruptionCallbacks(subscription);
       rethrow;

@@ -1,7 +1,5 @@
 import 'package:meta/meta.dart';
 
-import 'third_party/flutter_webrtc/android_audio_configuration.dart';
-
 /// The audio output route the platform switched to.
 @immutable
 class AudioRoute {
@@ -162,11 +160,8 @@ abstract class WebRtcPlatformEvents {
   /// Call it once. On Android, calling it again while an interruption is in
   /// progress drops that interruption, and its end is never reported.
   ///
-  /// On Android, [androidInterruptionSource] picks what counts as an
-  /// interruption. Throws [UnimplementedError] on platforms other than Android
-  /// and iOS.
-  Future<void> enableInterruptionEvents({
-    AndroidInterruptionSource androidInterruptionSource =
-        AndroidInterruptionSource.audioFocusAndTelephony,
-  });
+  /// On Android, an interruption is the call losing the audio focus it holds
+  /// while its audio runs; on iOS, an audio session interruption. Throws
+  /// [UnimplementedError] on platforms other than Android and iOS.
+  Future<void> enableInterruptionEvents();
 }

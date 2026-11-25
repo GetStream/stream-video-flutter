@@ -775,30 +775,12 @@ public class MethodCallHandlerImpl implements MethodCallHandler, StateProvider {
         break;
       }
       case "handleCallInterruptionCallbacks": {
-        String interruptionSource = call.argument("androidInterruptionSource");
-        AudioFocusManager.InterruptionSource source;
-
-        switch (interruptionSource) {
-          case "audioFocusOnly":
-            source = AudioFocusManager.InterruptionSource.AUDIO_FOCUS_ONLY;
-            break;
-          case "telephonyOnly":
-            source = AudioFocusManager.InterruptionSource.TELEPHONY_ONLY;
-            break;
-          case "audioFocusAndTelephony":
-            source = AudioFocusManager.InterruptionSource.AUDIO_FOCUS_AND_TELEPHONY;
-            break;
-          default:
-            source = AudioFocusManager.InterruptionSource.AUDIO_FOCUS_AND_TELEPHONY;
-            break;
-        }
-
         if (audioFocusManager != null) {
           audioFocusManager.setAudioFocusChangeListener(null);
           audioFocusManager = null;
         }
 
-        audioFocusManager = new AudioFocusManager(context, source);
+        audioFocusManager = new AudioFocusManager();
 
         audioFocusManager.setAudioFocusChangeListener(new AudioFocusManager.AudioFocusChangeListener() {
           @Override
