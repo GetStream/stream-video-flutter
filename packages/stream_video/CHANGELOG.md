@@ -168,7 +168,7 @@
 
 ### 🐞 Fixed
 
-- [iOS] A screen share broadcast started outside the app, such as from Control Center, is now shared.
+- [iOS] A screen share broadcast started outside the app, such as from Control Center, is now shared in the active call.
 - [iOS] A screen share broadcast that the call cannot share now ends with an error instead of running on.
 - [iOS] When the user chose the speaker or the receiver and the system moves audio between the two on its own, such as after a CallKit hold, the chosen output is put back instead of being replaced by the system's choice. A route to any other device, such as Bluetooth or AirPlay, is followed, and so is the system's route when the chosen output cannot be put back.
 - A muted microphone or camera is announced to the SFU as muted.

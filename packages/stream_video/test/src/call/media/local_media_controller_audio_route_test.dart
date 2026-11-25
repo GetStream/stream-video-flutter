@@ -50,6 +50,7 @@ void main() {
       muteAudioWhenInBackground: () => false,
       onMicrophoneMuted: (_) async {},
       onAudioOutputDeviceSet: (_) async {},
+      defaultBroadcastTarget: () => null,
       logger: taggedLogger(tag: 'test'),
     );
   });

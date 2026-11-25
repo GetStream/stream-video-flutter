@@ -35,6 +35,7 @@ import '../call_connect_options.dart';
 import '../session/call_session.dart';
 import '../state/call_state_notifier.dart';
 import '../stats/sfu_stats_reporter.dart';
+import 'ios_broadcast_owner.dart';
 
 /// Owns a call's connect options and its local media: the camera,
 /// microphone and screen share, and the audio and video devices.
@@ -51,6 +52,7 @@ class LocalMediaController {
     required this._muteAudioWhenInBackground,
     required this._onMicrophoneMuted,
     required this._onAudioOutputDeviceSet,
+    required this._defaultBroadcastTarget,
     required this._logger,
   });
 
@@ -67,6 +69,10 @@ class LocalMediaController {
   /// Mirrors an output WebRTC now uses into the system call, whose route can
   /// win over WebRTC's. Not awaited.
   final Future<void> Function(RtcMediaDevice device) _onAudioOutputDeviceSet;
+
+  /// The controller of the call that shares an iOS broadcast no call
+  /// requested: the client's active call, or none.
+  final LocalMediaController? Function() _defaultBroadcastTarget;
   final TaggedLogger _logger;
 
   final _multitaskingCameraLock = Lock();
@@ -651,6 +657,7 @@ class LocalMediaController {
       switch (event) {
         case ScreenSharingStoppedEvent _:
           if (CurrentPlatform.isIos) {
+            IosBroadcastOwner.instance.onStopped();
             // On iOS only one broadcast extension can be active at a time
             setScreenShareEnabled(enabled: false);
           } else {
@@ -1128,7 +1135,7 @@ class LocalMediaController {
 
     final updatedConstraints = constraints ?? _defaultScreenShareConstraints();
 
-    if (!enabled) _broadcastConstraints = null;
+    if (!enabled) releaseBroadcastRequest();
 
     if (enabled &&
         ScreenShareSource.forPlatform().usesBroadcastExtension(
@@ -1181,12 +1188,13 @@ class LocalMediaController {
     ScreenShareConstraints constraints,
   ) async {
     _broadcastConstraints = constraints;
+    IosBroadcastOwner.instance.request(this);
     try {
       await _rtcMediaDeviceNotifier().presentiOSBroadcastPicker();
       return const Result.success(none);
     } catch (error, stackTrace) {
       _logger.e(() => '[requestBroadcast] failed to show the picker: $error');
-      _broadcastConstraints = null;
+      releaseBroadcastRequest();
       return failureWithError(
         'Failed to show the broadcast picker',
         cause: error,
@@ -1195,12 +1203,34 @@ class LocalMediaController {
     }
   }
 
+  /// Forgets this call's request for an iOS broadcast, so a broadcast that
+  /// starts later is not shared with its constraints, and another call can
+  /// take a broadcast nobody requested.
+  void releaseBroadcastRequest() {
+    _broadcastConstraints = null;
+    IosBroadcastOwner.instance.release(this);
+  }
+
+  /// Whether this call shares the iOS broadcast that started: the call that
+  /// requested it, or with no request, the client's active call.
+  bool _ownsBroadcast() {
+    final owner = IosBroadcastOwner.instance;
+    if (owner.hasRequest) return owner.isRequestedBy(this);
+    return identical(_defaultBroadcastTarget(), this);
+  }
+
   /// Shares the screen once the iOS broadcast extension has started, with
   /// the constraints of the last request or the default broadcast ones.
   ///
-  /// Skipped while the call has no session, while a screen share is live and
-  /// without the screenshare permission.
+  /// Skipped in a call that does not own the broadcast, while the call has no
+  /// session, while a screen share is live and without the screenshare
+  /// permission.
   Future<void> _onBroadcastStarted() async {
+    if (!_ownsBroadcast()) {
+      _logger.v(() => '[onBroadcastStarted] shared by another call');
+      return;
+    }
+
     final session = _session();
     if (session == null) {
       _logger.v(() => '[onBroadcastStarted] no session');

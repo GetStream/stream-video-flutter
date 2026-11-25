@@ -316,7 +316,7 @@ class Call {
 
   /// Owns the connect options and the local camera, microphone and screen
   /// share.
-  late final _media = LocalMediaController(
+  late final LocalMediaController _media = LocalMediaController(
     stateManager: _stateManager,
     session: () => _session,
     sfuStatsReporter: () => _sfuStatsReporter,
@@ -329,6 +329,10 @@ class Call {
         _host.pushNotificationManager?.setCallMutedByCid(callCid.value, muted),
     onAudioOutputDeviceSet: (device) async => _host.pushNotificationManager
         ?.setCallAudioOutputDeviceByCid(callCid.value, device),
+    defaultBroadcastTarget: () {
+      final calls = _host.state.activeCalls.value;
+      return calls.length == 1 ? calls.single._media : null;
+    },
     logger: _logger,
   );
 

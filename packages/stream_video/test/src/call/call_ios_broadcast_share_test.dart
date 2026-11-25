@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/call/media/ios_broadcast_owner.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
@@ -84,9 +85,20 @@ void main() {
     ),
   );
 
+  MutableStateEmitter<List<Call>> activeCalls() =>
+      harness.streamVideo.state.activeCalls as MutableStateEmitter<List<Call>>;
+
   setUp(() {
     overrideWebRtcCapabilities(platform: PlatformType.ios);
+    IosBroadcastOwner.instance.reset();
     harness = ConnectionHarness();
+    final clientState = harness.streamVideo.state;
+    when(() => clientState.setActiveCall(any())).thenAnswer((
+      invocation,
+    ) async {
+      final call = invocation.positionalArguments.first as Call?;
+      if (call != null) activeCalls().value = [...activeCalls().value, call];
+    });
     notifier = MockRtcMediaDeviceNotifier();
     audio = _BroadcastEventsController();
     PlatformAudioController.instance = audio;
@@ -205,6 +217,61 @@ void main() {
       expect(sharing(call), isTrue);
     },
   );
+
+  group('with more than one call', () {
+    test('a broadcast another call requested is not shared', () async {
+      final other = harness.buildCall(rtcMediaDeviceNotifier: notifier);
+      await other.setScreenShareEnabled(enabled: true, constraints: _requested);
+      final call = await joinedCall();
+
+      await emit(ScreenSharingStartedEvent());
+
+      verifyNoScreenShare();
+      expect(sharing(call), isFalse);
+    });
+
+    test('a broadcast this call requested is shared even when another call '
+        'is active', () async {
+      final other = harness.buildCall(rtcMediaDeviceNotifier: notifier);
+      final call = await joinedCall();
+      activeCalls().value = [other];
+      await call.setScreenShareEnabled(enabled: true, constraints: _requested);
+
+      await emit(ScreenSharingStartedEvent());
+
+      expect(screenShareCalls(), [(true, _requested)]);
+      expect(sharing(call), isTrue);
+    });
+
+    test(
+      'a broadcast nobody requested is only shared in the active call',
+      () async {
+        final other = harness.buildCall(rtcMediaDeviceNotifier: notifier);
+        final call = await joinedCall();
+        activeCalls().value = [other];
+
+        await emit(ScreenSharingStartedEvent());
+
+        verifyNoScreenShare();
+        expect(sharing(call), isFalse);
+      },
+    );
+
+    test(
+      'a broadcast nobody requested is not shared while several calls are '
+      'active',
+      () async {
+        final other = harness.buildCall(rtcMediaDeviceNotifier: notifier);
+        final call = await joinedCall();
+        activeCalls().value = [other, call];
+
+        await emit(ScreenSharingStartedEvent());
+
+        verifyNoScreenShare();
+        expect(sharing(call), isFalse);
+      },
+    );
+  });
 
   test('a failed share leaves the share off and stops the broadcast', () async {
     final call = await joinedCall();
