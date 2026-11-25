@@ -1,38 +1,45 @@
 import 'dart:async';
 
+import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
-/// A microphone capture whose loudness can be sampled.
-@internal
-abstract interface class AudioLevelSource {
-  /// Opens a capture of the microphone [deviceId], or the default microphone
-  /// when it is null.
-  Future<void> open({String? deviceId});
+final _logger = Logger('SpeechActivityDetector');
 
+/// Opens a capture of the microphone [deviceId], or the default microphone
+/// when it is null, whose loudness can be sampled. Releases whatever it opened
+/// before throwing.
+@internal
+typedef AudioLevelSource =
+    Future<AudioLevelCapture> Function({String? deviceId});
+
+/// A microphone capture opened by an [AudioLevelSource].
+@internal
+abstract interface class AudioLevelCapture {
   /// The loudest frequency bin of the capture right now, from 0 to 255.
   int sample();
 
-  /// Releases the capture. Does nothing when none is open.
+  /// Releases the capture.
   Future<void> close();
 }
 
-/// Detects speech by sampling an [AudioLevelSource] on a timer.
+// ignore: subtype_of_sealed_class, the plugin implements its own contract
+/// A [SpeechActivityDetector] that samples an [AudioLevelCapture] on a timer.
 ///
 /// Reports each transition once on [activity]: [SpeechActivity.started] on the
 /// first sample at or above [audioLevelThreshold], [SpeechActivity.ended] on
-/// the first one below it.
+/// the first one below it. A sample that throws stops the sampling.
 @internal
-class SpeechActivityDetector {
-  SpeechActivityDetector(
-    this._source, {
+class SampledSpeechActivityDetector implements SpeechActivityDetector {
+  SampledSpeechActivityDetector(
+    this._openCapture, {
     this.detectionInterval = const Duration(milliseconds: 500),
     this.audioLevelThreshold = 150,
   });
 
-  final AudioLevelSource _source;
+  final AudioLevelSource _openCapture;
 
-  /// How often the source is sampled.
+  /// How often the capture is sampled.
   final Duration detectionInterval;
 
   /// A sample at or above this value (0 to 255) counts as speech.
@@ -40,52 +47,68 @@ class SpeechActivityDetector {
 
   final _activity = StreamController<SpeechActivity>.broadcast();
 
-  /// The speech transitions, while detection runs.
+  @override
   Stream<SpeechActivity> get activity => _activity.stream;
 
   Timer? _detectionTimer;
+  AudioLevelCapture? _capture;
   bool _isSpeaking = false;
   bool _started = false;
-  bool _opened = false;
 
-  /// Bumped on every [stop], so a [start] still opening the source can tell it
-  /// was cancelled.
+  /// Bumped on every [stop], so a [start] still opening its capture can tell
+  /// it was cancelled.
   int _generation = 0;
 
-  /// Opens the source on [deviceId] and starts sampling it. Does nothing while
-  /// detection runs. Throws when the source cannot be opened.
+  @override
   Future<void> start({String? deviceId}) async {
     if (_started) return;
     _started = true;
     final generation = _generation;
 
+    final AudioLevelCapture capture;
     try {
-      await _source.open(deviceId: deviceId);
+      capture = await _openCapture(deviceId: deviceId);
     } catch (_) {
       if (generation == _generation) _started = false;
       rethrow;
     }
 
     if (generation != _generation) {
-      // Stopped while the source was opening.
-      await _source.close();
+      // Stopped while the capture was opening.
+      await capture.close();
       return;
     }
 
-    _opened = true;
+    _capture = capture;
     _detectionTimer = Timer.periodic(detectionInterval, (_) => _sample());
   }
 
   void _sample() {
-    final speaking = _source.sample() >= audioLevelThreshold;
+    final capture = _capture;
+    if (capture == null) return;
+
+    final int level;
+    try {
+      level = capture.sample();
+    } catch (e) {
+      _logger.warning('Speech detection stopped sampling: $e');
+      _detectionTimer?.cancel();
+      _detectionTimer = null;
+      _setSpeaking(false);
+      return;
+    }
+
+    _setSpeaking(level >= audioLevelThreshold);
+  }
+
+  void _setSpeaking(bool speaking) {
     if (speaking == _isSpeaking) return;
 
     _isSpeaking = speaking;
     _activity.add(speaking ? SpeechActivity.started : SpeechActivity.ended);
   }
 
-  /// Stops sampling and closes the source. Reports [SpeechActivity.ended] when
-  /// speech was ongoing.
+  @override
   Future<void> stop() async {
     if (!_started) return;
     _started = false;
@@ -93,13 +116,10 @@ class SpeechActivityDetector {
 
     _detectionTimer?.cancel();
     _detectionTimer = null;
-    if (_isSpeaking) {
-      _isSpeaking = false;
-      _activity.add(SpeechActivity.ended);
-    }
+    _setSpeaking(false);
 
-    if (!_opened) return;
-    _opened = false;
-    await _source.close();
+    final capture = _capture;
+    _capture = null;
+    await capture?.close();
   }
 }

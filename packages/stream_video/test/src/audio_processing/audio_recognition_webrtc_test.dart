@@ -221,6 +221,19 @@ void main() {
       expect(platformEvents.stopCount, 1);
     });
 
+    test('every recognition runs a detector of its own', () async {
+      final first = AudioRecognitionWebRTC(deviceIdProvider: () => 'mic-1');
+      final second = AudioRecognitionWebRTC(deviceIdProvider: () => 'mic-2');
+
+      await first.start(onSoundStateChanged: (_) {});
+      await second.start(onSoundStateChanged: (_) {});
+      await first.stop();
+
+      expect(platformEvents.started, ['mic-1', 'mic-2']);
+      expect(platformEvents.detectors.map((d) => d.running), [false, true]);
+      await second.dispose();
+    });
+
     test('stop() before start() does not stop detection', () async {
       final sut = AudioRecognitionWebRTC();
 
@@ -262,17 +275,18 @@ class _FakePlatformEvents implements rtc.WebRtcPlatformEvents {
   /// When set, starting detection fails with it.
   Error? startError;
 
-  @override
-  Stream<rtc.SpeechActivity> get onSpeechActivity => speech.stream;
+  /// The detectors created, in order.
+  final detectors = <_FakeDetector>[];
 
   @override
-  Future<void> startSpeechActivityDetection({String? deviceId}) async {
-    started.add(deviceId);
-    if (startError case final error?) throw error;
+  Stream<rtc.SpeechActivity> get onSpeechActivity => const Stream.empty();
+
+  @override
+  rtc.SpeechActivityDetector createSpeechActivityDetector() {
+    final detector = _FakeDetector(this);
+    detectors.add(detector);
+    return detector;
   }
-
-  @override
-  Future<void> stopSpeechActivityDetection() async => stopCount++;
 
   @override
   Stream<rtc.AudioRoute> get onAudioRouteChanged => const Stream.empty();
@@ -293,4 +307,28 @@ class _FakePlatformEvents implements rtc.WebRtcPlatformEvents {
 
   @override
   Future<void> enableInterruptionEvents() async {}
+}
+
+// ignore: subtype_of_sealed_class, a fake for the tests
+class _FakeDetector implements rtc.SpeechActivityDetector {
+  _FakeDetector(this._events);
+
+  final _FakePlatformEvents _events;
+  bool running = false;
+
+  @override
+  Stream<rtc.SpeechActivity> get activity => _events.speech.stream;
+
+  @override
+  Future<void> start({String? deviceId}) async {
+    _events.started.add(deviceId);
+    if (_events.startError case final error?) throw error;
+    running = true;
+  }
+
+  @override
+  Future<void> stop() async {
+    _events.stopCount++;
+    running = false;
+  }
 }

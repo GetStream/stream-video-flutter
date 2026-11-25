@@ -167,16 +167,12 @@ class PlatformAudioController {
         },
       );
 
-  /// Starts reporting speech on [speechActivityStream] in the browser, from a
-  /// capture of the microphone [deviceId] (the default one when null). Does
-  /// nothing on other platforms, which report speech without it.
-  Future<void> startSpeechActivityDetection({String? deviceId}) {
-    return platformEvents.startSpeechActivityDetection(deviceId: deviceId);
-  }
-
-  /// Stops the detection [startSpeechActivityDetection] started.
-  Future<void> stopSpeechActivityDetection() {
-    return platformEvents.stopSpeechActivityDetection();
+  /// Creates a detector of the local user's speech while the microphone is
+  /// muted, independent of every other detector. Every platform, the browser
+  /// included.
+  @internal
+  rtc.SpeechActivityDetector createSpeechActivityDetector() {
+    return platformEvents.createSpeechActivityDetector();
   }
 
   /// The events the WebRTC plugin reports. Replaceable in tests, because the

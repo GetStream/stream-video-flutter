@@ -1,10 +1,11 @@
 import 'dart:async';
 
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
+
 import '../../stream_video.dart';
 
-/// [AudioRecognition] implementation backed by the speech-activity events of
-/// the WebRTC plugin (delivered through
-/// [PlatformAudioController.speechActivityStream]).
+/// [AudioRecognition] implementation backed by a speech activity detector of
+/// its own, from [PlatformAudioController.createSpeechActivityDetector].
 ///
 /// Android, iOS and macOS report speech from the audio device module. The
 /// browser reports it from a microphone capture of its own, which runs between
@@ -21,9 +22,9 @@ class AudioRecognitionWebRTC implements AudioRecognition {
   /// browser's default microphone when it is null, or returns null.
   final String? Function()? deviceIdProvider;
 
-  PlatformAudioController get _controller => PlatformAudioController.instance;
+  rtc.SpeechActivityDetector? _detector;
 
-  StreamSubscription<SpeechActivityEvent>? _subscription;
+  StreamSubscription<rtc.SpeechActivity>? _subscription;
   Timer? _silenceTimer;
   bool _isSpeaking = false;
 
@@ -33,11 +34,12 @@ class AudioRecognitionWebRTC implements AudioRecognition {
   }) async {
     if (_subscription != null) return;
 
-    final controller = _controller;
-    _subscription = controller.speechActivityStream.listen(
-      (event) {
-        switch (event) {
-          case SpeechActivityStarted():
+    final detector = _detector ??= PlatformAudioController.instance
+        .createSpeechActivityDetector();
+    _subscription = detector.activity.listen(
+      (activity) {
+        switch (activity) {
+          case rtc.SpeechActivity.started:
             if (!_isSpeaking) {
               _isSpeaking = true;
               onSoundStateChanged(
@@ -59,7 +61,7 @@ class AudioRecognitionWebRTC implements AudioRecognition {
               _silenceTimer = null;
             }
 
-          case SpeechActivityEnded():
+          case rtc.SpeechActivity.ended:
             // Native side may emit `ended` immediately on a brief pause.
             // Debounce to avoid flapping consumers.
             _armSilence(config.speechTimeout, onSoundStateChanged);
@@ -68,9 +70,7 @@ class AudioRecognitionWebRTC implements AudioRecognition {
     );
 
     try {
-      await controller.startSpeechActivityDetection(
-        deviceId: deviceIdProvider?.call(),
-      );
+      await detector.start(deviceId: deviceIdProvider?.call());
     } catch (_) {
       await stop();
       rethrow;
@@ -97,7 +97,7 @@ class AudioRecognitionWebRTC implements AudioRecognition {
     _subscription = null;
     _isSpeaking = false;
     await subscription.cancel();
-    await _controller.stopSpeechActivityDetection();
+    await _detector?.stop();
   }
 
   @override

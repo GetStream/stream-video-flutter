@@ -5,31 +5,24 @@ import 'speech_activity_detector.dart';
 import 'web_audio_level_source.dart';
 
 // ignore: subtype_of_sealed_class, the plugin implements its own contract
-/// The [WebRtcPlatformEvents] of the browser: speech activity while detection
-/// runs; every other stream is empty.
+/// The [WebRtcPlatformEvents] of the browser: speech detectors on microphone
+/// captures of their own; every stream is empty.
 @internal
 class DartWebRtcPlatformEvents implements WebRtcPlatformEvents {
   DartWebRtcPlatformEvents._();
 
   static final DartWebRtcPlatformEvents instance = DartWebRtcPlatformEvents._();
 
-  late final _speechDetector = SpeechActivityDetector(
-    WebAudioLevelSource(),
-  );
-
   @override
   Stream<AudioRoute> get onAudioRouteChanged => const Stream.empty();
 
   @override
-  Stream<SpeechActivity> get onSpeechActivity => _speechDetector.activity;
+  Stream<SpeechActivity> get onSpeechActivity => const Stream.empty();
 
   @override
-  Future<void> startSpeechActivityDetection({String? deviceId}) {
-    return _speechDetector.start(deviceId: deviceId);
+  SpeechActivityDetector createSpeechActivityDetector() {
+    return SampledSpeechActivityDetector(openWebAudioLevelCapture);
   }
-
-  @override
-  Future<void> stopSpeechActivityDetection() => _speechDetector.stop();
 
   @override
   Stream<AudioProcessingState> get onAudioProcessingStateChanged =>

@@ -10,75 +10,74 @@ import 'speech_activity_detector.dart';
 
 final _logger = Logger('WebAudioLevelSource');
 
-/// An [AudioLevelSource] on a microphone capture of its own, sampled through a
-/// Web Audio `AnalyserNode`.
+/// An [AudioLevelSource] that opens a microphone capture of its own, sampled
+/// through a Web Audio `AnalyserNode` with an FFT size of [fftSize].
+@internal
+Future<AudioLevelCapture> openWebAudioLevelCapture({
+  String? deviceId,
+  int fftSize = 128,
+}) async {
+  final stream = await web.window.navigator.mediaDevices
+      .getUserMedia(
+        web.MediaStreamConstraints(
+          audio: deviceId == null
+              ? true.toJS
+              : <String, Object>{
+                  'deviceId': {'exact': deviceId},
+                }.jsify()!,
+        ),
+      )
+      .toDart;
+
+  web.AudioContext? audioContext;
+  try {
+    audioContext = web.AudioContext();
+    final source = audioContext.createMediaStreamSource(stream);
+    final analyser = audioContext.createAnalyser()..fftSize = fftSize;
+    source.connect(analyser);
+    return _WebAudioLevelCapture(stream, audioContext, analyser);
+  } catch (_) {
+    await _release(stream, audioContext);
+    rethrow;
+  }
+}
+
+/// A microphone capture sampled through an `AnalyserNode`.
 ///
 /// While open it holds the capture, so the browser's microphone indicator
 /// stays on.
-@internal
-class WebAudioLevelSource implements AudioLevelSource {
-  WebAudioLevelSource({this.fftSize = 128});
+class _WebAudioLevelCapture implements AudioLevelCapture {
+  _WebAudioLevelCapture(this._stream, this._audioContext, this._analyser)
+    : _frequencyData = Uint8List(_analyser.frequencyBinCount).toJS {
+    // Detection can start outside a user gesture (a moderator mute, or a
+    // participant who joined muted), so autoplay policies can hand back a
+    // suspended context, and sampling one only ever yields silence.
+    _resumeIfSuspended();
+  }
 
-  /// FFT size of the analyser; it samples half as many frequency bins.
-  final int fftSize;
-
-  web.MediaStream? _stream;
-  web.AudioContext? _audioContext;
-  web.AnalyserNode? _analyser;
-  JSUint8Array? _frequencyData;
+  final web.MediaStream _stream;
+  final web.AudioContext _audioContext;
+  final web.AnalyserNode _analyser;
+  final JSUint8Array _frequencyData;
+  bool _closed = false;
 
   /// Guards against queuing a fresh `resume()` on every sample while an
   /// earlier one is still pending.
   bool _resumeInFlight = false;
 
   @override
-  Future<void> open({String? deviceId}) async {
-    final stream = await web.window.navigator.mediaDevices
-        .getUserMedia(
-          web.MediaStreamConstraints(
-            audio: deviceId == null
-                ? true.toJS
-                : <String, Object>{
-                    'deviceId': {'exact': deviceId},
-                  }.jsify()!,
-          ),
-        )
-        .toDart;
-
-    _stream = stream;
-    final audioContext = web.AudioContext();
-    _audioContext = audioContext;
-
-    final source = audioContext.createMediaStreamSource(stream);
-    final analyser = audioContext.createAnalyser()..fftSize = fftSize;
-    source.connect(analyser);
-    _analyser = analyser;
-    _frequencyData = Uint8List(analyser.frequencyBinCount).toJS;
-
-    // Detection can start outside a user gesture (a moderator mute, or a
-    // participant who joined muted), so autoplay policies can hand back a
-    // suspended context, and sampling one only ever yields silence.
-    _resumeIfSuspended(audioContext);
-  }
-
-  @override
   int sample() {
-    final audioContext = _audioContext;
-    final analyser = _analyser;
-    final frequencyData = _frequencyData;
-    if (audioContext == null || analyser == null || frequencyData == null) {
-      return 0;
-    }
+    if (_closed) return 0;
 
     // Re-checked on every sample: the browser suspends contexts on its own
     // (page backgrounded, audio interruption), and a context that goes back
     // to suspended would otherwise read as permanent silence.
-    _resumeIfSuspended(audioContext);
+    _resumeIfSuspended();
 
-    analyser.getByteFrequencyData(frequencyData);
+    _analyser.getByteFrequencyData(_frequencyData);
 
     var maxByte = 0;
-    for (final value in frequencyData.toDart) {
+    for (final value in _frequencyData.toDart) {
       if (value > maxByte) maxByte = value;
     }
     return maxByte;
@@ -89,17 +88,17 @@ class WebAudioLevelSource implements AudioLevelSource {
   /// Never awaited: a context blocked by the autoplay policy leaves
   /// `resume()`'s promise pending until the document gets a user gesture.
   /// Left pending, the same promise resumes detection once a gesture arrives.
-  void _resumeIfSuspended(web.AudioContext audioContext) {
+  void _resumeIfSuspended() {
     if (_resumeInFlight) return;
-    if (audioContext.state != 'suspended') return;
+    if (_audioContext.state != 'suspended') return;
 
     _resumeInFlight = true;
-    _resume(audioContext).ignore();
+    _resume().ignore();
   }
 
-  Future<void> _resume(web.AudioContext audioContext) async {
+  Future<void> _resume() async {
     try {
-      await audioContext.resume().toDart;
+      await _audioContext.resume().toDart;
     } catch (e) {
       _logger.warning('Failed to resume audio context: $e');
     } finally {
@@ -109,26 +108,25 @@ class WebAudioLevelSource implements AudioLevelSource {
 
   @override
   Future<void> close() async {
-    _resumeInFlight = false;
-    _analyser = null;
-    _frequencyData = null;
+    if (_closed) return;
+    _closed = true;
+    await _release(_stream, _audioContext);
+  }
+}
 
-    final audioContext = _audioContext;
-    _audioContext = null;
-    if (audioContext != null) {
-      try {
-        await audioContext.close().toDart;
-      } catch (e) {
-        _logger.warning('Failed to close audio context: $e');
-      }
-    }
+/// Closes [audioContext] and stops the tracks of [stream].
+Future<void> _release(
+  web.MediaStream stream,
+  web.AudioContext? audioContext,
+) async {
+  for (final track in stream.getTracks().toDart) {
+    track.stop();
+  }
 
-    final stream = _stream;
-    _stream = null;
-    if (stream != null) {
-      for (final track in stream.getTracks().toDart) {
-        track.stop();
-      }
-    }
+  if (audioContext == null) return;
+  try {
+    await audioContext.close().toDart;
+  } catch (e) {
+    _logger.warning('Failed to close audio context: $e');
   }
 }
