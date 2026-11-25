@@ -187,7 +187,12 @@ class Helper {
   static Future<void> clearAndroidCommunicationDevice() =>
       WebRTC.invokeMethod('clearAndroidCommunicationDevice');
 
-  /// Force Android to re-request audio focus after a loss.
+  /// Requests Android audio focus again for the call's audio after a loss.
+  ///
+  /// Does nothing while no call's audio runs or audio focus is not managed.
+  /// The request is made asynchronously and its outcome is not returned; a
+  /// granted request ends the interruption reported on
+  /// `platformEvents.onInterruption`.
   static Future<void> regainAndroidAudioFocus() async {
     if (WebRTC.platformIsAndroid) {
       return WebRTC.invokeMethod('regainAndroidAudioFocus');

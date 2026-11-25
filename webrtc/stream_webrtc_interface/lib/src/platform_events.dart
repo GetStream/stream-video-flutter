@@ -159,6 +159,9 @@ abstract class WebRtcPlatformEvents {
 
   /// Starts reporting audio interruptions on [onInterruption].
   ///
+  /// Call it once. On Android, calling it again while an interruption is in
+  /// progress drops that interruption, and its end is never reported.
+  ///
   /// On Android, [androidInterruptionSource] picks what counts as an
   /// interruption. Throws [UnimplementedError] on platforms other than Android
   /// and iOS.

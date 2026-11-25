@@ -28,8 +28,7 @@ public class AudioFocusManager {
     private PhoneStateListener phoneStateListener;
     private TelephonyCallback telephonyCallback;
 
-    private AudioFocusChangeListener focusChangeListener;
-    private volatile boolean interruptionActive = false;
+    private final AudioInterruptionState interruptionState = new AudioInterruptionState();
 
     private final AudioManager.OnAudioFocusChangeListener audioSwitchFocusListener = focusChange -> {
         switch (focusChange) {
@@ -73,21 +72,34 @@ public class AudioFocusManager {
     }
 
     public void setAudioFocusChangeListener(AudioFocusChangeListener listener) {
-        this.focusChangeListener = listener;
-
         if (listener != null) {
+            interruptionState.setListener(new AudioInterruptionState.Listener() {
+                @Override
+                public void onInterruptionStart() {
+                    listener.onInterruptionStart();
+                }
+
+                @Override
+                public void onInterruptionEnd() {
+                    listener.onInterruptionEnd();
+                }
+            });
             startMonitoring();
         } else {
             stopMonitoring();
+            interruptionState.setListener(null);
         }
     }
 
-    public void startMonitoring() {
-        interruptionActive = false;
+    /**
+     * Observes the audio focus WebRTC holds while a call's audio runs, and the call state when
+     * asked to. Requests no focus itself: an app that is in no call holds none.
+     */
+    private void startMonitoring() {
         if (monitorAudioFocus) {
             if (AudioSwitchManager.instance != null) {
                 AudioSwitchManager.instance.setAudioFocusChangeListener(audioSwitchFocusListener);
-                AudioSwitchManager.instance.requestAudioFocus();
+                AudioSwitchManager.instance.setAudioFocusReleasedListener(this::onAudioFocusReleased);
             } else {
                 Log.w(TAG, "AudioSwitchManager instance is null, cannot observe audio focus changes");
             }
@@ -98,11 +110,11 @@ public class AudioFocusManager {
         }
     }
 
-    public void stopMonitoring() {
+    private void stopMonitoring() {
         if (monitorAudioFocus && AudioSwitchManager.instance != null) {
             AudioSwitchManager.instance.setAudioFocusChangeListener(null);
+            AudioSwitchManager.instance.setAudioFocusReleasedListener(null);
         }
-        interruptionActive = false;
 
         if (monitorTelephony) {
             unregisterTelephonyListener();
@@ -198,40 +210,37 @@ public class AudioFocusManager {
         return false;
     }
 
+    /**
+     * WebRTC gave up its audio focus because the call's audio stopped, so no focus gain will end
+     * an interruption a focus loss started.
+     */
+    private void onAudioFocusReleased() {
+        handleInterruptionEnd("Audio focus released");
+    }
+
     private void handleInterruptionStart(String logMessage) {
-        if (focusChangeListener == null) {
-            return;
+        switch (interruptionState.start()) {
+            case REPORTED:
+                Log.d(TAG, logMessage);
+                break;
+            case IGNORED:
+                Log.d(TAG, "Ignoring duplicate interruption start: " + logMessage);
+                break;
+            case NO_LISTENER:
+                break;
         }
-
-        if (interruptionActive) {
-            Log.d(TAG, "Ignoring duplicate interruption start: " + logMessage);
-            return;
-        }
-
-        Log.d(TAG, logMessage);
-        interruptionActive = true;
-        focusChangeListener.onInterruptionStart();
     }
 
     private void handleInterruptionEnd(String logMessage) {
-        if (focusChangeListener == null) {
-            return;
+        switch (interruptionState.end()) {
+            case REPORTED:
+                Log.d(TAG, logMessage);
+                break;
+            case IGNORED:
+                Log.d(TAG, "Ignoring interruption end with no active interruption: " + logMessage);
+                break;
+            case NO_LISTENER:
+                break;
         }
-
-        if (!interruptionActive) {
-            Log.d(TAG, "Ignoring interruption end with no active interruption: " + logMessage);
-            return;
-        }
-
-        Log.d(TAG, logMessage);
-        interruptionActive = false;
-        focusChangeListener.onInterruptionEnd();
-    }
-
-    public void notifyManualAudioFocusRegain() {
-        if (!monitorAudioFocus) {
-            return;
-        }
-        handleInterruptionEnd("Audio focus manually requested");
     }
 }

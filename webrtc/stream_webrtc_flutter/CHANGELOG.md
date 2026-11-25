@@ -14,6 +14,10 @@
 * [iOS] The `onAudioRouteChange` event carries the system's route change `reason`, and is also sent when the system re-routes on its own, such as after a CallKit hold.
 * [iOS] fix: disposing the last stream or peer connection no longer tries to deactivate an audio session CallKit owns.
 * [iOS/macOS] fix: with CocoaPods, only the headers under `include/` are public, as with Swift Package Manager. The podspecs' `public_header_files` pattern matched nothing, so every header was public.
+* [Android] fix: enabling interruption events, `WebRTC.initialize` with an audio configuration and `selectAudioOutput` no longer take audio focus or change the audio mode outside a call, and the previous mode is restored after it.
+* [Android] fix: a call that reuses a microphone track captured before it, such as a lobby preview's, takes audio focus as soon as it sends audio.
+* [Android] fix: an interruption ends when the call's audio stops.
+* [Android] fix: `regainAndroidAudioFocus` requests audio focus again during a call whose focus WebRTC manages, and does nothing otherwise.
 
 [4.0.1] - 2026.10.22
 

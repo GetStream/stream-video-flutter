@@ -123,8 +123,12 @@ class _StreamDogFoodingAppContentState
         call?.setMicrophoneEnabled(enabled: false);
       },
       onInterruptionEnd: () {
-        if (_microphoneEnabledBeforeInterruption ?? false) {
-          StreamVideo.instance.activeCall?.setMicrophoneEnabled(enabled: true);
+        final call = StreamVideo.instance.activeCall;
+        // The interruption also ends when the call's audio stops, so a call
+        // that is being left gets no microphone back.
+        if ((_microphoneEnabledBeforeInterruption ?? false) &&
+            (call?.state.value.status.isConnected ?? false)) {
+          call?.setMicrophoneEnabled(enabled: true);
         }
         _microphoneEnabledBeforeInterruption = null;
       },

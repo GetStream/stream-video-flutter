@@ -1249,10 +1249,8 @@ public class MethodCallHandlerImpl implements MethodCallHandler, StateProvider {
               "AudioSwitch manager is not initialized. Ensure plugin is attached before requesting focus.", result);
           break;
         }
+        // A granted request is reported as a focus gain, which ends the interruption.
         AudioSwitchManager.instance.requestAudioFocus();
-        if (audioFocusManager != null) {
-          audioFocusManager.notifyManualAudioFocusRegain();
-        }
         result.success(null);
         break;
       }
