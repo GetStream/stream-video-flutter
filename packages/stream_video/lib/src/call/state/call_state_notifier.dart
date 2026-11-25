@@ -6,6 +6,7 @@ import 'package:stream_core/stream_core.dart';
 import '../../call_state.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/models.dart';
+import 'call_duration_timer.dart';
 import 'call_state_selection.dart';
 import 'mixins/state_call_actions_mixin.dart';
 import 'mixins/state_coordinator_mixin.dart';
@@ -24,13 +25,13 @@ class CallStateNotifier extends StateNotifier<CallState>
         StateRtcMixin,
         StateSfuMixin,
         StateCallActionsMixin {
-  CallStateNotifier(CallState initialState) : super(initialState) {
+  CallStateNotifier(CallState initialState)
+    : _durationTimer = CallDurationTimer(initialState),
+      super(initialState) {
     callStateStream = MutableStateEmitter<CallState>(
       initialState,
       sync: true,
     );
-    _durationTimerController = StreamController<Duration>.broadcast();
-    _setupDurationTimer();
   }
 
   final _logger = taggedLogger(tag: 'CallStateNotifier');
@@ -59,23 +60,11 @@ class CallStateNotifier extends StateNotifier<CallState>
     return callStateStream.map(selector).distinct(isSameCallStateSelection);
   }
 
-  Stream<Duration> get durationStream =>
-      _durationTimerController.stream.distinct();
+  Stream<Duration> get durationStream => _durationTimer.durationStream;
 
-  /// How long the call has been live, as described on
-  /// `Call.liveDurationStream`.
-  Stream<Duration> get liveDurationStream async* {
-    final current = _liveDuration(state);
-    if (current != null) yield current;
-    yield* _liveDurationController.stream;
-  }
+  Stream<Duration> get liveDurationStream => _durationTimer.liveDurationStream;
 
-  late final StreamController<Duration> _durationTimerController;
-  final _liveDurationController = StreamController<Duration>.broadcast();
-  Timer? _durationTimer;
-
-  /// The `liveEndedAt` the live duration was last frozen at.
-  DateTime? _frozenLiveEndedAt;
+  final CallDurationTimer _durationTimer;
 
   /// Stays readable after [dispose]: it is the last state set.
   @override
@@ -96,53 +85,7 @@ class CallStateNotifier extends StateNotifier<CallState>
     super.state = value;
     callStateStream.value = value;
 
-    _setupDurationTimer();
-  }
-
-  void _setupDurationTimer() {
-    _freezeLiveDuration();
-
-    final callTicking = state.startedAt != null && state.liveEndedAt == null;
-    if (!callTicking && !_isLive(state)) {
-      _durationTimer?.cancel();
-      _durationTimer = null;
-      return;
-    }
-
-    _durationTimer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
-      final now = DateTime.now();
-      final startedAt = state.startedAt;
-      if (startedAt != null && state.liveEndedAt == null) {
-        _durationTimerController.add(now.difference(startedAt));
-      }
-      final liveStartedAt = state.liveStartedAt;
-      if (liveStartedAt != null && _isLive(state)) {
-        _liveDurationController.add(now.difference(liveStartedAt));
-      }
-    });
-  }
-
-  /// Emits the length of a live that has just ended, once.
-  void _freezeLiveDuration() {
-    final liveEndedAt = state.liveEndedAt;
-    if (liveEndedAt == _frozenLiveEndedAt) return;
-    _frozenLiveEndedAt = liveEndedAt;
-
-    final duration = _liveDuration(state);
-    if (liveEndedAt != null && duration != null) {
-      _liveDurationController.add(duration);
-    }
-  }
-
-  static bool _isLive(CallState state) =>
-      state.liveStartedAt != null && state.liveEndedAt == null;
-
-  /// From `liveStartedAt` to `liveEndedAt`, or to now while live.
-  static Duration? _liveDuration(CallState state) {
-    final liveStartedAt = state.liveStartedAt;
-    if (liveStartedAt == null) return null;
-
-    return (state.liveEndedAt ?? DateTime.now()).difference(liveStartedAt);
+    _durationTimer.update(value);
   }
 
   void updateCallPreferences(CallPreferences preferences) {
@@ -154,9 +97,6 @@ class CallStateNotifier extends StateNotifier<CallState>
   void dispose() {
     super.dispose();
     callStateStream.close();
-    _durationTimer?.cancel();
-    _durationTimer = null;
-    _durationTimerController.close();
-    _liveDurationController.close();
+    _durationTimer.dispose();
   }
 }
