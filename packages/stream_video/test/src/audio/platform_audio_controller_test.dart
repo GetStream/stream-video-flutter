@@ -244,7 +244,6 @@ void main() {
         },
       ]);
     });
-
   });
 
   group('audioInterruptions', () {
@@ -344,6 +343,26 @@ void main() {
       expect(events.enableCount, 2);
       expect(received, [true]);
     });
+
+    test('tries again on the next first listen after enabling threw '
+        'synchronously', () async {
+      events.syncEnableError = StateError('enable failed');
+      final failed = fresh.audioInterruptions.listen((_) {});
+      await pumpEventQueue();
+      await failed.cancel();
+      expect(events.listeners, 0);
+
+      events.syncEnableError = null;
+      final received = <bool>[];
+      final subscription = fresh.audioInterruptions.listen(received.add);
+      addTearDown(subscription.cancel);
+      await pumpEventQueue();
+      events.interruptions.add(rtc.AudioInterruption.started);
+      await pumpEventQueue();
+
+      expect(events.enableCount, 2);
+      expect(received, [true]);
+    });
   });
 
   group('reinitializeAudioConfiguration', () {
@@ -423,6 +442,7 @@ class _FakePlatformEvents implements rtc.WebRtcPlatformEvents {
   // Closed in the tests' tearDown.
   // ignore: close_sinks
   final interruptions = StreamController<rtc.AudioInterruption>.broadcast();
+
   /// How many times [enableInterruptionEvents] ran.
   int enableCount = 0;
 
@@ -431,6 +451,9 @@ class _FakePlatformEvents implements rtc.WebRtcPlatformEvents {
 
   /// When set, enabling fails with it.
   Error? enableError;
+
+  /// When set, enabling throws it before returning a future.
+  Error? syncEnableError;
 
   /// The subscriptions to [onInterruption] not cancelled yet.
   int listeners = 0;
@@ -448,8 +471,13 @@ class _FakePlatformEvents implements rtc.WebRtcPlatformEvents {
   }, isBroadcast: true);
 
   @override
-  Future<void> enableInterruptionEvents() async {
+  Future<void> enableInterruptionEvents() {
     enableCount++;
+    if (syncEnableError case final error?) throw error;
+    return _enable();
+  }
+
+  Future<void> _enable() async {
     if (enableGates.isNotEmpty) await enableGates.removeAt(0).future;
     if (enableError case final error?) throw error;
   }
