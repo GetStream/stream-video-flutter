@@ -32,6 +32,7 @@ import '../../webrtc/rtc_media_device/rtc_media_device.dart';
 import '../../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../../webrtc/rtc_track/rtc_track.dart';
 import '../call_connect_options.dart';
+import '../call_events.dart';
 import '../session/call_session.dart';
 import '../state/call_state_notifier.dart';
 import '../stats/sfu_stats_reporter.dart';
@@ -53,6 +54,7 @@ class LocalMediaController {
     required this._onMicrophoneMuted,
     required this._onAudioOutputDeviceSet,
     required this._defaultBroadcastTarget,
+    required this._onCallEvent,
     required this._logger,
   });
 
@@ -73,6 +75,9 @@ class LocalMediaController {
   /// The controller of the call that shares an iOS broadcast no call
   /// requested: the client's active call, or none.
   final LocalMediaController? Function() _defaultBroadcastTarget;
+
+  /// Delivers an event this controller raises on the call's events.
+  final void Function(StreamCallEvent event) _onCallEvent;
   final TaggedLogger _logger;
 
   final _multitaskingCameraLock = Lock();
@@ -1307,7 +1312,8 @@ class LocalMediaController {
   ///
   /// Skipped in a call that does not own the broadcast, while the call has no
   /// session, while a screen share is live and without the screenshare
-  /// permission.
+  /// permission. A missing permission or a failed share is reported as a
+  /// [StreamCallScreenShareFailedEvent].
   Future<void> _onBroadcastStarted() async {
     if (!_ownsBroadcast()) {
       _logger.v(() => '[onBroadcastStarted] shared by another call');
@@ -1337,6 +1343,7 @@ class LocalMediaController {
 
     if (!_hasPermission(CallPermission.screenshare)) {
       _logger.w(() => '[onBroadcastStarted] missing screenshare permission');
+      _reportBroadcastFailure(ScreenShareFailureReason.missingPermission);
       return;
     }
 
@@ -1350,11 +1357,33 @@ class LocalMediaController {
       if (result case Failure(:final error)) {
         _logger.e(() => '[onBroadcastStarted] share failed: $error');
         await _stopBroadcast();
+        _reportBroadcastFailure(
+          ScreenShareFailureReason.publishFailed,
+          error: error,
+        );
       }
     } catch (error, stackTrace) {
       _logger.e(() => '[onBroadcastStarted] share failed: $error\n$stackTrace');
       await _stopBroadcast();
+      _reportBroadcastFailure(
+        ScreenShareFailureReason.publishFailed,
+        error: error,
+      );
     }
+  }
+
+  /// Reports a broadcast this call could not share on the call's events.
+  void _reportBroadcastFailure(
+    ScreenShareFailureReason reason, {
+    Object? error,
+  }) {
+    _onCallEvent(
+      StreamCallScreenShareFailedEvent(
+        _state.callCid,
+        reason: reason,
+        error: error,
+      ),
+    );
   }
 
   /// Asks the iOS broadcast extension to finish the broadcast this call could

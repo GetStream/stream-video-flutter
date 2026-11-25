@@ -141,6 +141,7 @@
 - Added `CallPermission.sendData` for the `send-data` capability, which used to be read as `CallPermission.unknown` with a warning.
 - Added `CallState.isAudioInterrupted`, whether the platform is interrupting the call's audio, such as for a phone call, an alarm or another app playing audio.
 - Added `CallPreferences.audioInterruptionReaction` and `AudioInterruptionReaction`, what a call does while its audio is interrupted: nothing (the default), or turn the microphone off and back on when the interruption ends, unless the app changed it meanwhile.
+- Added `StreamCallScreenShareFailedEvent` with a `ScreenShareFailureReason`, delivered on `Call.callEvents` when an iOS broadcast that started could not be shared.
 
 ### 🔄 Changed
 

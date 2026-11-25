@@ -333,6 +333,7 @@ class Call {
       final calls = _host.state.activeCalls.value;
       return calls.length == 1 ? calls.single._media : null;
     },
+    onCallEvent: _callEvents.emit,
     logger: _logger,
   );
 
@@ -1709,6 +1710,11 @@ class Call {
   Future<bool> requestScreenSharePermission() =>
       _media.requestScreenSharePermission();
 
+  /// Enables or disables the screen share for this call.
+  ///
+  /// With the iOS broadcast extension, enabling returns once the broadcast
+  /// picker is shown, and a later failure to share the broadcast is reported
+  /// as a [StreamCallScreenShareFailedEvent] on [callEvents].
   Future<Result<None>> setScreenShareEnabled({
     required bool enabled,
     ScreenShareConstraints? constraints,

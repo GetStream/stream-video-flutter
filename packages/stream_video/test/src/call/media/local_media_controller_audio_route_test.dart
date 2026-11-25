@@ -51,6 +51,7 @@ void main() {
       onMicrophoneMuted: (_) async {},
       onAudioOutputDeviceSet: (_) async {},
       defaultBroadcastTarget: () => null,
+      onCallEvent: (_) {},
       logger: taggedLogger(tag: 'test'),
     );
   });

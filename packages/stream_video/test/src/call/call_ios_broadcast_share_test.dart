@@ -147,6 +147,15 @@ void main() {
   bool sharing(Call call) =>
       call.state.value.localParticipant?.isScreenShareEnabled ?? false;
 
+  /// Collects the screen share failures [call] reports from now on.
+  List<StreamCallScreenShareFailedEvent> shareFailures(Call call) {
+    final failures = <StreamCallScreenShareFailedEvent>[];
+    call.callEvents.listen((event) {
+      if (event is StreamCallScreenShareFailedEvent) failures.add(event);
+    });
+    return failures;
+  }
+
   test('enabling shows the picker and shares nothing yet', () async {
     final call = await joinedCall();
 
@@ -179,12 +188,14 @@ void main() {
 
   test('the start event shares with the requested constraints', () async {
     final call = await joinedCall();
+    final failures = shareFailures(call);
     await call.setScreenShareEnabled(enabled: true, constraints: _requested);
 
     await emit(ScreenSharingStartedEvent());
 
     expect(screenShareCalls(), [(true, _requested)]);
     expect(sharing(call), isTrue);
+    expect(failures, isEmpty);
   });
 
   test('a second start event does not share again', () async {
@@ -195,11 +206,13 @@ void main() {
       () => harness.session.getTrack(any(), SfuTrackType.screenShare),
     ).thenReturn(shared);
     clearInteractions(harness.session);
+    final failures = shareFailures(call);
 
     await emit(ScreenSharingStartedEvent());
 
     verifyNoScreenShare();
     expect(sharing(call), isTrue);
+    expect(failures, isEmpty);
   });
 
   test(
@@ -275,6 +288,7 @@ void main() {
 
   test('a failed share leaves the share off and stops the broadcast', () async {
     final call = await joinedCall();
+    final failures = shareFailures(call);
     stubScreenShare(() async => failureWithError('no capture'));
 
     await emit(ScreenSharingStartedEvent());
@@ -282,22 +296,33 @@ void main() {
     expect(screenShareCalls(), hasLength(1));
     expect(sharing(call), isFalse);
     verify(notifier.stopiOSBroadcast).called(1);
+    expect(failures, hasLength(1));
+    expect(failures.single.callCid, call.callCid);
+    expect(failures.single.reason, ScreenShareFailureReason.publishFailed);
+    expect(failures.single.error, isA<StreamVideoException>());
   });
 
   test('a share that throws stops the broadcast', () async {
     final call = await joinedCall();
-    stubScreenShare(() async => throw StateError('no capture'));
+    final failures = shareFailures(call);
+    final error = StateError('no capture');
+    stubScreenShare(() async => throw error);
 
     await emit(ScreenSharingStartedEvent());
 
     expect(sharing(call), isFalse);
     verify(notifier.stopiOSBroadcast).called(1);
+    expect(failures, hasLength(1));
+    expect(failures.single.reason, ScreenShareFailureReason.publishFailed);
+    expect(failures.single.error, same(error));
   });
 
   test(
-    'a start event without the screenshare permission does nothing',
+    'a start event without the screenshare permission shares nothing and '
+    'reports it',
     () async {
       final call = await joinedCall();
+      final failures = shareFailures(call);
       when(
         () => harness.permissionsManager.hasPermission(
           CallPermission.screenshare,
@@ -308,6 +333,12 @@ void main() {
 
       verifyNoScreenShare();
       expect(sharing(call), isFalse);
+      expect(failures, hasLength(1));
+      expect(
+        failures.single.reason,
+        ScreenShareFailureReason.missingPermission,
+      );
+      expect(failures.single.error, isNull);
     },
   );
 

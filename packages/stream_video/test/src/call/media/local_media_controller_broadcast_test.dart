@@ -80,6 +80,7 @@ void main() {
       onMicrophoneMuted: (_) async {},
       onAudioOutputDeviceSet: (_) async {},
       defaultBroadcastTarget: () => controller,
+      onCallEvent: (_) {},
       logger: taggedLogger(tag: 'test'),
     );
     subscription = controller.observeNativeWebRtcEvents();
