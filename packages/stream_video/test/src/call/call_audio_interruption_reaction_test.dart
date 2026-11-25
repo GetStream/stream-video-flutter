@@ -235,6 +235,21 @@ void main() {
     expect(microphoneCalls(), [false, true]);
   });
 
+  test('a microphone the app turned on during an interruption comes back '
+      'with the app', () async {
+    muteAudioInBackground(audio: true);
+    final call = await activeCall();
+    await interrupt(interrupted: true);
+    await call.setMicrophoneEnabled(enabled: true);
+
+    await goTo(VideoLifecycleState.paused);
+    expect(microphoneOn(call), isFalse);
+    await goTo(VideoLifecycleState.resumed);
+
+    expect(microphoneOn(call), isTrue);
+    expect(call.state.value.isAudioInterrupted, isTrue);
+  });
+
   test('a microphone that cannot be turned back on is turned on by the next '
       'session', () async {
     final call = await activeCall();
