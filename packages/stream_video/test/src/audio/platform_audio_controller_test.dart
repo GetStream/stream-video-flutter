@@ -368,10 +368,16 @@ void main() {
   group('system-managed audio focus', () {
     test('is supported where WebRTC can leave focus to the system', () {
       overrideWebRtcCapabilities(platform: PlatformType.android);
-      expect(PlatformAudioController.isSystemManagedAudioFocusSupported, isTrue);
+      expect(
+        PlatformAudioController.isSystemManagedAudioFocusSupported,
+        isTrue,
+      );
 
       overrideWebRtcCapabilities(platform: PlatformType.ios);
-      expect(PlatformAudioController.isSystemManagedAudioFocusSupported, isFalse);
+      expect(
+        PlatformAudioController.isSystemManagedAudioFocusSupported,
+        isFalse,
+      );
     });
 
     // The plugin throws off Android, and the host running the tests is not.
