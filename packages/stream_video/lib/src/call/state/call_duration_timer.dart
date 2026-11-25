@@ -19,8 +19,9 @@ class CallDurationTimer {
   CallState _state;
   Timer? _timer;
 
-  /// The `liveEndedAt` the live duration was last frozen at.
-  DateTime? _frozenLiveEndedAt;
+  /// The live times the live duration was last emitted for.
+  DateTime? _liveStartedAt;
+  DateTime? _liveEndedAt;
 
   /// Time since `startedAt`, once a second until `liveEndedAt` is set.
   Stream<Duration> get durationStream => _durationController.stream.distinct();
@@ -36,7 +37,7 @@ class CallDurationTimer {
   /// Takes the times of [state], starting or stopping the ticks as they say.
   void update(CallState state) {
     _state = state;
-    _freezeLiveDuration();
+    _emitLiveChange();
 
     if (!_isRunning(state) && !_isLive(state)) {
       _timer?.cancel();
@@ -61,16 +62,18 @@ class CallDurationTimer {
     }
   }
 
-  /// Emits the length of a live that has just ended, once.
-  void _freezeLiveDuration() {
+  /// Emits the live duration at once when the call goes live or the live
+  /// ends, rather than at the next tick: zero on going live, the final length
+  /// on ending.
+  void _emitLiveChange() {
+    final liveStartedAt = _state.liveStartedAt;
     final liveEndedAt = _state.liveEndedAt;
-    if (liveEndedAt == _frozenLiveEndedAt) return;
-    _frozenLiveEndedAt = liveEndedAt;
+    if (liveStartedAt == _liveStartedAt && liveEndedAt == _liveEndedAt) return;
+    _liveStartedAt = liveStartedAt;
+    _liveEndedAt = liveEndedAt;
 
     final duration = _liveDuration(_state);
-    if (liveEndedAt != null && duration != null) {
-      _liveDurationController.add(duration);
-    }
+    if (duration != null) _liveDurationController.add(duration);
   }
 
   static bool _isRunning(CallState state) =>

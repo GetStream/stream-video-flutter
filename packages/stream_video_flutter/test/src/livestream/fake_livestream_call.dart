@@ -28,9 +28,10 @@ class FakeLivestreamCall extends Mock implements Call {
   Stream<List<CallParticipantState>> get participantsStream =>
       Stream.value(participants);
 
+  /// Differs from [liveDurationStream], so a test can tell which one shows.
   @override
   Stream<Duration> get callDurationStream =>
-      Stream.value(const Duration(seconds: 5));
+      Stream.value(const Duration(minutes: 40));
 
   @override
   Stream<Duration> get liveDurationStream =>

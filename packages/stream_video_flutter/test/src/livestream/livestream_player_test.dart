@@ -80,6 +80,14 @@ void main() {
   Widget backButton(BuildContext context) =>
       const SizedBox.square(key: ValueKey('back'), dimension: 40);
 
+  testWidgets('the duration badge shows the live time', (tester) async {
+    await pumpPlayer(tester);
+    await tester.pump();
+
+    expect(find.text('00:05'), findsOneWidget);
+    expect(find.text('40:00'), findsNothing);
+  });
+
   group('fullscreen video fit', () {
     testWidgets('inline the video fits by orientation', (tester) async {
       await pumpPlayer(tester);

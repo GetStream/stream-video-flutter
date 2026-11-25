@@ -102,6 +102,7 @@ void main() {
       await pump(tester, elapsed: const Duration(minutes: 40));
 
       expect(find.text('40:00'), findsOneWidget);
+      verifyNever(() => call.liveDurationStream);
     });
   });
 
