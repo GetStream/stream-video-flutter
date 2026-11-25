@@ -40,11 +40,11 @@ void main() {
           return true;
         });
 
-    final devices = MockRtcMediaDeviceNotifier();
+    final audio = MockPlatformAudioController();
     when(
-      devices.nativeWebRtcEventsStream,
+      audio.nativeWebRtcEventsStream,
     ).thenAnswer((_) => const Stream.empty());
-    RtcMediaDeviceNotifier.instance = devices;
+    PlatformAudioController.instance = audio;
 
     streamVideo = MockStreamVideo();
     when(() => streamVideo.options).thenReturn(StreamVideoOptions());
@@ -76,7 +76,7 @@ void main() {
   tearDown(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(platform.methodChannel, null);
-    RtcMediaDeviceNotifier.instance = null;
+    PlatformAudioController.instance = null;
     CurrentPlatform.debugCurrentPlatformOverride = null;
   });
 
