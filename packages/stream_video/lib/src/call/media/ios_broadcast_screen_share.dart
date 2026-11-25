@@ -146,6 +146,7 @@ class IosBroadcastScreenShare {
   /// broadcast.
   void onStopped() {
     _owner.onStopped();
+    _pendingConstraints = null;
 
     final options = _readConnectOptions();
     final option = options.screenShare;
@@ -163,10 +164,8 @@ class IosBroadcastScreenShare {
   /// Shares the screen once the broadcast extension has started, with the
   /// constraints of the last request or the default broadcast ones.
   ///
-  /// Skipped in a call that does not own the broadcast, while the call has no
-  /// session, while a screen share is live and without the screenshare
-  /// permission. A missing permission or a failed share ends the broadcast
-  /// and is reported as a [StreamCallScreenShareFailedEvent].
+  /// Skipped in a call that does not own the broadcast. While the call has no
+  /// session, or one is being applied, it is shared once the session applies.
   Future<void> onStarted() async {
     _owner.onStarted();
 
@@ -175,13 +174,38 @@ class IosBroadcastScreenShare {
       return;
     }
 
+    final constraints = _requestedConstraints ?? _defaultConstraints();
     final session = _session();
     if (session == null || _awaitsSession()) {
       _logger.i(() => '[onBroadcastStarted] shared once a session applies');
-      _pendingConstraints = _requestedConstraints ?? _defaultConstraints();
+      _pendingConstraints = constraints;
       return;
     }
 
+    await _share(session, constraints);
+  }
+
+  /// Shares a broadcast that started while a session was being applied, once
+  /// that session has applied the connect options.
+  Future<void> sharePending() async {
+    final constraints = _pendingConstraints;
+    final session = _session();
+    if (constraints == null || session == null) return;
+    _pendingConstraints = null;
+
+    _logger.d(() => '[sharePending] sharing the running broadcast');
+    await _share(session, constraints);
+  }
+
+  /// Publishes the running broadcast on [session] with [constraints].
+  ///
+  /// Skipped while a screen share is live. A missing permission or a failed
+  /// share ends the broadcast and is reported as a
+  /// [StreamCallScreenShareFailedEvent].
+  Future<void> _share(
+    CallSession session,
+    ScreenShareConstraints constraints,
+  ) async {
     final localParticipant = _state.localParticipant;
     final shared = localParticipant == null
         ? null
@@ -204,7 +228,7 @@ class IosBroadcastScreenShare {
     try {
       final result = await _applyScreenShare(
         enabled: true,
-        constraints: _requestedConstraints ?? _defaultConstraints(),
+        constraints: constraints,
       );
       if (result case Failure(:final error)) {
         _logger.e(() => '[onBroadcastStarted] share failed: $error');

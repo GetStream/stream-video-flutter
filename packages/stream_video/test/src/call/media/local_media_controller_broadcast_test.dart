@@ -54,6 +54,7 @@ void main() {
   late MockCallSession? session;
   late MockRtcMediaDeviceNotifier notifier;
   late _BroadcastEventsController audio;
+  late CallStateNotifier stateManager;
   late LocalMediaController controller;
   late StreamSubscription<NativeWebRtcEvent> subscription;
 
@@ -67,8 +68,9 @@ void main() {
     when(notifier.stopiOSBroadcast).thenAnswer((_) async {});
     audio = _BroadcastEventsController();
     PlatformAudioController.instance = audio;
+    stateManager = CallStateNotifier(createTestCallState());
     controller = LocalMediaController(
-      stateManager: CallStateNotifier(createTestCallState()),
+      stateManager: stateManager,
       session: () => session,
       sfuStatsReporter: () => null,
       hasPermission: (_) => true,
@@ -133,6 +135,33 @@ void main() {
 
       final next = session = _session();
       await controller.applyConnectOptions(session: next);
+
+      expect(enabledOn(next).single?.useiOSBroadcastExtension, isTrue);
+      verifyNever(notifier.presentiOSBroadcastPicker);
+    });
+
+    test('shares a broadcast that started while the session applied', () async {
+      stateManager.lifecycleCallConnecting(
+        attempt: 1,
+        strategy: SfuReconnectionStrategy.migrate,
+      );
+      final next = session = _session();
+      // An unused inherited track whose stop holds the apply open.
+      final stopping = Completer<void>();
+      final unused = MockRtcLocalTrack();
+      when(() => unused.trackType).thenReturn(SfuTrackType.audio);
+      when(unused.stop).thenAnswer((_) => stopping.future);
+
+      final applying = controller.applyConnectOptions(
+        session: next,
+        inheritedTracks: [unused],
+      );
+      await pumpEventQueue();
+      await emit(ScreenSharingStartedEvent());
+      verifyNotEnabledOn(next);
+
+      stopping.complete();
+      await applying;
 
       expect(enabledOn(next).single?.useiOSBroadcastExtension, isTrue);
       verifyNever(notifier.presentiOSBroadcastPicker);

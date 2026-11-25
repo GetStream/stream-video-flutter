@@ -433,6 +433,8 @@ class LocalMediaController {
       }
     }
 
+    await _broadcast.sharePending();
+
     if (_connectOptions.audioInputDevice != null) {
       await setAudioInputDevice(_connectOptions.audioInputDevice!);
     }
