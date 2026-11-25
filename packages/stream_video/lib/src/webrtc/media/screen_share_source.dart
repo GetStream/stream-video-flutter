@@ -30,7 +30,8 @@ abstract interface class ScreenShareSource {
   void addTo(Map<String, dynamic> video, ScreenShareConstraints constraints);
 }
 
-/// Captures through the iOS broadcast extension when asked to.
+/// Captures through the iOS broadcast extension when asked to. The capture
+/// shows no picker: it is shown on its own before the broadcast starts.
 @internal
 class BroadcastExtensionScreenShareSource implements ScreenShareSource {
   const BroadcastExtensionScreenShareSource();
@@ -42,7 +43,9 @@ class BroadcastExtensionScreenShareSource implements ScreenShareSource {
 
   @override
   void addTo(Map<String, dynamic> video, ScreenShareConstraints constraints) {
-    if (constraints.useiOSBroadcastExtension) video['deviceId'] = 'broadcast';
+    if (constraints.useiOSBroadcastExtension) {
+      video['deviceId'] = 'broadcast-manual';
+    }
   }
 }
 

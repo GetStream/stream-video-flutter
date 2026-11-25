@@ -192,4 +192,10 @@ class RtcMediaDeviceNotifier {
   Future<Result<List<RtcMediaDevice>>> videoInputs() {
     return enumerateDevices(kind: RtcMediaDeviceKind.videoInput);
   }
+
+  /// Shows the picker of the iOS broadcast extension, without starting a
+  /// capture. Throws an [UnsupportedError] on other platforms.
+  Future<void> presentiOSBroadcastPicker() {
+    return rtc.presentiOSBroadcastPicker();
+  }
 }
