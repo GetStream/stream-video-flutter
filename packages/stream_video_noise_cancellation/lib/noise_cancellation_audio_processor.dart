@@ -3,87 +3,69 @@
 /// during video calls.
 library;
 
+import 'dart:developer' as developer;
+
 import 'package:flutter/services.dart';
-import 'package:stream_video/stream_video.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
+
 import 'stream_video_noise_cancellation.dart';
 
 /// An [AudioProcessor] implementation that provides real-time noise cancellation.
 ///
-/// Note: Noise cancellation is only supported on iOS and Android platforms.
-/// On unsupported platforms, methods will return appropriate fallback values.
+/// Noise cancellation runs natively on Android and iOS. Elsewhere
+/// [isEnabled] and [deviceSupportsAdvancedAudioProcessing] report false and
+/// [setEnabled] throws.
 class NoiseCancellationAudioProcessor extends AudioProcessor {
   /// Creates a new [NoiseCancellationAudioProcessor] instance.
   NoiseCancellationAudioProcessor() {
     _init();
   }
 
-  final _logger = taggedLogger(tag: 'SV:NoiseCancellationAudioProcessor');
-
   Future<void> _init() async {
     try {
       await StreamVideoNoiseCancellation().registerProcessor();
-    } on PlatformException catch (e) {
-      _logger.w(
-        () => 'Noise cancellation is not supported on this platform: $e',
-      );
-    } catch (err) {
-      _logger.e(err.toString);
+    } catch (e) {
+      _log('Noise cancellation is not supported on this platform: $e');
     }
   }
 
   /// Returns whether noise cancellation is currently enabled.
   @override
-  Future<Result<bool>> isEnabled() async {
+  Future<bool> isEnabled() async {
     try {
-      final result = await StreamVideoNoiseCancellation().isEnabled() ?? false;
-      return Result.success(result);
-    } on PlatformException catch (e) {
-      _logger.w(
-        () => 'Noise cancellation is not supported on this platform: $e',
-      );
-
-      return const Result.success(false);
-    } catch (err, stackTrace) {
-      return failureWithError(err.toString(), stackTrace: stackTrace);
+      return await StreamVideoNoiseCancellation().isEnabled() ?? false;
+    } on Object catch (e) {
+      if (!_isUnsupported(e)) rethrow;
+      return false;
     }
   }
 
-  /// Enables or disables noise cancellation.
+  /// Enables or disables noise cancellation. Throws where it is not
+  /// supported.
   @override
-  Future<Result<None>> setEnabled(bool enabled) async {
-    try {
-      await StreamVideoNoiseCancellation().setEnabled(enabled);
-      return const Result.success(none);
-    } on PlatformException catch (e) {
-      _logger.e(
-        () => 'Noise cancellation is not supported on this platform: $e',
-      );
-
-      return failureWithError(
-        'Noise cancellation is not supported on this platform',
-      );
-    } catch (err, stackTrace) {
-      return failureWithError(err.toString(), stackTrace: stackTrace);
-    }
+  Future<void> setEnabled(bool enabled) {
+    return StreamVideoNoiseCancellation().setEnabled(enabled);
   }
 
   /// Checks if the current device supports advanced audio processing.
   @override
-  Future<Result<bool>> deviceSupportsAdvancedAudioProcessing() async {
+  Future<bool> deviceSupportsAdvancedAudioProcessing() async {
     try {
-      final result =
-          await StreamVideoNoiseCancellation()
+      return await StreamVideoNoiseCancellation()
               .deviceSupportsAdvancedAudioProcessing() ??
           false;
-      return Result.success(result);
-    } on PlatformException catch (e) {
-      _logger.w(
-        () => 'Noise cancellation is not supported on this platform: $e',
-      );
-
-      return const Result.success(false);
-    } catch (err, stackTrace) {
-      return failureWithError(err.toString(), stackTrace: stackTrace);
+    } on Object catch (e) {
+      if (!_isUnsupported(e)) rethrow;
+      return false;
     }
+  }
+
+  static bool _isUnsupported(Object error) =>
+      error is UnsupportedError ||
+      error is MissingPluginException ||
+      error is PlatformException;
+
+  static void _log(String message) {
+    developer.log(message, name: 'SV:NoiseCancellationAudioProcessor');
   }
 }

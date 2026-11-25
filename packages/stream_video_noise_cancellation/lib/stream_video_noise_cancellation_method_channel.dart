@@ -3,7 +3,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:stream_video/stream_video.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import 'stream_video_noise_cancellation_platform_interface.dart';
 
@@ -17,11 +17,7 @@ class MethodChannelStreamVideoNoiseCancellation
   /// Registers the noise cancellation processor with the native platform.
   @override
   Future<void> registerProcessor() async {
-    if (!CurrentPlatform.isAndroid && !CurrentPlatform.isIos) {
-      throw UnimplementedError(
-        'The current platform (${CurrentPlatform.operatingSystem}) does not support audio processing.',
-      );
-    }
+    _ensureSupported();
 
     await methodChannel.invokeMethod<void>('registerProcessor');
   }
@@ -29,11 +25,7 @@ class MethodChannelStreamVideoNoiseCancellation
   /// Returns whether noise cancellation is currently enabled.
   @override
   Future<bool?> isEnabled() async {
-    if (!CurrentPlatform.isAndroid && !CurrentPlatform.isIos) {
-      throw UnimplementedError(
-        'The current platform (${CurrentPlatform.operatingSystem}) does not support audio processing.',
-      );
-    }
+    _ensureSupported();
 
     return methodChannel.invokeMethod<bool>('isEnabled');
   }
@@ -41,11 +33,7 @@ class MethodChannelStreamVideoNoiseCancellation
   /// Enables or disables noise cancellation.
   @override
   Future<void> setEnabled(bool enabled) {
-    if (!CurrentPlatform.isAndroid && !CurrentPlatform.isIos) {
-      throw UnimplementedError(
-        'The current platform (${CurrentPlatform.operatingSystem}) does not support audio processing.',
-      );
-    }
+    _ensureSupported();
 
     return methodChannel.invokeMethod<void>('setEnabled', {'enabled': enabled});
   }
@@ -53,14 +41,20 @@ class MethodChannelStreamVideoNoiseCancellation
   /// Checks if the device supports advanced audio processing.
   @override
   Future<bool?> deviceSupportsAdvancedAudioProcessing() {
-    if (!CurrentPlatform.isAndroid && !CurrentPlatform.isIos) {
-      throw UnimplementedError(
-        'The current platform (${CurrentPlatform.operatingSystem}) does not support audio processing.',
-      );
-    }
+    _ensureSupported();
 
     return methodChannel.invokeMethod<bool>(
       'deviceSupportsAdvancedAudioProcessing',
     );
+  }
+
+  /// Throws where the WebRTC plugin cannot install an audio processing
+  /// module.
+  void _ensureSupported() {
+    if (!rtc.webRtcCapabilities.supportsAudioProcessingModule) {
+      throw UnsupportedError(
+        'Audio processing is not supported on this platform',
+      );
+    }
   }
 }

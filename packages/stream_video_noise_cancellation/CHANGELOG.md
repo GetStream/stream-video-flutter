@@ -3,10 +3,13 @@
 ### ⚠️ Breaking
 
 - [iOS] CocoaPods is no longer supported; enable Flutter's Swift Package Manager.
-
 ### 🐞 Fixed
-
 - [iOS] Added the missing `FlutterFramework` dependency to the Swift package.
+- `NoiseCancellationAudioProcessor` returns plain futures: `setEnabled` throws where noise cancellation is not supported.
+
+### 🔄 Changed
+
+- The package no longer depends on `stream_video`, and checks the WebRTC plugin's `supportsAudioProcessingModule` capability instead of the platform.
 
 ## 1.8.0
 
