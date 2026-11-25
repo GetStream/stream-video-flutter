@@ -155,8 +155,12 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   Future<void> stop() async {
     // Disable the track.
     disable();
+    await _release();
+  }
 
-    // Stop the track.
+  /// Stops [mediaTrack], its clones and [mediaStream], leaving `enabled` as
+  /// it is.
+  Future<void> _release() async {
     streamLog.i(_tag, () => 'Stopping track: $trackId');
     try {
       await mediaTrack.stop();
@@ -266,23 +270,33 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   /// Stops this track and captures it again with [mediaConstraints], or its
   /// own when null, on the same per-call factory. The new capture has no
   /// clones and is on no sender yet.
+  ///
+  /// The track is replaced, not muted, so it stays enabled while the new
+  /// capture is acquired: an announce made meanwhile reads it as enabled and
+  /// tells the SFU it is unmuted. If the capture fails nothing replaces it,
+  /// and it is disabled like any stopped track.
   Future<RtcLocalTrack<T>> recapture({T? mediaConstraints}) async {
     streamLog.i(_tag, () => 'Recapturing track: $trackId');
 
-    await stop();
+    await _release();
 
     final constraints = mediaConstraints ?? this.mediaConstraints;
-    final newStream = await rtc.navigator.mediaDevices.getMedia(
-      constraints,
-      nativeFactory: nativeFactory,
-    );
+    try {
+      final newStream = await rtc.navigator.mediaDevices.getMedia(
+        constraints,
+        nativeFactory: nativeFactory,
+      );
 
-    return copyWith(
-      mediaTrack: newStream.getTracks().first,
-      mediaStream: newStream,
-      mediaConstraints: constraints,
-      clonedTracks: const [],
-    );
+      return copyWith(
+        mediaTrack: newStream.getTracks().first,
+        mediaStream: newStream,
+        mediaConstraints: constraints,
+        clonedTracks: const [],
+      );
+    } catch (_) {
+      disable();
+      rethrow;
+    }
   }
 
   /// Sends a clone of this track on every one of [transceivers] that is

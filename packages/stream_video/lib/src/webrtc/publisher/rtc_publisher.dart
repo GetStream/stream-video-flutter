@@ -176,9 +176,9 @@ class RtcPublisher {
       final track = tracks[trackId];
       if (track == null) continue;
 
-      // Checked once this recapture's turn starts: a recapture still running
-      // has disabled the capture it replaces, and a track muted meanwhile
-      // stays muted.
+      // Checked once this recapture's turn starts: a recapture that ran
+      // before it and failed has disabled the capture it replaced, and a
+      // track muted meanwhile stays muted.
       // A track already capturing with these constraints is left alone, so
       // re-requesting the current profile does not restart the microphone.
       final recaptured = await recapture(

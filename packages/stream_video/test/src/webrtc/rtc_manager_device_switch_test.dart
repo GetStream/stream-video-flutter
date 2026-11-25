@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
@@ -456,6 +457,74 @@ void main() {
       expect(results.every((it) => it.isSuccess), isTrue);
       expect(platform.callsOf('selectAudioInput'), hasLength(1));
     });
+
+    /// The offer naming the microphone's sender, as a negotiation makes it.
+    String audioOffer() {
+      final sentId = fixture.transceivers.single.sender.track!.id;
+      return [
+        'v=0',
+        'o=- 1 2 IN IP4 127.0.0.1',
+        's=-',
+        't=0 0',
+        'm=audio 9 UDP/TLS/RTP/SAVPF 111',
+        'c=IN IP4 0.0.0.0',
+        'a=sendonly',
+        'a=msid:stream-id $sentId',
+        'a=mid:0',
+        '',
+      ].join('\r\n');
+    }
+
+    // The SFU takes the mute state from the announce, and nothing announces
+    // the microphone again once the new capture is on the sender. Announced
+    // muted, it stayed muted for the whole call.
+    test(
+      'on web, a microphone being captured again is announced unmuted',
+      () async {
+        overrideWebRtcCapabilities(platform: PlatformType.web);
+        final microphone = await publishMicrophone();
+        platform.getUserMediaGate = Completer<void>();
+
+        final switching = fixture.manager.setAudioInputDevice(
+          device: _otherMicrophone,
+        );
+        await pumpEventQueue();
+        expect(fakeMediaOf(microphone).stopped, isTrue);
+
+        final announced = await fixture.manager.getAnnouncedTracks(
+          sdp: audioOffer(),
+        );
+
+        expect(announced!.single.muted, isFalse);
+
+        platform.getUserMediaGate!.complete();
+        expect((await switching).isSuccess, isTrue);
+      },
+    );
+
+    test(
+      'on web, a microphone that cannot be captured again reads as muted',
+      () async {
+        overrideWebRtcCapabilities(platform: PlatformType.web);
+        final microphone = await publishMicrophone();
+        platform.getUserMediaError = PlatformException(code: 'NotReadable');
+
+        final result = await fixture.manager.setAudioInputDevice(
+          device: _otherMicrophone,
+        );
+
+        expect(result.isFailure, isTrue);
+        final held = storedMicrophone(microphone.trackId);
+        expect(held.mediaTrack, same(microphone.mediaTrack));
+        expect(held.mediaTrack.enabled, isFalse);
+        expect(
+          (await fixture.manager.getAnnouncedTracks(
+            sdp: audioOffer(),
+          ))!.single.muted,
+          isTrue,
+        );
+      },
+    );
 
     test('on web, captures the microphone again on the device', () async {
       overrideWebRtcCapabilities(platform: PlatformType.web);
