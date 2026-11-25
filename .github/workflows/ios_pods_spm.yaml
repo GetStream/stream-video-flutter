@@ -13,7 +13,7 @@ permissions:
 jobs:
   build-ios:
     name: iOS Build (Dogfooding)
-    runs-on: macos-latest
+    runs-on: { group: scaleway-macos }
 
     steps:
       - name: 🧰 Setup Checkout
