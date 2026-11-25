@@ -210,8 +210,10 @@ class PlatformAudioController {
     });
     _interruptionSubscription = subscription;
 
+    // Future.sync turns an implementation that throws synchronously into a
+    // failed future, so it is handled the same way.
     unawaited(
-      events.enableInterruptionEvents().catchError((
+      Future.sync(events.enableInterruptionEvents).catchError((
         Object e,
         StackTrace stk,
       ) async {

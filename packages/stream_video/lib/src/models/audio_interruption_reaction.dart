@@ -9,7 +9,8 @@
 /// as for a navigation prompt, and the focus coming back ends it. An app that
 /// takes focus for good, such as a video player or another calling app, does
 /// not give it back, so the interruption lasts until the call ends, unless
-/// the app regains focus with `RtcMediaDeviceNotifier.regainAndroidAudioFocus`.
+/// the app regains focus with
+/// `PlatformAudioController.instance.regainAndroidAudioFocus`.
 enum AudioInterruptionReaction {
   /// The call changes nothing.
   none,
