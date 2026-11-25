@@ -528,6 +528,10 @@ class LocalMediaController {
           ? screenShareOption.constraints as ScreenShareConstraints?
           : null;
 
+      if (constraints != null && _isRunningBroadcast(constraints)) {
+        return _recaptureBroadcast(constraints);
+      }
+
       return setScreenShareEnabled(
         enabled: true,
         constraints:
@@ -658,6 +662,7 @@ class LocalMediaController {
         case ScreenSharingStoppedEvent _:
           if (CurrentPlatform.isIos) {
             IosBroadcastOwner.instance.onStopped();
+            _dropBroadcastOption();
             // On iOS only one broadcast extension can be active at a time
             setScreenShareEnabled(enabled: false);
           } else {
@@ -676,6 +681,7 @@ class LocalMediaController {
           }
           break;
         case ScreenSharingStartedEvent _:
+          IosBroadcastOwner.instance.onStarted();
           unawaited(_onBroadcastStarted());
           break;
         case AudioRouteChangedEvent _:
@@ -1209,6 +1215,41 @@ class LocalMediaController {
   void releaseBroadcastRequest() {
     _broadcastConstraints = null;
     IosBroadcastOwner.instance.release(this);
+  }
+
+  /// Whether [constraints] capture the iOS broadcast extension while it is
+  /// broadcasting.
+  bool _isRunningBroadcast(ScreenShareConstraints constraints) {
+    return IosBroadcastOwner.instance.isActive &&
+        ScreenShareSource.forPlatform().usesBroadcastExtension(constraints);
+  }
+
+  /// Captures the running iOS broadcast again for a new session, without
+  /// showing the picker.
+  Future<Result<None>> _recaptureBroadcast(
+    ScreenShareConstraints constraints,
+  ) async {
+    if (!_hasPermission(CallPermission.screenshare)) {
+      return failureWithError(
+        'Missing permission to share screen for the user',
+      );
+    }
+    return _applyScreenShare(enabled: true, constraints: constraints);
+  }
+
+  /// Turns off a screen share option that captures the iOS broadcast
+  /// extension, so a later session does not capture a stopped broadcast.
+  void _dropBroadcastOption() {
+    final option = _connectOptions.screenShare;
+    if (option is! TrackEnabled) return;
+    final constraints = option.constraints;
+    if (constraints is! ScreenShareConstraints ||
+        !ScreenShareSource.forPlatform().usesBroadcastExtension(constraints)) {
+      return;
+    }
+    _connectOptions = _connectOptions.copyWith(
+      screenShare: TrackOption.disabled(),
+    );
   }
 
   /// Whether this call shares the iOS broadcast that started: the call that

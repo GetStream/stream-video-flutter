@@ -13,6 +13,10 @@ class IosBroadcastOwner {
   static final IosBroadcastOwner instance = IosBroadcastOwner._();
 
   Object? _requester;
+  bool _isActive = false;
+
+  /// Whether the broadcast is running, as the last start or stop event said.
+  bool get isActive => _isActive;
 
   /// Whether a call showed the picker and the broadcast has not stopped
   /// since.
@@ -29,12 +33,16 @@ class IosBroadcastOwner {
     if (identical(_requester, call)) _requester = null;
   }
 
+  void onStarted() => _isActive = true;
+
   void onStopped() {
+    _isActive = false;
     _requester = null;
   }
 
   @visibleForTesting
   void reset() {
     _requester = null;
+    _isActive = false;
   }
 }
