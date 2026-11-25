@@ -239,6 +239,25 @@ Flutter's defaults instead of the pinned theme, platform and locale.
 - `pumpBeforeTest` defaults to `onlyPumpAndSettle`, which never returns against a
   repeating animation. Pump an explicit duration instead.
 
+## Ready for review
+
+When the human author of a PR says it is ready for review, the agent may:
+
+1. Check that the PR's branch has no unpushed commits, so Jeffery reviews the
+   latest head. Pushing them still waits for the author's yes, as under
+   Conventions.
+2. Mark the PR ready for review, if it is still a draft.
+3. Add the `ready` label.
+4. Ask Jeffery, the review bot, for a review by commenting exactly:
+
+   ```text
+   /jeffery review
+   ```
+
+The author's own word is the trigger. A passing CI run, an approval or a
+comment from someone else is not. Jeffery replies on the PR and leaves its
+findings as inline comments.
+
 ## Conventions
 
 - **Ask before pushing, every time.** Committing locally is fine once the work
