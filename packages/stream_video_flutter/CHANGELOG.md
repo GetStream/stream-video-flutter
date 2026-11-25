@@ -234,6 +234,7 @@
 - `StreamParticipantTileStyle.topToolbarPadding` defaults to none.
 - A microphone or camera change on the ringing screens made just as the call is picked up now reaches the call, instead of being dropped.
 - The participants bar in `CallParticipantsSpotlightView` carries a button at either end for the tiles it cannot fit.
+- `StreamEffectsSettingsTab` shows the `effectsFill` icon instead of `blurFill`.
 - `CallParticipantsGridView` pages with the same button as the participants bar.
 - Above the small breakpoint, the grid's page buttons sit either side of the grid rather than over it.
 - The badge on the call control buttons is amber with no border, where it used to be red with one.
