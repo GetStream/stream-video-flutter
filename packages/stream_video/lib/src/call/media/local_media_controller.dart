@@ -100,6 +100,8 @@ class LocalMediaController {
   late final IosBroadcastScreenShare _broadcast = IosBroadcastScreenShare(
     stateManager: _stateManager,
     session: _session,
+    isApplying: (session) => identical(_optionsApplyingTo, session),
+    hasApplied: (session) => identical(_optionsAppliedTo, session),
     applyScreenShare: _applyScreenShare,
     readConnectOptions: () => _connectOptions,
     writeConnectOptions: (options) => _connectOptions = options,
@@ -135,6 +137,12 @@ class LocalMediaController {
   /// The session that started applying the options. While it is the call's
   /// session, they can only change through the device methods.
   CallSession? _optionsAppliedBy;
+
+  /// The session applying the options, until it has applied them.
+  CallSession? _optionsApplyingTo;
+
+  /// The session that finished applying the options.
+  CallSession? _optionsAppliedTo;
 
   /// Whether the connect options' audio output went to the system route on
   /// join. A rejoin or a migration applies it again to WebRTC only: the
@@ -320,6 +328,7 @@ class LocalMediaController {
     List<RtcLocalTrack> inheritedTracks = const [],
   }) async {
     _optionsAppliedBy = session;
+    _optionsApplyingTo = session;
     _connectOptionsOverride = null;
     _broadcast.takePending();
     _logger.d(
@@ -433,7 +442,9 @@ class LocalMediaController {
       }
     }
 
-    await _broadcast.sharePending();
+    if (identical(_optionsApplyingTo, session)) _optionsApplyingTo = null;
+    _optionsAppliedTo = session;
+    await _broadcast.sharePending(session);
 
     if (_connectOptions.audioInputDevice != null) {
       await setAudioInputDevice(_connectOptions.audioInputDevice!);

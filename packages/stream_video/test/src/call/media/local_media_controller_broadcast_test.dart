@@ -167,6 +167,52 @@ void main() {
       verifyNever(notifier.presentiOSBroadcastPicker);
     });
 
+    test(
+      'shares a broadcast that started after the session applied, before the '
+      'call connected',
+      () async {
+        stateManager.lifecycleCallConnecting(
+          attempt: 1,
+          strategy: SfuReconnectionStrategy.migrate,
+        );
+        final next = session = _session();
+        await controller.applyConnectOptions(session: next);
+
+        await emit(ScreenSharingStartedEvent());
+
+        expect(enabledOn(next).single?.useiOSBroadcastExtension, isTrue);
+      },
+    );
+
+    test('a session replaced while it applied does not share', () async {
+      stateManager.lifecycleCallConnecting(
+        attempt: 1,
+        strategy: SfuReconnectionStrategy.migrate,
+      );
+      final old = session = _session();
+      final stopping = Completer<void>();
+      final unused = MockRtcLocalTrack();
+      when(() => unused.trackType).thenReturn(SfuTrackType.audio);
+      when(unused.stop).thenAnswer((_) => stopping.future);
+
+      final applying = controller.applyConnectOptions(
+        session: old,
+        inheritedTracks: [unused],
+      );
+      await pumpEventQueue();
+      await emit(ScreenSharingStartedEvent());
+
+      final next = session = _session();
+      stopping.complete();
+      await applying;
+
+      verifyNotEnabledOn(old);
+      verifyNotEnabledOn(next);
+
+      await controller.applyConnectOptions(session: next);
+      expect(enabledOn(next).single?.useiOSBroadcastExtension, isTrue);
+    });
+
     test('does not capture a broadcast that stopped', () async {
       await emit(ScreenSharingStartedEvent());
       await emit(ScreenSharingStoppedEvent());

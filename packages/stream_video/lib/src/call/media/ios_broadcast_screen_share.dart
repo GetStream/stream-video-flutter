@@ -34,6 +34,8 @@ class IosBroadcastScreenShare {
   IosBroadcastScreenShare({
     required this._stateManager,
     required this._session,
+    required this._isApplying,
+    required this._hasApplied,
     required this._applyScreenShare,
     required this._readConnectOptions,
     required this._writeConnectOptions,
@@ -48,6 +50,12 @@ class IosBroadcastScreenShare {
 
   final CallStateNotifier _stateManager;
   final CallSession? Function() _session;
+
+  /// Whether a session is applying the connect options.
+  final bool Function(CallSession session) _isApplying;
+
+  /// Whether a session has finished applying the connect options.
+  final bool Function(CallSession session) _hasApplied;
   final ApplyScreenShare _applyScreenShare;
   final CallConnectOptions Function() _readConnectOptions;
   final void Function(CallConnectOptions options) _writeConnectOptions;
@@ -176,7 +184,7 @@ class IosBroadcastScreenShare {
 
     final constraints = _requestedConstraints ?? _defaultConstraints();
     final session = _session();
-    if (session == null || _awaitsSession()) {
+    if (session == null || _awaitsSession(session)) {
       _logger.i(() => '[onBroadcastStarted] shared once a session applies');
       _pendingConstraints = constraints;
       return;
@@ -185,12 +193,11 @@ class IosBroadcastScreenShare {
     await _share(session, constraints);
   }
 
-  /// Shares a broadcast that started while a session was being applied, once
-  /// that session has applied the connect options.
-  Future<void> sharePending() async {
+  /// Shares a broadcast that started while [session] applied the connect
+  /// options, once it has applied them and is still the call's session.
+  Future<void> sharePending(CallSession session) async {
     final constraints = _pendingConstraints;
-    final session = _session();
-    if (constraints == null || session == null) return;
+    if (constraints == null || !identical(session, _session())) return;
     _pendingConstraints = null;
 
     _logger.d(() => '[sharePending] sharing the running broadcast');
@@ -262,9 +269,11 @@ class IosBroadcastScreenShare {
     return identical(target, this);
   }
 
-  /// Whether a share now would reach no session or one being replaced.
-  bool _awaitsSession() {
-    if (_session() == null) return true;
+  /// Whether a share now would reach a session that is applying the connect
+  /// options, or one being replaced that has not applied them.
+  bool _awaitsSession(CallSession session) {
+    if (_isApplying(session)) return true;
+    if (_hasApplied(session)) return false;
     final status = _state.status;
     return status.isMigrating ||
         (status.isReconnecting && !status.isFastReconnecting);
