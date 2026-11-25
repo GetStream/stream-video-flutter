@@ -77,8 +77,8 @@ public class AudioFocusManager {
     }
 
     /**
-     * WebRTC gave up its audio focus because the call's audio stopped, so no focus gain will end
-     * an interruption a focus loss started.
+     * WebRTC gave up its audio focus because the call's audio stopped or focus handling was
+     * switched off, so no focus gain will end an interruption a focus loss started.
      */
     private void onAudioFocusReleased() {
         handleInterruptionEnd("Audio focus released");
