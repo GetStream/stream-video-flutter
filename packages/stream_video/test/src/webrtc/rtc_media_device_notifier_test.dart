@@ -39,6 +39,7 @@ void main() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
 
   var getSourcesCalls = 0;
+  Map<Object?, Object?>? initializeOptions;
   var sources = _sources;
   Completer<void>? getSourcesGate;
 
@@ -47,6 +48,10 @@ void main() {
   setUpAll(() async {
     messenger.setMockMethodCallHandler(channel, (call) async {
       switch (call.method) {
+        case 'initialize':
+          initializeOptions =
+              (call.arguments as Map)['options'] as Map<Object?, Object?>;
+          return null;
         case 'getSources':
           getSourcesCalls++;
           await getSourcesGate?.future;
@@ -336,6 +341,325 @@ void main() {
     });
   });
 
+  group('plugin events', () {
+    /// Sends [event] with [payload] the way the native side posts it.
+    Future<void> emit(
+      String event, [
+      Map<String, Object?> payload = const {},
+    ]) async {
+      await messenger.handlePlatformMessage(
+        'FlutterWebRTC.Event',
+        const StandardMethodCodec().encodeSuccessEnvelope({
+          'event': event,
+          ...payload,
+        }),
+        (_) {},
+      );
+      await pumpEventQueue();
+    }
+
+    test('screen sharing and audio route changes reach the native '
+        'events', () async {
+      final events = <NativeWebRtcEvent>[];
+      final subscription = notifier.nativeWebRtcEventsStream().listen(
+        events.add,
+      );
+
+      await emit('screenSharingStarted');
+      await emit('screenSharingStopped', {'trackId': 'track-1'});
+      await emit('onAudioRouteChange', {
+        'deviceId': 'speaker-uid',
+        'label': 'Speaker',
+        'groupId': 'Speaker',
+      });
+      await subscription.cancel();
+
+      expect(events, [
+        isA<ScreenSharingStartedEvent>(),
+        isA<ScreenSharingStoppedEvent>().having(
+          (e) => e.trackId,
+          'trackId',
+          'track-1',
+        ),
+        isA<AudioRouteChangedEvent>().having(
+          (e) => e.device,
+          'device',
+          const RtcMediaDevice(
+            id: 'speaker-uid',
+            label: 'Speaker',
+            groupId: 'Speaker',
+            kind: RtcMediaDeviceKind.audioOutput,
+          ),
+        ),
+      ]);
+    });
+
+    test('an audio route change carries its reason', () async {
+      final events = <NativeWebRtcEvent>[];
+      final subscription = notifier.nativeWebRtcEventsStream().listen(
+        events.add,
+      );
+
+      await emit('onAudioRouteChange', {
+        'deviceId': 'Speaker',
+        'label': 'Speaker',
+        'reason': 8,
+      });
+      await emit('onAudioRouteChange', {'deviceId': 'Receiver'});
+      await subscription.cancel();
+
+      expect(events.cast<AudioRouteChangedEvent>().map((e) => e.reason), [
+        AudioRouteChangeReason.routeConfigurationChange,
+        AudioRouteChangeReason.unknown,
+      ]);
+    });
+
+    test('an audio route without a device id is dropped', () async {
+      final events = <NativeWebRtcEvent>[];
+      final subscription = notifier.nativeWebRtcEventsStream().listen(
+        events.add,
+      );
+
+      await emit('onAudioRouteChange', {'deviceId': '', 'label': 'Speaker'});
+      await subscription.cancel();
+
+      expect(events, isEmpty);
+    });
+
+    test('speech activity reaches the speech activity stream', () async {
+      final events = <SpeechActivityEvent>[];
+      final subscription = notifier.speechActivityStream.listen(events.add);
+
+      await emit('onSpeechActivityChanged', {'type': 'started'});
+      await emit('onSpeechActivityChanged', {'type': 'ended'});
+      await subscription.cancel();
+
+      expect(events, [
+        isA<SpeechActivityStarted>(),
+        isA<SpeechActivityEnded>(),
+      ]);
+    });
+
+    test('an audio processing change is traced', () async {
+      await emit('onAudioProcessingStateChanged', {
+        'stereoPlayoutEnabled': true,
+        'voiceProcessingEnabled': false,
+        'voiceProcessingBypassed': true,
+        'voiceProcessingAGCEnabled': false,
+      });
+
+      final traces = notifier.getTrace().snapshot.where(
+        (record) => record.tag == TraceTag.audioProcessingStateChanged,
+      );
+      expect(traces.map((record) => record.data), [
+        {
+          'stereoPlayoutEnabled': true,
+          'voiceProcessingEnabled': false,
+          'voiceProcessingBypassed': true,
+          'voiceProcessingAGCEnabled': false,
+        },
+      ]);
+    });
+
+    // The host running the tests is neither Android nor iOS.
+    test('interruption callbacks are refused where the platform reports '
+        'none', () async {
+      await expectLater(
+        notifier.handleCallInterruptionCallbacks(),
+        throwsA(isA<UnimplementedError>()),
+      );
+    });
+
+    group('with interruptions reported', () {
+      late _FakePlatformEvents events;
+      late rtc.WebRtcPlatformEvents original;
+
+      setUp(() {
+        original = notifier.platformEvents;
+        events = _FakePlatformEvents();
+        notifier.platformEvents = events;
+      });
+
+      tearDown(() async {
+        notifier.platformEvents = original;
+        await events.interruptions.close();
+      });
+
+      test('the callbacks run on start and end', () async {
+        final calls = <String>[];
+        await notifier.handleCallInterruptionCallbacks(
+          onInterruptionStart: () => calls.add('start'),
+          onInterruptionEnd: () => calls.add('end'),
+          androidInterruptionSource:
+              rtc.AndroidInterruptionSource.telephonyOnly,
+        );
+
+        events.interruptions
+          ..add(rtc.AudioInterruption.started)
+          ..add(rtc.AudioInterruption.ended);
+        await pumpEventQueue();
+
+        expect(events.enabledWith, [
+          rtc.AndroidInterruptionSource.telephonyOnly,
+        ]);
+        expect(calls, ['start', 'end']);
+      });
+
+      test('a second call replaces the callbacks of the first', () async {
+        final calls = <String>[];
+        await notifier.handleCallInterruptionCallbacks(
+          onInterruptionStart: () => calls.add('first'),
+        );
+        await notifier.handleCallInterruptionCallbacks(
+          onInterruptionStart: () => calls.add('second'),
+        );
+
+        events.interruptions.add(rtc.AudioInterruption.started);
+        await pumpEventQueue();
+
+        expect(calls, ['second']);
+      });
+
+      test('of two overlapping calls, the last one wins', () async {
+        final first = Completer<void>();
+        final second = Completer<void>();
+        events.enableGates.addAll([first, second]);
+        final calls = <String>[];
+
+        final firstCall = notifier.handleCallInterruptionCallbacks(
+          onInterruptionStart: () => calls.add('first'),
+        );
+        final secondCall = notifier.handleCallInterruptionCallbacks(
+          onInterruptionStart: () => calls.add('second'),
+        );
+        // The platform answers the second call first.
+        second.complete();
+        await pumpEventQueue();
+        first.complete();
+        await Future.wait([firstCall, secondCall]);
+
+        events.interruptions.add(rtc.AudioInterruption.started);
+        await pumpEventQueue();
+
+        expect(calls, ['second']);
+      });
+
+      test('an interruption reported while enabling reaches the '
+          'callbacks', () async {
+        final enabling = Completer<void>();
+        events.enableGates.add(enabling);
+        final calls = <String>[];
+
+        final call = notifier.handleCallInterruptionCallbacks(
+          onInterruptionStart: () => calls.add('start'),
+        );
+        events.interruptions.add(rtc.AudioInterruption.started);
+        await pumpEventQueue();
+        enabling.complete();
+        await call;
+
+        expect(calls, ['start']);
+      });
+
+      test('a call that fails to enable keeps the callbacks set '
+          'before', () async {
+        final calls = <String>[];
+        await notifier.handleCallInterruptionCallbacks(
+          onInterruptionStart: () => calls.add('first'),
+        );
+        events.enableError = StateError('enable failed');
+
+        await expectLater(
+          notifier.handleCallInterruptionCallbacks(
+            onInterruptionStart: () => calls.add('second'),
+          ),
+          throwsStateError,
+        );
+        events.interruptions.add(rtc.AudioInterruption.started);
+        await pumpEventQueue();
+
+        expect(calls, ['first']);
+      });
+
+      test('an earlier call that fails after a later one succeeded leaves '
+          'only the later callbacks subscribed', () async {
+        final calls = <String>[];
+        await notifier.handleCallInterruptionCallbacks(
+          onInterruptionStart: () => calls.add('first'),
+        );
+        final earlier = Completer<void>();
+        events.enableGates.add(earlier);
+
+        final earlierCall = expectLater(
+          notifier.handleCallInterruptionCallbacks(
+            onInterruptionStart: () => calls.add('earlier'),
+          ),
+          throwsStateError,
+        );
+        await notifier.handleCallInterruptionCallbacks(
+          onInterruptionStart: () => calls.add('later'),
+        );
+        events.enableError = StateError('enable failed');
+        earlier.complete();
+        await earlierCall;
+
+        expect(events.listeners, 1);
+        events.interruptions.add(rtc.AudioInterruption.started);
+        await pumpEventQueue();
+        expect(calls, ['later']);
+      });
+
+      test('two overlapping calls that both fail keep the callbacks set '
+          'before', () async {
+        final calls = <String>[];
+        await notifier.handleCallInterruptionCallbacks(
+          onInterruptionStart: () => calls.add('first'),
+        );
+        final earlier = Completer<void>();
+        final later = Completer<void>();
+        events
+          ..enableGates.addAll([earlier, later])
+          ..enableError = StateError('enable failed');
+
+        final earlierCall = expectLater(
+          notifier.handleCallInterruptionCallbacks(
+            onInterruptionStart: () => calls.add('earlier'),
+          ),
+          throwsStateError,
+        );
+        final laterCall = expectLater(
+          notifier.handleCallInterruptionCallbacks(
+            onInterruptionStart: () => calls.add('later'),
+          ),
+          throwsStateError,
+        );
+        // The earlier call fails first.
+        earlier.complete();
+        await pumpEventQueue();
+        later.complete();
+        await Future.wait([earlierCall, laterCall]);
+
+        events.interruptions.add(rtc.AudioInterruption.started);
+        await pumpEventQueue();
+
+        expect(calls, ['first']);
+      });
+    });
+  });
+
+  group('reinitializeAudioConfiguration', () {
+    test('refreshes the implicit factory without the Apple '
+        'configuration', () async {
+      const policy = AudioConfigurationPolicy.viewer();
+      await notifier.reinitializeAudioConfiguration(policy);
+
+      expect(initializeOptions, {
+        'bypassVoiceProcessing': true,
+        'androidAudioConfiguration': policy.getAndroidConfiguration().toMap(),
+      });
+    });
+  });
+
   group('AudioRouteChangeReason', () {
     test('has the AVAudioSessionRouteChangeReason codes', () {
       expect(
@@ -385,45 +709,60 @@ void main() {
       },
     );
   });
+}
 
-  group('the onAudioRouteChange message from the WebRTC plugin', () {
-    test('carries the device and the reason', () {
-      final event = RtcMediaDeviceNotifier.nativeWebRtcEventFrom({
-        'onAudioRouteChange': {
-          'deviceId': 'Speaker',
-          'label': 'Speaker',
-          'reason': 8,
-        },
-      });
+// ignore: subtype_of_sealed_class, a fake for the tests
+class _FakePlatformEvents implements rtc.WebRtcPlatformEvents {
+  // Closed in the tests' tearDown.
+  // ignore: close_sinks
+  final interruptions = StreamController<rtc.AudioInterruption>.broadcast();
+  final enabledWith = <rtc.AndroidInterruptionSource>[];
 
-      expect(event, isA<AudioRouteChangedEvent>());
-      final routeChange = event! as AudioRouteChangedEvent;
-      expect(routeChange.device.id, 'Speaker');
-      expect(routeChange.device.kind, RtcMediaDeviceKind.audioOutput);
-      expect(
-        routeChange.reason,
-        AudioRouteChangeReason.routeConfigurationChange,
-      );
-    });
+  /// When not empty, each enable waits for the next of these.
+  final enableGates = <Completer<void>>[];
 
-    test('without a reason has an unknown one', () {
-      final event = RtcMediaDeviceNotifier.nativeWebRtcEventFrom({
-        'onAudioRouteChange': {'deviceId': 'Receiver'},
-      });
+  /// When set, enabling fails with it.
+  Error? enableError;
 
-      expect(
-        (event! as AudioRouteChangedEvent).reason,
-        AudioRouteChangeReason.unknown,
-      );
-    });
+  /// The subscriptions to [onInterruption] not cancelled yet.
+  int listeners = 0;
 
-    test('without a device is dropped', () {
-      expect(
-        RtcMediaDeviceNotifier.nativeWebRtcEventFrom({
-          'onAudioRouteChange': {'reason': 8},
-        }),
-        isNull,
-      );
-    });
-  });
+  @override
+  Stream<rtc.AudioInterruption> get onInterruption => Stream.multi((
+    controller,
+  ) {
+    listeners++;
+    final subscription = interruptions.stream.listen(controller.add);
+    controller.onCancel = () {
+      listeners--;
+      return subscription.cancel();
+    };
+  }, isBroadcast: true);
+
+  @override
+  Future<void> enableInterruptionEvents({
+    rtc.AndroidInterruptionSource androidInterruptionSource =
+        rtc.AndroidInterruptionSource.audioFocusAndTelephony,
+  }) async {
+    enabledWith.add(androidInterruptionSource);
+    if (enableGates.isNotEmpty) await enableGates.removeAt(0).future;
+    if (enableError case final error?) throw error;
+  }
+
+  @override
+  Stream<rtc.AudioRoute> get onAudioRouteChanged => const Stream.empty();
+
+  @override
+  Stream<rtc.SpeechActivity> get onSpeechActivity => const Stream.empty();
+
+  @override
+  Stream<rtc.AudioProcessingState> get onAudioProcessingStateChanged =>
+      const Stream.empty();
+
+  @override
+  Stream<void> get onScreenSharingStarted => const Stream.empty();
+
+  @override
+  Stream<rtc.ScreenSharingStopped> get onScreenSharingStopped =>
+      const Stream.empty();
 }

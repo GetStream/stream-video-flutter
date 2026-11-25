@@ -62,28 +62,11 @@ class StreamPeerConnectionFactory {
   Future<rtc.NativePeerConnectionFactory?> _buildNativeFactory() async {
     try {
       final policy = resolvedAudioConfigurationPolicy;
-      final options = <String, dynamic>{
-        'bypassVoiceProcessing': policy.bypassVoiceProcessing,
-      };
-
-      if (CurrentPlatform.isAndroid) {
-        options['androidAudioConfiguration'] = policy
-            .getAndroidConfiguration()
-            .toMap();
-      }
-
-      if (CurrentPlatform.isIos || CurrentPlatform.isMacOS) {
-        // Applied when the factory is built and again when its audio resumes.
-        // A policy that defaults to the speaker starts on the loudspeaker. On
-        // iOS, `Call.resumeAudio` then re-applies the configuration and output
-        // applied since.
-        options['appleAudioConfiguration'] = policy
-            .getAppleConfiguration(defaultToSpeaker: policy.defaultsToSpeaker)
-            .toMap();
-      }
-
+      // On iOS, the Apple configuration is applied when the factory is built
+      // and again when its audio resumes; `Call.resumeAudio` then re-applies
+      // the configuration and output applied since.
       _nativeFactory = await rtc.NativePeerConnectionFactory.create(
-        options: options,
+        options: policy.toFactoryOptions(),
       );
 
       _logger.i(
