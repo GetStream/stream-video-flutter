@@ -442,9 +442,7 @@ class LocalMediaController {
       }
     }
 
-    if (identical(_optionsApplyingTo, session)) _optionsApplyingTo = null;
-    _optionsAppliedTo = session;
-    await _broadcast.sharePending(session);
+    await _finishApplying(session);
 
     if (_connectOptions.audioInputDevice != null) {
       await setAudioInputDevice(_connectOptions.audioInputDevice!);
@@ -543,6 +541,14 @@ class LocalMediaController {
     }
 
     return const Result.success(none);
+  }
+
+  /// Records that [session] applied the connect options, and shares a
+  /// broadcast that started meanwhile.
+  Future<void> _finishApplying(CallSession session) async {
+    if (identical(_optionsApplyingTo, session)) _optionsApplyingTo = null;
+    _optionsAppliedTo = session;
+    await _broadcast.sharePending(session);
   }
 
   Future<Result<None>> _applyScreenShareOption(
