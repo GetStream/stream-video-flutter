@@ -13,7 +13,7 @@ class NativePeerConnectionFactory {
   final String factoryId;
 
   static Future<NativePeerConnectionFactory> create({
-    Map<String, dynamic>? options,
+    PeerConnectionFactoryOptions options = const PeerConnectionFactoryOptions(),
   }) async {
     throw UnimplementedError(
       'NativePeerConnectionFactory is not supported on web',

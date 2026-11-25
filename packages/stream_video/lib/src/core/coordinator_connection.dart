@@ -106,7 +106,7 @@ class CoordinatorConnection {
     }
 
     if (_connection.isConnected) {
-      _logger.w(() => '[connect] rejected (already connected)');
+      _logger.d(() => '[connect] rejected (already connected)');
       if (registerPushDevice) _registerPushDevice();
       // The cache can be briefly empty while a token refresh is in flight;
       // getToken serves the cached token when present and otherwise waits

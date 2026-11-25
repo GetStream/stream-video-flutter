@@ -9,9 +9,10 @@ import 'package:stream_video/stream_video.dart';
 import '../../test_helpers.dart';
 import 'fixtures/call_test_helpers.dart';
 
-/// Notifier whose audio interruptions are driven by the test, standing in for
-/// the WebRTC plugin's process-wide reports.
-class _InterruptionNotifier extends MockRtcMediaDeviceNotifier {
+/// Audio controller whose interruptions are driven by the test, standing in
+/// for the WebRTC plugin's process-wide reports.
+// ignore: subtype_of_sealed_class, a mock for the tests
+class _InterruptionController extends MockPlatformAudioController {
   // Closed by the test's tearDown, which the lint can't see from here.
   // ignore: close_sinks
   final interruptions = StreamController<bool>.broadcast();
@@ -28,13 +29,16 @@ void main() {
 
   group('Call audio interruption state', () {
     late BehaviorSubject<InternetStatus> internetStatusController;
-    late _InterruptionNotifier deviceNotifier;
+    late MockRtcMediaDeviceNotifier deviceNotifier;
+    late _InterruptionController audio;
 
     setUp(() {
       internetStatusController = BehaviorSubject<InternetStatus>.seeded(
         InternetStatus.connected,
       );
-      deviceNotifier = _InterruptionNotifier();
+      deviceNotifier = MockRtcMediaDeviceNotifier();
+      audio = _InterruptionController();
+      PlatformAudioController.instance = audio;
       // `Call.join` enumerates devices while applying the call settings.
       when(
         () => deviceNotifier.enumerateDevicesFor(any()),
@@ -43,7 +47,8 @@ void main() {
 
     tearDown(() async {
       await internetStatusController.close();
-      await deviceNotifier.interruptions.close();
+      PlatformAudioController.instance = null;
+      await audio.interruptions.close();
     });
 
     late MockClientState clientState;
@@ -86,10 +91,10 @@ void main() {
       final call = makeCall();
       await joinActive(call);
 
-      deviceNotifier.interruptions.add(true);
+      audio.interruptions.add(true);
       await expectInterrupted(call, interrupted: true);
 
-      deviceNotifier.interruptions.add(false);
+      audio.interruptions.add(false);
       await expectInterrupted(call, interrupted: false);
     });
 
@@ -97,7 +102,7 @@ void main() {
       final call = makeCall();
       await call.join();
 
-      deviceNotifier.interruptions.add(true);
+      audio.interruptions.add(true);
       await pumpEventQueue();
 
       expect(call.state.value.isAudioInterrupted, isFalse);
@@ -106,7 +111,7 @@ void main() {
     test('ends the interruption when the call is left', () async {
       final call = makeCall();
       await joinActive(call);
-      deviceNotifier.interruptions.add(true);
+      audio.interruptions.add(true);
       await expectInterrupted(call, interrupted: true);
 
       await call.leave();

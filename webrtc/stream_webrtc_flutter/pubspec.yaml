@@ -13,6 +13,7 @@ dependencies:
   flutter:
     sdk: flutter
   logger: ^2.0.2+1
+  meta: ^1.16.0
   path_provider: ^2.0.2
   stream_dart_webrtc: ^1.0.0
   stream_webrtc_interface: ^1.0.0

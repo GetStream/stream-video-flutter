@@ -13,6 +13,10 @@ class _MockPushNotificationManager extends Mock
 class _MockRtcMediaDeviceNotifier extends Mock
     implements RtcMediaDeviceNotifier {}
 
+// ignore: subtype_of_sealed_class
+class _MockPlatformAudioController extends Mock
+    implements PlatformAudioController {}
+
 /// Pins that a client built for a background push sets up no media, also
 /// while it accepts or declines a ring.
 void main() {
@@ -27,16 +31,19 @@ void main() {
   });
 
   late _MockRtcMediaDeviceNotifier notifier;
+  late _MockPlatformAudioController audio;
   late _MockPushNotificationManager push;
   late StreamController<RingingEvent> nativeEvents;
 
   setUp(() {
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
     notifier = _MockRtcMediaDeviceNotifier();
-    when(
-      () => notifier.reinitializeAudioConfiguration(any()),
-    ).thenAnswer((_) async {});
     RtcMediaDeviceNotifier.instance = notifier;
+    audio = _MockPlatformAudioController();
+    when(
+      () => audio.reinitializeAudioConfiguration(any()),
+    ).thenAnswer((_) async {});
+    PlatformAudioController.instance = audio;
 
     push = _MockPushNotificationManager();
     nativeEvents = StreamController<RingingEvent>.broadcast();
@@ -52,6 +59,7 @@ void main() {
 
   tearDown(() async {
     RtcMediaDeviceNotifier.instance = null;
+    PlatformAudioController.instance = null;
     CurrentPlatform.debugCurrentPlatformOverride = null;
     await nativeEvents.close();
   });
@@ -157,6 +165,7 @@ void main() {
       ),
     ).called(1);
     verifyZeroInteractions(notifier);
+    verifyZeroInteractions(audio);
   });
 
   test('accepting a ring touches no media', () async {
@@ -169,6 +178,7 @@ void main() {
     expect((await call.accept()).isSuccess, isTrue);
 
     verifyZeroInteractions(notifier);
+    verifyZeroInteractions(audio);
   });
 
   test('a ring from a client built without media cannot be joined', () async {
@@ -195,6 +205,7 @@ void main() {
       ),
     );
     verifyZeroInteractions(notifier);
+    verifyZeroInteractions(audio);
   });
 
   test('a client built outside it applies the audio configuration', () async {
@@ -202,19 +213,19 @@ void main() {
     addTearDown(fixture.dispose);
     await fixture.streamVideo.ready;
 
-    verify(() => notifier.reinitializeAudioConfiguration(any())).called(1);
+    verify(() => audio.reinitializeAudioConfiguration(any())).called(1);
   });
 
   test('joining a ring on a client built outside it observes the '
-      'notifier', () async {
+      'audio controller', () async {
     when(
-      () => notifier.webAudioPlaybackBlockedChanges,
+      () => audio.webAudioPlaybackBlockedChanges,
     ).thenAnswer((_) => const Stream.empty());
     when(
-      notifier.nativeWebRtcEventsStream,
+      audio.nativeWebRtcEventsStream,
     ).thenAnswer((_) => const Stream.empty());
     when(
-      () => notifier.audioInterruptions,
+      () => audio.audioInterruptions,
     ).thenAnswer((_) => const Stream.empty());
     final fixture = buildFixture();
     addTearDown(fixture.dispose);
@@ -236,20 +247,20 @@ void main() {
     await fixture.streamVideo.ready;
 
     final call = ring(fixture);
-    // The join observes the notifier as it starts; the rest of it is not
+    // The join observes the audio controller as it starts; the rest of it is not
     // under test, so the call is left right after.
     unawaited(call.join());
     await pumpEventQueue();
 
-    verify(() => notifier.webAudioPlaybackBlockedChanges).called(1);
-    verify(() => notifier.audioInterruptions).called(1);
+    verify(() => audio.webAudioPlaybackBlockedChanges).called(1);
+    verify(() => audio.audioInterruptions).called(1);
     await call.leave();
   });
 
   test('ready and the WebRTC set-up complete when the audio configuration '
       'fails', () async {
     when(
-      () => notifier.reinitializeAudioConfiguration(any()),
+      () => audio.reinitializeAudioConfiguration(any()),
     ).thenThrow(StateError('audio session'));
     final fixture = buildFixture();
     addTearDown(fixture.dispose);

@@ -27,17 +27,8 @@ class MediaDeviceNative extends MediaDevices {
       case 'onDeviceChange':
         ondevicechange?.call(null);
         break;
-      case 'onInterruptionStart':
-        onInterruptionStart?.call();
-        break;
-      case 'onInterruptionEnd':
-        onInterruptionEnd?.call();
-        break;
     }
   }
-
-  Function()? onInterruptionStart;
-  Function()? onInterruptionEnd;
 
   @override
   Future<MediaStream> getUserMedia(
