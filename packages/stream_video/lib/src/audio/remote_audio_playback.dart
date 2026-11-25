@@ -9,6 +9,10 @@ import '../logger/stream_log.dart';
 
 const _tag = 'SV:RemoteAudioPlayback';
 
+/// Receives a playback trace, tagged with a [TraceTag] or an
+/// [rtc.AudioRendererTraceTag].
+typedef RemoteAudioTraceHandler = void Function(String tag, Object? data);
+
 /// Creates the renderer of the remote audio track [id].
 typedef AudioRendererFactory =
     rtc.RTCAudioRenderer Function(
@@ -46,11 +50,15 @@ class RemoteAudioPlayback {
   static set instance(RemoteAudioPlayback? playback) => _instance = playback;
 
   /// Receives the playback traces, the renderers' included.
-  rtc.AudioRendererTraceHandler? traceHandler;
+  RemoteAudioTraceHandler? traceHandler;
 
   final AudioRendererFactory _createRenderer;
 
   void _trace(String tag, Object? data) => traceHandler?.call(tag, data);
+
+  void _traceRenderer(rtc.AudioRendererTrace trace) {
+    _trace(trace.tag, trace.data);
+  }
 
   /// The renderer of each track id.
   ///
@@ -58,7 +66,8 @@ class RemoteAudioPlayback {
   /// session being replaced and the one replacing it share a renderer.
   final _renderers = <String, rtc.RTCAudioRenderer>{};
 
-  final _blockedSubscriptions = <String, StreamSubscription<bool>>{};
+  final _stateSubscriptions =
+      <String, StreamSubscription<rtc.AudioRendererState>>{};
 
   /// Seeded so a listener that subscribes after playback was already blocked
   /// (e.g. a second call joining the page) gets the current value.
@@ -78,7 +87,7 @@ class RemoteAudioPlayback {
   bool _tracedOutputChangeUnsupported = false;
 
   void _notifyBlocked() {
-    final blocked = _renderers.values.any((renderer) => renderer.isBlocked);
+    final blocked = _renderers.values.any(_isBlocked);
     if (blocked == _blockedController.value) return;
 
     _blockedController.add(blocked);
@@ -91,11 +100,19 @@ class RemoteAudioPlayback {
   }
 
   rtc.RTCAudioRenderer _newRenderer(String id) {
-    final renderer = _createRenderer(id, onTrace: _trace);
-    _blockedSubscriptions[id] = renderer.playbackBlocked.listen(
+    final renderer = _createRenderer(id, onTrace: _traceRenderer);
+    _stateSubscriptions[id] = renderer.stateChanges.listen(
       (_) => _notifyBlocked(),
     );
     return renderer;
+  }
+
+  static bool _isBlocked(rtc.RTCAudioRenderer renderer) {
+    return renderer.state == rtc.AudioRendererState.blocked;
+  }
+
+  static bool _isRecovering(rtc.RTCAudioRenderer renderer) {
+    return renderer.state == rtc.AudioRendererState.recovering;
   }
 
   /// Stops playing [track] and releases the renderer of track [id].
@@ -117,8 +134,12 @@ class RemoteAudioPlayback {
     }
 
     _renderers.remove(id);
-    unawaited(_blockedSubscriptions.remove(id)?.cancel());
-    unawaited(renderer.dispose());
+    unawaited(_stateSubscriptions.remove(id)?.cancel());
+    unawaited(
+      renderer.dispose().catchError((Object e, StackTrace stk) {
+        streamLog.e(_tag, () => 'Failed to dispose audio for $id: $e\n$stk');
+      }),
+    );
     _notifyBlocked();
   }
 
@@ -197,8 +218,8 @@ class RemoteAudioPlayback {
   /// Recovering renderers are included because the gesture may be exactly
   /// what they were missing, and retrying now beats waiting out the backoff.
   Future<void> resume() async {
-    final blocked = _renderers.values.where((r) => r.isBlocked).toList();
-    final recovering = _renderers.values.where((r) => r.isRecovering).toList();
+    final blocked = _renderers.values.where(_isBlocked).toList();
+    final recovering = _renderers.values.where(_isRecovering).toList();
 
     _trace(TraceTag.resumeAudio, {
       'blockedTracks': blocked.length,
@@ -274,7 +295,7 @@ class RemoteAudioPlayback {
     _trace(TraceTag.audioPlaybackReattach, {
       'reason': reason,
       'tracks': trackIds.length,
-      'blockedTracks': _renderers.values.where((r) => r.isBlocked).length,
+      'blockedTracks': _renderers.values.where(_isBlocked).length,
     });
 
     for (final trackId in trackIds) {

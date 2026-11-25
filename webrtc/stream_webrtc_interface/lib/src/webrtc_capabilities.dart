@@ -3,9 +3,10 @@ import 'package:meta/meta.dart';
 /// What the WebRTC implementation on this platform can do.
 ///
 /// The WebRTC packages build the value for the platform the app runs on; a
-/// test builds one with the capabilities it needs.
+/// test builds one with the capabilities it needs. A capability added later
+/// defaults to `false`.
 @immutable
-class WebRtcCapabilities {
+final class WebRtcCapabilities {
   const WebRtcCapabilities({
     required this.supportsPerCallFactory,
     required this.supportsAudioPlayoutPause,
@@ -19,7 +20,7 @@ class WebRtcCapabilities {
     required this.usesExactDeviceIdConstraints,
     required this.reportsAudioInterruptions,
     required this.supportsSystemManagedAudioFocus,
-    required this.needsRemoteAudioReattach,
+    this.needsRemoteAudioReattach = false,
   });
 
   /// Whether each call can build its own peer connection factory, with its

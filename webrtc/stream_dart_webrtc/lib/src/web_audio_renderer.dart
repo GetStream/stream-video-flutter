@@ -2,12 +2,15 @@ import 'dart:async';
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
+import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 import 'package:web/web.dart' as web;
 
 import 'audio_playback_watchdog.dart';
 import 'third_party/dart_webrtc/media_stream_track_impl.dart';
+
+final _logger = Logger('WebAudioRenderer');
 
 /// The id of the hidden element that holds the remote audio elements.
 const audioContainerId = 'stream_audio_container';
@@ -36,11 +39,12 @@ Future<void> setAudioPlayoutPaused(bool paused) async {
   }
 }
 
+// ignore: subtype_of_sealed_class, the plugin implements its own contract
 /// An [RTCAudioRenderer] on an audio element in the [audioContainerId]
 /// container.
 @internal
 class WebAudioRenderer implements RTCAudioRenderer {
-  WebAudioRenderer(this.id, {this.onTrace}) {
+  WebAudioRenderer(this.id, {this.onTrace}) : _muted = _playoutPaused {
     _live.add(this);
   }
 
@@ -49,6 +53,11 @@ class WebAudioRenderer implements RTCAudioRenderer {
 
   /// Whether remote audio playout is paused, see [setAudioPlayoutPaused].
   static bool _playoutPaused = false;
+
+  /// Whether the browser's audio elements can pick their output.
+  static final bool _supportsSetSinkId = web.HTMLAudioElement()
+      .hasProperty('setSinkId'.toJS)
+      .toDart;
 
   @override
   final String id;
@@ -59,9 +68,16 @@ class WebAudioRenderer implements RTCAudioRenderer {
   MediaStreamTrack? _track;
   AudioPlaybackWatchdog? _watchdog;
   bool _disposed = false;
+  bool _muted;
+
+  /// The output [setSinkId] picked before there was an element.
+  String? _pendingSinkId;
 
   bool _blocked = false;
-  final _blockedController = StreamController<bool>.broadcast(sync: true);
+  AudioRendererState _state = AudioRendererState.detached;
+  final _stateChanges = StreamController<AudioRendererState>.broadcast(
+    sync: true,
+  );
 
   @override
   MediaStreamTrack? get track => _track;
@@ -80,7 +96,10 @@ class WebAudioRenderer implements RTCAudioRenderer {
 
   @override
   void attach(MediaStreamTrack track) {
-    if (_disposed || track is! MediaStreamTrackWeb) return;
+    if (track is! MediaStreamTrackWeb) {
+      throw ArgumentError.value(track, 'track', 'Not a browser track');
+    }
+    if (_disposed) return;
 
     final element = _element ??= _createElement();
     final stream = web.MediaStream()..addTrack(track.jsTrack);
@@ -96,8 +115,10 @@ class WebAudioRenderer implements RTCAudioRenderer {
       isBlocked: () => _blocked,
       markBlocked: () => _setBlocked(true),
       markUnblocked: () => _setBlocked(false),
+      onRecoveringChanged: _updateState,
       onTrace: onTrace,
     );
+    _updateState();
   }
 
   web.HTMLAudioElement _createElement() {
@@ -109,7 +130,11 @@ class WebAudioRenderer implements RTCAudioRenderer {
             ..id = elementId
             ..autoplay = true);
     if (existing == null) _findOrCreateContainer().append(element);
-    element.muted = _playoutPaused;
+    element.muted = _muted;
+
+    final sinkId = _pendingSinkId;
+    _pendingSinkId = null;
+    if (sinkId != null) unawaited(_applySinkId(element, sinkId));
     return element;
   }
 
@@ -119,41 +144,72 @@ class WebAudioRenderer implements RTCAudioRenderer {
     _watchdog?.dispose();
     _watchdog = null;
     _element?.srcObject = null;
+    _updateState();
   }
 
   @override
-  bool get muted => _element?.muted ?? _playoutPaused;
+  bool get muted => _muted;
 
   @override
-  set muted(bool muted) => _element?.muted = muted;
+  set muted(bool muted) {
+    _muted = muted;
+    _element?.muted = muted;
+  }
 
   @override
   Future<void> setSinkId(String deviceId) async {
-    final element = _element;
-    if (element == null || !element.hasProperty('setSinkId'.toJS).toDart) {
+    if (!_supportsSetSinkId) {
       throw UnsupportedError(
         'Audio output device change is not supported on this browser.',
       );
     }
+
+    final element = _element;
+    if (element == null) {
+      _pendingSinkId = deviceId;
+      return;
+    }
     await element.setSinkId(deviceId).toDart;
   }
 
-  @override
-  bool get isBlocked => _blocked;
+  Future<void> _applySinkId(
+    web.HTMLAudioElement element,
+    String deviceId,
+  ) async {
+    try {
+      await element.setSinkId(deviceId).toDart;
+    } catch (e) {
+      _logger.warning('Failed to play audio renderer $id on $deviceId: $e');
+    }
+  }
 
   @override
-  Stream<bool> get playbackBlocked => _blockedController.stream;
+  AudioRendererState get state => _state;
+
+  @override
+  Stream<AudioRendererState> get stateChanges => _stateChanges.stream;
 
   /// Returns whether the blocked state changed.
   bool _setBlocked(bool blocked) {
     if (_blocked == blocked) return false;
     _blocked = blocked;
-    _blockedController.add(blocked);
+    _updateState();
     return true;
   }
 
-  @override
-  bool get isRecovering => _watchdog?.isRecovering ?? false;
+  void _updateState() {
+    final state = _disposed || !isAttached
+        ? AudioRendererState.detached
+        : _blocked
+        ? AudioRendererState.blocked
+        : (_watchdog?.isRecovering ?? false)
+        ? AudioRendererState.recovering
+        : AudioRendererState.playing;
+    if (state == _state) return;
+
+    _state = state;
+    if (!_stateChanges.isClosed) _stateChanges.add(state);
+  }
 
   @override
   Future<void> resume() => _watchdog?.resume() ?? Future.value();
@@ -166,8 +222,7 @@ class WebAudioRenderer implements RTCAudioRenderer {
 
     _watchdog?.dispose();
     _watchdog = null;
-    _setBlocked(false);
-    await _blockedController.close();
+    _blocked = false;
 
     final element = _element;
     _element = null;
@@ -175,6 +230,8 @@ class WebAudioRenderer implements RTCAudioRenderer {
       element.srcObject = null;
       element.remove();
     }
+    _updateState();
+    await _stateChanges.close();
   }
 }
 

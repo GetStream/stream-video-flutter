@@ -8,7 +8,7 @@ import 'dart:js_interop';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_dart_webrtc/src/third_party/dart_webrtc/media_stream_track_impl.dart';
 import 'package:stream_dart_webrtc/src/web_audio_renderer.dart';
-import 'package:stream_dart_webrtc/src/web_capabilities.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 import 'package:web/web.dart' as web;
 
 /// A live remote-like audio track, generated so no device is needed.
@@ -92,21 +92,37 @@ void main() {
     expect(_element(id)!.muted, isFalse);
   });
 
-  group('supportsAudioOutputSelectionFor', () {
-    const safari =
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/605.1.15 '
-        '(KHTML, like Gecko) Version/17.5 Safari/605.1.15';
-    const chrome =
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_5) AppleWebKit/537.36 '
-        '(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36';
+  test('reports its state as it attaches and detaches', () {
+    final states = <AudioRendererState>[];
+    renderer.stateChanges.listen(states.add);
 
-    test('is false on WebKit', () {
-      expect(supportsAudioOutputSelectionFor(safari), isFalse);
-    });
+    renderer.attach(_audioTrack());
+    expect(renderer.state, AudioRendererState.playing);
+    renderer.detach();
 
-    // Chrome, which runs these tests, has `setSinkId`.
-    test('is true elsewhere where the browser has setSinkId', () {
-      expect(supportsAudioOutputSelectionFor(chrome), isTrue);
-    });
+    expect(states, [AudioRendererState.playing, AudioRendererState.detached]);
+  });
+
+  test('a mute set before attaching is kept', () {
+    renderer
+      ..muted = true
+      ..attach(_audioTrack());
+
+    expect(_element(id)!.muted, isTrue);
+    expect(renderer.muted, isTrue);
+  });
+
+  test('attaching a track of another implementation throws', () {
+    expect(() => renderer.attach(_OtherTrack()), throwsArgumentError);
+  });
+
+  // Chrome, which runs these tests, has `setSinkId`.
+  test('an output picked before attaching is not refused', () async {
+    await renderer.setSinkId('default');
+    renderer.attach(_audioTrack());
+
+    expect(_element(id), isNotNull);
   });
 }
+
+class _OtherTrack extends Fake implements MediaStreamTrack {}

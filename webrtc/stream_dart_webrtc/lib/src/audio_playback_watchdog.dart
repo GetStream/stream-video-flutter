@@ -53,6 +53,7 @@ class AudioPlaybackWatchdog {
     required this.isBlocked,
     required this.markBlocked,
     required this.markUnblocked,
+    this.onRecoveringChanged,
     this.onTrace,
   }) {
     element.listen(
@@ -77,9 +78,14 @@ class AudioPlaybackWatchdog {
   /// Records the element as no longer blocked; true when it was blocked.
   final bool Function() markUnblocked;
 
+  /// Called whenever [isRecovering] changes.
+  final void Function()? onRecoveringChanged;
+
   final AudioRendererTraceHandler? onTrace;
 
-  void _trace(String tag, Object? data) => onTrace?.call(tag, data);
+  void _trace(String tag, Map<String, Object?> data) {
+    onTrace?.call(AudioRendererTrace(tag, data));
+  }
 
   Timer? _pendingTimer;
   int _attempt = 0;
@@ -93,6 +99,12 @@ class AudioPlaybackWatchdog {
   /// Whether this element is in the middle of an unresolved outage, so a user
   /// gesture should retry it right away instead of letting the backoff run.
   bool get isRecovering => !_disposed && _degraded;
+
+  void _setDegraded(bool degraded) {
+    if (_degraded == degraded) return;
+    _degraded = degraded;
+    if (!_disposed) onRecoveringChanged?.call();
+  }
 
   void dispose() {
     if (_disposed) return;
@@ -121,6 +133,7 @@ class AudioPlaybackWatchdog {
 
     try {
       await element.play();
+      if (_disposed) return;
       _markPlaying();
     } catch (e) {
       if (_disposed) return;
@@ -185,7 +198,7 @@ class AudioPlaybackWatchdog {
         'kind': 'audio',
         'attempts': _attempt,
       });
-      _degraded = false;
+      _setDegraded(false);
     }
 
     _attempt = 0;
@@ -224,11 +237,11 @@ class AudioPlaybackWatchdog {
 
       // There is nothing to recover, so leave the machine re-armed. A latched
       // [_degraded] with no timer pending would swallow every later outage.
-      _degraded = false;
+      _setDegraded(false);
       return;
     }
 
-    _degraded = true;
+    _setDegraded(true);
     _pendingTimer = Timer(_backoff(_attempt), () {
       _pendingTimer = null;
       unawaited(play());

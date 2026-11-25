@@ -3,8 +3,7 @@
 --------------------------------------------
 [Unreleased]
 
-* Added `RTCAudioRenderer`, which plays a remote audio track, and `AudioRendererTraceTag`.
-* **Breaking:** `WebRtcCapabilities` has a new required field, `needsRemoteAudioReattach`.
+* Added `RTCAudioRenderer`, which plays a remote audio track, with its `AudioRendererState` and `AudioRendererTrace`.
 * Added `WebRtcPlatformEvents`, its event types and `SpeechActivityDetector`, and `PeerConnectionFactoryOptions`.
 * Added the Android and Apple audio configuration types, moved from `stream_webrtc_flutter`.
 * First version as `stream_webrtc_interface`, Stream's fork of `webrtc_interface` 1.5.1.

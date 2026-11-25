@@ -3,8 +3,7 @@
 --------------------------------------------
 [Unreleased]
 
-* Added `createAudioRenderer`, an audio element renderer that recovers paused or blocked playback, and `setAudioPlayoutPaused`.
-* `webRtcCapabilities.needsRemoteAudioReattach` is true on WebKit.
+* Added `createAudioRenderer`, which plays a remote audio track and recovers its playback, and `setAudioPlayoutPaused`.
 * Added `platformEvents`, whose `createSpeechActivityDetector` detects speech from a microphone capture; its streams never emit.
 * First version as `stream_dart_webrtc`, Stream's fork of `dart_webrtc` 1.8.2.
 * Licensed under the Stream licence; the code from upstream keeps its MIT licence (see `LICENSE`).

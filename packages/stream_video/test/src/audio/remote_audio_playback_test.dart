@@ -82,6 +82,40 @@ void main() {
         expect(renderers[alice]!.disposed, isTrue);
       },
     );
+
+    test('a renderer that fails to dispose is still released', () async {
+      final track = _MockTrack();
+      playback.start(alice, track);
+      renderers[alice]!.disposeError = StateError('dispose failed');
+
+      playback.stop(alice, track);
+      await pumpEventQueue();
+
+      expect(renderers[alice]!.disposed, isTrue);
+      playback.start(alice, track);
+      expect(renderers[alice]!.disposed, isFalse);
+    });
+
+    test('forwards the renderer traces', () {
+      rtc.AudioRendererTraceHandler? rendererTrace;
+      playback = RemoteAudioPlayback(
+        traceHandler: (tag, data) => traces.add((tag, data)),
+        createRenderer: (id, {onTrace}) {
+          rendererTrace = onTrace;
+          return renderers[id] = _FakeRenderer(id);
+        },
+      )..start(alice, _MockTrack());
+
+      rendererTrace!(
+        const rtc.AudioRendererTrace(rtc.AudioRendererTraceTag.stalled, {
+          'trackId': alice,
+        }),
+      );
+
+      expect(tracesOf(rtc.AudioRendererTraceTag.stalled), [
+        {'trackId': alice},
+      ]);
+    });
   });
 
   group('blocked playback', () {
@@ -290,6 +324,38 @@ void main() {
       expect(renderers[bob]!.isAttached, isTrue);
     });
 
+    test(
+      'a renderer that fails to detach leaves the others re-attached',
+      () async {
+        final bobTrack = _MockTrack();
+        playback
+          ..start(alice, _MockTrack())
+          ..start(bob, bobTrack);
+        renderers[alice]!.detachError = StateError('detach failed');
+
+        await playback.reattach(reason: 'subscriberOffer');
+
+        expect(renderers[bob]!.attached, [bobTrack, bobTrack]);
+      },
+    );
+
+    test(
+      'a renderer that fails to attach leaves the others attached',
+      () async {
+        final bobTrack = _MockTrack();
+        playback
+          ..start(alice, _MockTrack())
+          ..start(bob, bobTrack);
+
+        final reattach = playback.reattach(reason: 'subscriberOffer');
+        renderers[alice]!.attachError = StateError('attach failed');
+        await reattach;
+
+        expect(renderers[alice]!.isAttached, isFalse);
+        expect(renderers[bob]!.attached, [bobTrack, bobTrack]);
+      },
+    );
+
     test('a track started while it waits keeps its own attach', () async {
       final replacement = _MockTrack();
       playback.start(alice, _MockTrack());
@@ -328,6 +394,7 @@ void main() {
   });
 }
 
+// ignore: subtype_of_sealed_class, a fake for the tests
 class _FakeRenderer implements rtc.RTCAudioRenderer {
   _FakeRenderer(this.id);
 
@@ -342,16 +409,32 @@ class _FakeRenderer implements rtc.RTCAudioRenderer {
   String? sinkId;
   Error? sinkError;
 
-  bool recovering = false;
+  /// When set, [attach], [detach] or [dispose] throw it.
+  Error? attachError;
+  Error? detachError;
+  Error? disposeError;
 
   bool _attached = false;
-  bool _blocked = false;
-  final _blockedController = StreamController<bool>.broadcast(sync: true);
+  rtc.AudioRendererState _state = rtc.AudioRendererState.detached;
+  final _stateChanges = StreamController<rtc.AudioRendererState>.broadcast(
+    sync: true,
+  );
 
-  void setBlocked(bool blocked) {
-    _blocked = blocked;
-    _blockedController.add(blocked);
+  void _setState(rtc.AudioRendererState state) {
+    if (_state == state) return;
+    _state = state;
+    _stateChanges.add(state);
   }
+
+  void setBlocked(bool blocked) => _setState(
+    blocked ? rtc.AudioRendererState.blocked : rtc.AudioRendererState.playing,
+  );
+
+  set recovering(bool recovering) => _setState(
+    recovering
+        ? rtc.AudioRendererState.recovering
+        : rtc.AudioRendererState.playing,
+  );
 
   @override
   rtc.MediaStreamTrack? get track => attached.lastOrNull;
@@ -361,12 +444,18 @@ class _FakeRenderer implements rtc.RTCAudioRenderer {
 
   @override
   void attach(rtc.MediaStreamTrack track) {
+    if (attachError case final error?) throw error;
     attached.add(track);
     _attached = true;
+    _setState(rtc.AudioRendererState.playing);
   }
 
   @override
-  void detach() => _attached = false;
+  void detach() {
+    if (detachError case final error?) throw error;
+    _attached = false;
+    _setState(rtc.AudioRendererState.detached);
+  }
 
   @override
   bool isAttachedTo(rtc.MediaStreamTrack track) => identical(this.track, track);
@@ -381,13 +470,10 @@ class _FakeRenderer implements rtc.RTCAudioRenderer {
   }
 
   @override
-  bool get isBlocked => _blocked;
+  rtc.AudioRendererState get state => _state;
 
   @override
-  Stream<bool> get playbackBlocked => _blockedController.stream;
-
-  @override
-  bool get isRecovering => recovering;
+  Stream<rtc.AudioRendererState> get stateChanges => _stateChanges.stream;
 
   @override
   Future<void> resume() async => resumeCount++;
@@ -396,6 +482,7 @@ class _FakeRenderer implements rtc.RTCAudioRenderer {
   Future<void> dispose() async {
     disposed = true;
     _attached = false;
-    if (_blocked) setBlocked(false);
+    _setState(rtc.AudioRendererState.detached);
+    if (disposeError case final error?) throw error;
   }
 }

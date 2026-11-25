@@ -13,6 +13,7 @@ void main() {
   late _FakeElement element;
   late bool blocked;
   late List<(String, Object?)> traces;
+  late int recoveringChanges;
   late AudioPlaybackWatchdog watchdog;
 
   /// Builds the watchdog inside the fake zone, so its timers run on the fake
@@ -32,7 +33,8 @@ void main() {
         blocked = false;
         return true;
       },
-      onTrace: (tag, data) => traces.add((tag, data)),
+      onRecoveringChanged: () => recoveringChanges++,
+      onTrace: (trace) => traces.add((trace.tag, trace.data)),
     );
   }
 
@@ -42,6 +44,7 @@ void main() {
     element = _FakeElement();
     blocked = false;
     traces = [];
+    recoveringChanges = 0;
   });
 
   test('plays once on start and traces nothing when it plays', () {
@@ -119,6 +122,9 @@ void main() {
         tags().where((tag) => tag == AudioRendererTraceTag.stalled),
         hasLength(1),
       );
+      // Retries go on past the stall, until the 13th play succeeds.
+      expect(element.playCount, 13);
+      expect(tags().last, AudioRendererTraceTag.recovered);
     });
   });
 
@@ -174,6 +180,78 @@ void main() {
       expect(element.onPauseOrSuspend, isNull);
     });
   });
+  test('a `playing` event ends the recovery and its retries', () {
+    fakeAsync((async) {
+      element.failures.addAll(List.filled(3, StateError('decode')));
+      startWatchdog();
+      async.flushMicrotasks();
+      expect(watchdog.isRecovering, isTrue);
+
+      element.paused = false;
+      element.onPlaying!();
+      async.elapse(const Duration(seconds: 30));
+
+      expect(watchdog.isRecovering, isFalse);
+      expect(element.playCount, 1);
+      expect(tags(), [AudioRendererTraceTag.recovered]);
+      expect(recoveringChanges, 2);
+    });
+  });
+
+  test('resume while recovering plays right away', () {
+    fakeAsync((async) {
+      element.failures.addAll(List.filled(5, StateError('decode')));
+      startWatchdog();
+      async.flushMicrotasks();
+      async.elapse(const Duration(milliseconds: 250 + 500 + 1000));
+      expect(element.playCount, 4);
+
+      element.failures.clear();
+      unawaited(watchdog.resume());
+      async.flushMicrotasks();
+
+      expect(element.playCount, 5);
+      expect(watchdog.isRecovering, isFalse);
+
+      async.elapse(const Duration(seconds: 30));
+      expect(element.playCount, 5);
+    });
+  });
+
+  test('a dispose while play runs neither retries nor traces', () {
+    fakeAsync((async) {
+      final gate = element.playGate = Completer<void>();
+      element.failures.add(StateError('decode'));
+      startWatchdog();
+      async.flushMicrotasks();
+
+      watchdog.dispose();
+      gate.complete();
+      async.elapse(const Duration(seconds: 30));
+
+      expect(element.playCount, 1);
+      expect(traces, isEmpty);
+      expect(watchdog.isRecovering, isFalse);
+    });
+  });
+
+  test('a play that succeeds after dispose is not reported', () {
+    fakeAsync((async) {
+      element.failures.add(_autoplay);
+      startWatchdog();
+      async.flushMicrotasks();
+      expect(blocked, isTrue);
+
+      final gate = element.playGate = Completer<void>();
+      unawaited(watchdog.resume());
+      async.flushMicrotasks();
+      watchdog.dispose();
+      gate.complete();
+      async.flushMicrotasks();
+
+      expect(blocked, isTrue, reason: 'only the renderer clears it on dispose');
+    });
+  });
 }
 
 final _autoplay = StateError('NotAllowedError: play() needs a gesture');
@@ -190,9 +268,13 @@ class _FakeElement implements PlaybackElement {
   void Function(String type)? onPauseOrSuspend;
   void Function()? onPlaying;
 
+  /// When set, plays wait for it.
+  Completer<void>? playGate;
+
   @override
   Future<void> play() async {
     playCount++;
+    if (playGate case final gate?) await gate.future;
     if (failures.isNotEmpty) {
       paused = true;
       throw failures.removeAt(0);

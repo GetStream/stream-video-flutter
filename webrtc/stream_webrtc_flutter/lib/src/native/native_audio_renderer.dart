@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
@@ -18,6 +20,7 @@ Future<void> setAudioPlayoutPaused(bool paused) {
   return paused ? Helper.pauseAudioPlayout() : Helper.resumeAudioPlayout();
 }
 
+// ignore: subtype_of_sealed_class, the plugin implements its own contract
 /// An [RTCAudioRenderer] that does nothing, for native platforms.
 @internal
 class NativeAudioRenderer implements RTCAudioRenderer {
@@ -35,17 +38,30 @@ class NativeAudioRenderer implements RTCAudioRenderer {
   @override
   bool get isAttached => _attached;
 
+  final _stateChanges = StreamController<AudioRendererState>.broadcast(
+    sync: true,
+  );
+
   @override
   void attach(MediaStreamTrack track) {
     _track = track;
-    _attached = true;
+    _setAttached(true);
   }
 
   @override
-  void detach() => _attached = false;
+  void detach() => _setAttached(false);
+
+  void _setAttached(bool attached) {
+    if (_attached == attached) return;
+    _attached = attached;
+    _stateChanges.add(state);
+  }
 
   @override
-  bool isAttachedTo(MediaStreamTrack track) => identical(_track, track);
+  bool isAttachedTo(MediaStreamTrack track) {
+    final attached = _track;
+    return attached != null && attached.id == track.id;
+  }
 
   @override
   bool muted = false;
@@ -54,17 +70,18 @@ class NativeAudioRenderer implements RTCAudioRenderer {
   Future<void> setSinkId(String deviceId) async {}
 
   @override
-  bool get isBlocked => false;
+  AudioRendererState get state =>
+      _attached ? AudioRendererState.playing : AudioRendererState.detached;
 
   @override
-  Stream<bool> get playbackBlocked => const Stream.empty();
-
-  @override
-  bool get isRecovering => false;
+  Stream<AudioRendererState> get stateChanges => _stateChanges.stream;
 
   @override
   Future<void> resume() async {}
 
   @override
-  Future<void> dispose() async => _attached = false;
+  Future<void> dispose() async {
+    _setAttached(false);
+    await _stateChanges.close();
+  }
 }
