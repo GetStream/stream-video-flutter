@@ -1609,9 +1609,6 @@ class CallConnectionCoordinator {
         'strategy': sfuEvent.error.reconnectStrategy.name,
       });
 
-      // SFU_FULL, SFU_SHUTTING_DOWN, CALL_PARTICIPANT_LIMIT_REACHED are join
-      // errors. Although they may specify a `migrate` strategy, they should be
-      // handled by the join retry logic in the join flow with a REJOIN to a new SFU instead.
       // The livestream went back to backstage. A user who may stay there
       // keeps the call whatever strategy the error names; anyone else is
       // disconnected as if the call ended.
@@ -1620,6 +1617,9 @@ class CallConnectionCoordinator {
         return;
       }
 
+      // SFU_FULL, SFU_SHUTTING_DOWN, CALL_PARTICIPANT_LIMIT_REACHED are join
+      // errors. Although they may specify a `migrate` strategy, they should be
+      // handled by the join retry logic in the join flow with a REJOIN to a new SFU instead.
       if (sfuEvent.error.code.isJoinErrorCode) {
         _call._logger.w(
           () => '[onSfuEvent] skipping join error code: ${sfuEvent.error.code}',
