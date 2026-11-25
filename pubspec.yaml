@@ -265,29 +265,29 @@ melos:
       description: |
         Run `flutter build apk` in the example app.
 
-    test:android:push:
-      run: |
-        cd ./packages/stream_video_push_notification/example &&
-        flutter build apk --config-only &&
-        cd android &&
-        ./gradlew :stream_video_push_notification:testDebugUnitTest --console=plain
+    test:native:android:
+      run: melos exec -c 1 --fail-fast -- "\$MELOS_ROOT_PATH/.github/workflows/scripts/native-tests.sh android ."
       description: |
-        Run the Kotlin unit tests of stream_video_push_notification through its
-        example app, whose gradle wrapper the config-only build generates.
+        Run the JVM unit tests (android/src/test) of the plugin packages, each
+        through its example app. Packages without them are skipped.
+      packageFilters:
+        flutter: true
+        ignore: ["*example*", "flutter_dogfooding"]
 
-    test:ios:push:
-      run: |
-        cd ./packages/stream_video_push_notification/example &&
-        flutter build ios --config-only --no-codesign &&
-        cd ios &&
-        DEVICE=$(xcrun simctl list devices available | grep -m1 -oE '^ *iPhone .*\([0-9A-F-]{36}\)' | sed 's/^ *//') &&
-        UDID=$(echo "$DEVICE" | grep -oE '[0-9A-F-]{36}' || true) &&
-        if [ -z "$UDID" ]; then echo "No available iPhone simulator"; exit 1; fi &&
-        echo "Running RunnerTests on $DEVICE" &&
-        xcodebuild test -workspace Runner.xcworkspace -scheme Runner -configuration Debug \
-          -destination "platform=iOS Simulator,id=$UDID" -only-testing:RunnerTests \
-          CODE_SIGNING_ALLOWED=NO
+    test:native:ios:
+      run: melos exec -c 1 --fail-fast -- "\$MELOS_ROOT_PATH/.github/workflows/scripts/native-tests.sh ios ."
       description: |
-        Run the Swift unit tests of stream_video_push_notification (the RunnerTests
-        target of its example app) on the first available iPhone simulator, picked
-        by id so the device's iOS version does not have to be the newest installed.
+        Run the RunnerTests of the plugin packages' iOS example apps on the
+        first available iPhone simulator. Packages without them are skipped.
+      packageFilters:
+        flutter: true
+        ignore: ["*example*", "flutter_dogfooding"]
+
+    test:native:macos:
+      run: melos exec -c 1 --fail-fast -- "\$MELOS_ROOT_PATH/.github/workflows/scripts/native-tests.sh macos ."
+      description: |
+        Run the RunnerTests of the plugin packages' macOS example apps.
+        Packages without them are skipped.
+      packageFilters:
+        flutter: true
+        ignore: ["*example*", "flutter_dogfooding"]

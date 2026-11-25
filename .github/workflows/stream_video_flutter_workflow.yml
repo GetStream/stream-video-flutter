@@ -28,15 +28,18 @@ jobs:
   # filtering, which hangs forever) — see
   # https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks
   #
-  # `push` events to main and v2 always run the full suite.
+  # `push` events to main and v2 always run the full suite, except the native
+  # unit tests, which run only when the native code they build changed.
   gate:
     runs-on:
       group: github-public-amd64
     outputs:
       should_run: ${{ github.event_name == 'push' || (steps.filter.outputs.relevant == 'true' && github.event.pull_request.draft != true) }}
-      # The iOS unit tests build the push plugin's example app on a macOS
-      # runner, so they run only when something they depend on changed.
-      should_run_ios_tests: ${{ github.event_name == 'push' || (steps.filter.outputs.push_ios == 'true' && github.event.pull_request.draft != true) }}
+      # The packages whose native unit tests run, as JSON lists. A package's
+      # tests run only when its native code for that platform changed, or
+      # native code its example app builds against; see "Detect Native Changes".
+      android_test_packages: ${{ steps.native_tests.outputs.android }}
+      ios_test_packages: ${{ steps.native_tests.outputs.ios }}
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v7
@@ -61,14 +64,54 @@ jobs:
               - '.github/actions/select-xcode/**'
               - '.github/workflows/scripts/**'
               - '.github/workflows/stream_video_flutter_workflow.yml'
-            push_ios:
-              - 'packages/stream_video_push_notification/**'
-              - 'pubspec.yaml'
-              - 'pubspec.lock'
-              - '.github/actions/setup-flutter/**'
-              - '.github/actions/setup-melos/**'
-              - '.github/actions/select-xcode/**'
-              - '.github/workflows/stream_video_flutter_workflow.yml'
+
+      # One filter per package and platform, named <platform>_<package>, over
+      # the native code its tests build: the package's own, its example app's,
+      # and the native code of the packages that example also builds. An iOS
+      # package is listed only when its example has RunnerTests, since each one
+      # takes a macOS runner.
+      - name: "Detect Native Changes"
+        uses: dorny/paths-filter@v4
+        id: native
+        with:
+          token: ''
+          base: ${{ github.base_ref || github.ref }}
+          filters: |
+            android_stream_video_filters:
+              - 'packages/stream_video_filters/android/**'
+            android_stream_video_flutter:
+              - 'packages/stream_video_flutter/android/**'
+              - 'packages/stream_video_flutter/example/android/**'
+            android_stream_video_noise_cancellation:
+              - 'packages/stream_video_noise_cancellation/android/**'
+              - 'packages/stream_video_noise_cancellation/example/android/**'
+            android_stream_video_push_notification:
+              - 'packages/stream_video_push_notification/android/**'
+              - 'packages/stream_video_push_notification/example/android/**'
+            ios_stream_video_noise_cancellation:
+              - 'packages/stream_video_noise_cancellation/ios/**'
+              - 'packages/stream_video_noise_cancellation/example/ios/**'
+              - 'webrtc/stream_webrtc_flutter/ios/**'
+            ios_stream_video_push_notification:
+              - 'packages/stream_video_push_notification/ios/**'
+              - 'packages/stream_video_push_notification/example/ios/**'
+              - 'packages/stream_video_flutter/ios/**'
+              - 'webrtc/stream_webrtc_flutter/ios/**'
+
+      - name: "List Native Test Packages"
+        id: native_tests
+        env:
+          CHANGES: ${{ steps.native.outputs.changes }}
+          DRAFT: ${{ github.event.pull_request.draft == true }}
+        run: |
+          if [[ "$DRAFT" == "true" ]]; then
+            CHANGES='[]'
+          fi
+          for platform in android ios; do
+            packages=$(jq -c --arg prefix "${platform}_" \
+              'map(select(startswith($prefix)) | ltrimstr($prefix))' <<< "$CHANGES")
+            echo "$platform=$packages" >> "$GITHUB_OUTPUT"
+          done
 
   analyze:
     needs: gate
@@ -197,15 +240,27 @@ jobs:
         run: |
           melos run build:example:android
 
+      # The JVM unit tests of each package whose Android code changed, through
+      # its example app. webrtc/ runs its own in the webrtc workflow.
       - name: Android Unit Tests
+        if: needs.gate.outputs.android_test_packages != '[]'
+        env:
+          PACKAGES: ${{ needs.gate.outputs.android_test_packages }}
         run: |
-          melos run test:android:push
+          for package in $(jq -r '.[]' <<< "$PACKAGES"); do
+            .github/workflows/scripts/native-tests.sh android "packages/$package"
+          done
 
-  # Swift unit tests of the push plugin, run through its example app's
+  # The iOS unit tests of each package, run through its example app's
   # RunnerTests target. The example builds against the local plugin sources.
   ios-unit-tests:
     needs: gate
-    if: needs.gate.outputs.should_run_ios_tests == 'true'
+    if: needs.gate.outputs.ios_test_packages != '[]'
+    name: iOS unit tests (${{ matrix.package }})
+    strategy:
+      fail-fast: false
+      matrix:
+        package: ${{ fromJSON(needs.gate.outputs.ios_test_packages) }}
     timeout-minutes: 45
     runs-on: macos-latest
     steps:
@@ -222,7 +277,7 @@ jobs:
         uses: ./.github/actions/setup-melos
 
       - name: iOS Unit Tests
-        run: melos run test:ios:push
+        run: .github/workflows/scripts/native-tests.sh ios "packages/${{ matrix.package }}"
 
   # codecov/patch is a required check, but Codecov only reports it for a
   # commit with an upload. When the gate skips the tests, an empty upload
