@@ -447,25 +447,29 @@ void main() {
   group('incoming audio disabled', () {
     setUp(() => incomingAudioEnabled = false);
 
-    test('a received remote audio track starts disabled', () async {
+    MockRtcRemoteTrack mutedRemote() {
       final track = _remote(SfuTrackType.audio);
-      when(track.start).thenAnswer((_) async => events.add('start'));
-      when(track.disable).thenAnswer((_) => events.add('disable'));
+      when(() => track.start(enabled: false)).thenAnswer((_) async {});
+      return track;
+    }
+
+    test('a received remote audio track starts disabled', () async {
+      final track = mutedRemote();
 
       await controller.onRemoteTrackReceived(MockTracedPeerConnection(), track);
 
-      expect(events, ['start', 'disable']);
+      verify(() => track.start(enabled: false)).called(1);
+      verifyNever(track.start);
     });
 
     test('a published remote audio track starts disabled', () async {
-      final track = _remote(SfuTrackType.audio);
-      when(track.start).thenAnswer((_) async => events.add('start'));
-      when(track.disable).thenAnswer((_) => events.add('disable'));
+      final track = mutedRemote();
       give(track);
 
       await controller.onTrackPublished(published(SfuTrackType.audio));
 
-      expect(events, ['start', 'disable']);
+      verify(() => track.start(enabled: false)).called(1);
+      verifyNever(track.start);
     });
 
     test('a remote video track starts enabled', () async {
@@ -562,14 +566,16 @@ void main() {
       });
 
       test('starts a remote track that never started, disabled', () async {
-        when(remoteAudio.start).thenAnswer((_) async => events.add('start'));
-        when(remoteAudio.disable).thenAnswer((_) => events.add('disable'));
+        when(
+          () => remoteAudio.start(enabled: false),
+        ).thenAnswer((_) async {});
 
         await controller.resumeSuspendedAudioTracks({
           remoteAudio.trackId: SuspendedTrackState.neverStarted,
         });
 
-        expect(events, ['start', 'disable']);
+        verify(() => remoteAudio.start(enabled: false)).called(1);
+        verifyNever(remoteAudio.start);
       });
 
       test('re-enables an enabled remote track once incoming audio is '

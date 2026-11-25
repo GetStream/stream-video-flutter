@@ -411,12 +411,19 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
         .listen(_setIncomingAudioDisabled);
   }
 
+  /// Disables or enables [target]'s incoming audio, or [call]'s by default.
+  /// Audio the app disabled itself is left to the app.
   void _setIncomingAudioDisabled(bool disabled, {Call? target}) {
-    if (disabled == _incomingAudioDisabled) return;
+    final audioCall = target ?? call;
+    if (disabled) {
+      if (_incomingAudioDisabled || !audioCall.isIncomingAudioEnabled) return;
+    } else if (!_incomingAudioDisabled) {
+      return;
+    }
 
     _logger.d(() => '[setIncomingAudioDisabled] disabled: $disabled');
     _incomingAudioDisabled = disabled;
-    (target ?? call).setIncomingAudioEnabled(!disabled);
+    audioCall.setIncomingAudioEnabled(!disabled);
   }
 
   void _leaveOnDisconnect() {

@@ -134,7 +134,7 @@
 - Added `RetryConfig.rpcTimeout`, how long a coordinator request may wait to connect and then for its response (10 seconds by default).
 - Added `StreamCallStatsReportReadyEvent`, delivered when the stats report of a call session is ready. The `call.stats_report_ready` event used to be dropped as unknown.
 - Added `CallPermission.sendData` for the `send-data` capability, which used to be read as `CallPermission.unknown` with a warning.
-- `Call.setIncomingAudioEnabled` stops or resumes playing the other participants' audio in that call.
+- `Call.setIncomingAudioEnabled` stops or resumes playing the other participants' audio in that call, and `Call.isIncomingAudioEnabled` reads it.
 
 ### 🔄 Changed
 

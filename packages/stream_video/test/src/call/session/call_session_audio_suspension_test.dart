@@ -66,8 +66,9 @@ class _FakeAudioTrack extends Fake implements RtcRemoteTrack {
   void Function()? onStart;
 
   @override
-  Future<void> start() async {
+  Future<void> start({bool enabled = true}) async {
     startCalled = true;
+    this.enabled = enabled;
     onStart?.call();
   }
 
@@ -116,7 +117,7 @@ class _FakeVideoTrack extends Fake implements RtcRemoteTrack {
   void disable() {}
 
   @override
-  Future<void> start() async => startCalled = true;
+  Future<void> start({bool enabled = true}) async => startCalled = true;
 
   @override
   Future<void> stop({bool disposeWebAudioPlayer = true}) async {}

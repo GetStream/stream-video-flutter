@@ -196,8 +196,11 @@ void main() {
       final call = createCall();
       await call.join();
 
+      expect(call.isIncomingAudioEnabled, isTrue);
+
       call.setIncomingAudioEnabled(false);
 
+      expect(call.isIncomingAudioEnabled, isFalse);
       verify(callSession.applyIncomingAudioEnabled).called(1);
     });
 

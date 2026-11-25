@@ -427,6 +427,27 @@ void main() {
       verify(() => call.setIncomingAudioEnabled(false)).called(1);
     });
 
+    testWidgets('leaves audio the app disabled itself to the app', (
+      tester,
+    ) async {
+      final call = FakeLivestreamCall(liveCall.copyWith(isBackstage: true))
+        ..incomingAudioEnabled = false;
+      await pumpWidget(
+        tester,
+        LivestreamPlayer(
+          call: call,
+          joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+          onCallDisconnected: (_) {},
+        ),
+      );
+
+      call.callState = call.callState.copyWith(isBackstage: false);
+      await tester.pump();
+      await tester.pumpWidget(const SizedBox());
+
+      verifyNever(() => call.setIncomingAudioEnabled(any()));
+    });
+
     testWidgets('closing the player in backstage enables the audio again', (
       tester,
     ) async {

@@ -1708,6 +1708,10 @@ class Call {
     _session?.applyIncomingAudioEnabled();
   }
 
+  /// Whether the audio of the other participants is played, as set by
+  /// [setIncomingAudioEnabled].
+  bool get isIncomingAudioEnabled => _stateManager.incomingAudioEnabled;
+
   /// Sets the audio bitrate profile used to publish the microphone.
   ///
   /// [SfuAudioBitrateProfile.musicHighQuality] turns voice processing and

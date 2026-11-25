@@ -229,6 +229,20 @@ class SessionTrackController {
       track.isAudioTrack &&
       !_isIncomingAudioEnabled();
 
+  /// Starts [track], disabled from the start when it is a remote audio track
+  /// while incoming audio is disabled.
+  Future<void> _start(RtcTrack track, {required String tag}) {
+    if (track is RtcRemoteTrack && _isMutedIncomingAudioTrack(track)) {
+      _logger.d(
+        () =>
+            '$tag incoming audio disabled, starting ${track.trackId} disabled',
+      );
+      return track.start(enabled: false);
+    }
+
+    return track.start();
+  }
+
   /// Disables an audio track while audio is suspended, and starts any other
   /// track, re-applying the audio output for audio. A remote audio track
   /// starts disabled while incoming audio is disabled.
@@ -243,14 +257,7 @@ class SessionTrackController {
       return;
     }
 
-    await track.start();
-
-    if (_isMutedIncomingAudioTrack(track)) {
-      _logger.d(
-        () => '$tag incoming audio disabled, disabling ${track.trackId}',
-      );
-      track.disable();
-    }
+    await _start(track, tag: tag);
 
     if (track.isAudioTrack) {
       await applyCurrentAudioOutputDevice();
@@ -362,8 +369,7 @@ class SessionTrackController {
           return;
         }
 
-        await track.start();
-        if (_isMutedIncomingAudioTrack(track)) track.disable();
+        await _start(track, tag: '[resumeSuspendedAudioTracks]');
         await applyCurrentAudioOutputDevice();
         _logger.d(
           () => '[resumeSuspendedAudioTracks] started track $trackId',
