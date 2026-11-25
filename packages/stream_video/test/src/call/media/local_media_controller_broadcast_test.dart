@@ -273,4 +273,18 @@ void main() {
       });
     });
   });
+
+  test('a broadcast that could not be shared is no longer running', () async {
+    when(
+      () => session!.setScreenShareEnabled(
+        any(),
+        constraints: any(named: 'constraints'),
+      ),
+    ).thenAnswer((_) async => failureWithError('no capture'));
+
+    await emit(ScreenSharingStartedEvent());
+
+    verify(notifier.stopiOSBroadcast).called(1);
+    expect(IosBroadcastScreenShare.isBroadcastRunning, isFalse);
+  });
 }

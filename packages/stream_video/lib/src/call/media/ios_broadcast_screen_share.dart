@@ -323,8 +323,10 @@ class IosBroadcastScreenShare {
   }
 
   /// Asks the broadcast extension to finish the broadcast this call could
-  /// not share. The local participant is not sharing.
+  /// not share, and records it as stopped, as the extension may not report
+  /// the stop. The local participant is not sharing.
   Future<void> _stop() async {
+    _owner.onStopped();
     _stateManager.participantSetScreenShareEnabled(enabled: false);
     try {
       await _rtcMediaDeviceNotifier().stopiOSBroadcast();
