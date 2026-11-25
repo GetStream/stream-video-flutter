@@ -107,6 +107,48 @@ void main() {
     expect(find.bySemanticsLabel('Latency 100 milliseconds'), findsOneWidget);
   });
 
+  testWidgets(
+    'falls back to the subscriber while the publisher has no reading',
+    (tester) async {
+      when(() => reporter.currentMetrics).thenReturn(
+        CallMetrics(
+          clientEnvironment: ClientEnvironment.empty(),
+          publisher: PeerConnectionStats.empty(),
+          subscriber: PeerConnectionStats.empty().copyWith(latency: 250),
+        ),
+      );
+
+      await tester.pumpWidget(
+        TestWrapper(
+          child: Center(child: StreamCallLatencyBadge(call: call)),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(reading(tester), '250 ms');
+      expect(dotColor(tester), colors(tester).accentWarning);
+    },
+  );
+
+  testWidgets('prefers the publisher over the subscriber', (tester) async {
+    when(() => reporter.currentMetrics).thenReturn(
+      CallMetrics(
+        clientEnvironment: ClientEnvironment.empty(),
+        publisher: PeerConnectionStats.empty().copyWith(latency: 40),
+        subscriber: PeerConnectionStats.empty().copyWith(latency: 250),
+      ),
+    );
+
+    await tester.pumpWidget(
+      TestWrapper(
+        child: Center(child: StreamCallLatencyBadge(call: call)),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(reading(tester), '40 ms');
+  });
+
   testWidgets('marks a latency below 400 ms as fair', (tester) async {
     await pump(tester, latency: 399);
 

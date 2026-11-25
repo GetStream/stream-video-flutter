@@ -9,7 +9,8 @@ import 'stream_call_badge_style_defaults.dart';
 ///
 /// Built for a [CallAppBar], next to a [StreamCallDurationBadge] and a
 /// [StreamCallParticipantsBadge]. The reading is the round-trip time of the
-/// connection this client publishes on — a call-level figure, not a
+/// connection this client publishes on, or of the one it subscribes on while
+/// the publishing one has no reading — a call-level figure, not a
 /// per-participant one.
 ///
 /// A reading up to [fairFrom] is great, one below [poorFrom] is fair, and
@@ -57,6 +58,11 @@ class StreamCallLatencyBadge extends StatelessWidget {
   static ({String sessionId, bool connected}) _session(CallState state) =>
       (sessionId: state.sessionId, connected: state.status.isConnected);
 
+  // A client that publishes nothing, such as an anonymous viewer, has no
+  // reading on the publishing connection.
+  static int? _latency(CallMetrics? metrics) =>
+      metrics?.publisher?.latency ?? metrics?.subscriber?.latency;
+
   @override
   Widget build(BuildContext context) {
     final themeStyle = StreamCallLatencyBadgeTheme.of(context).style;
@@ -80,7 +86,7 @@ class StreamCallLatencyBadge extends StatelessWidget {
           builder: (context, snapshot) => _buildBadge(
             context,
             resolved,
-            snapshot.data?.publisher?.latency,
+            _latency(snapshot.data),
           ),
         );
       },

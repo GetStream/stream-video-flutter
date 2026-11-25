@@ -170,9 +170,11 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
         .whereType<RtcIceCandidatePair>()
         .firstOrNull;
     if (subscriberCandidatePair != null) {
+      final latency = subscriberCandidatePair.currentRoundTripTime;
       final incomingBitrate = subscriberCandidatePair.availableIncomingBitrate;
 
       subscriberStats = subscriberStats.copyWith(
+        latency: latency != null ? (latency * 1000).toInt() : null,
         bitrateKbps: incomingBitrate != null ? incomingBitrate / 1000 : null,
       );
     }
