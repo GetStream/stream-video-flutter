@@ -836,3 +836,19 @@ transforms:
     changes:
       - kind: "rename"
         newName: "DisconnectReasonNativeCallEnded"
+
+  - title: "Remove the Android audio attributes, which have no effect"
+    date: "2026-11-25"
+    element:
+      uris:
+        [
+          "package:stream_video/src/webrtc/rtc_media_device/rtc_media_device_notifier.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      method: "handleCallInterruptionCallbacks"
+      inClass: "RtcMediaDeviceNotifier"
+    changes:
+      - kind: "removeParameter"
+        name: "androidAudioAttributesUsageType"
+      - kind: "removeParameter"
+        name: "androidAudioAttributesContentType"

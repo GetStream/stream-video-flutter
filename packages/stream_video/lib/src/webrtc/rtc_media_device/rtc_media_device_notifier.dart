@@ -224,6 +224,10 @@ class RtcMediaDeviceNotifier {
     void Function()? onInterruptionEnd,
     rtc.AndroidInterruptionSource androidInterruptionSource =
         rtc.AndroidInterruptionSource.audioFocusAndTelephony,
+    @Deprecated('Has no effect; audio focus no longer needs it. Remove it.')
+    rtc.AndroidAudioAttributesUsageType? androidAudioAttributesUsageType,
+    @Deprecated('Has no effect; audio focus no longer needs it. Remove it.')
+    rtc.AndroidAudioAttributesContentType? androidAudioAttributesContentType,
   }) async {
     // Listens before enabling, so an interruption reported while the platform
     // starts reporting them is not missed. Only the subscription of the last
