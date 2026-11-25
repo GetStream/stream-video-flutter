@@ -2,28 +2,26 @@ import 'dart:async';
 
 import '../../stream_video.dart';
 
-/// [AudioRecognition] implementation backed by speech-activity events
-/// from the per-call audio device module (delivered through
+/// [AudioRecognition] implementation backed by the speech-activity events of
+/// the WebRTC plugin (delivered through
 /// [PlatformAudioController.speechActivityStream]).
 ///
-/// Events originate in the native fork:
-/// - iOS: `RTCAudioDeviceModuleDelegate.audioDeviceModule:didReceiveSpeechActivityEvent:`
-/// - Android: `JavaAudioDeviceModule.setSamplesReadyCallback` + RMS analysis
+/// Android, iOS and macOS report speech from the audio device module. The
+/// browser reports it from a microphone capture of its own, which runs between
+/// [start] and [stop].
 class AudioRecognitionWebRTC implements AudioRecognition {
   AudioRecognitionWebRTC({
-    this.config = const AudioRecognitionConfig(),
-    Stream<SpeechActivityEvent>? speechActivityStream,
-  }) : _speechActivityStream = speechActivityStream;
+    AudioRecognitionConfig? config,
+    this.deviceIdProvider,
+  }) : config = config ?? AudioRecognitionConfig.platformDefault();
 
   final AudioRecognitionConfig config;
 
-  /// Overrides the event source. Defaults to the per-call audio device
-  /// module's events.
-  final Stream<SpeechActivityEvent>? _speechActivityStream;
+  /// Resolves the microphone the browser monitors at each [start]. The
+  /// browser's default microphone when it is null, or returns null.
+  final String? Function()? deviceIdProvider;
 
-  Stream<SpeechActivityEvent> get _events =>
-      _speechActivityStream ??
-      PlatformAudioController.instance.speechActivityStream;
+  PlatformAudioController get _controller => PlatformAudioController.instance;
 
   StreamSubscription<SpeechActivityEvent>? _subscription;
   Timer? _silenceTimer;
@@ -35,7 +33,8 @@ class AudioRecognitionWebRTC implements AudioRecognition {
   }) async {
     if (_subscription != null) return;
 
-    _subscription = _events.listen(
+    final controller = _controller;
+    _subscription = controller.speechActivityStream.listen(
       (event) {
         switch (event) {
           case SpeechActivityStarted():
@@ -52,7 +51,13 @@ class AudioRecognitionWebRTC implements AudioRecognition {
             // speaking state for the rest of the mute, and consumers that
             // react to the transition — a banner, a snackbar — would never
             // fire again until the user unmuted and muted once more.
-            _armSilence(config.maxSpeechDuration, onSoundStateChanged);
+            final maxSpeechDuration = config.maxSpeechDuration;
+            if (maxSpeechDuration != null) {
+              _armSilence(maxSpeechDuration, onSoundStateChanged);
+            } else {
+              _silenceTimer?.cancel();
+              _silenceTimer = null;
+            }
 
           case SpeechActivityEnded():
             // Native side may emit `ended` immediately on a brief pause.
@@ -61,6 +66,15 @@ class AudioRecognitionWebRTC implements AudioRecognition {
         }
       },
     );
+
+    try {
+      await controller.startSpeechActivityDetection(
+        deviceId: deviceIdProvider?.call(),
+      );
+    } catch (_) {
+      await stop();
+      rethrow;
+    }
   }
 
   /// (Re)arms the single timer that ends the speaking state after [delay].
@@ -78,9 +92,12 @@ class AudioRecognitionWebRTC implements AudioRecognition {
   Future<void> stop() async {
     _silenceTimer?.cancel();
     _silenceTimer = null;
-    await _subscription?.cancel();
+    final subscription = _subscription;
+    if (subscription == null) return;
     _subscription = null;
     _isSpeaking = false;
+    await subscription.cancel();
+    await _controller.stopSpeechActivityDetection();
   }
 
   @override
@@ -95,18 +112,26 @@ class AudioRecognitionConfig {
     this.maxSpeechDuration = const Duration(seconds: 4),
   });
 
+  /// The config for the platform the app runs on: no [maxSpeechDuration] in
+  /// the browser, whose detection always reports the end of speech.
+  factory AudioRecognitionConfig.platformDefault() {
+    return CurrentPlatform.isWeb
+        ? const AudioRecognitionConfig(maxSpeechDuration: null)
+        : const AudioRecognitionConfig();
+  }
+
   /// Trailing silence duration before a `started`→`ended` transition is
   /// surfaced to the consumer. Mirrors the debounce of the previous
   /// stats-polling implementation so callers see a similar cadence.
   final Duration speechTimeout;
 
   /// How long a `started` with no matching `ended` keeps the speaking state
-  /// before it is ended anyway.
+  /// before it is ended anyway. Null keeps it until the `ended`.
   ///
   /// A safety net, not the primary mechanism: the platforms report speech in
   /// transitions (one `started`, one `ended` per utterance), so this only ever
   /// fires for an utterance that runs longer than this, or when the platform
   /// drops the `ended` altogether. Keep it comfortably longer than
   /// [speechTimeout] so it does not cut ordinary speech short.
-  final Duration maxSpeechDuration;
+  final Duration? maxSpeechDuration;
 }

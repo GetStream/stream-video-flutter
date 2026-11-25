@@ -515,6 +515,12 @@ class _FakePlatformEvents implements rtc.WebRtcPlatformEvents {
   Stream<rtc.SpeechActivity> get onSpeechActivity => const Stream.empty();
 
   @override
+  Future<void> startSpeechActivityDetection({String? deviceId}) async {}
+
+  @override
+  Future<void> stopSpeechActivityDetection() async {}
+
+  @override
   Stream<rtc.AudioProcessingState> get onAudioProcessingStateChanged =>
       const Stream.empty();
 
