@@ -1,23 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-// Answers every partial-state request from one fixed call state.
-class _FakeCall extends Mock implements Call {
-  _FakeCall(this._callState)
-    : _emitter = MutableStateEmitter<CallState>(_callState, sync: true);
-
-  final CallState _callState;
-  final MutableStateEmitter<CallState> _emitter;
-
-  @override
-  StateEmitter<CallState> get state => _emitter;
-
-  @override
-  Stream<T> partialState<T>(CallStateSelector<T> selector) =>
-      Stream.value(selector(_callState));
-}
+import 'fake_livestream_call.dart';
 
 void main() {
   testWidgets(
@@ -32,7 +17,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: LivestreamBackstageContent(call: _FakeCall(backstage)),
+          home: LivestreamBackstageContent(call: FakeLivestreamCall(backstage)),
         ),
       );
       await tester.pump();

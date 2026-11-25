@@ -4,6 +4,7 @@ import '../../stream_video_flutter.dart';
 import '../call_participants/screen_share_call_participants_content.dart';
 import '../call_screen/call_diagnostics_content/call_diagnostics_content.dart';
 import '../l10n/localization_extension.dart';
+import 'livestream_status_card.dart';
 
 typedef LivestreamHostsUnavailableBuilder =
     Widget Function(
@@ -70,8 +71,8 @@ class LivestreamNotConnectedProperties {
 
 /// The video renderer widget associated with [LivestreamPlayer].
 ///
-/// This widget also contains a diagnostic widget that can be used by
-/// double-tapping the whole widget.
+/// It shows call diagnostics over the video while [displayDiagnostics] is
+/// true.
 ///
 /// Additionally, there is an action button meant for a back/close action
 /// implemented in this widget.
@@ -79,8 +80,6 @@ class LivestreamContent extends StatefulWidget {
   /// Creates a [LivestreamContent] widget.
   ///
   /// * [call] is the livestream call intended to be viewed.
-  ///
-  /// * [callState] is the livestream call state.
   ///
   /// * [backButtonBuilder] allows you to build a back/close button for closing
   /// the livestream.
@@ -92,20 +91,17 @@ class LivestreamContent extends StatefulWidget {
   /// * [videoRendererBuilder] allows you to build a custom video renderer
   ///
   /// * [livestreamHostsUnavailableBuilder] allows you to build a custom widget when
-  /// a livestream is connected but no hosts have video enabled.
+  /// a livestream is connected but no host is in it.
   ///
   /// * [livestreamNotConnectedBuilder] allows you to build a custom widget when
   /// the livestream is not connected. Provides connection state information.
   ///
-  /// * [displayDiagnostics] displays call diagnostics when the widget is
-  /// double-tapped.
+  /// * [displayDiagnostics] displays call diagnostics over the video.
   ///
-  /// * [videoFit] denotes if the video fits the width (contain) or expands to
-  /// the whole size (cover).
+  /// * [videoFit] is how the video is fitted, by orientation by default.
   const LivestreamContent({
     super.key,
     required this.call,
-    @Deprecated(PartialStateDeprecationMessage.callState) this.callState,
     this.backButtonBuilder,
     this.videoPlaceholderBuilder,
     this.videoRendererBuilder,
@@ -115,7 +111,7 @@ class LivestreamContent extends StatefulWidget {
     this.livestreamHostsParticipantBuilder,
     this.livestreamHostsParticipantsFilter,
     this.displayDiagnostics = false,
-    this.videoFit = VideoFit.contain,
+    this.videoFit = VideoFit.adaptive,
     this.showMultipleHosts = false,
     this.layoutMode = ParticipantLayoutMode.grid,
     this.screenShareMode = LivestreamScreenShareMode.spotlight,
@@ -125,12 +121,8 @@ class LivestreamContent extends StatefulWidget {
   /// Represents a call.
   final Call call;
 
-  /// Holds information about the call.
-  @Deprecated(PartialStateDeprecationMessage.callState)
-  final CallState? callState;
-
-  /// [WidgetBuilder] used to build an action button on the top left side of
-  /// the screen.
+  /// [WidgetBuilder] used to build an action button over the top start
+  /// corner.
   final WidgetBuilder? backButtonBuilder;
 
   /// The builder used to create a custom widget for the video placeholder.
@@ -139,8 +131,8 @@ class LivestreamContent extends StatefulWidget {
   /// Builder function used to build a video renderer.
   final VideoRendererBuilder? videoRendererBuilder;
 
-  /// Builder function used to create a custom widget when a livestream is connected
-  /// but no hosts have video enabled.
+  /// Builder function used to create a custom widget when a livestream is
+  /// connected but no host is in it.
   final LivestreamHostsUnavailableBuilder? livestreamHostsUnavailableBuilder;
 
   /// Builder function used to create a custom widget when the livestream is not connected.
@@ -156,17 +148,22 @@ class LivestreamContent extends StatefulWidget {
   final LivestreamHostsParticipantBuilder? livestreamHostsParticipantBuilder;
 
   /// Function used to select the hosts from all the call participants.
-  /// If null, participants that have video enabled will be treated as hosts.
-  /// If [showMultipleHosts] is false, only the first streaming participant will be shown.
+  ///
+  /// If null, the participants with video enabled are the hosts. While none
+  /// has video, the participants with the `host` role and the call's creator
+  /// are, and their tiles show their avatar.
+  /// If [showMultipleHosts] is false, only the first host is shown.
   final LivestreamHostsParticipantsFilter? livestreamHostsParticipantsFilter;
 
-  /// Boolean to allow a user to double-tap a call to see diagnostic data.
+  /// Whether call diagnostics are shown over the video.
   ///
   /// Defaults to false.
   final bool displayDiagnostics;
 
-  /// Denotes if the video fits the width (contain) or expands to
-  /// the whole size (cover).
+  /// How the video is fitted.
+  ///
+  /// Defaults to [VideoFit.adaptive]: the video fills the widget when it
+  /// shares the widget's orientation, and is letterboxed when it does not.
   final VideoFit videoFit;
 
   /// Configuration for picture-in-picture mode.
@@ -195,13 +192,25 @@ class _LivestreamContentState extends State<LivestreamContent> {
   /// Represents a call.
   Call get call => widget.call;
 
-  /// Denotes if the video fits the width (contain) or expands to
-  /// the whole size (cover).
+  /// How the video is fitted.
   VideoFit get videoFit => widget.videoFit;
 
+  /// The participants sharing video, or, while none is, the hosts: their
+  /// tile then shows their avatar.
   LivestreamHostsParticipantsFilter get _defaultStreamingParticipantsFilter =>
-      (allCallParticipants) =>
-          allCallParticipants.where((e) => e.isVideoEnabled).toList();
+      (allCallParticipants) {
+        final streaming = allCallParticipants
+            .where((it) => it.isVideoEnabled)
+            .toList();
+        if (streaming.isNotEmpty) return streaming;
+
+        final createdBy = call.state.value.createdByUserId;
+        return allCallParticipants
+            .where(
+              (it) => it.roles.contains('host') || it.userId == createdBy,
+            )
+            .toList();
+      };
 
   CallParticipantBuilder get _defaultParticipantBuilder =>
       (context, call, participant) => StreamParticipantTile(
@@ -211,11 +220,8 @@ class _LivestreamContentState extends State<LivestreamContent> {
         rendererScopePrefix: 'livecontent',
         call: call,
         participant: participant,
-        style: StreamParticipantTileStyle(
-          backgroundColor: StreamVideoTheme.of(
-            context,
-          ).colorTheme.livestreamBackground,
-        ),
+        // The livestream tile's toolbar is the only chrome over the video.
+        style: const StreamParticipantTileStyle(showMoreButton: false),
         showConnectionQualityIndicator: false,
         showParticipantLabel: false,
         showSpeakerBorder: false,
@@ -243,9 +249,6 @@ class _LivestreamContentState extends State<LivestreamContent> {
               rendererScopePrefix: 'livecontent',
               call: call,
               participant: participant,
-              backgroundColor: StreamVideoTheme.of(
-                context,
-              ).colorTheme.livestreamBackground,
             ),
       );
 
@@ -253,11 +256,7 @@ class _LivestreamContentState extends State<LivestreamContent> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamVideoTheme.of(context);
-    final translations = context.translations;
-
-    final pipEnabled =
-        widget.pictureInPictureConfiguration.enablePictureInPicture;
+    final backButtonBuilder = widget.backButtonBuilder;
 
     // Status stays on the raw state so a disconnect is acted on at once; the
     // participants come through the throttled stream.
@@ -268,122 +267,115 @@ class _LivestreamContentState extends State<LivestreamContent> {
         return CallParticipantsBuilder(
           call: call,
           builder: (context, participants) {
-            late Widget bodyWidget;
-            if (status.isConnected ||
+            final isLive =
+                status.isConnected ||
                 status.isFastReconnecting ||
-                status.isMigrating) {
-              final streamingParticipants =
-                  widget.livestreamHostsParticipantsFilter?.call(
-                    participants,
-                  ) ??
-                  _defaultStreamingParticipantsFilter(participants);
+                status.isMigrating;
 
-              if (streamingParticipants.isEmpty) {
-                bodyWidget =
-                    widget.livestreamHostsUnavailableBuilder?.call(
-                      context,
-                      LivestreamHostsUnavailableProperties(call),
-                    ) ??
-                    Center(
-                      child: Text(
-                        translations.livestreamHostNotAvailable,
-                        style: theme.livestreamTheme.callStateButtonTextStyle,
-                      ),
-                    );
-              } else {
-                bodyWidget = Stack(
-                  children: [
-                    if (CurrentPlatform.isIos && pipEnabled)
-                      SizedBox(
-                        height: 600,
-                        width: 300,
-                        child: StreamPictureInPictureUiKitView(
-                          call: call,
-                          pictureInPictureConfiguration:
-                              widget.pictureInPictureConfiguration,
-                        ),
-                      ),
-                    if (CurrentPlatform.isAndroid && pipEnabled)
-                      StreamPictureInPictureAndroidView(
-                        call: call,
-                        configuration: widget.pictureInPictureConfiguration,
-                      ),
-                    widget.livestreamHostsParticipantBuilder?.call(
-                          context,
-                          LivestreamHostsParticipantProperties(
-                            call: call,
-                            hosts: streamingParticipants,
-                          ),
-                        ) ??
-                        _defaultHostsParticipantBuilder(
-                          context,
-                          LivestreamHostsParticipantProperties(
-                            call: call,
-                            hosts: streamingParticipants,
-                          ),
-                        ),
-                    if (status.isFastReconnecting)
-                      widget.livestreamFastReconnectingOverlayBuilder?.call(
-                            context,
-                            LivestreamFastReconnectingProperties(call),
-                          ) ??
-                          const Positioned(
-                            top: 25,
-                            left: 25,
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            ),
-                          ),
-                  ],
-                );
-              }
-            } else {
-              final isMigrating = status.isMigrating;
-              final isReconnecting = status.isReconnecting;
-              final statusText = isReconnecting ? 'Reconnecting' : 'Connecting';
-
-              bodyWidget =
-                  widget.livestreamNotConnectedBuilder?.call(
-                    context,
-                    LivestreamNotConnectedProperties(
-                      call,
-                      isMigrating: isMigrating,
-                      isReconnecting: isReconnecting,
-                    ),
-                  ) ??
-                  Center(
-                    child: Text(
-                      statusText,
-                      style: theme.livestreamTheme.callStateButtonTextStyle,
-                    ),
-                  );
-            }
-
-            return Scaffold(
-              backgroundColor: theme.colorTheme.livestreamBackground,
-              appBar: AppBar(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                automaticallyImplyLeading: false,
-                leading: widget.backButtonBuilder?.call(context),
-              ),
-              extendBodyBehindAppBar: true,
-              body: Stack(
-                children: [
-                  bodyWidget,
-                  if (widget.displayDiagnostics)
-                    CallDiagnosticsContent(call: call),
-                ],
-              ),
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                if (isLive)
+                  _liveBody(context, status, participants)
+                else
+                  _notConnectedBody(context, status),
+                if (backButtonBuilder != null)
+                  PositionedDirectional(
+                    top: 0,
+                    start: 0,
+                    child: SafeArea(child: backButtonBuilder(context)),
+                  ),
+                if (widget.displayDiagnostics)
+                  CallDiagnosticsContent(call: call),
+              ],
             );
           },
         );
       },
     );
+  }
+
+  /// The hosts' video while the call is connected, or a status card while no
+  /// host is in it.
+  Widget _liveBody(
+    BuildContext context,
+    CallStatus status,
+    List<CallParticipantState> participants,
+  ) {
+    final hosts =
+        widget.livestreamHostsParticipantsFilter?.call(participants) ??
+        _defaultStreamingParticipantsFilter(participants);
+
+    if (hosts.isEmpty) {
+      return widget.livestreamHostsUnavailableBuilder?.call(
+            context,
+            LivestreamHostsUnavailableProperties(call),
+          ) ??
+          LivestreamStatusCard(
+            title: context.translations.livestreamHostNotAvailable,
+          );
+    }
+
+    final pipEnabled =
+        widget.pictureInPictureConfiguration.enablePictureInPicture;
+    final hostsProperties = LivestreamHostsParticipantProperties(
+      call: call,
+      hosts: hosts,
+    );
+
+    return Stack(
+      children: [
+        if (CurrentPlatform.isIos && pipEnabled)
+          SizedBox(
+            height: 600,
+            width: 300,
+            child: StreamPictureInPictureUiKitView(
+              call: call,
+              pictureInPictureConfiguration:
+                  widget.pictureInPictureConfiguration,
+            ),
+          ),
+        if (CurrentPlatform.isAndroid && pipEnabled)
+          StreamPictureInPictureAndroidView(
+            call: call,
+            configuration: widget.pictureInPictureConfiguration,
+          ),
+        widget.livestreamHostsParticipantBuilder?.call(
+              context,
+              hostsProperties,
+            ) ??
+            _defaultHostsParticipantBuilder(context, hostsProperties),
+        if (status.isFastReconnecting)
+          widget.livestreamFastReconnectingOverlayBuilder?.call(
+                context,
+                LivestreamFastReconnectingProperties(call),
+              ) ??
+              PositionedDirectional(
+                top: context.streamSpacing.md,
+                start: context.streamSpacing.md,
+                child: StreamLoadingSpinner(),
+              ),
+      ],
+    );
+  }
+
+  /// A status card while the call connects or reconnects.
+  Widget _notConnectedBody(BuildContext context, CallStatus status) {
+    final translations = context.translations;
+    final isReconnecting = status.isReconnecting;
+
+    return widget.livestreamNotConnectedBuilder?.call(
+          context,
+          LivestreamNotConnectedProperties(
+            call,
+            isMigrating: status.isMigrating,
+            isReconnecting: isReconnecting,
+          ),
+        ) ??
+        LivestreamStatusCard(
+          title: isReconnecting
+              ? translations.callConnectionReconnecting
+              : translations.callConnectionConnecting,
+        );
   }
 }

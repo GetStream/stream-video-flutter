@@ -185,7 +185,11 @@ class CallState extends Equatable {
   final DateTime? liveEndedAt;
   final DateTime? timerEndsAt;
   final List<String> blockedUserIds;
+
+  /// How many participants are in the call, anonymous ones included.
   final int participantCount;
+
+  /// How many of [participantCount] are anonymous.
   final int anonymousParticipantCount;
   final bool iOSMultitaskingCameraAccessEnabled;
   final Map<String, Object> custom;
@@ -388,7 +392,8 @@ class CallState extends Equatable {
   }) {
     final capabilities = metadata.details.ownCapabilities.toList();
     // Once joined, the SFU reports the counts; until then the coordinator's
-    // session counts are the only source.
+    // session counts are the only source. Its count by role leaves anonymous
+    // participants out, so they are added to match the SFU's total.
     final countsFromSession = !status.isAlreadyJoined;
 
     return copyWith(
@@ -419,9 +424,10 @@ class CallState extends Equatable {
       timerEndsAt: metadata.session.timerEndsAt,
       participantCount: countsFromSession
           ? math.max(
-              metadata.session.participantsCountByRole.values.sum,
-              metadata.session.participants.length,
-            )
+                  metadata.session.participantsCountByRole.values.sum,
+                  metadata.session.participants.length,
+                ) +
+                metadata.session.anonymousParticipantCount
           : null,
       anonymousParticipantCount: countsFromSession
           ? metadata.session.anonymousParticipantCount

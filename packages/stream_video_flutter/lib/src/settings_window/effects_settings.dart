@@ -39,7 +39,7 @@ class _EffectsTabIcon extends StatelessWidget {
   const _EffectsTabIcon();
 
   @override
-  Widget build(BuildContext context) => Icon(context.streamIcons.blurFill);
+  Widget build(BuildContext context) => Icon(context.streamIcons.effectsFill);
 }
 
 class _EffectsTabLabel extends StatelessWidget {

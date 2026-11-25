@@ -22,27 +22,28 @@ StreamEffectsSettingsTab effectsTab(
   required Call call,
   required StreamVideoEffectsManager manager,
 }) {
-  final icons = context.streamIcons;
+  final blur = context.streamIcons.blurFill;
 
   return StreamEffectsSettingsTab(
     call: call,
     filters: [
-      for (final (intensity, label, icon) in [
-        (BlurIntensity.light, 'Light blur', icons.blurFill),
-        (BlurIntensity.medium, 'Medium blur', icons.gridPixelFill),
-        (BlurIntensity.heavy, 'Heavy blur', icons.fullBlurFill),
+      // One blur glyph, drawn larger the stronger the blur.
+      for (final (intensity, label, size) in [
+        (BlurIntensity.light, 'Light blur', 16.0),
+        (BlurIntensity.medium, 'Medium blur', 22.0),
+        (BlurIntensity.heavy, 'Heavy blur', 26.0),
       ])
         StreamVideoFilter(
           id: intensity.name,
           label: label,
-          icon: Icon(icon),
+          icon: Icon(blur, size: size),
           onSelected: () => manager.applyBackgroundBlurFilter(intensity),
         ),
       // A custom effect the app registers natively, to try that path out.
       StreamVideoFilter(
         id: _grayscale,
         label: 'Grayscale',
-        icon: Icon(icons.starFill),
+        icon: const Icon(Icons.filter_b_and_w),
         onSelected: () => manager.applyCustomEffect(
           _grayscale,
           registerEffectProcessorCallback:
