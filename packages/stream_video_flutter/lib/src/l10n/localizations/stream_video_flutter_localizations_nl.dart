@@ -126,6 +126,12 @@ class StreamVideoFlutterLocalizationsNl
   String get livestreamLive => 'Live';
 
   @override
+  String get livestreamLiveIndicatorLive => 'LIVE';
+
+  @override
+  String get livestreamLiveIndicatorBackstage => 'BACKSTAGE';
+
+  @override
   String get lobbyMicrophoneSection => 'Microfoon';
 
   @override
@@ -524,4 +530,15 @@ class StreamVideoFlutterLocalizationsNl
 
   @override
   String get recordingsRetry => 'Opnieuw proberen';
+
+  @override
+  String livestreamViewerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count kijkers',
+      one: '1 kijker',
+    );
+    return '$_temp0';
+  }
 }

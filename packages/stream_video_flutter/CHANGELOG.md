@@ -2,6 +2,7 @@
 
 ### ✅ Added
 
+- Added `StreamLiveIndicator` and `StreamSpectatorsIndicator`, the livestream's LIVE pill and viewer count, with `StreamLiveIndicatorThemeData` and `StreamSpectatorsIndicatorThemeData` on `StreamVideoTheme`.
 - Added `StreamMediaDevicesController.supportsAudioOutputSelection`; `audioOutputs` is empty where it is false.
 - Added `anchorPoint` to `showStreamModalDialog`, which picks the half of a folded window the dialog goes to.
 - Added `StreamCallConnectionBanner`, which says what the call's connection is doing while it reconnects.
@@ -235,6 +236,7 @@
 
 ### 🐞 Fixed
 
+- `LivestreamInfo` no longer counts anonymous viewers twice once the call is joined.
 - Every call control button shows a tooltip.
 - `CallFeatureButton` reports a feature that is on as selected, to assistive technology and to a custom `button` builder.
 - `StreamCallContainer` reports a call's disconnect once. A status the call settled on after it, such as a second disconnect from a race, no longer calls `onCallDisconnected`, or leaves, a second time.

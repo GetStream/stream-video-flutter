@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
@@ -134,10 +136,14 @@ class LivestreamInfo extends StatelessWidget {
                         ),
                         Text(
                           includeAnonymousParticipantsCount
-                              ? (callData.participantCount +
-                                        callData.anonymousParticipantCount)
-                                    .toString()
-                              : callData.participantCount.toString(),
+                              ? callData.participantCount.toString()
+                              : math
+                                    .max(
+                                      callData.participantCount -
+                                          callData.anonymousParticipantCount,
+                                      0,
+                                    )
+                                    .toString(),
                           style: theme.participantCountTextStyle,
                         ),
                       ],

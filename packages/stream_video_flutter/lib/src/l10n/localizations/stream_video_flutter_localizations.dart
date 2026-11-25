@@ -311,6 +311,18 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'Live'**
   String get livestreamLive;
 
+  /// The live indicator's label while the livestream is live, written in upper case
+  ///
+  /// In en, this message translates to:
+  /// **'LIVE'**
+  String get livestreamLiveIndicatorLive;
+
+  /// The live indicator's label while the livestream is in backstage, written in upper case
+  ///
+  /// In en, this message translates to:
+  /// **'BACKSTAGE'**
+  String get livestreamLiveIndicatorBackstage;
+
   /// Heading of the microphone group in the lobby's device menu
   ///
   /// In en, this message translates to:
@@ -1000,6 +1012,12 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'Try Again'**
   String get recordingsRetry;
+
+  /// Read out by screen readers for the livestream's viewer count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 viewer} other{{count} viewers}}'**
+  String livestreamViewerCount(int count);
 }
 
 class _StreamVideoFlutterLocalizationsDelegate
