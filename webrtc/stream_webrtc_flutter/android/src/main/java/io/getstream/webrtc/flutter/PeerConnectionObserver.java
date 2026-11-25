@@ -966,7 +966,21 @@ class PeerConnectionObserver implements PeerConnection.Observer, EventChannel.St
 
   public void addTrack(MediaStreamTrack track, List<String> streamIds, Result result) {
     RtpSender sender = peerConnection.addTrack(track, streamIds);
+    startAudioRoutingIfAudio(track);
     result.success(rtpSenderToMap(sender));
+  }
+
+  /**
+   * Starts audio routing, and with it the call's audio focus, once a peer connection
+   * sends an audio track. A track captured earlier, such as a lobby preview's, does
+   * not start it again when it is reused, and routing stops whenever the last peer
+   * connection is disposed, such as one made only to prepare the join.
+   */
+  private static void startAudioRoutingIfAudio(MediaStreamTrack track) {
+    if (track != null && "audio".equals(track.kind())
+        && AudioSwitchManager.instance != null) {
+      AudioSwitchManager.instance.start();
+    }
   }
 
   public void removeTrack(String senderId, Result result) {
@@ -993,6 +1007,7 @@ class PeerConnectionObserver implements PeerConnection.Observer, EventChannel.St
       transceiverId = stateProvider.getNextStreamUUID();
     }
     transceivers.put(transceiverId, transceiver);
+    startAudioRoutingIfAudio(track);
     result.success(transceiverToMap(transceiverId, transceiver));
   }
 
@@ -1116,6 +1131,7 @@ class PeerConnectionObserver implements PeerConnection.Observer, EventChannel.St
       return;
     }
     sender.setTrack(track, false);
+    startAudioRoutingIfAudio(track);
     result.success(null);
   }
 

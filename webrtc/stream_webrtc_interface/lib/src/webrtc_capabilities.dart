@@ -17,6 +17,8 @@ class WebRtcCapabilities {
     required this.supportsScreenShareSourceSelection,
     required this.omitsEarpieceFromEnumeration,
     required this.usesExactDeviceIdConstraints,
+    required this.reportsAudioInterruptions,
+    required this.supportsSystemManagedAudioFocus,
   });
 
   /// Whether each call can build its own peer connection factory, with its
@@ -58,6 +60,16 @@ class WebRtcCapabilities {
   /// cannot be combined with the optional constraints. Web.
   final bool usesExactDeviceIdConstraints;
 
+  /// Whether the platform reports interruptions of the app's audio, such as a
+  /// phone call or another app taking it, on
+  /// `WebRtcPlatformEvents.onInterruption`. Android and iOS.
+  final bool reportsAudioInterruptions;
+
+  /// Whether WebRTC can be told that the system manages audio focus for the
+  /// call in progress, such as Android's Telecom for a call it holds, and then
+  /// leaves the focus to it. Android.
+  final bool supportsSystemManagedAudioFocus;
+
   WebRtcCapabilities copyWith({
     bool? supportsPerCallFactory,
     bool? supportsAudioPlayoutPause,
@@ -69,6 +81,8 @@ class WebRtcCapabilities {
     bool? supportsScreenShareSourceSelection,
     bool? omitsEarpieceFromEnumeration,
     bool? usesExactDeviceIdConstraints,
+    bool? reportsAudioInterruptions,
+    bool? supportsSystemManagedAudioFocus,
   }) {
     return WebRtcCapabilities(
       supportsPerCallFactory:
@@ -91,6 +105,11 @@ class WebRtcCapabilities {
           omitsEarpieceFromEnumeration ?? this.omitsEarpieceFromEnumeration,
       usesExactDeviceIdConstraints:
           usesExactDeviceIdConstraints ?? this.usesExactDeviceIdConstraints,
+      reportsAudioInterruptions:
+          reportsAudioInterruptions ?? this.reportsAudioInterruptions,
+      supportsSystemManagedAudioFocus:
+          supportsSystemManagedAudioFocus ??
+          this.supportsSystemManagedAudioFocus,
     );
   }
 
@@ -107,6 +126,8 @@ class WebRtcCapabilities {
       'supportsScreenShareSourceSelection': supportsScreenShareSourceSelection,
       'omitsEarpieceFromEnumeration': omitsEarpieceFromEnumeration,
       'usesExactDeviceIdConstraints': usesExactDeviceIdConstraints,
+      'reportsAudioInterruptions': reportsAudioInterruptions,
+      'supportsSystemManagedAudioFocus': supportsSystemManagedAudioFocus,
     };
     final enabled = [
       for (final MapEntry(:key, :value) in flags.entries)
@@ -129,7 +150,10 @@ class WebRtcCapabilities {
           other.supportsScreenShareSourceSelection ==
               supportsScreenShareSourceSelection &&
           other.omitsEarpieceFromEnumeration == omitsEarpieceFromEnumeration &&
-          other.usesExactDeviceIdConstraints == usesExactDeviceIdConstraints;
+          other.usesExactDeviceIdConstraints == usesExactDeviceIdConstraints &&
+          other.reportsAudioInterruptions == reportsAudioInterruptions &&
+          other.supportsSystemManagedAudioFocus ==
+              supportsSystemManagedAudioFocus;
 
   @override
   int get hashCode => Object.hash(
@@ -143,6 +167,8 @@ class WebRtcCapabilities {
     supportsScreenShareSourceSelection,
     omitsEarpieceFromEnumeration,
     usesExactDeviceIdConstraints,
+    reportsAudioInterruptions,
+    supportsSystemManagedAudioFocus,
   );
 }
 

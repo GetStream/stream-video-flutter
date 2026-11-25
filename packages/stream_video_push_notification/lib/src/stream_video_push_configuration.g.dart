@@ -53,6 +53,7 @@ AndroidPushConfiguration _$AndroidPushConfigurationFromJson(
       : TelecomPushConfiguration.fromJson(
           json['telecom'] as Map<String, dynamic>,
         ),
+  reportOutgoingCalls: json['reportOutgoingCalls'] as bool?,
 );
 
 Map<String, dynamic> _$AndroidPushConfigurationToJson(
@@ -68,6 +69,7 @@ Map<String, dynamic> _$AndroidPushConfigurationToJson(
       instance.missedCallNotificationChannelName,
   'showFullScreenOnLockScreen': instance.showFullScreenOnLockScreen,
   'telecom': instance.telecom?.toJson(),
+  'reportOutgoingCalls': instance.reportOutgoingCalls,
 };
 
 TelecomPushConfiguration _$TelecomPushConfigurationFromJson(

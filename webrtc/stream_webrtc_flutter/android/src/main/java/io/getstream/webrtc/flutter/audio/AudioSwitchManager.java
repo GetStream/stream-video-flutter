@@ -4,10 +4,12 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.media.AudioAttributes;
+import android.media.AudioFocusRequest;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -40,8 +42,24 @@ public class AudioSwitchManager {
     @Nullable
     private WeakReference<Activity> activityRef;
 
+    /**
+     * Marks the posted runnables that start or stop the call's audio, so a start cancels a
+     * pending stop or start without also dropping other posted work, such as a device
+     * selection.
+     */
+    private static final Object LIFECYCLE_TOKEN = new Object();
+
     public boolean loggingEnabled;
     private boolean isActive = false;
+
+    /** Whether the call's audio is being started, when its settings already apply. */
+    private boolean isActivating = false;
+
+    /** The audio mode the device was in before the call's audio started, put back after. */
+    private int modeBeforeCall = AudioManager.MODE_NORMAL;
+
+    /** Whether audio focus is held for the call's audio, or has been asked for. */
+    private final AudioFocusHolding focusHolding = new AudioFocusHolding();
     @NonNull
     public Function2<
             ? super List<? extends AudioDevice>,
@@ -50,6 +68,9 @@ public class AudioSwitchManager {
 
     @NonNull
     private final ForwardingAudioFocusChangeListener audioFocusChangeListener = new ForwardingAudioFocusChangeListener();
+
+    @Nullable
+    private volatile Runnable audioFocusReleasedListener;
 
     @NonNull
     public List<Class<? extends AudioDevice>> preferredDeviceList;
@@ -66,6 +87,18 @@ public class AudioSwitchManager {
      * Defaults to true.
      */
     private boolean manageAudioFocus = true;
+
+    /**
+     * Whether the system manages the audio focus of the call in progress, such as Android's
+     * Telecom for a call it holds. WebRTC then manages none, whatever {@link #manageAudioFocus}
+     * says.
+     */
+    private boolean focusHandledBySystem = false;
+
+    /** Whether WebRTC manages audio focus now: configured to, and the system does not. */
+    private boolean focusManaged() {
+        return manageAudioFocus && !focusHandledBySystem;
+    }
 
     /**
      * The audio focus mode to use while started.
@@ -149,7 +182,7 @@ public class AudioSwitchManager {
                         audioFocusChangeListener,
                         preferredDeviceList
                 );
-                audioSwitch.setManageAudioFocus(manageAudioFocus);
+                audioSwitch.setManageAudioFocus(focusManaged());
                 audioSwitch.setFocusMode(focusMode);
                 audioSwitch.setAudioMode(audioMode);
                 audioSwitch.setAudioStreamType(audioStreamType);
@@ -163,14 +196,30 @@ public class AudioSwitchManager {
 
     public void start() {
         if (audioSwitch != null) {
-            handler.removeCallbacksAndMessages(null);
-            handler.postAtFrontOfQueue(() -> {
-                if (!isActive) {
+            // Called again for each audio track a call sends, so it leaves other posted work
+            // in place.
+            handler.removeCallbacksAndMessages(LIFECYCLE_TOKEN);
+            postLifecycleAtFront(() -> {
+                if (isActive) {
+                    // A focus switch posted before a stop that was dropped above.
+                    reconcileFocus();
+                } else {
                     if (audioSwitch != null) {
-                        ensureAudioConfigurationPersistsWith(() -> {
-                            audioSwitch.activate();
-                            isActive = true;
-                        });
+                        modeBeforeCall = audioManager.getMode();
+                        // AudioSwitch requests focus as it activates, by its own flag, which a
+                        // switch posted since may not have updated yet, such as one a stop
+                        // dropped: the focus it took would then not be tracked.
+                        audioSwitch.setManageAudioFocus(focusManaged());
+                        focusHolding.onStart(focusManaged());
+                        isActivating = true;
+                        try {
+                            ensureAudioConfigurationPersistsWith(() -> {
+                                audioSwitch.activate();
+                                isActive = true;
+                            });
+                        } finally {
+                            isActivating = false;
+                        }
                     }
                 }
             });
@@ -180,12 +229,36 @@ public class AudioSwitchManager {
     public void stop() {
         if (audioSwitch != null) {
             handler.removeCallbacksAndMessages(null);
-            handler.postAtFrontOfQueue(() -> {
+            postLifecycleAtFront(() -> {
                 if (isActive) {
                     Objects.requireNonNull(audioSwitch).deactivate();
                     isActive = false;
+                    // AudioSwitch gives up only the focus it requested as it activated, not
+                    // focus requested since. Giving up focus no one holds does nothing.
+                    if (focusHolding.onStop()) {
+                        abandonFocus();
+                    }
+                    // AudioSwitch puts back the mode it saw when it activated, which the
+                    // call's own settings had already replaced.
+                    audioManager.setMode(modeBeforeCall);
+                    resetVolumeControlStream();
+
+                    notifyAudioFocusReleased();
                 }
             });
+        }
+    }
+
+    private void postLifecycleAtFront(@NonNull Runnable runnable) {
+        Message message = Message.obtain(handler, runnable);
+        message.obj = LIFECYCLE_TOKEN;
+        handler.sendMessageAtFrontOfQueue(message);
+    }
+
+    private void notifyAudioFocusReleased() {
+        Runnable released = audioFocusReleasedListener;
+        if (released != null) {
+            released.run();
         }
     }
 
@@ -349,12 +422,53 @@ public class AudioSwitchManager {
         applyAudioManagerSettings();
     }
 
+    /**
+     * Switches whether WebRTC manages audio focus, also while a call's audio runs, such as for a
+     * call the system's call framework holds and manages focus for.
+     *
+     * <p>Switched off while the call's audio runs, the focus held for it is given up, which ends an
+     * interruption a focus loss started, and the audio mode and routing stay. Switched on, focus is
+     * requested for it; a granted request is reported to the focus listener as a gain. While no
+     * call's audio runs, it only applies to the next call. Null changes nothing.
+     */
     public void setManageAudioFocus(@Nullable Boolean manage) {
-        if (manage != null) {
-            this.manageAudioFocus = manage;
-            if (audioSwitch != null) {
-                Objects.requireNonNull(audioSwitch).setManageAudioFocus(this.manageAudioFocus);
-            }
+        if (manage == null) {
+            return;
+        }
+        // Set now, so a start or stop that drops the posted reconcile still sees it: start
+        // reconciles itself, and stop gives up focus whatever this says.
+        manageAudioFocus = manage;
+        handler.post(this::reconcileFocus);
+    }
+
+    /**
+     * Tells WebRTC whether the system manages the audio focus of the call in progress, such as
+     * Telecom for a call it holds, and applies it as {@link #setManageAudioFocus} does: while the
+     * system manages it, WebRTC manages none, whatever its configuration says.
+     */
+    public void setAudioFocusHandledBySystem(boolean handledBySystem) {
+        // Set now, for the same reason as manageAudioFocus.
+        focusHandledBySystem = handledBySystem;
+        handler.post(this::reconcileFocus);
+    }
+
+    /** Brings AudioSwitch and the focus held for the call's audio in line with focusManaged(). */
+    private void reconcileFocus() {
+        if (audioSwitch != null) {
+            Objects.requireNonNull(audioSwitch).setManageAudioFocus(focusManaged());
+        }
+
+        switch (focusHolding.onManagedChanged(focusManaged(), isActive)) {
+            case REQUEST:
+                requestFocusForCall();
+                break;
+            case ABANDON:
+                abandonFocus();
+                focusHolding.onAbandoned();
+                notifyAudioFocusReleased();
+                break;
+            case NONE:
+                break;
         }
     }
 
@@ -427,7 +541,11 @@ public class AudioSwitchManager {
         }
     }
 
+    /** Applies the call's audio mode; outside a call the device keeps the mode it is in. */
     private void applyAudioManagerSettings() {
+        if (!isActive && !isActivating) {
+            return;
+        }
         audioManager.setMode(audioMode);
     }
 
@@ -441,9 +559,20 @@ public class AudioSwitchManager {
     }
 
     private void applyVolumeControlStream() {
+        if (!isActive && !isActivating) {
+            return;
+        }
         Activity activity = getActivity();
         if (activity != null && !activity.isFinishing() && !activity.isDestroyed()) {
             activity.setVolumeControlStream(audioStreamType);
+        }
+    }
+
+    /** Lets the volume keys control the app's default stream again once the call's audio stops. */
+    private void resetVolumeControlStream() {
+        Activity activity = getActivity();
+        if (activity != null && !activity.isFinishing() && !activity.isDestroyed()) {
+            activity.setVolumeControlStream(AudioManager.USE_DEFAULT_STREAM_TYPE);
         }
     }
 
@@ -453,7 +582,7 @@ public class AudioSwitchManager {
         }
 
         AudioSwitch localAudioSwitch = Objects.requireNonNull(audioSwitch);
-        localAudioSwitch.setManageAudioFocus(manageAudioFocus);
+        localAudioSwitch.setManageAudioFocus(focusManaged());
         localAudioSwitch.setFocusMode(focusMode);
         localAudioSwitch.setAudioMode(audioMode);
         localAudioSwitch.setAudioStreamType(audioStreamType);
@@ -483,14 +612,77 @@ public class AudioSwitchManager {
         audioFocusChangeListener.setDelegate(listener);
     }
 
+    /**
+     * Sets the listener told when WebRTC gives up its audio focus because the call's audio
+     * stopped or focus handling was switched off, or clears it with null.
+     */
+    public void setAudioFocusReleasedListener(@Nullable Runnable listener) {
+        audioFocusReleasedListener = listener;
+    }
+
+    /**
+     * Requests audio focus again for the call's audio, such as after another app took it.
+     *
+     * <p>Does nothing while no call's audio runs or audio focus is not managed: an app in no call
+     * holds no focus. A granted request is reported to the focus listener as a gain, since the
+     * system reports none for it.
+     */
     public void requestAudioFocus() {
         handler.post(() -> {
-            if (audioSwitch != null) {
-                ensureAudioConfigurationPersistsWith(() -> {
-                    Objects.requireNonNull(audioSwitch).activate();
-                });
+            if (audioSwitch == null || !isActive || !focusManaged()) {
+                return;
             }
+            requestFocusForCall();
         });
+    }
+
+    /**
+     * Requests focus for the call's audio. AudioSwitch requests focus only when it activates, so
+     * asking it to activate again requests nothing. The request has the same listener as
+     * AudioSwitch's, so the system takes it for the same owner.
+     */
+    private void requestFocusForCall() {
+        int result = requestFocus();
+        focusHolding.onRequested(result == AudioManager.AUDIOFOCUS_REQUEST_FAILED);
+        if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+            audioFocusChangeListener.onAudioFocusChange(AudioManager.AUDIOFOCUS_GAIN);
+        }
+    }
+
+    @SuppressWarnings("deprecation")
+    private int requestFocus() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return audioManager.requestAudioFocus(focusRequest());
+        }
+        return audioManager.requestAudioFocus(audioFocusChangeListener, audioStreamType, focusMode);
+    }
+
+    /**
+     * Gives up the focus held for the call's audio. The system finds the focus by its listener, the
+     * same as AudioSwitch's, so this also gives up focus AudioSwitch requested.
+     */
+    @SuppressWarnings("deprecation")
+    private void abandonFocus() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            audioManager.abandonAudioFocusRequest(focusRequest());
+        } else {
+            audioManager.abandonAudioFocus(audioFocusChangeListener);
+        }
+    }
+
+    /** A focus request like AudioSwitch's, for API 26 and later. */
+    @SuppressLint("NewApi")
+    @NonNull
+    private AudioFocusRequest focusRequest() {
+        AudioAttributes attributes = new AudioAttributes.Builder()
+                .setUsage(audioAttributeUsageType)
+                .setContentType(audioAttributeContentType)
+                .build();
+        return new AudioFocusRequest.Builder(focusMode)
+                .setAudioAttributes(attributes)
+                .setAcceptsDelayedFocusGain(true)
+                .setOnAudioFocusChangeListener(audioFocusChangeListener)
+                .build();
     }
 
     private final class ForwardingAudioFocusChangeListener implements AudioManager.OnAudioFocusChangeListener {

@@ -79,6 +79,14 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
     );
   }
 
+  /// Seconds as whole milliseconds.
+  static int? _toMs(double? seconds) =>
+      seconds == null ? null : (seconds * 1000).toInt();
+
+  /// Bits per second as kilobits per second.
+  static double? _toKbps(double? bitsPerSecond) =>
+      bitsPerSecond == null ? null : bitsPerSecond / 1000;
+
   Future<void> _processStats(
     ({
       PeerConnectionStatsBundle publisherStatsBundle,
@@ -170,10 +178,9 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
         .whereType<RtcIceCandidatePair>()
         .firstOrNull;
     if (subscriberCandidatePair != null) {
-      final incomingBitrate = subscriberCandidatePair.availableIncomingBitrate;
-
       subscriberStats = subscriberStats.copyWith(
-        bitrateKbps: incomingBitrate != null ? incomingBitrate / 1000 : null,
+        latency: _toMs(subscriberCandidatePair.currentRoundTripTime),
+        bitrateKbps: _toKbps(subscriberCandidatePair.availableIncomingBitrate),
       );
     }
 
@@ -181,12 +188,9 @@ class StatsReporter extends StateNotifier<CallMetrics?> {
         .whereType<RtcIceCandidatePair>()
         .firstOrNull;
     if (publisherCandidatePair != null) {
-      final latency = publisherCandidatePair.currentRoundTripTime;
-      final outgoingBitrate = publisherCandidatePair.availableOutgoingBitrate;
-
       publisherStats = publisherStats.copyWith(
-        latency: latency != null ? (latency * 1000).toInt() : null,
-        bitrateKbps: outgoingBitrate != null ? outgoingBitrate / 1000 : null,
+        latency: _toMs(publisherCandidatePair.currentRoundTripTime),
+        bitrateKbps: _toKbps(publisherCandidatePair.availableOutgoingBitrate),
       );
     }
 

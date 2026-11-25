@@ -63,4 +63,12 @@ mixin StateRtcMixin on StateNotifier<CallState>, StatePendingTracksMixin {
 
     state = state.copyWith(isWebAudioPlaybackBlocked: isBlocked);
   }
+
+  void rtcSetAudioInterrupted({required bool isInterrupted}) {
+    if (state.isAudioInterrupted == isInterrupted) return;
+
+    _logger.d(() => '[rtcSetAudioInterrupted] isInterrupted: $isInterrupted');
+
+    state = state.copyWith(isAudioInterrupted: isInterrupted);
+  }
 }

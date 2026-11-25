@@ -9,6 +9,8 @@ import '../call/stats/trace_tag.dart';
 import '../call/stats/tracer.dart';
 import '../webrtc/rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 
+final _logger = taggedLogger(tag: 'SV:PlatformAudioController');
+
 abstract class InterruptionEvent {}
 
 class InterruptionBeginEvent extends InterruptionEvent {}
@@ -172,103 +174,57 @@ class PlatformAudioController {
   @visibleForTesting
   rtc.WebRtcPlatformEvents platformEvents = rtc.platformEvents;
 
-  /// Calls [onInterruptionStart] and [onInterruptionEnd] when the platform
-  /// reports an audio interruption. A later call replaces these callbacks; if
-  /// it throws, the earlier ones stay in place. [androidInterruptionSource]
-  /// picks what counts as an interruption on Android.
+  /// Emits `true` when the platform starts interrupting the audio of the
+  /// call in progress and `false` when the interruption ends.
   ///
-  /// On iOS, interruptions can occur due to:
-  /// - Incoming phone calls
-  /// - Siri activation
-  /// - Alarm or timer sounds
-  /// - Audio from other apps taking over (e.g., voice memo, navigation)
+  /// On Android an interruption is the call losing the audio focus it holds
+  /// while its audio runs, and it ends when the focus comes back or the call's
+  /// audio stops. On iOS it is an audio session interruption. Empty where the
+  /// platform reports none (`WebRtcCapabilities.reportsAudioInterruptions`).
   ///
-  /// On Android, interruption sources depend on the [androidInterruptionSource]:
-  /// - With audioFocus:
-  ///   - Other media apps interrupting (e.g., Spotify)
-  ///   - Assistant voice prompts (e.g., Google Assistant)
-  ///   - Alarms and notifications
-  /// - With telephony:
-  ///   - Phone calls (requires READ_PHONE_STATE permission)
-  ///
-  /// This method allows you to pause the call, mute the audio, or perform any other
-  /// necessary actions when interruptions occur.
-  ///
-  /// For more details on handling call interruptions, refer to the
-  /// [Stream Video documentation](https://getstream.io/video/docs/flutter/advanced/handling-system-audio-interruptions/).
-  Future<void> handleCallInterruptionCallbacks({
-    void Function()? onInterruptionStart,
-    void Function()? onInterruptionEnd,
-    rtc.AndroidInterruptionSource androidInterruptionSource =
-        rtc.AndroidInterruptionSource.audioFocusAndTelephony,
-    @Deprecated('Has no effect; audio focus no longer needs it. Remove it.')
-    rtc.AndroidAudioAttributesUsageType? androidAudioAttributesUsageType,
-    @Deprecated('Has no effect; audio focus no longer needs it. Remove it.')
-    rtc.AndroidAudioAttributesContentType? androidAudioAttributesContentType,
-  }) async {
-    // Listens before enabling, so an interruption reported while the platform
-    // starts reporting them is not missed. Only the subscription of the last
-    // call passes interruptions on.
-    StreamSubscription<rtc.AudioInterruption>? subscription;
-    subscription = platformEvents.onInterruption.listen((interruption) {
-      if (!identical(_interruptionSubscription, subscription)) return;
-      switch (interruption) {
-        case rtc.AudioInterruption.started:
-          onInterruptionStart?.call();
-        case rtc.AudioInterruption.ended:
-          onInterruptionEnd?.call();
-      }
-    });
-    _restoreOnFailure[subscription] = _interruptionSubscription;
-    _interruptionSubscription = subscription;
+  /// The platform is told to report interruptions on the first listen, and
+  /// keeps reporting them. Consumed by [Call] to keep
+  /// [CallState.isAudioInterrupted] up to date; integrators observe
+  /// `call.state` instead.
+  @internal
+  Stream<bool> get audioInterruptions => _audioInterruptions.stream;
 
-    try {
-      await platformEvents.enableInterruptionEvents(
-        androidInterruptionSource: androidInterruptionSource,
-      );
-    } catch (_) {
-      await _dropFailedInterruptionCallbacks(subscription);
-      rethrow;
-    }
+  late final _audioInterruptions = StreamController<bool>.broadcast(
+    onListen: _reportAudioInterruptions,
+  );
 
-    final previous = _restoreOnFailure.remove(subscription);
-    if (!identical(_interruptionSubscription, previous)) {
-      await previous?.cancel();
-    }
-  }
-
-  /// Cancels the callbacks of a call that failed to enable. The callbacks set
-  /// before it stay in place, also for a later call still enabling that would
-  /// restore these; callbacks a later call already replaced are cancelled.
-  Future<void> _dropFailedInterruptionCallbacks(
-    StreamSubscription<rtc.AudioInterruption> failed,
-  ) async {
-    final previous = _restoreOnFailure.remove(failed);
-    var kept = false;
-    if (identical(_interruptionSubscription, failed)) {
-      _interruptionSubscription = previous;
-      kept = true;
-    }
-    for (final MapEntry(:key, :value) in [..._restoreOnFailure.entries]) {
-      if (identical(value, failed)) {
-        _restoreOnFailure[key] = previous;
-        kept = true;
-      }
-    }
-    await failed.cancel();
-    if (!kept && !identical(_interruptionSubscription, previous)) {
-      await previous?.cancel();
-    }
-  }
-
+  /// The subscription forwarding the platform's interruptions, from the first
+  /// listen on; null again after enabling them failed, so the next first
+  /// listen tries again.
   StreamSubscription<rtc.AudioInterruption>? _interruptionSubscription;
 
-  /// For each call still enabling, the subscription its failure restores.
-  final _restoreOnFailure =
-      <
-        StreamSubscription<rtc.AudioInterruption>,
-        StreamSubscription<rtc.AudioInterruption>?
-      >{};
+  void _reportAudioInterruptions() {
+    if (_interruptionSubscription != null) return;
+    if (!rtc.webRtcCapabilities.reportsAudioInterruptions) return;
+
+    // Listens before enabling, so an interruption reported while the platform
+    // starts reporting them is not missed.
+    final events = platformEvents;
+    final subscription = events.onInterruption.listen((interruption) {
+      _audioInterruptions.add(interruption == rtc.AudioInterruption.started);
+    });
+    _interruptionSubscription = subscription;
+
+    // Future.sync turns an implementation that throws synchronously into a
+    // failed future, so it is handled the same way.
+    unawaited(
+      Future.sync(events.enableInterruptionEvents).catchError((
+        Object e,
+        StackTrace stk,
+      ) async {
+        if (identical(_interruptionSubscription, subscription)) {
+          _interruptionSubscription = null;
+        }
+        await subscription.cancel();
+        _logger.e(() => '[audioInterruptions] not reported: $e\n$stk');
+      }),
+    );
+  }
 
   /// The screen share and audio route changes the platform reports.
   Stream<NativeWebRtcEvent> nativeWebRtcEventsStream() {
@@ -400,14 +356,36 @@ class PlatformAudioController {
   /// which unmutes playout paused via [pauseAudioPlayout].
   Future<void> resumeWebAudioPlayback() => rtc_audio.resumeAudioPlayback();
 
-  /// Regains Android audio focus if it was lost.
-  ///
-  /// Audio focus may not come back on its own; call this (e.g. when the app
-  /// returns from the background) to get the `onInterruptionEnd` callback of
-  /// [handleCallInterruptionCallbacks]. Throws on other platforms.
+  /// Requests Android audio focus again for the call's audio after a loss,
+  /// such as when the app returns from the background. A granted request ends
+  /// Requests Android audio focus again for the call's audio after a loss,
+  /// such as when the app returns from the background. A granted request ends
+  /// the call's interruption, see [CallState.isAudioInterrupted]. Does nothing
+  /// while no call's audio runs or WebRTC does not manage its audio focus.
+  /// Throws on other platforms.
   Future<void> regainAndroidAudioFocus() {
     _tracer.trace(TraceTag.regainAndroidAudioFocus, null);
     return rtc.Helper.regainAndroidAudioFocus();
+  }
+
+  /// Whether WebRTC can be told that the system manages Android audio focus,
+  /// see [setAndroidAudioFocusHandledBySystem]. Android.
+  ///
+  /// Static, so a caller can check it without creating the shared instance.
+  @internal
+  static bool get isSystemManagedAudioFocusSupported =>
+      rtc.webRtcCapabilities.supportsSystemManagedAudioFocus;
+
+  /// Tells WebRTC whether the system manages Android audio focus for the
+  /// call in progress, such as Telecom for a call it holds. WebRTC then
+  /// manages none, whatever the audio configuration says. Does nothing where
+  /// [isSystemManagedAudioFocusSupported] is `false`.
+  @internal
+  Future<void> setAndroidAudioFocusHandledBySystem({
+    required bool handledBySystem,
+  }) async {
+    if (!isSystemManagedAudioFocusSupported) return;
+    await rtc.Helper.setAndroidAudioFocusHandledBySystem(handledBySystem);
   }
 
   /// Refreshes the snapshot the implicit native peer-connection factory will

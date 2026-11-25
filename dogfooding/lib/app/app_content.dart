@@ -68,7 +68,6 @@ class _StreamDogFoodingAppContentState
   }
 
   final _compositeSubscription = CompositeSubscription();
-  bool? _microphoneEnabledBeforeInterruption;
   bool _isInitialized = false;
   String? _routedCallCid;
 
@@ -106,29 +105,7 @@ class _StreamDogFoodingAppContentState
     // Observe FCM messages.
     _observeFcmMessages();
 
-    _handleMobileAudioInterruptions();
-
     _isInitialized = true;
-  }
-
-  void _handleMobileAudioInterruptions() {
-    if (!CurrentPlatform.isMobile) return;
-
-    PlatformAudioController.instance.handleCallInterruptionCallbacks(
-      onInterruptionStart: () {
-        final call = StreamVideo.instance.activeCall;
-        _microphoneEnabledBeforeInterruption =
-            call?.state.value.localParticipant?.isAudioEnabled;
-
-        call?.setMicrophoneEnabled(enabled: false);
-      },
-      onInterruptionEnd: () {
-        if (_microphoneEnabledBeforeInterruption ?? false) {
-          StreamVideo.instance.activeCall?.setMicrophoneEnabled(enabled: true);
-        }
-        _microphoneEnabledBeforeInterruption = null;
-      },
-    );
   }
 
   /// Opens the call screen for [call], at most once per call.

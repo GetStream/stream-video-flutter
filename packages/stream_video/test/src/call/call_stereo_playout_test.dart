@@ -9,6 +9,9 @@ class _CustomCallPreferences implements CallPreferences {
   @override
   Duration get connectTimeout => const Duration(seconds: 7);
   @override
+  AudioInterruptionReaction get audioInterruptionReaction =>
+      AudioInterruptionReaction.none;
+  @override
   Duration get reconnectTimeout => Duration.zero;
   @override
   Duration get networkAvailabilityTimeout => const Duration(minutes: 1);

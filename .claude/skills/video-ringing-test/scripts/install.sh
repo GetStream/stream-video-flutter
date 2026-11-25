@@ -116,7 +116,7 @@ if [ "$RING_CALLER_PLATFORM" = "android" ]; then
   adbc shell pm clear "$ANDROID_PKG" >/dev/null 2>&1 || true
   adbc install -r -d "$APK" >/dev/null 2>&1 \
     || { fail "caller-install" "adb install on the caller failed"; exit 1; }
-  for perm in RECORD_AUDIO CAMERA POST_NOTIFICATIONS READ_PHONE_STATE BLUETOOTH_CONNECT; do
+  for perm in RECORD_AUDIO CAMERA POST_NOTIFICATIONS BLUETOOTH_CONNECT; do
     adbc shell pm grant "$ANDROID_PKG" "android.permission.$perm" >/dev/null 2>&1 || true
   done
 

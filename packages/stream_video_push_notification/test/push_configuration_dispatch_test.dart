@@ -60,6 +60,23 @@ void main() {
     StreamVideoPushNotificationPlatform.instance = platform;
   });
 
+  test('android reportOutgoingCalls survives the merge and reaches the '
+      'platform', () {
+    final dispatched = _dispatch(
+      platform,
+      const StreamVideoPushConfiguration(
+        android: AndroidPushConfiguration(reportOutgoingCalls: true),
+      ),
+    );
+
+    final android = dispatched['android'] as Map<String, dynamic>;
+    expect(android['reportOutgoingCalls'], isTrue);
+    expect(
+      AndroidPushConfiguration.fromJson(android).reportOutgoingCalls,
+      isTrue,
+    );
+  });
+
   group('telecom configuration reaching the platform', () {
     test('survives the merge with the default configuration', () {
       // The default configuration carries an `android` section without a telecom one, so this is

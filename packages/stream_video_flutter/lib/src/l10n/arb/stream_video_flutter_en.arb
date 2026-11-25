@@ -291,6 +291,32 @@
       }
     }
   },
+  "callParticipantsSpoken": "{count, plural, one{1 participant} other{{count} participants}}",
+  "@callParticipantsSpoken": {
+    "description": "Accessible label for the participants badge in the call app bar",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "callLatencySpoken": "Latency {latency} milliseconds",
+  "@callLatencySpoken": {
+    "description": "Accessible label for the latency badge in the call app bar",
+    "placeholders": {
+      "latency": {
+        "type": "int"
+      }
+    }
+  },
+  "callLatencyUnknownSpoken": "Latency not measured yet",
+  "@callLatencyUnknownSpoken": {
+    "description": "Accessible label for the latency badge before the first measurement"
+  },
+  "callLatencyUnit": "ms",
+  "@callLatencyUnit": {
+    "description": "Unit shown after the number on the latency badge in the call app bar, short for milliseconds"
+  },
   "ringingIncomingCall": "Incoming call",
   "@ringingIncomingCall": {
     "description": "Status line on the incoming ringing screen, under the caller's name"

@@ -509,6 +509,30 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'{count, plural, one{1 second} other{{count} seconds}}'**
   String callDurationSeconds(int count);
 
+  /// Accessible label for the participants badge in the call app bar
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 participant} other{{count} participants}}'**
+  String callParticipantsSpoken(int count);
+
+  /// Accessible label for the latency badge in the call app bar
+  ///
+  /// In en, this message translates to:
+  /// **'Latency {latency} milliseconds'**
+  String callLatencySpoken(int latency);
+
+  /// Accessible label for the latency badge before the first measurement
+  ///
+  /// In en, this message translates to:
+  /// **'Latency not measured yet'**
+  String get callLatencyUnknownSpoken;
+
+  /// Unit shown after the number on the latency badge in the call app bar, short for milliseconds
+  ///
+  /// In en, this message translates to:
+  /// **'ms'**
+  String get callLatencyUnit;
+
   /// Status line on the incoming ringing screen, under the caller's name
   ///
   /// In en, this message translates to:

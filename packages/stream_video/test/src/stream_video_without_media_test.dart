@@ -48,6 +48,9 @@ void main() {
     push = _MockPushNotificationManager();
     nativeEvents = StreamController<RingingEvent>.broadcast();
     when(() => push.onCallEvent).thenAnswer((_) => nativeEvents.stream);
+    when(
+      () => push.systemManagedCallCids,
+    ).thenAnswer((_) => const Stream.empty());
     when(push.dispose).thenAnswer((_) async {});
     when(
       () => push.endCallByCid(any(), silent: any(named: 'silent')),
@@ -224,6 +227,9 @@ void main() {
     when(
       audio.nativeWebRtcEventsStream,
     ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => audio.audioInterruptions,
+    ).thenAnswer((_) => const Stream.empty());
     final fixture = buildFixture();
     addTearDown(fixture.dispose);
     when(
@@ -250,6 +256,7 @@ void main() {
     await pumpEventQueue();
 
     verify(() => audio.webAudioPlaybackBlockedChanges).called(1);
+    verify(() => audio.audioInterruptions).called(1);
     await call.leave();
   });
 

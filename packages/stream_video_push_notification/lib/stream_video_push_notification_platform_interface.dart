@@ -85,6 +85,13 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
     throw UnimplementedError('isMuted() has not been implemented.');
   }
 
+  /// The cids of the calls the Telecom integration holds now, from their
+  /// registration until Telecom drops them. Telecom manages the audio focus
+  /// of these calls.
+  ///
+  /// Android only; none elsewhere, and none by default.
+  Future<List<String>> telecomCallCids() async => const [];
+
   /// Asks the system to route the audio of the calls with [cid] to
   /// [endpoint], and answers whether it did. Among several endpoints of that
   /// type, such as two Bluetooth headsets, the one called [name] is preferred.

@@ -31,10 +31,7 @@ class DartWebRtcPlatformEvents implements WebRtcPlatformEvents {
   Stream<AudioInterruption> get onInterruption => const Stream.empty();
 
   @override
-  Future<void> enableInterruptionEvents({
-    AndroidInterruptionSource androidInterruptionSource =
-        AndroidInterruptionSource.audioFocusAndTelephony,
-  }) {
+  Future<void> enableInterruptionEvents() {
     throw UnimplementedError('Audio interruptions are not reported on web');
   }
 }

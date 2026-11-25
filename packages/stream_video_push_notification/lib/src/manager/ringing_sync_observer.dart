@@ -8,6 +8,9 @@ import 'native_call_controller.dart';
 
 const _idRinging = 2;
 
+/// Type of the custom event naming the calls Telecom holds.
+const _telecomCallsChanged = 'telecomCallsChanged';
+
 /// Applies what the native call UI reports and core does not handle itself:
 /// opens the coordinator connection when a call rings, mirrors a native mute
 /// onto the call's microphone, and on Android leaves a call Telecom holds.
@@ -22,12 +25,14 @@ class RingingSyncObserver {
     required this._client,
     required this._controller,
     required this._ringingEvents,
+    this._onTelecomCallsChanged,
   });
 
   final StreamVideo _streamVideo;
   final CoordinatorClient _client;
   final NativeCallController _controller;
   final Stream<RingingEvent> _ringingEvents;
+  final void Function(Set<String> callCids)? _onTelecomCallsChanged;
 
   final _logger = taggedLogger(tag: 'SV:PNSync');
 
@@ -53,6 +58,9 @@ class RingingSyncObserver {
         if (!_client.isConnected) {
           _client.openConnection();
         }
+      case ActionCallCustom(:final body?)
+          when body['type'] == _telecomCallsChanged:
+        _onTelecomCalls(body);
       default:
         break;
     }
@@ -158,6 +166,19 @@ class RingingSyncObserver {
     } catch (e, stk) {
       _logger.e(() => '[onCallEvent] Leaving held $cid failed: $e\n$stk');
     }
+  }
+
+  /// Passes on the calls Telecom holds, which the Android plugin reports as
+  /// they change.
+  void _onTelecomCalls(Map<String, Object?> body) {
+    final cids = body['callCids'];
+    if (cids is! List) {
+      _logger.w(() => '[onCallEvent] Telecom calls without cids: $body');
+      return;
+    }
+    final callCids = cids.whereType<String>().toSet();
+    _logger.d(() => '[onCallEvent] Telecom holds $callCids');
+    _onTelecomCallsChanged?.call(callCids);
   }
 
   /// Stops observing.

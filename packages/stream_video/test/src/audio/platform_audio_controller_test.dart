@@ -244,190 +244,150 @@ void main() {
         },
       ]);
     });
+  });
 
-    // The host running the tests is neither Android nor iOS.
-    test('interruption callbacks are refused where the platform reports '
-        'none', () async {
-      await expectLater(
-        controller.handleCallInterruptionCallbacks(),
-        throwsA(isA<UnimplementedError>()),
+  group('audioInterruptions', () {
+    late _FakePlatformEvents events;
+
+    /// A controller of its own, not listened to yet.
+    late PlatformAudioController fresh;
+
+    setUp(() {
+      overrideWebRtcCapabilities(platform: PlatformType.android);
+      PlatformAudioController.instance = null;
+      events = _FakePlatformEvents();
+      fresh = PlatformAudioController.instance..platformEvents = events;
+    });
+
+    tearDown(() async {
+      PlatformAudioController.instance = controller;
+      await events.interruptions.close();
+    });
+
+    test('maps a start to true and an end to false', () async {
+      final received = <bool>[];
+      final subscription = fresh.audioInterruptions.listen(received.add);
+      addTearDown(subscription.cancel);
+      await pumpEventQueue();
+
+      events.interruptions
+        ..add(rtc.AudioInterruption.started)
+        ..add(rtc.AudioInterruption.ended);
+      await pumpEventQueue();
+
+      expect(received, [true, false]);
+    });
+
+    test('enables the interruptions once, on the first listen', () async {
+      expect(events.enableCount, 0);
+
+      final first = fresh.audioInterruptions.listen((_) {});
+      final second = fresh.audioInterruptions.listen((_) {});
+      await pumpEventQueue();
+      await first.cancel();
+      await second.cancel();
+      final third = fresh.audioInterruptions.listen((_) {});
+      addTearDown(third.cancel);
+      await pumpEventQueue();
+
+      expect(events.enableCount, 1);
+      expect(events.listeners, 1);
+    });
+
+    test('reports none where the platform reports no interruptions', () async {
+      overrideWebRtcCapabilities(platform: PlatformType.linux);
+      final received = <bool>[];
+      final subscription = fresh.audioInterruptions.listen(received.add);
+      addTearDown(subscription.cancel);
+      await pumpEventQueue();
+
+      events.interruptions.add(rtc.AudioInterruption.started);
+      await pumpEventQueue();
+
+      expect(events.enableCount, 0);
+      expect(events.listeners, 0);
+      expect(received, isEmpty);
+    });
+
+    test('passes on an interruption reported while enabling', () async {
+      final enabling = Completer<void>();
+      events.enableGates.add(enabling);
+      final received = <bool>[];
+      final subscription = fresh.audioInterruptions.listen(received.add);
+      addTearDown(subscription.cancel);
+
+      events.interruptions.add(rtc.AudioInterruption.started);
+      await pumpEventQueue();
+      enabling.complete();
+      await pumpEventQueue();
+
+      expect(received, [true]);
+    });
+
+    test('tries again on the next first listen after enabling '
+        'failed', () async {
+      events.enableError = StateError('enable failed');
+      final failed = fresh.audioInterruptions.listen((_) {});
+      await pumpEventQueue();
+      await failed.cancel();
+      expect(events.listeners, 0);
+
+      events.enableError = null;
+      final received = <bool>[];
+      final subscription = fresh.audioInterruptions.listen(received.add);
+      addTearDown(subscription.cancel);
+      await pumpEventQueue();
+      events.interruptions.add(rtc.AudioInterruption.started);
+      await pumpEventQueue();
+
+      expect(events.enableCount, 2);
+      expect(received, [true]);
+    });
+
+    test('tries again on the next first listen after enabling threw '
+        'synchronously', () async {
+      events.syncEnableError = StateError('enable failed');
+      final failed = fresh.audioInterruptions.listen((_) {});
+      await pumpEventQueue();
+      await failed.cancel();
+      expect(events.listeners, 0);
+
+      events.syncEnableError = null;
+      final received = <bool>[];
+      final subscription = fresh.audioInterruptions.listen(received.add);
+      addTearDown(subscription.cancel);
+      await pumpEventQueue();
+      events.interruptions.add(rtc.AudioInterruption.started);
+      await pumpEventQueue();
+
+      expect(events.enableCount, 2);
+      expect(received, [true]);
+    });
+  });
+
+  group('system-managed audio focus', () {
+    test('is supported where WebRTC can leave focus to the system', () {
+      overrideWebRtcCapabilities(platform: PlatformType.android);
+      expect(
+        PlatformAudioController.isSystemManagedAudioFocusSupported,
+        isTrue,
+      );
+
+      overrideWebRtcCapabilities(platform: PlatformType.ios);
+      expect(
+        PlatformAudioController.isSystemManagedAudioFocusSupported,
+        isFalse,
       );
     });
 
-    group('with interruptions reported', () {
-      late _FakePlatformEvents events;
-      late rtc.WebRtcPlatformEvents original;
+    // The plugin throws off Android, and the host running the tests is not.
+    test('telling WebRTC does nothing where it is not supported', () async {
+      overrideWebRtcCapabilities(platform: PlatformType.ios);
 
-      setUp(() {
-        original = controller.platformEvents;
-        events = _FakePlatformEvents();
-        controller.platformEvents = events;
-      });
-
-      tearDown(() async {
-        controller.platformEvents = original;
-        await events.interruptions.close();
-      });
-
-      test('the callbacks run on start and end', () async {
-        final calls = <String>[];
-        await controller.handleCallInterruptionCallbacks(
-          onInterruptionStart: () => calls.add('start'),
-          onInterruptionEnd: () => calls.add('end'),
-          androidInterruptionSource:
-              rtc.AndroidInterruptionSource.telephonyOnly,
-        );
-
-        events.interruptions
-          ..add(rtc.AudioInterruption.started)
-          ..add(rtc.AudioInterruption.ended);
-        await pumpEventQueue();
-
-        expect(events.enabledWith, [
-          rtc.AndroidInterruptionSource.telephonyOnly,
-        ]);
-        expect(calls, ['start', 'end']);
-      });
-
-      test('a second call replaces the callbacks of the first', () async {
-        final calls = <String>[];
-        await controller.handleCallInterruptionCallbacks(
-          onInterruptionStart: () => calls.add('first'),
-        );
-        await controller.handleCallInterruptionCallbacks(
-          onInterruptionStart: () => calls.add('second'),
-        );
-
-        events.interruptions.add(rtc.AudioInterruption.started);
-        await pumpEventQueue();
-
-        expect(calls, ['second']);
-      });
-
-      test('of two overlapping calls, the last one wins', () async {
-        final first = Completer<void>();
-        final second = Completer<void>();
-        events.enableGates.addAll([first, second]);
-        final calls = <String>[];
-
-        final firstCall = controller.handleCallInterruptionCallbacks(
-          onInterruptionStart: () => calls.add('first'),
-        );
-        final secondCall = controller.handleCallInterruptionCallbacks(
-          onInterruptionStart: () => calls.add('second'),
-        );
-        // The platform answers the second call first.
-        second.complete();
-        await pumpEventQueue();
-        first.complete();
-        await Future.wait([firstCall, secondCall]);
-
-        events.interruptions.add(rtc.AudioInterruption.started);
-        await pumpEventQueue();
-
-        expect(calls, ['second']);
-      });
-
-      test('an interruption reported while enabling reaches the '
-          'callbacks', () async {
-        final enabling = Completer<void>();
-        events.enableGates.add(enabling);
-        final calls = <String>[];
-
-        final call = controller.handleCallInterruptionCallbacks(
-          onInterruptionStart: () => calls.add('start'),
-        );
-        events.interruptions.add(rtc.AudioInterruption.started);
-        await pumpEventQueue();
-        enabling.complete();
-        await call;
-
-        expect(calls, ['start']);
-      });
-
-      test('a call that fails to enable keeps the callbacks set '
-          'before', () async {
-        final calls = <String>[];
-        await controller.handleCallInterruptionCallbacks(
-          onInterruptionStart: () => calls.add('first'),
-        );
-        events.enableError = StateError('enable failed');
-
-        await expectLater(
-          controller.handleCallInterruptionCallbacks(
-            onInterruptionStart: () => calls.add('second'),
-          ),
-          throwsStateError,
-        );
-        events.interruptions.add(rtc.AudioInterruption.started);
-        await pumpEventQueue();
-
-        expect(calls, ['first']);
-      });
-
-      test('an earlier call that fails after a later one succeeded leaves '
-          'only the later callbacks subscribed', () async {
-        final calls = <String>[];
-        await controller.handleCallInterruptionCallbacks(
-          onInterruptionStart: () => calls.add('first'),
-        );
-        final earlier = Completer<void>();
-        events.enableGates.add(earlier);
-
-        final earlierCall = expectLater(
-          controller.handleCallInterruptionCallbacks(
-            onInterruptionStart: () => calls.add('earlier'),
-          ),
-          throwsStateError,
-        );
-        await controller.handleCallInterruptionCallbacks(
-          onInterruptionStart: () => calls.add('later'),
-        );
-        events.enableError = StateError('enable failed');
-        earlier.complete();
-        await earlierCall;
-
-        expect(events.listeners, 1);
-        events.interruptions.add(rtc.AudioInterruption.started);
-        await pumpEventQueue();
-        expect(calls, ['later']);
-      });
-
-      test('two overlapping calls that both fail keep the callbacks set '
-          'before', () async {
-        final calls = <String>[];
-        await controller.handleCallInterruptionCallbacks(
-          onInterruptionStart: () => calls.add('first'),
-        );
-        final earlier = Completer<void>();
-        final later = Completer<void>();
-        events
-          ..enableGates.addAll([earlier, later])
-          ..enableError = StateError('enable failed');
-
-        final earlierCall = expectLater(
-          controller.handleCallInterruptionCallbacks(
-            onInterruptionStart: () => calls.add('earlier'),
-          ),
-          throwsStateError,
-        );
-        final laterCall = expectLater(
-          controller.handleCallInterruptionCallbacks(
-            onInterruptionStart: () => calls.add('later'),
-          ),
-          throwsStateError,
-        );
-        // The earlier call fails first.
-        earlier.complete();
-        await pumpEventQueue();
-        later.complete();
-        await Future.wait([earlierCall, laterCall]);
-
-        events.interruptions.add(rtc.AudioInterruption.started);
-        await pumpEventQueue();
-
-        expect(calls, ['first']);
-      });
+      await expectLater(
+        controller.setAndroidAudioFocusHandledBySystem(handledBySystem: true),
+        completes,
+      );
     });
   });
 
@@ -508,13 +468,18 @@ class _FakePlatformEvents implements rtc.WebRtcPlatformEvents {
   // Closed in the tests' tearDown.
   // ignore: close_sinks
   final interruptions = StreamController<rtc.AudioInterruption>.broadcast();
-  final enabledWith = <rtc.AndroidInterruptionSource>[];
+
+  /// How many times [enableInterruptionEvents] ran.
+  int enableCount = 0;
 
   /// When not empty, each enable waits for the next of these.
   final enableGates = <Completer<void>>[];
 
   /// When set, enabling fails with it.
   Error? enableError;
+
+  /// When set, enabling throws it before returning a future.
+  Error? syncEnableError;
 
   /// The subscriptions to [onInterruption] not cancelled yet.
   int listeners = 0;
@@ -532,11 +497,13 @@ class _FakePlatformEvents implements rtc.WebRtcPlatformEvents {
   }, isBroadcast: true);
 
   @override
-  Future<void> enableInterruptionEvents({
-    rtc.AndroidInterruptionSource androidInterruptionSource =
-        rtc.AndroidInterruptionSource.audioFocusAndTelephony,
-  }) async {
-    enabledWith.add(androidInterruptionSource);
+  Future<void> enableInterruptionEvents() {
+    enableCount++;
+    if (syncEnableError case final error?) throw error;
+    return _enable();
+  }
+
+  Future<void> _enable() async {
     if (enableGates.isNotEmpty) await enableGates.removeAt(0).future;
     if (enableError case final error?) throw error;
   }
