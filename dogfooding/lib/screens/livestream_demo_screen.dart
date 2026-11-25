@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
@@ -19,6 +21,9 @@ class _LivestreamDemoScreenState extends State<LivestreamDemoScreen> {
   StreamVideo? _streamVideo;
   Call? _call;
 
+  /// Why the livestream could not be opened, null while it can.
+  String? _error;
+
   @override
   void initState() {
     super.initState();
@@ -28,87 +33,97 @@ class _LivestreamDemoScreenState extends State<LivestreamDemoScreen> {
   Future<void> _joinCall() async {
     final userId = randomId(size: 6);
 
-    final tokenResponse = await _tokenService.loadToken(
-      userId: userId,
-      environment: Environment.livestream,
-    );
+    try {
+      final tokenResponse = await _tokenService.loadToken(
+        userId: userId,
+        environment: Environment.livestream,
+      );
 
-    final streamVideo = StreamVideo.create(
-      tokenResponse.apiKey,
-      user: User(id: userId),
-      tokenLoader: (userId) async {
-        final token = await _tokenService.loadToken(
-          userId: userId,
-          environment: Environment.livestream,
-        );
-        return token.token;
-      },
-    );
+      final streamVideo = StreamVideo.create(
+        tokenResponse.apiKey,
+        user: User(id: userId),
+        tokenLoader: (userId) async {
+          final token = await _tokenService.loadToken(
+            userId: userId,
+            environment: Environment.livestream,
+          );
+          return token.token;
+        },
+      );
+      if (!mounted) {
+        unawaited(streamVideo.dispose());
+        return;
+      }
+      _streamVideo = streamVideo;
 
-    final call = streamVideo.makeCall(
-      callType: StreamCallType.liveStream(),
-      id: widget.callId,
-    );
-    final result = await call.getOrCreate();
+      final call = streamVideo.makeCall(
+        callType: StreamCallType.liveStream(),
+        id: widget.callId,
+      );
+      final result = await call.getOrCreate();
+      if (!mounted) return;
 
-    if (!mounted) {
-      return;
-    }
-
-    _streamVideo = streamVideo;
-
-    result.fold(
-      onSuccess: (_) {
-        _call = call;
-        if (mounted) {
-          setState(() {});
+      setState(() {
+        switch (result) {
+          case Success():
+            _call = call;
+          case Failure(:final error):
+            _error = '$error';
         }
-      },
-      onFailure: (error, stackTrace) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('$error')));
-      },
-    );
+      });
+    } catch (e, stk) {
+      debugPrint('Could not open livestream ${widget.callId}: $e');
+      debugPrintStack(stackTrace: stk);
+      if (mounted) setState(() => _error = '$e');
+    }
   }
 
   @override
   void dispose() {
-    _call
-        ?.leave(
-          reason: const DisconnectReason.left(initiator: LeaveInitiator.app),
-        )
-        .then((value) {
-          _streamVideo?.dispose();
-        });
+    final streamVideo = _streamVideo;
+    final call = _call;
+    if (call == null) {
+      unawaited(streamVideo?.dispose());
+    } else {
+      unawaited(
+        call
+            .leave(
+              reason: const DisconnectReason.left(
+                initiator: LeaveInitiator.app,
+              ),
+            )
+            .whenComplete(() => streamVideo?.dispose()),
+      );
+    }
     super.dispose();
   }
 
+  Widget _closeButton(BuildContext context) => StreamToolbarButton.icon(
+    icon: Icon(context.streamIcons.xmark),
+    tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+    onPressed: () => Navigator.maybePop(context),
+  );
+
   @override
   Widget build(BuildContext context) {
-    final streamVideoTheme = StreamVideoTheme.of(context);
-    final textTheme = streamVideoTheme.textTheme;
+    if (_call case final call?) {
+      return LivestreamPlayer(call: call, backButtonBuilder: _closeButton);
+    }
 
+    final error = _error;
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        titleSpacing: 4,
-        centerTitle: false,
-        title: Text('Livestream Demo', style: textTheme.body),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.close, color: Colors.white),
-            onPressed: () {
-              Navigator.maybePop(context);
-            },
-          ),
-        ],
+      appBar: AppBar(leading: _closeButton(context)),
+      body: Center(
+        child: error == null
+            ? const CircularProgressIndicator.adaptive()
+            : Padding(
+                padding: const EdgeInsets.all(32),
+                child: Text(
+                  "Couldn't open the livestream: $error",
+                  textAlign: TextAlign.center,
+                ),
+              ),
       ),
-      body: switch (_call) {
-        null => const Center(child: CircularProgressIndicator()),
-        final Call call => LivestreamPlayer(call: call),
-      },
     );
   }
 }

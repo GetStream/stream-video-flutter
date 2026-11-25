@@ -2,6 +2,12 @@
 
 ### ✅ Added
 
+- Added `livestreamEndedTitle` and `livestreamEndedSubtitle` to the localizations, in English and Dutch.
+- Added `livestreamEnterFullscreen` and `livestreamExitFullscreen` to the localizations, in English and Dutch.
+- Added `includeAnonymousParticipants`, `showLiveIndicator` and `showSpeakerphoneToggle` to `LivestreamPlayer`.
+- Added `StreamLivestreamTile`, the livestream's video with its live, viewer count and fullscreen toolbar and an optional speakerphone toggle, used by both host and viewers, with `StreamLivestreamTileThemeData` on `StreamVideoTheme` and a `livestreamTile` builder in `streamVideoComponentBuilders`.
+- Added `type` and `size` to `LivestreamSpeakerphoneOption`.
+- Added `StreamLiveIndicator` and `StreamSpectatorsIndicator`, the livestream's LIVE pill and viewer count, with `StreamLiveIndicatorThemeData` and `StreamSpectatorsIndicatorThemeData` on `StreamVideoTheme`.
 - Added `StreamMediaDevicesController.supportsAudioOutputSelection`; `audioOutputs` is empty where it is false.
 - Added `anchorPoint` to `showStreamModalDialog`, which picks the half of a folded window the dialog goes to.
 - Added `StreamCallConnectionBanner`, which says what the call's connection is doing while it reconnects.
@@ -213,7 +219,14 @@
 
 ### 🔄 Changed
 
+- `LivestreamInfo`'s fullscreen toggle uses the design system's `fullscreen` and `fullscreenExit` icons instead of Material's.
 - [Android] A call runs in the foreground service of the audio policy it uses, `Call.audioConfigurationPolicy`, so a ringing call follows `StreamVideoOptions.ringingAudioConfigurationPolicy`. An app whose `audioConfigurationPolicy` is `AudioConfigurationPolicy.viewer` and whose ringing policy is `AudioConfigurationPolicy.broadcaster` rings its calls in the `phoneCall` service rather than the `mediaPlayback` one.
+- `LivestreamPlayer` follows the new design: the video sits in a `StreamLivestreamTile` under a `CallAppBar` with the call duration, fullscreen fills the screen, and the ended, backstage and waiting states are drawn on the tile's surface.
+- `LivestreamPlayer.videoFit` and `LivestreamContent.videoFit` default to `VideoFit.adaptive`. Pass `VideoFit.contain` to keep the previous fit.
+- `LivestreamPlayer` shows the ended screen when the call disconnects because it ended, if `onCallDisconnected` keeps it on screen.
+- The ended screen shows `livestreamEndedTitle` and `livestreamEndedSubtitle`; `livestreamEndedStatus` is no longer shown.
+- Back leaves the `LivestreamPlayer`'s fullscreen before it leaves the screen.
+- `LivestreamPlayer` shows the hosts' avatars while none of them has video; `livestreamHostsUnavailableBuilder` now only shows while no host is in the call.
 - On a folded window, `showStreamModalDialog` goes to the trailing half by default, and `StreamAdaptiveMenuAnchor`'s sheet to the half its button is in.
 - On a window folded down the middle, `StreamLobbyView` puts the preview and the rest of the lobby on either side of the fold, and `CallControlBar` splits its centre controls between its two sides.
 - `StreamCallContent` keeps showing the participants during a reconnect, and after one fails until the call has left, with a `StreamCallConnectionBanner` above them instead of the centred "Reconnecting" text.
@@ -221,6 +234,7 @@
 - `StreamParticipantTileStyle.topToolbarPadding` defaults to none.
 - A microphone or camera change on the ringing screens made just as the call is picked up now reaches the call, instead of being dropped.
 - The participants bar in `CallParticipantsSpotlightView` carries a button at either end for the tiles it cannot fit.
+- `StreamEffectsSettingsTab` shows the `effectsFill` icon instead of `blurFill`.
 - `CallParticipantsGridView` pages with the same button as the participants bar.
 - Above the small breakpoint, the grid's page buttons sit either side of the grid rather than over it.
 - The badge on the call control buttons is amber with no border, where it used to be red with one.
@@ -235,6 +249,7 @@
 
 ### 🐞 Fixed
 
+- `LivestreamInfo` no longer counts anonymous viewers twice once the call is joined.
 - Every call control button shows a tooltip.
 - `CallFeatureButton` reports a feature that is on as selected, to assistive technology and to a custom `button` builder.
 - `StreamCallContainer` reports a call's disconnect once. A status the call settled on after it, such as a second disconnect from a race, no longer calls `onCallDisconnected`, or leaves, a second time.
@@ -304,6 +319,9 @@
 
 ### ⚠️ Deprecated
 
+- Deprecated `LivestreamInfo`; use `StreamLivestreamTile` instead.
+- Deprecated the `StreamLivestreamThemeData` colours, text styles, icon themes and `playPauseIconSize`.
+- Deprecated `StreamColorTheme.livestreamBackground`.
 - `StreamIncomingOutgoingCallThemeData`, `StreamIncomingOutgoingCallTheme` and `StreamVideoTheme.incomingCallTheme` / `outgoingCallTheme` are deprecated in favour of `StreamIncomingCallThemeData` and `StreamOutgoingCallThemeData`. The ringing screens are built on the design system now and no longer read them, so a theme set through them has no effect. The old pair also shared one inherited widget, so the two screens could never be themed apart.
 
 - `ParticipantLayoutMode.spotlight` is `speakerTop` now, and `pictureInPicture` is `speakerOneToOne`. `dart fix --apply` migrates both.
@@ -319,6 +337,11 @@
 ### ⚠️ Breaking
 
 - `StreamCallContainer` ends its call when it is disposed, for example when the back button pops its route. Before, the call stayed joined and kept publishing audio and video behind the closed screen. The container joins the call it is given, so it ends that call even when the app joined it first; an incoming call the user has not accepted is rejected as declined, since a leave would not tell the server. `LivestreamPlayer` does the same only for a call it joined itself through an auto-join `joinBehaviour`, as the Swift and JS players do; a call the app joined, or started joining, is still the app's to leave. A left call cannot be joined again, so anything that disposes the widget and builds a new one for the same call now ends the call: a page without keep-alive in a `PageView` or `TabBarView`, an `AnimatedSwitcher`, a parent that changes type, or `pushReplacement` to another screen with the same call. Keep the widget mounted or give it a `GlobalKey`. To keep the call running after the widget is gone, for example in an in-app picture-in-picture overlay, or to run your own cleanup before the leave, pass `leaveCallOnDispose: false` and call `Call.leave` yourself.
+- `LivestreamPlayer.backButtonBuilder` sits at the start of the app bar, and fullscreen hides it.
+- `LivestreamPlayer.livestreamControlsWidgetBuilder`'s controls cover the tile only; the call duration sits in the app bar above it.
+- `LivestreamPlayer.showParticipantCount` is nullable and falls back to `StreamLivestreamTileStyle.showSpectatorsIndicator`.
+- Removed `LivestreamPlayer.livestreamEndedBuilder`, `livestreamBackstageBuilder` and `livestreamControlsBuilder` with their typedefs, and `LivestreamContent.callState`. Use `livestreamEndedWidgetBuilder`, `livestreamBackstageWidgetBuilder` and `livestreamControlsWidgetBuilder` instead.
+- `LivestreamEndedContent`, `LivestreamBackstageContent` and `LivestreamContent` no longer bring their own `Scaffold`.
 - `isMobileLandscape` and `isMobilePortrait` are removed.
 - `StreamScreenSize` is `small` for any window shorter than 480, and `StreamScreenSize.fromSize` buckets a size by both axes.
 - `StreamCallContent.callFastReconnectingOverlayBuilder`, `CallFastReconnectingOverlayBuilder` and `CallFastReconnectingProperties` are removed; use `callConnectionBannerBuilder`, which is drawn for every reconnect and gets the call status through `CallConnectionBannerProperties`. `CallNotConnectedProperties.isMigrating` and `isReconnecting` are removed, since `callNotConnectedBuilder` is only used before the call first connects.
@@ -355,7 +378,7 @@
 - The lobby's card listing who is already in the call is gone, and `StreamLobbyParticipantsView` with it. `StreamLobbyParticipantsButton` replaces it: a badge with the number waiting, opening the list on tap.
 - The lobby's hardcoded English moved into the localizations, so the heading, subheading and join button follow the app's locale. Pass `title`, `subtitle` or `joinButtonLabel` to override them.
 
-- Every icon the SDK draws now resolves from the design system's icon set through `context.streamIcons`, instead of from Material. A microphone is `voiceFill` / `voiceOffFill`, a camera `videoFill` / `videoOffFill`, hanging up `phoneDownFill`, answering `phoneFill`, screen sharing `presentDesktopFill`, captions `captionFill`, recording `recordingFill` / `recordingStopFill`. The one exception is the livestream fullscreen toggle, whose cross-fade needs two distinct glyphs where the design system ships only `fullscreenFill`.
+- Every icon the SDK draws now resolves from the design system's icon set through `context.streamIcons`, instead of from Material. A microphone is `voiceFill` / `voiceOffFill`, a camera `videoFill` / `videoOffFill`, hanging up `phoneDownFill`, answering `phoneFill`, screen sharing `presentDesktopFill`, captions `captionFill`, recording `recordingFill` / `recordingStopFill`.
 - The `IconData` parameters on the control widgets — `enabledMicrophoneIcon`, `disabledCameraIcon`, `icon` on `StreamLeaveCallButton` and the rest — are now nullable and default to null, resolving from `context.streamIcons` at build time. Passing an icon still works; the defaults could not stay in the constructor because reading the theme needs a context.
 - This package's own three-icon `StreamIcons` class and its bundled font are removed. It was never exported from the barrel, and its `grid`, `spotlight` and `fullscreen` are covered by `context.streamIcons.gridFill`, `.speakerLeftFill` and `.fullscreenFill`.
 - The dead colour parameters on `StreamMicrophoneButton`, `StreamCameraButton`, `StreamRecordingButton`, `StreamClosedCaptionsButton` and `StreamScreenShareButton` (`enabled*IconColor`, `disabled*IconColor`, `enabled*BackgroundColor`, `disabled*BackgroundColor`) are removed. They stopped having any effect when those widgets moved onto `StreamButton`, so dropping them changes nothing at runtime. Run `dart fix --apply`.

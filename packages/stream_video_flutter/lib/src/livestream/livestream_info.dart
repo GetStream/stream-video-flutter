@@ -1,3 +1,7 @@
+// ignore_for_file: deprecated_member_use_from_same_package
+
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
@@ -5,6 +9,11 @@ import '../l10n/localization_extension.dart';
 
 /// A control bar style widget meant for displaying livestream controls and
 /// actions.
+@Deprecated(
+  'LivestreamPlayer draws its controls with StreamLivestreamTile. Use '
+  'StreamLivestreamTile, StreamLiveIndicator or StreamSpectatorsIndicator '
+  'instead.',
+)
 class LivestreamInfo extends StatelessWidget {
   /// Creates a [LivestreamInfo] widget.
   ///
@@ -19,6 +28,7 @@ class LivestreamInfo extends StatelessWidget {
   /// * [showParticipantCount] defines if the call should show participant count.
   ///
   /// * [includeAnonymousParticipantsCount] defines if the participant count should include anonymous participants.
+  @Deprecated('Use StreamLivestreamTile instead.')
   const LivestreamInfo({
     super.key,
     required this.call,
@@ -134,10 +144,14 @@ class LivestreamInfo extends StatelessWidget {
                         ),
                         Text(
                           includeAnonymousParticipantsCount
-                              ? (callData.participantCount +
-                                        callData.anonymousParticipantCount)
-                                    .toString()
-                              : callData.participantCount.toString(),
+                              ? callData.participantCount.toString()
+                              : math
+                                    .max(
+                                      callData.participantCount -
+                                          callData.anonymousParticipantCount,
+                                      0,
+                                    )
+                                    .toString(),
                           style: theme.participantCountTextStyle,
                         ),
                       ],
@@ -170,21 +184,13 @@ class LivestreamInfo extends StatelessWidget {
                   IconButton(
                     onPressed: onFullscreenTapped,
                     icon: AnimatedCrossFade(
-                      // The design system ships a single `fullscreenFill`
-                      // glyph and no exit-fullscreen counterpart, and the
-                      // cross-fade needs two distinct pictures, so this pair
-                      // stays on Material until core grows one.
                       firstChild: IconTheme(
                         data: contractIconTheme,
-                        child: const Icon(
-                          Icons.fullscreen_exit,
-                        ),
+                        child: Icon(context.streamIcons.fullscreenExit),
                       ),
                       secondChild: IconTheme(
                         data: expandIconTheme,
-                        child: const Icon(
-                          Icons.fullscreen,
-                        ),
+                        child: Icon(context.streamIcons.fullscreen),
                       ),
                       crossFadeState: fullscreen
                           ? CrossFadeState.showFirst

@@ -56,6 +56,7 @@ class StreamColorTheme {
       opacity: 1,
       blur: 8,
     ),
+    @Deprecated('Not read by any widget.')
     this.livestreamBackground = const Color(0xff000000),
     this.livestreamCallControlsColor = const Color(0xffffffff),
   });
@@ -112,6 +113,7 @@ class StreamColorTheme {
       ],
       stops: [0, 1],
     ),
+    @Deprecated('Not read by any widget.')
     this.livestreamBackground = const Color(0xff000000),
     this.livestreamCallControlsColor = const Color(0xffffffff),
   });
@@ -137,7 +139,7 @@ class StreamColorTheme {
     required this.overlay,
     required this.overlayDark,
     required this.bgGradient,
-    required this.livestreamBackground,
+    @Deprecated('Not read by any widget.') required this.livestreamBackground,
     required this.livestreamCallControlsColor,
   });
 
@@ -198,7 +200,8 @@ class StreamColorTheme {
   ///
   final Gradient bgGradient;
 
-  ///
+  /// Not read by any widget.
+  @Deprecated('Not read by any widget.')
   final Color livestreamBackground;
 
   ///
