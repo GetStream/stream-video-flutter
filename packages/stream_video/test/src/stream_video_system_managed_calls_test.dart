@@ -11,6 +11,10 @@ import 'fixtures/stream_video_fixture.dart';
 class _MockPushNotificationManager extends Mock
     implements PushNotificationManager {}
 
+/// A manager that keeps [PushNotificationManager]'s defaults.
+// ignore: prefer_mixin
+class _DefaultsManager extends PushNotificationManager with Mock {}
+
 // ignore: subtype_of_sealed_class, a mock for the tests
 class _MockPlatformAudioController extends Mock
     implements PlatformAudioController {}
@@ -152,6 +156,20 @@ void main() {
       call,
     ];
     systemManaged.add({'default:c1'});
+    await pumpEventQueue();
+
+    expect(handledBySystem, [false]);
+  });
+
+  test('a manager that keeps the default reports no system-managed calls, so '
+      'WebRTC is still told at start', () async {
+    final defaults = _DefaultsManager();
+    when(() => defaults.onCallEvent).thenAnswer((_) => const Stream.empty());
+    when(defaults.dispose).thenAnswer((_) async {});
+    final fixture = StreamVideoFixture(
+      pushNotificationManagerProvider: (_, _) => defaults,
+    );
+    addTearDown(fixture.dispose);
     await pumpEventQueue();
 
     expect(handledBySystem, [false]);
