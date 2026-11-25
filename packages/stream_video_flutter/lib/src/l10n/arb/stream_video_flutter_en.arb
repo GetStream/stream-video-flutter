@@ -121,7 +121,15 @@
   },
   "livestreamEndedStatus": "The livestream has ended.",
   "@livestreamEndedStatus": {
-    "description": "Label shown when the livestream has already ended."
+    "description": "No longer shown; the ended screen uses livestreamEndedTitle and livestreamEndedSubtitle."
+  },
+  "livestreamEndedTitle": "Livestream stopped",
+  "@livestreamEndedTitle": {
+    "description": "Title shown in the player once the livestream has ended."
+  },
+  "livestreamEndedSubtitle": "The broadcaster has gone off air",
+  "@livestreamEndedSubtitle": {
+    "description": "Line under the title shown in the player once the livestream has ended."
   },
   "livestreamEndedWatchRecordings": "Watch the recordings:",
   "@livestreamEndedWatchRecordings": {
@@ -135,9 +143,25 @@
   "@livestreamBackstage": {
     "description": "The badge text shown when the call mode is backstage"
   },
+  "livestreamEnterFullscreen": "Full screen",
+  "@livestreamEnterFullscreen": {
+    "description": "Tooltip of the livestream button that fills the screen with the video"
+  },
+  "livestreamExitFullscreen": "Exit full screen",
+  "@livestreamExitFullscreen": {
+    "description": "Tooltip of the livestream button that leaves fullscreen"
+  },
   "livestreamLive": "Live",
   "@livestreamLive": {
     "description": "The badge text shown when the call mode is live"
+  },
+  "livestreamLiveIndicatorLive": "LIVE",
+  "@livestreamLiveIndicatorLive": {
+    "description": "The live indicator's label while the livestream is live, written in upper case"
+  },
+  "livestreamLiveIndicatorBackstage": "BACKSTAGE",
+  "@livestreamLiveIndicatorBackstage": {
+    "description": "The live indicator's label while the livestream is in backstage, written in upper case"
   },
   "lobbyMicrophoneSection": "Microphone",
   "@lobbyMicrophoneSection": {
@@ -642,5 +666,14 @@
   "recordingsRetry": "Try Again",
   "@recordingsRetry": {
     "description": "Button that lists the call's recordings again after a failure"
+  },
+  "livestreamViewerCount": "{count, plural, one{1 viewer} other{{count} viewers}}",
+  "@livestreamViewerCount": {
+    "description": "Read out by screen readers for the livestream's viewer count",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

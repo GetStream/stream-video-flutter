@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import '../../test_utils/webrtc_capabilities.dart';
+
 // Answers every partial-state request from one fixed call state, counting the
 // subscriptions.
 class _FakeCall extends Mock implements Call {
@@ -92,6 +94,11 @@ void main() {
   testWidgets('LivestreamPlayer builds the livestream widgets it covers', (
     tester,
   ) async {
+    // The speakerphone toggle only shows where playout can be paused.
+    CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+    addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+    overrideAudioPlayoutPauseSupport(supported: true);
+
     final call = _FakeCall(
       callState.copyWith(status: CallStatus.connected()),
     );
@@ -101,13 +108,14 @@ void main() {
         home: LivestreamPlayer(
           call: call,
           joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+          showSpeakerphoneToggle: true,
         ),
       ),
     );
     await tester.pump();
 
     expect(find.byType(LivestreamContent), findsOneWidget);
-    expect(find.byType(LivestreamInfo), findsOneWidget);
+    expect(find.byType(StreamLivestreamTile), findsOneWidget);
     expect(find.byType(LivestreamSpeakerphoneOption), findsOneWidget);
   });
 }
