@@ -95,8 +95,8 @@ final class WebRtcCapabilities {
   final bool supportsVideoEffects;
 
   /// Whether a native audio processing module, such as noise cancellation,
-  /// can be installed through the plugin's audio processing hook. Android,
-  /// iOS and macOS.
+  /// can be installed through the plugin's audio processing hook. Android and
+  /// iOS.
   final bool supportsAudioProcessingModule;
 
   WebRtcCapabilities copyWith({

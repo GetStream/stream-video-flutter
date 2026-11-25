@@ -38,6 +38,6 @@ WebRtcCapabilities nativeWebRtcCapabilitiesFor({
     supportsEncryption: isAndroid || isIOS || isMacOS,
     supportsAudioModuleMicrophoneMute: isIOS || isMacOS,
     supportsVideoEffects: isAndroid || isIOS,
-    supportsAudioProcessingModule: isAndroid || isIOS || isMacOS,
+    supportsAudioProcessingModule: isAndroid || isIOS,
   );
 }

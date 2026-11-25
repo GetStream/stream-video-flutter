@@ -86,7 +86,7 @@ void main() {
         ),
         'supportsAudioProcessingModule': (
           (c) => c.supportsAudioProcessingModule,
-          {_Platform.android, _Platform.ios, _Platform.macos},
+          {_Platform.android, _Platform.ios},
         ),
         'supportsVideoEffects': (
           (c) => c.supportsVideoEffects,

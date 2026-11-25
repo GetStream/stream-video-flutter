@@ -113,8 +113,8 @@ These native entry points are part of the plugin's public API; packages such as 
 | Hook | Platform | Used for |
 | --- | --- | --- |
 | `FlutterWebRTCPlugin.sharedSingleton.setAudioProcessingFactoryProvider(AudioProcessingFactoryProvider)` | Android | An audio processing module, such as noise cancellation, on the microphone capture. `supportsAudioProcessingModule`. |
-| `AudioManager.sharedInstance().audioProcessingModule` | iOS, macOS | The same, through the `RTCDefaultAudioProcessingModule` the peer connection factories use. `supportsAudioProcessingModule`. |
-| `ProcessorProvider.addProcessor(name, factory)` with `setVideoEffects(trackId, names:)` | Android, iOS, macOS | Frame processors registered by name and attached to a local video track. `supportsVideoEffects`. |
+| `AudioManager.sharedInstance().audioProcessingModule` | iOS | The same, through the `RTCDefaultAudioProcessingModule` the peer connection factories use. `supportsAudioProcessingModule`. |
+| `ProcessorProvider.addProcessor(name, factory)` with `setVideoEffects(trackId, names:)` | Android, iOS | Frame processors registered by name and attached to a local video track. `supportsVideoEffects`. |
 
 ## Contributing
 

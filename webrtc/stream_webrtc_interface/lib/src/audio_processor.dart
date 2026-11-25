@@ -8,7 +8,7 @@ import 'media_stream_filter.dart';
 /// Android, `AudioManager.audioProcessingModule` on iOS) and turns it on and
 /// off here. An implementation that processes the stream itself returns a
 /// filter from [toFilter] instead.
-abstract class AudioProcessor {
+abstract base class AudioProcessor {
   const AudioProcessor();
 
   /// Whether the processing is on.
