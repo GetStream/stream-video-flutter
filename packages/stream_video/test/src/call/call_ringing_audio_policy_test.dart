@@ -3,6 +3,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../../fixtures/webrtc_capabilities.dart';
 import 'fixtures/call_test_helpers.dart';
 
 void main() {
@@ -52,6 +53,7 @@ void main() {
       // Web has no per-call native factory, so no platform channel is needed.
       CurrentPlatform.debugCurrentPlatformOverride = PlatformType.web;
       addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+      overrideWebRtcCapabilities(platform: PlatformType.web);
       final call = _callWith(options, ringing: true);
 
       await call.ensureNativeFactory();

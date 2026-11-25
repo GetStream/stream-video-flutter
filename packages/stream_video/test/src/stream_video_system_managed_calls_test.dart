@@ -5,19 +5,21 @@ import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../fixtures/webrtc_capabilities.dart';
 import 'fixtures/stream_video_fixture.dart';
 
 class _MockPushNotificationManager extends Mock
     implements PushNotificationManager {}
 
-class _MockRtcMediaDeviceNotifier extends Mock
-    implements RtcMediaDeviceNotifier {}
+// ignore: subtype_of_sealed_class, a mock for the tests
+class _MockPlatformAudioController extends Mock
+    implements PlatformAudioController {}
 
 /// Pins that the client tells WebRTC the system manages Android audio focus
 /// while one of its active calls is a call whose focus the system manages,
 /// such as one Telecom holds, and that it no longer does after.
 void main() {
-  late _MockRtcMediaDeviceNotifier notifier;
+  late _MockPlatformAudioController audio;
   late _MockPushNotificationManager push;
   late BehaviorSubject<Set<String>> systemManaged;
   late List<bool> handledBySystem;
@@ -25,21 +27,22 @@ void main() {
   setUp(() {
     TestWidgetsFlutterBinding.ensureInitialized();
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+    overrideWebRtcCapabilities(platform: PlatformType.android);
     registerFallbackValue(const AudioConfigurationPolicy.broadcaster());
 
     handledBySystem = [];
-    notifier = _MockRtcMediaDeviceNotifier();
+    audio = _MockPlatformAudioController();
     when(
-      () => notifier.reinitializeAudioConfiguration(any()),
+      () => audio.reinitializeAudioConfiguration(any()),
     ).thenAnswer((_) async {});
     when(
-      () => notifier.setAndroidAudioFocusHandledBySystem(
+      () => audio.setAndroidAudioFocusHandledBySystem(
         handledBySystem: any(named: 'handledBySystem'),
       ),
     ).thenAnswer((invocation) async {
       handledBySystem.add(invocation.namedArguments[#handledBySystem] as bool);
     });
-    RtcMediaDeviceNotifier.instance = notifier;
+    PlatformAudioController.instance = audio;
 
     systemManaged = BehaviorSubject.seeded(const {});
     push = _MockPushNotificationManager();
@@ -51,7 +54,7 @@ void main() {
   });
 
   tearDown(() async {
-    RtcMediaDeviceNotifier.instance = null;
+    PlatformAudioController.instance = null;
     CurrentPlatform.debugCurrentPlatformOverride = null;
     await systemManaged.close();
   });
@@ -104,6 +107,7 @@ void main() {
 
   test('does nothing off Android', () async {
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
+    overrideWebRtcCapabilities(platform: PlatformType.ios);
     final (fixture, call) = await client();
 
     systemManaged.add({'default:c1'});
