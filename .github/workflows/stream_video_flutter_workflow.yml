@@ -30,7 +30,8 @@ jobs:
   #
   # `push` events to main and v2 always run the full suite.
   gate:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     outputs:
       should_run: ${{ github.event_name == 'push' || (steps.filter.outputs.relevant == 'true' && github.event.pull_request.draft != true) }}
       # The iOS unit tests build the push plugin's example app on a macOS
@@ -75,7 +76,8 @@ jobs:
     timeout-minutes: 25
     # Goldens compare pixels, so this matches the image update_goldens.yml
     # renders them on.
-    runs-on: ubuntu-26.04
+    runs-on:
+      group: github-public-amd64
     permissions:
       contents: read
       pull-requests: read
@@ -132,7 +134,8 @@ jobs:
     needs: gate
     if: needs.gate.outputs.should_run == 'true' && github.event_name == 'pull_request'
     timeout-minutes: 10
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     # Posting the sticky audit comment needs write access; without it the
     # action still annotates the diff but skips the comment.
     permissions:
@@ -170,7 +173,8 @@ jobs:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
     timeout-minutes: 30
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
@@ -227,7 +231,8 @@ jobs:
     needs: gate
     if: needs.gate.outputs.should_run != 'true' && github.event_name == 'pull_request' && github.event.pull_request.draft != true
     timeout-minutes: 5
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     permissions:
       contents: read
       pull-requests: read
@@ -251,7 +256,8 @@ jobs:
     if: always()
     needs: [gate, analyze, complexity, build, coverage-skipped, ios-unit-tests]
     timeout-minutes: 5
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     steps:
       - name: Check results
         env:

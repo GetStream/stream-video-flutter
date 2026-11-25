@@ -1,3 +1,5 @@
+// ignore_for_file: invalid_use_of_visible_for_testing_member, implementation_imports
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -5,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
+import 'package:stream_webrtc_flutter/src/native/native_webrtc_capabilities.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../test_utils/test_wrapper.dart';
 
@@ -17,9 +21,9 @@ void main() {
 
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  final notifier = RtcMediaDeviceNotifier.instance;
-  final originalNativePause = notifier.nativePauseAudioPlayout;
-  final originalNativeResume = notifier.nativeResumeAudioPlayout;
+  final controller = PlatformAudioController.instance;
+  final originalNativePause = controller.nativePauseAudioPlayout;
+  final originalNativeResume = controller.nativeResumeAudioPlayout;
   final webrtcCalls = <String>[];
 
   /// Every native pause and resume, in order.
@@ -43,11 +47,12 @@ void main() {
 
   setUp(() {
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+    rtc.debugWebRtcCapabilitiesOverride = _capabilities(pauseSupported: true);
     webrtcCalls.clear();
     nativeCalls.clear();
     pauseGate = null;
     pauseError = null;
-    notifier
+    controller
       ..nativePauseAudioPlayout = () async {
         nativeCalls.add('pause');
         await pauseGate?.future;
@@ -63,13 +68,15 @@ void main() {
 
   tearDown(() async {
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+    rtc.debugWebRtcCapabilitiesOverride = _capabilities(pauseSupported: true);
     pauseGate = null;
     pauseError = null;
-    if (notifier.isAudioPlayoutPaused) await notifier.resumeAudioPlayout();
-    notifier
+    if (controller.isAudioPlayoutPaused) await controller.resumeAudioPlayout();
+    controller
       ..nativePauseAudioPlayout = originalNativePause
       ..nativeResumeAudioPlayout = originalNativeResume;
     CurrentPlatform.debugCurrentPlatformOverride = null;
+    rtc.debugWebRtcCapabilitiesOverride = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_webrtcChannel, null);
   });
@@ -95,18 +102,18 @@ void main() {
     final call = await pumpOption(tester);
 
     expect(find.byIcon(icons.audio), findsOneWidget);
-    expect(notifier.isAudioPlayoutPaused, isFalse);
+    expect(controller.isAudioPlayoutPaused, isFalse);
 
     await tester.tap(find.byType(StreamButton));
     await settle(tester);
 
-    expect(notifier.isAudioPlayoutPaused, isTrue);
+    expect(controller.isAudioPlayoutPaused, isTrue);
     expect(find.byIcon(icons.mute), findsOneWidget);
 
     await tester.tap(find.byType(StreamButton));
     await settle(tester);
 
-    expect(notifier.isAudioPlayoutPaused, isFalse);
+    expect(controller.isAudioPlayoutPaused, isFalse);
     expect(find.byIcon(icons.audio), findsOneWidget);
 
     verifyNever(() => call.setAudioOutputDevice(any()));
@@ -116,11 +123,11 @@ void main() {
   testWidgets('reflects playout paused elsewhere in the app', (tester) async {
     await pumpOption(tester);
 
-    await notifier.pauseAudioPlayout();
+    await controller.pauseAudioPlayout();
     await settle(tester);
     expect(find.byIcon(icons.mute), findsOneWidget);
 
-    await notifier.resumeAudioPlayout();
+    await controller.resumeAudioPlayout();
     await settle(tester);
     expect(find.byIcon(icons.audio), findsOneWidget);
   });
@@ -132,12 +139,12 @@ void main() {
 
     await tester.tap(find.byType(StreamButton));
     await settle(tester);
-    expect(notifier.isAudioPlayoutPaused, isTrue);
+    expect(controller.isAudioPlayoutPaused, isTrue);
 
     await tester.pumpWidget(const SizedBox());
     await settle(tester);
 
-    expect(notifier.isAudioPlayoutPaused, isFalse);
+    expect(controller.isAudioPlayoutPaused, isFalse);
   });
 
   testWidgets('unmutes when removed while its pause is still in flight', (
@@ -154,7 +161,7 @@ void main() {
     await settle(tester);
 
     expect(nativeCalls, ['pause', 'resume']);
-    expect(notifier.isAudioPlayoutPaused, isFalse);
+    expect(controller.isAudioPlayoutPaused, isFalse);
   });
 
   testWidgets('leaves playout paused by someone else alone on dispose', (
@@ -162,13 +169,13 @@ void main() {
   ) async {
     await pumpOption(tester);
 
-    await notifier.pauseAudioPlayout();
+    await controller.pauseAudioPlayout();
     await settle(tester);
 
     await tester.pumpWidget(const SizedBox());
     await settle(tester);
 
-    expect(notifier.isAudioPlayoutPaused, isTrue);
+    expect(controller.isAudioPlayoutPaused, isTrue);
   });
 
   testWidgets(
@@ -179,15 +186,15 @@ void main() {
       await tester.tap(find.byType(StreamButton));
       await settle(tester);
 
-      await notifier.resumeAudioPlayout();
+      await controller.resumeAudioPlayout();
       await settle(tester);
-      await notifier.pauseAudioPlayout();
+      await controller.pauseAudioPlayout();
       await settle(tester);
 
       await tester.pumpWidget(const SizedBox());
       await settle(tester);
 
-      expect(notifier.isAudioPlayoutPaused, isTrue);
+      expect(controller.isAudioPlayoutPaused, isTrue);
     },
   );
 
@@ -204,7 +211,7 @@ void main() {
     await settle(tester);
 
     expect(nativeCalls, ['pause']);
-    expect(notifier.isAudioPlayoutPaused, isTrue);
+    expect(controller.isAudioPlayoutPaused, isTrue);
     expect(find.byIcon(icons.mute), findsOneWidget);
   });
 
@@ -215,7 +222,7 @@ void main() {
     await tester.tap(find.byType(StreamButton));
     await settle(tester);
 
-    expect(notifier.isAudioPlayoutPaused, isFalse);
+    expect(controller.isAudioPlayoutPaused, isFalse);
     expect(find.byIcon(icons.audio), findsOneWidget);
 
     pauseError = null;
@@ -223,7 +230,7 @@ void main() {
     await settle(tester);
 
     expect(nativeCalls, ['pause', 'pause']);
-    expect(notifier.isAudioPlayoutPaused, isTrue);
+    expect(controller.isAudioPlayoutPaused, isTrue);
     expect(find.byIcon(icons.mute), findsOneWidget);
   });
 
@@ -242,9 +249,12 @@ void main() {
   });
 
   group('where pausing playout is not supported', () {
-    setUp(
-      () => CurrentPlatform.debugCurrentPlatformOverride = PlatformType.linux,
-    );
+    setUp(() {
+      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.linux;
+      rtc.debugWebRtcCapabilitiesOverride = _capabilities(
+        pauseSupported: false,
+      );
+    });
 
     testWidgets('the button is not shown', (tester) async {
       await pumpOption(tester);
@@ -253,9 +263,20 @@ void main() {
     });
 
     test('pausing playout does not report it paused', () async {
-      await notifier.pauseAudioPlayout();
+      await controller.pauseAudioPlayout();
 
-      expect(notifier.isAudioPlayoutPaused, isFalse);
+      expect(controller.isAudioPlayoutPaused, isFalse);
     });
   });
+}
+
+/// Android's capabilities, with audio playout pause as given.
+rtc.WebRtcCapabilities _capabilities({required bool pauseSupported}) {
+  return nativeWebRtcCapabilitiesFor(
+    isAndroid: true,
+    isIOS: false,
+    isMacOS: false,
+    isWindows: false,
+    isLinux: false,
+  ).copyWith(supportsAudioPlayoutPause: pauseSupported);
 }

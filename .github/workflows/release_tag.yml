@@ -15,7 +15,8 @@ jobs:
     # Manual dispatch, or a commit whose message starts `chore(repo): release`.
     # The tags come from the unpublished package versions, not from the message.
     if: "${{ github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'chore(repo): release') }}"
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     permissions:
       contents: write # push tags
 

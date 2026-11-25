@@ -1,4 +1,5 @@
 import '../../../stream_video.dart';
+import 'device_id_constraint.dart';
 
 /// Options used when creating an AudioTrack.
 class AudioConstraints extends MediaConstraints {
@@ -55,11 +56,10 @@ class AudioConstraints extends MediaConstraints {
   @override
   Map<String, dynamic> toMap() {
     final constraints = <String, dynamic>{};
-
-    /// in web platform it's not possible to provide optional and mandatory parameters.
-    /// deviceId is a mandatory parameter
-    if (!CurrentPlatform.isWeb || (CurrentPlatform.isWeb && deviceId == null)) {
-      constraints['optional'] = <Map<String, dynamic>>[
+    DeviceIdConstraint.forPlatform().addTo(
+      constraints,
+      deviceId: deviceId,
+      optional: [
         {'echoCancellation': echoCancellation},
         {'googDAEchoCancellation': echoCancellation},
         {'googEchoCancellation': echoCancellation},
@@ -72,18 +72,8 @@ class AudioConstraints extends MediaConstraints {
         {'googTypingNoiseDetection': typingNoiseDetection},
         {'DtlsSrtpKeyAgreement': true},
         {'channelCount': channelCount},
-      ];
-    }
-
-    if (deviceId != null) {
-      if (CurrentPlatform.isWeb) {
-        constraints['deviceId'] = {'exact': deviceId};
-      } else {
-        (constraints['optional'] as List).cast<Map<String, dynamic>>().add(
-          <String, dynamic>{'sourceId': deviceId},
-        );
-      }
-    }
+      ],
+    );
     return {
       'audio': constraints,
       'video': false,

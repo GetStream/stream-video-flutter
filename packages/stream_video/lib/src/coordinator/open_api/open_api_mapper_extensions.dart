@@ -474,6 +474,14 @@ StreamVideoEvent? coordinatorEventFromJson(
         endTime: event.callTranscription.endTime,
         sessionId: event.callTranscription.sessionId,
       );
+    case EventType.callStatsReportReady:
+      final event = open.CallStatsReportReadyEvent.fromJson(json);
+      return StreamCallStatsReportReadyEvent(
+        StreamCallCid(cid: event.callCid),
+        createdAt: event.createdAt,
+        sessionId: event.sessionId,
+        isTrimmed: event.isTrimmed,
+      );
     case EventType.ingressStarted:
       final event = open.IngressStartedEvent.fromJson(json);
       return StreamCallIngressStartedEvent(

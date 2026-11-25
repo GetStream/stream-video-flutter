@@ -8,6 +8,7 @@ import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
+import '../../fixtures/webrtc_capabilities.dart';
 import '../../test_helpers.dart';
 import 'fixtures/call_test_helpers.dart';
 import 'fixtures/connection_harness.dart';
@@ -176,6 +177,7 @@ void main() {
     test('off iOS, picks the audio output after publishing', () async {
       CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
       addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+      overrideWebRtcCapabilities(platform: PlatformType.android);
       // The stats reporter reads the thermal state on Android.
       final messenger =
           TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
@@ -237,6 +239,7 @@ void main() {
 
       setUp(() {
         CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+        overrideWebRtcCapabilities(platform: PlatformType.android);
         final messenger =
             TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
         for (final channel in ['thermal', 'thermal/events']) {
@@ -324,6 +327,7 @@ void main() {
 
     setUp(() {
       CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      overrideWebRtcCapabilities(platform: PlatformType.android);
       final messenger =
           TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
       for (final channel in ['thermal', 'thermal/events']) {
@@ -578,6 +582,7 @@ void main() {
       () async {
         CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
         addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+        overrideWebRtcCapabilities(platform: PlatformType.android);
 
         final events = <String>[];
         const channel = MethodChannel('FlutterWebRTC.Method');

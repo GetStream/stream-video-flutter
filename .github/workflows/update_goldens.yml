@@ -9,7 +9,8 @@ jobs:
   update_goldens:
     # Keep in sync with the analyze job in stream_video_flutter_workflow.yml,
     # which compares against the goldens rendered here.
-    runs-on: ubuntu-26.04
+    runs-on:
+      group: github-public-amd64
     steps:
       - name: 🔑 Mint CI Bot Token
         id: ci-bot-token

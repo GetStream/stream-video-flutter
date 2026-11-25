@@ -136,7 +136,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
     _logger.d(() => '[connectUser] user.id: ${user.id}');
     final state = _connectionState.value;
     if (state.isConnected) {
-      _logger.w(() => '[connectUser] rejected (already connected): $_user');
+      _logger.d(() => '[connectUser] rejected (already connected): $_user');
       return const Result.success(none);
     }
     if (state.isConnecting) {
@@ -353,7 +353,7 @@ class CoordinatorClientOpenApi extends CoordinatorClient {
         );
       }
       if (!ws.isDisconnected) {
-        _logger.w(() => '[openConnection] rejected (not closed)');
+        _logger.d(() => '[openConnection] rejected (not closed)');
         return failureWithError('WS is not closed');
       }
 
