@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
+import '../../test_utils/webrtc_capabilities.dart';
+
 // Answers every partial-state request from one fixed call state, counting the
 // subscriptions.
 class _FakeCall extends Mock implements Call {
@@ -95,6 +97,7 @@ void main() {
     // The speakerphone toggle only shows where playout can be paused.
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
     addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+    overrideAudioPlayoutPauseSupport(supported: true);
 
     final call = _FakeCall(
       callState.copyWith(status: CallStatus.connected()),
