@@ -195,6 +195,7 @@ class RtcMediaDeviceNotifier {
 
   /// Shows the picker of the iOS broadcast extension, without starting a
   /// capture. Throws an [UnsupportedError] on other platforms.
+  @internal
   Future<void> presentiOSBroadcastPicker() {
     return rtc.presentiOSBroadcastPicker();
   }
