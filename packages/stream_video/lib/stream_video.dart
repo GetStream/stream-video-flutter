@@ -23,10 +23,12 @@ export 'package:stream_webrtc_interface/stream_webrtc_interface.dart'
         EncryptionManager,
         WebRtcEngine;
 
-/// Filters that process local media before it is sent.
+/// Filters that process local media before it is sent, and the audio
+/// processor.
 export 'package:stream_webrtc_interface/stream_webrtc_interface.dart'
     show
         AudioFilter,
+        AudioProcessor,
         MediaStream,
         MediaStreamFilter,
         MediaStreamFilterInput,
@@ -40,7 +42,6 @@ export 'open_api/video/coordinator/api.dart' hide RecordingType, Role, User;
 export 'open_api/video/coordinator_aliases.dart';
 export 'open_api/video/coordinator_legacy_enums.dart';
 export 'src/audio/platform_audio_controller.dart';
-export 'src/audio_processing/audio_processor.dart';
 export 'src/audio_processing/audio_recognition.dart';
 export 'src/audio_processing/speaking_while_muted_recognition.dart';
 export 'src/call/call.dart'

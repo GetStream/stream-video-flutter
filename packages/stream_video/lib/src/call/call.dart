@@ -337,6 +337,7 @@ class Call {
       if (!_callEvents.isClosed) _callEvents.emit(event);
     },
     logger: _logger,
+    audioProcessorFilter: () => _host.options.audioProcessor?.toFilter(),
   );
 
   /// Accepts and rejects this call's ring, and waits for it to be answered.

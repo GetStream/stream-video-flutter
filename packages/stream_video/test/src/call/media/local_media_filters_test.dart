@@ -463,6 +463,38 @@ void main() {
     });
   });
 
+  group('the audio processor filter', () {
+    test('runs on the microphone after the app filter', () async {
+      filters = LocalMediaFilters(
+        audioProcessorFilter: () => _LoggingAudioFilter('nc', log),
+      );
+      await filters.setAudioFilter(_LoggingAudioFilter('app', log));
+
+      await filters.apply(_track('mic', SfuTrackType.audio, 'audio'));
+
+      expect(log, ['app apply mic', 'nc apply mic']);
+    });
+
+    test('is left out when the processor has none', () async {
+      filters = LocalMediaFilters(audioProcessorFilter: () => null);
+      await filters.setAudioFilter(_LoggingAudioFilter('app', log));
+
+      await filters.apply(_track('mic', SfuTrackType.audio, 'audio'));
+
+      expect(log, ['app apply mic']);
+    });
+
+    test('does not run on the camera', () async {
+      filters = LocalMediaFilters(
+        audioProcessorFilter: () => _LoggingAudioFilter('nc', log),
+      );
+
+      await filters.apply(camera('cam-1'));
+
+      expect(log, isEmpty);
+    });
+  });
+
   test('stopAll stops every applied filter and keeps the chains', () async {
     await filters.setVideoFilter(_LoggingFilter('blur', log));
     await filters.setAudioFilter(_LoggingAudioFilter('nc', log));

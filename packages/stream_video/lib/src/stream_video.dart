@@ -6,11 +6,12 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart' show CompositeSubscription, Rx;
 import 'package:stream_core/stream_core.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart'
+    show AudioProcessor;
 
 import '../globals.dart';
 import '../open_api/video/coordinator/api.dart' hide User;
 import 'audio/platform_audio_controller.dart';
-import 'audio_processing/audio_processor.dart';
 import 'call/call.dart';
 import 'call/call_host.dart';
 import 'call/call_ringing_state.dart';
@@ -23,6 +24,7 @@ import 'core/client_state.dart';
 import 'core/coordinator_connection.dart';
 import 'core/internet_connection_network_state_provider.dart';
 import 'errors/stream_video_exception.dart';
+import 'errors/stream_video_exception_composer.dart';
 import 'internal/_instance_holder.dart';
 import 'latency/latency_service.dart';
 import 'latency/latency_settings.dart';
@@ -1020,20 +1022,17 @@ class StreamVideo extends Disposable implements CallHost {
   }
 
   @internal
-  Future<Result<bool>> isAudioProcessingEnabled() async {
-    return await _options.audioProcessor?.isEnabled() ??
-        const Result.failure(
-          StreamVideoException(message: 'No audio processor found.'),
-        );
+  Future<Result<bool>> isAudioProcessingEnabled() {
+    return _runAudioProcessor((processor) => processor.isEnabled());
   }
 
   @override
   @internal
-  Future<Result<None>> setAudioProcessingEnabled(bool enabled) async {
-    return await _options.audioProcessor?.setEnabled(enabled) ??
-        const Result.failure(
-          StreamVideoException(message: 'No audio processor found.'),
-        );
+  Future<Result<None>> setAudioProcessingEnabled(bool enabled) {
+    return _runAudioProcessor((processor) async {
+      await processor.setEnabled(enabled);
+      return none;
+    });
   }
 
   /// This method returns true if the iOS device supports Apple's Neural Engine
@@ -1042,12 +1041,28 @@ class StreamVideo extends Disposable implements CallHost {
   ///
   /// Returns false on other platforms.
   @override
-  Future<Result<bool>> deviceSupportsAdvancedAudioProcessing() async {
-    return await _options.audioProcessor
-            ?.deviceSupportsAdvancedAudioProcessing() ??
-        const Result.failure(
-          StreamVideoException(message: 'No audio processor found.'),
-        );
+  Future<Result<bool>> deviceSupportsAdvancedAudioProcessing() {
+    return _runAudioProcessor(
+      (processor) => processor.deviceSupportsAdvancedAudioProcessing(),
+    );
+  }
+
+  /// Runs [action] on the audio processor, as a failure when there is none or
+  /// it throws.
+  Future<Result<T>> _runAudioProcessor<T>(
+    Future<T> Function(AudioProcessor processor) action,
+  ) async {
+    final processor = _options.audioProcessor;
+    if (processor == null) {
+      return const Result.failure(
+        StreamVideoException(message: 'No audio processor found.'),
+      );
+    }
+    try {
+      return Result.success(await action(processor));
+    } catch (e, stk) {
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
+    }
   }
 }
 
