@@ -141,8 +141,8 @@ void main() {
     ]);
   });
 
-  test('a read that answers after the manager is disposed is '
-      'dropped', () async {
+  test('a read that answers after the manager is disposed reports nothing '
+      'and throws nothing', () async {
     await manager.dispose();
 
     platform.heldCids.complete(['default:c1']);
