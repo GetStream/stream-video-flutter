@@ -176,9 +176,10 @@ class Helper {
 
   /// Set the audio configuration to for Android.
   /// Must be set before initiating a WebRTC session. Mid session, the audio
-  /// mode and routing do not change; `manageAudioFocus` switches focus
-  /// handling for the call in progress as [setAndroidAudioFocusManaged] does,
-  /// and the focus fields apply to later focus requests for it.
+  /// mode applies at once and the volume-key stream on the next output
+  /// selection; `manageAudioFocus` switches focus handling for the call in
+  /// progress as [setAndroidAudioFocusManaged] does, and the focus fields
+  /// apply to later focus requests for it.
   static Future<void> setAndroidAudioConfiguration(
     AndroidAudioConfiguration androidAudioConfiguration,
   ) => AndroidNativeAudioManagement.setAndroidAudioConfiguration(
