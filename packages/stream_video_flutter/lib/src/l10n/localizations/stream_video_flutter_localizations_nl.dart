@@ -275,6 +275,9 @@ class StreamVideoFlutterLocalizationsNl
   String get callLatencyUnknownSpoken => 'Vertraging nog niet gemeten';
 
   @override
+  String get callLatencyUnit => 'ms';
+
+  @override
   String get ringingIncomingCall => 'Inkomende oproep';
 
   @override

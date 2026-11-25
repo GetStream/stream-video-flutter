@@ -527,6 +527,12 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'Latency not measured yet'**
   String get callLatencyUnknownSpoken;
 
+  /// Unit shown after the number on the latency badge in the call app bar, short for milliseconds
+  ///
+  /// In en, this message translates to:
+  /// **'ms'**
+  String get callLatencyUnit;
+
   /// Status line on the incoming ringing screen, under the caller's name
   ///
   /// In en, this message translates to:

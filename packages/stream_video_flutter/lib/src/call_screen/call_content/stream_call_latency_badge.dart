@@ -132,7 +132,7 @@ class StreamCallLatencyBadge extends StatelessWidget {
                     children: [
                       TextSpan(text: latency?.toString() ?? '--'),
                       TextSpan(
-                        text: ' ms',
+                        text: ' ${translations.callLatencyUnit}',
                         style: TextStyle(color: style.unitTextColor),
                       ),
                     ],

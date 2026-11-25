@@ -162,4 +162,32 @@ void main() {
 
     expect(reading(tester), '42 ms');
   });
+
+  testWidgets('puts the dot after the reading right to left', (tester) async {
+    when(() => reporter.currentMetrics).thenReturn(metrics(42));
+
+    await tester.pumpWidget(
+      TestWrapper(
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Center(child: StreamCallLatencyBadge(call: call)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final dot = find.descendant(
+      of: find.byType(StreamCallLatencyBadge),
+      matching: find.byWidgetPredicate(
+        (it) =>
+            it is DecoratedBox &&
+            (it.decoration as BoxDecoration).shape == BoxShape.circle,
+      ),
+    );
+
+    expect(
+      tester.getTopLeft(dot).dx,
+      greaterThan(tester.getTopRight(find.byType(Text)).dx),
+    );
+  });
 }

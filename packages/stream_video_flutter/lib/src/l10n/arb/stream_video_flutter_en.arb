@@ -313,6 +313,10 @@
   "@callLatencyUnknownSpoken": {
     "description": "Accessible label for the latency badge before the first measurement"
   },
+  "callLatencyUnit": "ms",
+  "@callLatencyUnit": {
+    "description": "Unit shown after the number on the latency badge in the call app bar, short for milliseconds"
+  },
   "ringingIncomingCall": "Incoming call",
   "@ringingIncomingCall": {
     "description": "Status line on the incoming ringing screen, under the caller's name"

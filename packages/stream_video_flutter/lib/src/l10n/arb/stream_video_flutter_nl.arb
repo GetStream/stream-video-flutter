@@ -70,6 +70,7 @@
   "callParticipantsSpoken": "{count, plural, one{1 deelnemer} other{{count} deelnemers}}",
   "callLatencySpoken": "Vertraging {latency} milliseconden",
   "callLatencyUnknownSpoken": "Vertraging nog niet gemeten",
+  "callLatencyUnit": "ms",
   "ringingIncomingCall": "Inkomende oproep",
   "ringingCalling": "Bellen\u2026",
   "ringingAccept": "Opnemen",

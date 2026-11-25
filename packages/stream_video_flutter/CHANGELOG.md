@@ -10,7 +10,7 @@
 - Added `StreamLiveIndicator` and `StreamSpectatorsIndicator`, the livestream's LIVE pill and viewer count, with `StreamLiveIndicatorThemeData` and `StreamSpectatorsIndicatorThemeData` on `StreamVideoTheme`.
 - Added `StreamCallParticipantsBadge` and `StreamCallLatencyBadge`, with `StreamCallParticipantsBadgeThemeData` and `StreamCallLatencyBadgeThemeData` on `StreamVideoTheme`.
 - Added `StreamCallBadgeThemeData` on `StreamVideoTheme`, and `StreamCallBadgeTheme`, to restyle the duration, participants and latency badges in one place.
-- Added `callParticipantsSpoken`, `callLatencySpoken` and `callLatencyUnknownSpoken` to the localizations, in English and Dutch.
+- Added `callParticipantsSpoken`, `callLatencySpoken`, `callLatencyUnknownSpoken` and `callLatencyUnit` to the localizations, in English and Dutch.
 - Added `StreamMediaDevicesController.supportsAudioOutputSelection`; `audioOutputs` is empty where it is false.
 - Added `anchorPoint` to `showStreamModalDialog`, which picks the half of a folded window the dialog goes to.
 - Added `StreamCallConnectionBanner`, which says what the call's connection is doing while it reconnects.

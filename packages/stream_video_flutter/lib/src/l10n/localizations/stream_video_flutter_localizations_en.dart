@@ -273,6 +273,9 @@ class StreamVideoFlutterLocalizationsEn
   String get callLatencyUnknownSpoken => 'Latency not measured yet';
 
   @override
+  String get callLatencyUnit => 'ms';
+
+  @override
   String get ringingIncomingCall => 'Incoming call';
 
   @override

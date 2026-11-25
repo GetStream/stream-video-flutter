@@ -103,4 +103,23 @@ void main() {
     },
     variant: TargetPlatformVariant.mobile(),
   );
+
+  testWidgets('puts the icon after the count right to left', (tester) async {
+    when(() => callState.participantCount).thenReturn(12);
+
+    await tester.pumpWidget(
+      TestWrapper(
+        child: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Center(child: StreamCallParticipantsBadge(call: call)),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.getTopLeft(find.byType(Icon)).dx,
+      greaterThan(tester.getTopRight(find.text('12')).dx),
+    );
+  });
 }
