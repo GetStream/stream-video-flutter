@@ -76,6 +76,14 @@ void main() {
           (c) => c.needsRemoteAudioReattach,
           <_Platform>{},
         ),
+        'supportsEncryption': (
+          (c) => c.supportsEncryption,
+          {_Platform.android, _Platform.ios, _Platform.macos},
+        ),
+        'supportsAudioModuleMicrophoneMute': (
+          (c) => c.supportsAudioModuleMicrophoneMute,
+          {_Platform.ios, _Platform.macos},
+        ),
       };
 
   for (final MapEntry(key: name, value: (read, platforms))
@@ -153,6 +161,9 @@ void main() {
           base.copyWith(supportsSystemManagedAudioFocus: v),
       'needsRemoteAudioReattach': (v) =>
           base.copyWith(needsRemoteAudioReattach: v),
+      'supportsEncryption': (v) => base.copyWith(supportsEncryption: v),
+      'supportsAudioModuleMicrophoneMute': (v) =>
+          base.copyWith(supportsAudioModuleMicrophoneMute: v),
     };
 
     for (final MapEntry(key: name, value: flip) in flips.entries) {

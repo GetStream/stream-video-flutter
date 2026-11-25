@@ -11,8 +11,9 @@ import 'third_party/dart_webrtc/media_stream_impl.dart';
 import 'web_audio_renderer.dart' as audio_renderer;
 import 'web_capabilities.dart';
 
+// ignore: subtype_of_sealed_class, the plugin implements its own contract
 /// The [WebRtcEngine] of the browser.
-class BrowserWebRtcEngine implements WebRtcEngine {
+final class BrowserWebRtcEngine implements WebRtcEngine {
   BrowserWebRtcEngine();
 
   @override
@@ -40,9 +41,9 @@ class BrowserWebRtcEngine implements WebRtcEngine {
 
   @override
   Future<RTCPeerConnection> createPeerConnection(
-    Map<String, dynamic> configuration, [
+    Map<String, dynamic> configuration, {
     Map<String, dynamic> constraints = const {},
-  ]) {
+  }) {
     return rtc.createPeerConnection(configuration, constraints);
   }
 
@@ -69,13 +70,10 @@ class BrowserWebRtcEngine implements WebRtcEngine {
   @override
   Future<FirstFrameWatcher> watchFirstFrame(
     MediaStream stream, {
-    required void Function() onFirstFrame,
+    required void Function(FirstVideoFrame frame) onFirstFrame,
   }) async {
     return _VideoElementFirstFrameWatcher(stream, onFirstFrame);
   }
-
-  @override
-  bool get supportsEncryption => false;
 
   @override
   EncryptionManager createEncryptionManager({
@@ -86,6 +84,7 @@ class BrowserWebRtcEngine implements WebRtcEngine {
   }
 }
 
+// ignore: subtype_of_sealed_class, the plugin implements its own contract
 class _BrowserWebRtcAudio implements WebRtcAudio {
   _BrowserWebRtcAudio(this._engine);
 
@@ -136,16 +135,14 @@ class _BrowserWebRtcAudio implements WebRtcAudio {
   Future<void> showAudioRoutePicker() async {
     throw UnsupportedError('The audio route picker is on iOS only');
   }
-
-  @override
-  bool get supportsAudioModuleMicrophoneMute => false;
 }
 
+// ignore: subtype_of_sealed_class, the plugin implements its own contract
 class _BrowserWebRtcCamera implements WebRtcCamera {
   const _BrowserWebRtcCamera();
 
   @override
-  Future<bool> switchCamera(MediaStreamTrack track) async {
+  Future<CameraSwitchResult> switchCamera(MediaStreamTrack track) async {
     throw UnsupportedError('Capture the other camera instead');
   }
 
@@ -179,6 +176,7 @@ class _BrowserWebRtcCamera implements WebRtcCamera {
   Future<bool?> isMultitaskingAccessSupported() async => null;
 }
 
+// ignore: subtype_of_sealed_class, the plugin implements its own contract
 /// Plays the stream muted in a video element that is not in the page, and
 /// reports the first frame when the element has loaded it.
 class _VideoElementFirstFrameWatcher implements FirstFrameWatcher {
@@ -195,13 +193,18 @@ class _VideoElementFirstFrameWatcher implements FirstFrameWatcher {
   }
 
   final web.HTMLVideoElement _element = web.HTMLVideoElement();
-  final void Function() _onFirstFrame;
+  final void Function(FirstVideoFrame frame) _onFirstFrame;
   StreamSubscription<web.Event>? _loaded;
 
   void _report() {
     _loaded?.cancel();
     _loaded = null;
-    _onFirstFrame();
+    _onFirstFrame(
+      FirstVideoFrame(
+        width: _element.videoWidth,
+        height: _element.videoHeight,
+      ),
+    );
   }
 
   @override

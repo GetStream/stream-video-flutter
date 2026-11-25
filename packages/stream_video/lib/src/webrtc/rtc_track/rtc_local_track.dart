@@ -376,8 +376,11 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
       );
     }
 
-    // Use the native switchCamera method.
-    final isFrontCamera = await webRtcEngine.camera.switchCamera(mediaTrack);
+    final switched = await webRtcEngine.camera.switchCamera(mediaTrack);
+    // Without a facing from the platform, the previous one is kept.
+    final isFrontCamera =
+        switched.isFrontFacing ??
+        mediaConstraints.facingMode == FacingMode.user;
 
     final mediaDevicesResult = await RtcMediaDeviceNotifier.instance
         .enumerateDevicesFor(

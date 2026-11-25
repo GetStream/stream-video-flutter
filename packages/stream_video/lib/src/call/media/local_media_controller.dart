@@ -763,7 +763,7 @@ class LocalMediaController {
   /// Whether [setAudioOutputDevice] is applying an output. The system
   /// re-routes while it does, which says nothing about where audio ends up.
   ///
-  /// Best effort: the WebRTC plugin delivers route changes asynchronously, so
+  /// Best effort: the WebRTC engine delivers route changes asynchronously, so
   /// the ones an output change causes usually arrive after it returned, when
   /// this is false again. One that names the other built-in output then puts
   /// the selection back once more, and the last one names the output that

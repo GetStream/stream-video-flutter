@@ -51,7 +51,7 @@ class AudioRouteChangedEvent extends NativeWebRtcEvent {
   final RtcMediaDevice device;
 
   /// Why the route changed, or [AudioRouteChangeReason.unknown] when the
-  /// WebRTC plugin does not say.
+  /// WebRTC engine does not say.
   final AudioRouteChangeReason reason;
 
   @override
@@ -120,7 +120,7 @@ class SpeechActivityEnded extends SpeechActivityEvent {
 /// The app-wide audio of the platform: playout pause, interruptions, the
 /// audio configuration, speech activity, web autoplay recovery, Android audio
 /// focus, the iOS audio route picker, and the screen share and audio route
-/// events the WebRTC plugin reports.
+/// events the WebRTC engine reports.
 ///
 /// Implemented by the SDK only.
 @sealed
@@ -363,8 +363,6 @@ class PlatformAudioController {
   /// which unmutes playout paused via [pauseAudioPlayout].
   Future<void> resumeWebAudioPlayback() => remoteAudioPlayback.resume();
 
-  /// Requests Android audio focus again for the call's audio after a loss,
-  /// such as when the app returns from the background. A granted request ends
   /// Requests Android audio focus again for the call's audio after a loss,
   /// such as when the app returns from the background. A granted request ends
   /// the call's interruption, see [CallState.isAudioInterrupted]. Does nothing

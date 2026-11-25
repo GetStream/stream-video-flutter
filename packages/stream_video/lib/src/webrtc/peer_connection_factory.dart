@@ -114,7 +114,7 @@ class StreamPeerConnectionFactory {
   /// An instance member rather than a static so tests can exercise the
   /// ADM-level mute branch on any host.
   bool get isAppleAdmMicrophoneMuteSupported =>
-      webRtcEngine.audio.supportsAudioModuleMicrophoneMute;
+      webRtcEngine.capabilities.supportsAudioModuleMicrophoneMute;
 
   /// Mutes / unmutes microphone capture at the audio-device-module level
   /// while the audio engine keeps running, arming Apple's muted-talker
@@ -233,11 +233,11 @@ class StreamPeerConnectionFactory {
     final pc = nativeFactory != null
         ? await nativeFactory.createPeerConnection(
             configuration.toMap(),
-            mediaConstraints,
+            constraints: mediaConstraints,
           )
         : await webRtcEngine.createPeerConnection(
             configuration.toMap(),
-            mediaConstraints,
+            constraints: mediaConstraints,
           );
 
     final tracer = Tracer(
@@ -285,7 +285,7 @@ class StreamPeerConnectionFactory {
   Future<String> _createGenericSdp(rtc.TransceiverDirection direction) async {
     final nativeFactory = await ensureNativeFactory();
     final tempPC = nativeFactory != null
-        ? await nativeFactory.createPeerConnection({}, {})
+        ? await nativeFactory.createPeerConnection({})
         : await webRtcEngine.createPeerConnection({});
 
     final String? sdp;

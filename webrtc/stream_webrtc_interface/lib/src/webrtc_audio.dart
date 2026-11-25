@@ -1,7 +1,12 @@
+import 'package:meta/meta.dart';
+
 import 'third_party/flutter_webrtc/apple_audio_configuration.dart';
 
 /// The app-wide audio of the platform: input and output selection, playout,
 /// the Apple audio session and Android audio focus.
+///
+/// Implemented by the WebRTC packages only.
+@sealed
 abstract class WebRtcAudio {
   /// Routes the audio output to [deviceId].
   Future<void> selectAudioOutput(String deviceId);
@@ -34,8 +39,4 @@ abstract class WebRtcAudio {
 
   /// Shows the system picker for the audio output. iOS; throws elsewhere.
   Future<void> showAudioRoutePicker();
-
-  /// Whether the microphone can be muted in the audio device module, see
-  /// `PeerConnectionFactory.setMicrophoneMuted`. iOS and macOS.
-  bool get supportsAudioModuleMicrophoneMute;
 }

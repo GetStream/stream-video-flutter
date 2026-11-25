@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
@@ -11,9 +12,10 @@ import '../third_party/flutter_webrtc/native/rtc_video_renderer_impl.dart';
 import '../third_party/flutter_webrtc/native/utils.dart';
 import 'native_audio_renderer.dart' as audio_renderer;
 
+// ignore: subtype_of_sealed_class, the plugin implements its own contract
 /// The [WebRtcEngine] of Android, iOS, macOS, Windows and Linux, on the
 /// plugin's platform channels.
-class NativeWebRtcEngine implements WebRtcEngine {
+final class NativeWebRtcEngine implements WebRtcEngine {
   NativeWebRtcEngine();
 
   @override
@@ -41,9 +43,9 @@ class NativeWebRtcEngine implements WebRtcEngine {
 
   @override
   Future<RTCPeerConnection> createPeerConnection(
-    Map<String, dynamic> configuration, [
+    Map<String, dynamic> configuration, {
     Map<String, dynamic> constraints = const {},
-  ]) {
+  }) {
     return rtc.createPeerConnection(configuration, constraints);
   }
 
@@ -74,18 +76,30 @@ class NativeWebRtcEngine implements WebRtcEngine {
   @override
   Future<FirstFrameWatcher> watchFirstFrame(
     MediaStream stream, {
-    required void Function() onFirstFrame,
+    required void Function(FirstVideoFrame frame) onFirstFrame,
   }) async {
     final renderer = RTCVideoRenderer();
-    await renderer.initialize();
-    renderer
-      ..onFirstFrameRendered = onFirstFrame
-      ..srcObject = stream;
+    try {
+      await renderer.initialize();
+      var reported = false;
+      renderer
+        ..onFirstFrameRendered = () {
+          if (reported) return;
+          reported = true;
+          onFirstFrame(
+            FirstVideoFrame(
+              width: renderer.videoWidth,
+              height: renderer.videoHeight,
+            ),
+          );
+        }
+        ..srcObject = stream;
+    } catch (_) {
+      await renderer.dispose();
+      rethrow;
+    }
     return _RendererFirstFrameWatcher(renderer);
   }
-
-  @override
-  bool get supportsEncryption => e2ee.encryptionManagerIsSupported;
 
   @override
   EncryptionManager createEncryptionManager({
@@ -96,6 +110,7 @@ class NativeWebRtcEngine implements WebRtcEngine {
   }
 }
 
+// ignore: subtype_of_sealed_class, the plugin implements its own contract
 /// A [PeerConnectionFactory] over a [NativePeerConnectionFactory].
 class _NativePerCallFactory implements PeerConnectionFactory {
   _NativePerCallFactory(this._native);
@@ -107,9 +122,9 @@ class _NativePerCallFactory implements PeerConnectionFactory {
 
   @override
   Future<RTCPeerConnection> createPeerConnection(
-    Map<String, dynamic> configuration, [
+    Map<String, dynamic> configuration, {
     Map<String, dynamic> constraints = const {},
-  ]) {
+  }) {
     return _native.createPeerConnection(configuration, constraints);
   }
 
@@ -146,6 +161,7 @@ class _NativePerCallFactory implements PeerConnectionFactory {
   Future<void> dispose() => _native.dispose();
 }
 
+// ignore: subtype_of_sealed_class, the plugin implements its own contract
 class _NativeWebRtcAudio implements WebRtcAudio {
   const _NativeWebRtcAudio();
 
@@ -188,18 +204,16 @@ class _NativeWebRtcAudio implements WebRtcAudio {
   Future<void> showAudioRoutePicker() {
     return Helper.triggeriOSAudioRouteSelectionUI();
   }
-
-  @override
-  bool get supportsAudioModuleMicrophoneMute =>
-      NativePeerConnectionFactory.isAdmMicrophoneMuteSupported;
 }
 
+// ignore: subtype_of_sealed_class, the plugin implements its own contract
 class _NativeWebRtcCamera implements WebRtcCamera {
   const _NativeWebRtcCamera();
 
   @override
-  Future<bool> switchCamera(MediaStreamTrack track) {
-    return Helper.switchCamera(track);
+  Future<CameraSwitchResult> switchCamera(MediaStreamTrack track) async {
+    final isFrontFacing = await Helper.switchCamera(track);
+    return CameraSwitchResult(isFrontFacing: isFrontFacing);
   }
 
   @override
@@ -228,6 +242,7 @@ class _NativeWebRtcCamera implements WebRtcCamera {
   }
 }
 
+// ignore: subtype_of_sealed_class, the plugin implements its own contract
 class _RendererFirstFrameWatcher implements FirstFrameWatcher {
   _RendererFirstFrameWatcher(this._renderer);
 

@@ -1,6 +1,7 @@
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:stream_webrtc_flutter/src/native/native_webrtc_capabilities.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 
 class _FakeEncryptionManager extends Fake implements EncryptionManager {
@@ -13,11 +14,19 @@ class _FakeEncryptionManager extends Fake implements EncryptionManager {
   final EncryptionAlgorithm algorithm;
 }
 
+// ignore: subtype_of_sealed_class, a fake for the tests
 class _FakeEngine extends Fake implements WebRtcEngine {
-  _FakeEngine({required this.supportsEncryption});
+  _FakeEngine({required bool supportsEncryption})
+    : capabilities = nativeWebRtcCapabilitiesFor(
+        isAndroid: true,
+        isIOS: false,
+        isMacOS: false,
+        isWindows: false,
+        isLinux: false,
+      ).copyWith(supportsEncryption: supportsEncryption);
 
   @override
-  final bool supportsEncryption;
+  final WebRtcCapabilities capabilities;
 
   @override
   EncryptionManager createEncryptionManager({
@@ -47,6 +56,12 @@ void main() {
   });
 
   group('EncryptionManager', () {
+    test('isSupported is false while no engine is registered', () {
+      WebRtcEngine.debugUnregister();
+
+      expect(EncryptionManager.isSupported, isFalse);
+    });
+
     test('isSupported asks the registered engine', () {
       WebRtcEngine.instance = _FakeEngine(supportsEncryption: true);
       expect(EncryptionManager.isSupported, isTrue);
@@ -92,7 +107,6 @@ void main() {
       usesExactDeviceIdConstraints: false,
       reportsAudioInterruptions: false,
       supportsSystemManagedAudioFocus: false,
-      needsRemoteAudioReattach: false,
     );
 
     tearDown(() => debugWebRtcCapabilitiesOverride = null);

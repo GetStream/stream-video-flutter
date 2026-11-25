@@ -39,6 +39,9 @@ class MediaFrameReporter {
 
   final Map<String, rtc.FirstFrameWatcher> _watchers = {};
 
+  /// The tracks whose watch is starting or running.
+  final Set<String> _watchedTrackIds = {};
+
   String? _audioTrackId;
 
   /// Records the remote audio track so [onSubscriberStats] can attribute the
@@ -63,12 +66,15 @@ class MediaFrameReporter {
     required rtc.MediaStream stream,
     required String trackId,
   }) async {
-    if (_videoReported || _disposed || _watchers.containsKey(trackId)) return;
+    if (_videoReported || _disposed) return;
+    // Claimed before the await, so a second call for the track starts no
+    // second watch.
+    if (!_watchedTrackIds.add(trackId)) return;
 
     try {
       final watcher = await webRtcEngine.watchFirstFrame(
         stream,
-        onFirstFrame: () => _reportVideo(trackId),
+        onFirstFrame: (_) => _reportVideo(trackId),
       );
 
       // State may have changed while the watch started.
@@ -79,6 +85,7 @@ class MediaFrameReporter {
 
       _watchers[trackId] = watcher;
     } catch (e) {
+      _watchedTrackIds.remove(trackId);
       _logger.w(() => '[onRemoteVideoTrack] first frame watch failed: $e');
     }
   }
@@ -105,8 +112,12 @@ class MediaFrameReporter {
   }
 
   void _disposeWatchers() {
-    for (final watcher in _watchers.values) {
-      unawaited(watcher.dispose());
+    for (final MapEntry(key: trackId, value: watcher) in _watchers.entries) {
+      unawaited(
+        watcher.dispose().catchError((Object e) {
+          _logger.w(() => '[dispose] watcher of $trackId failed: $e');
+        }),
+      );
     }
     _watchers.clear();
   }

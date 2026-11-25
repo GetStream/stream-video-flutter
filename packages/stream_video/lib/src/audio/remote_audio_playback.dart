@@ -27,7 +27,7 @@ typedef AudioRendererFactory =
 /// swap; the gap makes the detach real.
 const _reattachDelay = Duration(milliseconds: 25);
 
-/// Plays the remote audio tracks of every call through the WebRTC plugin's
+/// Plays the remote audio tracks of every call through the WebRTC engine's
 /// [rtc.RTCAudioRenderer]s, one per track id, and decides when to re-attach
 /// them, which tracks are blocked by the browser's autoplay policy and what is
 /// traced.

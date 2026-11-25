@@ -27,7 +27,8 @@ abstract class EncryptionManager {
   /// Creates a manager that encrypts outgoing frames as [userId].
   ///
   /// [userId] must be non-empty and must be the local user's id — remote
-  /// participants select a decryption key by it.
+  /// participants select a decryption key by it. Throws a [StateError] when
+  /// no [WebRtcEngine] is registered.
   factory EncryptionManager.create({
     required String userId,
     EncryptionAlgorithm algorithm = EncryptionAlgorithm.aes128Gcm,
@@ -44,8 +45,11 @@ abstract class EncryptionManager {
   /// Whether the running platform can attach encoded transforms.
   ///
   /// `true` on Android, iOS and macOS; `false` on web, Windows and Linux,
-  /// where [EncryptionManager.create] throws [UnsupportedError].
-  static bool get isSupported => WebRtcEngine.instance.supportsEncryption;
+  /// where [EncryptionManager.create] throws [UnsupportedError], and while no
+  /// [WebRtcEngine] is registered.
+  static bool get isSupported =>
+      WebRtcEngine.isRegistered &&
+      WebRtcEngine.instance.capabilities.supportsEncryption;
 
   /// The local user id passed to [EncryptionManager.create].
   String get userId;

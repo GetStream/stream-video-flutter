@@ -21,8 +21,11 @@ export 'webrtc_camera.dart';
 
 /// The WebRTC implementation of the platform the app runs on.
 ///
-/// A WebRTC package registers its engine in [instance] before the SDK uses
-/// it; a test registers a fake one.
+/// An engine is registered in [instance] before WebRTC is used; a test
+/// registers a fake one.
+///
+/// Implemented by the WebRTC packages only.
+@sealed
 abstract class WebRtcEngine {
   static WebRtcEngine? _instance;
 
@@ -65,9 +68,9 @@ abstract class WebRtcEngine {
   WebRtcCamera get camera;
 
   /// Sets the options the shared peer connection factory is built with the
-  /// next time it is built. Applies only once unless [refresh] is true. Its
-  /// Apple configuration is not applied. Throws [UnsupportedError] where
-  /// there is no shared factory to configure.
+  /// next time it is built, its Android and Apple audio configuration
+  /// included. Applies only once unless [refresh] is true. Throws
+  /// [UnsupportedError] where there is no shared factory to configure.
   Future<void> configureDefaultFactory({
     PeerConnectionFactoryOptions? options,
     bool refresh = false,
@@ -75,9 +78,9 @@ abstract class WebRtcEngine {
 
   /// Builds a peer connection in the shared factory.
   Future<RTCPeerConnection> createPeerConnection(
-    Map<String, dynamic> configuration, [
+    Map<String, dynamic> configuration, {
     Map<String, dynamic> constraints = const {},
-  ]);
+  });
 
   /// Builds a factory for one call. Throws [UnsupportedError] where
   /// `WebRtcCapabilities.supportsPerCallFactory` is false.
@@ -96,18 +99,16 @@ abstract class WebRtcEngine {
     AudioRendererTraceHandler? onTrace,
   });
 
-  /// Calls [onFirstFrame] once the first frame of the video in [stream] is
-  /// decoded.
+  /// Calls [onFirstFrame] once, when the first frame of the video in [stream]
+  /// is decoded.
   Future<FirstFrameWatcher> watchFirstFrame(
     MediaStream stream, {
-    required void Function() onFirstFrame,
+    required void Function(FirstVideoFrame frame) onFirstFrame,
   });
 
-  /// Whether [createEncryptionManager] can build a manager.
-  bool get supportsEncryption;
-
   /// Builds an [EncryptionManager] that encrypts outgoing frames as [userId].
-  /// Throws [UnsupportedError] where [supportsEncryption] is false.
+  /// Throws [UnsupportedError] where `WebRtcCapabilities.supportsEncryption`
+  /// is false.
   EncryptionManager createEncryptionManager({
     required String userId,
     EncryptionAlgorithm algorithm = EncryptionAlgorithm.aes128Gcm,

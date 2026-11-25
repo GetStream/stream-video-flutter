@@ -3,7 +3,7 @@
 * **Breaking:** [iOS/macOS] CocoaPods is no longer supported; enable Flutter's Swift Package Manager.
 * Added `NativeWebRtcEngine`, the `WebRtcEngine` of the native platforms.
 * The end-to-end encryption types moved to `stream_webrtc_interface`; this package still exports them.
-* **Breaking:** `EncryptionManager.create` and `isSupported` need a registered `WebRtcEngine`, and `create` throws `UnsupportedError` on web.
+* **Breaking:** `EncryptionManager.create` needs a registered `WebRtcEngine` and throws `UnsupportedError` on web; `isSupported` is false without one.
 * Added `createAudioRenderer` and `setAudioPlayoutPaused` for every platform; native renderers do nothing.
 * Added `platformEvents.createSpeechActivityDetector`, which detects speech while the microphone is muted on Android, iOS, macOS and the browser.
 * **Breaking:** platform events are typed; listen to `platformEvents`. `eventStream` is no longer exported.
