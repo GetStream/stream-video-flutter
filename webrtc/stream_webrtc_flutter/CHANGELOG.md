@@ -1,12 +1,12 @@
 [Unreleased]
 
 * **Breaking:** platform events are typed; listen to `platformEvents`. `eventStream` is no longer exported.
-* **Breaking:** `handleCallInterruptionCallbacks` is removed; call `platformEvents.enableInterruptionEvents` and listen to `platformEvents.onInterruption`. Apps using `stream_video` must not call it, since the SDK does.
+* **Breaking:** `handleCallInterruptionCallbacks` is removed; call `platformEvents.enableInterruptionEvents` and listen to `platformEvents.onInterruption`. Apps using `stream_video` must not call `enableInterruptionEvents`, since the SDK does.
 * **Breaking:** `NativePeerConnectionFactory.create` takes a `PeerConnectionFactoryOptions` instead of a map. Options without a field of their own, such as `forceSWCodec`, go in its `additionalOptions`.
 * `WebRTC.initialize` accepts a `PeerConnectionFactoryOptions` as `factoryOptions`.
 * The Android and Apple audio configuration types moved to `stream_webrtc_interface`; this package still exports them.
 * **Breaking:** depends on `stream_dart_webrtc` and `stream_webrtc_interface` instead of `dart_webrtc` and `webrtc_interface`. The re-exported types now come from `stream_webrtc_interface`, so they no longer match `package:webrtc_interface` types.
-* **Breaking:** `AndroidInterruptionSource` is removed and `enableInterruptionEvents` takes no arguments; on Android, interruptions come only from audio focus, so `READ_PHONE_STATE` is not needed.
+* **Breaking:** `AndroidInterruptionSource` is removed and `enableInterruptionEvents` takes no arguments; on Android, interruptions come only from audio focus, so `READ_PHONE_STATE` is not needed and none are reported with `manageAudioFocus` off.
 * Licensed under the Stream licence; the code from upstream keeps its MIT licence (see `LICENSE`).
 * Added `webRtcCapabilities`, the capabilities of the platform the app runs on.
 * [iOS/macOS] Added `FlutterWebRTCPlugin.audioEngineControl`, for an app that activates the audio session itself, such as through CallKit. `setAudioEngineAvailable:` stops and restarts the audio engine of every peer-connection factory, including ones built later, and `audioEngineStartFailedHandler` is called when the engine cannot be started again. `FlutterWebRTCAudioEngineAvailabilityNotification` and `FlutterWebRTCAudioEngineStartFailedNotification` do the same for code that does not link the plugin.
@@ -18,7 +18,7 @@
 * [Android] fix: enabling interruption events, `WebRTC.initialize` with an audio configuration and `selectAudioOutput` no longer take audio focus or change the audio mode outside a call, and the previous mode is restored after it.
 * [Android] fix: a call that reuses a microphone track captured before it, such as a lobby preview's, takes audio focus as soon as it sends audio.
 * [Android] fix: an interruption ends when the call's audio stops.
-* [Android] fix: `regainAndroidAudioFocus` requests audio focus again during a call, and does nothing outside one.
+* [Android] fix: `regainAndroidAudioFocus` requests audio focus again during a call whose focus WebRTC manages, and does nothing otherwise.
 * [Android] Added `Helper.setAndroidAudioFocusManaged`, to switch WebRTC's audio focus handling during a call; `manageAudioFocus` in `setAndroidAudioConfiguration` now switches it too.
 * [Android] Added `Helper.setAndroidAudioFocusHandledBySystem`, to tell WebRTC that the system, such as Telecom, manages the call's audio focus.
 
