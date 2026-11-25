@@ -1186,6 +1186,7 @@ class LocalMediaController {
       return const Result.success(none);
     } catch (error, stackTrace) {
       _logger.e(() => '[requestBroadcast] failed to show the picker: $error');
+      _broadcastConstraints = null;
       return failureWithError(
         'Failed to show the broadcast picker',
         cause: error,

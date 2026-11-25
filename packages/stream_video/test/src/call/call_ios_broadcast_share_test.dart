@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/stream_video.dart';
@@ -143,6 +144,22 @@ void main() {
 
     expect(result.isSuccess, isTrue);
     verify(notifier.presentiOSBroadcastPicker).called(1);
+    verifyNoScreenShare();
+    expect(sharing(call), isFalse);
+  });
+
+  test('a picker that cannot be shown fails the enable', () async {
+    final call = await joinedCall();
+    when(notifier.presentiOSBroadcastPicker).thenThrow(
+      PlatformException(code: 'BroadcastPickerError'),
+    );
+
+    final result = await call.setScreenShareEnabled(
+      enabled: true,
+      constraints: _requested,
+    );
+
+    expect(result.isFailure, isTrue);
     verifyNoScreenShare();
     expect(sharing(call), isFalse);
   });
