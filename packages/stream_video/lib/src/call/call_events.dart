@@ -1650,8 +1650,8 @@ extension type const ScreenShareFailureReason(String value) implements String {
 /// Delivered on `Call.callEvents` when an iOS broadcast started, through the
 /// broadcast picker or Control Center, but the call could not share it.
 ///
-/// The local participant is not sharing. When publishing failed, the SDK
-/// also asks the broadcast extension to finish the broadcast.
+/// The local participant is not sharing, and the SDK asks the broadcast
+/// extension to finish the broadcast.
 ///
 /// This event is created on the device, so `StreamVideo.events` does not
 /// carry it.

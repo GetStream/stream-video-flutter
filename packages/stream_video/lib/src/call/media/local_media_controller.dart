@@ -1312,8 +1312,8 @@ class LocalMediaController {
   ///
   /// Skipped in a call that does not own the broadcast, while the call has no
   /// session, while a screen share is live and without the screenshare
-  /// permission. A missing permission or a failed share is reported as a
-  /// [StreamCallScreenShareFailedEvent].
+  /// permission. A missing permission or a failed share ends the broadcast
+  /// and is reported as a [StreamCallScreenShareFailedEvent].
   Future<void> _onBroadcastStarted() async {
     if (!_ownsBroadcast()) {
       _logger.v(() => '[onBroadcastStarted] shared by another call');
@@ -1343,6 +1343,7 @@ class LocalMediaController {
 
     if (!_hasPermission(CallPermission.screenshare)) {
       _logger.w(() => '[onBroadcastStarted] missing screenshare permission');
+      await _stopBroadcast();
       _reportBroadcastFailure(ScreenShareFailureReason.missingPermission);
       return;
     }

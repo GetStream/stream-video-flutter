@@ -318,8 +318,8 @@ void main() {
   });
 
   test(
-    'a start event without the screenshare permission shares nothing and '
-    'reports it',
+    'a start event without the screenshare permission shares nothing, ends '
+    'the broadcast and reports it',
     () async {
       final call = await joinedCall();
       final failures = shareFailures(call);
@@ -332,6 +332,7 @@ void main() {
       await emit(ScreenSharingStartedEvent());
 
       verifyNoScreenShare();
+      verify(notifier.stopiOSBroadcast).called(1);
       expect(sharing(call), isFalse);
       expect(failures, hasLength(1));
       expect(
