@@ -106,6 +106,16 @@ If necessary, in the same `build.gradle` you will need to increase `minSdkVersio
 When you compile the release apk, you need to add the following operations,
 [Setup Proguard Rules](https://github.com/flutter-webrtc/flutter-webrtc/blob/main/android/proguard-rules.pro)
 
+## Audio and video processing hooks
+
+These native entry points are part of the plugin's public API; packages such as noise cancellation and video filters plug into them. `webRtcCapabilities` says where each is available.
+
+| Hook | Platform | Used for |
+| --- | --- | --- |
+| `FlutterWebRTCPlugin.sharedSingleton.setAudioProcessingFactoryProvider(AudioProcessingFactoryProvider)` | Android | An audio processing module, such as noise cancellation, on the microphone capture. `supportsAudioProcessingModule`. |
+| `AudioManager.sharedInstance().audioProcessingModule` | iOS, macOS | The same, through the `RTCDefaultAudioProcessingModule` the peer connection factories use. `supportsAudioProcessingModule`. |
+| `ProcessorProvider.addProcessor(name, factory)` with `setVideoEffects(trackId, names:)` | Android, iOS, macOS | Frame processors registered by name and attached to a local video track. `supportsVideoEffects`. |
+
 ## Contributing
 
 The project is inseparable from the contributors of the community.

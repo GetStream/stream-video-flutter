@@ -24,6 +24,7 @@ final class WebRtcCapabilities {
     this.supportsEncryption = false,
     this.supportsAudioModuleMicrophoneMute = false,
     this.supportsVideoEffects = false,
+    required this.supportsAudioProcessingModule,
   });
 
   /// Whether each call can build its own peer connection factory, with its
@@ -93,6 +94,11 @@ final class WebRtcCapabilities {
   /// `setVideoEffects`. Android and iOS.
   final bool supportsVideoEffects;
 
+  /// Whether a native audio processing module, such as noise cancellation,
+  /// can be installed through the plugin's audio processing hook. Android,
+  /// iOS and macOS.
+  final bool supportsAudioProcessingModule;
+
   WebRtcCapabilities copyWith({
     bool? supportsPerCallFactory,
     bool? supportsAudioPlayoutPause,
@@ -110,6 +116,7 @@ final class WebRtcCapabilities {
     bool? supportsEncryption,
     bool? supportsAudioModuleMicrophoneMute,
     bool? supportsVideoEffects,
+    bool? supportsAudioProcessingModule,
   }) {
     return WebRtcCapabilities(
       supportsPerCallFactory:
@@ -144,6 +151,8 @@ final class WebRtcCapabilities {
           supportsAudioModuleMicrophoneMute ??
           this.supportsAudioModuleMicrophoneMute,
       supportsVideoEffects: supportsVideoEffects ?? this.supportsVideoEffects,
+      supportsAudioProcessingModule:
+          supportsAudioProcessingModule ?? this.supportsAudioProcessingModule,
     );
   }
 
@@ -166,6 +175,7 @@ final class WebRtcCapabilities {
       'supportsEncryption': supportsEncryption,
       'supportsAudioModuleMicrophoneMute': supportsAudioModuleMicrophoneMute,
       'supportsVideoEffects': supportsVideoEffects,
+      'supportsAudioProcessingModule': supportsAudioProcessingModule,
     };
     final enabled = [
       for (final MapEntry(:key, :value) in flags.entries)
@@ -196,7 +206,8 @@ final class WebRtcCapabilities {
           other.supportsEncryption == supportsEncryption &&
           other.supportsAudioModuleMicrophoneMute ==
               supportsAudioModuleMicrophoneMute &&
-          other.supportsVideoEffects == supportsVideoEffects;
+          other.supportsVideoEffects == supportsVideoEffects &&
+          other.supportsAudioProcessingModule == supportsAudioProcessingModule;
 
   @override
   int get hashCode => Object.hash(
@@ -216,6 +227,7 @@ final class WebRtcCapabilities {
     supportsEncryption,
     supportsAudioModuleMicrophoneMute,
     supportsVideoEffects,
+    supportsAudioProcessingModule,
   );
 }
 
