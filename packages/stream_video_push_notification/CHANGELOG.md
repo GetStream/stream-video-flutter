@@ -77,6 +77,7 @@
 
 ### 🐞 Fixed
 
+- [iOS] A VoIP push now calls PushKit's completion only once CallKit has accepted or refused the incoming call. It used to run right away, and iOS could suspend an app woken in the background before the call reached Dart or its ring timeout was scheduled.
 - [iOS] A call answered from CallKit with `configureAudioSession: false` had no audio in either direction.
 - [iOS] `setCallConnected` for a call answered from CallKit no longer asks CallKit to answer it again, which sent a second `ActionCallAccept`. A call accepted in the app is still answered in CallKit.
 - [iOS] `endCall` or `setCallConnected` with an id that is neither a call the plugin knows nor a uuid no longer crashes the app, and neither does `endCall` after a VoIP push whose call id was not a uuid.
