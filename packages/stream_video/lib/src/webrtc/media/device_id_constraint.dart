@@ -1,5 +1,5 @@
 import 'package:meta/meta.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import '../webrtc_engine.dart';
 
 /// How a capture request names the device to capture from.
 ///
@@ -11,7 +11,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 abstract interface class DeviceIdConstraint {
   /// The form the current platform takes.
   factory DeviceIdConstraint.forPlatform() {
-    if (rtc.webRtcCapabilities.usesExactDeviceIdConstraints) {
+    if (webRtcEngine.capabilities.usesExactDeviceIdConstraints) {
       return const ExactDeviceIdConstraint();
     }
     return const OptionalDeviceIdConstraint();

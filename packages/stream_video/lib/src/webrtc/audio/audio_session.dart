@@ -1,8 +1,8 @@
 import 'package:meta/meta.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../../stream_video.dart';
 import 'ios_audio_session.dart';
+import '../webrtc_engine.dart';
 
 /// The audio session of a call and its audio output.
 ///
@@ -50,6 +50,6 @@ class DefaultAudioSession implements AudioSession {
 
   @override
   Future<void> selectOutput(RtcMediaDevice device) {
-    return rtc.Helper.selectAudioOutput(device.id);
+    return webRtcEngine.audio.selectAudioOutput(device.id);
   }
 }

@@ -1,8 +1,9 @@
 import 'package:meta/meta.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../../../stream_video.dart';
 import '../publisher/rtc_publisher.dart';
+import '../webrtc_engine.dart';
 
 const _tag = 'SV:RtcLocalAudioTrack';
 
@@ -15,7 +16,7 @@ const _tag = 'SV:RtcLocalAudioTrack';
 abstract interface class AudioInputSwitcher {
   /// The switcher of the current platform.
   factory AudioInputSwitcher.forPlatform() {
-    if (rtc.webRtcCapabilities.switchesAudioInputInPlace) {
+    if (webRtcEngine.capabilities.switchesAudioInputInPlace) {
       return const InPlaceAudioInputSwitcher();
     }
     return const RecaptureAudioInputSwitcher();
@@ -66,7 +67,7 @@ class InPlaceAudioInputSwitcher implements AudioInputSwitcher {
     RtcMediaDevice device,
   ) async {
     try {
-      await rtc.Helper.selectAudioInput(device.id);
+      await webRtcEngine.audio.selectAudioInput(device.id);
     } catch (e) {
       streamLog.e(_tag, () => 'Error selecting audio input: $e');
       rethrow;

@@ -8,8 +8,8 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_core/stream_core.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../globals.dart';
@@ -83,6 +83,7 @@ import 'stats/sfu_stats_reporter.dart';
 import 'stats/stats_reporter.dart';
 import 'stats/trace_tag.dart';
 import 'viewport_visibility_registry.dart';
+import '../webrtc/webrtc_engine.dart';
 
 part 'call_actions.dart';
 part 'call_debug.dart';
@@ -438,7 +439,7 @@ class Call {
     _logger.d(() => '[applyStereoPlayoutPreference] preferred: $preferred');
     _stereoPlayoutPreferredByThisCall = preferred;
     try {
-      await rtc.Helper.setiOSStereoPlayoutPreferred(preferred);
+      await webRtcEngine.audio.setStereoPlayoutPreferred(preferred);
     } catch (e) {
       _logger.w(() => '[applyStereoPlayoutPreference] failed: $e');
     }
@@ -473,7 +474,9 @@ class Call {
     }
 
     unawaited(
-      rtc.Helper.setiOSStereoPlayoutPreferred(false).catchError((Object e) {
+      webRtcEngine.audio.setStereoPlayoutPreferred(false).catchError((
+        Object e,
+      ) {
         _logger.w(() => '[clear] resetting stereo playout failed: $e');
       }),
     );
@@ -492,7 +495,7 @@ class Call {
     );
   }
 
-  Future<rtc.NativePeerConnectionFactory?> ensureNativeFactory() {
+  Future<rtc.PeerConnectionFactory?> ensureNativeFactory() {
     return _ensurePcFactory().ensureNativeFactory();
   }
 
@@ -1792,7 +1795,7 @@ class Call {
   /// Whether [setAudioOutputDevice] can route audio on this platform. See
   /// [RtcMediaDeviceNotifier.isAudioOutputSelectionSupported].
   bool checkIfAudioOutputChangeSupported() {
-    return rtc.webRtcCapabilities.supportsAudioOutputSelection;
+    return webRtcEngine.capabilities.supportsAudioOutputSelection;
   }
 
   /// Sets the mirror state for a remote participant's video track.

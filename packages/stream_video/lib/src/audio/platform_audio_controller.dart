@@ -2,12 +2,13 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../../stream_video.dart';
 import '../call/stats/trace_tag.dart';
 import '../call/stats/tracer.dart';
 import 'remote_audio_playback.dart';
+import '../webrtc/webrtc_engine.dart';
 
 final _logger = taggedLogger(tag: 'SV:PlatformAudioController');
 
@@ -179,12 +180,12 @@ class PlatformAudioController {
     return platformEvents.createSpeechActivityDetector();
   }
 
-  /// The events the WebRTC plugin reports. Replaceable in tests, because the
-  /// plugin reports interruptions only on Android and iOS hosts.
+  /// The events the WebRTC engine reports. Replaceable in tests, because the
+  /// engine reports interruptions only on Android and iOS hosts.
   /// A replacement does not reach the audio processing trace, which listens
   /// from construction.
   @visibleForTesting
-  rtc.WebRtcPlatformEvents platformEvents = rtc.platformEvents;
+  rtc.WebRtcPlatformEvents platformEvents = webRtcEngine.events;
 
   /// Emits `true` when the platform starts interrupting the audio of the
   /// call in progress and `false` when the interruption ends.
@@ -212,7 +213,7 @@ class PlatformAudioController {
 
   void _reportAudioInterruptions() {
     if (_interruptionSubscription != null) return;
-    if (!rtc.webRtcCapabilities.reportsAudioInterruptions) return;
+    if (!webRtcEngine.capabilities.reportsAudioInterruptions) return;
 
     // Listens before enabling, so an interruption reported while the platform
     // starts reporting them is not missed.
@@ -278,7 +279,7 @@ class PlatformAudioController {
   /// output. The choice is reported as an [AudioRouteChangedEvent]. Throws on
   /// other platforms.
   Future<void> triggeriOSAudioRouteSelectionUI() {
-    return rtc.Helper.triggeriOSAudioRouteSelectionUI();
+    return webRtcEngine.audio.showAudioRoutePicker();
   }
 
   /// Whether [pauseAudioPlayout] can mute remote audio on this platform.
@@ -287,7 +288,7 @@ class PlatformAudioController {
   /// playout is not implemented, so [pauseAudioPlayout] and
   /// [resumeAudioPlayout] do nothing and [isAudioPlayoutPaused] stays `false`.
   bool get isAudioPlayoutPauseSupported =>
-      rtc.webRtcCapabilities.supportsAudioPlayoutPause;
+      webRtcEngine.capabilities.supportsAudioPlayoutPause;
 
   /// Whether remote audio playout is currently paused via
   /// [pauseAudioPlayout].
@@ -303,12 +304,12 @@ class PlatformAudioController {
 
   final _audioPlayoutPausedController = BehaviorSubject<bool>.seeded(false);
 
-  /// Pauses or resumes playout in the WebRTC plugin. Replaceable in tests,
-  /// because the plugin only reaches the platform channel on Android, iOS and
+  /// Pauses or resumes playout in the WebRTC engine. Replaceable in tests,
+  /// because the engine only reaches the platform channel on Android, iOS and
   /// macOS hosts.
   @visibleForTesting
   Future<void> Function(bool paused) setPlayoutPaused =
-      rtc.setAudioPlayoutPaused;
+      webRtcEngine.audio.setPlayoutPaused;
 
   /// Temporarily mutes all audio output (playout) from the app.
   /// This does not affect the microphone, the audio output route or remote
@@ -371,7 +372,7 @@ class PlatformAudioController {
   /// Throws on other platforms.
   Future<void> regainAndroidAudioFocus() {
     _tracer.trace(TraceTag.regainAndroidAudioFocus, null);
-    return rtc.Helper.regainAndroidAudioFocus();
+    return webRtcEngine.audio.regainAndroidAudioFocus();
   }
 
   /// Whether WebRTC can be told that the system manages Android audio focus,
@@ -380,7 +381,7 @@ class PlatformAudioController {
   /// Static, so a caller can check it without creating the shared instance.
   @internal
   static bool get isSystemManagedAudioFocusSupported =>
-      rtc.webRtcCapabilities.supportsSystemManagedAudioFocus;
+      webRtcEngine.capabilities.supportsSystemManagedAudioFocus;
 
   /// Tells WebRTC whether the system manages Android audio focus for the
   /// call in progress, such as Telecom for a call it holds. WebRTC then
@@ -391,7 +392,9 @@ class PlatformAudioController {
     required bool handledBySystem,
   }) async {
     if (!isSystemManagedAudioFocusSupported) return;
-    await rtc.Helper.setAndroidAudioFocusHandledBySystem(handledBySystem);
+    await webRtcEngine.audio.setAndroidAudioFocusHandledBySystem(
+      handledBySystem,
+    );
   }
 
   /// Refreshes the snapshot the implicit native peer-connection factory will
@@ -405,9 +408,9 @@ class PlatformAudioController {
     // Leaves the Apple audio session as it is; iOS gets the stereo playout
     // preference below.
     final options = policy.toFactoryOptions();
-    await rtc.WebRTC.initialize(
+    await webRtcEngine.configureDefaultFactory(
       refresh: true,
-      factoryOptions: rtc.PeerConnectionFactoryOptions(
+      options: rtc.PeerConnectionFactoryOptions(
         bypassVoiceProcessing: options.bypassVoiceProcessing,
         androidAudioConfiguration: options.androidAudioConfiguration,
       ),
@@ -417,7 +420,7 @@ class PlatformAudioController {
     // When voice processing is bypassed (e.g. ViewerAudioPolicy), stereo
     // playout is preferred for high-fidelity audio.
     if (CurrentPlatform.isIos) {
-      await rtc.Helper.setiOSStereoPlayoutPreferred(
+      await webRtcEngine.audio.setStereoPlayoutPreferred(
         policy.bypassVoiceProcessing,
       );
     }

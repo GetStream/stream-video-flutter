@@ -64,6 +64,7 @@ import 'utils/none.dart';
 import 'utils/result.dart';
 import 'utils/subscriptions.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
+import 'webrtc/webrtc_engine.dart';
 
 const _tag = 'SV:Client';
 
@@ -282,6 +283,7 @@ class StreamVideo extends Disposable implements CallHost {
          allowMultipleActiveCalls: options.allowMultipleActiveCalls,
          multiCallAudioPolicy: options.multiCallAudioPolicy,
        ) {
+    ensureWebRtcEngine();
     _networkMonitor = networkMonitor ?? _options.networkMonitorSettings.build();
 
     _clientEventReporter = ClientEventReporter.create(

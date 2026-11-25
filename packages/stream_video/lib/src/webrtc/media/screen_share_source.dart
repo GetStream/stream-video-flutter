@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import 'screen_share_constraints.dart';
+import '../webrtc_engine.dart';
 
 /// Where a screen share captures from.
 ///
@@ -12,7 +12,7 @@ import 'screen_share_constraints.dart';
 abstract interface class ScreenShareSource {
   /// The source of the current platform.
   factory ScreenShareSource.forPlatform() {
-    final capabilities = rtc.webRtcCapabilities;
+    final capabilities = webRtcEngine.capabilities;
     if (capabilities.supportsBroadcastExtension) {
       return const BroadcastExtensionScreenShareSource();
     }

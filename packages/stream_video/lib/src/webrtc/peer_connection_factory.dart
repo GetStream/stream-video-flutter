@@ -1,4 +1,4 @@
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../../protobuf/video/sfu/models/models.pb.dart';
 import '../../stream_video.dart';
@@ -8,6 +8,7 @@ import '../call/stats/tracer.dart';
 import '../sfu/sfu_client.dart';
 import 'sdp/editor/sdp_editor.dart';
 import 'traced_peer_connection.dart';
+import 'webrtc_engine.dart';
 
 /// Owns the per-call native peer connection factory.
 ///
@@ -35,18 +36,18 @@ class StreamPeerConnectionFactory {
   AudioConfigurationPolicy get resolvedAudioConfigurationPolicy =>
       audioConfigurationPolicy ?? const BroadcasterAudioPolicy();
 
-  rtc.NativePeerConnectionFactory? _nativeFactory;
-  Future<rtc.NativePeerConnectionFactory?>? _nativeFactoryFuture;
+  rtc.PeerConnectionFactory? _nativeFactory;
+  Future<rtc.PeerConnectionFactory?>? _nativeFactoryFuture;
 
   /// Whether the platform has per-call factories. Elsewhere the global webrtc
   /// entrypoints are used.
   bool get _isPerCallFactorySupported =>
-      rtc.webRtcCapabilities.supportsPerCallFactory;
+      webRtcEngine.capabilities.supportsPerCallFactory;
 
   /// The per-call native factory, lazily built on first use. Returns null where
   /// the platform has no per-call factory, so callers fall back to the global
   /// webrtc entrypoints.
-  Future<rtc.NativePeerConnectionFactory?> ensureNativeFactory() {
+  Future<rtc.PeerConnectionFactory?> ensureNativeFactory() {
     if (!_isPerCallFactorySupported) {
       return Future.value();
     }
@@ -56,13 +57,13 @@ class StreamPeerConnectionFactory {
     return _nativeFactoryFuture ??= _buildNativeFactory();
   }
 
-  Future<rtc.NativePeerConnectionFactory?> _buildNativeFactory() async {
+  Future<rtc.PeerConnectionFactory?> _buildNativeFactory() async {
     try {
       final policy = resolvedAudioConfigurationPolicy;
       // On iOS, the Apple configuration is applied when the factory is built
       // and again when its audio resumes; `Call.resumeAudio` then re-applies
       // the configuration and output applied since.
-      _nativeFactory = await rtc.NativePeerConnectionFactory.create(
+      _nativeFactory = await webRtcEngine.createPeerConnectionFactory(
         options: policy.toFactoryOptions(),
       );
 
@@ -82,7 +83,7 @@ class StreamPeerConnectionFactory {
   /// Synchronous accessor returning the cached factory if already built.
   /// Returns null if [ensureNativeFactory] has not yet been awaited or on
   /// platforms without per-call factory support.
-  rtc.NativePeerConnectionFactory? get nativeFactory => _nativeFactory;
+  rtc.PeerConnectionFactory? get nativeFactory => _nativeFactory;
 
   /// Suspends this factory's audio capture + playback so another factory
   /// can take exclusive ownership of mic/speaker resources. Used when this
@@ -113,7 +114,7 @@ class StreamPeerConnectionFactory {
   /// An instance member rather than a static so tests can exercise the
   /// ADM-level mute branch on any host.
   bool get isAppleAdmMicrophoneMuteSupported =>
-      rtc.NativePeerConnectionFactory.isAdmMicrophoneMuteSupported;
+      webRtcEngine.audio.supportsAudioModuleMicrophoneMute;
 
   /// Mutes / unmutes microphone capture at the audio-device-module level
   /// while the audio engine keeps running, arming Apple's muted-talker
@@ -234,7 +235,7 @@ class StreamPeerConnectionFactory {
             configuration.toMap(),
             mediaConstraints,
           )
-        : await rtc.createPeerConnection(
+        : await webRtcEngine.createPeerConnection(
             configuration.toMap(),
             mediaConstraints,
           );
@@ -285,7 +286,7 @@ class StreamPeerConnectionFactory {
     final nativeFactory = await ensureNativeFactory();
     final tempPC = nativeFactory != null
         ? await nativeFactory.createPeerConnection({}, {})
-        : await rtc.createPeerConnection({});
+        : await webRtcEngine.createPeerConnection({});
 
     final String? sdp;
     try {

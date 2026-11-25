@@ -2,6 +2,7 @@
 
 ### ⚠️ Breaking
 
+- `Call.ensureNativeFactory`, `RtcLocalTrack` and `MediaDevices.getMedia` take and return the `PeerConnectionFactory` contract instead of `NativePeerConnectionFactory`.
 - The app-wide audio members of `RtcMediaDeviceNotifier` moved to `PlatformAudioController.instance`: `nativeWebRtcEventsStream`, `speechActivityStream`, `triggeriOSAudioRouteSelectionUI`, `isAudioPlayoutPauseSupported`, `isAudioPlayoutPaused`, `audioPlayoutPausedChanges`, `pauseAudioPlayout`, `resumeAudioPlayout`, `resumeWebAudioPlayback`, `regainAndroidAudioFocus` and `reinitializeAudioConfiguration`.
 - `PlatformAudioController` is `@sealed`, so a test mock that implements it gets a `subtype_of_sealed_class` warning; add `// ignore: subtype_of_sealed_class` to it.
 - `PlatformAudioController.nativePauseAudioPlayout` and `nativeResumeAudioPlayout` are removed; use `pauseAudioPlayout` and `resumeAudioPlayout`.
@@ -146,6 +147,7 @@
 
 ### 🔄 Changed
 
+- WebRTC is reached through the `WebRtcEngine` contract of `stream_webrtc_interface`; the E2EE types are exported from there with the same names.
 - On web, speaking while muted is detected by the WebRTC plugin, and `SoundState.audioLevel` is 1 while speaking and 0 otherwise.
 - [Android] `PlatformAudioController.regainAndroidAudioFocus` acts only during a call whose audio focus WebRTC manages, and ends the interruption only when focus is granted.
 - A leave for a failure or an SFU error tells the SFU the error's message, such as `failure: <message>` or `sfu error: <code>: <message>`, rather than the whole error with its stack trace.

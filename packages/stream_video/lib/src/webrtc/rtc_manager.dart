@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../../stream_video.dart';
 import '../call/state/call_state_notifier.dart';
@@ -26,6 +26,7 @@ import 'rtc_parser.dart';
 import 'subscriber/rtc_subscriber.dart';
 import 'traced_peer_connection.dart';
 import 'transceiver_cache.dart';
+import 'webrtc_engine.dart';
 
 export '../errors/track_missing_exception.dart';
 export 'publisher/announced_tracks.dart' show resolveTrackMid;

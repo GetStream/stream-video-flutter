@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../../stream_video.dart';
 import '../../call/stats/trace_tag.dart';
@@ -11,10 +10,11 @@ import '../../call/stats/tracer.dart';
 import '../../errors/stream_video_exception_composer.dart';
 import '../../utils/extensions.dart';
 import 'device_enumeration_trigger.dart';
+import '../webrtc_engine.dart';
 
 class RtcMediaDeviceNotifier {
   RtcMediaDeviceNotifier._internal() {
-    rtc.navigator.mediaDevices.ondevicechange = _onDeviceChange;
+    webRtcEngine.mediaDevices.ondevicechange = _onDeviceChange;
     // Reads the initial devices list.
     enumerateDevicesFor(DeviceEnumerationTrigger.initial);
   }
@@ -45,7 +45,7 @@ class RtcMediaDeviceNotifier {
   /// browsers without `setSinkId`: audio plays on the system default output,
   /// and an output picker should be hidden. True on native platforms.
   static bool get isAudioOutputSelectionSupported =>
-      rtc.webRtcCapabilities.supportsAudioOutputSelection;
+      webRtcEngine.capabilities.supportsAudioOutputSelection;
 
   Stream<List<RtcMediaDevice>> get onDeviceChange => _devicesController.stream;
   final _devicesController = BehaviorSubject<List<RtcMediaDevice>>();
@@ -141,7 +141,7 @@ class RtcMediaDeviceNotifier {
 
   Future<Result<List<RtcMediaDevice>>> _enumerateAllDevices() async {
     try {
-      final devices = await rtc.navigator.mediaDevices.enumerateDevices();
+      final devices = await webRtcEngine.mediaDevices.enumerateDevices();
 
       // Shared by every caller of a coalesced enumeration and every
       // [onDeviceChange] listener, so it must not be mutated.
@@ -155,7 +155,7 @@ class RtcMediaDeviceNotifier {
           );
         }),
 
-        if (rtc.webRtcCapabilities.omitsEarpieceFromEnumeration &&
+        if (webRtcEngine.capabilities.omitsEarpieceFromEnumeration &&
             devices.none(
               (d) => d.deviceId.equalsIgnoreCase(
                 AudioDefaultDevice.earpiece,

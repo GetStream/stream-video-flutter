@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../../../stream_video.dart';
 import '../../audio/remote_audio_playback.dart';
@@ -11,6 +11,7 @@ import '../../sfu/data/models/sfu_model_parser.dart';
 import '../peer_connection.dart';
 import '../sdp/incoming_audio_sources.dart';
 import '../traced_peer_connection.dart';
+import '../webrtc_engine.dart';
 
 /// {@template OnRemoteTrackReceived}
 /// Called when a subscriber track is received.
@@ -58,7 +59,7 @@ class RtcSubscriber {
   /// WebKit only: everywhere else the offers are neither kept nor parsed.
   /// Swappable so a test on the VM can take the WebKit path.
   bool Function() needsRemoteAudioReattach = () =>
-      rtc.webRtcCapabilities.needsRemoteAudioReattach;
+      webRtcEngine.capabilities.needsRemoteAudioReattach;
 
   /// Re-attaches every remote audio element after a subscriber renegotiation
   /// brought in a new audio source. Swappable so a test can observe the
@@ -189,7 +190,7 @@ class RtcSubscriber {
   Future<Result<None>> setAudioSink(RtcMediaDevice device) async {
     final audioTracks = this.audioTracks;
 
-    if (!rtc.webRtcCapabilities.supportsAudioOutputSelection) {
+    if (!webRtcEngine.capabilities.supportsAudioOutputSelection) {
       _logger.w(
         () =>
             '[setAudioSink] rejected: Audio Output device change is not supported on this browser.',

@@ -5,8 +5,6 @@ import 'package:async/async.dart' show CancelableOperation;
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_core/stream_core.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../../open_api/video/coordinator/api.dart' hide User;
@@ -37,6 +35,7 @@ import '../session/call_session.dart';
 import '../state/call_state_notifier.dart';
 import '../stats/sfu_stats_reporter.dart';
 import 'ios_broadcast_screen_share.dart';
+import '../../webrtc/webrtc_engine.dart';
 
 /// Owns a call's connect options and its local media: the camera,
 /// microphone and screen share, and the audio and video devices.
@@ -893,7 +892,7 @@ class LocalMediaController {
     return _multitaskingCameraLock.synchronized(() async {
       if (CurrentPlatform.isIos) {
         try {
-          final result = await rtc.Helper.enableIOSMultitaskingCameraAccess(
+          final result = await webRtcEngine.camera.setMultitaskingAccessEnabled(
             enabled,
           );
           return Result.success(result);
@@ -932,7 +931,7 @@ class LocalMediaController {
     }
 
     try {
-      await rtc.Helper.setZoom(localTrack.mediaTrack, zoomLevel);
+      await webRtcEngine.camera.setZoom(localTrack.mediaTrack, zoomLevel);
       return const Result.success(none);
     } catch (error, stackTrace) {
       _logger.e(() => '[setZoom] Failed to set zoom: $error');
@@ -960,8 +959,14 @@ class LocalMediaController {
     }
 
     try {
-      await Helper.setFocusPoint(localTrack.mediaTrack, focusPoint);
-      await Helper.setExposurePoint(localTrack.mediaTrack, focusPoint);
+      await webRtcEngine.camera.setFocusPoint(
+        localTrack.mediaTrack,
+        focusPoint,
+      );
+      await webRtcEngine.camera.setExposurePoint(
+        localTrack.mediaTrack,
+        focusPoint,
+      );
     } catch (error, stackTrace) {
       _logger.e(() => '[focus] Failed to set focus: $error');
       return failureWithError('Failed to set focus', stackTrace: stackTrace);
@@ -1192,7 +1197,7 @@ class LocalMediaController {
       return nativeFactory.requestCapturePermission();
     }
 
-    return Helper.requestCapturePermission();
+    return webRtcEngine.requestCapturePermission();
   }
 
   Future<Result<None>> setScreenShareEnabled({
@@ -1360,7 +1365,7 @@ class LocalMediaController {
     if (!CurrentPlatform.isIos) return null;
 
     try {
-      return await rtc.Helper.isIOSMultitaskingCameraAccessSupported();
+      return await webRtcEngine.camera.isMultitaskingAccessSupported();
     } catch (e, stk) {
       _logger.w(() => '[multitaskingCameraAccessSupported] failed: $e\n$stk');
       return null;

@@ -2,7 +2,7 @@ part of 'rtc_manager.dart';
 
 extension RtcManagerTrackHelper on RtcManager {
   Future<Result<RtcLocalCameraTrack>> flipCamera() async {
-    final capabilities = rtc.webRtcCapabilities;
+    final capabilities = webRtcEngine.capabilities;
     if (!capabilities.supportsCameraSwitch) {
       _logger.e(
         () => '[switchCamera] rejected (not supported by $capabilities)',
@@ -91,7 +91,7 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<Result<None>> setAudioOutputDevice({
     required RtcMediaDevice device,
   }) async {
-    if (rtc.webRtcCapabilities.selectsAudioOutputPerElement) {
+    if (webRtcEngine.capabilities.selectsAudioOutputPerElement) {
       return _subscriber.setAudioSink(device);
     }
 
