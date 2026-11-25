@@ -126,6 +126,8 @@
 - Added `DisconnectReasonUnsupportedNetwork`, the reason a call disconnects with when the network cannot carry WebRTC, so an app can tell the user their network blocks calls rather than that the connection dropped.
 - Added `CallPreferences.maxIceFailuresWithoutConnect`, how many reconnects for sessions in which ICE never connected end the call with `DisconnectReasonUnsupportedNetwork`. `DefaultCallPreferences` defaults it to 2. If your app implements `CallPreferences` directly, add the getter to your implementation.
 - Added `RetryConfig.rpcTimeout`, how long a coordinator request may wait to connect and then for its response (10 seconds by default).
+- Added `StreamCallStatsReportReadyEvent`, delivered when the stats report of a call session is ready. The `call.stats_report_ready` event used to be dropped as unknown.
+- Added `CallPermission.sendData` for the `send-data` capability, which used to be read as `CallPermission.unknown` with a warning.
 
 ### 🔄 Changed
 
@@ -177,6 +179,8 @@
 - `Call.update` no longer sends empty custom data when none is given, so updating a setting leaves the call's custom data alone.
 - Fixed `Call.setPreferredIncomingVideoResolution` and `setIncomingVideoEnabled` throwing before the call is joined; the setting now applies on join.
 - `CallSettings` equality now compares every section.
+- A peer connection no longer restarts ICE or asks for a reconnect when its connection drops while the call is being left.
+- Outcomes that are expected on normal paths, such as a join or reconnect that stops because the call was left, or a connect while already connected, are logged at debug level instead of as warnings. Native WebRTC events are logged with their contents and no longer all labelled as a screen share stop.
 - A failed `Call.join` now returns the error it failed with, retries a retryable coordinator failure, and reports one telemetry abort.
 - A call ended remotely now sends the SFU leave message, like a local leave.
 - A reconnect asked for while a call is joining or reconnecting is no longer dropped.

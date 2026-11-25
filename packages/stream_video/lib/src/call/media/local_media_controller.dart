@@ -628,9 +628,7 @@ class LocalMediaController {
     return RtcMediaDeviceNotifier.instance.nativeWebRtcEventsStream().listen((
       event,
     ) {
-      _logger.d(
-        () => '[_onNativeWebRtcEvent] screenSharingStopped: $event',
-      );
+      _logger.d(() => '[_onNativeWebRtcEvent] event: $event');
 
       switch (event) {
         case ScreenSharingStoppedEvent _:

@@ -25,11 +25,17 @@ abstract class NativeWebRtcEvent {}
 class ScreenSharingStoppedEvent extends NativeWebRtcEvent {
   ScreenSharingStoppedEvent({this.data});
   final Map<dynamic, dynamic>? data;
+
+  @override
+  String toString() => 'ScreenSharingStoppedEvent{data: $data}';
 }
 
 class ScreenSharingStartedEvent extends NativeWebRtcEvent {
   ScreenSharingStartedEvent({this.data});
   final Map<dynamic, dynamic>? data;
+
+  @override
+  String toString() => 'ScreenSharingStartedEvent{data: $data}';
 }
 
 /// Emitted (iOS) when the active audio output route changes outside of an
@@ -48,6 +54,10 @@ class AudioRouteChangedEvent extends NativeWebRtcEvent {
   /// Why the route changed, or [AudioRouteChangeReason.unknown] when the
   /// WebRTC plugin does not say.
   final AudioRouteChangeReason reason;
+
+  @override
+  String toString() =>
+      'AudioRouteChangedEvent{device: $device, reason: ${reason.name}}';
 }
 
 /// Why the audio route changed: iOS's `AVAudioSessionRouteChangeReason`.

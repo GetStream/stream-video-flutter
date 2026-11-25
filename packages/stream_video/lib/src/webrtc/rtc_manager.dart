@@ -116,6 +116,13 @@ class RtcManager extends Disposable {
   final TracedStreamPeerConnection? publisher;
   final TracedStreamPeerConnection subscriber;
 
+  /// Stops both peer connections from restarting ICE or asking for
+  /// reconnects, because the session is leaving.
+  void stopRecovery() {
+    publisher?.stopRecovery();
+    subscriber.stopRecovery();
+  }
+
   late final RtcPublisher _publisher;
 
   /// The sending side of this session.
