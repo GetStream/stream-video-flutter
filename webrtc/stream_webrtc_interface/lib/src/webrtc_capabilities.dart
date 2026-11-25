@@ -23,6 +23,7 @@ final class WebRtcCapabilities {
     this.needsRemoteAudioReattach = false,
     this.supportsEncryption = false,
     this.supportsAudioModuleMicrophoneMute = false,
+    required this.supportsVideoEffects,
   });
 
   /// Whether each call can build its own peer connection factory, with its
@@ -87,6 +88,11 @@ final class WebRtcCapabilities {
   /// `PeerConnectionFactory.setMicrophoneMuted`. iOS and macOS.
   final bool supportsAudioModuleMicrophoneMute;
 
+  /// Whether frame processors registered by name in the plugin's
+  /// `ProcessorProvider` can be attached to a local video track through
+  /// `setVideoEffects`. Android, iOS and macOS.
+  final bool supportsVideoEffects;
+
   WebRtcCapabilities copyWith({
     bool? supportsPerCallFactory,
     bool? supportsAudioPlayoutPause,
@@ -103,6 +109,7 @@ final class WebRtcCapabilities {
     bool? needsRemoteAudioReattach,
     bool? supportsEncryption,
     bool? supportsAudioModuleMicrophoneMute,
+    bool? supportsVideoEffects,
   }) {
     return WebRtcCapabilities(
       supportsPerCallFactory:
@@ -136,6 +143,7 @@ final class WebRtcCapabilities {
       supportsAudioModuleMicrophoneMute:
           supportsAudioModuleMicrophoneMute ??
           this.supportsAudioModuleMicrophoneMute,
+      supportsVideoEffects: supportsVideoEffects ?? this.supportsVideoEffects,
     );
   }
 
@@ -157,6 +165,7 @@ final class WebRtcCapabilities {
       'needsRemoteAudioReattach': needsRemoteAudioReattach,
       'supportsEncryption': supportsEncryption,
       'supportsAudioModuleMicrophoneMute': supportsAudioModuleMicrophoneMute,
+      'supportsVideoEffects': supportsVideoEffects,
     };
     final enabled = [
       for (final MapEntry(:key, :value) in flags.entries)
@@ -186,7 +195,8 @@ final class WebRtcCapabilities {
           other.needsRemoteAudioReattach == needsRemoteAudioReattach &&
           other.supportsEncryption == supportsEncryption &&
           other.supportsAudioModuleMicrophoneMute ==
-              supportsAudioModuleMicrophoneMute;
+              supportsAudioModuleMicrophoneMute &&
+          other.supportsVideoEffects == supportsVideoEffects;
 
   @override
   int get hashCode => Object.hash(
@@ -205,6 +215,7 @@ final class WebRtcCapabilities {
     needsRemoteAudioReattach,
     supportsEncryption,
     supportsAudioModuleMicrophoneMute,
+    supportsVideoEffects,
   );
 }
 
