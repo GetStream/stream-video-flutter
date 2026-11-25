@@ -126,6 +126,17 @@ void main() {
       verifyNever(notifier.presentiOSBroadcastPicker);
     });
 
+    test('shares a broadcast that started while there was none', () async {
+      session = null;
+      await emit(ScreenSharingStartedEvent());
+
+      final next = session = _session();
+      await controller.applyConnectOptions(session: next);
+
+      expect(enabledOn(next).single?.useiOSBroadcastExtension, isTrue);
+      verifyNever(notifier.presentiOSBroadcastPicker);
+    });
+
     test('does not capture a broadcast that stopped', () async {
       await emit(ScreenSharingStartedEvent());
       await emit(ScreenSharingStoppedEvent());

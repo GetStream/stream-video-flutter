@@ -95,6 +95,10 @@ class LocalMediaController {
   /// [setScreenShareEnabled], used once the broadcast starts.
   ScreenShareConstraints? _broadcastConstraints;
 
+  /// A broadcast that started while no session could share it, shared by
+  /// the next session that applies the connect options.
+  ScreenShareConstraints? _pendingBroadcast;
+
   /// Whether the platform interrupts the call's audio with the microphone to
   /// be off for it.
   bool _muteMicrophoneWhileInterrupted = false;
@@ -306,6 +310,7 @@ class LocalMediaController {
   }) async {
     _optionsAppliedBy = session;
     _connectOptionsOverride = null;
+    _takePendingBroadcast();
     _logger.d(
       () =>
           '[applyConnectOptions] connectOptions: $_connectOptions, '
@@ -1214,6 +1219,7 @@ class LocalMediaController {
   /// take a broadcast nobody requested.
   void releaseBroadcastRequest() {
     _broadcastConstraints = null;
+    _pendingBroadcast = null;
     IosBroadcastOwner.instance.release(this);
   }
 
@@ -1257,7 +1263,35 @@ class LocalMediaController {
   bool _ownsBroadcast() {
     final owner = IosBroadcastOwner.instance;
     if (owner.hasRequest) return owner.isRequestedBy(this);
-    return identical(_defaultBroadcastTarget(), this);
+    final target = _defaultBroadcastTarget();
+    if (target == null) owner.markUnclaimed();
+    return identical(target, this);
+  }
+
+  /// Whether a share now would reach no session or one being replaced.
+  bool _awaitsSession() {
+    if (_session() == null) return true;
+    final status = _state.status;
+    return status.isMigrating ||
+        (status.isReconnecting && !status.isFastReconnecting);
+  }
+
+  /// Writes a broadcast that started before this session into the connect
+  /// options, so the session shares it.
+  void _takePendingBroadcast() {
+    var pending = _pendingBroadcast;
+    _pendingBroadcast = null;
+    if (pending == null &&
+        identical(_defaultBroadcastTarget(), this) &&
+        IosBroadcastOwner.instance.claim()) {
+      pending = _defaultScreenShareConstraints(useiOSBroadcastExtension: true);
+    }
+    if (pending == null) return;
+
+    _logger.d(() => '[applyConnectOptions] sharing the running broadcast');
+    _connectOptions = _connectOptions.copyWith(
+      screenShare: TrackOption.enabled(constraints: pending),
+    );
   }
 
   /// Shares the screen once the iOS broadcast extension has started, with
@@ -1273,8 +1307,11 @@ class LocalMediaController {
     }
 
     final session = _session();
-    if (session == null) {
-      _logger.v(() => '[onBroadcastStarted] no session');
+    if (session == null || _awaitsSession()) {
+      _logger.i(() => '[onBroadcastStarted] shared once a session applies');
+      _pendingBroadcast =
+          _broadcastConstraints ??
+          _defaultScreenShareConstraints(useiOSBroadcastExtension: true);
       return;
     }
 

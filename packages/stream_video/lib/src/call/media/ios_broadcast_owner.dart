@@ -37,12 +37,27 @@ class IosBroadcastOwner {
 
   void onStopped() {
     _isActive = false;
+    _isUnclaimed = false;
     _requester = null;
+  }
+
+  bool _isUnclaimed = false;
+
+  /// Keeps a broadcast that no call could take for the next call that joins.
+  void markUnclaimed() => _isUnclaimed = true;
+
+  /// Whether a running broadcast was waiting for a call. Only the first
+  /// caller gets true.
+  bool claim() {
+    final unclaimed = _isUnclaimed && _isActive;
+    _isUnclaimed = false;
+    return unclaimed;
   }
 
   @visibleForTesting
   void reset() {
     _requester = null;
     _isActive = false;
+    _isUnclaimed = false;
   }
 }
