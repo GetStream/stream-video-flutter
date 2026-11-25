@@ -127,4 +127,27 @@ void main() {
       {'default:c2'},
     ]);
   });
+
+  test('a read that fails leaves no calls held, and reports still '
+      'apply', () async {
+    platform.heldCids.completeError(StateError('no Telecom'));
+    await pumpEventQueue();
+    platform.report(['default:c1']);
+    await pumpEventQueue();
+
+    expect(held, [
+      <String>{},
+      {'default:c1'},
+    ]);
+  });
+
+  test('a read that answers after the manager is disposed is '
+      'dropped', () async {
+    await manager.dispose();
+
+    platform.heldCids.complete(['default:c1']);
+    await pumpEventQueue();
+
+    expect(held, [<String>{}]);
+  });
 }

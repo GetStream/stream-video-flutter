@@ -59,8 +59,11 @@ void main() {
     await systemManaged.close();
   });
 
-  Future<(StreamVideoFixture, Call)> client() async {
+  Future<(StreamVideoFixture, Call)> client({
+    StreamVideoOptions? options,
+  }) async {
     final fixture = StreamVideoFixture(
+      options: options,
       pushNotificationManagerProvider: (_, _) => push,
     );
     addTearDown(fixture.dispose);
@@ -94,6 +97,64 @@ void main() {
     systemManaged.add(const {});
     await pumpEventQueue();
     expect(handledBySystem, [false, true, false]);
+  });
+
+  test('no longer tells WebRTC the system manages focus once the call is not '
+      'active, while the system still lists it', () async {
+    final (fixture, call) = await client();
+    systemManaged.add({'default:c1'});
+    await fixture.streamVideo.state.setActiveCall(call);
+    await pumpEventQueue();
+
+    // A leave removes the call before it ends the system's call.
+    await fixture.streamVideo.state.removeActiveCall(call);
+    await pumpEventQueue();
+
+    expect(handledBySystem, [false, true, false]);
+  });
+
+  test('with two active calls, follows the one the system manages', () async {
+    final (fixture, managed) = await client(
+      options: StreamVideoOptions(
+        autoConnect: false,
+        allowMultipleActiveCalls: true,
+        multiCallAudioPolicy: MultiCallAudioPolicy.manual,
+      ),
+    );
+    final other = fixture.streamVideo.makeCall(
+      callType: StreamCallType.defaultType(),
+      id: 'c2',
+    );
+    systemManaged.add({'default:c1'});
+    await fixture.streamVideo.state.setActiveCall(other);
+    await pumpEventQueue();
+    expect(handledBySystem, [false]);
+
+    await fixture.streamVideo.state.setActiveCall(managed);
+    await pumpEventQueue();
+    expect(handledBySystem, [false, true]);
+
+    await fixture.streamVideo.state.removeActiveCall(other);
+    await pumpEventQueue();
+    expect(handledBySystem, [false, true]);
+
+    await fixture.streamVideo.state.removeActiveCall(managed);
+    await pumpEventQueue();
+    expect(handledBySystem, [false, true, false]);
+  });
+
+  test('tells WebRTC nothing after the client is disposed', () async {
+    final (fixture, call) = await client();
+
+    await fixture.streamVideo.dispose();
+    (fixture.streamVideo.state.activeCalls as MutableStateEmitter<List<Call>>)
+        .value = [
+      call,
+    ];
+    systemManaged.add({'default:c1'});
+    await pumpEventQueue();
+
+    expect(handledBySystem, [false]);
   });
 
   test('a system-managed call that is not active changes nothing', () async {
