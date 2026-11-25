@@ -1,9 +1,8 @@
 import 'dart:typed_data';
 
-import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
-
-import '../native/encryption_manager_impl.dart'
-    if (dart.library.js_interop) '../web/encryption_manager_impl.dart';
+import '../../../webrtc_engine.dart';
+import '../../webrtc_interface/rtc_rtp_receiver.dart';
+import '../../webrtc_interface/rtc_rtp_sender.dart';
 import 'encryption_types.dart';
 
 /// Attaches AES-GCM end-to-end encryption to RTP senders and receivers.
@@ -36,14 +35,17 @@ abstract class EncryptionManager {
     if (userId.isEmpty) {
       throw ArgumentError.value(userId, 'userId', 'must not be empty');
     }
-    return createEncryptionManager(userId: userId, algorithm: algorithm);
+    return WebRtcEngine.instance.createEncryptionManager(
+      userId: userId,
+      algorithm: algorithm,
+    );
   }
 
   /// Whether the running platform can attach encoded transforms.
   ///
   /// `true` on Android, iOS and macOS; `false` on web, Windows and Linux,
-  /// where every other method throws [UnsupportedError].
-  static bool get isSupported => encryptionManagerIsSupported;
+  /// where [EncryptionManager.create] throws [UnsupportedError].
+  static bool get isSupported => WebRtcEngine.instance.supportsEncryption;
 
   /// The local user id passed to [EncryptionManager.create].
   String get userId;
