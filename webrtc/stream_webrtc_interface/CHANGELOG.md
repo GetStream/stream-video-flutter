@@ -3,6 +3,7 @@
 --------------------------------------------
 [Unreleased]
 
+* Added `startSpeechActivityDetection` and `stopSpeechActivityDetection` to `WebRtcPlatformEvents`.
 * Added `WebRtcPlatformEvents` and its event types, and `PeerConnectionFactoryOptions`.
 * Added the Android and Apple audio configuration types, moved from `stream_webrtc_flutter`.
 * First version as `stream_webrtc_interface`, Stream's fork of `webrtc_interface` 1.5.1.

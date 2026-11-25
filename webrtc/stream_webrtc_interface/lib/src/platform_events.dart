@@ -135,8 +135,22 @@ abstract class WebRtcPlatformEvents {
   Stream<AudioRoute> get onAudioRouteChanged;
 
   /// The local user started or stopped speaking while the microphone is
-  /// muted. Android, iOS and macOS.
+  /// muted. Android, iOS and macOS report it from the audio device module; the
+  /// browser reports it between [startSpeechActivityDetection] and
+  /// [stopSpeechActivityDetection].
   Stream<SpeechActivity> get onSpeechActivity;
+
+  /// Starts detecting speech on the microphone [deviceId], or the default
+  /// microphone when it is null, and reporting it on [onSpeechActivity].
+  ///
+  /// In the browser this opens a microphone capture of its own, which keeps
+  /// the browser's microphone indicator on. Does nothing on other platforms,
+  /// where the audio device module reports speech by itself.
+  Future<void> startSpeechActivityDetection({String? deviceId});
+
+  /// Stops the detection [startSpeechActivityDetection] started and releases
+  /// its microphone capture. Does nothing on other platforms.
+  Future<void> stopSpeechActivityDetection();
 
   /// The audio device module changed its audio processing. iOS and macOS.
   Stream<AudioProcessingState> get onAudioProcessingStateChanged;

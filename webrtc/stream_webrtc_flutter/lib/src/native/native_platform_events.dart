@@ -102,6 +102,12 @@ class NativeWebRtcPlatformEvents implements WebRtcPlatformEvents {
       .whereType<AudioInterruption>();
 
   @override
+  Future<void> startSpeechActivityDetection({String? deviceId}) async {}
+
+  @override
+  Future<void> stopSpeechActivityDetection() async {}
+
+  @override
   Future<void> enableInterruptionEvents() async {
     if (!Platform.isAndroid && !Platform.isIOS) {
       throw UnimplementedError(
