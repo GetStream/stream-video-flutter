@@ -669,7 +669,7 @@ class LocalMediaController {
           }
           break;
         case ScreenSharingStartedEvent _:
-          _onBroadcastStarted();
+          unawaited(_onBroadcastStarted());
           break;
         case AudioRouteChangedEvent _:
           onAudioRouteChanged(event);
@@ -1224,14 +1224,31 @@ class LocalMediaController {
       return;
     }
 
-    final result = await _applyScreenShare(
-      enabled: true,
-      constraints:
-          _broadcastConstraints ??
-          _defaultScreenShareConstraints(useiOSBroadcastExtension: true),
-    );
-    if (result case Failure(:final error)) {
-      _logger.e(() => '[onBroadcastStarted] share failed: $error');
+    try {
+      final result = await _applyScreenShare(
+        enabled: true,
+        constraints:
+            _broadcastConstraints ??
+            _defaultScreenShareConstraints(useiOSBroadcastExtension: true),
+      );
+      if (result case Failure(:final error)) {
+        _logger.e(() => '[onBroadcastStarted] share failed: $error');
+        await _stopBroadcast();
+      }
+    } catch (error, stackTrace) {
+      _logger.e(() => '[onBroadcastStarted] share failed: $error\n$stackTrace');
+      await _stopBroadcast();
+    }
+  }
+
+  /// Asks the iOS broadcast extension to finish the broadcast this call could
+  /// not share. The local participant is not sharing.
+  Future<void> _stopBroadcast() async {
+    _stateManager.participantSetScreenShareEnabled(enabled: false);
+    try {
+      await _rtcMediaDeviceNotifier().stopiOSBroadcast();
+    } catch (error) {
+      _logger.e(() => '[stopBroadcast] failed: $error');
     }
   }
 

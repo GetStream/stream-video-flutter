@@ -94,6 +94,7 @@ void main() {
       () => notifier.enumerateDevicesFor(any()),
     ).thenAnswer((_) async => const Result.success([]));
     when(notifier.presentiOSBroadcastPicker).thenAnswer((_) async {});
+    when(notifier.stopiOSBroadcast).thenAnswer((_) async {});
     for (final permission in CallPermission.values) {
       when(
         () => harness.permissionsManager.hasPermission(permission),
@@ -205,7 +206,7 @@ void main() {
     },
   );
 
-  test('a failed share leaves the share off', () async {
+  test('a failed share leaves the share off and stops the broadcast', () async {
     final call = await joinedCall();
     stubScreenShare(() async => failureWithError('no capture'));
 
@@ -213,6 +214,17 @@ void main() {
 
     expect(screenShareCalls(), hasLength(1));
     expect(sharing(call), isFalse);
+    verify(notifier.stopiOSBroadcast).called(1);
+  });
+
+  test('a share that throws stops the broadcast', () async {
+    final call = await joinedCall();
+    stubScreenShare(() async => throw StateError('no capture'));
+
+    await emit(ScreenSharingStartedEvent());
+
+    expect(sharing(call), isFalse);
+    verify(notifier.stopiOSBroadcast).called(1);
   });
 
   test(
