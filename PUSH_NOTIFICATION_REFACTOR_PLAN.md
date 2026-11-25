@@ -384,7 +384,7 @@ Rough totals: 27 PRs, median net diff ~250 lines, the two largest (B-2, C-4) ~55
 - Which matrix rows (R1–R20) the PR can affect, and the device(s) they were run on.
 - "Move" or "change", and for a change: the one behaviour that changed and the test that pins it.
 - Contract: unchanged / changed (and 0-1's test updated).
-- For native PRs: `melos run test:android:push` / `xcodebuild test` output; for B-5 and later: dogfooding Pods+SPM job green.
+- For native PRs: `melos run test:native:android` / `melos run test:native:ios` output; for B-5 and later: dogfooding Pods+SPM job green.
 
 ### 4.2 The hold spike (before B-6)
 

@@ -16,10 +16,25 @@ melos run analyze        # dart analyze --fatal-infos, every package
 melos run format
 melos run generate:flutter   # build_runner, for *.g.theme.dart and friends
 melos run test:all
-melos run test:android:push   # Kotlin unit tests of the push plugin, via its example app
-melos run test:ios:push       # Swift unit tests of the push plugin (RunnerTests), iPhone simulator
+melos run test:native:android   # JVM unit tests (android/src/test), each via its package's example app
+melos run test:native:ios       # RunnerTests of the example apps, iPhone simulator
+melos run test:native:macos     # RunnerTests of the macOS example apps
 melos run webrtc:analyze     # and webrtc:test, webrtc:format:verify: webrtc/ only
 ```
+
+The `test:native:*` scripts ask which package to run; pass `--no-select` for
+all of them. Each runs `.github/workflows/scripts/native-tests.sh`, which CI
+calls directly, and skips a package without tests for that platform. Native
+tests live in the package's `android/src/test`, or in the `RunnerTests` target
+of its example app, which the example's `Runner` scheme has to test.
+
+CI runs a package's native tests only when native code they build changed:
+the `Detect Native Changes` filters in `stream_video_flutter_workflow.yml`,
+and the `*_tests` filters in `webrtc.yml`. A package that gets its first
+`RunnerTests` needs an `ios_<package>` filter there, or CI never runs them, and
+so does a package's first `android/src/test` without an `android_<package>`
+filter. A filter lists native paths only: changes to `pubspec.lock`, the
+setup actions or the workflows don't run native tests.
 
 The `webrtc/` packages include the root `analysis_options.yaml` like the rest,
 but turn off the rules their upstream code doesn't follow yet.
