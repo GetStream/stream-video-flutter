@@ -189,7 +189,12 @@ void main() {
   /// join did on the session.
   Future<Call> joinedCall({bool clear = true}) async {
     final call = harness.buildCall(rtcMediaDeviceNotifier: notifier);
-    await call.join();
+    // The calls share a cid, so the join of a second one would be refused
+    // while the first one is active.
+    final others = activeCalls().value;
+    activeCalls().value = [];
+    expect((await call.join()).isSuccess, isTrue);
+    activeCalls().value = [...others, ...activeCalls().value];
     harness.stateManager.state = harness.stateManager.callState.copyWith(
       callParticipants: [
         CallParticipantState(
@@ -359,6 +364,33 @@ void main() {
     );
 
     test(
+      'a broadcast requested by a call that left is shared in the remaining '
+      'active call',
+      () async {
+        final left = await joinedCall();
+        final call = await joinedCall();
+        await left.setScreenShareEnabled(
+          enabled: true,
+          constraints: _requested,
+        );
+        await left.leave();
+        activeCalls().value = [call];
+
+        await emit(ScreenSharingStartedEvent());
+
+        verifyNoScreenShare();
+        final captured = verify(
+          () => harness.sessions[1].setScreenShareEnabled(
+            true,
+            constraints: captureAny(named: 'constraints'),
+          ),
+        ).captured;
+        expect(captured.single, _isDefaultBroadcast(call));
+        expect(sharing(call), isTrue);
+      },
+    );
+
+    test(
       'a broadcast nobody requested is not shared while several calls are '
       'active',
       () async {
@@ -497,6 +529,7 @@ void main() {
       activeCalls().value = [];
 
       final second = await joinedCall();
+      expect(activeCalls().value, [second]);
 
       verifyNoScreenShare(harness.sessions[1]);
       expect(sharing(second), isFalse);

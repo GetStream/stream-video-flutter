@@ -329,10 +329,9 @@ class Call {
         _host.pushNotificationManager?.setCallMutedByCid(callCid.value, muted),
     onAudioOutputDeviceSet: (device) async => _host.pushNotificationManager
         ?.setCallAudioOutputDeviceByCid(callCid.value, device),
-    defaultBroadcastTarget: () {
-      final calls = _host.state.activeCalls.value;
-      return calls.length == 1 ? calls.single._media : null;
-    },
+    activeCalls: () => [
+      for (final call in _host.state.activeCalls.value) call._media,
+    ],
     onCallEvent: (event) {
       if (!_callEvents.isClosed) _callEvents.emit(event);
     },

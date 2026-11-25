@@ -43,7 +43,7 @@ class IosBroadcastScreenShare {
     required this._writeConnectOptions,
     required this._hasPermission,
     required this._rtcMediaDeviceNotifier,
-    required this._defaultTarget,
+    required this._activeCalls,
     required this._onCallEvent,
     required this._logger,
   });
@@ -64,9 +64,9 @@ class IosBroadcastScreenShare {
   final bool Function(CallPermission permission) _hasPermission;
   final RtcMediaDeviceNotifier Function() _rtcMediaDeviceNotifier;
 
-  /// The share of the call that takes a broadcast no call requested: the
-  /// client's active call, or none.
-  final IosBroadcastScreenShare? Function() _defaultTarget;
+  /// The shares of the client's active calls. A broadcast no call requested
+  /// is shared by the active call when there is exactly one.
+  final List<IosBroadcastScreenShare> Function() _activeCalls;
 
   /// Delivers an event on the call's events.
   final void Function(StreamCallEvent event) _onCallEvent;
@@ -291,12 +291,26 @@ class IosBroadcastScreenShare {
     );
   }
 
+  /// The share of the call that takes a broadcast no call requested: the
+  /// client's only active call, or none.
+  IosBroadcastScreenShare? _defaultTarget() {
+    final calls = _activeCalls();
+    return calls.length == 1 ? calls.single : null;
+  }
+
   /// Whether this call shares the broadcast that started: the call that
-  /// requested it, or with no request, the client's active call.
+  /// requested it, or with no request, the client's only active call.
+  ///
+  /// A broadcast nobody requested while several calls are active is shared
+  /// by none of them, and not by a call that joins later either.
   bool _ownsBroadcast() {
-    final owns = _owner.hasRequest
-        ? _owner.isRequestedBy(this)
-        : identical(_defaultTarget(), this);
+    if (_owner.hasRequest) return _claimIf(_owner.isRequestedBy(this));
+    final calls = _activeCalls();
+    if (calls.length > 1) _owner.markClaimed();
+    return _claimIf(calls.length == 1 && identical(calls.single, this));
+  }
+
+  bool _claimIf(bool owns) {
     if (owns) _owner.markClaimed();
     return owns;
   }

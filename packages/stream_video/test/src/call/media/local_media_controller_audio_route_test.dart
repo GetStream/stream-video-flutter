@@ -50,7 +50,7 @@ void main() {
       muteAudioWhenInBackground: () => false,
       onMicrophoneMuted: (_) async {},
       onAudioOutputDeviceSet: (_) async {},
-      defaultBroadcastTarget: () => null,
+      activeCalls: () => [],
       onCallEvent: (_) {},
       logger: taggedLogger(tag: 'test'),
     );

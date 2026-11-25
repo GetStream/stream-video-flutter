@@ -58,7 +58,25 @@ void main() {
   late LocalMediaController controller;
   late StreamSubscription<NativeWebRtcEvent> subscription;
   late bool canShare;
+  late List<LocalMediaController> activeCalls;
   late List<StreamCallEvent> events;
+
+  LocalMediaController buildController() => LocalMediaController(
+    stateManager: stateManager,
+    session: () => session,
+    sfuStatsReporter: () => null,
+    hasPermission: (_) => canShare,
+    rtcMediaDeviceNotifier: () => notifier,
+    audioConfigurationPolicy: () =>
+        const AudioConfigurationPolicy.broadcaster(),
+    muteVideoWhenInBackground: () => false,
+    muteAudioWhenInBackground: () => false,
+    onMicrophoneMuted: (_) async {},
+    onAudioOutputDeviceSet: (_) async {},
+    activeCalls: () => activeCalls,
+    onCallEvent: events.add,
+    logger: taggedLogger(tag: 'test'),
+  );
 
   setUp(() {
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
@@ -74,22 +92,8 @@ void main() {
     canShare = true;
     events = [];
     stateManager = CallStateNotifier(createTestCallState());
-    controller = LocalMediaController(
-      stateManager: stateManager,
-      session: () => session,
-      sfuStatsReporter: () => null,
-      hasPermission: (_) => canShare,
-      rtcMediaDeviceNotifier: () => notifier,
-      audioConfigurationPolicy: () =>
-          const AudioConfigurationPolicy.broadcaster(),
-      muteVideoWhenInBackground: () => false,
-      muteAudioWhenInBackground: () => false,
-      onMicrophoneMuted: (_) async {},
-      onAudioOutputDeviceSet: (_) async {},
-      defaultBroadcastTarget: () => controller,
-      onCallEvent: events.add,
-      logger: taggedLogger(tag: 'test'),
-    );
+    controller = buildController();
+    activeCalls = [controller];
     subscription = controller.observeNativeWebRtcEvents();
   });
 
@@ -273,6 +277,23 @@ void main() {
       });
     });
   });
+
+  test(
+    'a broadcast nobody requested while several calls are active is not '
+    'taken by a later session',
+    () async {
+      activeCalls = [controller, buildController()];
+      await emit(ScreenSharingStartedEvent());
+      verifyNotEnabledOn(session!);
+
+      activeCalls = [controller];
+      final next = session = _session();
+      await controller.applyConnectOptions(session: next);
+
+      verifyNotEnabledOn(next);
+      verifyNever(notifier.presentiOSBroadcastPicker);
+    },
+  );
 
   test('a broadcast that could not be shared is no longer running', () async {
     when(

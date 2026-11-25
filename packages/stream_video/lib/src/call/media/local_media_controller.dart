@@ -53,7 +53,7 @@ class LocalMediaController {
     required this._muteAudioWhenInBackground,
     required this._onMicrophoneMuted,
     required this._onAudioOutputDeviceSet,
-    required this._defaultBroadcastTarget,
+    required this._activeCalls,
     required this._onCallEvent,
     required this._logger,
   });
@@ -72,9 +72,9 @@ class LocalMediaController {
   /// win over WebRTC's. Not awaited.
   final Future<void> Function(RtcMediaDevice device) _onAudioOutputDeviceSet;
 
-  /// The controller of the call that shares an iOS broadcast no call
-  /// requested: the client's active call, or none.
-  final LocalMediaController? Function() _defaultBroadcastTarget;
+  /// The controllers of the client's active calls, which share an iOS
+  /// broadcast no call requested.
+  final List<LocalMediaController> Function() _activeCalls;
 
   /// Delivers an event this controller raises on the call's events.
   final void Function(StreamCallEvent event) _onCallEvent;
@@ -107,7 +107,7 @@ class LocalMediaController {
     writeConnectOptions: (options) => _connectOptions = options,
     hasPermission: _hasPermission,
     rtcMediaDeviceNotifier: _rtcMediaDeviceNotifier,
-    defaultTarget: () => _defaultBroadcastTarget()?._broadcast,
+    activeCalls: () => [for (final media in _activeCalls()) media._broadcast],
     onCallEvent: _onCallEvent,
     logger: _logger,
   );
