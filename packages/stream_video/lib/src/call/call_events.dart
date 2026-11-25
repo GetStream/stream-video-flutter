@@ -1280,6 +1280,34 @@ class StreamCallTranscriptionReadyEvent extends StreamCallEvent {
   ];
 }
 
+/// Event that is triggered when the stats report of a call session is ready
+/// to be fetched.
+class StreamCallStatsReportReadyEvent extends StreamCallEvent {
+  const StreamCallStatsReportReadyEvent(
+    super.callCid, {
+    required this.createdAt,
+    required this.sessionId,
+    this.isTrimmed,
+  });
+
+  /// When the backend sent the event.
+  final DateTime createdAt;
+
+  /// The session the report is for.
+  final String sessionId;
+
+  /// Whether the report was trimmed to fit, when the backend says.
+  final bool? isTrimmed;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    createdAt,
+    sessionId,
+    isTrimmed,
+  ];
+}
+
 /// Event triggered when a third-party ingress stream (RTMP/SRT/WHIP) has
 /// started for a call.
 class StreamCallIngressStartedEvent extends StreamCallEvent {

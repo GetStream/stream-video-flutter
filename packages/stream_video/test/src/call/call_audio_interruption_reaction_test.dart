@@ -14,8 +14,9 @@ class _FakeMediaStreamTrack extends Fake implements rtc.MediaStreamTrack {
   bool enabled = true;
 }
 
-/// Notifier whose audio interruptions are driven by the test.
-class _InterruptionNotifier extends MockRtcMediaDeviceNotifier {
+/// Audio controller whose interruptions are driven by the test.
+// ignore: subtype_of_sealed_class, a mock for the tests
+class _InterruptionController extends MockPlatformAudioController {
   // Closed by the test's tearDown, which the lint can't see from here.
   // ignore: close_sinks
   final interruptions = StreamController<bool>.broadcast();
@@ -34,7 +35,8 @@ void main() {
   });
 
   late ConnectionHarness harness;
-  late _InterruptionNotifier notifier;
+  late MockRtcMediaDeviceNotifier notifier;
+  late _InterruptionController audio;
   late RtcLocalTrack published;
 
   MutableStateEmitter<VideoLifecycleState?> appState() =>
@@ -47,7 +49,7 @@ void main() {
   }
 
   Future<void> interrupt({required bool interrupted}) async {
-    notifier.interruptions.add(interrupted);
+    audio.interruptions.add(interrupted);
     await pumpEventQueue();
   }
 
@@ -87,7 +89,9 @@ void main() {
 
   setUp(() {
     harness = ConnectionHarness();
-    notifier = _InterruptionNotifier();
+    notifier = MockRtcMediaDeviceNotifier();
+    audio = _InterruptionController();
+    PlatformAudioController.instance = audio;
     // `Call.join` enumerates devices while applying the call settings.
     when(
       () => notifier.enumerateDevicesFor(any()),
@@ -106,7 +110,8 @@ void main() {
 
   tearDown(() async {
     await harness.dispose();
-    await notifier.interruptions.close();
+    PlatformAudioController.instance = null;
+    await audio.interruptions.close();
   });
 
   /// Joins an active call with the microphone on.
@@ -186,7 +191,7 @@ void main() {
     final mute = Completer<Result<RtcLocalTrack>>();
     stubMicrophone(() => mute.future);
 
-    notifier.interruptions
+    audio.interruptions
       ..add(true)
       ..add(false)
       ..add(true);

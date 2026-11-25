@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
+import '../../../native/peer_connection_factory_options_map.dart';
 import 'media_stream_impl.dart';
 import 'rtc_peerconnection_impl.dart';
 import 'utils.dart';
@@ -21,16 +22,16 @@ class NativePeerConnectionFactory {
   final String factoryId;
   bool _disposed = false;
 
-  /// Builds a fresh per-call factory. Initializes the WebRTC plugin if it
-  /// hasn't been initialized yet.
-  ///
-  /// [options] mirrors the [WebRTC.initialize] options map
+  /// Builds a fresh per-call factory with the audio settings in [options].
+  /// Initializes the WebRTC plugin if it hasn't been initialized yet.
   static Future<NativePeerConnectionFactory> create({
-    Map<String, dynamic>? options,
+    PeerConnectionFactoryOptions options = const PeerConnectionFactoryOptions(),
   }) async {
     final response = await WebRTC.invokeMethod(
       'createPeerConnectionFactory',
-      <String, dynamic>{'options': options ?? <String, dynamic>{}},
+      <String, dynamic>{
+        'options': peerConnectionFactoryOptionsMap(options),
+      },
     );
 
     if (response == null) {

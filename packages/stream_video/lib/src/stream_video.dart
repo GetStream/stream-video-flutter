@@ -9,6 +9,7 @@ import 'package:stream_core/stream_core.dart';
 
 import '../globals.dart';
 import '../open_api/video/coordinator/api.dart' hide User;
+import 'audio/platform_audio_controller.dart';
 import 'audio_processing/audio_processor.dart';
 import 'call/call.dart';
 import 'call/call_host.dart';
@@ -60,7 +61,6 @@ import 'token/token_source.dart';
 import 'utils/none.dart';
 import 'utils/result.dart';
 import 'utils/subscriptions.dart';
-import 'webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
 
 const _tag = 'SV:Client';
@@ -383,7 +383,7 @@ class StreamVideo extends Disposable implements CallHost {
   Future<void> _configureAudio() async {
     try {
       if (setsUpMedia && (CurrentPlatform.isAndroid || CurrentPlatform.isIos)) {
-        await RtcMediaDeviceNotifier.instance.reinitializeAudioConfiguration(
+        await PlatformAudioController.instance.reinitializeAudioConfiguration(
           _options.audioConfigurationPolicy,
         );
       }
@@ -475,7 +475,11 @@ class StreamVideo extends Disposable implements CallHost {
   /// manage it leaves the app's own audio configuration as it is.
   void _observeSystemManagedCalls() {
     final manager = pushNotificationManager;
-    if (manager == null || !setsUpMedia || !CurrentPlatform.isAndroid) return;
+    if (manager == null ||
+        !setsUpMedia ||
+        !PlatformAudioController.isSystemManagedAudioFocusSupported) {
+      return;
+    }
 
     _systemManagedCallsSubscription =
         Rx.combineLatest2<Set<String>, List<Call>, bool>(
@@ -493,7 +497,7 @@ class StreamVideo extends Disposable implements CallHost {
       () => '[observeSystemManagedCalls] systemManaged: $systemManaged',
     );
     unawaited(
-      RtcMediaDeviceNotifier.instance
+      PlatformAudioController.instance
           .setAndroidAudioFocusHandledBySystem(handledBySystem: systemManaged)
           .catchError((Object e, StackTrace stk) {
             _logger.e(
@@ -1188,7 +1192,7 @@ class StreamVideoOptions {
   ///
   /// Defaults to [BroadcasterAudioPolicy].
   /// Once set it will be applied for all calls.
-  /// To change the audio configuration policy after initial setup, use [RtcMediaDeviceNotifier.reinitializeAudioConfiguration].
+  /// To change the audio configuration policy after initial setup, use [PlatformAudioController.reinitializeAudioConfiguration].
   ///
   /// A ringing call uses [ringingAudioConfigurationPolicy] instead, when set.
   final AudioConfigurationPolicy audioConfigurationPolicy;

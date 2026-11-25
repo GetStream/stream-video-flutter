@@ -4,9 +4,12 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/protobuf/video/sfu/models/models.pb.dart'
+    show PerformanceStats;
 import 'package:stream_video/protobuf/video/sfu/signal_rpc/signal.pb.dart'
     as sfu;
 import 'package:stream_video/src/call/stats/sfu_stats_reporter.dart';
+import 'package:stream_video/src/call/stats/trace_record.dart';
 import 'package:stream_video/src/call/stats/tracer.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/src/webrtc/traced_peer_connection.dart';
@@ -29,6 +32,15 @@ class FakeSubscriber extends Fake implements TracedStreamPeerConnection {
 
   @override
   final Tracer tracer = Tracer('subscriber');
+
+  @override
+  Future<void> traceStats(List<Map<String, dynamic>> newRtcStats) async {}
+
+  @override
+  List<PerformanceStats> getPerformanceStats(
+    List<RtcStats> rtcStats,
+    SfuTrackType? Function(String) trackIdToTrackType,
+  ) => const [];
 
   @override
   Future<
@@ -112,6 +124,7 @@ SfuStatsReporter _createReporter({
   required MockCallSession callSession,
   required MockSfuClient sfuClient,
   required FakeSubscriber subscriber,
+  bool enableRtcStats = false,
 }) {
   final rtcManager = MockRtcManager();
   when(() => rtcManager.subscriber).thenReturn(subscriber);
@@ -126,8 +139,8 @@ SfuStatsReporter _createReporter({
 
   return SfuStatsReporter(
     callSession: callSession,
-    statsOptions: const StatsOptions(
-      enableRtcStats: false,
+    statsOptions: StatsOptions(
+      enableRtcStats: enableRtcStats,
       reportingIntervalMs: 500,
     ),
   );
@@ -183,6 +196,64 @@ void main() {
       reporter.stop();
 
       verify(() => sfuClient.sendStats(any())).called(1);
+    });
+
+    group("the platform audio controller's trace", () {
+      late bool rolledBack;
+
+      setUp(() {
+        rolledBack = false;
+        final audio = MockPlatformAudioController();
+        when(audio.getTrace).thenReturn(
+          TraceSlice(
+            snapshot: const [
+              TraceRecord(
+                tag: 'platformAudioTraceProbe',
+                data: null,
+                timestamp: 1,
+              ),
+            ],
+            rollback: () => rolledBack = true,
+          ),
+        );
+        PlatformAudioController.instance = audio;
+        addTearDown(() => PlatformAudioController.instance = null);
+      });
+
+      test('is sent with the stats', () async {
+        final reporter = _createReporter(
+          callSession: callSession,
+          sfuClient: sfuClient,
+          subscriber: subscriber,
+          enableRtcStats: true,
+        );
+
+        await reporter.flush();
+        reporter.stop();
+
+        final request =
+            verify(() => sfuClient.sendStats(captureAny())).captured.single
+                as sfu.SendStatsRequest;
+        expect(request.rtcStats, contains('platformAudioTraceProbe'));
+        expect(rolledBack, isFalse);
+      });
+
+      test('is rolled back when the stats are not sent', () async {
+        final reporter = _createReporter(
+          callSession: callSession,
+          sfuClient: sfuClient,
+          subscriber: subscriber,
+          enableRtcStats: true,
+        );
+        when(
+          () => sfuClient.sendStats(any()),
+        ).thenAnswer((_) async => failureWithError('sfu down'));
+
+        await reporter.flush();
+        reporter.stop();
+
+        expect(rolledBack, isTrue);
+      });
     });
 
     test('flush is a no-op after stop', () async {

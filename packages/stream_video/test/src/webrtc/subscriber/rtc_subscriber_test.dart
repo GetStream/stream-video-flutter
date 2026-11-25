@@ -7,6 +7,7 @@ import 'package:stream_video/src/webrtc/subscriber/rtc_subscriber.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
+import '../../../fixtures/webrtc_capabilities.dart';
 import '../fixtures/rtc_manager_fakes.dart';
 
 class _FakeTrackEvent extends Fake implements rtc.RTCTrackEvent {
@@ -188,6 +189,21 @@ void main() {
 
       expect(result.isSuccess, isTrue);
       expect(subscriber.tracks[audio.trackId]!.audioSinkId, 'speaker-2');
+    });
+
+    test('setAudioSink fails and leaves the tracks where the browser cannot '
+        'select the output', () async {
+      overrideWebRtcCapabilities(
+        capabilities: webRtcCapabilitiesOf(
+          PlatformType.web,
+        ).copyWith(supportsAudioOutputSelection: false),
+      );
+      final audio = deliver('alice:TRACK_TYPE_AUDIO');
+
+      final result = await subscriber.setAudioSink(_speaker);
+
+      expect(result.isFailure, isTrue);
+      expect(subscriber.tracks[audio.trackId]!.audioSinkId, isNull);
     });
 
     test(

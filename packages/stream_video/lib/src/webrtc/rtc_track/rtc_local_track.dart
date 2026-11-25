@@ -3,6 +3,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../../stream_video.dart';
 import '../../exceptions/video_exception.dart';
+import '../audio/audio_input_switcher.dart';
 import '../rtc_media_device/device_enumeration_trigger.dart';
 
 const kLocalTrackIdPrefix = 'local';
@@ -363,9 +364,15 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
   Future<RtcLocalCameraTrack> flipCamera() async {
     streamLog.i(_cameraTag, () => 'Flipping camera');
 
-    if (CurrentPlatform.isWeb) {
-      streamLog.w(_cameraTag, () => 'Flipping camera is not supported on web');
-      throw UnsupportedError('Flipping camera is not supported on web');
+    final capabilities = rtc.webRtcCapabilities;
+    if (!capabilities.supportsCameraSwitch) {
+      streamLog.w(
+        _cameraTag,
+        () => 'Flipping camera is not supported by $capabilities',
+      );
+      throw UnsupportedError(
+        'Flipping camera is not supported on this platform',
+      );
     }
 
     // Use the native switchCamera method.
@@ -459,36 +466,10 @@ extension RtcLocalAudioTrackHardwareExt on RtcLocalAudioTrack {
       return this;
     }
 
-    final updatedConstraints = mediaConstraints.copyWith(deviceId: device.id);
-
-    if (CurrentPlatform.isWeb) {
-      // recreate the track with new deviceId.
-      return recreate(transceivers, mediaConstraints: updatedConstraints);
-    }
-
-    try {
-      await rtc.Helper.selectAudioInput(device.id);
-      return copyWith(mediaConstraints: updatedConstraints);
-    } catch (e) {
-      streamLog.e(_audioTag, () => 'Error selecting audio input: $e');
-      rethrow;
-    }
-  }
-}
-
-extension RtcLocalScreenShareTrackExt on RtcLocalScreenShareTrack {
-  bool compareScreenShareMode(MediaConstraints? constraints) {
-    if (constraints is! ScreenShareConstraints) {
-      return true;
-    }
-
-    // On web we always get a new media track and deviceId is `null`.
-    if (CurrentPlatform.isWeb) {
-      return false;
-    }
-
-    return mediaConstraints.useiOSBroadcastExtension ==
-            constraints.useiOSBroadcastExtension &&
-        mediaConstraints.deviceId == constraints.deviceId;
+    return AudioInputSwitcher.forPlatform().switchTrack(
+      this,
+      transceivers,
+      device,
+    );
   }
 }
