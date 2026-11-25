@@ -100,7 +100,14 @@ class IosBroadcastScreenShare {
 
   /// Shows the picker of the broadcast extension. The share starts when the
   /// broadcast does, in [onStarted].
+  ///
+  /// Fails without showing the picker while the call has no session.
   Future<Result<None>> request(ScreenShareConstraints constraints) async {
+    if (_session() == null) {
+      return failureWithError(
+        'Call session is null, cannot start screen share',
+      );
+    }
     _requestedConstraints = constraints;
     _owner.request(this);
     try {

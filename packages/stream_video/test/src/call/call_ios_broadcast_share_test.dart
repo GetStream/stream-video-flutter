@@ -40,6 +40,21 @@ const _requested = ScreenShareConstraints(
   params: RtcVideoParametersPresets.h720_16x9,
 );
 
+/// Matches the broadcast constraints [call] shares without a request: the
+/// broadcast extension at the call's screen share resolution.
+Matcher _isDefaultBroadcast(Call call) => isA<ScreenShareConstraints>()
+    .having((c) => c.useiOSBroadcastExtension, 'useiOSBroadcastExtension', true)
+    .having((c) => c.captureScreenAudio, 'captureScreenAudio', false)
+    .having((c) => c.deviceId, 'deviceId', isNull)
+    .having((c) => c.maxFrameRate, 'maxFrameRate', isNull)
+    .having(
+      (c) => c.params,
+      'params',
+      call.state.value.settings.screenShare.targetResolution!.toVideoParams(
+        defaultBitrate: RtcVideoParametersPresets.k1080pBitrate,
+      ),
+    );
+
 /// Pins how a call shares the screen through the iOS broadcast extension:
 /// enabling only shows the picker, and the share starts with the broadcast.
 void main() {
@@ -218,6 +233,30 @@ void main() {
     expect(sharing(call), isFalse);
   });
 
+  test(
+    'enabling before the join fails without showing the picker',
+    () async {
+      final call = harness.buildCall(rtcMediaDeviceNotifier: notifier);
+
+      final result = await call.setScreenShareEnabled(
+        enabled: true,
+        constraints: _requested,
+      );
+
+      expect(result.isFailure, isTrue);
+      verifyNever(notifier.presentiOSBroadcastPicker);
+
+      // The failed enable is not a request: a later broadcast is shared with
+      // the default constraints.
+      await call.join();
+      await emit(ScreenSharingStartedEvent());
+      final calls = screenShareCalls();
+      expect(calls, hasLength(1));
+      expect(calls.single.$1, isTrue);
+      expect(calls.single.$2, _isDefaultBroadcast(call));
+    },
+  );
+
   test('a picker that cannot be shown fails the enable', () async {
     final call = await joinedCall();
     when(notifier.presentiOSBroadcastPicker).thenThrow(
@@ -281,13 +320,14 @@ void main() {
 
   group('with more than one call', () {
     test('a broadcast another call requested is not shared', () async {
-      final other = harness.buildCall(rtcMediaDeviceNotifier: notifier);
+      final other = await joinedCall();
       await other.setScreenShareEnabled(enabled: true, constraints: _requested);
       final call = await joinedCall();
 
       await emit(ScreenSharingStartedEvent());
 
-      verifyNoScreenShare();
+      expect(screenShareCalls(), [(true, _requested)]);
+      verifyNoScreenShare(harness.sessions[1]);
       expect(sharing(call), isFalse);
     });
 
