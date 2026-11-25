@@ -5,10 +5,10 @@ import 'package:meta/meta.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../../stream_video.dart';
+import '../../audio/remote_audio_playback.dart';
 import '../../errors/stream_video_exception_composer.dart';
 import '../../sfu/data/models/sfu_model_parser.dart';
 import '../peer_connection.dart';
-import '../rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 import '../sdp/incoming_audio_sources.dart';
 import '../traced_peer_connection.dart';
 
@@ -57,13 +57,15 @@ class RtcSubscriber {
   /// Whether subscriber offers have to be compared for new audio sources.
   /// WebKit only: everywhere else the offers are neither kept nor parsed.
   /// Swappable so a test on the VM can take the WebKit path.
-  bool Function() needsRemoteAudioReattach = rtc_audio.needsRemoteAudioReattach;
+  bool Function() needsRemoteAudioReattach = () =>
+      rtc.webRtcCapabilities.needsRemoteAudioReattach;
 
   /// Re-attaches every remote audio element after a subscriber renegotiation
   /// brought in a new audio source. Swappable so a test can observe the
   /// trigger.
   Future<void> Function({required String reason}) reattachRemoteAudio =
-      rtc_audio.reattachRemoteAudio;
+      ({required reason}) =>
+          RemoteAudioPlayback.instance.reattach(reason: reason);
 
   /// Applies the SFU's [offerSdp] and returns the answer, or null when either
   /// step failed. Re-attaches remote audio when a WebKit renegotiation brings

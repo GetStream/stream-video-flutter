@@ -7,7 +7,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import '../../stream_video.dart';
 import '../call/stats/trace_tag.dart';
 import '../call/stats/tracer.dart';
-import '../webrtc/rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
+import 'remote_audio_playback.dart';
 
 final _logger = taggedLogger(tag: 'SV:PlatformAudioController');
 
@@ -125,8 +125,8 @@ class SpeechActivityEnded extends SpeechActivityEvent {
 @sealed
 class PlatformAudioController {
   PlatformAudioController._internal() {
-    // Routes remote audio playback traces (web only).
-    rtc_audio.setAudioTraceHandler(_tracer.trace);
+    // Routes remote audio playback traces.
+    remoteAudioPlayback.traceHandler = _tracer.trace;
 
     _listenForAudioProcessingStateChanges();
   }
@@ -151,6 +151,10 @@ class PlatformAudioController {
       _instance = controller;
 
   final _tracer = Tracer(null);
+
+  /// Plays the remote audio tracks of every call.
+  @internal
+  RemoteAudioPlayback get remoteAudioPlayback => RemoteAudioPlayback.instance;
 
   @internal
   TraceSlice getTrace() {
@@ -299,16 +303,12 @@ class PlatformAudioController {
 
   final _audioPlayoutPausedController = BehaviorSubject<bool>.seeded(false);
 
-  /// Pauses playout in the WebRTC plugin. Replaceable in tests, because the
-  /// plugin only reaches the platform channel on Android, iOS and macOS hosts.
+  /// Pauses or resumes playout in the WebRTC plugin. Replaceable in tests,
+  /// because the plugin only reaches the platform channel on Android, iOS and
+  /// macOS hosts.
   @visibleForTesting
-  Future<void> Function() nativePauseAudioPlayout =
-      rtc.Helper.pauseAudioPlayout;
-
-  /// Resumes playout in the WebRTC plugin, see [nativePauseAudioPlayout].
-  @visibleForTesting
-  Future<void> Function() nativeResumeAudioPlayout =
-      rtc.Helper.resumeAudioPlayout;
+  Future<void> Function(bool paused) setPlayoutPaused =
+      rtc.setAudioPlayoutPaused;
 
   /// Temporarily mutes all audio output (playout) from the app.
   /// This does not affect the microphone, the audio output route or remote
@@ -322,8 +322,7 @@ class PlatformAudioController {
     if (!isAudioPlayoutPauseSupported) return;
 
     _tracer.trace(TraceTag.pauseAudioPlayout, null);
-    await nativePauseAudioPlayout();
-    rtc_audio.setAudioPlayoutPaused(paused: true);
+    await setPlayoutPaused(true);
     _setAudioPlayoutPaused(true);
   }
 
@@ -334,8 +333,7 @@ class PlatformAudioController {
     if (!isAudioPlayoutPauseSupported) return;
 
     _tracer.trace(TraceTag.resumeAudioPlayout, null);
-    await nativeResumeAudioPlayout();
-    rtc_audio.setAudioPlayoutPaused(paused: false);
+    await setPlayoutPaused(false);
     _setAudioPlayoutPaused(false);
   }
 
@@ -353,7 +351,7 @@ class PlatformAudioController {
   /// `call.state` instead.
   @internal
   Stream<bool> get webAudioPlaybackBlockedChanges =>
-      rtc_audio.audioPlaybackBlockedChanges;
+      remoteAudioPlayback.blockedChanges;
 
   /// Retries playback of the remote audio elements the browser's autoplay
   /// policy blocked. Must be called from within a user gesture (e.g. a button
@@ -362,7 +360,7 @@ class PlatformAudioController {
   /// Observe [CallState.isWebAudioPlaybackBlocked] to know when it is needed.
   /// Web only; a no-op on other platforms. Unrelated to [resumeAudioPlayout],
   /// which unmutes playout paused via [pauseAudioPlayout].
-  Future<void> resumeWebAudioPlayback() => rtc_audio.resumeAudioPlayback();
+  Future<void> resumeWebAudioPlayback() => remoteAudioPlayback.resume();
 
   /// Requests Android audio focus again for the call's audio after a loss,
   /// such as when the app returns from the background. A granted request ends

@@ -1,9 +1,9 @@
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
+import '../../audio/remote_audio_playback.dart';
 import '../../logger/stream_log.dart';
 import '../../sfu/data/models/sfu_track_type.dart';
 import '../model/rtc_video_dimension.dart';
-import '../rtc_audio_api/rtc_audio_api.dart' as rtc_audio_api;
 import 'rtc_track.dart';
 
 const _tag = 'SV:RtcRemoteTrack';
@@ -33,7 +33,10 @@ class RtcRemoteTrack extends RtcTrack {
 
     // Start the audio player if it's an audio track.
     if (isAudioTrack) {
-      rtc_audio_api.startAudio(trackId, mediaTrack);
+      RemoteAudioPlayback.instance.start(
+        trackId,
+        mediaTrack,
+      );
 
       final sinkId = audioSinkId;
       if (sinkId != null) {
@@ -72,7 +75,10 @@ class RtcRemoteTrack extends RtcTrack {
 
     // Stop the audio player if it's an audio track.
     if (isAudioTrack && disposeWebAudioPlayer) {
-      rtc_audio_api.stopAudio(trackId, mediaTrack);
+      RemoteAudioPlayback.instance.stop(
+        trackId,
+        mediaTrack,
+      );
     }
   }
 
@@ -114,7 +120,10 @@ extension RtcRemoteAudioTrackHardwareExt on RtcRemoteTrack {
 
     streamLog.i(_audioTag, () => 'Setting sink id for track $trackId to $id');
 
-    await rtc_audio_api.setSinkId(trackId, id);
+    await RemoteAudioPlayback.instance.setSinkId(
+      trackId,
+      id,
+    );
     return copyWith(audioSinkId: id);
   }
 }
