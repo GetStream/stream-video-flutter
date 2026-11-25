@@ -8,7 +8,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('presentiOSBroadcastPicker is unsupported off iOS', () async {
+  test('the broadcast picker and stop are unsupported off iOS', () async {
     final calls = <MethodCall>[];
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(const MethodChannel('FlutterWebRTC.Method'), (
@@ -26,6 +26,7 @@ void main() {
     );
 
     await expectLater(presentiOSBroadcastPicker(), throwsUnsupportedError);
+    await expectLater(stopiOSBroadcast(), throwsUnsupportedError);
     expect(calls, isEmpty);
   });
 }

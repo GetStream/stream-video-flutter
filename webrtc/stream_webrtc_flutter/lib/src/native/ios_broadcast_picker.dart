@@ -19,3 +19,15 @@ Future<void> presentiOSBroadcastPicker() async {
   }
   await WebRTC.invokeMethod<void, void>('presentBroadcastPicker');
 }
+
+/// Asks the app's broadcast upload extension to finish its broadcast with an
+/// error. iOS only.
+///
+/// The extension reports the stop as `onScreenSharingStopped` when it has
+/// finished. Throws an [UnsupportedError] on other platforms.
+Future<void> stopiOSBroadcast() async {
+  if (!WebRTC.platformIsIOS) {
+    throw UnsupportedError('stopiOSBroadcast is only supported on iOS');
+  }
+  await WebRTC.invokeMethod<void, void>('stopBroadcast');
+}
