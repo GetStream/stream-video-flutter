@@ -1,7 +1,7 @@
 [Unreleased]
 
 * **Breaking:** platform events are typed; listen to `platformEvents`. `eventStream` is no longer exported.
-* **Breaking:** `handleCallInterruptionCallbacks` is removed; call `platformEvents.enableInterruptionEvents` and listen to `platformEvents.onInterruption`. Apps using `stream_video` must not call it, since the SDK does.
+* **Breaking:** `handleCallInterruptionCallbacks` is removed; call `platformEvents.enableInterruptionEvents` and listen to `platformEvents.onInterruption`. Apps using `stream_video` must not call `enableInterruptionEvents`, since the SDK does.
 * **Breaking:** `NativePeerConnectionFactory.create` takes a `PeerConnectionFactoryOptions` instead of a map. Options without a field of their own, such as `forceSWCodec`, go in its `additionalOptions`.
 * `WebRTC.initialize` accepts a `PeerConnectionFactoryOptions` as `factoryOptions`.
 * The Android and Apple audio configuration types moved to `stream_webrtc_interface`; this package still exports them.
