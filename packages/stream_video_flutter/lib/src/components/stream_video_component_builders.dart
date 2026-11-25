@@ -19,6 +19,9 @@ Iterable<StreamComponentBuilderExtension<Object>> streamVideoComponentBuilders({
   StreamComponentBuilder<StreamLobbyHeaderProps>? lobbyHeader,
   StreamComponentBuilder<StreamLobbyFooterProps>? lobbyFooter,
 
+  // ── Livestream ───────────────────────────────────────────────────────────
+  StreamComponentBuilder<StreamLivestreamTileProps>? livestreamTile,
+
   // ── Shared ───────────────────────────────────────────────────────────────
   StreamComponentBuilder<StreamUserAvatarProps>? userAvatar,
 }) {
@@ -39,6 +42,8 @@ Iterable<StreamComponentBuilderExtension<Object>> streamVideoComponentBuilders({
       StreamComponentBuilderExtension(builder: lobbyHeader),
     if (lobbyFooter != null)
       StreamComponentBuilderExtension(builder: lobbyFooter),
+    if (livestreamTile != null)
+      StreamComponentBuilderExtension(builder: livestreamTile),
     if (userAvatar != null)
       StreamComponentBuilderExtension(builder: userAvatar),
   ];

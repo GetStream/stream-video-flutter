@@ -54,6 +54,8 @@ final shadStreamIcons = const StreamIcons().copyWith(
   folder: LucideIcons.folder,
   folderLarge: LucideIcons.folder,
   fullBlurFill: LucideIcons.droplets,
+  fullscreen: LucideIcons.maximize,
+  fullscreenExit: LucideIcons.minimize,
   fullscreenFill: LucideIcons.maximize,
   gallery: LucideIcons.images,
   gridDefaultFill: LucideIcons.layoutGrid,

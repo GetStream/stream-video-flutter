@@ -176,21 +176,13 @@ class LivestreamInfo extends StatelessWidget {
                   IconButton(
                     onPressed: onFullscreenTapped,
                     icon: AnimatedCrossFade(
-                      // The design system ships a single `fullscreenFill`
-                      // glyph and no exit-fullscreen counterpart, and the
-                      // cross-fade needs two distinct pictures, so this pair
-                      // stays on Material until core grows one.
                       firstChild: IconTheme(
                         data: contractIconTheme,
-                        child: const Icon(
-                          Icons.fullscreen_exit,
-                        ),
+                        child: Icon(context.streamIcons.fullscreenExit),
                       ),
                       secondChild: IconTheme(
                         data: expandIconTheme,
-                        child: const Icon(
-                          Icons.fullscreen,
-                        ),
+                        child: Icon(context.streamIcons.fullscreen),
                       ),
                       crossFadeState: fullscreen
                           ? CrossFadeState.showFirst
