@@ -17,7 +17,7 @@
 * [Android] fix: enabling interruption events, `WebRTC.initialize` with an audio configuration and `selectAudioOutput` no longer take audio focus or change the audio mode outside a call, and the previous mode is restored after it.
 * [Android] fix: a call that reuses a microphone track captured before it, such as a lobby preview's, takes audio focus as soon as it sends audio.
 * [Android] fix: an interruption ends when the call's audio stops.
-* [Android] fix: `regainAndroidAudioFocus` requests audio focus again during a call, and does nothing outside one.
+* [Android] fix: `regainAndroidAudioFocus` requests audio focus again during a call whose focus WebRTC manages, and does nothing otherwise.
 
 [4.0.1] - 2026.10.22
 
