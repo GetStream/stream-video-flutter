@@ -191,8 +191,8 @@ class Helper {
   ///
   /// Does nothing while no call's audio runs or audio focus is not managed.
   /// The request is made asynchronously and its outcome is not returned; a
-  /// granted request ends the interruption `handleCallInterruptionCallbacks`
-  /// reported.
+  /// granted request ends the interruption reported on
+  /// `platformEvents.onInterruption`.
   static Future<void> regainAndroidAudioFocus() async {
     if (WebRTC.platformIsAndroid) {
       return WebRTC.invokeMethod('regainAndroidAudioFocus');

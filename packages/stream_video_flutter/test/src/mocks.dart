@@ -51,6 +51,10 @@ class MockRtcMediaDeviceNotifier extends Mock
     implements RtcMediaDeviceNotifier {}
 
 // ignore: subtype_of_sealed_class
+class MockPlatformAudioController extends Mock
+    implements PlatformAudioController {}
+
+// ignore: subtype_of_sealed_class
 class MockStreamVideo extends Mock implements StreamVideo {
   // StreamVideo marks dispose as @mustBeOverridden.
   @override

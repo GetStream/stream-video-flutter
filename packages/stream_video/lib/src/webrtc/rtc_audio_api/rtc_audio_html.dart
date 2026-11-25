@@ -8,12 +8,13 @@ import 'dart:math' as math;
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_dart_webrtc/src/third_party/dart_webrtc/media_stream_track_impl.dart';
+import 'package:stream_dart_webrtc/stream_dart_webrtc.dart'
+    show isWebKitUserAgent;
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:web/web.dart' as web;
 
 import '../../call/stats/trace_tag.dart';
 import '../../logger/stream_log.dart';
-import '../../utils/user_agent.dart';
 
 const audioContainerId = 'stream_audio_container';
 const audioPrefix = 'stream_audio_';
@@ -56,16 +57,14 @@ bool? _isWebKitOverride;
 
 bool get _isWebKit => _isWebKitOverride ?? _isWebKitUserAgent;
 
-/// Makes this page count as WebKit, or not, whatever its user agent says.
-/// Null goes back to the user agent.
+/// Makes this page count as WebKit, or not, for re-attaching remote audio,
+/// whatever its user agent says. Null goes back to the user agent.
 ///
 /// The WebKit-only paths are otherwise unreachable from a test, which runs in
 /// Chrome.
 @visibleForTesting
 void debugOverrideIsWebKit(bool? isWebKit) {
   _isWebKitOverride = isWebKit;
-  // Cached from whichever engine was in effect when it was first asked.
-  _audioOutputChangeSupported = null;
 }
 
 /// How long [reattachRemoteAudio] leaves the elements empty before giving them
@@ -304,7 +303,7 @@ void stopAudio(String id, rtc.MediaStreamTrack track) {
 /// Applies the audio output device [deviceId] to the audio element of track
 /// [id].
 Future<void> setSinkId(String id, String deviceId) async {
-  if (!checkIfAudioOutputChangeSupported()) {
+  if (!rtc.webRtcCapabilities.supportsAudioOutputSelection) {
     streamLog.w(
       _tag,
       () => 'Audio output device change is not supported on this browser.',
@@ -407,36 +406,6 @@ Future<void> resumeAudioPlayback() async {
 /// reported. The capability is page-global and cached, so tracing it per track
 /// would repeat one fact once per participant.
 bool _tracedOutputChangeUnsupported = false;
-
-/// Cached result of [checkIfAudioOutputChangeSupported].
-///
-/// Probing creates a detached `<audio>` element, so it is done once per page
-/// instead of once per track.
-bool? _audioOutputChangeSupported;
-
-/// Whether remote audio can be routed to a chosen output with `setSinkId`.
-///
-/// False on WebKit even where the method exists. Safari rejects `setSinkId`
-/// without a user gesture, so applying it to each new track fails. Where it
-/// succeeds, the output it creates keeps the sample rate the device had at
-/// that moment, and a Bluetooth headset changes rate as its mic turns on and
-/// off, so voices come out pitched up or down. And when the chosen device
-/// disconnects, that output is rebuilt on the missing device and goes silent.
-/// The system default output has none of these problems.
-bool checkIfAudioOutputChangeSupported() {
-  final cached = _audioOutputChangeSupported;
-  if (cached != null) return cached;
-
-  if (_isWebKit) return _audioOutputChangeSupported = false;
-
-  // Detect the capability by looking the method up rather than calling it:
-  // `setSinkId` returns a promise, so invoking it would route audio and leave
-  // a rejection unhandled instead of reporting support.
-  final element = web.document.createElement('audio');
-  return _audioOutputChangeSupported = element
-      .hasProperty('setSinkId'.toJS)
-      .toDart;
-}
 
 web.HTMLDivElement findOrCreateAudioContainer() {
   var div = web.document.getElementById(audioContainerId);

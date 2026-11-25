@@ -18,11 +18,18 @@ class MockCall extends Mock implements Call {}
 class MockCoordinatorClient extends Mock implements CoordinatorClient {}
 
 class MockRtcMediaDeviceNotifier extends Mock
-    implements RtcMediaDeviceNotifier {
-  /// Autoplay blocking is a web-only concern and never happens in tests, so
-  /// call sites don't need to stub what `Call` subscribes to on init.
+    implements RtcMediaDeviceNotifier {}
+
+// ignore: subtype_of_sealed_class
+class MockPlatformAudioController extends Mock
+    implements PlatformAudioController {
+  /// Autoplay blocking and the plugin's events never happen in tests, so call
+  /// sites don't need to stub the streams `Call` subscribes to on init.
   @override
   Stream<bool> get webAudioPlaybackBlockedChanges => const Stream.empty();
+
+  @override
+  Stream<NativeWebRtcEvent> nativeWebRtcEventsStream() => const Stream.empty();
 }
 
 /// The client a [Call] under test belongs to.
