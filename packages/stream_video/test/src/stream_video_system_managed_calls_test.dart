@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_video/src/call/media/ios_broadcast_screen_share.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../fixtures/webrtc_capabilities.dart';
@@ -40,6 +41,9 @@ void main() {
       () => audio.reinitializeAudioConfiguration(any()),
     ).thenAnswer((_) async {});
     when(
+      audio.nativeWebRtcEventsStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
       () => audio.setAndroidAudioFocusHandledBySystem(
         handledBySystem: any(named: 'handledBySystem'),
       ),
@@ -58,6 +62,7 @@ void main() {
   });
 
   tearDown(() async {
+    IosBroadcastScreenShare.resetOwnership();
     PlatformAudioController.instance = null;
     CurrentPlatform.debugCurrentPlatformOverride = null;
     await systemManaged.close();

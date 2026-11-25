@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/call/media/ios_broadcast_screen_share.dart';
+import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
@@ -58,12 +59,16 @@ void main() {
     await pumpEventQueue();
   }
 
-  void stubScreenShare(Future<Result<RtcLocalTrack>> Function() answer) => when(
-    () => harness.session.setScreenShareEnabled(
-      any(),
-      constraints: any(named: 'constraints'),
-    ),
-  ).thenAnswer((_) => answer());
+  void stubScreenShare(Future<Result<RtcLocalTrack>> Function() answer) {
+    for (final session in harness.sessions) {
+      when(
+        () => session.setScreenShareEnabled(
+          any(),
+          constraints: any(named: 'constraints'),
+        ),
+      ).thenAnswer((_) => answer());
+    }
+  }
 
   List<(bool, ScreenShareConstraints?)> screenShareCalls() {
     final captured = verify(
@@ -78,12 +83,52 @@ void main() {
     ];
   }
 
-  void verifyNoScreenShare() => verifyNever(
-    () => harness.session.setScreenShareEnabled(
+  void verifyNoScreenShare([MockCallSession? session]) => verifyNever(
+    () => (session ?? harness.session).setScreenShareEnabled(
       any(),
       constraints: any(named: 'constraints'),
     ),
   );
+
+  /// Makes each session start apply the call's connect options, which the
+  /// default session mock skips.
+  void applyOptionsOnStart() {
+    for (final session in harness.sessions) {
+      when(
+        () => session.setCameraEnabled(
+          any(),
+          constraints: any(named: 'constraints'),
+        ),
+      ).thenAnswer((_) async => failureWithError('no camera'));
+      when(
+        () => session.setMicrophoneEnabled(
+          any(),
+          constraints: any(named: 'constraints'),
+        ),
+      ).thenAnswer((_) async => failureWithError('no microphone'));
+      when(
+        () => session.start(
+          reconnectDetails: any(named: 'reconnectDetails'),
+          onRtcManagerCreatedCallback: any(
+            named: 'onRtcManagerCreatedCallback',
+          ),
+          isAnonymousUser: any(named: 'isAnonymousUser'),
+          capabilities: any(named: 'capabilities'),
+          unifiedSessionId: any(named: 'unifiedSessionId'),
+          clientEventRetryCount: any(named: 'clientEventRetryCount'),
+        ),
+      ).thenAnswer((invocation) async {
+        final onCreated =
+            invocation.namedArguments[#onRtcManagerCreatedCallback]
+                as FutureOr<void> Function(RtcManager)?;
+        await onCreated?.call(MockRtcManager());
+        return Result.success((
+          callState: createTestSfuCallState(),
+          fastReconnectDeadline: Duration.zero,
+        ));
+      });
+    }
+  }
 
   MutableStateEmitter<List<Call>> activeCalls() =>
       harness.streamVideo.state.activeCalls as MutableStateEmitter<List<Call>>;
@@ -91,7 +136,8 @@ void main() {
   setUp(() {
     overrideWebRtcCapabilities(platform: PlatformType.ios);
     IosBroadcastScreenShare.resetOwnership();
-    harness = ConnectionHarness();
+    // A second call that joins gets the second session.
+    harness = ConnectionHarness(sessionCount: 2);
     final clientState = harness.streamVideo.state;
     when(() => clientState.setActiveCall(any())).thenAnswer((
       invocation,
@@ -102,6 +148,7 @@ void main() {
     notifier = MockRtcMediaDeviceNotifier();
     audio = _BroadcastEventsController();
     PlatformAudioController.instance = audio;
+    IosBroadcastScreenShare.observeBroadcasts();
     when(
       () => notifier.enumerateDevicesFor(any()),
     ).thenAnswer((_) async => const Result.success([]));
@@ -123,8 +170,9 @@ void main() {
     await audio.events.close();
   });
 
-  /// Joins an active call with a local participant.
-  Future<Call> joinedCall() async {
+  /// Joins an active call with a local participant. [clear] forgets what the
+  /// join did on the session.
+  Future<Call> joinedCall({bool clear = true}) async {
     final call = harness.buildCall(rtcMediaDeviceNotifier: notifier);
     await call.join();
     harness.stateManager.state = harness.stateManager.callState.copyWith(
@@ -140,7 +188,7 @@ void main() {
         ),
       ],
     );
-    clearInteractions(harness.session);
+    if (clear) clearInteractions(harness.session);
     return call;
   }
 
@@ -357,13 +405,56 @@ void main() {
     expect(calls.single.$2?.useiOSBroadcastExtension, isTrue);
   });
 
-  test('a start event before the call is joined is skipped', () async {
+  test('a broadcast started before the call is joined is shared on the '
+      'join', () async {
+    applyOptionsOnStart();
     harness.buildCall(rtcMediaDeviceNotifier: notifier);
     await pumpEventQueue();
 
     await emit(ScreenSharingStartedEvent());
-
     verifyNoScreenShare();
+
+    await joinedCall(clear: false);
+
+    final calls = screenShareCalls();
+    expect(calls, hasLength(1));
+    expect(calls.single.$1, isTrue);
+    expect(calls.single.$2?.useiOSBroadcastExtension, isTrue);
+  });
+
+  group('a broadcast started before any call exists', () {
+    setUp(applyOptionsOnStart);
+
+    test('is shared by the call that joins', () async {
+      await emit(ScreenSharingStartedEvent());
+
+      await joinedCall(clear: false);
+
+      final calls = screenShareCalls();
+      expect(calls, hasLength(1));
+      expect(calls.single.$1, isTrue);
+      expect(calls.single.$2?.useiOSBroadcastExtension, isTrue);
+    });
+
+    test('is not shared by a second call that joins', () async {
+      await emit(ScreenSharingStartedEvent());
+      await joinedCall();
+      activeCalls().value = [];
+
+      final second = await joinedCall();
+
+      verifyNoScreenShare(harness.sessions[1]);
+      expect(sharing(second), isFalse);
+    });
+
+    test('that stopped is not shared by the call that joins', () async {
+      await emit(ScreenSharingStartedEvent());
+      await emit(ScreenSharingStoppedEvent());
+
+      await joinedCall(clear: false);
+
+      verifyNoScreenShare();
+    });
   });
 
   test('the stop event disables the share', () async {

@@ -1,7 +1,13 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart'
+    show
+        NativeWebRtcEvent,
+        ScreenSharingStartedEvent,
+        ScreenSharingStoppedEvent;
 
+import '../../audio/platform_audio_controller.dart';
 import '../../call_state.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/models.dart';
@@ -28,7 +34,8 @@ typedef ApplyScreenShare =
 ///
 /// Requesting shows the broadcast picker. The share starts once the
 /// broadcast does, in the call that owns it, and a broadcast that starts
-/// while the call has no session is shared by the next session.
+/// while the call has no session, or before any call is active, is shared by
+/// the next session.
 @internal
 class IosBroadcastScreenShare {
   IosBroadcastScreenShare({
@@ -79,7 +86,15 @@ class IosBroadcastScreenShare {
 
   CallState get _state => _stateManager.callState;
 
-  /// Clears which call owns the broadcast and whether it runs.
+  /// Records the broadcast starts and stops of the app, also while no call
+  /// observes them, so the next call that joins shares a running broadcast.
+  /// Does nothing when already observing.
+  static void observeBroadcasts() {
+    _owner.observe(PlatformAudioController.instance.nativeWebRtcEventsStream());
+  }
+
+  /// Clears which call owns the broadcast and whether it runs, and stops
+  /// observing the broadcast starts and stops.
   @visibleForTesting
   static void resetOwnership() => _owner.reset();
 
@@ -263,10 +278,11 @@ class IosBroadcastScreenShare {
   /// Whether this call shares the broadcast that started: the call that
   /// requested it, or with no request, the client's active call.
   bool _ownsBroadcast() {
-    if (_owner.hasRequest) return _owner.isRequestedBy(this);
-    final target = _defaultTarget();
-    if (target == null) _owner.markUnclaimed();
-    return identical(target, this);
+    final owns = _owner.hasRequest
+        ? _owner.isRequestedBy(this)
+        : identical(_defaultTarget(), this);
+    if (owns) _owner.markClaimed();
+    return owns;
   }
 
   /// Whether a share now would reach a session that is applying the connect
@@ -307,8 +323,9 @@ class IosBroadcastScreenShare {
 ///
 /// The broadcast belongs to the call that showed the picker last. One that
 /// starts without a request, such as from Control Center, belongs to the
-/// client's active call.
+/// client's active call, or with none, to the next call that joins.
 class _BroadcastOwner {
+  StreamSubscription<NativeWebRtcEvent>? _events;
   Object? _requester;
   bool _isActive = false;
   bool _isUnclaimed = false;
@@ -331,7 +348,28 @@ class _BroadcastOwner {
     if (identical(_requester, call)) _requester = null;
   }
 
-  void onStarted() => _isActive = true;
+  /// Follows the broadcast starts and stops in [events]. Does nothing when
+  /// already following.
+  void observe(Stream<NativeWebRtcEvent> events) {
+    _events ??= events.listen((event) {
+      switch (event) {
+        case ScreenSharingStartedEvent _:
+          onStarted();
+        case ScreenSharingStoppedEvent _:
+          onStopped();
+        default:
+          return;
+      }
+    });
+  }
+
+  /// Records a running broadcast, unclaimed until a call takes it. A start
+  /// while it runs changes nothing.
+  void onStarted() {
+    if (_isActive) return;
+    _isActive = true;
+    _isUnclaimed = true;
+  }
 
   void onStopped() {
     _isActive = false;
@@ -339,8 +377,9 @@ class _BroadcastOwner {
     _requester = null;
   }
 
-  /// Keeps a broadcast that no call could take for the next call that joins.
-  void markUnclaimed() => _isUnclaimed = true;
+  /// Records that a call took the running broadcast, so the next call that
+  /// joins does not take it too.
+  void markClaimed() => _isUnclaimed = false;
 
   /// Whether a running broadcast was waiting for a call. Only the first
   /// caller gets true.
@@ -351,6 +390,8 @@ class _BroadcastOwner {
   }
 
   void reset() {
+    unawaited(_events?.cancel());
+    _events = null;
     _requester = null;
     _isActive = false;
     _isUnclaimed = false;

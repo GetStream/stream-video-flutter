@@ -68,6 +68,7 @@ void main() {
     when(notifier.stopiOSBroadcast).thenAnswer((_) async {});
     audio = _BroadcastEventsController();
     PlatformAudioController.instance = audio;
+    IosBroadcastScreenShare.observeBroadcasts();
     stateManager = CallStateNotifier(createTestCallState());
     controller = LocalMediaController(
       stateManager: stateManager,
