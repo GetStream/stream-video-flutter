@@ -483,13 +483,11 @@ class StreamVideo extends Disposable implements CallHost {
 
     _systemManagedCallsSubscription =
         Rx.combineLatest2<Set<String>, List<Call>, bool>(
-              manager.systemManagedCallCids,
-              _state.activeCalls,
-              (cids, calls) =>
-                  calls.any((call) => cids.contains(call.callCid.value)),
-            )
-            .distinct()
-            .listen(_onSystemManagedCalls);
+          manager.systemManagedCallCids,
+          _state.activeCalls,
+          (cids, calls) =>
+              calls.any((call) => cids.contains(call.callCid.value)),
+        ).distinct().listen(_onSystemManagedCalls);
   }
 
   void _onSystemManagedCalls(bool systemManaged) {
