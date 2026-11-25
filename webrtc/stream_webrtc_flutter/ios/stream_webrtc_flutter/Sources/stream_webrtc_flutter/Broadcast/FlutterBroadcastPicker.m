@@ -5,19 +5,30 @@
 
 #import "../include/stream_webrtc_flutter/Broadcast/FlutterBroadcastScreenCapturer.h"
 
+NSErrorDomain const FlutterBroadcastPickerErrorDomain = @"FlutterBroadcastPicker";
+
 @implementation FlutterBroadcastPicker
 
-+ (void)present {
++ (BOOL)presentWithError:(NSError**)error {
   NSString* extension =
       [[[NSBundle mainBundle] infoDictionary] valueForKey:kRTCScreenSharingExtension];
+  if (extension == nil) {
+    if (error != NULL) {
+      *error = [NSError
+          errorWithDomain:FlutterBroadcastPickerErrorDomain
+                     code:FlutterBroadcastPickerErrorMissingExtensionKey
+                 userInfo:@{
+                   NSLocalizedDescriptionKey : [NSString
+                       stringWithFormat:@"The %@ Info.plist key is missing",
+                                        kRTCScreenSharingExtension]
+                 }];
+    }
+    return NO;
+  }
 
   RPSystemBroadcastPickerView* picker = [[RPSystemBroadcastPickerView alloc] init];
   picker.showsMicrophoneButton = false;
-  if (extension) {
-    picker.preferredExtension = extension;
-  } else {
-    NSLog(@"Not able to find the %@ key", kRTCScreenSharingExtension);
-  }
+  picker.preferredExtension = extension;
   // Opens the picker through its button's public UIControl action; the
   // private buttonPressed: selector is rejected by App Store review.
   UIButton* pickerButton = nil;
@@ -27,11 +38,20 @@
       break;
     }
   }
-  if (pickerButton != nil) {
-    [pickerButton sendActionsForControlEvents:UIControlEventTouchUpInside];
-  } else {
-    NSLog(@"RPSystemBroadcastPickerView button not found, broadcast picker was not presented");
+  if (pickerButton == nil) {
+    if (error != NULL) {
+      *error = [NSError
+          errorWithDomain:FlutterBroadcastPickerErrorDomain
+                     code:FlutterBroadcastPickerErrorMissingButton
+                 userInfo:@{
+                   NSLocalizedDescriptionKey : @"The RPSystemBroadcastPickerView button was not found"
+                 }];
+    }
+    return NO;
   }
+
+  [pickerButton sendActionsForControlEvents:UIControlEventTouchUpInside];
+  return YES;
 }
 
 @end

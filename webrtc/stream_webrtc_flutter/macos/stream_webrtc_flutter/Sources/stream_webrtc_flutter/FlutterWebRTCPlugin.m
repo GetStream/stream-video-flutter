@@ -809,8 +809,14 @@ static FlutterWebRTCPlugin* sharedSingleton;
     [self getDisplayMedia:constraints factoryId:factoryId result:result];
   } else if ([@"presentBroadcastPicker" isEqualToString:call.method]) {
 #if TARGET_OS_IPHONE
-    [FlutterBroadcastPicker present];
-    result(nil);
+    NSError* pickerError = nil;
+    if ([FlutterBroadcastPicker presentWithError:&pickerError]) {
+      result(nil);
+    } else {
+      result([FlutterError errorWithCode:@"BroadcastPickerError"
+                                 message:pickerError.localizedDescription
+                                 details:nil]);
+    }
 #else
     result([FlutterError errorWithCode:@"UnsupportedPlatformError"
                                message:@"presentBroadcastPicker is only supported on iOS"

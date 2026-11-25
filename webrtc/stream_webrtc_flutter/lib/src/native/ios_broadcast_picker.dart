@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart' show PlatformException;
+
 import '../third_party/flutter_webrtc/native/utils.dart';
 
 /// Shows the system picker of the app's broadcast upload extension. iOS only.
@@ -6,7 +8,9 @@ import '../third_party/flutter_webrtc/native/utils.dart';
 /// `broadcast-manual` as the `deviceId` captures it without showing the picker
 /// again.
 ///
-/// Throws an [UnsupportedError] on other platforms.
+/// Throws a [PlatformException] when the `RTCScreenSharingExtension`
+/// Info.plist key is missing or the picker cannot be opened, and an
+/// [UnsupportedError] on other platforms.
 Future<void> presentiOSBroadcastPicker() async {
   if (!WebRTC.platformIsIOS) {
     throw UnsupportedError(

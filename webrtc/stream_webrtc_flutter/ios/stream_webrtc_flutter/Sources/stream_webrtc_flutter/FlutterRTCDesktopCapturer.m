@@ -116,7 +116,10 @@ static id _pendingContentFilter = nil;
   };
 
   if (presentBroadcastPicker) {
-    [FlutterBroadcastPicker present];
+    NSError* pickerError = nil;
+    if (![FlutterBroadcastPicker presentWithError:&pickerError]) {
+      NSLog(@"Broadcast picker was not presented: %@", pickerError.localizedDescription);
+    }
   }
 #endif
 
