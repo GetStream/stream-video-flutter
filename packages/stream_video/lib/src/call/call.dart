@@ -333,7 +333,9 @@ class Call {
       final calls = _host.state.activeCalls.value;
       return calls.length == 1 ? calls.single._media : null;
     },
-    onCallEvent: _callEvents.emit,
+    onCallEvent: (event) {
+      if (!_callEvents.isClosed) _callEvents.emit(event);
+    },
     logger: _logger,
   );
 

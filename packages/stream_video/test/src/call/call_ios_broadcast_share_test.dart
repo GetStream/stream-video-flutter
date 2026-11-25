@@ -390,6 +390,21 @@ void main() {
     expect(failures.single.error, isA<StreamVideoException>());
   });
 
+  test('a call disposed while the broadcast ends reports nothing', () async {
+    final call = await joinedCall();
+    final stopping = Completer<void>();
+    when(notifier.stopiOSBroadcast).thenAnswer((_) => stopping.future);
+    stubScreenShare(() async => failureWithError('no capture'));
+
+    await emit(ScreenSharingStartedEvent());
+    verify(notifier.stopiOSBroadcast).called(1);
+    await call.dispose();
+    stopping.complete();
+    await pumpEventQueue();
+
+    expect(sharing(call), isFalse);
+  });
+
   test('a share that throws stops the broadcast', () async {
     final call = await joinedCall();
     final failures = shareFailures(call);
