@@ -92,6 +92,10 @@ void main() {
   testWidgets('LivestreamPlayer builds the livestream widgets it covers', (
     tester,
   ) async {
+    // The speakerphone toggle only shows where playout can be paused.
+    CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+    addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+
     final call = _FakeCall(
       callState.copyWith(status: CallStatus.connected()),
     );
