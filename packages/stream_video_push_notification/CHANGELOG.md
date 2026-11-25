@@ -77,6 +77,7 @@
 
 ### 🐞 Fixed
 
+- [iOS] A new or rotated PushKit VoIP token is registered with Stream as soon as PushKit issues it, rather than on the next launch, and a token PushKit issues before the plugin registers, as when the app delegate registers PushKit in `didFinishLaunching`, is no longer dropped.
 - [iOS] A call answered from CallKit with `configureAudioSession: false` had no audio in either direction.
 - [iOS] `setCallConnected` for a call answered from CallKit no longer asks CallKit to answer it again, which sent a second `ActionCallAccept`. A call accepted in the app is still answered in CallKit.
 - [iOS] `endCall` or `setCallConnected` with an id that is neither a call the plugin knows nor a uuid no longer crashes the app, and neither does `endCall` after a VoIP push whose call id was not a uuid.

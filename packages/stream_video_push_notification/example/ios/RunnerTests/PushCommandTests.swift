@@ -262,4 +262,69 @@ final class PushCommandTests: XCTestCase {
         StreamVideoCallkitManager.shared.handle(.silenceEvents(false)) { _ in }
         XCTAssertFalse(sink.isSilenced)
     }
+
+    // MARK: - The VoIP token
+
+    /// Runs `body` with empty user defaults of its own and a fresh event sink.
+    private func withTokenStore(_ body: (UserDefaults, RingingEventSink) -> Void) {
+        let suite = "PushCommandTests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { defaults.removePersistentDomain(forName: suite) }
+        body(defaults, RingingEventSink())
+    }
+
+    /// Lets the events `send` queued on the main queue run.
+    private func drainMainQueue() {
+        let drained = expectation(description: "main queue drained")
+        DispatchQueue.main.async { drained.fulfill() }
+        wait(for: [drained], timeout: 1)
+    }
+
+    private func listen(to sink: RingingEventSink) -> () -> [[String: Any]] {
+        var received: [[String: Any]] = []
+        let handler = EventCallbackHandler(sink: sink)
+        sink.attach(handler)
+        _ = handler.onListen(withArguments: nil) { event in
+            if let event = event as? [String: Any] { received.append(event) }
+        }
+        return { received }
+    }
+
+    func testAVoIPTokenIsStoredAndSentToDart() {
+        withTokenStore { defaults, sink in
+            StreamVideoPushNotificationPlugin.setDevicePushTokenVoIP(
+                "abc123", in: defaults, notifying: sink)
+
+            XCTAssertEqual(
+                StreamVideoPushNotificationPlugin.devicePushTokenVoIP(in: defaults), "abc123")
+
+            // Sent before Dart listens, as when PushKit delivers the token from
+            // `didFinishLaunching`: held until it does.
+            drainMainQueue()
+            let received = listen(to: sink)
+            XCTAssertEqual(received().count, 1)
+            XCTAssertEqual(
+                received().first?["event"] as? String,
+                "io.getstream.video.DID_UPDATE_DEVICE_PUSH_TOKEN_VOIP")
+            XCTAssertEqual(
+                (received().first?["body"] as? [String: Any])?["deviceTokenVoIP"] as? String,
+                "abc123")
+        }
+    }
+
+    func testAnInvalidatedVoIPTokenIsClearedAndSentEmpty() {
+        withTokenStore { defaults, sink in
+            let received = listen(to: sink)
+            StreamVideoPushNotificationPlugin.setDevicePushTokenVoIP(
+                "abc123", in: defaults, notifying: sink)
+            StreamVideoPushNotificationPlugin.setDevicePushTokenVoIP(
+                "", in: defaults, notifying: sink)
+            drainMainQueue()
+
+            XCTAssertEqual(StreamVideoPushNotificationPlugin.devicePushTokenVoIP(in: defaults), "")
+            XCTAssertEqual(
+                received().map { ($0["body"] as? [String: Any])?["deviceTokenVoIP"] as? String },
+                ["abc123", ""])
+        }
+    }
 }

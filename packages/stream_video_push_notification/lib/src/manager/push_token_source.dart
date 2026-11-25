@@ -42,13 +42,17 @@ final class VoIPTokenSource extends PushTokenSource {
     return token;
   }
 
+  /// Emits each new token PushKit issues. PushKit invalidating the token
+  /// arrives as an empty one, which is left out: there is nothing to register
+  /// until PushKit issues the next.
   @override
   Stream<String> get onRefresh {
     if (!CurrentPlatform.isIos) return const Stream.empty();
 
     return RingingEventBroadcaster.shared.onEvent
         .whereType<ActionDidUpdateDevicePushTokenVoip>()
-        .map((event) => event.token);
+        .map((event) => event.token)
+        .where((token) => token.isNotEmpty);
   }
 }
 
