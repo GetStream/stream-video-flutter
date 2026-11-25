@@ -281,11 +281,23 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'{count, plural, zero{No participants have} one{One participant has} other{{count} participants have}} joined early'**
   String livestreamBackstageParticipants(num count);
 
-  /// Label shown when the livestream has already ended.
+  /// No longer shown; the ended screen uses livestreamEndedTitle and livestreamEndedSubtitle.
   ///
   /// In en, this message translates to:
   /// **'The livestream has ended.'**
   String get livestreamEndedStatus;
+
+  /// Title shown in the player once the livestream has ended.
+  ///
+  /// In en, this message translates to:
+  /// **'Livestream stopped'**
+  String get livestreamEndedTitle;
+
+  /// Line under the title shown in the player once the livestream has ended.
+  ///
+  /// In en, this message translates to:
+  /// **'The broadcaster has gone off air'**
+  String get livestreamEndedSubtitle;
 
   /// Label shown when the livestream has already ended listing the recordings.
   ///
