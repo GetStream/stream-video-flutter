@@ -21,6 +21,9 @@ class LivestreamEndedContent extends StatefulWidget {
 }
 
 class _LivestreamEndedContentState extends State<LivestreamEndedContent> {
+  // Fetched once, on first use, so rebuilds don't list the recordings again.
+  late final _recordings = widget.call.listRecordings();
+
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
@@ -39,7 +42,7 @@ class _LivestreamEndedContentState extends State<LivestreamEndedContent> {
             ),
             if (widget.showRecordings)
               FutureBuilder(
-                future: widget.call.listRecordings(),
+                future: _recordings,
                 builder: (context, snapshot) {
                   if (snapshot.hasData && snapshot.data!.isSuccess) {
                     final recordings = snapshot.requireData.getDataOrNull();
