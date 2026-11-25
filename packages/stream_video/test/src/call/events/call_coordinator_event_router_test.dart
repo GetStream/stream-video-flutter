@@ -34,6 +34,7 @@ void main() {
             const Result.success(none),
         setCameraEnabled: ({required enabled}) async =>
             const Result.success(none),
+        setModerationFilter: (_) async {},
         logger: taggedLogger(tag: 'test'),
       ),
       onPermissionRequest: (_) => calls.add('permissionRequest'),

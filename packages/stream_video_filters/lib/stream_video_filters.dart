@@ -3,6 +3,8 @@ library;
 
 import 'stream_video_filters_platform_interface.dart';
 
+export 'src/full_frame_blur_filter.dart';
+
 class StreamVideoFilters {
   Future<bool?> isBackgroundEffectSupported() {
     return StreamVideoFiltersPlatform.instance.isBackgroundEffectSupported();

@@ -32,6 +32,12 @@ typedef OnLocalTrackMuted = void Function(RtcLocalTrack track, bool muted);
 /// {@endtemplate}
 typedef OnLocalTrackPublished = void Function(RtcLocalTrack track);
 
+/// {@template OnLocalCapture}
+/// Called with every new local capture before it is sent, returning the
+/// track to send in its place.
+/// {@endtemplate}
+typedef OnLocalCapture = Future<RtcLocalTrack> Function(RtcLocalTrack track);
+
 final _logger = taggedLogger(tag: 'SV:RtcPublisher');
 
 /// How long [RtcPublisher.getAnnouncedTracks] waits for in-flight transceiver
@@ -124,6 +130,9 @@ class RtcPublisher {
 
   OnLocalTrackMuted? onLocalTrackMuted;
   OnLocalTrackPublished? onLocalTrackPublished;
+
+  /// {@macro OnLocalCapture}
+  OnLocalCapture? onLocalCapture;
 
   /// Runs [create] as the single acquire-and-publish in flight for
   /// [trackType], returning the already-running one when there is one.
@@ -759,11 +768,12 @@ class RtcPublisher {
   /// on one of them or that is still running when disposing starts: each
   /// stops the track and keeps nothing.
   Future<Result<RtcLocalTrack>> _publish(
-    RtcLocalTrack track, {
+    RtcLocalTrack captured, {
     required String tag,
     RtcTrackPublishOptions Function()? trackPublishOptions,
     Future<void> Function(RtcLocalTrack track)? beforeSend,
   }) async {
+    final track = await _filterCapture(captured);
     final registered = track.trackIdPrefix == kLocalTrackIdPrefix
         ? track.copyWith(trackIdPrefix: publisherId)
         : track;
@@ -1484,9 +1494,10 @@ class RtcPublisher {
 
       RtcLocalTrack? captured;
       try {
-        var sending = captured = await current.recapture(
+        captured = await current.recapture(
           mediaConstraints: constraintsFor?.call(current),
         );
+        var sending = captured = await _filterCapture(captured);
 
         // Sender by sender, each only while the track is still held, so a
         // track published again meanwhile keeps its senders.
@@ -1514,6 +1525,19 @@ class RtcPublisher {
         return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
       }
     });
+  }
+
+  /// [track] as [onLocalCapture] filters it. A failure sends [track] as it
+  /// is.
+  Future<RtcLocalTrack> _filterCapture(RtcLocalTrack track) async {
+    final filter = onLocalCapture;
+    if (filter == null) return track;
+    try {
+      return await filter(track);
+    } catch (e, stk) {
+      _logger.e(() => '[filterCapture] failed for ${track.trackId}: $e\n$stk');
+      return track;
+    }
   }
 
   /// Keeps [updated] in place of [current] when [current] is still the held
@@ -1634,6 +1658,7 @@ class RtcPublisher {
 
     onLocalTrackMuted = null;
     onLocalTrackPublished = null;
+    onLocalCapture = null;
 
     await pc?.dispose();
   }

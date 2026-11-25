@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/call/events/call_video_moderation.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../logger/impl/test_logger.dart';
 import '../fixtures/call_test_helpers.dart';
@@ -14,6 +15,7 @@ void main() {
   late CallStateNotifier stateManager;
   late CallVideoModeration moderation;
   late List<String> toggles;
+  late List<VideoFilter?> moderationFilters;
 
   void setUpModeration(
     VideoModerationConfig config, {
@@ -21,6 +23,7 @@ void main() {
     Result<None> cameraResult = const Result.success(none),
   }) {
     toggles = [];
+    moderationFilters = [];
     stateManager = CallStateNotifier(
       createActiveCallState().copyWith(
         preferences: DefaultCallPreferences(videoModerationConfig: config),
@@ -37,6 +40,7 @@ void main() {
         toggles.add('camera: $enabled');
         return cameraResult;
       },
+      setModerationFilter: (filter) async => moderationFilters.add(filter),
       logger: taggedLogger(tag: 'SV:CallVideoModerationTest'),
     );
   }
@@ -90,7 +94,7 @@ void main() {
     }
 
     test('a blur-only config leaves the microphone and camera alone', () async {
-      setUpModeration(const VideoModerationConfig.blur());
+      setUpModeration(const VideoModerationConfig.blur(filter: _blur));
 
       await moderation.onBlur(blur());
 
@@ -116,12 +120,44 @@ void main() {
     });
   });
 
+  group('blur filter', () {
+    test('a blur sets the moderation filter', () async {
+      setUpModeration(const VideoModerationConfig.blur(filter: _blur));
+
+      await moderation.onBlur(blur());
+
+      expect(moderationFilters, [_blur]);
+    });
+
+    test('clearing the blur removes the moderation filter', () async {
+      setUpModeration(const VideoModerationConfig.blur(filter: _blur));
+
+      await moderation.onBlur(blur());
+      moderation.clear();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(moderationFilters, [_blur, null]);
+    });
+
+    test('a config without a blur filter sets none', () async {
+      setUpModeration(const VideoModerationConfig.mute());
+
+      await moderation.onBlur(blur());
+      moderation.clear();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(moderationFilters, isEmpty);
+    });
+  });
+
   group('timed clear', () {
     const duration = Duration(seconds: 10);
 
     test('a second blur restarts the timed clear', () {
       fakeAsync((async) {
-        setUpModeration(const VideoModerationConfig.blur(duration: duration));
+        setUpModeration(
+          const VideoModerationConfig.blur(filter: _blur, duration: duration),
+        );
 
         moderation.onBlur(blur());
         async.elapse(duration ~/ 2);
@@ -138,7 +174,9 @@ void main() {
 
     test('cancelTimer stops a pending timed clear', () {
       fakeAsync((async) {
-        setUpModeration(const VideoModerationConfig.blur(duration: duration));
+        setUpModeration(
+          const VideoModerationConfig.blur(filter: _blur, duration: duration),
+        );
 
         moderation.onBlur(blur());
         async.flushMicrotasks();
@@ -149,4 +187,15 @@ void main() {
       });
     });
   });
+}
+
+const _blur = _FakeVideoFilter();
+
+class _FakeVideoFilter extends VideoFilter {
+  const _FakeVideoFilter();
+
+  @override
+  Future<MediaStreamFilterResult> apply(rtc.MediaStream input) async {
+    return MediaStreamFilterResult(input);
+  }
 }

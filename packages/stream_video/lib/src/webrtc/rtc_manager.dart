@@ -31,7 +31,7 @@ import 'webrtc_engine.dart';
 export '../errors/track_missing_exception.dart';
 export 'publisher/announced_tracks.dart' show resolveTrackMid;
 export 'publisher/rtc_publisher.dart'
-    show OnLocalTrackMuted, OnLocalTrackPublished;
+    show OnLocalCapture, OnLocalTrackMuted, OnLocalTrackPublished;
 export 'subscriber/rtc_subscriber.dart' show OnRemoteTrackReceived;
 
 part 'rtc_manager_media.dart';
@@ -249,6 +249,13 @@ class RtcManager extends Disposable {
 
   set onLocalTrackPublished(OnLocalTrackPublished? callback) {
     _publisher.onLocalTrackPublished = callback;
+  }
+
+  /// {@macro OnLocalCapture}
+  OnLocalCapture? get onLocalCapture => _publisher.onLocalCapture;
+
+  set onLocalCapture(OnLocalCapture? callback) {
+    _publisher.onLocalCapture = callback;
   }
 
   /// Called for every remote track the subscriber receives.

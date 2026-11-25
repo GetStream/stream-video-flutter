@@ -374,7 +374,9 @@ class StreamLobbyController extends ChangeNotifier {
     _notify();
     final requested = devices.selectedVideoInput?.id;
     try {
-      final track = await _openCameraTrackFor(requested);
+      final track = await _filterCamera(
+        await _openCameraTrackFor(requested),
+      );
       // See setMicrophoneEnabled.
       if (_disposed || !_cameraDesired) {
         _openingCamera = false;
@@ -399,6 +401,36 @@ class StreamLobbyController extends ChangeNotifier {
       return _reopenCamera();
     }
     return true;
+  }
+
+  /// The call's camera filter, applied to the preview and to the camera the
+  /// call publishes.
+  VideoFilter? get videoFilter => call.videoFilter;
+
+  /// Applies [filter] to the preview and to the camera of the call. Null
+  /// removes it.
+  ///
+  /// The call publishes the preview without filtering it a second time.
+  Future<void> setVideoFilter(VideoFilter? filter) async {
+    await call.setVideoFilter(filter);
+
+    // A preview opened while no filter was set has not run the chain yet.
+    final track = _cameraTrack;
+    if (track != null && filter != null) {
+      // ignore: invalid_use_of_internal_member
+      final filtered = await call.applyLocalFilters(track);
+      if (_cameraTrack == track) _cameraTrack = filtered as RtcLocalCameraTrack;
+    }
+    _notify();
+  }
+
+  /// [track] as the call's filters make it, when the call has a camera
+  /// filter.
+  Future<RtcLocalCameraTrack> _filterCamera(RtcLocalCameraTrack track) async {
+    if (call.videoFilter == null) return track;
+    // ignore: invalid_use_of_internal_member
+    final filtered = await call.applyLocalFilters(track);
+    return filtered as RtcLocalCameraTrack;
   }
 
   /// Reopens the preview on the newly picked camera, reporting whether it

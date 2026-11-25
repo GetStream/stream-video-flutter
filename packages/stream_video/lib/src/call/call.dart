@@ -762,6 +762,7 @@ class Call {
   /// Applies and clears video moderation.
   late final _moderation = CallVideoModeration(
     stateManager: _stateManager,
+    setModerationFilter: _media.filters.setModerationFilter,
     currentUserId: () => _host.currentUser.id,
     setMicrophoneEnabled: setMicrophoneEnabled,
     setCameraEnabled: setCameraEnabled,
@@ -957,15 +958,31 @@ class Call {
   /// until the user manually re-enables them.
   void clearModerationBlur() => _moderation.clear();
 
-  /// Registers handlers for the native blur effect pipeline.
+  /// The filter applied to the camera, set through [setVideoFilter].
+  VideoFilter? get videoFilter => _media.videoFilter;
+
+  /// Applies [filter] to the camera, now and to every later capture, before
+  /// it is sent. Null removes it.
   ///
-  /// Called automatically by `StreamVideoEffectsManager` from
-  /// `stream_video_filters` when [VideoModerationConfig.applyBlur] is true.
+  /// A moderation blur set through [VideoModerationConfig.blur] runs after
+  /// it while active.
+  Future<void> setVideoFilter(VideoFilter? filter) =>
+      _media.setVideoFilter(filter);
+
+  /// The filter applied to the microphone, set through [setAudioFilter].
+  AudioFilter? get audioFilter => _media.audioFilter;
+
+  /// Applies [filter] to the microphone, now and to every later capture,
+  /// before it is sent. Null removes it.
+  Future<void> setAudioFilter(AudioFilter? filter) =>
+      _media.setAudioFilter(filter);
+
+  /// Runs this call's filters on [track], a capture made outside the call,
+  /// such as a lobby preview. Publishing that track later does not filter it
+  /// again.
   @internal
-  void setModerationBlurEffectHandlers({
-    required void Function() onApply,
-    required void Function() onClear,
-  }) => _moderation.setBlurEffectHandlers(onApply: onApply, onClear: onClear);
+  Future<RtcLocalTrack> applyLocalFilters(RtcLocalTrack track) =>
+      _media.filters.apply(track);
 
   @internal
   void traceSessionLog(String tag, dynamic data) {

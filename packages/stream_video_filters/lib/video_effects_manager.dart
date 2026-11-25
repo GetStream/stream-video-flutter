@@ -19,15 +19,7 @@ enum BlurIntensity {
 }
 
 class StreamVideoEffectsManager {
-  StreamVideoEffectsManager(this.call) {
-    if (call.state.value.preferences.videoModerationConfig.applyBlur) {
-      // ignore: invalid_use_of_internal_member
-      call.setModerationBlurEffectHandlers(
-        onApply: applyFullFrameBlurFilter,
-        onClear: disableAllFilters,
-      );
-    }
-  }
+  StreamVideoEffectsManager(this.call);
 
   static bool isBlurRegistered = false;
   static bool isFullFrameBlurRegistered = false;

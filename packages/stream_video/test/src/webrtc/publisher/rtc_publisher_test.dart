@@ -443,6 +443,64 @@ void main() {
     });
   });
 
+  group('onLocalCapture', () {
+    test('runs on a published capture before it is sent', () async {
+      final rtcPublisher = publisher();
+      final filtered = FakeMediaStreamTrack('filtered', kind: 'audio');
+      final captured = <String>[];
+      rtcPublisher.onLocalCapture = (track) async {
+        captured.add(track.mediaTrack.id!);
+        return track.copyWith(mediaTrack: filtered);
+      };
+
+      final result = await rtcPublisher.publishAudioTrack(track: localMic());
+
+      expect(captured, ['mic']);
+      expect(result.getDataOrNull()!.mediaTrack, same(filtered));
+      expect(transceivers.single.sender.track, same(filtered.clones.single));
+    });
+
+    test('a failing filter sends the capture as it is', () async {
+      final rtcPublisher = publisher();
+      rtcPublisher.onLocalCapture = (_) async => throw Exception('filter');
+
+      final result = await rtcPublisher.publishAudioTrack(track: localMic());
+
+      expect(result.getDataOrNull()!.mediaTrack.id, 'mic');
+      expect(transceivers, hasLength(1));
+    });
+
+    group('on a recapture', () {
+      late FakeWebRtcPlatform platform;
+
+      setUp(() {
+        TestWidgetsFlutterBinding.ensureInitialized();
+        platform = FakeWebRtcPlatform()..install();
+      });
+
+      tearDown(() => platform.uninstall());
+
+      test('runs on the new capture before it is sent', () async {
+        final rtcPublisher = publisher();
+        final captured = <String>[];
+        rtcPublisher.onLocalCapture = (track) async {
+          captured.add(track.mediaTrack.id!);
+          return track;
+        };
+        final track = (await rtcPublisher.publishAudioTrack(
+          track: localMic(),
+        )).getDataOrNull()!;
+        await rtcPublisher.muteTrack(trackId: track.trackId);
+
+        final unmuted = await rtcPublisher.unmuteTrack(trackId: track.trackId);
+
+        final recaptured = unmuted.getDataOrNull()!;
+        expect(captured, ['mic', recaptured.mediaTrack.id]);
+        expect(recaptured.mediaTrack.id, isNot('mic'));
+      });
+    });
+  });
+
   test('republishing a video track keeps its stopTrackOnMute', () async {
     when(
       () => pc.addVideoTransceiver(

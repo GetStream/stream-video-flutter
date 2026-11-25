@@ -36,6 +36,7 @@ import '../session/call_session.dart';
 import '../state/call_state_notifier.dart';
 import '../stats/sfu_stats_reporter.dart';
 import 'ios_broadcast_screen_share.dart';
+import 'local_media_filters.dart';
 
 /// Owns a call's connect options and its local media: the camera,
 /// microphone and screen share, and the audio and video devices.
@@ -150,6 +151,28 @@ class LocalMediaController {
   bool _audioOutputRoutedOnJoin = false;
 
   CallState get _state => _stateManager.callState;
+
+  /// The filter chains run on every local capture.
+  late final filters = LocalMediaFilters(logger: _logger);
+
+  /// The app's camera filter.
+  VideoFilter? get videoFilter => filters.videoFilter;
+
+  /// The app's microphone filter.
+  AudioFilter? get audioFilter => filters.audioFilter;
+
+  /// Sets the app's camera filter, applied to the camera in use and to every
+  /// later capture. Null removes it.
+  Future<void> setVideoFilter(VideoFilter? filter) =>
+      filters.setVideoFilter(filter);
+
+  /// Sets the app's microphone filter, applied to the microphone in use and
+  /// to every later capture. Null removes it.
+  Future<void> setAudioFilter(AudioFilter? filter) =>
+      filters.setAudioFilter(filter);
+
+  /// Stops the filters on the local captures, before they are released.
+  Future<void> releaseFilters() => filters.stopAll();
 
   /// The options the next session starts with: an override set before the
   /// join, or the options the call resolved.

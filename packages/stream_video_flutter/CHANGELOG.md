@@ -14,6 +14,7 @@
 - Registers the WebRTC plugin's `WebRtcEngine` for `stream_video` on Android, iOS, macOS, Windows and Linux.
 - Exports the native WebRTC version constants, which moved here from `stream_video`.
 - Exports `NativeWebRtcEngine`, for a test to register as `WebRtcEngine.instance`.
+- Added `StreamLobbyController.setVideoFilter`, which filters the preview and the camera the call publishes.
 - Added `StreamMediaDevicesController.supportsAudioOutputSelection`; `audioOutputs` is empty where it is false.
 - Added `anchorPoint` to `showStreamModalDialog`, which picks the half of a folded window the dialog goes to.
 - Added `StreamCallConnectionBanner`, which says what the call's connection is doing while it reconnects.

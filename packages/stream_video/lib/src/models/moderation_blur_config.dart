@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
+
 /// Configures how the SDK handles `call.moderation` events.
 ///
 /// Convenience constructors [VideoModerationConfig.disabled],
@@ -9,7 +11,7 @@ class VideoModerationConfig {
   const VideoModerationConfig({
     this.muteAudio = false,
     this.muteVideo = false,
-    this.applyBlur = false,
+    this.blurFilter,
     this.duration,
     this.onApply,
     this.onWarning,
@@ -21,7 +23,7 @@ class VideoModerationConfig {
   const VideoModerationConfig.disabled()
     : muteAudio = false,
       muteVideo = false,
-      applyBlur = false,
+      blurFilter = null,
       duration = null,
       onApply = null,
       onWarning = null,
@@ -33,26 +35,35 @@ class VideoModerationConfig {
   const VideoModerationConfig.mute({this.duration})
     : muteAudio = true,
       muteVideo = true,
-      applyBlur = false,
+      blurFilter = null,
       onApply = null,
       onWarning = null,
       onClear = null;
 
-  /// Applies a full-frame native blur on the camera track via
-  /// `StreamVideoEffectsManager` from the `stream_video_filters` package.
-  /// The blur is visible to ALL participants because it modifies frames
-  /// before encoding. Requires the `stream_video_filters` package.
-  const VideoModerationConfig.blur({this.duration})
-    : muteAudio = false,
-      muteVideo = false,
-      applyBlur = true,
-      onApply = null,
-      onWarning = null,
-      onClear = null;
+  /// Applies [filter] to the camera, after the call's own video filter, for
+  /// the configured [duration]. If [duration] is null, the blur persists
+  /// until `call.clearModerationBlur()` is called. The call's own filter is
+  /// applied alone again afterwards.
+  ///
+  /// The blur is visible to all participants because it changes the frames
+  /// before encoding. `FullFrameBlurFilter` from the `stream_video_filters`
+  /// package blurs the whole frame.
+  const VideoModerationConfig.blur({
+    required VideoFilter filter,
+    this.duration,
+  }) : muteAudio = false,
+       muteVideo = false,
+       blurFilter = filter,
+       onApply = null,
+       onWarning = null,
+       onClear = null;
 
   final bool muteAudio;
   final bool muteVideo;
-  final bool applyBlur;
+
+  /// The filter applied to the camera while the call is moderated. Null
+  /// applies none.
+  final VideoFilter? blurFilter;
 
   final Duration? duration;
 
@@ -64,7 +75,7 @@ class VideoModerationConfig {
   bool get isDisabled =>
       !muteAudio &&
       !muteVideo &&
-      !applyBlur &&
+      blurFilter == null &&
       onApply == null &&
       onWarning == null &&
       onClear == null;
