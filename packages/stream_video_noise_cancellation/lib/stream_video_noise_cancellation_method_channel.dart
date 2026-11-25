@@ -32,7 +32,7 @@ class MethodChannelStreamVideoNoiseCancellation
 
   /// Enables or disables noise cancellation.
   @override
-  Future<void> setEnabled(bool enabled) {
+  Future<void> setEnabled(bool enabled) async {
     _ensureSupported();
 
     return methodChannel.invokeMethod<void>('setEnabled', {'enabled': enabled});
@@ -40,7 +40,7 @@ class MethodChannelStreamVideoNoiseCancellation
 
   /// Checks if the device supports advanced audio processing.
   @override
-  Future<bool?> deviceSupportsAdvancedAudioProcessing() {
+  Future<bool?> deviceSupportsAdvancedAudioProcessing() async {
     _ensureSupported();
 
     return methodChannel.invokeMethod<bool>(

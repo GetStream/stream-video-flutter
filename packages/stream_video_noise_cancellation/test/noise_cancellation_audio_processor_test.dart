@@ -1,5 +1,7 @@
 // ignore_for_file: implementation_imports, invalid_use_of_visible_for_testing_member
 
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video_noise_cancellation/noise_cancellation_audio_processor.dart';
@@ -58,6 +60,46 @@ void main() {
       await expectLater(processor.setEnabled(true), throwsUnsupportedError);
     });
 
+    test('a native error is reported, not read as unsupported', () async {
+      platform.error = PlatformException(code: 'native');
+      final processor = NoiseCancellationAudioProcessor();
+
+      await expectLater(
+        processor.isEnabled(),
+        throwsA(isA<PlatformException>()),
+      );
+      await expectLater(
+        processor.deviceSupportsAdvancedAudioProcessing(),
+        throwsA(isA<PlatformException>()),
+      );
+      await expectLater(
+        processor.setEnabled(true),
+        throwsA(isA<PlatformException>()),
+      );
+    });
+
+    test('turning it on waits for the registration', () async {
+      platform.registration = Completer<void>();
+      final processor = NoiseCancellationAudioProcessor();
+
+      final enabling = processor.setEnabled(true);
+      await Future<void>.delayed(Duration.zero);
+      expect(platform.calls, isEmpty);
+      platform.registration!.complete();
+      await enabling;
+
+      expect(platform.calls, ['registerProcessor', 'setEnabled']);
+    });
+
+    test('a failed registration still lets it be used', () async {
+      platform.registerError = PlatformException(code: 'native');
+      final processor = NoiseCancellationAudioProcessor();
+
+      await processor.setEnabled(true);
+
+      expect(await processor.isEnabled(), isTrue);
+    });
+
     test('runs natively, with no microphone filter', () {
       expect(NoiseCancellationAudioProcessor().toFilter(), isNull);
     });
@@ -99,15 +141,25 @@ void main() {
       ]);
     });
 
+    test('throws on macOS', () async {
+      debugWebRtcCapabilitiesOverride = _capabilities(isMacOS: true);
+
+      await expectLater(
+        MethodChannelStreamVideoNoiseCancellation().isEnabled(),
+        throwsUnsupportedError,
+      );
+      expect(calls, isEmpty);
+    });
+
     test('throws where audio processing is not supported', () async {
       debugWebRtcCapabilitiesOverride = _capabilities(isWindows: true);
       final platform = MethodChannelStreamVideoNoiseCancellation();
 
       await expectLater(platform.registerProcessor(), throwsUnsupportedError);
       await expectLater(platform.isEnabled(), throwsUnsupportedError);
-      expect(() => platform.setEnabled(true), throwsUnsupportedError);
-      expect(
-        platform.deviceSupportsAdvancedAudioProcessing,
+      await expectLater(platform.setEnabled(true), throwsUnsupportedError);
+      await expectLater(
+        platform.deviceSupportsAdvancedAudioProcessing(),
         throwsUnsupportedError,
       );
       expect(calls, isEmpty);
@@ -117,12 +169,13 @@ void main() {
 
 WebRtcCapabilities _capabilities({
   bool isAndroid = false,
+  bool isMacOS = false,
   bool isWindows = false,
 }) {
   return nativeWebRtcCapabilitiesFor(
     isAndroid: isAndroid,
     isIOS: false,
-    isMacOS: false,
+    isMacOS: isMacOS,
     isWindows: isWindows,
     isLinux: false,
   );

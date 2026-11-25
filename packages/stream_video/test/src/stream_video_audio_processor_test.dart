@@ -53,7 +53,7 @@ void main() {
     final result = await streamVideo.setAudioProcessingEnabled(true);
 
     expect(result.isFailure, isTrue);
-    expect(logger.errors, [contains('native failure')]);
+    expect(logger.errors, contains(contains('native failure')));
   });
 }
 

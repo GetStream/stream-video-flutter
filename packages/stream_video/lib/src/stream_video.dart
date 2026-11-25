@@ -1061,6 +1061,7 @@ class StreamVideo extends Disposable implements CallHost {
     try {
       return Result.success(await action(processor));
     } catch (e, stk) {
+      _logger.e(() => '[audioProcessor] failed: $e\n$stk');
       return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
     }
   }
