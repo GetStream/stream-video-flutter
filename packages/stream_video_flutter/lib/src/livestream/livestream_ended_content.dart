@@ -21,8 +21,26 @@ class LivestreamEndedContent extends StatefulWidget {
 }
 
 class _LivestreamEndedContentState extends State<LivestreamEndedContent> {
-  // Fetched once, on first use, so rebuilds don't list the recordings again.
-  late final _recordings = widget.call.listRecordings();
+  Future<Result<List<CallRecording>>>? _recordings;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRecordingsIfShown();
+  }
+
+  @override
+  void didUpdateWidget(LivestreamEndedContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.call != oldWidget.call) _recordings = null;
+    _fetchRecordingsIfShown();
+  }
+
+  /// Lists the call's recordings when they are shown and not fetched yet.
+  void _fetchRecordingsIfShown() {
+    if (!widget.showRecordings) return;
+    _recordings ??= widget.call.listRecordings();
+  }
 
   @override
   Widget build(BuildContext context) {
