@@ -11,7 +11,7 @@ inputs:
     required: false
     default: "stable"
   cache:
-    description: "Whether to cache the Flutter SDK."
+    description: "Whether to cache the Flutter SDK and pub dependencies."
     required: false
     default: "true"
   java-version:
@@ -19,6 +19,10 @@ inputs:
     required: false
     default: ""
 
+# The repository's Actions cache holds 10 GB and evicts the least recently used
+# entries. A cache saved by a pull request is visible to that pull request only,
+# so the SDK is restored by every run but saved only by Linux pushes to main and
+# v2: one SDK per branch, readable by every pull request.
 runs:
   using: "composite"
   steps:
@@ -29,10 +33,35 @@ runs:
         distribution: "zulu"
         java-version: ${{ inputs.java-version }}
 
+    - name: 🐦 Resolve Flutter
+      id: flutter
+      uses: subosito/flutter-action@v2
+      with:
+        dry-run: true
+        channel: ${{ inputs.flutter-channel }}
+        flutter-version: ${{ inputs.flutter-version }}
+        cache-key: "flutter-:os:-:channel:-:version:-:arch:"
+
+    - name: 📦 Restore Flutter SDK
+      id: sdk-cache
+      if: ${{ inputs.cache == 'true' }}
+      uses: actions/cache/restore@v5
+      with:
+        path: ${{ steps.flutter.outputs.CACHE-PATH }}
+        key: ${{ steps.flutter.outputs.CACHE-KEY }}
+
+    # Skips the download when the SDK was restored. The pub cache is saved at
+    # the end of the job, after the packages are resolved, and only on a miss.
     - name: 🐦 Install Flutter
       uses: subosito/flutter-action@v2
       with:
-        cache: ${{ inputs.cache }}
-        channel: ${{ inputs.flutter-channel }}
-        flutter-version: ${{ inputs.flutter-version }}
-        cache-key: flutter-:os:-:channel:-:version:-:arch:-:hash:-${{ hashFiles('**/pubspec.lock') }}
+        channel: ${{ steps.flutter.outputs.CHANNEL }}
+        flutter-version: ${{ steps.flutter.outputs.VERSION }}
+        pub-cache: ${{ inputs.cache }}
+
+    - name: 💾 Save Flutter SDK
+      if: ${{ inputs.cache == 'true' && runner.os == 'Linux' && github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/v2') && steps.sdk-cache.outputs.cache-hit != 'true' }}
+      uses: actions/cache/save@v5
+      with:
+        path: ${{ steps.flutter.outputs.CACHE-PATH }}
+        key: ${{ steps.flutter.outputs.CACHE-KEY }}

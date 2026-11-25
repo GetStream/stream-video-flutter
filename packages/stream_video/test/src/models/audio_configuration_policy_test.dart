@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart'
-    show AppleAudioMode;
+    show AndroidAudioConfiguration, AppleAudioMode;
 
 void main() {
   group('AudioConfigurationPolicy.androidCallServiceKind', () {
@@ -114,6 +114,47 @@ void main() {
             .appleAudioMode,
         AppleAudioMode.default_,
       );
+    });
+  });
+
+  group('AudioConfigurationPolicy.toFactoryOptions', () {
+    test("carries the policy's voice processing and both configurations", () {
+      const policy = AudioConfigurationPolicy.broadcaster();
+      final options = policy.toFactoryOptions();
+
+      expect(options.bypassVoiceProcessing, isFalse);
+      expect(
+        options.androidAudioConfiguration?.toMap(),
+        policy.getAndroidConfiguration().toMap(),
+      );
+      expect(
+        options.appleAudioConfiguration?.toMap(),
+        policy.getAppleConfiguration().toMap(),
+      );
+    });
+
+    test('a policy that defaults to the speaker starts Apple audio on the '
+        'loudspeaker', () {
+      const policy = AudioConfigurationPolicy.viewer();
+      final options = policy.toFactoryOptions();
+
+      expect(options.bypassVoiceProcessing, isTrue);
+      expect(
+        options.appleAudioConfiguration?.toMap(),
+        policy.getAppleConfiguration(defaultToSpeaker: true).toMap(),
+      );
+    });
+
+    test('a custom policy passes its own configurations through', () {
+      final android = AndroidAudioConfiguration.media;
+      final policy = AudioConfigurationPolicy.custom(
+        androidConfiguration: android,
+        bypassVoiceProcessing: true,
+      );
+      final options = policy.toFactoryOptions();
+
+      expect(options.bypassVoiceProcessing, isTrue);
+      expect(options.androidAudioConfiguration, same(android));
     });
   });
 }

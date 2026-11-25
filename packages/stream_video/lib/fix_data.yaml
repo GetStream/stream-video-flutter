@@ -836,3 +836,19 @@ transforms:
     changes:
       - kind: "rename"
         newName: "DisconnectReasonNativeCallEnded"
+
+  - title: "Remove the Android audio attributes, which have no effect"
+    date: "2026-11-25"
+    element:
+      uris:
+        [
+          "package:stream_video/src/audio/platform_audio_controller.dart",
+          "package:stream_video/stream_video.dart",
+        ]
+      method: "handleCallInterruptionCallbacks"
+      inClass: "PlatformAudioController"
+    changes:
+      - kind: "removeParameter"
+        name: "androidAudioAttributesUsageType"
+      - kind: "removeParameter"
+        name: "androidAudioAttributesContentType"

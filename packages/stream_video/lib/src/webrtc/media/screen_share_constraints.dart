@@ -1,5 +1,5 @@
-import 'package:stream_core/stream_core.dart';
 import '../model/rtc_video_parameters.dart';
+import 'screen_share_source.dart';
 import 'video_constraints.dart';
 
 /// Options used when creating a video track that captures the screen.
@@ -37,20 +37,7 @@ class ScreenShareConstraints extends VideoConstraints {
   @override
   Map<String, dynamic> toMap() {
     final constraints = <String, dynamic>{...super.toMap()};
-    if (useiOSBroadcastExtension && CurrentPlatform.isIos) {
-      constraints['deviceId'] = 'broadcast';
-    }
-    if (CurrentPlatform.isDesktop) {
-      if (deviceId != null) {
-        constraints['deviceId'] = {'exact': deviceId};
-      }
-      // Left out entirely when there is no cap to ask for: a null here reaches
-      // the platform as a null `frameRate`, which every implementation has to
-      // defend against to fall back to its own default.
-      if (maxFrameRate != null && maxFrameRate != 0.0) {
-        constraints['mandatory'] = {'frameRate': maxFrameRate};
-      }
-    }
+    ScreenShareSource.forPlatform().addTo(constraints, this);
     return {
       'audio': captureScreenAudio,
       'video': constraints,

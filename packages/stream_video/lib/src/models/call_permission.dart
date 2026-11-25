@@ -39,6 +39,7 @@ enum CallPermission {
   startRawRecordCall('start-raw-record-call'),
   stopRawRecordCall('stop-raw-record-call'),
   sendClosedCaptionsCall('send-closed-captions-call'),
+  sendData('send-data'),
   unknown('unknown');
 
   const CallPermission(this.alias);
