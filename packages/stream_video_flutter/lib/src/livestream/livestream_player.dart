@@ -645,7 +645,10 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
                 // Repaints once a second, so it doesn't repaint the video
                 // with it.
                 title: RepaintBoundary(
-                  child: StreamCallDurationBadge(call: call),
+                  child: StreamCallDurationBadge(
+                    call: call,
+                    liveDuration: true,
+                  ),
                 ),
               ),
         // The larger of the safe area and the side spacing, not both. In

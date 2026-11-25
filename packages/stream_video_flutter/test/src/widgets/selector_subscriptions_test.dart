@@ -32,6 +32,9 @@ class _FakeCall extends Mock implements Call {
   Stream<Duration> get callDurationStream => Stream.value(Duration.zero);
 
   @override
+  Stream<Duration> get liveDurationStream => Stream.value(Duration.zero);
+
+  @override
   CallConnectOptions get connectOptions => const CallConnectOptions();
 }
 

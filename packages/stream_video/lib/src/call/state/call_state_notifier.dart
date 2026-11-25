@@ -62,8 +62,20 @@ class CallStateNotifier extends StateNotifier<CallState>
   Stream<Duration> get durationStream =>
       _durationTimerController.stream.distinct();
 
+  /// How long the call has been live, as described on
+  /// `Call.liveDurationStream`.
+  Stream<Duration> get liveDurationStream async* {
+    final current = _liveDuration(state);
+    if (current != null) yield current;
+    yield* _liveDurationController.stream;
+  }
+
   late final StreamController<Duration> _durationTimerController;
+  final _liveDurationController = StreamController<Duration>.broadcast();
   Timer? _durationTimer;
+
+  /// The `liveEndedAt` the live duration was last frozen at.
+  DateTime? _frozenLiveEndedAt;
 
   /// Stays readable after [dispose]: it is the last state set.
   @override
@@ -88,20 +100,49 @@ class CallStateNotifier extends StateNotifier<CallState>
   }
 
   void _setupDurationTimer() {
-    if (state.liveEndedAt != null) {
+    _freezeLiveDuration();
+
+    final callTicking = state.startedAt != null && state.liveEndedAt == null;
+    if (!callTicking && !_isLive(state)) {
       _durationTimer?.cancel();
       _durationTimer = null;
       return;
     }
 
-    if (state.startedAt == null || _durationTimer != null) return;
-
-    _durationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (state.startedAt == null) return;
-
-      final duration = DateTime.now().difference(state.startedAt!);
-      _durationTimerController.add(duration);
+    _durationTimer ??= Timer.periodic(const Duration(seconds: 1), (timer) {
+      final now = DateTime.now();
+      final startedAt = state.startedAt;
+      if (startedAt != null && state.liveEndedAt == null) {
+        _durationTimerController.add(now.difference(startedAt));
+      }
+      final liveStartedAt = state.liveStartedAt;
+      if (liveStartedAt != null && _isLive(state)) {
+        _liveDurationController.add(now.difference(liveStartedAt));
+      }
     });
+  }
+
+  /// Emits the length of a live that has just ended, once.
+  void _freezeLiveDuration() {
+    final liveEndedAt = state.liveEndedAt;
+    if (liveEndedAt == _frozenLiveEndedAt) return;
+    _frozenLiveEndedAt = liveEndedAt;
+
+    final duration = _liveDuration(state);
+    if (liveEndedAt != null && duration != null) {
+      _liveDurationController.add(duration);
+    }
+  }
+
+  static bool _isLive(CallState state) =>
+      state.liveStartedAt != null && state.liveEndedAt == null;
+
+  /// From `liveStartedAt` to `liveEndedAt`, or to now while live.
+  static Duration? _liveDuration(CallState state) {
+    final liveStartedAt = state.liveStartedAt;
+    if (liveStartedAt == null) return null;
+
+    return (state.liveEndedAt ?? DateTime.now()).difference(liveStartedAt);
   }
 
   void updateCallPreferences(CallPreferences preferences) {
@@ -116,5 +157,6 @@ class CallStateNotifier extends StateNotifier<CallState>
     _durationTimer?.cancel();
     _durationTimer = null;
     _durationTimerController.close();
+    _liveDurationController.close();
   }
 }

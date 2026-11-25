@@ -364,7 +364,7 @@ class CallState extends Equatable {
       updatedAt: updatedAt ?? this.updatedAt,
       startsAt: startsAt ?? this.startsAt,
       endedAt: endedAt ?? this.endedAt,
-      startedAt: startedAt ?? this.startedAt ?? this.liveStartedAt,
+      startedAt: startedAt ?? this.startedAt,
       liveStartedAt: liveStartedAt ?? this.liveStartedAt,
       liveEndedAt: liveEndedAt ?? this.liveEndedAt,
       timerEndsAt: timerEndsAt ?? this.timerEndsAt,
@@ -410,7 +410,6 @@ class CallState extends Equatable {
       updatedAt: metadata.details.updatedAt,
       startsAt: metadata.details.startsAt,
       endedAt: metadata.details.endedAt,
-      startedAt: metadata.session.startedAt ?? metadata.session.liveStartedAt,
       createdByUser: metadata.details.createdBy,
       custom: changedOrNull(custom, metadata.details.custom),
       egress: metadata.details.egress,
@@ -419,9 +418,6 @@ class CallState extends Equatable {
       ownCapabilities: capabilities.isEmpty
           ? null
           : changedOrNull(ownCapabilities, capabilities),
-      liveStartedAt: metadata.session.liveStartedAt,
-      liveEndedAt: metadata.session.liveEndedAt,
-      timerEndsAt: metadata.session.timerEndsAt,
       participantCount: countsFromSession
           ? math.max(
                   metadata.session.participantsCountByRole.values.sum,
@@ -439,6 +435,60 @@ class CallState extends Equatable {
       callMembers: updateMembers
           ? changedOrNull(callMembers, metadata.toCallMembers())
           : null,
+    ).copyWithSessionTimes(metadata.session);
+  }
+
+  /// This state with the times of [session] taken as they are.
+  ///
+  /// A call payload carries the whole session, so a null time there means the
+  /// time is not set: it clears the one held here, where [copyWith] would keep
+  /// it. Going live again, for one, clears `liveEndedAt`.
+  @internal
+  CallState copyWithSessionTimes(CallSessionData session) {
+    return CallState._(
+      preferences: preferences,
+      currentUserId: currentUserId,
+      callCid: callCid,
+      createdByUser: createdByUser,
+      isRingingFlow: isRingingFlow,
+      isRingingWithVideo: isRingingWithVideo,
+      sessionId: sessionId,
+      status: status,
+      isRecording: isRecording,
+      isBroadcasting: isBroadcasting,
+      isTranscribing: isTranscribing,
+      isCaptioning: isCaptioning,
+      isBackstage: isBackstage,
+      isAudioProcessing: isAudioProcessing,
+      audioBitrateProfile: audioBitrateProfile,
+      settings: settings,
+      egress: egress,
+      rtmpIngress: rtmpIngress,
+      ownCapabilities: ownCapabilities,
+      callParticipants: callParticipants,
+      callMembers: callMembers,
+      capabilitiesByRole: capabilitiesByRole,
+      videoInputDevice: videoInputDevice,
+      audioInputDevice: audioInputDevice,
+      audioOutputDevice: audioOutputDevice,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+      startsAt: startsAt,
+      endedAt: endedAt,
+      startedAt: session.startedAt,
+      liveStartedAt: session.liveStartedAt,
+      liveEndedAt: session.liveEndedAt,
+      timerEndsAt: session.timerEndsAt,
+      blockedUserIds: blockedUserIds,
+      participantCount: participantCount,
+      anonymousParticipantCount: anonymousParticipantCount,
+      iOSMultitaskingCameraAccessEnabled: iOSMultitaskingCameraAccessEnabled,
+      custom: custom,
+      isVideoModerated: isVideoModerated,
+      isAudioSuspended: isAudioSuspended,
+      isAudioInterrupted: isAudioInterrupted,
+      isWebAudioPlaybackBlocked: isWebAudioPlaybackBlocked,
+      isE2eeEnabled: isE2eeEnabled,
     );
   }
 

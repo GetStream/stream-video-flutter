@@ -31,4 +31,8 @@ class FakeLivestreamCall extends Mock implements Call {
   @override
   Stream<Duration> get callDurationStream =>
       Stream.value(const Duration(seconds: 5));
+
+  @override
+  Stream<Duration> get liveDurationStream =>
+      Stream.value(const Duration(seconds: 5));
 }

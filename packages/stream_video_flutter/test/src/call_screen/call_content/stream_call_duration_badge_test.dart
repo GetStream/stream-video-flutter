@@ -79,6 +79,32 @@ void main() {
     ];
   }
 
+  group('liveDuration', () {
+    testWidgets('shows how long the call has been live', (tester) async {
+      when(() => call.liveDurationStream).thenAnswer(
+        (_) => Stream.value(const Duration(minutes: 2, seconds: 7)),
+      );
+
+      await pump(
+        tester,
+        elapsed: const Duration(minutes: 40),
+        badge: StreamCallDurationBadge(call: call, liveDuration: true),
+      );
+
+      expect(find.text('02:07'), findsOneWidget);
+    });
+
+    testWidgets('shows the call duration by default', (tester) async {
+      when(
+        () => call.liveDurationStream,
+      ).thenAnswer((_) => Stream.value(const Duration(minutes: 2)));
+
+      await pump(tester, elapsed: const Duration(minutes: 40));
+
+      expect(find.text('40:00'), findsOneWidget);
+    });
+  });
+
   group('the spoken duration', () {
     String spokenOf(WidgetTester tester) =>
         tester.widget<Text>(find.byType(Text)).semanticsLabel!;
