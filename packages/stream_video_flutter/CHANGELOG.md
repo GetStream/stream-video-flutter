@@ -342,6 +342,7 @@
 - `LivestreamPlayer.showParticipantCount` is nullable and falls back to `StreamLivestreamTileStyle.showSpectatorsIndicator`.
 - Removed `LivestreamPlayer.livestreamEndedBuilder`, `livestreamBackstageBuilder` and `livestreamControlsBuilder` with their typedefs, and `LivestreamContent.callState`. Use `livestreamEndedWidgetBuilder`, `livestreamBackstageWidgetBuilder` and `livestreamControlsWidgetBuilder` instead.
 - `LivestreamEndedContent`, `LivestreamBackstageContent` and `LivestreamContent` no longer bring their own `Scaffold`.
+- `LivestreamPlayer.showRecordingsWhenEnded` and `LivestreamEndedContent.showRecordings` default to false. Pass true to list the recordings when a livestream ends.
 - `isMobileLandscape` and `isMobilePortrait` are removed.
 - `StreamScreenSize` is `small` for any window shorter than 480, and `StreamScreenSize.fromSize` buckets a size by both axes.
 - `StreamCallContent.callFastReconnectingOverlayBuilder`, `CallFastReconnectingOverlayBuilder` and `CallFastReconnectingProperties` are removed; use `callConnectionBannerBuilder`, which is drawn for every reconnect and gets the call status through `CallConnectionBannerProperties`. `CallNotConnectedProperties.isMigrating` and `isReconnecting` are removed, since `callNotConnectedBuilder` is only used before the call first connects.

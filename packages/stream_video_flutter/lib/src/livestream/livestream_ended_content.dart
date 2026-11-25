@@ -12,7 +12,7 @@ class LivestreamEndedContent extends StatefulWidget {
   const LivestreamEndedContent({
     super.key,
     required this.call,
-    this.showRecordings = true,
+    this.showRecordings = false,
     this.onRecordingTapped,
   });
 
@@ -21,7 +21,7 @@ class LivestreamEndedContent extends StatefulWidget {
 
   /// Whether the call's recordings are listed.
   ///
-  /// Defaults to true.
+  /// Defaults to false.
   final bool showRecordings;
 
   /// Called with a recording's URL when it is tapped.

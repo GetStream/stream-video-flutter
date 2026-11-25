@@ -28,7 +28,6 @@ void main() {
             name: 'ended',
             child: LivestreamEndedContent(
               call: FakeLivestreamCall(base),
-              showRecordings: false,
             ),
           ),
           GoldenTestScenario(
