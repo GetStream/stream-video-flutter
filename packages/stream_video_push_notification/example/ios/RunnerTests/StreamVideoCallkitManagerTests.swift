@@ -885,11 +885,49 @@ final class StreamVideoCallkitManagerTests: XCTestCase {
         let shown = CallData(args: ["id": uuid.uuidString])
         _ = manager.store.incomingReported(shown, uuid: uuid)
 
+        let call = manager.store.call(forCallKit: uuid)!
+
         manager.callEndTimeout(shown)
         drainMainQueue()
 
         XCTAssertEqual(receivedNames, [StreamVideoIncomingCallConstants.ACTION_CALL_TIMEOUT])
-        XCTAssertEqual(manager.store.call(forCallKit: uuid)?.phase, .ended(.unanswered))
+        XCTAssertEqual(call.phase, .ended(.unanswered))
+        XCTAssertNil(manager.store.call(forCallKit: uuid))
+    }
+
+    /// Dart's mute, hold, end, connection and `isMuted` for a call that timed out or that the app
+    /// reported ended act on nothing: CallKit no longer knows the call.
+    func testDartRequestsForAnEndedCallDoNothing() {
+        let ends: [(String, (CallData) -> Void)] = [
+            ("timed out", { self.manager.callEndTimeout($0) }),
+            ("reported end", { self.manager.saveEndCall($0.uuid, 2) }),
+        ]
+        listen()
+        for (name, end) in ends {
+            let uuid = UUID()
+            let shown = CallData(args: ["id": uuid.uuidString])
+            _ = manager.store.incomingReported(shown, uuid: uuid)
+            manager.store.call(forCallKit: uuid)!.isMuted = true
+            end(shown)
+            drainMainQueue()
+            received = []
+            var isMuted: Any?
+
+            manager.handle(.muteCall(id: uuid.uuidString, isMuted: false)) { _ in }
+            manager.handle(.muteCall(id: uuid.uuidString, isMuted: true)) { _ in }
+            manager.handle(.holdCall(id: uuid.uuidString, onHold: true)) { _ in }
+            manager.handle(.isMuted(id: uuid.uuidString)) { isMuted = $0 }
+            manager.handle(.endCall(["id": uuid.uuidString])) { _ in }
+            manager.handle(.callConnected(["id": uuid.uuidString])) { _ in }
+            drainMainQueue()
+
+            XCTAssertTrue(receivedNames.isEmpty, name)
+            XCTAssertTrue(callController.mutedUUIDs.isEmpty, name)
+            XCTAssertTrue(callController.heldUUIDs.isEmpty, name)
+            XCTAssertTrue(callController.endedUUIDs.isEmpty, name)
+            XCTAssertTrue(callController.answeredUUIDs.isEmpty, name)
+            XCTAssertEqual(isMuted as? Bool, false, name)
+        }
     }
 
     func testThePluginRunsTheCompletionOfACallItCannotReport() {
@@ -1069,6 +1107,8 @@ final class RecordingCallController: CallKitCallControlling {
     var callUUIDs: [UUID] = []
     private(set) var answeredUUIDs: [UUID] = []
     private(set) var endedUUIDs: [UUID] = []
+    private(set) var mutedUUIDs: [UUID] = []
+    private(set) var heldUUIDs: [UUID] = []
 
     func request(_ transaction: CXTransaction, completion: @escaping (Error?) -> Void) {
         for action in transaction.actions {
@@ -1077,6 +1117,12 @@ final class RecordingCallController: CallKitCallControlling {
             }
             if let end = action as? CXEndCallAction {
                 endedUUIDs.append(end.callUUID)
+            }
+            if let mute = action as? CXSetMutedCallAction {
+                mutedUUIDs.append(mute.callUUID)
+            }
+            if let hold = action as? CXSetHeldCallAction {
+                heldUUIDs.append(hold.callUUID)
             }
         }
         completion(nil)

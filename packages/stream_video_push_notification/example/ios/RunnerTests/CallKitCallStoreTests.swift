@@ -159,17 +159,19 @@ final class CallKitCallStoreTests: XCTestCase {
 
     // MARK: - The ring times out
 
-    func testATrackedRingTimesOutSendingTimeoutAndStaysTracked() {
+    func testATrackedRingTimesOutSendingTimeoutAndIsForgotten() {
         let uuid = UUID()
         let shown = options(uuid.uuidString)
         _ = store.incomingReported(shown, uuid: uuid)
+        let call = store.call(forCallKit: uuid)!
         XCTAssertTrue(store.shouldTimeOut(appId: shown.uuid))
 
         let effects = store.timedOut(shown)
 
         XCTAssertEqual(names(effects), [StreamVideoIncomingCallConstants.ACTION_CALL_TIMEOUT])
         XCTAssertEqual(sentIds(effects), [uuid.uuidString])
-        XCTAssertEqual(store.call(forCallKit: uuid)?.phase, .ended(.unanswered))
+        XCTAssertEqual(call.phase, .ended(.unanswered))
+        assertForgotten(call)
     }
 
     func testAnUntrackedRingSendsNothingWhenItTimesOut() {
@@ -219,6 +221,66 @@ final class CallKitCallStoreTests: XCTestCase {
         store.endReported(uuid: call.identity.callKitUUID, reason: .remoteEnded)
 
         XCTAssertFalse(store.shouldTimeOut(appId: "ended"))
+    }
+
+    // MARK: - An ended call is forgotten
+
+    func testACallTheAppReportedEndedIsForgotten() {
+        let call = ring("reported")
+        _ = store.answerPerformed(uuid: call.identity.callKitUUID)
+
+        store.endReported(uuid: call.identity.callKitUUID, reason: .remoteEnded)
+
+        XCTAssertEqual(call.phase, .ended(.remoteEnded))
+        assertForgotten(call)
+    }
+
+    func testAnOutgoingCallTheAppReportedEndedIsForgotten() {
+        let uuid = UUID()
+        store.registerPendingOutgoing(options("outgoing"), uuid: uuid)
+        let call = store.startPerformed(uuid: uuid)!.call
+
+        store.endReported(uuid: uuid, reason: .remoteEnded)
+
+        assertForgotten(call)
+    }
+
+    /// CallKit acting on a call after its end was reported, such as the user answering a ring
+    /// just as it timed out, fails. An end action is reported as for a call the store never
+    /// tracked: by the id CallKit knows the call by.
+    func testCallKitActionsOnAForgottenCallFail() {
+        let ends: [(String, (CallKitCall) -> Void)] = [
+            ("timed out", { _ = self.store.timedOut($0.options) }),
+            ("reported end", { self.store.endReported(uuid: $0.identity.callKitUUID, reason: .remoteEnded) }),
+        ]
+        for (name, end) in ends {
+            store = CallKitCallStore()
+            let call = ring("ended")
+            let uuid = call.identity.callKitUUID
+            end(call)
+
+            XCTAssertNil(store.answerPerformed(uuid: uuid), name)
+            XCTAssertNil(store.mutePerformed(uuid: uuid, muted: true), name)
+            XCTAssertNil(store.holdPerformed(uuid: uuid, onHold: true), name)
+            XCTAssertNil(store.connected(uuid: uuid), name)
+            let end = store.endPerformed(uuid: uuid)
+            XCTAssertFalse(end.fulfills, name)
+            XCTAssertEqual(names(end.effects), [StreamVideoIncomingCallConstants.ACTION_CALL_TIMEOUT], name)
+            guard case .send(_, let body)? = end.effects.first else {
+                return XCTFail("no event is sent: \(name)")
+            }
+            XCTAssertEqual(body as? [String: String], ["id": uuid.uuidString.lowercased()], name)
+            XCTAssertNil(store.callKitUUID(endingDartId: "ended"), name)
+            XCTAssertFalse(call.options.isAccepted, name)
+        }
+    }
+
+    private func assertForgotten(
+        _ call: CallKitCall, file: StaticString = #filePath, line: UInt = #line
+    ) {
+        XCTAssertNil(store.call(forCallKit: call.identity.callKitUUID), file: file, line: line)
+        XCTAssertNil(store.call(forAppId: call.identity.appId), file: file, line: line)
+        XCTAssertFalse(store.calls.contains { $0 === call }, file: file, line: line)
     }
 
     // MARK: - Two calls at once
@@ -379,17 +441,15 @@ final class CallKitCallStoreTests: XCTestCase {
         XCTAssertEqual(active.filter { $0["isAccepted"] as? Bool == true }.map { $0["id"] as? String }, ["answered"])
     }
 
-    func testAnEndedCallStaysEnded() {
-        let uuid = UUID()
-        let shown = options(uuid.uuidString)
-        _ = store.incomingReported(shown, uuid: uuid)
-        _ = store.timedOut(shown)
+    func testACallsPhaseStaysEndedOnceItEnds() {
+        let call = ring("ended")
+        call.move(to: .ended(.unanswered))
 
-        _ = store.answerPerformed(uuid: uuid)
-        XCTAssertEqual(store.call(forCallKit: uuid)?.phase, .ended(.unanswered))
+        call.move(to: .answering)
+        XCTAssertEqual(call.phase, .ended(.unanswered))
 
-        store.endReported(uuid: uuid, reason: .remoteEnded)
-        XCTAssertEqual(store.call(forCallKit: uuid)?.phase, .ended(.remoteEnded))
+        call.move(to: .ended(.remoteEnded))
+        XCTAssertEqual(call.phase, .ended(.remoteEnded))
     }
 
     // MARK: - The outgoing call ends
