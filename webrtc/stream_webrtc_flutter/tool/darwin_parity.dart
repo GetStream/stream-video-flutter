@@ -36,6 +36,8 @@ const iosOnly = <String>{
   'AudioUtils.m',
   'Broadcast/FlutterBroadcastObserver.h',
   'Broadcast/FlutterBroadcastObserver.m',
+  'Broadcast/FlutterBroadcastPicker.h',
+  'Broadcast/FlutterBroadcastPicker.m',
   'Broadcast/FlutterBroadcastScreenCapturer.m',
   'Broadcast/FlutterSocketConnection.m',
   'Broadcast/FlutterSocketConnectionFrameReader.m',

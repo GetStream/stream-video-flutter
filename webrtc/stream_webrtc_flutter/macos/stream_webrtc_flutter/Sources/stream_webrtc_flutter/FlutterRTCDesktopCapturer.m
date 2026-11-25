@@ -4,6 +4,7 @@
 
 #if TARGET_OS_IPHONE
 #import <ReplayKit/ReplayKit.h>
+#import "Broadcast/FlutterBroadcastPicker.h"
 #import "include/stream_webrtc_flutter/Broadcast/FlutterBroadcastScreenCapturer.h"
 #import "include/stream_webrtc_flutter/FlutterRPScreenRecorder.h"
 #endif
@@ -115,31 +116,7 @@ static id _pendingContentFilter = nil;
   };
 
   if (presentBroadcastPicker) {
-    NSString* extension =
-        [[[NSBundle mainBundle] infoDictionary] valueForKey:kRTCScreenSharingExtension];
-
-    RPSystemBroadcastPickerView* picker = [[RPSystemBroadcastPickerView alloc] init];
-    picker.showsMicrophoneButton = false;
-    if (extension) {
-      picker.preferredExtension = extension;
-    } else {
-      NSLog(@"Not able to find the %@ key", kRTCScreenSharingExtension);
-    }
-    // Trigger the picker's internal button via public UIControl APIs only.
-    // Calling the private buttonPressed: selector gets apps rejected under
-    // App Store Guideline 2.5.1 (non-public API).
-    UIButton* pickerButton = nil;
-    for (UIView* subview in picker.subviews) {
-      if ([subview isKindOfClass:[UIButton class]]) {
-        pickerButton = (UIButton*)subview;
-        break;
-      }
-    }
-    if (pickerButton != nil) {
-      [pickerButton sendActionsForControlEvents:UIControlEventTouchUpInside];
-    } else {
-      NSLog(@"RPSystemBroadcastPickerView button not found, broadcast picker was not presented");
-    }
+    [FlutterBroadcastPicker present];
   }
 #endif
 

@@ -3,6 +3,8 @@ library stream_webrtc_flutter;
 export 'package:stream_webrtc_interface/stream_webrtc_interface.dart'
     hide MediaDevices, MediaRecorder, Navigator;
 
+export 'src/native/ios_broadcast_picker.dart'
+    if (dart.library.js_interop) 'src/web/ios_broadcast_picker.dart';
 export 'src/third_party/flutter_webrtc/desktop_capturer.dart';
 export 'src/third_party/flutter_webrtc/e2ee/encryption_manager.dart';
 export 'src/third_party/flutter_webrtc/e2ee/encryption_types.dart';
