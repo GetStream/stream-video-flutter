@@ -62,8 +62,14 @@ class _BackgroundFiltersMenuItemState extends State<BackgroundFiltersMenuItem> {
     final next = filter == null || _isFilterApplied(filter)
         ? null
         : filter.filter;
-    await widget.call.setVideoFilter(next);
-    if (mounted) setState(() {});
+    final result = await widget.call.setVideoFilter(next);
+    if (!mounted) return;
+    setState(() {});
+    if (result.isFailure) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(content: Text('Could not apply the filter')),
+      );
+    }
   }
 }
 
@@ -154,7 +160,7 @@ class _GrayscaleFilterOption extends _FilterOption {
   @override
   late final VideoFilter filter = CustomVideoFilter(
     'grayscale',
-    onRegister: DogfoodingAppChannel().registerGreyscaleEffect,
+    onRegister: (_) => DogfoodingAppChannel().registerGreyscaleEffect(),
   );
 
   @override

@@ -46,7 +46,7 @@ StreamEffectsSettingsTab effectsTab(
         (BlurIntensity.heavy, 'Heavy blur', 26.0),
       ])
         option(
-          BackgroundBlurFilter(intensity),
+          BackgroundBlurFilter(intensity: intensity),
           label: label,
           icon: Icon(blur, size: size),
         ),
@@ -54,7 +54,7 @@ StreamEffectsSettingsTab effectsTab(
       option(
         CustomVideoFilter(
           _grayscale,
-          onRegister: DogfoodingAppChannel().registerGreyscaleEffect,
+          onRegister: (_) => DogfoodingAppChannel().registerGreyscaleEffect(),
         ),
         label: 'Grayscale',
         icon: const Icon(Icons.filter_b_and_w),

@@ -474,10 +474,9 @@ class _BlurToggle extends StatelessWidget {
   static final _blur = BackgroundBlurFilter();
 
   Future<void> _setEnabled(StreamLobbyController lobby, bool enabled) async {
-    try {
-      await lobby.setVideoFilter(enabled ? _blur : null);
-    } catch (e, stk) {
-      _logger.e(() => 'Could not change the background blur: $e\n$stk');
+    final result = await lobby.setVideoFilter(enabled ? _blur : null);
+    if (result case Failure(:final error)) {
+      _logger.e(() => 'Could not change the background blur: $error');
     }
   }
 
