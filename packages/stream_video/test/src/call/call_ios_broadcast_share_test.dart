@@ -50,7 +50,7 @@ Matcher _isDefaultBroadcast(Call call) => isA<ScreenShareConstraints>()
     .having(
       (c) => c.params,
       'params',
-      call.state.value.settings.screenShare.targetResolution!.toVideoParams(
+      call.state.value.settings.screenShare.targetResolution.toVideoParams(
         defaultBitrate: RtcVideoParametersPresets.k1080pBitrate,
       ),
     );

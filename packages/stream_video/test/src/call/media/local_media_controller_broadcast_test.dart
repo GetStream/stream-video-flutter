@@ -57,6 +57,8 @@ void main() {
   late CallStateNotifier stateManager;
   late LocalMediaController controller;
   late StreamSubscription<NativeWebRtcEvent> subscription;
+  late bool canShare;
+  late List<StreamCallEvent> events;
 
   setUp(() {
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
@@ -69,12 +71,14 @@ void main() {
     audio = _BroadcastEventsController();
     PlatformAudioController.instance = audio;
     IosBroadcastScreenShare.observeBroadcasts();
+    canShare = true;
+    events = [];
     stateManager = CallStateNotifier(createTestCallState());
     controller = LocalMediaController(
       stateManager: stateManager,
       session: () => session,
       sfuStatsReporter: () => null,
-      hasPermission: (_) => true,
+      hasPermission: (_) => canShare,
       rtcMediaDeviceNotifier: () => notifier,
       audioConfigurationPolicy: () =>
           const AudioConfigurationPolicy.broadcaster(),
@@ -83,7 +87,7 @@ void main() {
       onMicrophoneMuted: (_) async {},
       onAudioOutputDeviceSet: (_) async {},
       defaultBroadcastTarget: () => controller,
-      onCallEvent: (_) {},
+      onCallEvent: events.add,
       logger: taggedLogger(tag: 'test'),
     );
     subscription = controller.observeNativeWebRtcEvents();
@@ -223,6 +227,50 @@ void main() {
 
       verifyNotEnabledOn(next);
       verifyNever(notifier.presentiOSBroadcastPicker);
+    });
+
+    group('that cannot capture the running broadcast again', () {
+      test('without the screenshare permission ends and reports it', () async {
+        await emit(ScreenSharingStartedEvent());
+        canShare = false;
+
+        final next = session = _session();
+        await controller.applyConnectOptions(session: next);
+
+        verifyNotEnabledOn(next);
+        verify(notifier.stopiOSBroadcast).called(1);
+        expect(events, [
+          isA<StreamCallScreenShareFailedEvent>().having(
+            (e) => e.reason,
+            'reason',
+            ScreenShareFailureReason.missingPermission,
+          ),
+        ]);
+        expect(controller.connectOptions.screenShare, isA<TrackDisabled>());
+      });
+
+      test('after a failed share ends and reports it', () async {
+        await emit(ScreenSharingStartedEvent());
+
+        final next = session = _session();
+        when(
+          () => next.setScreenShareEnabled(
+            any(),
+            constraints: any(named: 'constraints'),
+          ),
+        ).thenAnswer((_) async => failureWithError('no capture'));
+        await controller.applyConnectOptions(session: next);
+
+        verify(notifier.stopiOSBroadcast).called(1);
+        expect(events, [
+          isA<StreamCallScreenShareFailedEvent>().having(
+            (e) => e.reason,
+            'reason',
+            ScreenShareFailureReason.publishFailed,
+          ),
+        ]);
+        expect(controller.connectOptions.screenShare, isA<TrackDisabled>());
+      });
     });
   });
 }

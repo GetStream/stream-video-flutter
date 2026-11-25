@@ -1,11 +1,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart'
-    show
-        NativeWebRtcEvent,
-        ScreenSharingStartedEvent,
-        ScreenSharingStoppedEvent;
 
 import '../../audio/platform_audio_controller.dart';
 import '../../call_state.dart';
@@ -93,6 +88,10 @@ class IosBroadcastScreenShare {
     _owner.observe(PlatformAudioController.instance.nativeWebRtcEventsStream());
   }
 
+  /// Whether the broadcast runs, as far as the calls know.
+  @visibleForTesting
+  static bool get isBroadcastRunning => _owner.isActive;
+
   /// Clears which call owns the broadcast and whether it runs, and stops
   /// observing the broadcast starts and stops.
   @visibleForTesting
@@ -142,13 +141,11 @@ class IosBroadcastScreenShare {
 
   /// Captures the running broadcast again for a new session, without
   /// showing the picker.
-  Future<Result<None>> recapture(ScreenShareConstraints constraints) async {
-    if (!_hasPermission(CallPermission.screenshare)) {
-      return failureWithError(
-        'Missing permission to share screen for the user',
-      );
-    }
-    return _applyScreenShare(enabled: true, constraints: constraints);
+  ///
+  /// A missing permission or a failed share ends the broadcast and is
+  /// reported as a [StreamCallScreenShareFailedEvent].
+  Future<Result<None>> recapture(ScreenShareConstraints constraints) {
+    return _publish(constraints);
   }
 
   /// Writes a broadcast that started before this session into the connect
@@ -226,11 +223,8 @@ class IosBroadcastScreenShare {
     await _share(session, constraints);
   }
 
-  /// Publishes the running broadcast on [session] with [constraints].
-  ///
-  /// Skipped while a screen share is live. A missing permission or a failed
-  /// share ends the broadcast and is reported as a
-  /// [StreamCallScreenShareFailedEvent].
+  /// Publishes the running broadcast on [session] with [constraints], unless
+  /// a screen share is live.
   Future<void> _share(
     CallSession session,
     ScreenShareConstraints constraints,
@@ -247,11 +241,20 @@ class IosBroadcastScreenShare {
       return;
     }
 
+    await _publish(constraints);
+  }
+
+  /// Publishes the running broadcast with [constraints]. A missing permission
+  /// or a failed share ends the broadcast and is reported as a
+  /// [StreamCallScreenShareFailedEvent].
+  Future<Result<None>> _publish(ScreenShareConstraints constraints) async {
     if (!_hasPermission(CallPermission.screenshare)) {
-      _logger.w(() => '[onBroadcastStarted] missing screenshare permission');
+      _logger.w(() => '[shareBroadcast] missing screenshare permission');
       await _stop();
       _reportFailure(ScreenShareFailureReason.missingPermission);
-      return;
+      return failureWithError(
+        'Missing permission to share screen for the user',
+      );
     }
 
     try {
@@ -260,14 +263,20 @@ class IosBroadcastScreenShare {
         constraints: constraints,
       );
       if (result case Failure(:final error)) {
-        _logger.e(() => '[onBroadcastStarted] share failed: $error');
+        _logger.e(() => '[shareBroadcast] share failed: $error');
         await _stop();
         _reportFailure(ScreenShareFailureReason.publishFailed, error: error);
       }
+      return result;
     } catch (error, stackTrace) {
-      _logger.e(() => '[onBroadcastStarted] share failed: $error\n$stackTrace');
+      _logger.e(() => '[shareBroadcast] share failed: $error\n$stackTrace');
       await _stop();
       _reportFailure(ScreenShareFailureReason.publishFailed, error: error);
+      return failureWithError(
+        'Failed to share the broadcast',
+        cause: error,
+        stackTrace: stackTrace,
+      );
     }
   }
 
