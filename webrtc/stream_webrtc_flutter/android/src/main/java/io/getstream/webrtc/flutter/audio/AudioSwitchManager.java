@@ -591,7 +591,7 @@ public class AudioSwitchManager {
 
     /**
      * Sets the listener told when WebRTC gives up its audio focus because the call's audio
-     * stopped, or clears it with null.
+     * stopped or focus handling was switched off, or clears it with null.
      */
     public void setAudioFocusReleasedListener(@Nullable Runnable listener) {
         audioFocusReleasedListener = listener;
