@@ -19,6 +19,7 @@ class WebRtcCapabilities {
     required this.usesExactDeviceIdConstraints,
     required this.reportsAudioInterruptions,
     required this.supportsSystemManagedAudioFocus,
+    required this.needsRemoteAudioReattach,
   });
 
   /// Whether each call can build its own peer connection factory, with its
@@ -70,6 +71,11 @@ class WebRtcCapabilities {
   /// leaves the focus to it. Android.
   final bool supportsSystemManagedAudioFocus;
 
+  /// Whether remote audio goes silent after a subscriber renegotiation that
+  /// adds an audio source, until each audio renderer is detached and attached
+  /// again. WebKit browsers.
+  final bool needsRemoteAudioReattach;
+
   WebRtcCapabilities copyWith({
     bool? supportsPerCallFactory,
     bool? supportsAudioPlayoutPause,
@@ -83,6 +89,7 @@ class WebRtcCapabilities {
     bool? usesExactDeviceIdConstraints,
     bool? reportsAudioInterruptions,
     bool? supportsSystemManagedAudioFocus,
+    bool? needsRemoteAudioReattach,
   }) {
     return WebRtcCapabilities(
       supportsPerCallFactory:
@@ -110,6 +117,8 @@ class WebRtcCapabilities {
       supportsSystemManagedAudioFocus:
           supportsSystemManagedAudioFocus ??
           this.supportsSystemManagedAudioFocus,
+      needsRemoteAudioReattach:
+          needsRemoteAudioReattach ?? this.needsRemoteAudioReattach,
     );
   }
 
@@ -128,6 +137,7 @@ class WebRtcCapabilities {
       'usesExactDeviceIdConstraints': usesExactDeviceIdConstraints,
       'reportsAudioInterruptions': reportsAudioInterruptions,
       'supportsSystemManagedAudioFocus': supportsSystemManagedAudioFocus,
+      'needsRemoteAudioReattach': needsRemoteAudioReattach,
     };
     final enabled = [
       for (final MapEntry(:key, :value) in flags.entries)
@@ -153,7 +163,8 @@ class WebRtcCapabilities {
           other.usesExactDeviceIdConstraints == usesExactDeviceIdConstraints &&
           other.reportsAudioInterruptions == reportsAudioInterruptions &&
           other.supportsSystemManagedAudioFocus ==
-              supportsSystemManagedAudioFocus;
+              supportsSystemManagedAudioFocus &&
+          other.needsRemoteAudioReattach == needsRemoteAudioReattach;
 
   @override
   int get hashCode => Object.hash(
@@ -169,6 +180,7 @@ class WebRtcCapabilities {
     usesExactDeviceIdConstraints,
     reportsAudioInterruptions,
     supportsSystemManagedAudioFocus,
+    needsRemoteAudioReattach,
   );
 }
 

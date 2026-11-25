@@ -72,6 +72,10 @@ void main() {
           (c) => c.supportsSystemManagedAudioFocus,
           {_Platform.android},
         ),
+        'needsRemoteAudioReattach': (
+          (c) => c.needsRemoteAudioReattach,
+          <_Platform>{},
+        ),
       };
 
   for (final MapEntry(key: name, value: (read, platforms))
@@ -92,6 +96,16 @@ void main() {
         supportsAudioOutputSelection: false,
       ).supportsAudioOutputSelection,
       isFalse,
+    );
+  });
+
+  test('a WebKit browser needs remote audio re-attached', () {
+    expect(
+      browserWebRtcCapabilitiesFor(
+        supportsAudioOutputSelection: false,
+        isWebKit: true,
+      ).needsRemoteAudioReattach,
+      isTrue,
     );
   });
 
@@ -137,6 +151,8 @@ void main() {
           base.copyWith(reportsAudioInterruptions: v),
       'supportsSystemManagedAudioFocus': (v) =>
           base.copyWith(supportsSystemManagedAudioFocus: v),
+      'needsRemoteAudioReattach': (v) =>
+          base.copyWith(needsRemoteAudioReattach: v),
     };
 
     for (final MapEntry(key: name, value: flip) in flips.entries) {

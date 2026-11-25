@@ -35,5 +35,6 @@ WebRtcCapabilities nativeWebRtcCapabilitiesFor({
     usesExactDeviceIdConstraints: false,
     reportsAudioInterruptions: isAndroid || isIOS,
     supportsSystemManagedAudioFocus: isAndroid,
+    needsRemoteAudioReattach: false,
   );
 }
