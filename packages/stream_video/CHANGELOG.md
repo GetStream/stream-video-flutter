@@ -2,11 +2,12 @@
 
 ### ⚠️ Breaking
 
-- The app-wide audio members of `RtcMediaDeviceNotifier` moved to `PlatformAudioController.instance`: `handleCallInterruptionCallbacks`, `nativeWebRtcEventsStream`, `speechActivityStream`, `triggeriOSAudioRouteSelectionUI`, `isAudioPlayoutPauseSupported`, `isAudioPlayoutPaused`, `audioPlayoutPausedChanges`, `pauseAudioPlayout`, `resumeAudioPlayout`, `resumeWebAudioPlayback`, `regainAndroidAudioFocus` and `reinitializeAudioConfiguration`.
+- The app-wide audio members of `RtcMediaDeviceNotifier` moved to `PlatformAudioController.instance`: `nativeWebRtcEventsStream`, `speechActivityStream`, `triggeriOSAudioRouteSelectionUI`, `isAudioPlayoutPauseSupported`, `isAudioPlayoutPaused`, `audioPlayoutPausedChanges`, `pauseAudioPlayout`, `resumeAudioPlayout`, `resumeWebAudioPlayback`, `regainAndroidAudioFocus` and `reinitializeAudioConfiguration`.
 - `PlatformAudioController` is `@sealed`, so a test mock that implements it gets a `subtype_of_sealed_class` warning; add `// ignore: subtype_of_sealed_class` to it.
 - `ScreenSharingStoppedEvent` carries a `trackId` instead of a `data` map, and `ScreenSharingStartedEvent` has no `data`.
 - `CallState.participantCount` includes the anonymous participants before the call is joined too, as it already did once joined. `anonymousParticipantCount` says how many of them are anonymous.
-- `handleCallInterruptionCallbacks`, now on `PlatformAudioController`, no longer takes `androidInterruptionSource`; on Android an interruption is now only a loss of audio focus, so `READ_PHONE_STATE` is not needed.
+- `RtcMediaDeviceNotifier.handleCallInterruptionCallbacks` is removed: each call reports interruptions of its audio on `CallState.isAudioInterrupted` and reacts as `CallPreferences.audioInterruptionReaction` says, with `AudioInterruptionReaction.muteMicrophone` for what the documented callbacks did. The SDK enables the WebRTC plugin's interruption events, so don't call `platformEvents.enableInterruptionEvents` yourself. On Android an interruption is now only a loss of audio focus, so `READ_PHONE_STATE` is not needed.
+- `CallPreferences` has a new getter, `audioInterruptionReaction`. If your app implements `CallPreferences` directly, add it to your implementation.
 - `PushNotificationManager` has a new method, `setCallAudioOutputDeviceByCid`. A class that `implements` it has to add it; one that `extends` it inherits a no-op.
 - `PushNotificationManager` has three new methods that a call uses to tell the native call UI what happened: `onRingEnded` when its ring is over before the user answered it on this device, `onCallLeft` when a call this device joined or accepted is left, and `onCallAccepted` when the user accepts it in the app. A class that `implements` it has to add them; one that `extends` it inherits `onRingEnded` and `onCallLeft` calling `endCallByCid`, silently for `onRingEnded`, and an `onCallAccepted` that does nothing.
 - `RingingEvent` has a new subtype, `ActionCallDismissed`, so an exhaustive `switch` over ringing events needs a case for it. `disposeAfterResolvingRinging` no longer disposes on `ActionCallTimeout`, which iOS sends when CallKit's ring times out and Android now sends when a ring times out natively, so the client's own ring timeout can still reject the call.
@@ -135,6 +136,8 @@
 - Added `RetryConfig.rpcTimeout`, how long a coordinator request may wait to connect and then for its response (10 seconds by default).
 - Added `StreamCallStatsReportReadyEvent`, delivered when the stats report of a call session is ready. The `call.stats_report_ready` event used to be dropped as unknown.
 - Added `CallPermission.sendData` for the `send-data` capability, which used to be read as `CallPermission.unknown` with a warning.
+- Added `CallState.isAudioInterrupted`, whether the platform is interrupting the call's audio, such as for a phone call, an alarm or another app playing audio.
+- Added `CallPreferences.audioInterruptionReaction` and `AudioInterruptionReaction`, what a call does while its audio is interrupted: nothing (the default), or turn the microphone off and back on when the interruption ends, unless the app changed it meanwhile.
 
 ### 🔄 Changed
 
@@ -162,7 +165,6 @@
 
 ### 🐞 Fixed
 
-- `handleCallInterruptionCallbacks` no longer misses an interruption reported while it starts listening.
 - [iOS] When the user chose the speaker or the receiver and the system moves audio between the two on its own, such as after a CallKit hold, the chosen output is put back instead of being replaced by the system's choice. A route to any other device, such as Bluetooth or AirPlay, is followed, and so is the system's route when the chosen output cannot be put back.
 - A muted microphone or camera is announced to the SFU as muted.
 - Joining a call retries sooner when the SFU connection closes before the join response.

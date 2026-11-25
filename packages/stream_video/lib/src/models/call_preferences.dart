@@ -1,5 +1,6 @@
 import '../webrtc/e2ee/call_encryption_key.dart';
 import 'audio_configuration_policy.dart';
+import 'audio_interruption_reaction.dart';
 import 'call_client_publish_options.dart';
 import 'moderation_blur_config.dart';
 import 'participants_throttle.dart';
@@ -77,6 +78,11 @@ abstract class CallPreferences {
   /// otherwise.
   AudioConfigurationPolicy? get audioConfigurationPolicy;
 
+  /// What the call does while the platform interrupts its audio, such as for
+  /// a phone call. The interruption is reported on
+  /// `CallState.isAudioInterrupted` either way.
+  AudioInterruptionReaction get audioInterruptionReaction;
+
   /// How long `Call.participantsStream` holds participant updates back, as a
   /// function of the participant count.
   ///
@@ -128,6 +134,7 @@ class DefaultCallPreferences implements CallPreferences {
     this.closedCaptionsVisibleCaptions = 2,
     this.videoModerationConfig = const VideoModerationConfig.disabled(),
     this.audioConfigurationPolicy,
+    this.audioInterruptionReaction = AudioInterruptionReaction.none,
     this.participantsThrottleIntervalResolver =
         defaultParticipantsThrottleInterval,
     this.encryptionKeyResolver,
@@ -233,6 +240,13 @@ class DefaultCallPreferences implements CallPreferences {
   @override
   final AudioConfigurationPolicy? audioConfigurationPolicy;
 
+  /// What the call does while the platform interrupts its audio. See
+  /// [CallPreferences.audioInterruptionReaction].
+  ///
+  /// Defaults to [AudioInterruptionReaction.none].
+  @override
+  final AudioInterruptionReaction audioInterruptionReaction;
+
   /// How long `Call.participantsStream` holds participant updates back, as a
   /// function of the participant count. See
   /// [CallPreferences.participantsThrottleIntervalResolver].
@@ -325,6 +339,10 @@ class _AudioPolicyCallPreferences implements CallPreferences {
 
   @override
   VideoModerationConfig get videoModerationConfig => base.videoModerationConfig;
+
+  @override
+  AudioInterruptionReaction get audioInterruptionReaction =>
+      base.audioInterruptionReaction;
 
   @override
   ParticipantsThrottleIntervalResolver?

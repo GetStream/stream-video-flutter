@@ -198,6 +198,7 @@ StreamVideo _initStreamVideo(
           : null,
       defaultCallPreferences: DefaultCallPreferences(
         encryptionKeyResolver: resolveRingingEncryptionKey,
+        audioInterruptionReaction: AudioInterruptionReaction.muteMicrophone,
       ),
     ),
     pushNotificationManagerProvider: StreamVideoPushNotificationManager.create(

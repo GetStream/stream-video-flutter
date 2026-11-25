@@ -18,5 +18,6 @@ WebRtcCapabilities browserWebRtcCapabilitiesFor({
     supportsScreenShareSourceSelection: false,
     omitsEarpieceFromEnumeration: false,
     usesExactDeviceIdConstraints: true,
+    reportsAudioInterruptions: false,
   );
 }

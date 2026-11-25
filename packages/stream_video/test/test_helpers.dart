@@ -30,6 +30,10 @@ class MockPlatformAudioController extends Mock
 
   @override
   Stream<NativeWebRtcEvent> nativeWebRtcEventsStream() => const Stream.empty();
+
+  /// Interruptions come only from tests that drive them.
+  @override
+  Stream<bool> get audioInterruptions => const Stream.empty();
 }
 
 /// The client a [Call] under test belongs to.

@@ -62,6 +62,7 @@ class ConnectionHarness {
     CallStatus? status,
     RetryPolicy? retryPolicy,
     bool isRingingFlow = false,
+    RtcMediaDeviceNotifier? rtcMediaDeviceNotifier,
   }) {
     var callState = CallState(
       preferences: preferences ?? DefaultCallPreferences(),
@@ -81,6 +82,7 @@ class ConnectionHarness {
       ),
       retryPolicy: retryPolicy,
       sessionFactory: sessionFactory,
+      rtcMediaDeviceNotifier: rtcMediaDeviceNotifier,
     );
     _calls.add(call);
     return call;

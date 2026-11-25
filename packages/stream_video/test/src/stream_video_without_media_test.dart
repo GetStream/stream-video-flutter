@@ -224,6 +224,9 @@ void main() {
     when(
       audio.nativeWebRtcEventsStream,
     ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => audio.audioInterruptions,
+    ).thenAnswer((_) => const Stream.empty());
     final fixture = buildFixture();
     addTearDown(fixture.dispose);
     when(
@@ -250,6 +253,7 @@ void main() {
     await pumpEventQueue();
 
     verify(() => audio.webAudioPlaybackBlockedChanges).called(1);
+    verify(() => audio.audioInterruptions).called(1);
     await call.leave();
   });
 

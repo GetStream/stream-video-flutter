@@ -17,6 +17,7 @@ class WebRtcCapabilities {
     required this.supportsScreenShareSourceSelection,
     required this.omitsEarpieceFromEnumeration,
     required this.usesExactDeviceIdConstraints,
+    required this.reportsAudioInterruptions,
   });
 
   /// Whether each call can build its own peer connection factory, with its
@@ -58,6 +59,11 @@ class WebRtcCapabilities {
   /// cannot be combined with the optional constraints. Web.
   final bool usesExactDeviceIdConstraints;
 
+  /// Whether the platform reports interruptions of the app's audio, such as a
+  /// phone call or another app taking it, on
+  /// `WebRtcPlatformEvents.onInterruption`. Android and iOS.
+  final bool reportsAudioInterruptions;
+
   WebRtcCapabilities copyWith({
     bool? supportsPerCallFactory,
     bool? supportsAudioPlayoutPause,
@@ -69,6 +75,7 @@ class WebRtcCapabilities {
     bool? supportsScreenShareSourceSelection,
     bool? omitsEarpieceFromEnumeration,
     bool? usesExactDeviceIdConstraints,
+    bool? reportsAudioInterruptions,
   }) {
     return WebRtcCapabilities(
       supportsPerCallFactory:
@@ -91,6 +98,8 @@ class WebRtcCapabilities {
           omitsEarpieceFromEnumeration ?? this.omitsEarpieceFromEnumeration,
       usesExactDeviceIdConstraints:
           usesExactDeviceIdConstraints ?? this.usesExactDeviceIdConstraints,
+      reportsAudioInterruptions:
+          reportsAudioInterruptions ?? this.reportsAudioInterruptions,
     );
   }
 
@@ -107,6 +116,7 @@ class WebRtcCapabilities {
       'supportsScreenShareSourceSelection': supportsScreenShareSourceSelection,
       'omitsEarpieceFromEnumeration': omitsEarpieceFromEnumeration,
       'usesExactDeviceIdConstraints': usesExactDeviceIdConstraints,
+      'reportsAudioInterruptions': reportsAudioInterruptions,
     };
     final enabled = [
       for (final MapEntry(:key, :value) in flags.entries)
@@ -129,7 +139,8 @@ class WebRtcCapabilities {
           other.supportsScreenShareSourceSelection ==
               supportsScreenShareSourceSelection &&
           other.omitsEarpieceFromEnumeration == omitsEarpieceFromEnumeration &&
-          other.usesExactDeviceIdConstraints == usesExactDeviceIdConstraints;
+          other.usesExactDeviceIdConstraints == usesExactDeviceIdConstraints &&
+          other.reportsAudioInterruptions == reportsAudioInterruptions;
 
   @override
   int get hashCode => Object.hash(
@@ -143,6 +154,7 @@ class WebRtcCapabilities {
     supportsScreenShareSourceSelection,
     omitsEarpieceFromEnumeration,
     usesExactDeviceIdConstraints,
+    reportsAudioInterruptions,
   );
 }
 
