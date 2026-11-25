@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_filters/video_effects_manager.dart';
+import 'package:stream_video_filters/stream_video_filters.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../utils/consts.dart';
@@ -41,7 +41,6 @@ class CallMoreMenu extends StatefulWidget {
   const CallMoreMenu({
     required this.call,
     required this.devices,
-    required this.videoEffectsManager,
     required this.icon,
     this.screenShareConstraints,
     this.onStatsPressed,
@@ -54,8 +53,6 @@ class CallMoreMenu extends StatefulWidget {
   /// The screen's device controller — the same one behind the split buttons'
   /// carets, so the menu and the carets never disagree about what is in use.
   final StreamMediaDevicesController devices;
-
-  final StreamVideoEffectsManager videoEffectsManager;
 
   /// The glyph on the button that opens the menu.
   final IconData icon;
@@ -78,7 +75,7 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
   @override
   void initState() {
     super.initState();
-    widget.videoEffectsManager.isSupported().then((supported) {
+    StreamVideoFilters().isSupported().then((supported) {
       if (mounted) setState(() => _effectsSupported = supported);
     });
   }
@@ -127,9 +124,7 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
       if (_effectsSupported)
         StreamMenuSection(
           // No handle: the strip stays open so several filters can be tried.
-          content: (context, _) => BackgroundFiltersMenuItem(
-            videoEffectsManager: widget.videoEffectsManager,
-          ),
+          content: (context, _) => BackgroundFiltersMenuItem(call: widget.call),
         ),
       StreamMenuSection(options: _actions(context, state, size)),
       if (!size.hasDevicePickers)
