@@ -358,8 +358,11 @@ class PlatformAudioController {
 
   /// Requests Android audio focus again for the call's audio after a loss,
   /// such as when the app returns from the background. A granted request ends
+  /// Requests Android audio focus again for the call's audio after a loss,
+  /// such as when the app returns from the background. A granted request ends
   /// the call's interruption, see [CallState.isAudioInterrupted]. Does nothing
-  /// while no call's audio runs. Throws on other platforms.
+  /// while no call's audio runs or WebRTC does not manage its audio focus.
+  /// Throws on other platforms.
   Future<void> regainAndroidAudioFocus() {
     _tracer.trace(TraceTag.regainAndroidAudioFocus, null);
     return rtc.Helper.regainAndroidAudioFocus();
