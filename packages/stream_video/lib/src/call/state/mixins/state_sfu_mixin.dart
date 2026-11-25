@@ -4,6 +4,7 @@ import 'package:state_notifier/state_notifier.dart';
 import '../../../../stream_video.dart';
 import '../../../models/call_participant_pin.dart';
 import '../../../sfu/data/events/sfu_events.dart';
+import '../../../sfu/data/models/sfu_call_ended_reason.dart';
 import '../../../sfu/data/models/sfu_inbound_video_state.dart';
 import '../../../sfu/data/models/sfu_pin.dart';
 import '../../../sfu/sfu_extensions.dart';
@@ -94,9 +95,42 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
   ) {
     _logger.d(() => '[sfuCallEnded] ${state.sessionId}; event: $event');
 
+    if (event.callEndedReason == SfuCallEndedReason.liveEnded) {
+      sfuLiveEnded();
+      return;
+    }
+
+    _end();
+  }
+
+  /// Puts the call back in backstage after its livestream ended. A user with
+  /// the join-backstage capability stays in the call; anyone else is
+  /// disconnected as if the call ended.
+  ///
+  /// Returns whether the user stays in the call.
+  bool sfuLiveEnded() {
+    final staysInBackstage = state.ownCapabilities.contains(
+      CallPermission.joinBackstage,
+    );
+    _logger.d(
+      () =>
+          '[sfuLiveEnded] ${state.sessionId}; '
+          'staysInBackstage: $staysInBackstage',
+    );
+
+    if (staysInBackstage) {
+      state = state.copyWith(isBackstage: true);
+    } else {
+      _end(isBackstage: true);
+    }
+    return staysInBackstage;
+  }
+
+  void _end({bool? isBackstage}) {
     state = state.copyWith(
       status: CallStatus.disconnected(endedReason),
       callParticipants: const [],
+      isBackstage: isBackstage,
     );
   }
 

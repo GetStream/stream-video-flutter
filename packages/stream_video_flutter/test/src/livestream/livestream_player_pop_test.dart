@@ -8,7 +8,7 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 import '../mocks.dart';
 
 /// `Navigator.maybePop` closes the topmost route, not the one the player is
-/// in. The stream ending is not the user asking to leave whatever happens to
+/// in. A disconnect is not the user asking to leave whatever happens to
 /// be above it.
 void main() {
   late MockCall call;
@@ -110,13 +110,26 @@ void main() {
 
   tearDown(() => status.close());
 
-  testWidgets('leaves a route above it alone when the stream ends', (
+  testWidgets('stays on the ended view when the livestream ends', (
+    tester,
+  ) async {
+    await pumpPlayerRoute(tester);
+
+    status.add(CallStatus.disconnected(const DisconnectReason.ended()));
+    await tester.pumpAndSettle();
+
+    expect(find.text('stream'), findsOneWidget);
+    expect(find.text('home'), findsNothing);
+    verifyNever(() => call.leave(reason: any(named: 'reason')));
+  });
+
+  testWidgets('leaves a route above it alone when the call disconnects', (
     tester,
   ) async {
     await pumpPlayerRoute(tester);
     await pushOverIt(tester);
 
-    status.add(CallStatus.disconnected(const DisconnectReason.ended()));
+    status.add(CallStatus.disconnected(DisconnectReason.reconnectionFailed()));
     await tester.pumpAndSettle();
 
     expect(find.text('above'), findsOneWidget);
@@ -132,7 +145,7 @@ void main() {
     await pumpPlayerRoute(tester);
     await pushOverIt(tester);
 
-    status.add(CallStatus.disconnected(const DisconnectReason.ended()));
+    status.add(CallStatus.disconnected(DisconnectReason.reconnectionFailed()));
     await tester.pumpAndSettle();
 
     navigatorKey.currentState!.pop();
@@ -146,7 +159,7 @@ void main() {
   testWidgets('pops straight away when it is the top route', (tester) async {
     await pumpPlayerRoute(tester);
 
-    status.add(CallStatus.disconnected(const DisconnectReason.ended()));
+    status.add(CallStatus.disconnected(DisconnectReason.reconnectionFailed()));
     await tester.pumpAndSettle();
 
     expect(find.text('home'), findsOneWidget);

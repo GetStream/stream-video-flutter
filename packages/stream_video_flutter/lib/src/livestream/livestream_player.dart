@@ -212,7 +212,10 @@ class LivestreamPlayer extends StatefulWidget {
   /// If [showMultipleHosts] is false, only the first host is shown.
   final LivestreamHostsParticipantsFilter? livestreamHostsParticipantsFilter;
 
-  /// The action to perform when the call is disconnected. By default, it pops the current route.
+  /// The action to perform when the call is disconnected.
+  ///
+  /// By default, it leaves the call and pops the current route, except when
+  /// the livestream ended: then the player stays and shows the ended view.
   final void Function(CallDisconnectedProperties)? onCallDisconnected;
 
   /// The action to perform when the recording shown when livestream is ended is tapped.
@@ -406,6 +409,10 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
           );
 
           widget.onCallDisconnected?.call(disconnectedProperties);
+        } else if (status case CallStatusDisconnected(
+          reason: DisconnectReasonEnded(),
+        )) {
+          _logger.d(() => '[onDisconnected] livestream ended, staying');
         } else {
           _leave();
         }
