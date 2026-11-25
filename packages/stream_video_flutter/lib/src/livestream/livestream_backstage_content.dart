@@ -3,13 +3,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../stream_video_flutter.dart';
 import '../l10n/localization_extension.dart';
+import 'livestream_status_card.dart';
 
+/// The livestream tile's backstage state: a status card with the time left
+/// until the call starts and how many viewers joined early.
 class LivestreamBackstageContent extends StatefulWidget {
+  /// Creates a [LivestreamBackstageContent].
   const LivestreamBackstageContent({
     super.key,
     required this.call,
   });
 
+  /// The livestream in backstage.
   final Call call;
 
   @override
@@ -102,48 +107,39 @@ class _LivestreamBackstageContentState
 
   @override
   Widget build(BuildContext context) {
-    final theme = StreamVideoTheme.of(context);
-    final liveTheme = theme.livestreamTheme;
     final translations = context.translations;
+    final colorScheme = context.streamColorScheme;
+    final textTheme = context.streamTextTheme;
 
     return PartialCallStateBuilder(
       call: widget.call,
       selector: _callData,
       builder: (context, callData) {
         final participantCount = callData.participantCount;
-        final startsAt = callData.startsAt;
+        final counting = callData.startsAt != null && _timeLeft > Duration.zero;
 
-        return Scaffold(
-          backgroundColor: theme.colorTheme.livestreamBackground,
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  startsAt == null || _timeLeft <= Duration.zero
-                      ? translations.livestreamBackstageStartingSoon
-                      : translations.livestreamBackstageStartingIn,
-                  style: liveTheme.backstageTextStyle,
+        return LivestreamStatusCard(
+          title: counting
+              ? translations.livestreamBackstageStartingIn
+              : translations.livestreamBackstageStartingSoon,
+          children: [
+            if (counting)
+              Text(
+                _formatDuration(_timeLeft),
+                style: textTheme.headingLg.copyWith(
+                  color: colorScheme.textPrimary,
+                  fontFeatures: const [FontFeature.tabularFigures()],
                 ),
-                if (startsAt != null && _timeLeft > Duration.zero) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    _formatDuration(_timeLeft),
-                    style: liveTheme.backstageCounterTextStyle,
-                  ),
-                ],
-                if (participantCount > 0) ...[
-                  const SizedBox(height: 12),
-                  Text(
-                    translations.livestreamBackstageParticipants(
-                      participantCount,
-                    ),
-                    style: liveTheme.backstageParticipantsTextStyle,
-                  ),
-                ],
-              ],
-            ),
-          ),
+              ),
+            if (participantCount > 0)
+              Text(
+                translations.livestreamBackstageParticipants(participantCount),
+                textAlign: TextAlign.center,
+                style: textTheme.bodyDefault.copyWith(
+                  color: colorScheme.textSecondary,
+                ),
+              ),
+          ],
         );
       },
     );

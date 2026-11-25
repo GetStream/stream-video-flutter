@@ -30,10 +30,16 @@
   "livestreamBackstageStartingIn": "Livestream begint over:",
   "livestreamBackstageParticipants": "{count, plural, zero{Nog geen deelnemers  zijn} one{Eén deelnemer is} other{{count} deelnemers zijn}} vroeg aanwezig",
   "livestreamEndedStatus": "De livestream is afgelopen.",
+  "livestreamEndedTitle": "Livestream gestopt",
+  "livestreamEndedSubtitle": "De uitzender is offline gegaan",
   "livestreamEndedWatchRecordings": "Bekijk de opnames:",
   "livestreamHostNotAvailable": "De video van de host is niet beschikbaar.",
   "livestreamBackstage": "Backstage",
+  "livestreamEnterFullscreen": "Volledig scherm",
+  "livestreamExitFullscreen": "Volledig scherm afsluiten",
   "livestreamLive": "Live",
+  "livestreamLiveIndicatorLive": "LIVE",
+  "livestreamLiveIndicatorBackstage": "BACKSTAGE",
   "lobbyMicrophoneSection": "Microfoon",
   "lobbySpeakerSection": "Luidspreker",
   "lobbyCameraSection": "Camera",
@@ -148,5 +154,6 @@
   "recordingsEmptyDescription": "Opnames van dit gesprek verschijnen hier zodra ze klaar zijn.",
   "recordingsErrorTitle": "Opnames laden mislukt",
   "recordingsErrorDescription": "Controleer je verbinding en probeer het opnieuw.",
-  "recordingsRetry": "Opnieuw proberen"
+  "recordingsRetry": "Opnieuw proberen",
+  "livestreamViewerCount": "{count, plural, one{1 kijker} other{{count} kijkers}}"
 }

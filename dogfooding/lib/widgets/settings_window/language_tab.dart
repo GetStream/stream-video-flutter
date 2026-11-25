@@ -15,7 +15,7 @@ const _languageNames = {'en': 'English', 'nl': 'Nederlands'};
 /// Offers every language the SDK is translated into, and following the
 /// device.
 StreamModalWindowTab languageTab(BuildContext context) => StreamModalWindowTab(
-  icon: Icon(context.streamIcons.language),
+  icon: Icon(context.streamIcons.languageFill),
   label: const _LanguageTabLabel(),
   builder: (context) => const _LanguageSettings(),
 );
