@@ -168,7 +168,8 @@
 
 ### 🐞 Fixed
 
-- [iOS] A screen share broadcast started outside the app, such as from Control Center, is now shared.- [iOS] When the user chose the speaker or the receiver and the system moves audio between the two on its own, such as after a CallKit hold, the chosen output is put back instead of being replaced by the system's choice. A route to any other device, such as Bluetooth or AirPlay, is followed, and so is the system's route when the chosen output cannot be put back.
+- [iOS] A screen share broadcast started outside the app, such as from Control Center, is now shared.
+- [iOS] When the user chose the speaker or the receiver and the system moves audio between the two on its own, such as after a CallKit hold, the chosen output is put back instead of being replaced by the system's choice. A route to any other device, such as Bluetooth or AirPlay, is followed, and so is the system's route when the chosen output cannot be put back.
 - A muted microphone or camera is announced to the SFU as muted.
 - Joining a call retries sooner when the SFU connection closes before the join response.
 - On iOS, a call that defaults to the loudspeaker now starts on it, instead of switching to it after the microphone is already recording.
