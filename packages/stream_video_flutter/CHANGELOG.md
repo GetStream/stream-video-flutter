@@ -223,7 +223,7 @@
 - [Android] A call runs in the foreground service of the audio policy it uses, `Call.audioConfigurationPolicy`, so a ringing call follows `StreamVideoOptions.ringingAudioConfigurationPolicy`. An app whose `audioConfigurationPolicy` is `AudioConfigurationPolicy.viewer` and whose ringing policy is `AudioConfigurationPolicy.broadcaster` rings its calls in the `phoneCall` service rather than the `mediaPlayback` one.
 - `LivestreamPlayer` follows the new design: the video sits in a `StreamLivestreamTile` under a `CallAppBar` with the call duration, fullscreen fills the screen, and the ended, backstage and waiting states are drawn on the tile's surface.
 - `LivestreamPlayer.videoFit` and `LivestreamContent.videoFit` default to `VideoFit.adaptive`. Pass `VideoFit.contain` to keep the previous fit.
-- `LivestreamPlayer` shows the ended screen when the call disconnects because it ended, if `onCallDisconnected` keeps it on screen.
+- `LivestreamPlayer` shows the ended screen when the call disconnects because it ended, and by default stays on it instead of closing the route.
 - The ended screen shows `livestreamEndedTitle` and `livestreamEndedSubtitle`; `livestreamEndedStatus` is no longer shown.
 - Back leaves the `LivestreamPlayer`'s fullscreen before it leaves the screen.
 - `LivestreamPlayer` shows the hosts' avatars while none of them has video; `livestreamHostsUnavailableBuilder` now only shows while no host is in the call.
@@ -245,7 +245,6 @@
 - [Android] On Android 12 and above the system now enters picture-in-picture by itself when the user leaves the app during a call, with a smoother transition, and dialogs or permission prompts no longer trigger it.
 - [Android] `StreamCallContent` no longer builds its app bar and controls while in picture-in-picture, where the overlay covers them and the window is too small to lay them out. A custom `callAppBarWidgetBuilder` or `callControlsWidgetBuilder` is disposed on entering picture-in-picture and built again on leaving it, so any state it holds is lost.
 - [Android] The picture-in-picture overlay, and a custom `callPictureInPictureWidgetBuilder`, are built in the root overlay, so a route on an outer navigator is no longer drawn over them. They keep the call screen's themes, but no longer see other inherited widgets placed between the root navigator and the call screen, such as a `Provider`.
-- `LivestreamPlayer` stays on the ended view when the livestream ends, instead of leaving and closing the route.
 
 ### 🐞 Fixed
 

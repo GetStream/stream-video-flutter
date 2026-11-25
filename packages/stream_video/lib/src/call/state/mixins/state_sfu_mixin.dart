@@ -104,11 +104,15 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
   }
 
   /// Puts the call back in backstage after its livestream ended. A user with
-  /// the join-backstage capability stays in the call; anyone else is
-  /// disconnected as if the call ended.
-  ///
-  /// Returns whether the user stays in the call.
-  bool sfuLiveEnded() {
+  /// [CallPermission.joinBackstage] stays in the call; anyone else is
+  /// disconnected as if the call ended. A call already disconnected keeps
+  /// its reason.
+  void sfuLiveEnded() {
+    if (state.status.isDisconnected) {
+      _logger.d(() => '[sfuLiveEnded] rejected (status is disconnected)');
+      return;
+    }
+
     final staysInBackstage = state.ownCapabilities.contains(
       CallPermission.joinBackstage,
     );
@@ -123,7 +127,6 @@ mixin StateSfuMixin on StateNotifier<CallState>, StatePendingTracksMixin {
     } else {
       _end(isBackstage: true);
     }
-    return staysInBackstage;
   }
 
   void _end({bool? isBackstage}) {

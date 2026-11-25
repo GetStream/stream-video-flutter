@@ -215,7 +215,8 @@ class LivestreamPlayer extends StatefulWidget {
   /// The action to perform when the call is disconnected.
   ///
   /// By default, it leaves the call and pops the current route, except when
-  /// the livestream ended: then the player stays and shows the ended view.
+  /// the call disconnects because it ended: then the player stays and shows
+  /// the ended view.
   final void Function(CallDisconnectedProperties)? onCallDisconnected;
 
   /// The action to perform when the recording shown when livestream is ended is tapped.
@@ -412,7 +413,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
         } else if (status case CallStatusDisconnected(
           reason: DisconnectReasonEnded(),
         )) {
-          _logger.d(() => '[onDisconnected] livestream ended, staying');
+          _logger.d(() => '[onDisconnected] call ended, staying');
         } else {
           _leave();
         }
