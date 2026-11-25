@@ -99,8 +99,9 @@ class AndroidPushConfiguration {
   /// Registered, the call gets what an incoming call Telecom holds gets: the
   /// audio routes Telecom offers, Telecom's management of the call's audio
   /// focus, and an end when Telecom holds it for a phone call, as the SDK
-  /// leaves a held call. It is marked active once the call connects, and ends
-  /// with the call however it ends. Without the Telecom integration (see
+  /// leaves a held call. Telecom marks it active as soon as it is registered,
+  /// so a hold while it still rings already leaves it, and it ends with the
+  /// call however it ends. Without the Telecom integration (see
   /// [telecom]) nothing visible changes; the plugin only tracks the call until
   /// it ends.
   ///
