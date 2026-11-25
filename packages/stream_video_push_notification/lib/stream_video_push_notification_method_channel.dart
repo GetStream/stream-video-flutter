@@ -92,6 +92,16 @@ class MethodChannelStreamVideoPushNotification
   }
 
   @override
+  Future<List<String>> telecomCallCids() async {
+    if (!CurrentPlatform.isAndroid) return const [];
+
+    final cids = await methodChannel.invokeListMethod<String>(
+      'telecomCallCids',
+    );
+    return cids ?? const [];
+  }
+
+  @override
   Future<bool> isMuted(String id) async {
     return (await methodChannel.invokeMethod('isMuted', {'id': id})) as bool? ??
         false;

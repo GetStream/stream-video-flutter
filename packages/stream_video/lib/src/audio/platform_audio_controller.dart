@@ -368,6 +368,26 @@ class PlatformAudioController {
     return rtc.Helper.regainAndroidAudioFocus();
   }
 
+  /// Whether WebRTC can be told that the system manages Android audio focus,
+  /// see [setAndroidAudioFocusHandledBySystem]. Android.
+  ///
+  /// Static, so a caller can check it without creating the shared instance.
+  @internal
+  static bool get isSystemManagedAudioFocusSupported =>
+      rtc.webRtcCapabilities.supportsSystemManagedAudioFocus;
+
+  /// Tells WebRTC whether the system manages Android audio focus for the
+  /// call in progress, such as Telecom for a call it holds. WebRTC then
+  /// manages none, whatever the audio configuration says. Does nothing where
+  /// [isSystemManagedAudioFocusSupported] is `false`.
+  @internal
+  Future<void> setAndroidAudioFocusHandledBySystem({
+    required bool handledBySystem,
+  }) async {
+    if (!isSystemManagedAudioFocusSupported) return;
+    await rtc.Helper.setAndroidAudioFocusHandledBySystem(handledBySystem);
+  }
+
   /// Refreshes the snapshot the implicit native peer-connection factory will
   /// use the next time it is built.
   ///

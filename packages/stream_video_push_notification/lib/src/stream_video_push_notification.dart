@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_video/stream_video.dart';
 import '../stream_video_push_notification.dart';
@@ -43,7 +46,10 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       client: client,
       controller: _controller,
       ringingEvents: onCallEvent,
+      onTelecomCallsChanged: _onTelecomCallsChanged,
     )..start();
+
+    if (CurrentPlatform.isAndroid) unawaited(_readTelecomCalls());
 
     if (CurrentPlatform.isIos &&
         (pushConfiguration.ios?.reportOutgoingCalls ?? false)) {
@@ -116,6 +122,34 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   final _broadcaster = RingingEventBroadcaster.shared;
 
   final _logger = taggedLogger(tag: 'SV:PNManager');
+
+  final _telecomCallCids = BehaviorSubject<Set<String>>.seeded(const {});
+
+  /// Whether the plugin reported the calls Telecom holds since this manager
+  /// was created, which makes the first read out of date.
+  bool _telecomCallsReported = false;
+
+  @override
+  Stream<Set<String>> get systemManagedCallCids =>
+      _telecomCallCids.stream.distinct(const SetEquality<String>().equals);
+
+  void _onTelecomCallsChanged(Set<String> callCids) {
+    _telecomCallsReported = true;
+    _telecomCallCids.add(callCids);
+  }
+
+  /// Reads the calls Telecom already holds, such as a call answered while the
+  /// app was not running, which the plugin reported before this manager
+  /// listened.
+  Future<void> _readTelecomCalls() async {
+    try {
+      final callCids = await _controller.telecomCallCids();
+      if (_telecomCallsReported || _telecomCallCids.isClosed) return;
+      _telecomCallCids.add(callCids.toSet());
+    } catch (e, stk) {
+      _logger.w(() => '[readTelecomCalls] failed: $e\n$stk');
+    }
+  }
 
   @override
   void registerDevice() => _registrar.registerDevice();
@@ -277,6 +311,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   @override
   Future<void> dispose() async {
     _observer?.dispose();
+    await _telecomCallCids.close();
     await _registrar.dispose();
     await _outgoingCallReporter?.dispose();
     _outgoingCallReporter = null;

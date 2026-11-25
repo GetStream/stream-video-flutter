@@ -291,6 +291,18 @@ internal class RingingController(
         sendEvent(event, body)
     }
 
+    /**
+     * Tells Dart which calls Telecom holds; Dart also asks with `telecomCallCids` as it starts.
+     * Sent while events are silenced too: it is the current state, which a later report would not
+     * repeat.
+     */
+    override fun onRegisteredCallsChanged(callCids: List<String>) {
+        sendEvent(
+            IncomingCallConstants.ACTION_CALL_CUSTOM,
+            mapOf("type" to CUSTOM_EVENT_TELECOM_CALLS, "callCids" to callCids),
+        )
+    }
+
     private fun report(event: String, data: Bundle, vararg extra: Pair<String, Any?>) {
         if (RingingComponents.silenceEvents) return
         val body = CallPayloadMapper.toEventBody(
@@ -315,3 +327,6 @@ internal class RingingController(
         const val TAG = "RingingController"
     }
 }
+
+/** Payload type of the [IncomingCallConstants.ACTION_CALL_CUSTOM] event naming the calls Telecom holds. */
+internal const val CUSTOM_EVENT_TELECOM_CALLS = "telecomCallsChanged"

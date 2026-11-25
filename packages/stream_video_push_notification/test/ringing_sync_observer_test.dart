@@ -529,4 +529,57 @@ void main() {
       verifyNotLeft(target);
     });
   });
+
+  group('the calls Telecom holds', () {
+    late List<Set<String>> reported;
+
+    setUp(() {
+      reported = [];
+      observer.dispose();
+      observer = RingingSyncObserver(
+        streamVideo: streamVideo,
+        client: client,
+        controller: controller,
+        ringingEvents: broadcaster.onEvent,
+        onTelecomCallsChanged: reported.add,
+      );
+      addTearDown(observer.dispose);
+    });
+
+    Future<void> custom(Map<String, Object?> body) async {
+      platform.emit(ActionCallCustom(body));
+      await pumpEventQueue();
+    }
+
+    test('are passed on as the plugin reports them', () async {
+      await start();
+
+      await custom({
+        'type': 'telecomCallsChanged',
+        'callCids': ['default:c1', 'default:c2'],
+      });
+      await custom({'type': 'telecomCallsChanged', 'callCids': <String>[]});
+
+      expect(reported, [
+        {'default:c1', 'default:c2'},
+        <String>{},
+      ]);
+    });
+
+    test('are not passed on from a report without cids', () async {
+      await start();
+
+      await custom({'type': 'telecomCallsChanged'});
+
+      expect(reported, isEmpty);
+    });
+
+    test('ignore other custom events', () async {
+      await start();
+
+      await custom({'type': 'telecomAudioEndpointsChanged', 'callCids': []});
+
+      expect(reported, isEmpty);
+    });
+  });
 }

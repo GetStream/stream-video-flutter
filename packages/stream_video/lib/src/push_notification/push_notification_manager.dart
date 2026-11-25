@@ -160,6 +160,14 @@ abstract class PushNotificationManager {
     RtcMediaDevice device,
   ) async {}
 
+  /// The cids of the calls whose audio focus the system manages: on Android,
+  /// the calls the Telecom integration holds. A new listener gets the current
+  /// calls, and every change after.
+  ///
+  /// The client stops WebRTC from managing audio focus while one of its
+  /// active calls is among them. None by default.
+  Stream<Set<String>> get systemManagedCallCids => Stream.value(const {});
+
   /// Retrieves a list of active calls.
   Future<List<CallData>> activeCalls();
 

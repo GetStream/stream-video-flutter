@@ -225,6 +225,28 @@ class Helper {
     }
   }
 
+  /// Tells WebRTC whether the system manages Android audio focus for the call
+  /// in progress, such as Telecom for a call it holds.
+  ///
+  /// While it does, WebRTC manages no audio focus, whatever
+  /// `manageAudioFocus` or [setAndroidAudioFocusManaged] say, and gives up
+  /// focus it holds for the call; once it no longer does, those apply again.
+  /// Done asynchronously.
+  static Future<void> setAndroidAudioFocusHandledBySystem(
+    bool handledBySystem,
+  ) async {
+    if (WebRTC.platformIsAndroid) {
+      return WebRTC.invokeMethod(
+        'setAndroidAudioFocusHandledBySystem',
+        <String, dynamic>{'handledBySystem': handledBySystem},
+      );
+    } else {
+      throw Exception(
+        'setAndroidAudioFocusHandledBySystem is only supported on Android',
+      );
+    }
+  }
+
   /// Set the audio configuration for iOS
   static Future<void> setAppleAudioConfiguration(
     AppleAudioConfiguration appleAudioConfiguration,

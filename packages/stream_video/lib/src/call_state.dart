@@ -208,6 +208,9 @@ class CallState extends Equatable {
   /// starts while the call is joined, active and its audio not suspended is
   /// reported; with several active calls, each of them reports it. What the
   /// call does about it is set by `CallPreferences.audioInterruptionReaction`.
+  ///
+  /// On Android, a call Telecom holds reports none: Telecom manages its audio
+  /// focus, and puts it on hold for a phone call, which leaves the call.
   final bool isAudioInterrupted;
 
   /// Whether the browser's autoplay policy is blocking playback of remote

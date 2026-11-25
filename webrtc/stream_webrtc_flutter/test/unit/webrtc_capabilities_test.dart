@@ -68,6 +68,10 @@ void main() {
           (c) => c.reportsAudioInterruptions,
           {_Platform.android, _Platform.ios},
         ),
+        'supportsSystemManagedAudioFocus': (
+          (c) => c.supportsSystemManagedAudioFocus,
+          {_Platform.android},
+        ),
       };
 
   for (final MapEntry(key: name, value: (read, platforms))
@@ -131,6 +135,8 @@ void main() {
           base.copyWith(usesExactDeviceIdConstraints: v),
       'reportsAudioInterruptions': (v) =>
           base.copyWith(reportsAudioInterruptions: v),
+      'supportsSystemManagedAudioFocus': (v) =>
+          base.copyWith(supportsSystemManagedAudioFocus: v),
     };
 
     for (final MapEntry(key: name, value: flip) in flips.entries) {

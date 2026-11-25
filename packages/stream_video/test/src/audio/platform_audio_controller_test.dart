@@ -365,6 +365,32 @@ void main() {
     });
   });
 
+  group('system-managed audio focus', () {
+    test('is supported where WebRTC can leave focus to the system', () {
+      overrideWebRtcCapabilities(platform: PlatformType.android);
+      expect(
+        PlatformAudioController.isSystemManagedAudioFocusSupported,
+        isTrue,
+      );
+
+      overrideWebRtcCapabilities(platform: PlatformType.ios);
+      expect(
+        PlatformAudioController.isSystemManagedAudioFocusSupported,
+        isFalse,
+      );
+    });
+
+    // The plugin throws off Android, and the host running the tests is not.
+    test('telling WebRTC does nothing where it is not supported', () async {
+      overrideWebRtcCapabilities(platform: PlatformType.ios);
+
+      await expectLater(
+        controller.setAndroidAudioFocusHandledBySystem(handledBySystem: true),
+        completes,
+      );
+    });
+  });
+
   group('reinitializeAudioConfiguration', () {
     test('refreshes the implicit factory without the Apple '
         'configuration', () async {

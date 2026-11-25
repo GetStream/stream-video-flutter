@@ -20,6 +20,7 @@
 * [Android] fix: an interruption ends when the call's audio stops.
 * [Android] fix: `regainAndroidAudioFocus` requests audio focus again during a call whose focus WebRTC manages, and does nothing otherwise.
 * [Android] Added `Helper.setAndroidAudioFocusManaged`, to switch WebRTC's audio focus handling during a call; `manageAudioFocus` in `setAndroidAudioConfiguration` now switches it too.
+* [Android] Added `Helper.setAndroidAudioFocusHandledBySystem`, to tell WebRTC that the system, such as Telecom, manages the call's audio focus.
 
 [4.0.1] - 2026.10.22
 

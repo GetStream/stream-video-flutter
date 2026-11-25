@@ -89,6 +89,18 @@ public class AudioSwitchManager {
     private boolean manageAudioFocus = true;
 
     /**
+     * Whether the system manages the audio focus of the call in progress, such as Android's
+     * Telecom for a call it holds. WebRTC then manages none, whatever {@link #manageAudioFocus}
+     * says.
+     */
+    private boolean focusHandledBySystem = false;
+
+    /** Whether WebRTC manages audio focus now: configured to, and the system does not. */
+    private boolean focusManaged() {
+        return manageAudioFocus && !focusHandledBySystem;
+    }
+
+    /**
      * The audio focus mode to use while started.
      * <br />
      * Defaults to AudioManager.AUDIOFOCUS_GAIN.
@@ -170,7 +182,7 @@ public class AudioSwitchManager {
                         audioFocusChangeListener,
                         preferredDeviceList
                 );
-                audioSwitch.setManageAudioFocus(manageAudioFocus);
+                audioSwitch.setManageAudioFocus(focusManaged());
                 audioSwitch.setFocusMode(focusMode);
                 audioSwitch.setAudioMode(audioMode);
                 audioSwitch.setAudioStreamType(audioStreamType);
@@ -197,8 +209,8 @@ public class AudioSwitchManager {
                         // AudioSwitch requests focus as it activates, by its own flag, which a
                         // switch posted since may not have updated yet, such as one a stop
                         // dropped: the focus it took would then not be tracked.
-                        audioSwitch.setManageAudioFocus(manageAudioFocus);
-                        focusHolding.onStart(manageAudioFocus);
+                        audioSwitch.setManageAudioFocus(focusManaged());
+                        focusHolding.onStart(focusManaged());
                         isActivating = true;
                         try {
                             ensureAudioConfigurationPersistsWith(() -> {
@@ -429,13 +441,24 @@ public class AudioSwitchManager {
         handler.post(this::reconcileFocus);
     }
 
-    /** Brings AudioSwitch and the focus held for the call's audio in line with manageAudioFocus. */
+    /**
+     * Tells WebRTC whether the system manages the audio focus of the call in progress, such as
+     * Telecom for a call it holds, and applies it as {@link #setManageAudioFocus} does: while the
+     * system manages it, WebRTC manages none, whatever its configuration says.
+     */
+    public void setAudioFocusHandledBySystem(boolean handledBySystem) {
+        // Set now, for the same reason as manageAudioFocus.
+        focusHandledBySystem = handledBySystem;
+        handler.post(this::reconcileFocus);
+    }
+
+    /** Brings AudioSwitch and the focus held for the call's audio in line with focusManaged(). */
     private void reconcileFocus() {
         if (audioSwitch != null) {
-            Objects.requireNonNull(audioSwitch).setManageAudioFocus(manageAudioFocus);
+            Objects.requireNonNull(audioSwitch).setManageAudioFocus(focusManaged());
         }
 
-        switch (focusHolding.onManagedChanged(manageAudioFocus, isActive)) {
+        switch (focusHolding.onManagedChanged(focusManaged(), isActive)) {
             case REQUEST:
                 requestFocusForCall();
                 break;
@@ -559,7 +582,7 @@ public class AudioSwitchManager {
         }
 
         AudioSwitch localAudioSwitch = Objects.requireNonNull(audioSwitch);
-        localAudioSwitch.setManageAudioFocus(manageAudioFocus);
+        localAudioSwitch.setManageAudioFocus(focusManaged());
         localAudioSwitch.setFocusMode(focusMode);
         localAudioSwitch.setAudioMode(audioMode);
         localAudioSwitch.setAudioStreamType(audioStreamType);
@@ -606,7 +629,7 @@ public class AudioSwitchManager {
      */
     public void requestAudioFocus() {
         handler.post(() -> {
-            if (audioSwitch == null || !isActive || !manageAudioFocus) {
+            if (audioSwitch == null || !isActive || !focusManaged()) {
                 return;
             }
             requestFocusForCall();

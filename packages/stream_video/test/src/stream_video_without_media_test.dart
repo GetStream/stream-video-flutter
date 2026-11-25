@@ -48,6 +48,9 @@ void main() {
     push = _MockPushNotificationManager();
     nativeEvents = StreamController<RingingEvent>.broadcast();
     when(() => push.onCallEvent).thenAnswer((_) => nativeEvents.stream);
+    when(
+      () => push.systemManagedCallCids,
+    ).thenAnswer((_) => const Stream.empty());
     when(push.dispose).thenAnswer((_) async {});
     when(
       () => push.endCallByCid(any(), silent: any(named: 'silent')),

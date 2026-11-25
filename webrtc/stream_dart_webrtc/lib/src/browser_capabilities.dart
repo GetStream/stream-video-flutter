@@ -19,5 +19,6 @@ WebRtcCapabilities browserWebRtcCapabilitiesFor({
     omitsEarpieceFromEnumeration: false,
     usesExactDeviceIdConstraints: true,
     reportsAudioInterruptions: false,
+    supportsSystemManagedAudioFocus: false,
   );
 }
