@@ -113,6 +113,12 @@ class StreamVideoFlutterLocalizationsNl
   String get livestreamEndedStatus => 'De livestream is afgelopen.';
 
   @override
+  String get livestreamEndedTitle => 'Livestream gestopt';
+
+  @override
+  String get livestreamEndedSubtitle => 'De uitzender is offline gegaan';
+
+  @override
   String get livestreamEndedWatchRecordings => 'Bekijk de opnames:';
 
   @override
@@ -123,7 +129,19 @@ class StreamVideoFlutterLocalizationsNl
   String get livestreamBackstage => 'Backstage';
 
   @override
+  String get livestreamEnterFullscreen => 'Volledig scherm';
+
+  @override
+  String get livestreamExitFullscreen => 'Volledig scherm afsluiten';
+
+  @override
   String get livestreamLive => 'Live';
+
+  @override
+  String get livestreamLiveIndicatorLive => 'LIVE';
+
+  @override
+  String get livestreamLiveIndicatorBackstage => 'BACKSTAGE';
 
   @override
   String get lobbyMicrophoneSection => 'Microfoon';
@@ -524,4 +542,15 @@ class StreamVideoFlutterLocalizationsNl
 
   @override
   String get recordingsRetry => 'Opnieuw proberen';
+
+  @override
+  String livestreamViewerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count kijkers',
+      one: '1 kijker',
+    );
+    return '$_temp0';
+  }
 }

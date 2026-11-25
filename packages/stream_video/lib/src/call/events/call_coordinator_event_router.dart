@@ -42,8 +42,8 @@ class CallCoordinatorEventRouter {
   /// accept or reject hook runs.
   final void Function() _onRingActivity;
 
-  // Called when the participant count of a call not joined yet drops to
-  // zero, after its state took the count.
+  // Called when a call not joined yet has no named participants left,
+  // anonymous ones aside, after its state took the count.
   final Future<void> Function() _onNoParticipantsLeft;
 
   /// Routes [event], which the caller has already matched to this call.
@@ -102,15 +102,16 @@ class CallCoordinatorEventRouter {
       case StreamCallSessionParticipantCountUpdatedEvent _:
         if (_stateManager.callState.status.isAlreadyJoined) return;
 
-        final totalCount = event.participantsCountByRole.values.fold(
+        final namedCount = event.participantsCountByRole.values.fold(
           0,
           (a, b) => a + b,
         );
+        // The count by role leaves anonymous participants out.
         _stateManager.setParticipantsCount(
-          totalCount: totalCount,
+          totalCount: namedCount + event.anonymousParticipantCount,
           anonymousCount: event.anonymousParticipantCount,
         );
-        if (totalCount == 0) await _onNoParticipantsLeft();
+        if (namedCount == 0) await _onNoParticipantsLeft();
         return;
       case StreamCallMemberAddedEvent _:
         return _stateManager.coordinatorCallMemberAdded(event);
