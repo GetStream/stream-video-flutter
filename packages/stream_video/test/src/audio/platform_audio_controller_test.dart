@@ -504,6 +504,7 @@ class _FakePlatformEvents implements rtc.WebRtcPlatformEvents {
   // Closed in the tests' tearDown.
   // ignore: close_sinks
   final interruptions = StreamController<rtc.AudioInterruption>.broadcast();
+
   /// How many times [enableInterruptionEvents] ran.
   int enableCount = 0;
 
