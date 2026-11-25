@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../stream_video.dart';
+import '../webrtc_engine.dart';
 
 enum RtcMediaDeviceKind {
   audioInput('audioinput'),
@@ -53,44 +53,9 @@ class RtcMediaDevice extends Equatable {
     };
   }
 
-  /// The set of external audio ports that are considered external outputs
-  static const Set<String> iOSExternalPorts = {
-    'bluetoothA2DP',
-    'bluetoothLE',
-    'bluetoothHFP',
-    'carAudio',
-    'headphones',
-  };
-
-  /// The set of external audio device types that are considered external outputs
-  static const Set<String> androidExternalAudioDeviceType = {
-    'bluetooth',
-    'wired-headset',
-  };
-
-  /// Whether this device represents an external audio output.
-  /// Checks if the device label contains any of the external port types.
-  bool get isExternal {
-    if (groupId == null) {
-      return false;
-    }
-
-    if (CurrentPlatform.isIos) {
-      return iOSExternalPorts.any(
-        (port) => groupId!.toLowerCase().contains(
-          port.toLowerCase(),
-        ),
-      );
-    } else if (CurrentPlatform.isAndroid) {
-      return androidExternalAudioDeviceType.any(
-        (type) => groupId!.toLowerCase().contains(
-          type.toLowerCase(),
-        ),
-      );
-    } else {
-      return groupId!.toLowerCase().contains('bluetooth');
-    }
-  }
+  /// Whether this device is an external audio device, such as a headset or a
+  /// car, as the WebRTC engine reports it.
+  bool get isExternal => webRtcEngine.audio.isExternalDevice(groupId);
 
   bool get isSpeaker => id.toLowerCase() == 'speaker';
 

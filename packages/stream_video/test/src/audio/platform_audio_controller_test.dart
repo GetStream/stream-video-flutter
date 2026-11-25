@@ -1,73 +1,37 @@
 import 'dart:async';
 
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/call/stats/trace_tag.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
+import '../../fixtures/fake_webrtc_engine.dart';
 import '../../fixtures/webrtc_capabilities.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
-
-  const channel = MethodChannel('FlutterWebRTC.Method');
-  final messenger =
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
-
-  Map<Object?, Object?>? initializeOptions;
-
+  late FakePlatformEvents events;
+  late FakeWebRtcEngine engine;
   late PlatformAudioController controller;
 
-  setUpAll(() {
-    messenger.setMockMethodCallHandler(channel, (call) async {
-      if (call.method == 'initialize') {
-        initializeOptions =
-            (call.arguments as Map)['options'] as Map<Object?, Object?>;
-      }
-      return null;
-    });
-
-    controller = PlatformAudioController.instance;
-  });
-
-  tearDownAll(() {
-    messenger.setMockMethodCallHandler(channel, null);
-  });
-
   setUp(() {
-    // Drop the traces of earlier tests.
-    controller.getTrace();
+    events = FakePlatformEvents();
+    engine = FakeWebRtcEngine(events: events);
+    controller = PlatformAudioController.withEngine(engine);
   });
+
+  tearDown(() => events.close());
 
   group('audio playout pause', () {
-    late Future<void> Function(bool paused) originalSetPlayoutPaused;
-    final nativeCalls = <String>[];
     Exception? pauseError;
 
     setUp(() {
       overrideWebRtcCapabilities(platform: PlatformType.android);
-      nativeCalls.clear();
       pauseError = null;
-      originalSetPlayoutPaused = controller.setPlayoutPaused;
-      controller.setPlayoutPaused = (paused) async {
-        nativeCalls.add(paused ? 'pause' : 'resume');
+      engine.audio.onSetPlayoutPaused = (paused) async {
         if (paused) {
           if (pauseError case final error?) throw error;
         }
       };
-    });
-
-    tearDown(() async {
-      rtc.debugWebRtcCapabilitiesOverride = webRtcCapabilitiesOf(
-        PlatformType.android,
-      );
-      pauseError = null;
-      if (controller.isAudioPlayoutPaused) {
-        await controller.resumeAudioPlayout();
-      }
-      controller.setPlayoutPaused = originalSetPlayoutPaused;
-      rtc.debugWebRtcCapabilitiesOverride = null;
     });
 
     test('starts unpaused and emits only when the state changes', () async {
@@ -88,7 +52,7 @@ void main() {
 
       await subscription.cancel();
       expect(emitted, [false, true, false]);
-      expect(nativeCalls, ['pause', 'pause', 'resume', 'resume']);
+      expect(engine.audio.calls, ['pause', 'pause', 'resume', 'resume']);
     });
 
     test('traces each pause and resume', () async {
@@ -107,7 +71,7 @@ void main() {
         await controller.pauseAudioPlayout();
 
         expect(controller.isAudioPlayoutPaused, isFalse);
-        expect(nativeCalls, isEmpty);
+        expect(engine.audio.calls, isEmpty);
       });
     }
 
@@ -121,40 +85,29 @@ void main() {
     });
   });
 
-  group('plugin events', () {
-    /// Sends [event] with [payload] the way the native side posts it.
-    Future<void> emit(
-      String event, [
-      Map<String, Object?> payload = const {},
-    ]) async {
-      await messenger.handlePlatformMessage(
-        'FlutterWebRTC.Event',
-        const StandardMethodCodec().encodeSuccessEnvelope({
-          'event': event,
-          ...payload,
-        }),
-        (_) {},
-      );
-      await pumpEventQueue();
-    }
-
+  group('platform events', () {
     test('screen sharing and audio route changes reach the native '
         'events', () async {
-      final events = <NativeWebRtcEvent>[];
+      final received = <NativeWebRtcEvent>[];
       final subscription = controller.nativeWebRtcEventsStream().listen(
-        events.add,
+        received.add,
       );
 
-      await emit('screenSharingStarted');
-      await emit('screenSharingStopped', {'trackId': 'track-1'});
-      await emit('onAudioRouteChange', {
-        'deviceId': 'speaker-uid',
-        'label': 'Speaker',
-        'groupId': 'Speaker',
-      });
+      events.screenSharingStarts.add(null);
+      events.screenSharingStops.add(
+        const rtc.ScreenSharingStopped(trackId: 'track-1'),
+      );
+      events.audioRoutes.add(
+        const rtc.AudioRoute(
+          deviceId: 'speaker-uid',
+          label: 'Speaker',
+          groupId: 'Speaker',
+        ),
+      );
+      await pumpEventQueue();
       await subscription.cancel();
 
-      expect(events, [
+      expect(received, [
         isA<ScreenSharingStartedEvent>(),
         isA<ScreenSharingStoppedEvent>().having(
           (e) => e.trackId,
@@ -175,58 +128,57 @@ void main() {
     });
 
     test('an audio route change carries its reason', () async {
-      final events = <NativeWebRtcEvent>[];
+      final received = <NativeWebRtcEvent>[];
       final subscription = controller.nativeWebRtcEventsStream().listen(
-        events.add,
+        received.add,
       );
 
-      await emit('onAudioRouteChange', {
-        'deviceId': 'Speaker',
-        'label': 'Speaker',
-        'reason': 8,
-      });
-      await emit('onAudioRouteChange', {'deviceId': 'Receiver'});
+      events.audioRoutes
+        ..add(
+          const rtc.AudioRoute(
+            deviceId: 'Speaker',
+            label: 'Speaker',
+            reason: AudioRouteChangeReason.routeConfigurationChange,
+          ),
+        )
+        ..add(const rtc.AudioRoute(deviceId: 'Receiver', label: 'Receiver'));
+      await pumpEventQueue();
       await subscription.cancel();
 
-      expect(events.cast<AudioRouteChangedEvent>().map((e) => e.reason), [
+      expect(received.cast<AudioRouteChangedEvent>().map((e) => e.reason), [
         AudioRouteChangeReason.routeConfigurationChange,
         AudioRouteChangeReason.unknown,
       ]);
     });
 
-    test('an audio route without a device id is dropped', () async {
-      final events = <NativeWebRtcEvent>[];
-      final subscription = controller.nativeWebRtcEventsStream().listen(
-        events.add,
+    test('speech activity reaches the speech activity stream', () async {
+      final received = <SpeechActivityEvent>[];
+      final subscription = controller.speechActivityStream.listen(
+        received.add,
       );
 
-      await emit('onAudioRouteChange', {'deviceId': '', 'label': 'Speaker'});
+      events.speechActivity
+        ..add(rtc.SpeechActivity.started)
+        ..add(rtc.SpeechActivity.ended);
+      await pumpEventQueue();
       await subscription.cancel();
 
-      expect(events, isEmpty);
-    });
-
-    test('speech activity reaches the speech activity stream', () async {
-      final events = <SpeechActivityEvent>[];
-      final subscription = controller.speechActivityStream.listen(events.add);
-
-      await emit('onSpeechActivityChanged', {'type': 'started'});
-      await emit('onSpeechActivityChanged', {'type': 'ended'});
-      await subscription.cancel();
-
-      expect(events, [
+      expect(received, [
         isA<SpeechActivityStarted>(),
         isA<SpeechActivityEnded>(),
       ]);
     });
 
     test('an audio processing change is traced', () async {
-      await emit('onAudioProcessingStateChanged', {
-        'stereoPlayoutEnabled': true,
-        'voiceProcessingEnabled': false,
-        'voiceProcessingBypassed': true,
-        'voiceProcessingAGCEnabled': false,
-      });
+      events.audioProcessingStates.add(
+        const rtc.AudioProcessingState(
+          stereoPlayoutEnabled: true,
+          voiceProcessingEnabled: false,
+          voiceProcessingBypassed: true,
+          voiceProcessingAGCEnabled: false,
+        ),
+      );
+      await pumpEventQueue();
 
       final traces = controller.getTrace().snapshot.where(
         (record) => record.tag == TraceTag.audioProcessingStateChanged,
@@ -250,13 +202,13 @@ void main() {
 
     setUp(() {
       overrideWebRtcCapabilities(platform: PlatformType.android);
-      PlatformAudioController.instance = null;
       events = _FakePlatformEvents();
-      fresh = PlatformAudioController.instance..platformEvents = events;
+      fresh = PlatformAudioController.withEngine(
+        FakeWebRtcEngine(events: events),
+      );
     });
 
     tearDown(() async {
-      PlatformAudioController.instance = controller;
       await events.interruptions.close();
     });
 
@@ -376,14 +328,14 @@ void main() {
       );
     });
 
-    // The plugin throws off Android, and the host running the tests is not.
     test('telling WebRTC does nothing where it is not supported', () async {
       overrideWebRtcCapabilities(platform: PlatformType.ios);
 
-      await expectLater(
-        controller.setAndroidAudioFocusHandledBySystem(handledBySystem: true),
-        completes,
+      await controller.setAndroidAudioFocusHandledBySystem(
+        handledBySystem: true,
       );
+
+      expect(engine.audio.calls, isEmpty);
     });
   });
 
@@ -393,17 +345,34 @@ void main() {
       const policy = AudioConfigurationPolicy.viewer();
       await controller.reinitializeAudioConfiguration(policy);
 
-      expect(initializeOptions, {
-        'bypassVoiceProcessing': true,
-        'androidAudioConfiguration': policy.getAndroidConfiguration().toMap(),
-      });
+      final options = engine.defaultFactoryOptions.single!;
+      expect(options.bypassVoiceProcessing, isTrue);
+      expect(
+        options.androidAudioConfiguration?.toMap(),
+        policy.getAndroidConfiguration().toMap(),
+      );
+      expect(options.appleAudioConfiguration, isNull);
+    });
+
+    test('prefers stereo playout when voice processing is bypassed', () async {
+      await controller.reinitializeAudioConfiguration(
+        const AudioConfigurationPolicy.viewer(),
+      );
+      await controller.reinitializeAudioConfiguration(
+        const AudioConfigurationPolicy.broadcaster(),
+      );
+
+      expect(
+        engine.defaultFactoryOptions.map((o) => o?.preferStereoPlayout),
+        [true, false],
+      );
     });
   });
 
-  // The host running the tests is not Android, where the plugin refuses it.
   test('regaining Android audio focus is traced', () async {
-    await expectLater(controller.regainAndroidAudioFocus(), throwsException);
+    await controller.regainAndroidAudioFocus();
 
+    expect(engine.audio.calls, ['regainAndroidAudioFocus']);
     final tags = controller.getTrace().snapshot.map((record) => record.tag);
     expect(tags, contains(TraceTag.regainAndroidAudioFocus));
   });

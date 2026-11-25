@@ -77,7 +77,7 @@ void main() {
           deviceId: 'speaker-uid',
           label: 'Speaker',
           groupId: 'Speaker',
-          reasonCode: 8,
+          reason: AudioRouteChangeReason.routeConfigurationChange,
         ),
       );
     });

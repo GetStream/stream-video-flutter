@@ -2,6 +2,9 @@
 
 ### ⚠️ Breaking
 
+- `AudioRouteChangeReason` comes from `stream_webrtc_interface`; `stream_video` still exports it.
+- `RtcMediaDevice.iOSExternalPorts` and `RtcMediaDevice.androidExternalAudioDeviceType` are removed; `RtcMediaDevice.isExternal` asks the WebRTC engine.
+- The unused `InterruptionEvent`, `InterruptionBeginEvent` and `InterruptionEndEvent` are removed, and `NativeWebRtcEvent` is sealed.
 - `Call.ensureNativeFactory`, `RtcLocalTrack` and `MediaDevices.getMedia` take and return the `PeerConnectionFactory` contract instead of `NativePeerConnectionFactory`.
 - `EncryptionManager.create` throws `UnsupportedError` on web instead of returning a manager whose operations throw.
 - The app-wide audio members of `RtcMediaDeviceNotifier` moved to `PlatformAudioController.instance`: `nativeWebRtcEventsStream`, `speechActivityStream`, `triggeriOSAudioRouteSelectionUI`, `isAudioPlayoutPauseSupported`, `isAudioPlayoutPaused`, `audioPlayoutPausedChanges`, `pauseAudioPlayout`, `resumeAudioPlayout`, `resumeWebAudioPlayback`, `regainAndroidAudioFocus` and `reinitializeAudioConfiguration`.

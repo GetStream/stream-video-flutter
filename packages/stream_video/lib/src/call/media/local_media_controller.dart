@@ -746,8 +746,6 @@ class LocalMediaController {
         case AudioRouteChangedEvent _:
           onAudioRouteChanged(event);
           break;
-        default:
-          return;
       }
     });
   }

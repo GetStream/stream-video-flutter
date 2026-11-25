@@ -19,6 +19,10 @@ abstract class WebRtcAudio {
   /// where `WebRtcCapabilities.supportsAudioPlayoutPause` is false.
   Future<void> setPlayoutPaused(bool paused);
 
+  /// Whether the app has an audio session to configure with
+  /// [setAppleAudioConfiguration]. iOS.
+  bool get hasAudioSession;
+
   /// Applies [configuration] to the Apple audio session. iOS.
   Future<void> setAppleAudioConfiguration(
     AppleAudioConfiguration configuration,
@@ -39,4 +43,9 @@ abstract class WebRtcAudio {
 
   /// Shows the system picker for the audio output. iOS; throws elsewhere.
   Future<void> showAudioRoutePicker();
+
+  /// Whether the audio device in the group [groupId], as
+  /// `MediaDeviceInfo.groupId` or `AudioRoute.groupId` report it, is
+  /// external, such as a headset or a car.
+  bool isExternalDevice(String? groupId);
 }

@@ -12,13 +12,8 @@ import 'remote_audio_playback.dart';
 
 final _logger = taggedLogger(tag: 'SV:PlatformAudioController');
 
-abstract class InterruptionEvent {}
-
-class InterruptionBeginEvent extends InterruptionEvent {}
-
-class InterruptionEndEvent extends InterruptionEvent {}
-
-abstract class NativeWebRtcEvent {}
+/// A screen share or audio route change the platform reports.
+sealed class NativeWebRtcEvent {}
 
 /// A screen share stopped outside the app's control.
 class ScreenSharingStoppedEvent extends NativeWebRtcEvent {
@@ -59,52 +54,6 @@ class AudioRouteChangedEvent extends NativeWebRtcEvent {
       'AudioRouteChangedEvent{device: $device, reason: ${reason.name}}';
 }
 
-/// Why the audio route changed: iOS's `AVAudioSessionRouteChangeReason`.
-enum AudioRouteChangeReason {
-  /// The reason is not known.
-  unknown(0),
-
-  /// A device became available, such as headphones that were plugged in.
-  newDeviceAvailable(1),
-
-  /// The device in use became unavailable, such as headphones that were
-  /// unplugged.
-  oldDeviceUnavailable(2),
-
-  /// The audio session's category changed.
-  categoryChange(3),
-
-  /// The app overrode the route, such as to the loudspeaker.
-  override(4),
-
-  /// The device woke from sleep.
-  wakeFromSleep(6),
-
-  /// No route suits the audio session's category.
-  noSuitableRouteForCategory(7),
-
-  /// The route's configuration changed without a device being added or
-  /// removed, such as when the audio unit is rebuilt after a CallKit hold.
-  routeConfigurationChange(8);
-
-  const AudioRouteChangeReason(this.code);
-
-  /// The `AVAudioSessionRouteChangeReason` raw value.
-  final int code;
-
-  /// The reason with [code], or [unknown] for a code it does not know.
-  static AudioRouteChangeReason fromCode(int? code) => values.firstWhere(
-    (reason) => reason.code == code,
-    orElse: () => AudioRouteChangeReason.unknown,
-  );
-
-  /// Whether the system re-routed on its own, with no device added or
-  /// removed: after a category change, or when the audio unit was rebuilt,
-  /// such as after a CallKit hold.
-  bool get isSystemReconfiguration =>
-      this == categoryChange || this == routeConfigurationChange;
-}
-
 sealed class SpeechActivityEvent {
   const SpeechActivityEvent();
 }
@@ -125,7 +74,7 @@ class SpeechActivityEnded extends SpeechActivityEvent {
 /// Implemented by the SDK only.
 @sealed
 class PlatformAudioController {
-  PlatformAudioController._internal() {
+  PlatformAudioController._internal(this._engine) {
     // Routes remote audio playback traces.
     remoteAudioPlayback.traceHandler = _tracer.trace;
 
@@ -140,7 +89,16 @@ class PlatformAudioController {
   /// touched when the controller is actually used.
   // ignore: prefer_constructors_over_static_methods, lazy singleton accessor
   static PlatformAudioController get instance =>
-      _instance ??= PlatformAudioController._internal();
+      _instance ??= PlatformAudioController._internal(webRtcEngine);
+
+  /// A controller on [engine] instead of the registered WebRTC engine, for
+  /// testing.
+  @visibleForTesting
+  factory PlatformAudioController.withEngine(rtc.WebRtcEngine engine) =>
+      PlatformAudioController._internal(engine);
+
+  /// The WebRTC engine whose audio this controls.
+  final rtc.WebRtcEngine _engine;
 
   /// Overrides the shared [instance], for testing.
   ///
@@ -165,7 +123,7 @@ class PlatformAudioController {
   /// Emits when the local user starts or stops speaking while the microphone
   /// is muted.
   Stream<SpeechActivityEvent> get speechActivityStream =>
-      platformEvents.onSpeechActivity.map(
+      _events.onSpeechActivity.map(
         (activity) => switch (activity) {
           rtc.SpeechActivity.started => const SpeechActivityStarted(),
           rtc.SpeechActivity.ended => const SpeechActivityEnded(),
@@ -177,15 +135,10 @@ class PlatformAudioController {
   /// browser; on Windows and Linux it never reports.
   @internal
   rtc.SpeechActivityDetector createSpeechActivityDetector() {
-    return platformEvents.createSpeechActivityDetector();
+    return _events.createSpeechActivityDetector();
   }
 
-  /// The events the WebRTC engine reports. Replaceable in tests, because the
-  /// engine reports interruptions only on Android and iOS hosts.
-  /// A replacement does not reach the audio processing trace, which listens
-  /// from construction.
-  @visibleForTesting
-  rtc.WebRtcPlatformEvents platformEvents = webRtcEngine.events;
+  rtc.WebRtcPlatformEvents get _events => _engine.events;
 
   /// Emits `true` when the platform starts interrupting the audio of the
   /// call in progress and `false` when the interruption ends.
@@ -213,11 +166,11 @@ class PlatformAudioController {
 
   void _reportAudioInterruptions() {
     if (_interruptionSubscription != null) return;
-    if (!webRtcEngine.capabilities.reportsAudioInterruptions) return;
+    if (!_engine.capabilities.reportsAudioInterruptions) return;
 
     // Listens before enabling, so an interruption reported while the platform
     // starts reporting them is not missed.
-    final events = platformEvents;
+    final events = _events;
     final subscription = events.onInterruption.listen((interruption) {
       _audioInterruptions.add(interruption == rtc.AudioInterruption.started);
     });
@@ -241,7 +194,7 @@ class PlatformAudioController {
 
   /// The screen share and audio route changes the platform reports.
   Stream<NativeWebRtcEvent> nativeWebRtcEventsStream() {
-    final events = platformEvents;
+    final events = _events;
     return Rx.merge<NativeWebRtcEvent>([
       events.onScreenSharingStopped.map(
         (stopped) => ScreenSharingStoppedEvent(trackId: stopped.trackId),
@@ -255,14 +208,14 @@ class PlatformAudioController {
             groupId: route.groupId,
             kind: RtcMediaDeviceKind.audioOutput,
           ),
-          reason: AudioRouteChangeReason.fromCode(route.reasonCode),
+          reason: route.reason,
         ),
       ),
     ]).asBroadcastStream();
   }
 
   void _listenForAudioProcessingStateChanges() {
-    platformEvents.onAudioProcessingStateChanged.listen((state) {
+    _events.onAudioProcessingStateChanged.listen((state) {
       _tracer.trace(
         TraceTag.audioProcessingStateChanged,
         {
@@ -279,7 +232,7 @@ class PlatformAudioController {
   /// output. The choice is reported as an [AudioRouteChangedEvent]. Throws on
   /// other platforms.
   Future<void> triggeriOSAudioRouteSelectionUI() {
-    return webRtcEngine.audio.showAudioRoutePicker();
+    return _engine.audio.showAudioRoutePicker();
   }
 
   /// Whether [pauseAudioPlayout] can mute remote audio on this platform.
@@ -288,7 +241,7 @@ class PlatformAudioController {
   /// playout is not implemented, so [pauseAudioPlayout] and
   /// [resumeAudioPlayout] do nothing and [isAudioPlayoutPaused] stays `false`.
   bool get isAudioPlayoutPauseSupported =>
-      webRtcEngine.capabilities.supportsAudioPlayoutPause;
+      _engine.capabilities.supportsAudioPlayoutPause;
 
   /// Whether remote audio playout is currently paused via
   /// [pauseAudioPlayout].
@@ -304,13 +257,6 @@ class PlatformAudioController {
 
   final _audioPlayoutPausedController = BehaviorSubject<bool>.seeded(false);
 
-  /// Pauses or resumes playout in the WebRTC engine. Replaceable in tests,
-  /// because the engine only reaches the platform channel on Android, iOS and
-  /// macOS hosts.
-  @visibleForTesting
-  Future<void> Function(bool paused) setPlayoutPaused =
-      webRtcEngine.audio.setPlayoutPaused;
-
   /// Temporarily mutes all audio output (playout) from the app.
   /// This does not affect the microphone, the audio output route or remote
   /// track subscriptions; remote tracks that arrive while paused start muted.
@@ -323,7 +269,7 @@ class PlatformAudioController {
     if (!isAudioPlayoutPauseSupported) return;
 
     _tracer.trace(TraceTag.pauseAudioPlayout, null);
-    await setPlayoutPaused(true);
+    await _engine.audio.setPlayoutPaused(true);
     _setAudioPlayoutPaused(true);
   }
 
@@ -334,7 +280,7 @@ class PlatformAudioController {
     if (!isAudioPlayoutPauseSupported) return;
 
     _tracer.trace(TraceTag.resumeAudioPlayout, null);
-    await setPlayoutPaused(false);
+    await _engine.audio.setPlayoutPaused(false);
     _setAudioPlayoutPaused(false);
   }
 
@@ -370,7 +316,7 @@ class PlatformAudioController {
   /// Throws on other platforms.
   Future<void> regainAndroidAudioFocus() {
     _tracer.trace(TraceTag.regainAndroidAudioFocus, null);
-    return webRtcEngine.audio.regainAndroidAudioFocus();
+    return _engine.audio.regainAndroidAudioFocus();
   }
 
   /// Whether WebRTC can be told that the system manages Android audio focus,
@@ -390,7 +336,7 @@ class PlatformAudioController {
     required bool handledBySystem,
   }) async {
     if (!isSystemManagedAudioFocusSupported) return;
-    await webRtcEngine.audio.setAndroidAudioFocusHandledBySystem(
+    await _engine.audio.setAndroidAudioFocusHandledBySystem(
       handledBySystem,
     );
   }
@@ -403,24 +349,16 @@ class PlatformAudioController {
   Future<void> reinitializeAudioConfiguration(
     AudioConfigurationPolicy policy,
   ) async {
-    // Leaves the Apple audio session as it is; iOS gets the stereo playout
-    // preference below.
+    // Leaves the Apple audio session as it is. Stereo playout is preferred
+    // when voice processing is bypassed, such as under ViewerAudioPolicy.
     final options = policy.toFactoryOptions();
-    await webRtcEngine.configureDefaultFactory(
+    await _engine.configureDefaultFactory(
       refresh: true,
       options: rtc.PeerConnectionFactoryOptions(
         bypassVoiceProcessing: options.bypassVoiceProcessing,
         androidAudioConfiguration: options.androidAudioConfiguration,
+        preferStereoPlayout: policy.bypassVoiceProcessing,
       ),
     );
-
-    // On iOS, configure stereo playout preference based on the policy.
-    // When voice processing is bypassed (e.g. ViewerAudioPolicy), stereo
-    // playout is preferred for high-fidelity audio.
-    if (CurrentPlatform.isIos) {
-      await webRtcEngine.audio.setStereoPlayoutPreferred(
-        policy.bypassVoiceProcessing,
-      );
-    }
   }
 }
