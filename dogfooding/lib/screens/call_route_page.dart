@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:stream_video_filters/video_effects_manager.dart';
@@ -9,6 +11,7 @@ import '../core/repos/app_preferences.dart';
 import '../di/injector.dart';
 import '../router/routes.dart';
 import '../utils/app_call.dart';
+import '../utils/call_encryption.dart';
 import '../utils/call_lookup.dart';
 import 'call_screen.dart';
 import 'lobby_screen.dart';
@@ -75,6 +78,10 @@ class _CallRoutePageState extends State<CallRoutePage> {
   Call? _call;
   bool _callExists = false;
 
+  /// Whether the user only watches [_call], a livestream: they get the
+  /// livestream player instead of the lobby and the call screen.
+  bool _isLivestreamViewer = false;
+
   /// Why the call could not be opened, null while it can.
   String? _error;
 
@@ -103,6 +110,8 @@ class _CallRoutePageState extends State<CallRoutePage> {
         setState(() {
           _call = existing;
           _inCall = true;
+          // A joined call already knows its capabilities.
+          _isLivestreamViewer = _watchesOnly(existing);
         });
         return;
       }
@@ -128,9 +137,11 @@ class _CallRoutePageState extends State<CallRoutePage> {
       }
 
       if (!mounted) return;
+      final callExists = (lookup as Success<bool>).data;
       setState(() {
         _call = call;
-        _callExists = (lookup as Success<bool>).data;
+        _callExists = callExists;
+        _isLivestreamViewer = callExists && _watchesOnly(call);
       });
     } catch (e, stk) {
       debugPrint('Could not open call ${widget.callId}: $e');
@@ -139,8 +150,64 @@ class _CallRoutePageState extends State<CallRoutePage> {
     }
   }
 
-  /// Leaves this page once it is on screen, for a call that is already over.
+  /// Whether [call] is a livestream this user only watches. Hosts, who can
+  /// publish video, go through the lobby to the call screen, and so does an
+  /// encrypted livestream, since the lobby attaches its key.
+  static bool _watchesOnly(Call call) {
+    if (call.type != StreamCallType.liveStream()) return false;
+    if (isCallEncrypted(call.state.value.settings)) return false;
+
+    final capabilities = call.state.value.ownCapabilities;
+    return !capabilities.contains(CallPermission.sendVideo);
+  }
+
+  @override
+  void dispose() {
+    // Leaving this page any way at all (system back included) leaves the
+    // call as the user, so the player is told not to leave it itself.
+    if (_isLivestreamViewer) {
+      unawaited(
+        _call?.leave(
+          reason: const DisconnectReason.left(initiator: LeaveInitiator.user),
+        ),
+      );
+    }
+    super.dispose();
+  }
+
+  /// Keeps the page for a livestream that ended, so the viewer sees that it
+  /// did; any other disconnect closes it.
+  void _onViewerDisconnected(CallDisconnectedProperties properties) {
+    final reason = properties.reason;
+    if (reason is DisconnectReasonEnded) return;
+
+    final message = switch (reason) {
+      DisconnectReasonLeft() => null,
+      DisconnectReasonFailure(:final error) =>
+        'The livestream disconnected: ${error.message}',
+      DisconnectReasonReconnectionFailed() =>
+        "Couldn't restore the connection to the livestream.",
+      DisconnectReasonUnsupportedNetwork() =>
+        'This network blocks calls. Try another network, or turn off your '
+            'VPN.',
+      _ => 'The livestream disconnected.',
+    };
+    if (message != null) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        SnackBar(content: Text(message), behavior: SnackBarBehavior.floating),
+      );
+    }
+    _close();
+  }
+
+  /// Whether [_close] has been asked for, so a second tap does not pop the
+  /// page under this one too.
+  bool _closing = false;
+
+  /// Leaves this page once it is on screen.
   void _close() {
+    if (_closing) return;
+    _closing = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       if (context.canPop()) {
@@ -192,6 +259,20 @@ class _CallRoutePageState extends State<CallRoutePage> {
           child: error != null
               ? _JoinFailed(callId: widget.callId, error: error)
               : const CircularProgressIndicator.adaptive(),
+        ),
+      );
+    }
+
+    if (_isLivestreamViewer) {
+      return LivestreamPlayer(
+        call: call,
+        onCallDisconnected: _onViewerDisconnected,
+        // Closing the page leaves the call; see [dispose].
+        leaveCallOnDispose: false,
+        backButtonBuilder: (context) => StreamToolbarButton.icon(
+          icon: Icon(context.streamIcons.xmark),
+          tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+          onPressed: _close,
         ),
       );
     }
