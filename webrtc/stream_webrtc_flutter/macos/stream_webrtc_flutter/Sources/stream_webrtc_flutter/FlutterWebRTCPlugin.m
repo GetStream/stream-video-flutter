@@ -475,6 +475,9 @@ static FlutterWebRTCPlugin* sharedSingleton;
 - (FlutterError* _Nullable)onListenWithArguments:(id _Nullable)arguments
                                        eventSink:(nonnull FlutterEventSink)sink {
   _eventSink = sink;
+#if TARGET_OS_IPHONE
+  [FlutterBroadcastObserver replayState];
+#endif
   return nil;
 }
 

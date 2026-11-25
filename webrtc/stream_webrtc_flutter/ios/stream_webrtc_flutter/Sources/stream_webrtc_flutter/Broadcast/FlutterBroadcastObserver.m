@@ -7,23 +7,29 @@ static NSString* const kBroadcastStartedNotification =
 static NSString* const kBroadcastStoppedNotification =
     @"io.getstream.video.screen_sharing.broadcastStopped";
 
+/** Whether the extension is broadcasting. Read and written on the main queue. */
+static BOOL sBroadcastActive = NO;
+
+/** Whether a stop was posted while no Dart listener was attached. Main queue. */
+static BOOL sStopMissed = NO;
+
 static void FlutterBroadcastNotificationCallback(CFNotificationCenterRef center,
                                                  void* observer,
                                                  CFNotificationName name,
                                                  const void* object,
                                                  CFDictionaryRef userInfo) {
   NSString* notification = (__bridge NSString*)name;
-  NSString* event = nil;
-  if ([notification isEqualToString:kBroadcastStartedNotification]) {
-    event = @"screenSharingStarted";
-  } else if ([notification isEqualToString:kBroadcastStoppedNotification]) {
-    event = @"screenSharingStopped";
-  }
-  if (event == nil) {
+  BOOL started = [notification isEqualToString:kBroadcastStartedNotification];
+  BOOL stopped = [notification isEqualToString:kBroadcastStoppedNotification];
+  if (!started && !stopped) {
     return;
   }
   dispatch_async(dispatch_get_main_queue(), ^{
-    [[FlutterWebRTCPlugin sharedSingleton] postEventWithName:event data:nil];
+    sBroadcastActive = started;
+    FlutterWebRTCPlugin* plugin = [FlutterWebRTCPlugin sharedSingleton];
+    sStopMissed = stopped && plugin.eventSink == nil;
+    [plugin postEventWithName:started ? @"screenSharingStarted" : @"screenSharingStopped"
+                         data:nil];
   });
 }
 
@@ -39,6 +45,21 @@ static void FlutterBroadcastNotificationCallback(CFNotificationCenterRef center,
                                       (__bridge CFStringRef)name, NULL,
                                       CFNotificationSuspensionBehaviorDeliverImmediately);
     }
+  });
+}
+
++ (void)replayState {
+  dispatch_async(dispatch_get_main_queue(), ^{
+    FlutterWebRTCPlugin* plugin = [FlutterWebRTCPlugin sharedSingleton];
+    if (plugin.eventSink == nil) {
+      return;
+    }
+    if (sBroadcastActive) {
+      [plugin postEventWithName:@"screenSharingStarted" data:nil];
+    } else if (sStopMissed) {
+      [plugin postEventWithName:@"screenSharingStopped" data:nil];
+    }
+    sStopMissed = NO;
   });
 }
 
