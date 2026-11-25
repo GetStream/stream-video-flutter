@@ -18,13 +18,15 @@ import '../../webrtc/rtc_track/rtc_track.dart';
 ///
 /// An audio track that arrives while audio is suspended is disabled and
 /// recorded instead of started, so [resumeSuspendedAudioTracks] can bring it
-/// back.
+/// back. A remote audio track is also kept disabled while incoming audio is
+/// disabled.
 @internal
 class SessionTrackController {
   SessionTrackController({
     required this._rtcManager,
     required this._getTrack,
     required this._isAudioSuspended,
+    required this._isIncomingAudioEnabled,
     required this._localParticipant,
     required this._participants,
     required this._audioOutputSelectedByUser,
@@ -43,6 +45,7 @@ class SessionTrackController {
   final RtcTrack? Function(String trackIdPrefix, SfuTrackType trackType)
   _getTrack;
   final bool Function() _isAudioSuspended;
+  final bool Function() _isIncomingAudioEnabled;
   final CallParticipantState? Function() _localParticipant;
   final List<CallParticipantState> Function() _participants;
   final bool Function() _audioOutputSelectedByUser;
@@ -198,8 +201,51 @@ class SessionTrackController {
     }
   }
 
+  /// Enables or disables every remote audio track to match whether incoming
+  /// audio is enabled. While audio is suspended this leaves the tracks alone:
+  /// [resumeSuspendedAudioTracks] applies it.
+  void applyIncomingAudioEnabled() {
+    if (_isAudioSuspended()) return;
+
+    final rtcManager = _rtcManager();
+    if (rtcManager == null) return;
+
+    final enabled = _isIncomingAudioEnabled();
+    for (final track in rtcManager.remoteTracks.values) {
+      if (!track.isAudioTrack) continue;
+
+      if (enabled) {
+        track.enable();
+      } else {
+        track.disable();
+      }
+    }
+  }
+
+  /// Whether [track] is a remote audio track while incoming audio is
+  /// disabled.
+  bool _isMutedIncomingAudioTrack(RtcTrack track) =>
+      track is RtcRemoteTrack &&
+      track.isAudioTrack &&
+      !_isIncomingAudioEnabled();
+
+  /// Starts [track], disabled from the start when it is a remote audio track
+  /// while incoming audio is disabled.
+  Future<void> _start(RtcTrack track, {required String tag}) {
+    if (track is RtcRemoteTrack && _isMutedIncomingAudioTrack(track)) {
+      _logger.d(
+        () =>
+            '$tag incoming audio disabled, starting ${track.trackId} disabled',
+      );
+      return track.start(enabled: false);
+    }
+
+    return track.start();
+  }
+
   /// Disables an audio track while audio is suspended, and starts any other
-  /// track, re-applying the audio output for audio.
+  /// track, re-applying the audio output for audio. A remote audio track
+  /// starts disabled while incoming audio is disabled.
   Future<void> _startOrSuspend(RtcTrack track, {required String tag}) async {
     if (track.isAudioTrack && _isAudioSuspended()) {
       _logger.d(
@@ -211,7 +257,7 @@ class SessionTrackController {
       return;
     }
 
-    await track.start();
+    await _start(track, tag: tag);
 
     if (track.isAudioTrack) {
       await applyCurrentAudioOutputDevice();
@@ -298,6 +344,15 @@ class SessionTrackController {
           return;
         }
 
+        if (_isMutedIncomingAudioTrack(track)) {
+          _logger.d(
+            () =>
+                '[resumeSuspendedAudioTracks] incoming audio disabled, '
+                'leaving $trackId disabled',
+          );
+          return;
+        }
+
         track.enable();
         _logger.d(
           () => '[resumeSuspendedAudioTracks] re-enabled track $trackId',
@@ -314,7 +369,7 @@ class SessionTrackController {
           return;
         }
 
-        await track.start();
+        await _start(track, tag: '[resumeSuspendedAudioTracks]');
         await applyCurrentAudioOutputDevice();
         _logger.d(
           () => '[resumeSuspendedAudioTracks] started track $trackId',

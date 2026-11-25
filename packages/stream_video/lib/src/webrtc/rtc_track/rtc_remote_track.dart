@@ -24,10 +24,15 @@ class RtcRemoteTrack extends RtcTrack {
   /// The audio sink device id of the track in case it is an audio track.
   final String? audioSinkId;
 
+  /// Starts the track. With [enabled] false the track starts disabled, so
+  /// an audio track plays nothing until it is enabled.
   @override
-  Future<void> start() async {
-    // Enable the track.
-    enable();
+  Future<void> start({bool enabled = true}) async {
+    if (enabled) {
+      enable();
+    } else {
+      disable();
+    }
 
     streamLog.i(_tag, () => 'Starting track: $trackId');
 

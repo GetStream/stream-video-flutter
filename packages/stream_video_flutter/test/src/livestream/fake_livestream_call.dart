@@ -28,6 +28,13 @@ class FakeLivestreamCall extends Mock implements Call {
   Stream<List<CallParticipantState>> get participantsStream =>
       Stream.value(participants);
 
+  /// What [isIncomingAudioEnabled] returns. [setIncomingAudioEnabled] is left
+  /// to the mock, so tests can verify it.
+  bool incomingAudioEnabled = true;
+
+  @override
+  bool get isIncomingAudioEnabled => incomingAudioEnabled;
+
   @override
   Stream<Duration> get callDurationStream =>
       Stream.value(const Duration(seconds: 5));

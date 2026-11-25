@@ -376,6 +376,108 @@ void main() {
     });
   });
 
+  group('backstage audio', () {
+    Future<FakeLivestreamCall> pumpBackstage(
+      WidgetTester tester, {
+      List<CallPermission> ownCapabilities = const [],
+    }) async {
+      final call = FakeLivestreamCall(
+        liveCall.copyWith(
+          isBackstage: true,
+          ownCapabilities: ownCapabilities,
+        ),
+      );
+      await pumpWidget(
+        tester,
+        LivestreamPlayer(
+          call: call,
+          joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+          onCallDisconnected: (_) {},
+        ),
+      );
+      return call;
+    }
+
+    testWidgets('a viewer hears nothing until the livestream is live', (
+      tester,
+    ) async {
+      final call = await pumpBackstage(tester);
+      verify(() => call.setIncomingAudioEnabled(false)).called(1);
+      verifyNever(() => call.setIncomingAudioEnabled(true));
+
+      call.callState = call.callState.copyWith(isBackstage: false);
+      await tester.pump();
+
+      verify(() => call.setIncomingAudioEnabled(true)).called(1);
+    });
+
+    testWidgets('a viewer of a live call is not muted', (tester) async {
+      final call = FakeLivestreamCall(liveCall);
+      await pumpPlayer(tester, call: call);
+
+      verifyNever(() => call.setIncomingAudioEnabled(any()));
+    });
+
+    testWidgets('a user who can join backstage is muted too', (tester) async {
+      final call = await pumpBackstage(
+        tester,
+        ownCapabilities: const [CallPermission.joinBackstage],
+      );
+
+      verify(() => call.setIncomingAudioEnabled(false)).called(1);
+    });
+
+    testWidgets('leaves audio the app disabled itself to the app', (
+      tester,
+    ) async {
+      final call = FakeLivestreamCall(liveCall.copyWith(isBackstage: true))
+        ..incomingAudioEnabled = false;
+      await pumpWidget(
+        tester,
+        LivestreamPlayer(
+          call: call,
+          joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+          onCallDisconnected: (_) {},
+        ),
+      );
+
+      call.callState = call.callState.copyWith(isBackstage: false);
+      await tester.pump();
+      await tester.pumpWidget(const SizedBox());
+
+      verifyNever(() => call.setIncomingAudioEnabled(any()));
+    });
+
+    testWidgets('closing the player in backstage enables the audio again', (
+      tester,
+    ) async {
+      final call = await pumpBackstage(tester);
+      verify(() => call.setIncomingAudioEnabled(false)).called(1);
+
+      await tester.pumpWidget(const SizedBox());
+
+      verify(() => call.setIncomingAudioEnabled(true)).called(1);
+    });
+
+    testWidgets('swapping the call enables the audio of the old one', (
+      tester,
+    ) async {
+      final first = await pumpBackstage(tester);
+      final second = FakeLivestreamCall(liveCall);
+      await pumpWidget(
+        tester,
+        LivestreamPlayer(
+          call: second,
+          joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+          onCallDisconnected: (_) {},
+        ),
+      );
+
+      verify(() => first.setIncomingAudioEnabled(true)).called(1);
+      verifyNever(() => second.setIncomingAudioEnabled(any()));
+    });
+  });
+
   group('call phases', () {
     testWidgets('goes from backstage to live to ended', (tester) async {
       final call = FakeLivestreamCall(liveCall.copyWith(isBackstage: true));
