@@ -137,6 +137,7 @@
 
 ### 🔄 Changed
 
+- [Android] `PlatformAudioController.regainAndroidAudioFocus` acts only during a call, and ends the interruption only when focus is granted.
 - A leave for a failure or an SFU error tells the SFU the error's message, such as `failure: <message>` or `sfu error: <code>: <message>`, rather than the whole error with its stack trace.
 - A failed coordinator request's `StreamVideoException.message` now names the method, host and path, and a request the server never answered ends in a short reason such as `request timed out` or `connection failed` instead of the previous text.
 - Updated `stream_webrtc_flutter` to `^4.0.0`.
