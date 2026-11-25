@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_video/src/utils/user_agent.dart';
+// The library itself, not the barrel, which needs a browser.
+// ignore: implementation_imports
+import 'package:stream_dart_webrtc/src/user_agent.dart';
 
 void main() {
   group('isWebKitUserAgent', () {

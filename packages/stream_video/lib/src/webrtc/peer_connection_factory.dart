@@ -38,17 +38,14 @@ class StreamPeerConnectionFactory {
   rtc.NativePeerConnectionFactory? _nativeFactory;
   Future<rtc.NativePeerConnectionFactory?>? _nativeFactoryFuture;
 
-  /// Whether the platform exposes the per-call native factory APIs.
-  /// Web / desktop fall through to the global webrtc entrypoints because
-  /// per-call factories aren't a concept there.
+  /// Whether the platform has per-call factories. Elsewhere the global webrtc
+  /// entrypoints are used.
   bool get _isPerCallFactorySupported =>
-      CurrentPlatform.isAndroid ||
-      CurrentPlatform.isIos ||
-      CurrentPlatform.isMacOS;
+      rtc.webRtcCapabilities.supportsPerCallFactory;
 
-  /// The per-call native factory, lazily built on first use. Returns null on
-  /// web (no per-call factory concept) so callers can fall back to the
-  /// global webrtc entrypoints.
+  /// The per-call native factory, lazily built on first use. Returns null where
+  /// the platform has no per-call factory, so callers fall back to the global
+  /// webrtc entrypoints.
   Future<rtc.NativePeerConnectionFactory?> ensureNativeFactory() {
     if (!_isPerCallFactorySupported) {
       return Future.value();

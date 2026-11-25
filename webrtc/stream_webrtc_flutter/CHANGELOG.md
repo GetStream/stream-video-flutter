@@ -7,6 +7,7 @@
 * The Android and Apple audio configuration types moved to `stream_webrtc_interface`; this package still exports them.
 * **Breaking:** depends on `stream_dart_webrtc` and `stream_webrtc_interface` instead of `dart_webrtc` and `webrtc_interface`. The re-exported types now come from `stream_webrtc_interface`, so they no longer match `package:webrtc_interface` types.
 * Licensed under the Stream licence; the code from upstream keeps its MIT licence (see `LICENSE`).
+* Added `webRtcCapabilities`, the capabilities of the platform the app runs on.
 * [iOS/macOS] Added `FlutterWebRTCPlugin.audioEngineControl`, for an app that activates the audio session itself, such as through CallKit. `setAudioEngineAvailable:` stops and restarts the audio engine of every peer-connection factory, including ones built later, and `audioEngineStartFailedHandler` is called when the engine cannot be started again. `FlutterWebRTCAudioEngineAvailabilityNotification` and `FlutterWebRTCAudioEngineStartFailedNotification` do the same for code that does not link the plugin.
 * [iOS/macOS] A call whose audio engine was stopped while its playout ran resumes on live audio, instead of replaying the last seconds received while it was stopped, such as what others said during a CallKit hold.
 * [iOS] Added `setCallKitAudioSessionActive:` on `audioEngineControl`, to tell WebRTC that CallKit activated or deactivated the audio session, so WebRTC stops activating or deactivating it itself while CallKit owns it. The availability notification carries it as `FlutterWebRTCAudioSessionActiveKey`.

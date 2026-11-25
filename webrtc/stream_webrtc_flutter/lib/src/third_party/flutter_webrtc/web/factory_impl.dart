@@ -3,7 +3,7 @@ import 'package:meta/meta.dart';
 import '../desktop_capturer.dart';
 
 export 'package:stream_dart_webrtc/stream_dart_webrtc.dart'
-    hide MediaDevices, MediaRecorder, videoRenderer;
+    hide MediaDevices, MediaRecorder, isWebKitUserAgent, videoRenderer;
 
 DesktopCapturer get desktopCapturer => throw UnimplementedError();
 
