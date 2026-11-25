@@ -34,6 +34,8 @@ const macosTree = 'macos/stream_webrtc_flutter/Sources/stream_webrtc_flutter';
 /// other tree or naming it here.
 const iosOnly = <String>{
   'AudioUtils.m',
+  'Broadcast/FlutterBroadcastObserver.h',
+  'Broadcast/FlutterBroadcastObserver.m',
   'Broadcast/FlutterBroadcastScreenCapturer.m',
   'Broadcast/FlutterSocketConnection.m',
   'Broadcast/FlutterSocketConnectionFrameReader.m',

@@ -13,6 +13,7 @@
 #import "include/stream_webrtc_flutter/FlutterRTCMediaStream.h"
 #import "include/stream_webrtc_flutter/FlutterRTCPeerConnection.h"
 #if TARGET_OS_IPHONE
+#import "Broadcast/FlutterBroadcastObserver.h"
 #import "include/stream_webrtc_flutter/FlutterRTCMediaRecorder.h"
 #import "include/stream_webrtc_flutter/FlutterRTCVideoPlatformViewController.h"
 #import "include/stream_webrtc_flutter/FlutterRTCVideoPlatformViewFactory.h"
@@ -362,6 +363,9 @@ static FlutterWebRTCPlugin* sharedSingleton;
 #endif
                                       withTextures:[registrar textures]];
   [registrar addMethodCallDelegate:instance channel:channel];
+#if TARGET_OS_IPHONE
+  [FlutterBroadcastObserver startObserving];
+#endif
 }
 
 - (instancetype)initWithChannel:(FlutterMethodChannel*)channel

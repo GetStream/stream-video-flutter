@@ -141,14 +141,12 @@ abstract class WebRtcPlatformEvents {
   /// The audio device module changed its audio processing. iOS and macOS.
   Stream<AudioProcessingState> get onAudioProcessingStateChanged;
 
-  /// The iOS broadcast extension started a screen share. Posted by
-  /// `stream_video_flutter`'s iOS plugin.
+  /// The iOS broadcast extension started a screen share.
   Stream<void> get onScreenSharingStarted;
 
   /// A screen share stopped outside the app's control: on Android, from the
   /// system UI; on macOS, a share started from the system content picker; on
-  /// iOS, the broadcast extension, posted by `stream_video_flutter`'s iOS
-  /// plugin.
+  /// iOS, the broadcast extension.
   Stream<ScreenSharingStopped> get onScreenSharingStopped;
 
   /// Audio interruptions, reported once [enableInterruptionEvents] has run.
