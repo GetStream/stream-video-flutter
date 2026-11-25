@@ -53,6 +53,9 @@ class CallStateNotifier extends StateNotifier<CallState>
   /// passive OS audio-route change (`AudioRouteChangedEvent`).
   bool audioOutputSelectedByUser = false;
 
+  /// Whether remote audio is played, as set by `Call.setIncomingAudioEnabled`.
+  bool incomingAudioEnabled = true;
+
   // Each listener gets its own selector chain on the value stream, which ends
   // when that listener cancels.
   Stream<T> partialCallStateStream<T>(T Function(CallState state) selector) {

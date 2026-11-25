@@ -525,7 +525,11 @@ class Call {
       for (final entry in tracks.entries) {
         final track = entry.value;
         if (track.isAudioTrack) {
-          final wasEnabled = track.mediaTrack.enabled;
+          // A remote track disabled only because incoming audio is disabled
+          // counts as enabled: the resume disables it again while that lasts.
+          final wasEnabled =
+              track.mediaTrack.enabled ||
+              (track is RtcRemoteTrack && !_stateManager.incomingAudioEnabled);
           _suspendedTrackStates[entry.key] = wasEnabled
               ? SuspendedTrackState.wasEnabled
               : SuspendedTrackState.wasDisabled;
@@ -1691,6 +1695,18 @@ class Call {
   /// setting audio output devices programmatically.
   Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) =>
       _media.setAudioOutputDevice(device);
+
+  /// Sets whether the audio of the other participants is played.
+  ///
+  /// Disabled, the call keeps receiving the audio tracks but plays none of
+  /// them, including tracks that arrive later, until it is enabled again. It
+  /// lasts for this [Call], across reconnects, and does not affect other calls
+  /// or the audio output device.
+  void setIncomingAudioEnabled(bool enabled) {
+    _logger.d(() => '[setIncomingAudioEnabled] enabled: $enabled');
+    _stateManager.incomingAudioEnabled = enabled;
+    _session?.applyIncomingAudioEnabled();
+  }
 
   /// Sets the audio bitrate profile used to publish the microphone.
   ///

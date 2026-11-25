@@ -104,6 +104,10 @@ class LivestreamPlayer extends StatefulWidget {
   final Call call;
 
   /// Defines the behavior for automatically joining the livestream.
+  ///
+  /// A viewer who joins before the livestream is live hears nothing until it
+  /// goes live, through [Call.setIncomingAudioEnabled]. A user with the
+  /// `join-backstage` capability hears the backstage.
   final LivestreamJoinBehaviour joinBehaviour;
 
   /// Whether the player leaves the call when it is disposed, for example
@@ -302,6 +306,12 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   /// back handling must not hold back.
   var _closing = false;
 
+  StreamSubscription<bool>? _backstageAudioSubscription;
+
+  /// Whether this player disabled the call's incoming audio, so it only
+  /// enables what it disabled itself.
+  var _incomingAudioDisabled = false;
+
   @override
   void initState() {
     super.initState();
@@ -313,6 +323,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     }
 
     _leaveOnDisconnect();
+    _muteViewerInBackstage();
   }
 
   void _joinWhenPossible() {
@@ -391,6 +402,26 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     _compositeSubscription.add(_joinSubscription!);
   }
 
+  /// A viewer, who cannot join backstage, hears nothing until the
+  /// livestream is live, even when they joined early.
+  static bool _isBackstageViewer(CallState state) =>
+      state.isBackstage &&
+      !state.ownCapabilities.contains(CallPermission.joinBackstage);
+
+  void _muteViewerInBackstage() {
+    _backstageAudioSubscription = call
+        .partialState(_isBackstageViewer)
+        .listen(_setIncomingAudioDisabled);
+  }
+
+  void _setIncomingAudioDisabled(bool disabled, {Call? target}) {
+    if (disabled == _incomingAudioDisabled) return;
+
+    _logger.d(() => '[setIncomingAudioDisabled] disabled: $disabled');
+    _incomingAudioDisabled = disabled;
+    (target ?? call).setIncomingAudioEnabled(!disabled);
+  }
+
   void _leaveOnDisconnect() {
     _leaveSubscription = call.partialState((state) => state.status).listen((
       status,
@@ -418,6 +449,8 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   @override
   void dispose() {
     _compositeSubscription.dispose();
+    unawaited(_backstageAudioSubscription?.cancel());
+    _setIncomingAudioDisabled(false);
 
     final joinedCall = _joinedCall;
     if (widget.leaveCallOnDispose && joinedCall != null) {
@@ -449,7 +482,13 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
   void didUpdateWidget(LivestreamPlayer oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.call != widget.call) _popPending = false;
+    if (oldWidget.call != widget.call) {
+      _popPending = false;
+
+      unawaited(_backstageAudioSubscription?.cancel());
+      _setIncomingAudioDisabled(false, target: oldWidget.call);
+      _muteViewerInBackstage();
+    }
   }
 
   @override

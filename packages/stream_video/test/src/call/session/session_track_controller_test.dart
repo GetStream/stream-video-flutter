@@ -51,6 +51,7 @@ void main() {
   late MockRtcManager rtcManager;
   RtcManager? manager;
   late bool audioSuspended;
+  late bool incomingAudioEnabled;
   late CallParticipantState? localParticipant;
   late bool selectedByUser;
   late RtcMediaDevice? audioOutput;
@@ -69,6 +70,7 @@ void main() {
     rtcManager = MockRtcManager();
     manager = rtcManager;
     audioSuspended = false;
+    incomingAudioEnabled = true;
     localParticipant = harnessParticipant(
       userId: 'me',
       sessionId: 'me-session',
@@ -94,6 +96,7 @@ void main() {
       rtcManager: () => manager,
       getTrack: (prefix, type) => manager?.getTrack('$prefix:$type'),
       isAudioSuspended: () => audioSuspended,
+      isIncomingAudioEnabled: () => incomingAudioEnabled,
       localParticipant: () => localParticipant,
       participants: () => [
         harnessParticipant(trackIdPrefix: 'alice'),
@@ -438,6 +441,147 @@ void main() {
       });
 
       verifyNever(remoteAudio.start);
+    });
+  });
+
+  group('incoming audio disabled', () {
+    setUp(() => incomingAudioEnabled = false);
+
+    test('a received remote audio track starts disabled', () async {
+      final track = _remote(SfuTrackType.audio);
+      when(track.start).thenAnswer((_) async => events.add('start'));
+      when(track.disable).thenAnswer((_) => events.add('disable'));
+
+      await controller.onRemoteTrackReceived(MockTracedPeerConnection(), track);
+
+      expect(events, ['start', 'disable']);
+    });
+
+    test('a published remote audio track starts disabled', () async {
+      final track = _remote(SfuTrackType.audio);
+      when(track.start).thenAnswer((_) async => events.add('start'));
+      when(track.disable).thenAnswer((_) => events.add('disable'));
+      give(track);
+
+      await controller.onTrackPublished(published(SfuTrackType.audio));
+
+      expect(events, ['start', 'disable']);
+    });
+
+    test('a remote video track starts enabled', () async {
+      final track = _remote(SfuTrackType.video);
+
+      await controller.onRemoteTrackReceived(MockTracedPeerConnection(), track);
+
+      verify(track.start).called(1);
+      verifyNever(track.disable);
+    });
+
+    test('a local audio track starts enabled', () async {
+      final track = _local(SfuTrackType.audio);
+
+      await controller.onLocalTrackPublished(track);
+
+      verify(track.start).called(1);
+      verifyNever(track.disable);
+    });
+
+    group('applyIncomingAudioEnabled', () {
+      late MockRtcRemoteTrack audio;
+      late MockRtcRemoteTrack video;
+
+      setUp(() {
+        audio = _remote(SfuTrackType.audio);
+        video = _remote(SfuTrackType.video, prefix: 'bob');
+        when(() => rtcManager.remoteTracks).thenReturn({
+          audio.trackId: audio,
+          video.trackId: video,
+        });
+      });
+
+      test('disables the remote audio tracks only', () {
+        controller.applyIncomingAudioEnabled();
+
+        verify(audio.disable).called(1);
+        verifyNever(video.disable);
+      });
+
+      test('enables them again once incoming audio is enabled', () {
+        incomingAudioEnabled = true;
+
+        controller.applyIncomingAudioEnabled();
+
+        verify(audio.enable).called(1);
+        verifyNever(video.enable);
+      });
+
+      test('leaves the tracks alone while audio is suspended', () {
+        audioSuspended = true;
+
+        controller.applyIncomingAudioEnabled();
+
+        verifyNever(audio.disable);
+        verifyNever(audio.enable);
+      });
+
+      test('does nothing without a manager', () {
+        manager = null;
+
+        controller.applyIncomingAudioEnabled();
+
+        verifyNever(audio.disable);
+      });
+    });
+
+    group('resumeSuspendedAudioTracks', () {
+      late MockRtcRemoteTrack remoteAudio;
+      late MockRtcLocalTrack localMic;
+
+      setUp(() {
+        remoteAudio = _remote(SfuTrackType.audio);
+        localMic = _local(SfuTrackType.audio);
+        give(remoteAudio);
+        give(localMic);
+        when(
+          () => rtcManager.localTracks,
+        ).thenReturn({localMic.trackId: localMic});
+        when(
+          () => rtcManager.remoteTracks,
+        ).thenReturn({remoteAudio.trackId: remoteAudio});
+      });
+
+      test('keeps an enabled remote track disabled, and still re-enables '
+          'the microphone', () async {
+        await controller.resumeSuspendedAudioTracks({
+          remoteAudio.trackId: SuspendedTrackState.wasEnabled,
+          localMic.trackId: SuspendedTrackState.wasEnabled,
+        });
+
+        verifyNever(remoteAudio.enable);
+        verify(localMic.enable).called(1);
+      });
+
+      test('starts a remote track that never started, disabled', () async {
+        when(remoteAudio.start).thenAnswer((_) async => events.add('start'));
+        when(remoteAudio.disable).thenAnswer((_) => events.add('disable'));
+
+        await controller.resumeSuspendedAudioTracks({
+          remoteAudio.trackId: SuspendedTrackState.neverStarted,
+        });
+
+        expect(events, ['start', 'disable']);
+      });
+
+      test('re-enables an enabled remote track once incoming audio is '
+          'enabled again', () async {
+        incomingAudioEnabled = true;
+
+        await controller.resumeSuspendedAudioTracks({
+          remoteAudio.trackId: SuspendedTrackState.wasEnabled,
+        });
+
+        verify(remoteAudio.enable).called(1);
+      });
     });
   });
 }

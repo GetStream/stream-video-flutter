@@ -169,6 +169,81 @@ void main() {
     });
   });
 
+  group('Call.setIncomingAudioEnabled()', () {
+    late BehaviorSubject<InternetStatus> internetStatusController;
+    late MockCallSession callSession;
+    late MockCallHost mockStreamVideo;
+
+    setUp(() {
+      internetStatusController = BehaviorSubject<InternetStatus>.seeded(
+        InternetStatus.connected,
+      );
+      callSession = _mockSessionForAudioSuspension();
+      mockStreamVideo = setupMockCallHost();
+    });
+
+    tearDown(() async => internetStatusController.close());
+
+    Call createCall() => createTestCall(
+      networkMonitor: setupMockInternetConnection(
+        statusStream: internetStatusController,
+      ),
+      sessionFactory: setupMockSessionFactory(callSession: callSession),
+      streamVideo: mockStreamVideo,
+    );
+
+    test('applies the setting to the active session', () async {
+      final call = createCall();
+      await call.join();
+
+      call.setIncomingAudioEnabled(false);
+
+      verify(callSession.applyIncomingAudioEnabled).called(1);
+    });
+
+    test('a suspension records a remote track it disabled as '
+        'enabled', () async {
+      RtcRemoteTrack remote(String prefix) => RtcRemoteTrack(
+        trackIdPrefix: prefix,
+        trackType: SfuTrackType.audio,
+        mediaStream: FakeMediaStream(),
+        mediaTrack: FakeMediaStreamTrack('$prefix-audio', kind: 'audio'),
+      );
+      final mutedRemote = remote('muted')..mediaTrack.enabled = false;
+      final mic = fakeAudioTrack('mic')..mediaTrack.enabled = false;
+      final rtcManager = MockRtcManager();
+      when(() => rtcManager.localTracks).thenReturn({mic.trackId: mic});
+      when(
+        () => rtcManager.remoteTracks,
+      ).thenReturn({mutedRemote.trackId: mutedRemote});
+      when(
+        rtcManager.reconcileAppleAdmMicrophoneMute,
+      ).thenAnswer((_) async {});
+      when(() => callSession.rtcManager).thenReturn(rtcManager);
+
+      Map<String, SuspendedTrackState>? recorded;
+      when(() => callSession.resumeSuspendedAudioTracks(any())).thenAnswer((
+        invocation,
+      ) async {
+        recorded = {
+          ...invocation.positionalArguments.first
+              as Map<String, SuspendedTrackState>,
+        };
+      });
+
+      final call = createCall();
+      await call.join();
+      call.setIncomingAudioEnabled(false);
+      await call.suspendAudio();
+      await call.resumeAudio();
+
+      expect(recorded, {
+        mutedRemote.trackId: SuspendedTrackState.wasEnabled,
+        mic.trackId: SuspendedTrackState.wasDisabled,
+      });
+    });
+  });
+
   // -------------------------------------------------------------------------
   // resumeAudio
   // -------------------------------------------------------------------------

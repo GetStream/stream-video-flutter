@@ -287,6 +287,7 @@ class CallSessionHarness {
     when(() => stateManager.callState).thenAnswer((_) => _callState.value);
     when(() => stateManager.callStateStream).thenAnswer((_) => _callState);
     when(() => stateManager.audioOutputSelectedByUser).thenReturn(false);
+    when(() => stateManager.incomingAudioEnabled).thenReturn(true);
   }
 
   void _stubSocket() {

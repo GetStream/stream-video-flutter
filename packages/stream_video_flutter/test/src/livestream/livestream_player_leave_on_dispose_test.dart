@@ -66,6 +66,9 @@ void main() {
     ).thenAnswer(
       (_) => const Stream<({bool hasEnded, bool isBackstage})>.empty(),
     );
+    when(
+      () => call.partialState<bool>(any()),
+    ).thenAnswer((_) => const Stream<bool>.empty());
   });
 
   Future<void> pumpPlayerRoute(

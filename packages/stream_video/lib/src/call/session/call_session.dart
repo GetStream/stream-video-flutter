@@ -148,6 +148,7 @@ class CallSession extends Disposable with _CallSessionMedia {
     rtcManager: () => rtcManager,
     getTrack: getTrack,
     isAudioSuspended: () => stateManager.callState.isAudioSuspended,
+    isIncomingAudioEnabled: () => stateManager.incomingAudioEnabled,
     localParticipant: () => stateManager.callState.localParticipant,
     participants: () => stateManager.callState.callParticipants,
     audioOutputSelectedByUser: () => stateManager.audioOutputSelectedByUser,
@@ -776,6 +777,10 @@ class CallSession extends Disposable with _CallSessionMedia {
   @internal
   Future<Result<None>> applyCurrentAudioOutputDevice() =>
       _tracks.applyCurrentAudioOutputDevice();
+
+  /// Enables or disables the remote audio tracks to match
+  /// [CallStateNotifier.incomingAudioEnabled].
+  void applyIncomingAudioEnabled() => _tracks.applyIncomingAudioEnabled();
 
   /// Resumes audio tracks that were suspended or arrived during suspension.
   Future<void> resumeSuspendedAudioTracks(
