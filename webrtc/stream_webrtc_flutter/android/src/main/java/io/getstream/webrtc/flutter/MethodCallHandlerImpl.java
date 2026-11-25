@@ -1236,6 +1236,21 @@ public class MethodCallHandlerImpl implements MethodCallHandler, StateProvider {
         result.success(null);
         break;
       }
+      case "setAndroidAudioFocusManaged": {
+        if (AudioSwitchManager.instance == null) {
+          resultError("setAndroidAudioFocusManaged",
+              "AudioSwitch manager is not initialized. Ensure plugin is attached before switching focus handling.", result);
+          break;
+        }
+        Boolean managed = call.argument("managed");
+        if (managed == null) {
+          resultError("setAndroidAudioFocusManaged", "managed is required", result);
+          break;
+        }
+        AudioSwitchManager.instance.setManageAudioFocus(managed);
+        result.success(null);
+        break;
+      }
       case "clearAndroidCommunicationDevice": {
         AudioSwitchManager.instance.clearCommunicationDevice();
         result.success(null);

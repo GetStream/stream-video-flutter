@@ -175,8 +175,11 @@ class Helper {
       NativeAudioManagement.pauseAudioPlayout();
 
   /// Set the audio configuration to for Android.
-  /// Must be set before initiating a WebRTC session and cannot be changed
-  /// mid session.
+  /// Must be set before initiating a WebRTC session. Mid session, the audio
+  /// mode applies at once and the volume-key stream on the next output
+  /// selection; `manageAudioFocus` switches focus handling for the call in
+  /// progress as [setAndroidAudioFocusManaged] does, and the focus fields
+  /// apply to later focus requests for it.
   static Future<void> setAndroidAudioConfiguration(
     AndroidAudioConfiguration androidAudioConfiguration,
   ) => AndroidNativeAudioManagement.setAndroidAudioConfiguration(
@@ -198,6 +201,27 @@ class Helper {
       return WebRTC.invokeMethod('regainAndroidAudioFocus');
     } else {
       throw Exception('regainAndroidAudioFocus is only supported on Android');
+    }
+  }
+
+  /// Switches whether WebRTC manages Android audio focus, also while a call's
+  /// audio runs, such as for a call the system's call framework (Telecom) holds
+  /// and manages focus for.
+  ///
+  /// Switched off while a call's audio runs, the focus held for it is given
+  /// up, which ends an interruption a focus loss started; the audio mode and
+  /// routing stay. Switched on, focus is requested for it. While no call's
+  /// audio runs, it applies to the next call. Done asynchronously.
+  static Future<void> setAndroidAudioFocusManaged(bool managed) async {
+    if (WebRTC.platformIsAndroid) {
+      return WebRTC.invokeMethod(
+        'setAndroidAudioFocusManaged',
+        <String, dynamic>{'managed': managed},
+      );
+    } else {
+      throw Exception(
+        'setAndroidAudioFocusManaged is only supported on Android',
+      );
     }
   }
 
