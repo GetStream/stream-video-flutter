@@ -34,7 +34,26 @@ class LivestreamEndedContent extends StatefulWidget {
 class _LivestreamEndedContentState extends State<LivestreamEndedContent> {
   static final _logger = taggedLogger(tag: 'SV:LivestreamEnded');
 
-  late var _recordings = _fetchRecordings();
+  Future<Result<List<CallRecording>>>? _recordings;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRecordingsIfShown();
+  }
+
+  @override
+  void didUpdateWidget(LivestreamEndedContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.call != oldWidget.call) _recordings = null;
+    _fetchRecordingsIfShown();
+  }
+
+  /// Lists the call's recordings when they are shown and not fetched yet.
+  void _fetchRecordingsIfShown() {
+    if (!widget.showRecordings) return;
+    _recordings ??= _fetchRecordings();
+  }
 
   void _retry() => setState(() => _recordings = _fetchRecordings());
 
