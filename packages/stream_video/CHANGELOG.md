@@ -97,6 +97,7 @@
 
 ### ✅ Added
 
+- `CallMetrics.subscriber.latency` holds the round-trip time of the connection this client subscribes on.
 - `AudioConfigurationPolicy.toFactoryOptions` returns the settings a peer connection factory is built with under the policy.
 - Added `PushNotificationManager.systemManagedCallCids`, the calls whose audio focus the system manages, such as Android's Telecom; WebRTC leaves the focus of those calls alone.
 - `StreamVideoOptions.ringingAudioConfigurationPolicy`, the audio configuration policy of ringing calls, incoming and outgoing. It falls back to `audioConfigurationPolicy` when null, the default. A call's own policy, from `CallPreferences.audioConfigurationPolicy` or `Call.setAudioConfigurationPolicy`, still wins. With the push notification package on iOS, a call answered from the CallKit screen gets its audio settings from the start.

@@ -8,6 +8,9 @@
 - Added `StreamLivestreamTile`, the livestream's video with its live, viewer count and fullscreen toolbar and an optional speakerphone toggle, used by both host and viewers, with `StreamLivestreamTileThemeData` on `StreamVideoTheme` and a `livestreamTile` builder in `streamVideoComponentBuilders`.
 - Added `type` and `size` to `LivestreamSpeakerphoneOption`.
 - Added `StreamLiveIndicator` and `StreamSpectatorsIndicator`, the livestream's LIVE pill and viewer count, with `StreamLiveIndicatorThemeData` and `StreamSpectatorsIndicatorThemeData` on `StreamVideoTheme`.
+- Added `StreamCallParticipantsBadge` and `StreamCallLatencyBadge`, with `StreamCallParticipantsBadgeThemeData` and `StreamCallLatencyBadgeThemeData` on `StreamVideoTheme`.
+- Added `StreamCallBadgeThemeData` on `StreamVideoTheme`, and `StreamCallBadgeTheme`, to restyle the duration, participants and latency badges in one place.
+- Added `callParticipantsSpoken`, `callLatencySpoken`, `callLatencyUnknownSpoken` and `callLatencyUnit` to the localizations, in English and Dutch.
 - Added `StreamMediaDevicesController.supportsAudioOutputSelection`; `audioOutputs` is empty where it is false.
 - Added `anchorPoint` to `showStreamModalDialog`, which picks the half of a folded window the dialog goes to.
 - Added `StreamCallConnectionBanner`, which says what the call's connection is doing while it reconnects.
@@ -227,6 +230,7 @@
 - The ended screen shows `livestreamEndedTitle` and `livestreamEndedSubtitle`; `livestreamEndedStatus` is no longer shown.
 - Back leaves the `LivestreamPlayer`'s fullscreen before it leaves the screen.
 - `LivestreamPlayer` shows the hosts' avatars while none of them has video; `livestreamHostsUnavailableBuilder` now only shows while no host is in the call.
+- On desktop and web, `StreamCallDurationBadge` uses `captionEmphasis` and 16px indicators; its content height defaults to 20 rather than the indicator size.
 - On a folded window, `showStreamModalDialog` goes to the trailing half by default, and `StreamAdaptiveMenuAnchor`'s sheet to the half its button is in.
 - On a window folded down the middle, `StreamLobbyView` puts the preview and the rest of the lobby on either side of the fold, and `CallControlBar` splits its centre controls between its two sides.
 - `StreamCallContent` keeps showing the participants during a reconnect, and after one fails until the call has left, with a `StreamCallConnectionBanner` above them instead of the centred "Reconnecting" text.

@@ -1,8 +1,11 @@
 export 'adaptive_menu_anchor_theme.dart';
 export 'call_app_bar_theme.dart';
+export 'call_badge_theme.dart';
 export 'call_button_badge_theme.dart';
 export 'call_control_bar_theme.dart';
 export 'call_duration_badge_theme.dart';
+export 'call_latency_badge_theme.dart';
+export 'call_participants_badge_theme.dart';
 export 'call_participants_grid_theme.dart';
 export 'call_participants_spotlight_theme.dart';
 export 'connection_quality_indicator_theme.dart';

@@ -87,6 +87,11 @@ class StreamCallDurationBadgeThemeData with _$StreamCallDurationBadgeThemeData {
 }
 
 /// Visual styling properties for a [StreamCallDurationBadge].
+///
+/// When null, [padding], [contentHeight], [spacing], [indicatorSize],
+/// [backgroundColor], [borderRadius] and [textStyle] fall back to the shared
+/// [StreamCallBadgeStyle] on [StreamCallBadgeTheme], so one theme can restyle
+/// every call badge.
 @themeGen
 @immutable
 class StreamCallDurationBadgeStyle with _$StreamCallDurationBadgeStyle {
@@ -114,13 +119,13 @@ class StreamCallDurationBadgeStyle with _$StreamCallDurationBadgeStyle {
 
   /// The height the content is held to, whatever it is showing.
   ///
-  /// Defaults to [indicatorSize]. The timestamp's own box is shorter than an
-  /// icon, so without this a badge showing the time alone would be shorter than
-  /// one carrying indicators.
+  /// Defaults to 20, so the pill is 32 tall whether or not it carries
+  /// indicators.
   final double? contentHeight;
 
-  /// The gap between the indicators and the timestamp. Defaults to
-  /// `spacing.xs`.
+  /// The gap between the indicators and the timestamp.
+  ///
+  /// Defaults to `spacing.xxs` on desktop and web and `spacing.xs` on mobile.
   ///
   /// Charged only when there is an indicator to separate.
   final double? spacing;
@@ -128,8 +133,9 @@ class StreamCallDurationBadgeStyle with _$StreamCallDurationBadgeStyle {
   /// The gap between two indicators. Defaults to `spacing.xxxs`.
   final double? indicatorSpacing;
 
-  /// The size of an indicator icon. Defaults to 20, the design system's medium
-  /// icon.
+  /// The size of an indicator icon.
+  ///
+  /// Defaults to 16 on desktop and web and 20 on mobile.
   final double? indicatorSize;
 
   /// The pill's fill. Defaults to `colorScheme.backgroundSurface`.
@@ -140,7 +146,8 @@ class StreamCallDurationBadgeStyle with _$StreamCallDurationBadgeStyle {
 
   /// The timestamp's style, and the colour the time not yet elapsed takes.
   ///
-  /// Defaults to `textTheme.bodyEmphasis` in `colorScheme.textTertiary`, at
+  /// Defaults to `textTheme.captionEmphasis` on desktop and web and
+  /// `textTheme.bodyEmphasis` on mobile, in `colorScheme.textTertiary`, at
   /// `height: 1` and with tabular figures — so the digits centre against the
   /// indicators and the pill holds still as the seconds tick.
   final TextStyle? textStyle;
