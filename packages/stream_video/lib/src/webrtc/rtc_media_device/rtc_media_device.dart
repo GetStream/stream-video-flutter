@@ -1,5 +1,8 @@
 import 'package:equatable/equatable.dart';
 
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
+
+import '../../logger/stream_log.dart';
 import '../webrtc_engine.dart';
 
 enum RtcMediaDeviceKind {
@@ -54,8 +57,16 @@ class RtcMediaDevice extends Equatable {
   }
 
   /// Whether this device is an external audio device, such as a headset or a
-  /// car, as the WebRTC engine reports it.
-  bool get isExternal => webRtcEngine.audio.isExternalDevice(groupId);
+  /// car, as the WebRTC engine reports it. False while no engine is
+  /// registered.
+  bool get isExternal {
+    ensureWebRtcEngine();
+    if (!WebRtcEngine.isRegistered) {
+      streamLog.w('SV:RtcMediaDevice', () => 'No WebRtcEngine registered');
+      return false;
+    }
+    return WebRtcEngine.instance.audio.isExternalDevice(groupId);
+  }
 
   bool get isSpeaker => id.toLowerCase() == 'speaker';
 

@@ -12,4 +12,13 @@ void main() {
 
     expect(WebRtcEngine.instance, isA<NativeWebRtcEngine>());
   });
+
+  test('keeps an engine registered before it', () {
+    final engine = NativeWebRtcEngine();
+    WebRtcEngine.instance = engine;
+
+    StreamVideoFlutterEngineRegistrant.registerWith();
+
+    expect(WebRtcEngine.instance, same(engine));
+  });
 }

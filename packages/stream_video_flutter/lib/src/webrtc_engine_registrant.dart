@@ -10,8 +10,10 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 @internal
 // ignore: avoid_classes_with_only_static_members, the shape Flutter's plugin registrant calls
 class StreamVideoFlutterEngineRegistrant {
-  /// Registers a [NativeWebRtcEngine] as `WebRtcEngine.instance`.
+  /// Registers a [NativeWebRtcEngine] as `WebRtcEngine.instance`, unless an
+  /// engine is registered already.
   static void registerWith() {
+    if (WebRtcEngine.isRegistered) return;
     WebRtcEngine.instance = NativeWebRtcEngine();
   }
 }
