@@ -669,7 +669,7 @@ class LocalMediaController {
             IosBroadcastOwner.instance.onStopped();
             _dropBroadcastOption();
             // On iOS only one broadcast extension can be active at a time
-            setScreenShareEnabled(enabled: false);
+            unawaited(_disableScreenShareOnStop());
           } else {
             final trackId = event.trackId;
             final localParticipant = _state.localParticipant;
@@ -680,7 +680,7 @@ class LocalMediaController {
               );
 
               if (track?.mediaTrack.id == trackId) {
-                setScreenShareEnabled(enabled: false);
+                unawaited(_disableScreenShareOnStop());
               }
             }
           }
@@ -696,6 +696,14 @@ class LocalMediaController {
           return;
       }
     });
+  }
+
+  /// Turns the screen share off after the platform stopped it.
+  Future<void> _disableScreenShareOnStop() async {
+    final result = await setScreenShareEnabled(enabled: false);
+    if (result case Failure(:final error)) {
+      _logger.w(() => '[onScreenSharingStopped] disable failed: $error');
+    }
   }
 
   /// Whether [setAudioOutputDevice] is applying an output. The system
@@ -1323,7 +1331,7 @@ class LocalMediaController {
             SfuTrackType.screenShare,
           );
     if (shared != null && shared.mediaTrack.enabled) {
-      _logger.v(() => '[onBroadcastStarted] already sharing');
+      _logger.w(() => '[onBroadcastStarted] skipped: a screen share is live');
       return;
     }
 
