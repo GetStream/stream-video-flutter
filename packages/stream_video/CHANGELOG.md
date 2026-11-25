@@ -5,7 +5,7 @@
 - The app-wide audio members of `RtcMediaDeviceNotifier` moved to `PlatformAudioController.instance`: `handleCallInterruptionCallbacks`, `nativeWebRtcEventsStream`, `speechActivityStream`, `triggeriOSAudioRouteSelectionUI`, `isAudioPlayoutPauseSupported`, `isAudioPlayoutPaused`, `audioPlayoutPausedChanges`, `pauseAudioPlayout`, `resumeAudioPlayout`, `resumeWebAudioPlayback`, `regainAndroidAudioFocus` and `reinitializeAudioConfiguration`.
 - `PlatformAudioController` is `@sealed`, so a test mock that implements it gets a `subtype_of_sealed_class` warning; add `// ignore: subtype_of_sealed_class` to it.
 - `ScreenSharingStoppedEvent` carries a `trackId` instead of a `data` map, and `ScreenSharingStartedEvent` has no `data`.
-- `handleCallInterruptionCallbacks`, now on `PlatformAudioController`, no longer takes `androidInterruptionSource`. On Android an interruption is now the call losing its audio focus, and the phone call state is no longer read, so the app does not need `READ_PHONE_STATE` for it. The call state also reports the app's own calls registered with Telecom, so the app's own incoming call was reported as an interruption of the call in progress, and a real interruption during such a call was dropped.
+- `handleCallInterruptionCallbacks`, now on `PlatformAudioController`, no longer takes `androidInterruptionSource`; on Android an interruption is now only a loss of audio focus, so `READ_PHONE_STATE` is not needed.
 - `PushNotificationManager` has a new method, `setCallAudioOutputDeviceByCid`. A class that `implements` it has to add it; one that `extends` it inherits a no-op.
 - `PushNotificationManager` has three new methods that a call uses to tell the native call UI what happened: `onRingEnded` when its ring is over before the user answered it on this device, `onCallLeft` when a call this device joined or accepted is left, and `onCallAccepted` when the user accepts it in the app. A class that `implements` it has to add them; one that `extends` it inherits `onRingEnded` and `onCallLeft` calling `endCallByCid`, silently for `onRingEnded`, and an `onCallAccepted` that does nothing.
 - `RingingEvent` has a new subtype, `ActionCallDismissed`, so an exhaustive `switch` over ringing events needs a case for it. `disposeAfterResolvingRinging` no longer disposes on `ActionCallTimeout`, which iOS sends when CallKit's ring times out and Android now sends when a ring times out natively, so the client's own ring timeout can still reject the call.
@@ -137,6 +137,7 @@
 
 ### 🔄 Changed
 
+- [Android] `PlatformAudioController.regainAndroidAudioFocus` acts only during a call, and ends the interruption only when focus is granted.
 - A leave for a failure or an SFU error tells the SFU the error's message, such as `failure: <message>` or `sfu error: <code>: <message>`, rather than the whole error with its stack trace.
 - A failed coordinator request's `StreamVideoException.message` now names the method, host and path, and a request the server never answered ends in a short reason such as `request timed out` or `connection failed` instead of the previous text.
 - Updated `stream_webrtc_flutter` to `^4.0.0`.
