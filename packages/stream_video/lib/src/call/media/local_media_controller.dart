@@ -36,7 +36,7 @@ import '../call_events.dart';
 import '../session/call_session.dart';
 import '../state/call_state_notifier.dart';
 import '../stats/sfu_stats_reporter.dart';
-import 'ios_broadcast_owner.dart';
+import 'ios_broadcast_screen_share.dart';
 
 /// Owns a call's connect options and its local media: the camera,
 /// microphone and screen share, and the audio and video devices.
@@ -96,13 +96,19 @@ class LocalMediaController {
   /// [onAppResumed].
   bool _isAppPaused = false;
 
-  /// The constraints of the last iOS broadcast share requested through
-  /// [setScreenShareEnabled], used once the broadcast starts.
-  ScreenShareConstraints? _broadcastConstraints;
-
-  /// A broadcast that started while no session could share it, shared by
-  /// the next session that applies the connect options.
-  ScreenShareConstraints? _pendingBroadcast;
+  /// The screen share through the iOS broadcast extension.
+  late final IosBroadcastScreenShare _broadcast = IosBroadcastScreenShare(
+    stateManager: _stateManager,
+    session: _session,
+    applyScreenShare: _applyScreenShare,
+    readConnectOptions: () => _connectOptions,
+    writeConnectOptions: (options) => _connectOptions = options,
+    hasPermission: _hasPermission,
+    rtcMediaDeviceNotifier: _rtcMediaDeviceNotifier,
+    defaultTarget: () => _defaultBroadcastTarget()?._broadcast,
+    onCallEvent: _onCallEvent,
+    logger: _logger,
+  );
 
   /// Whether the platform interrupts the call's audio with the microphone to
   /// be off for it.
@@ -315,7 +321,7 @@ class LocalMediaController {
   }) async {
     _optionsAppliedBy = session;
     _connectOptionsOverride = null;
-    _takePendingBroadcast();
+    _broadcast.takePending();
     _logger.d(
       () =>
           '[applyConnectOptions] connectOptions: $_connectOptions, '
@@ -538,8 +544,8 @@ class LocalMediaController {
           ? screenShareOption.constraints as ScreenShareConstraints?
           : null;
 
-      if (constraints != null && _isRunningBroadcast(constraints)) {
-        return _recaptureBroadcast(constraints);
+      if (constraints != null && _broadcast.isRunning(constraints)) {
+        return _broadcast.recapture(constraints);
       }
 
       return setScreenShareEnabled(
@@ -671,8 +677,7 @@ class LocalMediaController {
       switch (event) {
         case ScreenSharingStoppedEvent _:
           if (CurrentPlatform.isIos) {
-            IosBroadcastOwner.instance.onStopped();
-            _dropBroadcastOption();
+            _broadcast.onStopped();
             // On iOS only one broadcast extension can be active at a time
             unawaited(_disableScreenShareOnStop());
           } else {
@@ -691,8 +696,7 @@ class LocalMediaController {
           }
           break;
         case ScreenSharingStartedEvent _:
-          IosBroadcastOwner.instance.onStarted();
-          unawaited(_onBroadcastStarted());
+          unawaited(_broadcast.onStarted());
           break;
         case AudioRouteChangedEvent _:
           onAudioRouteChanged(event);
@@ -1165,19 +1169,15 @@ class LocalMediaController {
         ScreenShareSource.forPlatform().usesBroadcastExtension(
           updatedConstraints,
         )) {
-      return _requestBroadcast(updatedConstraints);
+      return _broadcast.request(updatedConstraints);
     }
 
     return _applyScreenShare(enabled: enabled, constraints: updatedConstraints);
   }
 
   /// Screen share constraints at the call's screen share resolution.
-  ScreenShareConstraints _defaultScreenShareConstraints({
-    bool useiOSBroadcastExtension = false,
-  }) {
-    return ScreenShareConstraints(
-      useiOSBroadcastExtension: useiOSBroadcastExtension,
-    ).copyWith(
+  ScreenShareConstraints _defaultScreenShareConstraints() {
+    return const ScreenShareConstraints().copyWith(
       params: _connectOptions.screenShareTargetResolution?.toVideoParams(
         defaultBitrate: RtcVideoParametersPresets.k1080pBitrate,
       ),
@@ -1206,197 +1206,10 @@ class LocalMediaController {
     return result.map((_) => none);
   }
 
-  /// Shows the picker of the iOS broadcast extension. The share starts when
-  /// the broadcast does, in [_onBroadcastStarted].
-  Future<Result<None>> _requestBroadcast(
-    ScreenShareConstraints constraints,
-  ) async {
-    _broadcastConstraints = constraints;
-    IosBroadcastOwner.instance.request(this);
-    try {
-      await _rtcMediaDeviceNotifier().presentiOSBroadcastPicker();
-      return const Result.success(none);
-    } catch (error, stackTrace) {
-      _logger.e(() => '[requestBroadcast] failed to show the picker: $error');
-      releaseBroadcastRequest();
-      return failureWithError(
-        'Failed to show the broadcast picker',
-        cause: error,
-        stackTrace: stackTrace,
-      );
-    }
-  }
-
   /// Forgets this call's request for an iOS broadcast, so a broadcast that
   /// starts later is not shared with its constraints, and another call can
   /// take a broadcast nobody requested.
-  void releaseBroadcastRequest() {
-    _broadcastConstraints = null;
-    _pendingBroadcast = null;
-    IosBroadcastOwner.instance.release(this);
-  }
-
-  /// Whether [constraints] capture the iOS broadcast extension while it is
-  /// broadcasting.
-  bool _isRunningBroadcast(ScreenShareConstraints constraints) {
-    return IosBroadcastOwner.instance.isActive &&
-        ScreenShareSource.forPlatform().usesBroadcastExtension(constraints);
-  }
-
-  /// Captures the running iOS broadcast again for a new session, without
-  /// showing the picker.
-  Future<Result<None>> _recaptureBroadcast(
-    ScreenShareConstraints constraints,
-  ) async {
-    if (!_hasPermission(CallPermission.screenshare)) {
-      return failureWithError(
-        'Missing permission to share screen for the user',
-      );
-    }
-    return _applyScreenShare(enabled: true, constraints: constraints);
-  }
-
-  /// Turns off a screen share option that captures the iOS broadcast
-  /// extension, so a later session does not capture a stopped broadcast.
-  void _dropBroadcastOption() {
-    final option = _connectOptions.screenShare;
-    if (option is! TrackEnabled) return;
-    final constraints = option.constraints;
-    if (constraints is! ScreenShareConstraints ||
-        !ScreenShareSource.forPlatform().usesBroadcastExtension(constraints)) {
-      return;
-    }
-    _connectOptions = _connectOptions.copyWith(
-      screenShare: TrackOption.disabled(),
-    );
-  }
-
-  /// Whether this call shares the iOS broadcast that started: the call that
-  /// requested it, or with no request, the client's active call.
-  bool _ownsBroadcast() {
-    final owner = IosBroadcastOwner.instance;
-    if (owner.hasRequest) return owner.isRequestedBy(this);
-    final target = _defaultBroadcastTarget();
-    if (target == null) owner.markUnclaimed();
-    return identical(target, this);
-  }
-
-  /// Whether a share now would reach no session or one being replaced.
-  bool _awaitsSession() {
-    if (_session() == null) return true;
-    final status = _state.status;
-    return status.isMigrating ||
-        (status.isReconnecting && !status.isFastReconnecting);
-  }
-
-  /// Writes a broadcast that started before this session into the connect
-  /// options, so the session shares it.
-  void _takePendingBroadcast() {
-    var pending = _pendingBroadcast;
-    _pendingBroadcast = null;
-    if (pending == null &&
-        identical(_defaultBroadcastTarget(), this) &&
-        IosBroadcastOwner.instance.claim()) {
-      pending = _defaultScreenShareConstraints(useiOSBroadcastExtension: true);
-    }
-    if (pending == null) return;
-
-    _logger.d(() => '[applyConnectOptions] sharing the running broadcast');
-    _connectOptions = _connectOptions.copyWith(
-      screenShare: TrackOption.enabled(constraints: pending),
-    );
-  }
-
-  /// Shares the screen once the iOS broadcast extension has started, with
-  /// the constraints of the last request or the default broadcast ones.
-  ///
-  /// Skipped in a call that does not own the broadcast, while the call has no
-  /// session, while a screen share is live and without the screenshare
-  /// permission. A missing permission or a failed share ends the broadcast
-  /// and is reported as a [StreamCallScreenShareFailedEvent].
-  Future<void> _onBroadcastStarted() async {
-    if (!_ownsBroadcast()) {
-      _logger.v(() => '[onBroadcastStarted] shared by another call');
-      return;
-    }
-
-    final session = _session();
-    if (session == null || _awaitsSession()) {
-      _logger.i(() => '[onBroadcastStarted] shared once a session applies');
-      _pendingBroadcast =
-          _broadcastConstraints ??
-          _defaultScreenShareConstraints(useiOSBroadcastExtension: true);
-      return;
-    }
-
-    final localParticipant = _state.localParticipant;
-    final shared = localParticipant == null
-        ? null
-        : session.getTrack(
-            localParticipant.trackIdPrefix,
-            SfuTrackType.screenShare,
-          );
-    if (shared != null && shared.mediaTrack.enabled) {
-      _logger.w(() => '[onBroadcastStarted] skipped: a screen share is live');
-      return;
-    }
-
-    if (!_hasPermission(CallPermission.screenshare)) {
-      _logger.w(() => '[onBroadcastStarted] missing screenshare permission');
-      await _stopBroadcast();
-      _reportBroadcastFailure(ScreenShareFailureReason.missingPermission);
-      return;
-    }
-
-    try {
-      final result = await _applyScreenShare(
-        enabled: true,
-        constraints:
-            _broadcastConstraints ??
-            _defaultScreenShareConstraints(useiOSBroadcastExtension: true),
-      );
-      if (result case Failure(:final error)) {
-        _logger.e(() => '[onBroadcastStarted] share failed: $error');
-        await _stopBroadcast();
-        _reportBroadcastFailure(
-          ScreenShareFailureReason.publishFailed,
-          error: error,
-        );
-      }
-    } catch (error, stackTrace) {
-      _logger.e(() => '[onBroadcastStarted] share failed: $error\n$stackTrace');
-      await _stopBroadcast();
-      _reportBroadcastFailure(
-        ScreenShareFailureReason.publishFailed,
-        error: error,
-      );
-    }
-  }
-
-  /// Reports a broadcast this call could not share on the call's events.
-  void _reportBroadcastFailure(
-    ScreenShareFailureReason reason, {
-    Object? error,
-  }) {
-    _onCallEvent(
-      StreamCallScreenShareFailedEvent(
-        _state.callCid,
-        reason: reason,
-        error: error,
-      ),
-    );
-  }
-
-  /// Asks the iOS broadcast extension to finish the broadcast this call could
-  /// not share. The local participant is not sharing.
-  Future<void> _stopBroadcast() async {
-    _stateManager.participantSetScreenShareEnabled(enabled: false);
-    try {
-      await _rtcMediaDeviceNotifier().stopiOSBroadcast();
-    } catch (error) {
-      _logger.e(() => '[stopBroadcast] failed: $error');
-    }
-  }
+  void releaseBroadcastRequest() => _broadcast.releaseRequest();
 
   void _onScreenShareEnabled({
     required bool enabled,

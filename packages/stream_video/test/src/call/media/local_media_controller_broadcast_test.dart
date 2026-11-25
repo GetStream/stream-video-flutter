@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_video/src/call/media/ios_broadcast_owner.dart';
+import 'package:stream_video/src/call/media/ios_broadcast_screen_share.dart';
 import 'package:stream_video/src/call/media/local_media_controller.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/stream_video.dart';
@@ -60,7 +60,7 @@ void main() {
   setUp(() {
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
     overrideWebRtcCapabilities(platform: PlatformType.ios);
-    IosBroadcastOwner.instance.reset();
+    IosBroadcastScreenShare.resetOwnership();
     session = _session();
     notifier = MockRtcMediaDeviceNotifier();
     when(notifier.presentiOSBroadcastPicker).thenAnswer((_) async {});

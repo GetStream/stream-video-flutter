@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_video/src/call/media/ios_broadcast_owner.dart';
+import 'package:stream_video/src/call/media/ios_broadcast_screen_share.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
@@ -90,7 +90,7 @@ void main() {
 
   setUp(() {
     overrideWebRtcCapabilities(platform: PlatformType.ios);
-    IosBroadcastOwner.instance.reset();
+    IosBroadcastScreenShare.resetOwnership();
     harness = ConnectionHarness();
     final clientState = harness.streamVideo.state;
     when(() => clientState.setActiveCall(any())).thenAnswer((
