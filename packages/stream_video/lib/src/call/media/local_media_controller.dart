@@ -1056,6 +1056,7 @@ class LocalMediaController {
   }) {
     _microphoneMutedInBackground = false;
     _microphoneMutedByInterruption = false;
+    _muteMicrophoneWhileInterrupted = false;
     return _setMicrophoneEnabled(
       enabled: enabled,
       constraints: constraints,
