@@ -418,13 +418,13 @@ void main() {
       verifyNever(() => call.setIncomingAudioEnabled(any()));
     });
 
-    testWidgets('a user who can join backstage is not muted', (tester) async {
+    testWidgets('a user who can join backstage is muted too', (tester) async {
       final call = await pumpBackstage(
         tester,
         ownCapabilities: const [CallPermission.joinBackstage],
       );
 
-      verifyNever(() => call.setIncomingAudioEnabled(any()));
+      verify(() => call.setIncomingAudioEnabled(false)).called(1);
     });
 
     testWidgets('closing the player in backstage enables the audio again', (

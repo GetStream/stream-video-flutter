@@ -105,9 +105,8 @@ class LivestreamPlayer extends StatefulWidget {
 
   /// Defines the behavior for automatically joining the livestream.
   ///
-  /// A viewer who joins before the livestream is live hears nothing until it
-  /// goes live, through [Call.setIncomingAudioEnabled]. A user with the
-  /// `join-backstage` capability hears the backstage.
+  /// A player that joins before the livestream is live plays no audio until
+  /// it goes live, through [Call.setIncomingAudioEnabled].
   final LivestreamJoinBehaviour joinBehaviour;
 
   /// Whether the player leaves the call when it is disposed, for example
@@ -323,7 +322,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     }
 
     _leaveOnDisconnect();
-    _muteViewerInBackstage();
+    _muteInBackstage();
   }
 
   void _joinWhenPossible() {
@@ -402,15 +401,13 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     _compositeSubscription.add(_joinSubscription!);
   }
 
-  /// A viewer, who cannot join backstage, hears nothing until the
-  /// livestream is live, even when they joined early.
-  static bool _isBackstageViewer(CallState state) =>
-      state.isBackstage &&
-      !state.ownCapabilities.contains(CallPermission.joinBackstage);
+  static bool _isBackstage(CallState state) => state.isBackstage;
 
-  void _muteViewerInBackstage() {
+  /// The player plays nothing until the livestream is live, even when it
+  /// joined early.
+  void _muteInBackstage() {
     _backstageAudioSubscription = call
-        .partialState(_isBackstageViewer)
+        .partialState(_isBackstage)
         .listen(_setIncomingAudioDisabled);
   }
 
@@ -487,7 +484,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
 
       unawaited(_backstageAudioSubscription?.cancel());
       _setIncomingAudioDisabled(false, target: oldWidget.call);
-      _muteViewerInBackstage();
+      _muteInBackstage();
     }
   }
 
