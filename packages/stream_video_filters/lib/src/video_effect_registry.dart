@@ -1,13 +1,18 @@
 import 'package:meta/meta.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
-/// The native effects attached to each local video track.
+/// The native effects attached to each local video track, and whether the
+/// processors registered so far are still registered.
 ///
 /// Each filter attaches and detaches only its own effect, and every change
 /// sends the track's whole list.
 @internal
 class VideoEffectRegistry {
   VideoEffectRegistry._();
+
+  /// Bumped when every processor is unregistered, so a filter registers its
+  /// processor again the next time it is applied.
+  static int generation = 0;
 
   static final _effects = <String, List<String>>{};
 
@@ -47,5 +52,6 @@ class VideoEffectRegistry {
   @visibleForTesting
   static void reset() {
     _effects.clear();
+    generation = 0;
   }
 }

@@ -90,7 +90,7 @@ final class WebRtcCapabilities {
 
   /// Whether frame processors registered by name in the plugin's
   /// `ProcessorProvider` can be attached to a local video track through
-  /// `setVideoEffects`. Android, iOS and macOS.
+  /// `setVideoEffects`. Android and iOS.
   final bool supportsVideoEffects;
 
   WebRtcCapabilities copyWith({

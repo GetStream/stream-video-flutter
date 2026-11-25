@@ -86,7 +86,7 @@ void main() {
         ),
         'supportsVideoEffects': (
           (c) => c.supportsVideoEffects,
-          {_Platform.android, _Platform.ios, _Platform.macos},
+          {_Platform.android, _Platform.ios},
         ),
       };
 
