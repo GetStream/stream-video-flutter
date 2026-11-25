@@ -78,8 +78,34 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
+  /// The call types the join field takes as a `<type>:<id>` prefix.
+  static const _prefixTypes = {
+    'default',
+    'livestream',
+    'audio_room',
+    'development',
+  };
+
+  /// Splits a known call type off [input], such as `livestream:<id>`, where
+  /// `livestream:` alone starts a new one. Anything else is the call id as
+  /// typed, colons included.
+  static ({StreamCallType? callType, String callId}) _parseCallId(
+    String input,
+  ) {
+    final colon = input.indexOf(':');
+    final prefix = colon > 0 ? input.substring(0, colon) : null;
+    if (prefix == null || !_prefixTypes.contains(prefix)) {
+      return (callType: null, callId: input);
+    }
+
+    return (
+      callType: StreamCallType.fromString(prefix),
+      callId: input.substring(colon + 1),
+    );
+  }
+
   Future<void> _getOrCreateCall({List<String> memberIds = const []}) async {
-    var callId = _callIdController.text;
+    var (:callType, :callId) = _parseCallId(_callIdController.text.trim());
 
     // Always generate a new call id for ringing
     if (callId.isEmpty || memberIds.isNotEmpty) {
@@ -91,7 +117,10 @@ class _HomeScreenState extends State<HomeScreen> {
       final encryptionKey = invited?.callId == callId ? invited?.key : null;
       unawaited(
         context.push<void>(
-          JoinRoute(callId: callId).locationFor(encryptionKey: encryptionKey),
+          JoinRoute(callId: callId).locationFor(
+            callType: callType,
+            encryptionKey: encryptionKey,
+          ),
         ),
       );
       return;
@@ -99,6 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     unawaited(showLoadingIndicator(context));
 
+    // Ringing always makes a default call.
     final call = makeAppCall(callId);
 
     try {
@@ -443,7 +473,7 @@ class _JoinForm extends StatelessWidget {
   );
 
   Widget _scanQRButton(BuildContext context) => StreamButton.icon(
-    icon: const Icon(Icons.qr_code),
+    icon: Icon(context.streamIcons.qrCodeFill),
     style: .secondary,
     type: .ghost,
     onPressed: () async {

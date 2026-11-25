@@ -157,9 +157,7 @@ same way, because this repo shipped a three-icon class of that name; that class
 is gone, so a bare `StreamIcons` is now core's full set and `const StreamIcons()`
 is how a test names the icon a widget will resolve.
 
-Every icon comes from `context.streamIcons`. No `Icons.*` from Material, with one
-documented exception: the livestream fullscreen toggle cross-fades between two
-glyphs and core ships no exit-fullscreen counterpart.
+Every icon comes from `context.streamIcons`. No `Icons.*` from Material.
 
 Shadows come from `StreamElevation` through a `Material`, not a hand-painted
 `BoxShadow`. Material clips with `PhysicalShape`, so draw borders in a

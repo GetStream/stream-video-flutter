@@ -281,11 +281,23 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'{count, plural, zero{No participants have} one{One participant has} other{{count} participants have}} joined early'**
   String livestreamBackstageParticipants(num count);
 
-  /// Label shown when the livestream has already ended.
+  /// No longer shown; the ended screen uses livestreamEndedTitle and livestreamEndedSubtitle.
   ///
   /// In en, this message translates to:
   /// **'The livestream has ended.'**
   String get livestreamEndedStatus;
+
+  /// Title shown in the player once the livestream has ended.
+  ///
+  /// In en, this message translates to:
+  /// **'Livestream stopped'**
+  String get livestreamEndedTitle;
+
+  /// Line under the title shown in the player once the livestream has ended.
+  ///
+  /// In en, this message translates to:
+  /// **'The broadcaster has gone off air'**
+  String get livestreamEndedSubtitle;
 
   /// Label shown when the livestream has already ended listing the recordings.
   ///
@@ -305,11 +317,35 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'Backstage'**
   String get livestreamBackstage;
 
+  /// Tooltip of the livestream button that fills the screen with the video
+  ///
+  /// In en, this message translates to:
+  /// **'Full screen'**
+  String get livestreamEnterFullscreen;
+
+  /// Tooltip of the livestream button that leaves fullscreen
+  ///
+  /// In en, this message translates to:
+  /// **'Exit full screen'**
+  String get livestreamExitFullscreen;
+
   /// The badge text shown when the call mode is live
   ///
   /// In en, this message translates to:
   /// **'Live'**
   String get livestreamLive;
+
+  /// The live indicator's label while the livestream is live, written in upper case
+  ///
+  /// In en, this message translates to:
+  /// **'LIVE'**
+  String get livestreamLiveIndicatorLive;
+
+  /// The live indicator's label while the livestream is in backstage, written in upper case
+  ///
+  /// In en, this message translates to:
+  /// **'BACKSTAGE'**
+  String get livestreamLiveIndicatorBackstage;
 
   /// Heading of the microphone group in the lobby's device menu
   ///
@@ -1000,6 +1036,12 @@ abstract class StreamVideoFlutterLocalizations {
   /// In en, this message translates to:
   /// **'Try Again'**
   String get recordingsRetry;
+
+  /// Read out by screen readers for the livestream's viewer count
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 viewer} other{{count} viewers}}'**
+  String livestreamViewerCount(int count);
 }
 
 class _StreamVideoFlutterLocalizationsDelegate
