@@ -214,6 +214,7 @@ StreamVideo _initStreamVideo(
         ),
         android: AndroidPushConfiguration(
           defaultAvatar: 'assets/logo.png',
+          reportOutgoingCalls: true,
           telecom: TelecomPushConfiguration(
             enabled: true,
             schema: 'streamvideo',

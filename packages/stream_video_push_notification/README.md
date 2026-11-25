@@ -65,8 +65,23 @@ Nothing about ringing depends on it. `CallsManager.addCall` requires only `MANAG
 Jetpack Telecom checks the Bluetooth grant before every use and falls back cleanly. Without it, only
 the active Bluetooth device is surfaced and its name falls back to a generic default.
 
-On Android, outgoing calls are registered with Telecom when you call `startOutgoingCall`; the SDK
-does not call it for you there. On iOS it can, with `reportOutgoingCalls`, below.
+By default, outgoing calls are registered with Telecom only when you call `startOutgoingCall`. To
+have the SDK register the ringing calls the current user starts, turn on `reportOutgoingCalls`,
+as on iOS (below):
+
+```dart
+StreamVideoPushNotificationManager.create(
+  // ...
+  pushConfiguration: const StreamVideoPushConfiguration(
+    android: AndroidPushConfiguration(reportOutgoingCalls: true),
+  ),
+);
+```
+
+The call is then in Telecom as long as it rings and until it ends, like an incoming one: it gets
+the audio routes Telecom offers and Telecom's management of its audio focus, and a Telecom hold
+leaves it, as described below. Leave it off if your app calls `startOutgoingCall` itself, or the
+call is registered twice.
 
 When Telecom puts a call on hold, for example because the user answered a phone call with
 **Hold and answer** or pressed hold on a watch, the SDK leaves the call, as the native Android SDK

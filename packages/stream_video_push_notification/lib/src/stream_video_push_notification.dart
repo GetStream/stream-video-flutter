@@ -51,8 +51,10 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
 
     if (CurrentPlatform.isAndroid) unawaited(_readTelecomCalls());
 
-    if (CurrentPlatform.isIos &&
-        (pushConfiguration.ios?.reportOutgoingCalls ?? false)) {
+    final reportOutgoingCalls = CurrentPlatform.isIos
+        ? pushConfiguration.ios?.reportOutgoingCalls
+        : pushConfiguration.android?.reportOutgoingCalls;
+    if (reportOutgoingCalls ?? false) {
       _outgoingCallReporter = OutgoingCallReporter(
         manager: this,
         outgoingCalls: streamVideo.state.outgoingCall,
@@ -114,7 +116,9 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   /// mobile, where there is a native call UI.
   RingingSyncObserver? _observer;
 
-  /// Set when [IOSPushConfiguration.reportOutgoingCalls] is on, on iOS.
+  /// Set when `reportOutgoingCalls` is on for the platform: on iOS
+  /// [IOSPushConfiguration.reportOutgoingCalls], on Android
+  /// [AndroidPushConfiguration.reportOutgoingCalls].
   OutgoingCallReporter? _outgoingCallReporter;
 
   /// The one broadcaster of this process's ringing events; see
