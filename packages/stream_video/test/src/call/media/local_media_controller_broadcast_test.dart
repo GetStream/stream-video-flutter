@@ -193,6 +193,31 @@ void main() {
       },
     );
 
+    for (final strategy in [
+      SfuReconnectionStrategy.migrate,
+      SfuReconnectionStrategy.rejoin,
+    ]) {
+      test(
+        'shares a broadcast that started during a ${strategy.name} before it '
+        'applied, not the session it replaces',
+        () async {
+          final old = session!;
+          await controller.applyConnectOptions(session: old);
+          stateManager.lifecycleCallConnecting(attempt: 1, strategy: strategy);
+
+          await emit(ScreenSharingStartedEvent());
+          verifyNotEnabledOn(old);
+
+          final next = session = _session();
+          await controller.applyConnectOptions(session: next);
+
+          verifyNotEnabledOn(old);
+          expect(enabledOn(next).single?.useiOSBroadcastExtension, isTrue);
+          verifyNever(notifier.presentiOSBroadcastPicker);
+        },
+      );
+    }
+
     test('a session replaced while it applied does not share', () async {
       stateManager.lifecycleCallConnecting(
         attempt: 1,

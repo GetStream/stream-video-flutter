@@ -56,7 +56,8 @@ class IosBroadcastScreenShare {
   /// Whether a session is applying the connect options.
   final bool Function(CallSession session) _isApplying;
 
-  /// Whether a session has finished applying the connect options.
+  /// Whether a session has finished applying the connect options, during
+  /// the running migration or rejoin when there is one.
   final bool Function(CallSession session) _hasApplied;
   final ApplyScreenShare _applyScreenShare;
   final CallConnectOptions Function() _readConnectOptions;

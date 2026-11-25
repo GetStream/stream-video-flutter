@@ -101,7 +101,7 @@ class LocalMediaController {
     stateManager: _stateManager,
     session: _session,
     isApplying: (session) => identical(_optionsApplyingTo, session),
-    hasApplied: (session) => identical(_optionsAppliedTo, session),
+    hasApplied: _hasAppliedInCurrentConnect,
     applyScreenShare: _applyScreenShare,
     readConnectOptions: () => _connectOptions,
     writeConnectOptions: (options) => _connectOptions = options,
@@ -143,6 +143,9 @@ class LocalMediaController {
 
   /// The session that finished applying the options.
   CallSession? _optionsAppliedTo;
+
+  /// The call's status when [_optionsAppliedTo] finished applying them.
+  CallStatus? _optionsAppliedDuring;
 
   /// Whether the connect options' audio output went to the system route on
   /// join. A rejoin or a migration applies it again to WebRTC only: the
@@ -548,7 +551,22 @@ class LocalMediaController {
   Future<void> _finishApplying(CallSession session) async {
     if (identical(_optionsApplyingTo, session)) _optionsApplyingTo = null;
     _optionsAppliedTo = session;
+    _optionsAppliedDuring = _state.status;
     await _broadcast.sharePending(session);
+  }
+
+  /// Whether [session] applied the connect options, and while a migration or
+  /// a rejoin runs, did so during it: a session that applied before is the
+  /// one being replaced.
+  bool _hasAppliedInCurrentConnect(CallSession session) {
+    if (!identical(_optionsAppliedTo, session)) return false;
+    final applied = _optionsAppliedDuring;
+    return switch (_state.status) {
+      CallStatusMigrating() => applied is CallStatusMigrating,
+      CallStatusReconnecting(isFastReconnectAttempt: false, :final attempt) =>
+        applied is CallStatusReconnecting && applied.attempt == attempt,
+      _ => true,
+    };
   }
 
   Future<Result<None>> _applyScreenShareOption(
