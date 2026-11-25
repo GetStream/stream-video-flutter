@@ -132,7 +132,22 @@ class FakeMediaStreamTrack extends Fake implements rtc.MediaStreamTrack {
 }
 
 class FakeMediaStream extends Fake implements rtc.MediaStream {
+  FakeMediaStream([this.tracks = const []]);
+
+  final List<rtc.MediaStreamTrack> tracks;
+
   int disposeCount = 0;
+
+  @override
+  List<rtc.MediaStreamTrack> getTracks() => tracks;
+
+  @override
+  List<rtc.MediaStreamTrack> getAudioTracks() =>
+      tracks.where((it) => it.kind == 'audio').toList();
+
+  @override
+  List<rtc.MediaStreamTrack> getVideoTracks() =>
+      tracks.where((it) => it.kind == 'video').toList();
 
   @override
   String get id => 'fake-stream';

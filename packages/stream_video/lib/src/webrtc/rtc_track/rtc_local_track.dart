@@ -26,8 +26,27 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     this.stopTrackOnMute = true,
     this.clonedTracks = const [],
     this.nativeFactory,
+    this.capturedStream,
     super.videoDimension,
   });
+
+  /// The stream captured from the device when [mediaStream] is what the
+  /// local media filters made of it. Null when [mediaStream] is the capture
+  /// itself.
+  ///
+  /// [stop] stops it along with [mediaStream].
+  final rtc.MediaStream? capturedStream;
+
+  /// The captured track: the first of [capturedStream], or [mediaTrack] when
+  /// the track is not filtered into a stream of its own.
+  rtc.MediaStreamTrack get capturedTrack {
+    final captured = capturedStream;
+    if (captured == null) return mediaTrack;
+    final tracks = trackType == SfuTrackType.audio
+        ? captured.getAudioTracks()
+        : captured.getVideoTracks();
+    return tracks.firstOrNull ?? mediaTrack;
+  }
 
   /// Per-call native factory the track is pinned to. Carried on the track so
   /// [recreate] can target the same factory. Null on web, which has no
@@ -171,6 +190,17 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     } catch (e) {
       streamLog.w(_tag, () => 'Error disposing mediaStream: $e');
     }
+
+    if (capturedStream case final captured?) {
+      try {
+        for (final track in captured.getTracks()) {
+          await track.stop();
+        }
+        await captured.dispose();
+      } catch (e) {
+        streamLog.w(_tag, () => 'Error stopping the captured stream: $e');
+      }
+    }
   }
 
   /// Stops the clones given to senders, but not [mediaTrack] or
@@ -246,6 +276,29 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       videoDimension: videoDimension ?? this.videoDimension,
       clonedTracks: clonedTracks ?? this.clonedTracks,
       nativeFactory: nativeFactory ?? this.nativeFactory,
+      capturedStream: capturedStream,
+    );
+  }
+
+  /// This track sending [stream] and its [track], made of [capturedStream]
+  /// by the local media filters. A null [capturedStream] means [stream] is
+  /// the capture itself.
+  RtcLocalTrack<T> withMedia({
+    required rtc.MediaStream stream,
+    required rtc.MediaStreamTrack track,
+    required rtc.MediaStream? capturedStream,
+  }) {
+    return RtcLocalTrack(
+      trackIdPrefix: trackIdPrefix,
+      trackType: trackType,
+      mediaStream: stream,
+      mediaTrack: track,
+      mediaConstraints: mediaConstraints,
+      stopTrackOnMute: stopTrackOnMute,
+      videoDimension: videoDimension,
+      clonedTracks: clonedTracks,
+      nativeFactory: nativeFactory,
+      capturedStream: capturedStream,
     );
   }
 
@@ -278,12 +331,11 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       nativeFactory: nativeFactory,
     );
 
-    return copyWith(
-      mediaTrack: newStream.getTracks().first,
-      mediaStream: newStream,
-      mediaConstraints: constraints,
-      clonedTracks: const [],
-    );
+    return withMedia(
+      stream: newStream,
+      track: newStream.getTracks().first,
+      capturedStream: null,
+    ).copyWith(mediaConstraints: constraints, clonedTracks: const []);
   }
 
   /// Sends a clone of this track on every one of [transceivers] that is
@@ -376,7 +428,9 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
       );
     }
 
-    final isFrontCamera = await webRtcEngine.camera.switchCamera(mediaTrack);
+    final isFrontCamera = await webRtcEngine.camera.switchCamera(
+      capturedTrack,
+    );
 
     final mediaDevicesResult = await RtcMediaDeviceNotifier.instance
         .enumerateDevicesFor(

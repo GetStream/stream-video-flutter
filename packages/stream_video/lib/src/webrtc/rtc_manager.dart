@@ -31,7 +31,11 @@ import 'webrtc_engine.dart';
 export '../errors/track_missing_exception.dart';
 export 'publisher/announced_tracks.dart' show resolveTrackMid;
 export 'publisher/rtc_publisher.dart'
-    show OnLocalCapture, OnLocalTrackMuted, OnLocalTrackPublished;
+    show
+        OnLocalCapture,
+        OnLocalCaptureReleased,
+        OnLocalTrackMuted,
+        OnLocalTrackPublished;
 export 'subscriber/rtc_subscriber.dart' show OnRemoteTrackReceived;
 
 part 'rtc_manager_media.dart';
@@ -256,6 +260,20 @@ class RtcManager extends Disposable {
 
   set onLocalCapture(OnLocalCapture? callback) {
     _publisher.onLocalCapture = callback;
+  }
+
+  /// {@macro OnLocalCaptureReleased}
+  OnLocalCaptureReleased? get onLocalCaptureReleased =>
+      _publisher.onLocalCaptureReleased;
+
+  set onLocalCaptureReleased(OnLocalCaptureReleased? callback) {
+    _publisher.onLocalCaptureReleased = callback;
+  }
+
+  /// Sends what the local media filters now make of the published track of
+  /// [trackType] in place of what is sent.
+  Future<Result<None>> refilterTrack(SfuTrackType trackType) {
+    return _publisher.refilterTrack(trackType);
   }
 
   /// Called for every remote track the subscriber receives.

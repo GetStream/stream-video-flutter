@@ -153,7 +153,13 @@ class LocalMediaController {
   CallState get _state => _stateManager.callState;
 
   /// The filter chains run on every local capture.
-  late final filters = LocalMediaFilters(logger: _logger);
+  late final filters = LocalMediaFilters(logger: _logger)
+    ..onOutputChanged = _refilterSent;
+
+  Future<Result<None>> _refilterSent(SfuTrackType kind) async {
+    return await _session()?.refilterLocalTrack(kind) ??
+        const Result.success(none);
+  }
 
   /// The app's camera filter.
   VideoFilter? get videoFilter => filters.videoFilter;
@@ -163,13 +169,17 @@ class LocalMediaController {
 
   /// Sets the app's camera filter, applied to the camera in use and to every
   /// later capture. Null removes it.
-  Future<void> setVideoFilter(VideoFilter? filter) =>
-      filters.setVideoFilter(filter);
+  Future<Result<None>> setVideoFilter(VideoFilter? filter) async {
+    final result = await filters.setVideoFilter(filter);
+    return result.map((_) => none);
+  }
 
   /// Sets the app's microphone filter, applied to the microphone in use and
   /// to every later capture. Null removes it.
-  Future<void> setAudioFilter(AudioFilter? filter) =>
-      filters.setAudioFilter(filter);
+  Future<Result<None>> setAudioFilter(AudioFilter? filter) async {
+    final result = await filters.setAudioFilter(filter);
+    return result.map((_) => none);
+  }
 
   /// Stops the filters on the local captures, before they are released.
   Future<void> releaseFilters() => filters.stopAll();

@@ -10,6 +10,7 @@
 - `Call.ensureNativeFactory`, `RtcLocalTrack` and `MediaDevices.getMedia` take and return the `PeerConnectionFactory` contract instead of `NativePeerConnectionFactory`.
 - `EncryptionManager.create` throws `UnsupportedError` on web instead of returning a manager whose operations throw.
 - `VideoModerationConfig.applyBlur` and `Call.setModerationBlurEffectHandlers` are removed; pass the blur to `VideoModerationConfig.blur(filter:)`, such as `FullFrameBlurFilter` from `stream_video_filters`.
+- `VideoModerationConfig` is a `final class`.
 - The app-wide audio members of `RtcMediaDeviceNotifier` moved to `PlatformAudioController.instance`: `nativeWebRtcEventsStream`, `speechActivityStream`, `triggeriOSAudioRouteSelectionUI`, `isAudioPlayoutPauseSupported`, `isAudioPlayoutPaused`, `audioPlayoutPausedChanges`, `pauseAudioPlayout`, `resumeAudioPlayout`, `resumeWebAudioPlayback`, `regainAndroidAudioFocus` and `reinitializeAudioConfiguration`.
 - `PlatformAudioController` is `@sealed`, so a test mock that implements it gets a `subtype_of_sealed_class` warning; add `// ignore: subtype_of_sealed_class` to it.
 - `PlatformAudioController.nativePauseAudioPlayout` and `nativeResumeAudioPlayout` are removed; use `pauseAudioPlayout` and `resumeAudioPlayout`.
@@ -107,7 +108,9 @@
 ### ✅ Added
 
 - `CallMetrics.subscriber.latency` holds the round-trip time of the connection this client subscribes on.
-- Added `Call.setVideoFilter` and `Call.setAudioFilter`, which run a `VideoFilter` or `AudioFilter` on every local capture before it is sent.
+- Added `Call.setVideoFilter` and `Call.setAudioFilter`, which filter the camera and microphone before they are sent, and report a filter that fails.
+- Added `VideoModerationConfig.copyWith`.
+- A moderation blur that cannot be applied turns the camera off.
 - `AudioConfigurationPolicy.toFactoryOptions` returns the settings a peer connection factory is built with under the policy.
 - Added `PushNotificationManager.systemManagedCallCids`, the calls whose audio focus the system manages, such as Android's Telecom; WebRTC leaves the focus of those calls alone.
 - `StreamVideoOptions.ringingAudioConfigurationPolicy`, the audio configuration policy of ringing calls, incoming and outgoing. It falls back to `audioConfigurationPolicy` when null, the default. A call's own policy, from `CallPreferences.audioConfigurationPolicy` or `Call.setAudioConfigurationPolicy`, still wins. With the push notification package on iOS, a call answered from the CallKit screen gets its audio settings from the start.

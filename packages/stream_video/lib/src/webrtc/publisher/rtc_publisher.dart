@@ -34,9 +34,21 @@ typedef OnLocalTrackPublished = void Function(RtcLocalTrack track);
 
 /// {@template OnLocalCapture}
 /// Called with every new local capture before it is sent, returning the
-/// track to send in its place.
+/// track to send in its place. Throws when the capture must not be sent.
+///
+/// [isCurrent] says whether the capture still replaces the one held under its
+/// id.
 /// {@endtemplate}
-typedef OnLocalCapture = Future<RtcLocalTrack> Function(RtcLocalTrack track);
+typedef OnLocalCapture =
+    Future<RtcLocalTrack> Function(
+      RtcLocalTrack track, {
+      bool Function()? isCurrent,
+    });
+
+/// {@template OnLocalCaptureReleased}
+/// Called with a local track once its capture is stopped.
+/// {@endtemplate}
+typedef OnLocalCaptureReleased = Future<void> Function(RtcLocalTrack track);
 
 final _logger = taggedLogger(tag: 'SV:RtcPublisher');
 
@@ -133,6 +145,9 @@ class RtcPublisher {
 
   /// {@macro OnLocalCapture}
   OnLocalCapture? onLocalCapture;
+
+  /// {@macro OnLocalCaptureReleased}
+  OnLocalCaptureReleased? onLocalCaptureReleased;
 
   /// Runs [create] as the single acquire-and-publish in flight for
   /// [trackType], returning the already-running one when there is one.
@@ -268,6 +283,15 @@ class RtcPublisher {
       await track.stopClones();
     } else {
       await track.stop();
+      await _releaseCapture(track);
+    }
+  }
+
+  Future<void> _releaseCapture(RtcLocalTrack track) async {
+    try {
+      await onLocalCaptureReleased?.call(track);
+    } catch (e, stk) {
+      _logger.w(() => '[releaseCapture] failed for ${track.trackId}: $e\n$stk');
     }
   }
 
@@ -711,6 +735,7 @@ class RtcPublisher {
     }
 
     await acquired.stop();
+    await _releaseCapture(acquired);
   }
 
   /// Publishes a microphone or screen share audio track.
@@ -761,7 +786,9 @@ class RtcPublisher {
     }
   }
 
-  /// Publishes [track] on every publish option of its type and keeps it.
+  /// Publishes what the local media filters make of [captured] on every
+  /// publish option of its type and keeps it. A capture the filters reject is
+  /// stopped and fails.
   ///
   /// A track with the local prefix gets the publisher id. A track type
   /// without a publish option fails, and so does a publish that cannot send
@@ -773,7 +800,14 @@ class RtcPublisher {
     RtcTrackPublishOptions Function()? trackPublishOptions,
     Future<void> Function(RtcLocalTrack track)? beforeSend,
   }) async {
-    final track = await _filterCapture(captured);
+    final RtcLocalTrack track;
+    try {
+      track = await _filterCapture(captured);
+    } catch (e, stk) {
+      _logger.e(() => '$tag filtering failed, not sent: $e');
+      await captured.stop();
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
+    }
     final registered = track.trackIdPrefix == kLocalTrackIdPrefix
         ? track.copyWith(trackIdPrefix: publisherId)
         : track;
@@ -1273,6 +1307,7 @@ class RtcPublisher {
     } else if (track.stopTrackOnMute) {
       // Releases the track and stops the permission indicator.
       await track.stop();
+      await _releaseCapture(track);
     }
 
     onLocalTrackMuted?.call(track, true);
@@ -1497,7 +1532,10 @@ class RtcPublisher {
         captured = await current.recapture(
           mediaConstraints: constraintsFor?.call(current),
         );
-        var sending = captured = await _filterCapture(captured);
+        var sending = captured = await _filterCapture(
+          captured,
+          isCurrent: () => _isHeld(current),
+        );
 
         // Sender by sender, each only while the track is still held, so a
         // track published again meanwhile keeps its senders.
@@ -1527,17 +1565,67 @@ class RtcPublisher {
     });
   }
 
-  /// [track] as [onLocalCapture] filters it. A failure sends [track] as it
-  /// is.
-  Future<RtcLocalTrack> _filterCapture(RtcLocalTrack track) async {
+  /// [track] as [onLocalCapture] filters it. Throws when it must not be
+  /// sent.
+  Future<RtcLocalTrack> _filterCapture(
+    RtcLocalTrack track, {
+    bool Function()? isCurrent,
+  }) async {
     final filter = onLocalCapture;
     if (filter == null) return track;
-    try {
-      return await filter(track);
-    } catch (e, stk) {
-      _logger.e(() => '[filterCapture] failed for ${track.trackId}: $e\n$stk');
-      return track;
-    }
+    return filter(track, isCurrent: isCurrent);
+  }
+
+  /// Sends what [onLocalCapture] now makes of the held track of [trackType]
+  /// on every sender that carried it, and keeps it. Does nothing when no
+  /// such track is held, or the result is the track already sent.
+  Future<Result<None>> refilterTrack(SfuTrackType trackType) async {
+    final held = getPublisherTrackByType(trackType);
+    if (held == null) return const Result.success(none);
+    final trackId = held.trackId;
+
+    return _oneRecaptureAtATime(trackId, () async {
+      final current = tracks[trackId];
+      if (current == null) return const Result.success(none);
+
+      RtcLocalTrack? sending;
+      try {
+        final filtered = await _filterCapture(current);
+        if (identical(filtered.mediaTrack, current.mediaTrack)) {
+          return const Result.success(none);
+        }
+
+        var out = sending = filtered.copyWith(clonedTracks: const []);
+        final clones = <rtc.MediaStreamTrack>[];
+        for (final transceiver in transceiversManager.getTransceiversForTrack(
+          trackId,
+        )) {
+          if (!_isHeld(current)) break;
+          final sent = await out.sendOn([transceiver]);
+          clones.addAll(sent.clonedTracks);
+          out = sending = out.copyWith(clonedTracks: [...clones]);
+        }
+        if (!current.mediaTrack.enabled) out.disable();
+
+        if (!_isHeld(current)) {
+          _logger.w(() => '[refilterTrack] $trackId is no longer held');
+          await out.stopClones();
+          return failureWithError(
+            'Track was unpublished while it was filtered',
+          );
+        }
+
+        await current.stopClones();
+        tracks[trackId] = out.copyWith(
+          stopTrackOnMute: current.stopTrackOnMute,
+        );
+        return const Result.success(none);
+      } catch (e, stk) {
+        _logger.e(() => '[refilterTrack] failed for $trackId: $e');
+        await sending?.stopClones();
+        return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
+      }
+    });
   }
 
   /// Keeps [updated] in place of [current] when [current] is still the held
@@ -1659,6 +1747,7 @@ class RtcPublisher {
     onLocalTrackMuted = null;
     onLocalTrackPublished = null;
     onLocalCapture = null;
+    onLocalCaptureReleased = null;
 
     await pc?.dispose();
   }

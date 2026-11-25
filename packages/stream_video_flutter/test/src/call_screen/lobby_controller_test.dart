@@ -607,24 +607,38 @@ void main() {
         final filtered = MockRtcLocalCameraTrack();
         when(filtered.stop).thenAnswer((_) async {});
         const filter = _NoopVideoFilter();
-        when(() => call.setVideoFilter(filter)).thenAnswer((_) async {});
+        when(
+          () => call.setVideoFilter(filter),
+        ).thenAnswer((_) async => const Result.success(none));
+        final controller = build(openCameraTrack: (_) async => tracks.camera);
+        await controller.toggleCamera();
         when(
           () => call.applyLocalFilters(tracks.camera),
         ).thenAnswer((_) async => filtered);
-        final controller = build(openCameraTrack: (_) async => tracks.camera);
-        await controller.toggleCamera();
 
-        await controller.setVideoFilter(filter);
+        final result = await controller.setVideoFilter(filter);
 
         verify(() => call.setVideoFilter(filter)).called(1);
+        expect(result.isSuccess, isTrue);
         expect(controller.cameraTrack, filtered);
+      });
+
+      test('reports a filter that fails', () async {
+        const filter = _NoopVideoFilter();
+        when(
+          () => call.setVideoFilter(filter),
+        ).thenAnswer((_) async => failureWithError('filter failed'));
+        final controller = build();
+
+        final result = await controller.setVideoFilter(filter);
+
+        expect(result.isFailure, isTrue);
       });
 
       test('runs a newly opened preview through the call filters', () async {
         final tracks = fakeTracks();
         final filtered = MockRtcLocalCameraTrack();
         when(filtered.stop).thenAnswer((_) async {});
-        when(() => call.videoFilter).thenReturn(const _NoopVideoFilter());
         when(
           () => call.applyLocalFilters(tracks.camera),
         ).thenAnswer((_) async => filtered);
@@ -635,14 +649,27 @@ void main() {
         expect(controller.cameraTrack, filtered);
       });
 
-      test('leaves the preview alone without a filter', () async {
+      test('stops the preview when the filters reject it', () async {
         final tracks = fakeTracks();
+        when(
+          () => call.applyLocalFilters(tracks.camera),
+        ).thenThrow(Exception('blur failed'));
         final controller = build(openCameraTrack: (_) async => tracks.camera);
 
         await controller.toggleCamera();
 
-        expect(controller.cameraTrack, tracks.camera);
-        verifyNever(() => call.applyLocalFilters(tracks.camera));
+        expect(controller.cameraTrack, isNull);
+        verify(tracks.camera.stop).called(1);
+      });
+
+      test('releases the filters of a closed preview', () async {
+        final tracks = fakeTracks();
+        final controller = build(openCameraTrack: (_) async => tracks.camera);
+        await controller.toggleCamera();
+
+        await controller.toggleCamera();
+
+        verify(() => call.releaseLocalFilters(tracks.camera)).called(1);
       });
     });
 
@@ -977,11 +1004,11 @@ void main() {
   });
 }
 
-class _NoopVideoFilter extends VideoFilter {
+final class _NoopVideoFilter extends VideoFilter {
   const _NoopVideoFilter();
 
   @override
-  Future<MediaStreamFilterResult> apply(MediaStream input) async {
-    return MediaStreamFilterResult(input);
+  Future<MediaStreamFilterResult> apply(MediaStreamFilterInput input) async {
+    return MediaStreamFilterResult(input.stream);
   }
 }

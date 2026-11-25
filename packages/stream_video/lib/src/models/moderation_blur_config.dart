@@ -7,11 +7,11 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 /// Convenience constructors [VideoModerationConfig.disabled],
 /// [VideoModerationConfig.mute], and [VideoModerationConfig.blur] cover
 /// the most common presets.
-class VideoModerationConfig {
+final class VideoModerationConfig {
   const VideoModerationConfig({
     this.muteAudio = false,
     this.muteVideo = false,
-    this.blurFilter,
+    this.filter,
     this.duration,
     this.onApply,
     this.onWarning,
@@ -23,7 +23,7 @@ class VideoModerationConfig {
   const VideoModerationConfig.disabled()
     : muteAudio = false,
       muteVideo = false,
-      blurFilter = null,
+      filter = null,
       duration = null,
       onApply = null,
       onWarning = null,
@@ -35,7 +35,7 @@ class VideoModerationConfig {
   const VideoModerationConfig.mute({this.duration})
     : muteAudio = true,
       muteVideo = true,
-      blurFilter = null,
+      filter = null,
       onApply = null,
       onWarning = null,
       onClear = null;
@@ -49,11 +49,10 @@ class VideoModerationConfig {
   /// before encoding. `FullFrameBlurFilter` from the `stream_video_filters`
   /// package blurs the whole frame.
   const VideoModerationConfig.blur({
-    required VideoFilter filter,
+    required VideoFilter this.filter,
     this.duration,
   }) : muteAudio = false,
        muteVideo = false,
-       blurFilter = filter,
        onApply = null,
        onWarning = null,
        onClear = null;
@@ -61,9 +60,12 @@ class VideoModerationConfig {
   final bool muteAudio;
   final bool muteVideo;
 
-  /// The filter applied to the camera while the call is moderated. Null
-  /// applies none.
-  final VideoFilter? blurFilter;
+  /// The filter applied to the camera while the call is moderated, such as a
+  /// blur. Null applies none.
+  ///
+  /// When it cannot be applied to the camera in use, the camera is turned
+  /// off instead.
+  final VideoFilter? filter;
 
   final Duration? duration;
 
@@ -71,11 +73,32 @@ class VideoModerationConfig {
   final void Function(String)? onWarning;
   final VoidCallback? onClear;
 
+  /// A copy of this config with the given fields replaced.
+  VideoModerationConfig copyWith({
+    bool? muteAudio,
+    bool? muteVideo,
+    VideoFilter? filter,
+    Duration? duration,
+    VoidCallback? onApply,
+    void Function(String)? onWarning,
+    VoidCallback? onClear,
+  }) {
+    return VideoModerationConfig(
+      muteAudio: muteAudio ?? this.muteAudio,
+      muteVideo: muteVideo ?? this.muteVideo,
+      filter: filter ?? this.filter,
+      duration: duration ?? this.duration,
+      onApply: onApply ?? this.onApply,
+      onWarning: onWarning ?? this.onWarning,
+      onClear: onClear ?? this.onClear,
+    );
+  }
+
   /// Whether this config takes no automatic action.
   bool get isDisabled =>
       !muteAudio &&
       !muteVideo &&
-      blurFilter == null &&
+      filter == null &&
       onApply == null &&
       onWarning == null &&
       onClear == null;

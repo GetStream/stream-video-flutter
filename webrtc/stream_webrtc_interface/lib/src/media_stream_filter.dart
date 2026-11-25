@@ -7,36 +7,83 @@ import 'third_party/webrtc_interface/media_stream.dart';
 /// [apply] receives the captured stream and returns the stream to send in its
 /// place. A filter that processes frames natively, inside the capture, can
 /// return its input unchanged.
-abstract class MediaStreamFilter {
+///
+/// Extend [VideoFilter] or [AudioFilter] to write one.
+abstract base class MediaStreamFilter {
   const MediaStreamFilter();
 
   /// Applies this filter to [input].
   ///
-  /// Called once for every new capture. The returned
-  /// [MediaStreamFilterResult.stop] is called when that capture is replaced,
-  /// stopped or the filter is removed.
-  Future<MediaStreamFilterResult> apply(MediaStream input);
+  /// Called for every new capture, and again on the capture in use when the
+  /// chain the filter is part of changes. The returned
+  /// [MediaStreamFilterResult.stop] is called when that capture is replaced or
+  /// released, or the chain changes.
+  Future<MediaStreamFilterResult> apply(MediaStreamFilterInput input);
 }
 
 /// A [MediaStreamFilter] for camera and screen share video.
-abstract class VideoFilter extends MediaStreamFilter {
+abstract base class VideoFilter extends MediaStreamFilter {
   const VideoFilter();
 }
 
 /// A [MediaStreamFilter] for microphone audio.
-abstract class AudioFilter extends MediaStreamFilter {
+abstract base class AudioFilter extends MediaStreamFilter {
   const AudioFilter();
 }
 
+/// The local media a [MediaStreamFilter] runs on.
+enum MediaStreamFilterSource {
+  /// The camera.
+  camera,
+
+  /// The microphone.
+  microphone,
+
+  /// The screen share.
+  screenShare,
+}
+
+/// What a [MediaStreamFilter] is applied to.
+final class MediaStreamFilterInput {
+  const MediaStreamFilterInput({required this.stream, required this.source});
+
+  /// The stream to filter: the capture, or what the filter before this one
+  /// made of it.
+  final MediaStream stream;
+
+  /// The local media [stream] comes from.
+  final MediaStreamFilterSource source;
+}
+
+/// Why [MediaStreamFilterResult.stop] is called.
+enum MediaStreamFilterStopReason {
+  /// The capture the filter ran on is replaced by a new one.
+  captureReplaced,
+
+  /// The capture the filter ran on is stopped.
+  captureReleased,
+
+  /// The chain the filter is part of changed, and was applied again.
+  chainChanged,
+}
+
+/// Details of a [MediaStreamFilterResult.stop] call.
+final class MediaStreamFilterStopDetails {
+  const MediaStreamFilterStopDetails({required this.reason});
+
+  /// Why the filter is stopped.
+  final MediaStreamFilterStopReason reason;
+}
+
 /// What a [MediaStreamFilter] made of its input.
-class MediaStreamFilterResult {
+final class MediaStreamFilterResult {
   const MediaStreamFilterResult(this.output, {this.stop});
 
-  /// The stream to send in place of the input. The input itself when the
-  /// filter processes frames in place.
+  /// The stream to send in place of the input. The input stream itself when
+  /// the filter processes frames in place.
   final MediaStream output;
 
   /// Undoes the filter and releases what it holds. When [output] is not the
-  /// input, it stops [output] as well.
-  final FutureOr<void> Function()? stop;
+  /// input stream, it stops [output] as well.
+  final FutureOr<void> Function(MediaStreamFilterStopDetails details)? stop;
 }

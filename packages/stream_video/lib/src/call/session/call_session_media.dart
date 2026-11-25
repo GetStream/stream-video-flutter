@@ -112,6 +112,14 @@ mixin _CallSessionMedia {
     );
   }
 
+  /// Sends what the local media filters now make of the published track of
+  /// [trackType]. Nothing to do without a connected manager.
+  Future<Result<None>> refilterLocalTrack(SfuTrackType trackType) async {
+    final rtcManager = this.rtcManager;
+    if (rtcManager == null) return const Result.success(none);
+    return rtcManager.refilterTrack(trackType);
+  }
+
   Future<Result<RtcLocalTrack<CameraConstraints>>> flipCamera() {
     return _withManager(
       'flip camera',

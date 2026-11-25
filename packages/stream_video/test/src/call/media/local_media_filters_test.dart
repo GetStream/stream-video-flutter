@@ -22,7 +22,7 @@ void main() {
 
       await filters.apply(camera('cam-1'));
 
-      expect(log, ['blur apply cam-1']);
+      expect(log, ['blur apply cam-1 camera']);
     });
 
     test('stops the filters of the capture it replaces', () async {
@@ -31,7 +31,11 @@ void main() {
       await filters.apply(camera('cam-1'));
       await filters.apply(camera('cam-2'));
 
-      expect(log, ['blur apply cam-1', 'blur stop cam-1', 'blur apply cam-2']);
+      expect(log, [
+        'blur apply cam-1 camera',
+        'blur stop cam-1 captureReplaced',
+        'blur apply cam-2 camera',
+      ]);
     });
 
     test('is not filtered again when it is published later', () async {
@@ -41,30 +45,75 @@ void main() {
       await filters.apply(preview);
       final published = await filters.apply(preview.copyWith());
 
-      expect(log, ['blur apply cam-1']);
+      expect(log, ['blur apply cam-1 camera']);
       expect(published.mediaTrack, same(preview.mediaTrack));
     });
 
     test('is sent as the stream the chain made of it', () async {
-      final output = _FakeStream([
-        FakeMediaStreamTrack('out', kind: 'video'),
-      ]);
-      await filters.setVideoFilter(_ReplacingFilter(output));
+      final output = _stream('out', 'video');
+      await filters.setVideoFilter(_ReplacingFilter(output, log));
+      final capture = camera('cam-1');
 
-      final filtered = await filters.apply(camera('cam-1'));
+      final filtered = await filters.apply(capture);
 
       expect(filtered.mediaStream, same(output));
       expect(filtered.mediaTrack.id, 'out');
+      expect(filtered.capturedStream, same(capture.mediaStream));
+      expect(filtered.capturedTrack, same(capture.mediaTrack));
+    });
+
+    test('published again as the capture is sent as the output', () async {
+      final output = _stream('out', 'video');
+      await filters.setVideoFilter(_ReplacingFilter(output, log));
+      final capture = camera('cam-1');
+      await filters.apply(capture);
+
+      final again = await filters.apply(capture);
+
+      expect(again.mediaStream, same(output));
+      expect(log, ['replace apply cam-1']);
     });
 
     test('skips a filter that fails', () async {
       await filters.setVideoFilter(_FailingFilter());
-      await filters.setModerationFilter(_LoggingFilter('mod', log));
+      await filters.setAudioFilter(_LoggingAudioFilter('nc', log));
 
       final filtered = await filters.apply(camera('cam-1'));
 
-      expect(log, ['mod apply cam-1']);
       expect(filtered.mediaTrack.id, 'cam-1');
+    });
+
+    test('skips a filter whose output has no track of its kind', () async {
+      await filters.setVideoFilter(
+        _ReplacingFilter(_stream('out', 'audio'), log),
+      );
+
+      final filtered = await filters.apply(camera('cam-1'));
+
+      expect(filtered.mediaTrack.id, 'cam-1');
+      expect(log, ['replace apply cam-1', 'replace stop captureReleased']);
+    });
+
+    test('is not sent while the moderation filter fails on it', () async {
+      await filters.setVideoFilter(_LoggingFilter('blur', log));
+      await filters.setModerationFilter(_FailingFilter());
+
+      await expectLater(filters.apply(camera('cam-1')), throwsException);
+      expect(log, [
+        'blur apply cam-1 camera',
+        'blur stop cam-1 captureReleased',
+      ]);
+    });
+
+    test('that no longer replaces the held one leaves it alone', () async {
+      await filters.setVideoFilter(_LoggingFilter('blur', log));
+      await filters.apply(camera('cam-1'));
+
+      await expectLater(
+        filters.apply(camera('cam-2'), isCurrent: () => false),
+        throwsStateError,
+      );
+      expect(log, ['blur apply cam-1 camera']);
     });
 
     test('of the screen share audio is not filtered', () async {
@@ -75,7 +124,7 @@ void main() {
       );
       await filters.apply(_track('mic', SfuTrackType.audio, 'audio'));
 
-      expect(log, ['nc apply mic']);
+      expect(log, ['nc apply mic microphone']);
     });
 
     test('of another kind keeps the camera filters', () async {
@@ -85,12 +134,15 @@ void main() {
       await filters.apply(camera('cam-1'));
       await filters.apply(_track('screen', SfuTrackType.screenShare, 'video'));
 
-      expect(log, ['blur apply cam-1', 'share apply screen']);
+      expect(log, [
+        'blur apply cam-1 camera',
+        'share apply screen screenShare',
+      ]);
     });
   });
 
   group('a change of filter', () {
-    test('applies to the capture in use', () async {
+    test('applies the new chain before stopping the old one', () async {
       await filters.apply(camera('cam-1'));
 
       await filters.setVideoFilter(_LoggingFilter('blur', log));
@@ -98,34 +150,107 @@ void main() {
       await filters.setVideoFilter(null);
 
       expect(log, [
-        'blur apply cam-1',
-        'blur stop cam-1',
-        'image apply cam-1',
-        'image stop cam-1',
+        'blur apply cam-1 camera',
+        'image apply cam-1 camera',
+        'blur stop cam-1 chainChanged',
+        'image stop cam-1 chainChanged',
       ]);
       expect(filters.videoFilter, isNull);
     });
 
+    test('reports it applied to the capture in use', () async {
+      await filters.apply(camera('cam-1'));
+
+      final result = await filters.setVideoFilter(_LoggingFilter('b', log));
+
+      expect(result, const Result.success(LocalFilterChange.applied));
+    });
+
     test('before any capture applies to the first one', () async {
-      await filters.setVideoFilter(_LoggingFilter('blur', log));
+      final result = await filters.setVideoFilter(_LoggingFilter('b', log));
+      expect(result, const Result.success(LocalFilterChange.deferred));
       expect(log, isEmpty);
 
       await filters.apply(camera('cam-1'));
 
-      expect(log, ['blur apply cam-1']);
+      expect(log, ['b apply cam-1 camera']);
     });
 
-    test(
-      'to one that replaces the stream waits for the next capture',
-      () async {
-        await filters.apply(camera('cam-1'));
+    test('fails when a filter of the chain fails', () async {
+      await filters.apply(camera('cam-1'));
 
-        await filters.setVideoFilter(_ReplacingFilter(_FakeStream([])));
-        await filters.setVideoFilter(_LoggingFilter('blur', log));
+      final result = await filters.setVideoFilter(_FailingFilter());
 
-        expect(log, ['blur apply cam-1']);
-      },
-    );
+      expect(result.isFailure, isTrue);
+      expect(filters.videoFilter, isA<_FailingFilter>());
+    });
+
+    test('to one that replaces the stream sends the new stream', () async {
+      final sent = <SfuTrackType>[];
+      filters.onOutputChanged = (kind) async {
+        sent.add(kind);
+        log.add('send');
+        return const Result.success(none);
+      };
+      final capture = camera('cam-1');
+      final output = _stream('out', 'video');
+      await filters.apply(capture);
+
+      await filters.setVideoFilter(_ReplacingFilter(output, log));
+      final held = await filters.apply(capture);
+      await filters.setVideoFilter(null);
+      final restored = await filters.apply(held);
+
+      expect(sent, [SfuTrackType.video, SfuTrackType.video]);
+      expect(held.mediaStream, same(output));
+      expect(restored.mediaTrack, same(capture.mediaTrack));
+      expect(restored.capturedStream, isNull);
+      expect(log, [
+        'replace apply cam-1',
+        'send',
+        'send',
+        'replace stop chainChanged',
+      ]);
+    });
+
+    test('in place does not send a new stream', () async {
+      var sent = 0;
+      filters.onOutputChanged = (_) async {
+        sent++;
+        return const Result.success(none);
+      };
+      await filters.apply(camera('cam-1'));
+
+      await filters.setVideoFilter(_LoggingFilter('blur', log));
+
+      expect(sent, 0);
+    });
+
+    test('fails when the new stream cannot be sent', () async {
+      filters.onOutputChanged = (_) async => failureWithError('not sent');
+      await filters.apply(camera('cam-1'));
+
+      final result = await filters.setVideoFilter(
+        _ReplacingFilter(_stream('out', 'video'), log),
+      );
+
+      expect(result.isFailure, isTrue);
+    });
+
+    test('after the capture is released waits for the next one', () async {
+      final capture = camera('cam-1');
+      await filters.setVideoFilter(_LoggingFilter('blur', log));
+      await filters.apply(capture);
+
+      await filters.release(capture);
+      final result = await filters.setVideoFilter(_LoggingFilter('img', log));
+
+      expect(result, const Result.success(LocalFilterChange.deferred));
+      expect(log, [
+        'blur apply cam-1 camera',
+        'blur stop cam-1 captureReleased',
+      ]);
+    });
   });
 
   group('the moderation filter', () {
@@ -135,10 +260,10 @@ void main() {
 
       await filters.apply(camera('cam-1'));
 
-      expect(log, ['blur apply cam-1', 'mod apply cam-1']);
+      expect(log, ['blur apply cam-1 camera', 'mod apply cam-1 camera']);
     });
 
-    test('leaves the app filter alone once removed', () async {
+    test('leaves the app filter applied once removed', () async {
       await filters.setVideoFilter(_LoggingFilter('blur', log));
       await filters.apply(camera('cam-1'));
       await filters.setModerationFilter(_LoggingFilter('mod', log));
@@ -146,19 +271,60 @@ void main() {
 
       await filters.setModerationFilter(null);
 
-      expect(log, ['mod stop cam-1', 'blur stop cam-1', 'blur apply cam-1']);
+      expect(log, [
+        'blur apply cam-1 camera',
+        'mod stop cam-1 chainChanged',
+        'blur stop cam-1 chainChanged',
+      ]);
     });
 
     test('keeps a filter picked while it is on', () async {
       await filters.apply(camera('cam-1'));
       await filters.setModerationFilter(_LoggingFilter('mod', log));
       await filters.setVideoFilter(_LoggingFilter('image', log));
-      log.clear();
 
       await filters.setModerationFilter(null);
 
-      expect(log, ['mod stop cam-1', 'image stop cam-1', 'image apply cam-1']);
       expect(filters.videoFilter, isA<_LoggingFilter>());
+      expect(filters.moderationFilter, isNull);
+    });
+
+    test('with a replacing app filter runs on its output', () async {
+      final output = _stream('out', 'video');
+      await filters.setVideoFilter(_ReplacingFilter(output, log));
+      await filters.setModerationFilter(_LoggingFilter('mod', log));
+
+      final sent = await filters.apply(camera('cam-1'));
+
+      expect(log, ['replace apply cam-1', 'mod apply out camera']);
+      expect(sent.mediaStream, same(output));
+    });
+  });
+
+  group('the audio processor filter', () {
+    test('runs after the app filter', () async {
+      filters = LocalMediaFilters(
+        audioProcessorFilter: () => _LoggingAudioFilter('nc', log),
+      );
+      await filters.setAudioFilter(_LoggingAudioFilter('app', log));
+
+      await filters.apply(_track('mic', SfuTrackType.audio, 'audio'));
+
+      expect(log, ['app apply mic microphone', 'nc apply mic microphone']);
+    });
+
+    test('that throws leaves the rest of the chain applied', () async {
+      filters = LocalMediaFilters(
+        audioProcessorFilter: () => throw Exception('no filter'),
+      );
+      await filters.apply(_track('mic', SfuTrackType.audio, 'audio'));
+
+      final result = await filters.setAudioFilter(
+        _LoggingAudioFilter('app', log),
+      );
+
+      expect(result, const Result.success(LocalFilterChange.applied));
+      expect(log, ['app apply mic microphone']);
     });
   });
 
@@ -172,7 +338,11 @@ void main() {
     await filters.stopAll();
     await filters.apply(camera('cam-1'));
 
-    expect(log, ['blur stop cam-1', 'nc stop mic', 'blur apply cam-1']);
+    expect(log, [
+      'blur stop cam-1 captureReleased',
+      'nc stop mic captureReleased',
+      'blur apply cam-1 camera',
+    ]);
   });
 
   test('a failing stop is logged and the next capture still applies', () async {
@@ -196,71 +366,80 @@ RtcLocalTrack _track(String id, SfuTrackType trackType, String kind) {
   );
 }
 
+rtc.MediaStream _stream(String trackId, String kind) {
+  return _FakeStream([FakeMediaStreamTrack(trackId, kind: kind)]);
+}
+
 String _firstTrackId(rtc.MediaStream stream) => stream.getTracks().first.id!;
 
-class _LoggingFilter extends VideoFilter {
+final class _LoggingFilter extends VideoFilter {
   _LoggingFilter(this.name, this.log);
 
   final String name;
   final List<String> log;
 
   @override
-  Future<MediaStreamFilterResult> apply(rtc.MediaStream input) async {
-    final id = _firstTrackId(input);
-    log.add('$name apply $id');
+  Future<MediaStreamFilterResult> apply(MediaStreamFilterInput input) async {
+    final id = _firstTrackId(input.stream);
+    log.add('$name apply $id ${input.source.name}');
     return MediaStreamFilterResult(
-      input,
-      stop: () => log.add('$name stop $id'),
+      input.stream,
+      stop: (details) => log.add('$name stop $id ${details.reason.name}'),
     );
   }
 }
 
-class _LoggingAudioFilter extends AudioFilter {
+final class _LoggingAudioFilter extends AudioFilter {
   _LoggingAudioFilter(this.name, this.log);
 
   final String name;
   final List<String> log;
 
   @override
-  Future<MediaStreamFilterResult> apply(rtc.MediaStream input) async {
-    final id = _firstTrackId(input);
-    log.add('$name apply $id');
+  Future<MediaStreamFilterResult> apply(MediaStreamFilterInput input) async {
+    final id = _firstTrackId(input.stream);
+    log.add('$name apply $id ${input.source.name}');
     return MediaStreamFilterResult(
-      input,
-      stop: () => log.add('$name stop $id'),
+      input.stream,
+      stop: (details) => log.add('$name stop $id ${details.reason.name}'),
     );
   }
 }
 
-class _ReplacingFilter extends VideoFilter {
-  _ReplacingFilter(this.output);
+final class _ReplacingFilter extends VideoFilter {
+  _ReplacingFilter(this.output, this.log);
 
   final rtc.MediaStream output;
+  final List<String> log;
 
   @override
-  Future<MediaStreamFilterResult> apply(rtc.MediaStream input) async {
-    return MediaStreamFilterResult(output);
+  Future<MediaStreamFilterResult> apply(MediaStreamFilterInput input) async {
+    log.add('replace apply ${_firstTrackId(input.stream)}');
+    return MediaStreamFilterResult(
+      output,
+      stop: (details) => log.add('replace stop ${details.reason.name}'),
+    );
   }
 }
 
-class _FailingFilter extends VideoFilter {
+final class _FailingFilter extends VideoFilter {
   @override
-  Future<MediaStreamFilterResult> apply(rtc.MediaStream input) async {
+  Future<MediaStreamFilterResult> apply(MediaStreamFilterInput input) async {
     throw Exception('filter failed');
   }
 }
 
-class _FailingStopFilter extends VideoFilter {
+final class _FailingStopFilter extends VideoFilter {
   _FailingStopFilter(this.log);
 
   final List<String> log;
 
   @override
-  Future<MediaStreamFilterResult> apply(rtc.MediaStream input) async {
-    log.add('apply ${_firstTrackId(input)}');
+  Future<MediaStreamFilterResult> apply(MediaStreamFilterInput input) async {
+    log.add('apply ${_firstTrackId(input.stream)}');
     return MediaStreamFilterResult(
-      input,
-      stop: () => throw Exception('stop failed'),
+      input.stream,
+      stop: (_) => throw Exception('stop failed'),
     );
   }
 }

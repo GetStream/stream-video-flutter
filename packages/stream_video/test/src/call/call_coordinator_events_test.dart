@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../logger/impl/test_logger.dart';
 import 'fixtures/call_test_helpers.dart';
@@ -2053,27 +2053,54 @@ void main() {
       expect(warnings, ['for me']);
     });
 
-    test('a blur for the current user applies the moderation', () async {
+    test('a blur for the current user blurs the camera in use', () async {
       var applied = 0;
       final blur = _RecordingVideoFilter();
       final (:call, :events) = await setupModeratedCall(
-        VideoModerationConfig(blurFilter: blur, onApply: () => applied++),
+        VideoModerationConfig(filter: blur, onApply: () => applied++),
       );
+      await call.applyLocalFilters(fakeCameraTrack('cam'));
 
       events.emit(blurEvent(call, currentUserId));
       await Future<void>.delayed(Duration.zero);
-      await call.applyLocalFilters(fakeCameraTrack('cam'));
 
       expect(call.state.value.isVideoModerated, isTrue);
       expect(applied, 1);
       expect(blur.applied, 1);
     });
 
+    test('a blur that fails on the camera turns the camera off', () async {
+      final logger = installRecordingLogger();
+      final (:call, :events) = await setupModeratedCall(
+        VideoModerationConfig(filter: _FailingVideoFilter()),
+      );
+      await call.applyLocalFilters(fakeCameraTrack('cam'));
+
+      events.emit(blurEvent(call, currentUserId));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(call.state.value.isVideoModerated, isTrue);
+      expect(logger.errors, contains(contains('turning the camera off')));
+    });
+
+    test('a capture made while the blur fails is not sent', () async {
+      final (:call, :events) = await setupModeratedCall(
+        VideoModerationConfig(filter: _FailingVideoFilter()),
+      );
+      events.emit(blurEvent(call, currentUserId));
+      await Future<void>.delayed(Duration.zero);
+
+      await expectLater(
+        call.applyLocalFilters(fakeCameraTrack('cam')),
+        throwsException,
+      );
+    });
+
     test('a blur for another user is ignored', () async {
       var applied = 0;
       final (:call, :events) = await setupModeratedCall(
         VideoModerationConfig(
-          blurFilter: _RecordingVideoFilter(),
+          filter: _RecordingVideoFilter(),
           onApply: () => applied++,
         ),
       );
@@ -2114,34 +2141,41 @@ void main() {
       expect(mic.getErrorOrNull()?.message, 'Blocked by video moderation');
     });
 
-    test('a blur with a duration clears itself', () async {
-      var cleared = 0;
-      final blur = _RecordingVideoFilter();
-      final (:call, :events) = await setupModeratedCall(
-        VideoModerationConfig(
-          blurFilter: blur,
-          duration: const Duration(milliseconds: 50),
-          onClear: () => cleared++,
-        ),
-      );
+    test('a blur with a duration clears itself', () {
+      fakeAsync((async) {
+        var cleared = 0;
+        final blur = _RecordingVideoFilter();
+        late final Call call;
+        late final MutableSharedEmitter<StreamVideoEvent> events;
+        setupModeratedCall(
+          VideoModerationConfig(
+            filter: blur,
+            duration: const Duration(seconds: 5),
+            onClear: () => cleared++,
+          ),
+        ).then((it) => (call: call, events: events) = it);
+        async.flushMicrotasks();
+        call.applyLocalFilters(fakeCameraTrack('cam'));
+        async.flushMicrotasks();
 
-      events.emit(blurEvent(call, currentUserId));
-      await Future<void>.delayed(Duration.zero);
-      await call.applyLocalFilters(fakeCameraTrack('cam'));
-      expect(call.state.value.isVideoModerated, isTrue);
+        events.emit(blurEvent(call, currentUserId));
+        async.flushMicrotasks();
+        expect(call.state.value.isVideoModerated, isTrue);
+        expect(blur.attached, 1);
 
-      await Future<void>.delayed(const Duration(milliseconds: 100));
+        async.elapse(const Duration(seconds: 5));
 
-      expect(call.state.value.isVideoModerated, isFalse);
-      expect(cleared, 1);
-      expect(blur.stopped, 1);
+        expect(call.state.value.isVideoModerated, isFalse);
+        expect(cleared, 1);
+        expect(blur.attached, 0);
+      });
     });
 
     test('clearModerationBlur does nothing when not moderated', () async {
       var cleared = 0;
       final (:call, events: _) = await setupModeratedCall(
         VideoModerationConfig(
-          blurFilter: _RecordingVideoFilter(),
+          filter: _RecordingVideoFilter(),
           onClear: () => cleared++,
         ),
       );
@@ -2161,7 +2195,7 @@ void main() {
       await runZoned(
         () async {
           final (:call, :events) = await setupModeratedCall(
-            VideoModerationConfig(blurFilter: blur, duration: duration),
+            VideoModerationConfig(filter: blur, duration: duration),
           );
 
           events.emit(blurEvent(call, currentUserId));
@@ -2186,13 +2220,23 @@ void main() {
   });
 }
 
-class _RecordingVideoFilter extends VideoFilter {
+final class _RecordingVideoFilter extends VideoFilter {
   int applied = 0;
   int stopped = 0;
 
+  /// How many captures the filter is on now.
+  int get attached => applied - stopped;
+
   @override
-  Future<MediaStreamFilterResult> apply(rtc.MediaStream input) async {
+  Future<MediaStreamFilterResult> apply(MediaStreamFilterInput input) async {
     applied++;
-    return MediaStreamFilterResult(input, stop: () => stopped++);
+    return MediaStreamFilterResult(input.stream, stop: (_) => stopped++);
+  }
+}
+
+final class _FailingVideoFilter extends VideoFilter {
+  @override
+  Future<MediaStreamFilterResult> apply(MediaStreamFilterInput input) async {
+    throw Exception('blur failed');
   }
 }

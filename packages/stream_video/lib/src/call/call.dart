@@ -961,28 +961,42 @@ class Call {
   /// The filter applied to the camera, set through [setVideoFilter].
   VideoFilter? get videoFilter => _media.videoFilter;
 
-  /// Applies [filter] to the camera, now and to every later capture, before
-  /// it is sent. Null removes it.
+  /// Applies [filter] to the camera, to the capture in use and to every later
+  /// one, before it is sent. Null removes it.
+  ///
+  /// With the camera off, the filter is applied when it is next turned on.
+  /// Fails when a filter on the camera fails to apply; the filter stays set
+  /// and is tried again on the next capture.
   ///
   /// A moderation blur set through [VideoModerationConfig.blur] runs after
   /// it while active.
-  Future<void> setVideoFilter(VideoFilter? filter) =>
+  Future<Result<None>> setVideoFilter(VideoFilter? filter) =>
       _media.setVideoFilter(filter);
 
   /// The filter applied to the microphone, set through [setAudioFilter].
   AudioFilter? get audioFilter => _media.audioFilter;
 
-  /// Applies [filter] to the microphone, now and to every later capture,
-  /// before it is sent. Null removes it.
-  Future<void> setAudioFilter(AudioFilter? filter) =>
+  /// Applies [filter] to the microphone, to the capture in use and to every
+  /// later one, before it is sent. Null removes it.
+  ///
+  /// With the microphone off, the filter is applied when it is next turned
+  /// on. Fails when a filter on the microphone fails to apply; the filter
+  /// stays set and is tried again on the next capture.
+  Future<Result<None>> setAudioFilter(AudioFilter? filter) =>
       _media.setAudioFilter(filter);
 
   /// Runs this call's filters on [track], a capture made outside the call,
-  /// such as a lobby preview. Publishing that track later does not filter it
-  /// again.
+  /// such as a lobby preview, returning the track to show and send. Publishing
+  /// that track later does not filter it again.
   @internal
   Future<RtcLocalTrack> applyLocalFilters(RtcLocalTrack track) =>
       _media.filters.apply(track);
+
+  /// Stops the filters run on [track] by [applyLocalFilters], once its
+  /// capture is stopped.
+  @internal
+  Future<void> releaseLocalFilters(RtcLocalTrack track) =>
+      _media.filters.release(track);
 
   @internal
   void traceSessionLog(String tag, dynamic data) {

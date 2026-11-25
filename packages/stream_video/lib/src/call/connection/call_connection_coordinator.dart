@@ -866,7 +866,9 @@ class CallConnectionCoordinator {
         clientPublishOptions:
             _call._stateManager.callState.preferences.clientPublishOptions,
       );
-      session.onLocalCapture = _call._media.filters.apply;
+      session
+        ..onLocalCapture = _call._media.filters.apply
+        ..onLocalCaptureReleased = _call._media.filters.release;
       // The teardown has already released the sessions it knows about.
       if (_isLeftOrLeaving) {
         _call._logger.w(

@@ -448,7 +448,7 @@ void main() {
       final rtcPublisher = publisher();
       final filtered = FakeMediaStreamTrack('filtered', kind: 'audio');
       final captured = <String>[];
-      rtcPublisher.onLocalCapture = (track) async {
+      rtcPublisher.onLocalCapture = (track, {isCurrent}) async {
         captured.add(track.mediaTrack.id!);
         return track.copyWith(mediaTrack: filtered);
       };
@@ -460,14 +460,90 @@ void main() {
       expect(transceivers.single.sender.track, same(filtered.clones.single));
     });
 
-    test('a failing filter sends the capture as it is', () async {
+    test('a capture the filters reject is stopped, not sent', () async {
       final rtcPublisher = publisher();
-      rtcPublisher.onLocalCapture = (_) async => throw Exception('filter');
+      rtcPublisher.onLocalCapture = (_, {isCurrent}) async {
+        throw Exception('filter');
+      };
+      final mic = localMic();
 
-      final result = await rtcPublisher.publishAudioTrack(track: localMic());
+      final result = await rtcPublisher.publishAudioTrack(track: mic);
 
-      expect(result.getDataOrNull()!.mediaTrack.id, 'mic');
-      expect(transceivers, hasLength(1));
+      expect(result.isFailure, isTrue);
+      expect(transceivers, isEmpty);
+      expect(fakeMediaOf(mic).stopped, isTrue);
+    });
+
+    test('a filtered track stops the capture it was made of', () async {
+      final rtcPublisher = publisher();
+      final mic = localMic();
+      final filtered = FakeMediaStreamTrack('filtered', kind: 'audio');
+      rtcPublisher.onLocalCapture = (track, {isCurrent}) async {
+        return track.withMedia(
+          stream: FakeMediaStream([filtered]),
+          track: filtered,
+          capturedStream: FakeMediaStream([track.mediaTrack]),
+        );
+      };
+      final published = (await rtcPublisher.publishAudioTrack(
+        track: mic,
+      )).getDataOrNull()!;
+
+      await rtcPublisher.unpublishTrack(trackId: published.trackId);
+
+      expect(filtered.stopped, isTrue);
+      expect(fakeMediaOf(mic).stopped, isTrue);
+    });
+
+    test('a stopped capture is reported released', () async {
+      final rtcPublisher = publisher();
+      final released = <String>[];
+      rtcPublisher.onLocalCaptureReleased = (track) async {
+        released.add(track.mediaTrack.id!);
+      };
+      final track = (await rtcPublisher.publishAudioTrack(
+        track: localMic(),
+      )).getDataOrNull()!;
+
+      await rtcPublisher.muteTrack(trackId: track.trackId);
+
+      expect(released, ['mic']);
+    });
+
+    group('refilterTrack', () {
+      test('sends what the filters now make of the held track', () async {
+        final rtcPublisher = publisher();
+        final track = (await rtcPublisher.publishAudioTrack(
+          track: localMic(),
+        )).getDataOrNull()!;
+        final oldClone = fakeMediaOf(track).clones.single;
+        final filtered = FakeMediaStreamTrack('filtered', kind: 'audio');
+        rtcPublisher.onLocalCapture = (held, {isCurrent}) async {
+          return held.copyWith(mediaTrack: filtered);
+        };
+
+        final result = await rtcPublisher.refilterTrack(SfuTrackType.audio);
+
+        expect(result.isSuccess, isTrue);
+        expect(transceivers.single.sender.track, same(filtered.clones.single));
+        expect(oldClone.stopped, isTrue);
+        expect(fakeMediaOf(track).stopped, isFalse);
+        expect(rtcPublisher.tracks[track.trackId]!.mediaTrack, same(filtered));
+      });
+
+      test('leaves the senders alone when nothing changed', () async {
+        final rtcPublisher = publisher();
+        final track = (await rtcPublisher.publishAudioTrack(
+          track: localMic(),
+        )).getDataOrNull()!;
+        final clone = fakeMediaOf(track).clones.single;
+        rtcPublisher.onLocalCapture = (held, {isCurrent}) async => held;
+
+        await rtcPublisher.refilterTrack(SfuTrackType.audio);
+
+        expect(transceivers.single.sender.track, same(clone));
+        expect(clone.stopped, isFalse);
+      });
     });
 
     group('on a recapture', () {
@@ -483,7 +559,7 @@ void main() {
       test('runs on the new capture before it is sent', () async {
         final rtcPublisher = publisher();
         final captured = <String>[];
-        rtcPublisher.onLocalCapture = (track) async {
+        rtcPublisher.onLocalCapture = (track, {isCurrent}) async {
           captured.add(track.mediaTrack.id!);
           return track;
         };

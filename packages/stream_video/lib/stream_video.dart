@@ -29,7 +29,11 @@ export 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart'
         AudioFilter,
         MediaStream,
         MediaStreamFilter,
+        MediaStreamFilterInput,
         MediaStreamFilterResult,
+        MediaStreamFilterSource,
+        MediaStreamFilterStopDetails,
+        MediaStreamFilterStopReason,
         VideoFilter;
 
 export 'open_api/video/coordinator/api.dart' hide RecordingType, Role, User;

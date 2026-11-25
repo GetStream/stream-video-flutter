@@ -5,33 +5,42 @@ import 'package:meta/meta.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:synchronized/synchronized.dart';
 
+import '../../errors/stream_video_exception_composer.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../sfu/data/models/sfu_track_type.dart';
+import '../../utils/none.dart';
+import '../../utils/result.dart';
 import '../../webrtc/rtc_track/rtc_track.dart';
 
-/// Runs the local media filters on a new capture, returning the track to
-/// send in its place.
+/// Where a changed filter chain stands.
 @internal
-typedef LocalCaptureFilter =
-    Future<RtcLocalTrack> Function(RtcLocalTrack track);
+enum LocalFilterChange {
+  /// The chain runs on the capture in use.
+  applied,
+
+  /// No capture of that kind is in use; the chain runs on the next one.
+  deferred,
+}
 
 /// The filter chains of a call's local media: one for the camera, one for the
 /// microphone and one for the screen share.
 ///
 /// Each chain runs on every new capture of its kind, in order: the app's
 /// filter first, then the call's own (the moderation blur on the camera, the
-/// audio processor's filter on the microphone). A change to a chain applies
-/// to the capture in use right away.
+/// audio processor's filter on the microphone). A change to a chain runs it
+/// again on the capture in use; when that changes the stream sent,
+/// [onOutputChanged] sends the new one.
 @internal
 class LocalMediaFilters {
-  LocalMediaFilters({
-    rtc.AudioFilter? Function()? audioProcessorFilter,
-    TaggedLogger? logger,
-  }) : _audioProcessorFilter = audioProcessorFilter,
-       _logger = logger ?? taggedLogger(tag: 'SV:LocalMediaFilters');
+  LocalMediaFilters({this._audioProcessorFilter, TaggedLogger? logger})
+    : _logger = logger ?? taggedLogger(tag: 'SV:LocalMediaFilters');
 
   final rtc.AudioFilter? Function()? _audioProcessorFilter;
   final TaggedLogger _logger;
+
+  /// Sends what the chain of a kind now makes of the capture in use, in place
+  /// of the stream sent so far.
+  Future<Result<None>> Function(SfuTrackType kind)? onOutputChanged;
 
   final _locks = <SfuTrackType, Lock>{};
   final _applied = <SfuTrackType, _AppliedChain>{};
@@ -50,125 +59,205 @@ class LocalMediaFilters {
   /// The moderation blur, applied after [videoFilter] while set.
   rtc.VideoFilter? get moderationFilter => _moderationFilter;
 
-  /// Sets the app's camera filter.
-  Future<void> setVideoFilter(rtc.VideoFilter? filter) {
+  /// Sets the app's camera filter. Fails when a filter of the chain fails.
+  Future<Result<LocalFilterChange>> setVideoFilter(rtc.VideoFilter? filter) {
     return _change(SfuTrackType.video, () => _videoFilter = filter);
   }
 
   /// Sets the moderation blur, which runs after the app's camera filter.
-  Future<void> setModerationFilter(rtc.VideoFilter? filter) {
+  ///
+  /// Fails when a filter of the chain fails. A new capture is not sent while
+  /// the blur fails on it.
+  Future<Result<LocalFilterChange>> setModerationFilter(
+    rtc.VideoFilter? filter,
+  ) {
     return _change(SfuTrackType.video, () => _moderationFilter = filter);
   }
 
-  /// Sets the screen share filter.
-  Future<void> setScreenShareFilter(rtc.VideoFilter? filter) {
+  /// Sets the screen share filter. Fails when a filter of the chain fails.
+  Future<Result<LocalFilterChange>> setScreenShareFilter(
+    rtc.VideoFilter? filter,
+  ) {
     return _change(SfuTrackType.screenShare, () => _screenShareFilter = filter);
   }
 
-  /// Sets the app's microphone filter.
-  Future<void> setAudioFilter(rtc.AudioFilter? filter) {
+  /// Sets the app's microphone filter. Fails when a filter of the chain
+  /// fails.
+  Future<Result<LocalFilterChange>> setAudioFilter(rtc.AudioFilter? filter) {
     return _change(SfuTrackType.audio, () => _audioFilter = filter);
   }
 
-  /// Applies the microphone chain again, after the audio processor's filter
-  /// changed.
-  Future<void> refreshAudioFilters() => _change(SfuTrackType.audio, () {});
-
-  List<rtc.MediaStreamFilter> _chainFor(SfuTrackType kind) {
-    if (kind == SfuTrackType.video) return [?_videoFilter, ?_moderationFilter];
-    if (kind == SfuTrackType.audio) {
-      return [?_audioFilter, ?_audioProcessorFilter?.call()];
+  List<_ChainEntry> _chainFor(SfuTrackType kind) {
+    if (kind == SfuTrackType.video) {
+      return [
+        if (_videoFilter case final filter?) _ChainEntry(filter),
+        if (_moderationFilter case final filter?)
+          _ChainEntry(filter, required: true),
+      ];
     }
-    if (kind == SfuTrackType.screenShare) return [?_screenShareFilter];
+    if (kind == SfuTrackType.audio) {
+      return [
+        if (_audioFilter case final filter?) _ChainEntry(filter),
+        if (_processorFilter() case final filter?) _ChainEntry(filter),
+      ];
+    }
+    if (kind == SfuTrackType.screenShare) {
+      return [if (_screenShareFilter case final filter?) _ChainEntry(filter)];
+    }
     return const [];
   }
 
-  static bool _isFiltered(SfuTrackType kind) =>
-      kind == SfuTrackType.video ||
-      kind == SfuTrackType.audio ||
-      kind == SfuTrackType.screenShare;
+  rtc.AudioFilter? _processorFilter() {
+    try {
+      return _audioProcessorFilter?.call();
+    } catch (e, stk) {
+      _logger.e(() => '[chain] the audio processor filter failed: $e\n$stk');
+      return null;
+    }
+  }
+
+  static rtc.MediaStreamFilterSource? _sourceOf(SfuTrackType kind) {
+    if (kind == SfuTrackType.video) return rtc.MediaStreamFilterSource.camera;
+    if (kind == SfuTrackType.audio) {
+      return rtc.MediaStreamFilterSource.microphone;
+    }
+    if (kind == SfuTrackType.screenShare) {
+      return rtc.MediaStreamFilterSource.screenShare;
+    }
+    return null;
+  }
 
   Lock _lockFor(SfuTrackType kind) => _locks.putIfAbsent(kind, Lock.new);
 
-  /// Runs the chain of [track]'s kind on it, unless that capture was
-  /// filtered already. Stops the filters of the capture it replaces.
-  Future<RtcLocalTrack> apply(RtcLocalTrack track) {
+  /// [track] as the chain of its kind makes it: the chain's output for a
+  /// capture the chain already runs on, or for a new capture after the chain
+  /// ran on it. A new capture stops the filters of the capture it replaces,
+  /// unless [isCurrent] says it no longer replaces it.
+  ///
+  /// Throws when a filter that must apply, the moderation blur, fails.
+  Future<RtcLocalTrack> apply(
+    RtcLocalTrack track, {
+    bool Function()? isCurrent,
+  }) {
     final kind = track.trackType;
-    if (!_isFiltered(kind)) return Future.value(track);
+    final source = _sourceOf(kind);
+    if (source == null) return Future.value(track);
 
     return _lockFor(kind).synchronized(() async {
       final previous = _applied[kind];
-      if (previous != null && previous.holds(track.mediaTrack)) return track;
+      if (previous != null && previous.holds(track)) {
+        return previous.sent(track);
+      }
+
+      if (isCurrent != null && !isCurrent()) {
+        throw StateError('${track.trackId} was replaced while it was filtered');
+      }
 
       if (previous != null) {
         _applied.remove(kind);
-        await previous.stop(_logger);
+        await previous.stop(
+          rtc.MediaStreamFilterStopReason.captureReplaced,
+          _logger,
+        );
       }
 
       final applied = await _AppliedChain.run(
         _chainFor(kind),
-        track.mediaStream,
-        track.mediaTrack,
-        _logger,
+        source: source,
+        capture: track.capturedStream ?? track.mediaStream,
+        captureTrack: track.capturedTrack,
+        logger: _logger,
       );
-      _applied[kind] = applied;
-
-      if (identical(applied.output, track.mediaStream)) return track;
-
-      final outputTrack = applied.outputTrack(kind);
-      if (outputTrack == null) {
-        _logger.w(() => '[apply] filter output has no $kind track, ignored');
-        await applied.stop(_logger);
-        _applied[kind] = _AppliedChain.unfiltered(
-          track.mediaStream,
-          track.mediaTrack,
+      if (applied.requiredFailure case final failure?) {
+        await applied.stop(
+          rtc.MediaStreamFilterStopReason.captureReleased,
+          _logger,
         );
-        return track;
+        Error.throwWithStackTrace(failure.error, failure.stackTrace);
       }
 
-      return track.copyWith(
-        mediaStream: applied.output,
-        mediaTrack: outputTrack,
+      _applied[kind] = applied;
+      return applied.sent(track);
+    });
+  }
+
+  /// Stops the filters of [track]'s capture, once that capture is stopped.
+  Future<void> release(RtcLocalTrack track) {
+    final kind = track.trackType;
+    return _lockFor(kind).synchronized(() async {
+      final applied = _applied[kind];
+      if (applied == null || !applied.holds(track)) return;
+
+      _applied.remove(kind);
+      await applied.stop(
+        rtc.MediaStreamFilterStopReason.captureReleased,
+        _logger,
       );
     });
   }
 
-  /// Changes a chain, then applies it again to the capture of that kind in
-  /// use.
-  Future<void> _change(SfuTrackType kind, void Function() change) {
-    return _lockFor(kind).synchronized(() async {
+  /// Changes a chain, then runs it again on the capture of that kind in use.
+  ///
+  /// The new chain is applied before the old one is stopped, and its output
+  /// is sent first when it is another stream.
+  Future<Result<LocalFilterChange>> _change(
+    SfuTrackType kind,
+    void Function() change,
+  ) async {
+    final changed = await _lockFor(kind).synchronized(() async {
       change();
 
       final current = _applied[kind];
-      if (current == null) return;
+      if (current == null) return null;
 
-      if (!current.isPassThrough) {
-        // The stream being sent would end; a new chain applies from the next
-        // capture.
-        _logger.w(() => '[change] $kind applies from the next capture');
-        return;
-      }
-
-      await current.stop(_logger);
       final applied = await _AppliedChain.run(
         _chainFor(kind),
-        current.source,
-        current.sourceTrack,
-        _logger,
+        source: current.input.source,
+        capture: current.capture,
+        captureTrack: current.captureTrack,
+        knownTrackIds: current.knownTrackIds,
+        logger: _logger,
       );
-
-      if (!applied.isPassThrough) {
-        _logger.w(() => '[change] $kind applies from the next capture');
-        await applied.stop(_logger);
-        _applied[kind] = _AppliedChain.unfiltered(
-          current.source,
-          current.sourceTrack,
-        );
-        return;
-      }
-
       _applied[kind] = applied;
+      return (applied: applied, retired: current);
     });
+    if (changed == null) {
+      return const Result.success(LocalFilterChange.deferred);
+    }
+
+    final (:applied, :retired) = changed;
+    var sent = const Result<None>.success(none);
+    if (!identical(applied.output, retired.output)) {
+      sent = await _sendOutput(kind);
+    }
+
+    await _lockFor(kind).synchronized(
+      () => retired.stop(rtc.MediaStreamFilterStopReason.chainChanged, _logger),
+    );
+
+    if (applied.failures.firstOrNull case final failure?) {
+      return Result.failure(
+        StreamVideoExceptions.compose(failure.error, failure.stackTrace),
+        failure.stackTrace,
+      );
+    }
+    if (sent case final Failure failure) return failure;
+    return const Result.success(LocalFilterChange.applied);
+  }
+
+  Future<Result<None>> _sendOutput(SfuTrackType kind) async {
+    final send = onOutputChanged;
+    if (send == null) return const Result.success(none);
+    try {
+      final result = await send(kind);
+      if (result case Failure(:final error)) {
+        _logger.e(() => '[change] failed to send the new $kind stream: $error');
+      }
+      return result;
+    } catch (e, stk) {
+      _logger.e(() => '[change] failed to send the new $kind stream: $e\n$stk');
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
+    }
   }
 
   /// Stops every applied filter, keeping the chains for the next capture.
@@ -176,72 +265,163 @@ class LocalMediaFilters {
     for (final kind in _applied.keys.toList()) {
       await _lockFor(kind).synchronized(() async {
         final applied = _applied.remove(kind);
-        await applied?.stop(_logger);
+        await applied?.stop(
+          rtc.MediaStreamFilterStopReason.captureReleased,
+          _logger,
+        );
       });
     }
   }
 }
 
+class _ChainEntry {
+  const _ChainEntry(this.filter, {this.required = false});
+
+  final rtc.MediaStreamFilter filter;
+
+  /// Whether a capture must not be sent while this filter fails on it.
+  final bool required;
+}
+
+class _FilterFailure {
+  const _FilterFailure(this.error, this.stackTrace);
+
+  final Object error;
+  final StackTrace stackTrace;
+}
+
 /// A chain applied to one capture.
 class _AppliedChain {
-  _AppliedChain._(this.source, this.sourceTrack, this.output, this._results);
-
-  _AppliedChain.unfiltered(this.source, this.sourceTrack)
-    : output = source,
-      _results = const [];
+  _AppliedChain._({
+    required this.input,
+    required this.capture,
+    required this.captureTrack,
+    required this.output,
+    required this.outputTrack,
+    required this.knownTrackIds,
+    required this._results,
+    required this.failures,
+    required this.requiredFailure,
+  });
 
   static Future<_AppliedChain> run(
-    List<rtc.MediaStreamFilter> chain,
-    rtc.MediaStream source,
-    rtc.MediaStreamTrack sourceTrack,
-    TaggedLogger logger,
-  ) async {
+    List<_ChainEntry> chain, {
+    required rtc.MediaStreamFilterSource source,
+    required rtc.MediaStream capture,
+    required rtc.MediaStreamTrack captureTrack,
+    required TaggedLogger logger,
+    Set<String> knownTrackIds = const {},
+  }) async {
     final results = <rtc.MediaStreamFilterResult>[];
-    var stream = source;
-    for (final filter in chain) {
+    final failures = <_FilterFailure>[];
+    _FilterFailure? requiredFailure;
+    var stream = capture;
+    var track = captureTrack;
+
+    for (final entry in chain) {
+      final filter = entry.filter;
       try {
-        final result = await filter.apply(stream);
+        final result = await filter.apply(
+          rtc.MediaStreamFilterInput(stream: stream, source: source),
+        );
+        final output = result.output;
+        final outputTrack = identical(output, stream)
+            ? track
+            : _trackOf(output, source);
+        if (outputTrack == null) {
+          await result.stop?.call(
+            const rtc.MediaStreamFilterStopDetails(
+              reason: rtc.MediaStreamFilterStopReason.captureReleased,
+            ),
+          );
+          throw StateError('${filter.runtimeType} made a stream with no track');
+        }
         results.add(result);
-        stream = result.output;
+        stream = output;
+        track = outputTrack;
       } catch (e, stk) {
         logger.e(() => '[apply] ${filter.runtimeType} failed: $e\n$stk');
+        final failure = _FilterFailure(e, stk);
+        failures.add(failure);
+        if (entry.required) requiredFailure ??= failure;
       }
     }
-    return _AppliedChain._(source, sourceTrack, stream, results);
+
+    return _AppliedChain._(
+      input: rtc.MediaStreamFilterInput(stream: capture, source: source),
+      capture: capture,
+      captureTrack: captureTrack,
+      output: stream,
+      outputTrack: track,
+      knownTrackIds: {...knownTrackIds, captureTrack.id!, track.id!},
+      results: results,
+      failures: failures,
+      requiredFailure: requiredFailure,
+    );
   }
 
-  /// The captured stream the chain ran on.
-  final rtc.MediaStream source;
-
-  /// The captured track the chain ran on.
-  final rtc.MediaStreamTrack sourceTrack;
-
-  /// The stream the chain made of [source].
-  final rtc.MediaStream output;
-
-  final List<rtc.MediaStreamFilterResult> _results;
-
-  /// Whether the chain sends [source] itself.
-  bool get isPassThrough => identical(output, source);
-
-  rtc.MediaStreamTrack? outputTrack(SfuTrackType kind) {
-    final tracks = kind == SfuTrackType.audio
-        ? output.getAudioTracks()
-        : output.getVideoTracks();
+  static rtc.MediaStreamTrack? _trackOf(
+    rtc.MediaStream stream,
+    rtc.MediaStreamFilterSource source,
+  ) {
+    final tracks = source == rtc.MediaStreamFilterSource.microphone
+        ? stream.getAudioTracks()
+        : stream.getVideoTracks();
     return tracks.firstOrNull;
   }
 
-  /// Whether [track] is the capture this chain ran on, or what it made.
-  bool holds(rtc.MediaStreamTrack track) {
-    if (track.id == sourceTrack.id) return true;
-    return output.getTracks().any((it) => it.id == track.id);
+  /// The captured stream the chain ran on, with its source.
+  final rtc.MediaStreamFilterInput input;
+
+  /// The captured stream the chain ran on.
+  final rtc.MediaStream capture;
+
+  /// The captured track the chain ran on.
+  final rtc.MediaStreamTrack captureTrack;
+
+  /// The stream the chain made of [capture].
+  final rtc.MediaStream output;
+
+  /// The track of [output] that is sent.
+  final rtc.MediaStreamTrack outputTrack;
+
+  /// The ids of [captureTrack] and of every track the chains run on it made.
+  final Set<String> knownTrackIds;
+
+  /// The filters that failed, in order.
+  final List<_FilterFailure> failures;
+
+  /// The failure of a filter that must apply, if one failed.
+  final _FilterFailure? requiredFailure;
+
+  final List<rtc.MediaStreamFilterResult> _results;
+
+  /// Whether [track] is the capture this chain ran on, or what a chain run
+  /// on it made.
+  bool holds(RtcLocalTrack track) {
+    return knownTrackIds.contains(track.mediaTrack.id) ||
+        knownTrackIds.contains(track.capturedTrack.id);
+  }
+
+  /// [track] sending [output].
+  RtcLocalTrack sent(RtcLocalTrack track) {
+    if (identical(track.mediaStream, output)) return track;
+    return track.withMedia(
+      stream: output,
+      track: outputTrack,
+      capturedStream: identical(output, capture) ? null : capture,
+    );
   }
 
   /// Stops the filters, last first. A failure is logged.
-  Future<void> stop(TaggedLogger logger) async {
+  Future<void> stop(
+    rtc.MediaStreamFilterStopReason reason,
+    TaggedLogger logger,
+  ) async {
+    final details = rtc.MediaStreamFilterStopDetails(reason: reason);
     for (final result in _results.reversed) {
       try {
-        await result.stop?.call();
+        await result.stop?.call(details);
       } catch (e, stk) {
         logger.w(() => '[stop] filter stop failed: $e\n$stk');
       }
