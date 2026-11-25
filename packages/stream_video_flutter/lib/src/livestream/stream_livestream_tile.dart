@@ -197,7 +197,7 @@ class DefaultStreamLivestreamTile extends StatelessWidget {
 
     final trailing = [
       if ((props.showSpeakerphoneToggle ?? resolved.showSpeakerphoneToggle) &&
-          RtcMediaDeviceNotifier.instance.isAudioPlayoutPauseSupported)
+          PlatformAudioController.instance.isAudioPlayoutPauseSupported)
         LivestreamSpeakerphoneOption(
           call: props.call,
           enabledSpeakerphoneIconTheme: const IconThemeData(),

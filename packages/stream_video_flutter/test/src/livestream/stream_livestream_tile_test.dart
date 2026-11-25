@@ -5,6 +5,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart' hide Finder;
 
 import '../../test_utils/test_wrapper.dart';
+import '../../test_utils/webrtc_capabilities.dart';
 import '../mocks.dart';
 
 void main() {
@@ -56,12 +57,15 @@ void main() {
   testWidgets(
     'leaves the speakerphone toggle out where playout cannot pause',
     (tester) async {
-      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.linux;
-      addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+      overrideAudioPlayoutPauseSupport(supported: false);
 
       await pump(
         tester,
-        StreamLivestreamTile(call: call, child: const Text('video')),
+        StreamLivestreamTile(
+          call: call,
+          showSpeakerphoneToggle: true,
+          child: const Text('video'),
+        ),
       );
 
       expect(find.byType(LivestreamSpeakerphoneOption), findsNothing);
@@ -308,6 +312,7 @@ void main() {
     setUp(() {
       // The toggle only shows where playout can be paused.
       CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      overrideAudioPlayoutPauseSupport(supported: true);
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         ..setMockMethodCallHandler(webrtcMethods, (_) async => null)
         ..setMockStreamHandler(

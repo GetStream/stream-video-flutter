@@ -6,6 +6,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart' hide Finder;
 
 import '../../test_utils/goldens.dart';
+import '../../test_utils/webrtc_capabilities.dart';
 import '../mocks.dart';
 
 void main() {
@@ -78,6 +79,7 @@ void main() {
   setUp(() {
     // The speakerphone toggle only shows where playout can be paused.
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+    overrideAudioPlayoutPauseSupport(supported: true);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       ..setMockMethodCallHandler(webrtcMethods, (_) async => null)
       ..setMockStreamHandler(
