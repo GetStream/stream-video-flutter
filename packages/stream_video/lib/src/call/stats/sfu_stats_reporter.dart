@@ -15,6 +15,7 @@ import '../session/call_session.dart';
 import 'trace_record.dart';
 import 'trace_tag.dart';
 import 'tracer.dart';
+import '../../webrtc/webrtc_engine.dart';
 
 class SfuStatsReporter {
   SfuStatsReporter({
@@ -231,14 +232,7 @@ class SfuStatsReporter {
             sdk: streamSdkName,
             android: androidState,
             apple: appleState,
-            webrtcVersion: switch (CurrentPlatform.type) {
-              PlatformType.android => androidWebRTCVersion,
-              PlatformType.ios => iosWebRTCVersion,
-              PlatformType.macOS => macOsWebRTCVersion,
-              PlatformType.windows => windowsWebRTCVersion,
-              PlatformType.linux => linuxWebRTCVersion,
-              _ => null,
-            },
+            webrtcVersion: webRtcEngine.webRtcVersion,
             telemetry: _calculateTelemetry(
               connectionTimeMs,
               reconnectionStrategy,

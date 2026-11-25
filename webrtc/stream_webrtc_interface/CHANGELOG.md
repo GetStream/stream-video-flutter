@@ -4,6 +4,7 @@
 [Unreleased]
 
 * Added `webRtcLogHandler`, which receives the log records of the WebRTC packages.
+* Added `WebRtcEngine.webRtcVersion`.
 * **Breaking:** `AudioRoute.reasonCode` is replaced by a typed `reason`, an `AudioRouteChangeReason`.
 * Added `hasAudioSession` and `isExternalDevice` to `WebRtcAudio`.
 * Added `WebRtcEngine`, the contract of a platform's WebRTC implementation, with `PeerConnectionFactory`, `WebRtcAudio`, `WebRtcCamera`, `FirstFrameWatcher` and their result types.

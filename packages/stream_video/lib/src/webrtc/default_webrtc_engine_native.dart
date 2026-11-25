@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
-/// The engine of the WebRTC plugin.
+/// None: on native platforms, stream_video_flutter registers the engine.
 @internal
-WebRtcEngine createDefaultWebRtcEngine() => NativeWebRtcEngine();
+WebRtcEngine? createDefaultWebRtcEngine() => null;

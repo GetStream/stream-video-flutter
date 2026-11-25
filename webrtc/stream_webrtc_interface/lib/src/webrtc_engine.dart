@@ -56,6 +56,10 @@ abstract class WebRtcEngine {
   /// What this implementation can do.
   WebRtcCapabilities get capabilities;
 
+  /// The version of the WebRTC library this engine runs. Null where the
+  /// platform's own WebRTC runs, as in a browser.
+  String? get webRtcVersion;
+
   /// The events the platform reports outside of a peer connection, a track or
   /// a renderer.
   WebRtcPlatformEvents get events;

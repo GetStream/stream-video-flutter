@@ -31,6 +31,7 @@ import 'session_signaling.dart';
 import 'session_track_controller.dart';
 import 'sfu_event_router.dart';
 import 'sfu_join_request_builder.dart';
+import '../../webrtc/webrtc_engine.dart';
 
 part 'call_session_media.dart';
 
@@ -461,14 +462,7 @@ class CallSession extends Disposable with _CallSessionMedia {
     final environment = ClientEnvironment(
       sfu: config.sfuUrl,
       sdkVersion: streamVideoVersion,
-      webRtcVersion: switch (CurrentPlatform.type) {
-        PlatformType.android => androidWebRTCVersion,
-        PlatformType.ios => iosWebRTCVersion,
-        PlatformType.macOS => macOsWebRTCVersion,
-        PlatformType.windows => windowsWebRTCVersion,
-        PlatformType.linux => linuxWebRTCVersion,
-        _ => '',
-      },
+      webRtcVersion: webRtcEngine.webRtcVersion ?? '',
     );
 
     return StatsReporter(

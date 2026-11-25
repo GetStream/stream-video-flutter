@@ -67,8 +67,21 @@ flutter:
       android:
         package: io.getstream.video.flutter.stream_video_flutter
         pluginClass: StreamVideoFlutterPlugin
+        dartPluginClass: StreamVideoFlutterEngineRegistrant
+        dartFileName: src/webrtc_engine_registrant.dart
       ios:
         pluginClass: StreamVideoFlutterPlugin
+        dartPluginClass: StreamVideoFlutterEngineRegistrant
+        dartFileName: src/webrtc_engine_registrant.dart
+      linux:
+        dartPluginClass: StreamVideoFlutterEngineRegistrant
+        dartFileName: src/webrtc_engine_registrant.dart
+      macos:
+        dartPluginClass: StreamVideoFlutterEngineRegistrant
+        dartFileName: src/webrtc_engine_registrant.dart
+      windows:
+        dartPluginClass: StreamVideoFlutterEngineRegistrant
+        dartFileName: src/webrtc_engine_registrant.dart
 
 topics:
   - video

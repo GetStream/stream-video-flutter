@@ -152,10 +152,14 @@ void main() {
   });
 
   group('AudioSession.forPlatform', () {
+    late WebRtcEngine registered;
     late FakeWebRtcEngine engine;
 
-    setUp(() => WebRtcEngine.instance = engine = FakeWebRtcEngine());
-    tearDown(WebRtcEngine.debugUnregister);
+    setUp(() {
+      registered = WebRtcEngine.instance;
+      WebRtcEngine.instance = engine = FakeWebRtcEngine();
+    });
+    tearDown(() => WebRtcEngine.instance = registered);
 
     test('is the Apple session where the engine has an audio session', () {
       engine.audio.hasAudioSession = true;
