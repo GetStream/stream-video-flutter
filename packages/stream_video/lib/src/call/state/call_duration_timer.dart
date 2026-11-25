@@ -28,10 +28,23 @@ class CallDurationTimer {
 
   /// How long the call has been live, as described on
   /// `Call.liveDurationStream`.
-  Stream<Duration> get liveDurationStream async* {
-    final current = _liveDuration(_state);
-    if (current != null) yield current;
-    yield* _liveDurationController.stream;
+  ///
+  /// The current value and the subscription to later ones are taken in the
+  /// same step, so no update falls between them.
+  Stream<Duration> get liveDurationStream {
+    return Stream.multi((controller) {
+      final current = _liveDuration(_state);
+      if (current != null) controller.add(current);
+      final subscription = _liveDurationController.stream.listen(
+        controller.addSync,
+        onDone: controller.closeSync,
+      );
+      controller
+        ..onPause = subscription.pause
+        ..onResume = subscription.resume
+        // Not awaited: the done event would wait on the cancel.
+        ..onCancel = () => unawaited(subscription.cancel());
+    });
   }
 
   /// Takes the times of [state], starting or stopping the ticks as they say.

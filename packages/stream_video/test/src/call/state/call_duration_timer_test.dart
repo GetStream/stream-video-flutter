@@ -164,6 +164,31 @@ void main() {
       });
     });
 
+    test('keeps an update that lands as the current value arrives', () {
+      inFakeTime((async) {
+        final liveStartedAt = start.subtract(const Duration(minutes: 4));
+        final ended = state(
+          liveStartedAt: liveStartedAt,
+          liveEndedAt: start.add(const Duration(seconds: 30)),
+        );
+        final timer = CallDurationTimer(state(liveStartedAt: liveStartedAt));
+        final durations = <Duration>[];
+        timer.liveDurationStream.listen((duration) {
+          // The live ends while the first value is being delivered.
+          if (durations.isEmpty) timer.update(ended);
+          durations.add(duration);
+        });
+
+        async.elapse(const Duration(seconds: 3));
+
+        expect(durations, const [
+          Duration(minutes: 4),
+          Duration(minutes: 4, seconds: 30),
+        ]);
+        timer.dispose();
+      });
+    });
+
     test('starts with the frozen length when listened to after the live', () {
       inFakeTime((async) {
         final timer = CallDurationTimer(
