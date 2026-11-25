@@ -14,13 +14,6 @@ NS_ASSUME_NONNULL_BEGIN
 /** Starts observing, once per process. Later calls do nothing. */
 + (void)startObserving;
 
-/**
- * Posts `screenSharingStarted` while the extension is broadcasting, or
- * `screenSharingStopped` when a stop was posted with no Dart listener
- * attached. Called when a Dart listener attaches.
- */
-+ (void)replayState;
-
 @end
 
 NS_ASSUME_NONNULL_END

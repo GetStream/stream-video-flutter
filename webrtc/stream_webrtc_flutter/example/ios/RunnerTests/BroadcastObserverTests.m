@@ -19,6 +19,14 @@
 }
 
 - (void)tearDown {
+  // Ends with the broadcast stopped and lets pending events reach this test's
+  // sink, so the next test starts from the same state.
+  [FlutterWebRTCPlugin sharedSingleton].eventSink = ^(id payload) {
+  };
+  CFNotificationCenterPostNotification(
+      CFNotificationCenterGetDarwinNotifyCenter(),
+      CFSTR("io.getstream.video.screen_sharing.broadcastStopped"), NULL, NULL, true);
+  [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
   [FlutterWebRTCPlugin sharedSingleton].eventSink = self.previousSink;
   [super tearDown];
 }
@@ -46,33 +54,6 @@
 - (void)testBroadcastStoppedPostsScreenSharingStopped {
   [self expectEvent:@"screenSharingStopped"
       afterNotification:@"io.getstream.video.screen_sharing.broadcastStopped"];
-}
-
-- (void)testRunningBroadcastIsReplayedWhenAListenerAttaches {
-  FlutterWebRTCPlugin* plugin = [FlutterWebRTCPlugin sharedSingleton];
-  plugin.eventSink = nil;
-  CFNotificationCenterPostNotification(
-      CFNotificationCenterGetDarwinNotifyCenter(),
-      CFSTR("io.getstream.video.screen_sharing.broadcastStarted"), NULL, NULL, true);
-  // Lets the notification reach the observer while nothing listens.
-  [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
-
-  XCTestExpectation* replayed = [self expectationWithDescription:@"replayed"];
-  [plugin onListenWithArguments:nil
-                      eventSink:^(id payload) {
-                        if ([payload isKindOfClass:[NSDictionary class]] &&
-                            [((NSDictionary*)payload)[@"event"]
-                                isEqualToString:@"screenSharingStarted"]) {
-                          [replayed fulfill];
-                        }
-                      }];
-
-  [self waitForExpectations:@[ replayed ] timeout:5];
-
-  CFNotificationCenterPostNotification(
-      CFNotificationCenterGetDarwinNotifyCenter(),
-      CFSTR("io.getstream.video.screen_sharing.broadcastStopped"), NULL, NULL, true);
-  [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
 }
 
 @end
