@@ -514,7 +514,17 @@ class _CallScreenState extends State<CallScreen>
     ),
   );
 
-  /// The app bar on a large screen: the current user on the left, and the
+  /// The flip camera button, once the call has a local participant to flip.
+  Widget _flipCameraButton(Call call) => PartialCallStateBuilder(
+    call: call,
+    selector: (state) => state.localParticipant != null,
+    builder: (context, hasLocalParticipant) => hasLocalParticipant
+        ? StreamFlipCameraButton(call: call)
+        : const SizedBox.shrink(),
+  );
+
+  /// The app bar on a large screen: the current user, the go live button of
+  /// a livestream host and the flip camera button on the left, and the
   /// participant count, duration and latency on the right.
   PreferredSizeWidget _largeAppBar(BuildContext context, Call call) {
     final spacing = context.streamSpacing;
@@ -528,12 +538,18 @@ class _CallScreenState extends State<CallScreen>
     return CallAppBar(
       call: call,
       showLeaveCallAction: false,
-      leading: currentUser == null
-          ? null
-          : Padding(
-              padding: EdgeInsetsDirectional.only(start: edgeInset),
-              child: _CurrentUserLabel(user: currentUser),
-            ),
+      leading: Padding(
+        padding: EdgeInsetsDirectional.only(start: edgeInset),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (currentUser != null)
+              Flexible(child: _CurrentUserLabel(user: currentUser)),
+            if (_isLivestream) LivestreamGoLiveButton(call: call),
+            if (StreamFlipCameraButton.isSupported) _flipCameraButton(call),
+          ],
+        ),
+      ),
       title: const SizedBox.shrink(),
       actions: [
         Padding(
@@ -843,14 +859,7 @@ class _CallScreenState extends State<CallScreen>
                       // the layout toggle.
                       if (_isLivestream) LivestreamGoLiveButton(call: call),
                       if (StreamFlipCameraButton.isSupported)
-                        PartialCallStateBuilder(
-                          call: call,
-                          selector: (state) => state.localParticipant != null,
-                          builder: (context, hasLocalParticipant) =>
-                              hasLocalParticipant
-                              ? StreamFlipCameraButton(call: call)
-                              : const SizedBox.shrink(),
-                        ),
+                        _flipCameraButton(call),
                     ],
                   ),
                   title: StreamCallDurationBadge(call: call),
