@@ -3,7 +3,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/audio/remote_audio_playback.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
 import 'package:stream_video/src/webrtc/rtc_track/rtc_remote_track.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 class _MockTransceiver extends Mock implements rtc.RTCRtpTransceiver {}
 

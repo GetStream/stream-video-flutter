@@ -1,5 +1,5 @@
 import 'package:stream_core/stream_core.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../../../logger/stream_log.dart';
 import 'rtc_audio_source.dart';

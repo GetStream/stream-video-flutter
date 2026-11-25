@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart'
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart'
     show AndroidAudioConfiguration, AppleAudioMode;
 
 void main() {

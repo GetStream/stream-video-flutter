@@ -7,7 +7,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/call/stats/trace_tag.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import 'fixtures/call_session_harness.dart';
 
