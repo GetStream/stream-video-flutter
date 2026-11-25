@@ -5,13 +5,17 @@
 - [iOS] CocoaPods is no longer supported; enable Flutter's Swift Package Manager.
 - `StreamVideoEffectsManager` is removed; filters are `VideoFilter` values for `Call.setVideoFilter`: `BackgroundBlurFilter`, `VirtualBackgroundFilter`, `FullFrameBlurFilter` and `CustomVideoFilter`.
 - The package no longer depends on `stream_video`.
+- `BackgroundBlurFilter` takes a named `intensity`, and `BlurIntensity` is a class with `light`, `medium` and `heavy` presets.
+- `CustomVideoFilter.onRegister` takes a `CustomVideoFilterRegistration`.
 
 ### ✅ Added
 
 - Added `StreamVideoFilters.isSupported`, whether the device can run the filters.
+- Added `NativeVideoFilter`, the base of filters that run a frame processor registered natively.
 
 ### 🐞 Fixed
 
+- Two filters on one camera, such as a virtual background and the moderation blur, both apply.
 - Video filters on iOS follow the orientation of the app's window scene, including after it moves to another display.
 - [iOS] Added the missing `FlutterFramework` dependency to the Swift package.
 

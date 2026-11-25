@@ -3,20 +3,15 @@
 library;
 
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
+import 'src/video_effect_registry.dart';
 import 'stream_video_filters_platform_interface.dart';
 
 export 'src/native_video_filter.dart';
 export 'src/video_filters.dart';
 
 class StreamVideoFilters {
-  /// Bumped by [unregisterAllFilters], so a filter registers its processor
-  /// again the next time it is applied.
-  @internal
-  static int registryGeneration = 0;
-
   /// Whether this device can run the filters of this package.
   Future<bool> isSupported() async {
     if (!rtc.webRtcCapabilities.supportsVideoEffects) return false;
@@ -55,7 +50,7 @@ class StreamVideoFilters {
   /// Call it once no call uses the filters any more: a processor still
   /// attached to a track stays alive until that track is released.
   Future<void> unregisterAllFilters() {
-    registryGeneration++;
+    VideoEffectRegistry.generation++;
     return StreamVideoFiltersPlatform.instance.unregisterAllFilters();
   }
 }

@@ -3,6 +3,7 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:stream_video_filters/src/video_effect_registry.dart';
 import 'package:stream_video_filters/stream_video_filters.dart';
 import 'package:stream_video_filters/stream_video_filters_platform_interface.dart';
 import 'package:stream_webrtc_flutter/src/native/native_webrtc_capabilities.dart';
@@ -13,10 +14,12 @@ void main() {
 
   late _FakeFiltersPlatform platform;
   late List<String> attached;
+  var failAttach = false;
 
   setUp(() {
     platform = _FakeFiltersPlatform();
     StreamVideoFiltersPlatform.instance = platform;
+    VideoEffectRegistry.reset();
     debugWebRtcCapabilitiesOverride = _capabilities(isAndroid: true);
 
     attached = [];
@@ -25,6 +28,7 @@ void main() {
           call,
         ) async {
           if (call.method == 'setVideoEffects') {
+            if (failAttach) throw PlatformException(code: 'attach');
             final args = call.arguments as Map;
             attached.add(
               '${args['trackId']}: ${(args['names'] as List).join(',')}',
@@ -45,7 +49,7 @@ void main() {
 
   final filters = <String, (NativeVideoFilter Function(), String)>{
     'BackgroundBlurFilter': (
-      () => BackgroundBlurFilter(BlurIntensity.heavy),
+      () => BackgroundBlurFilter(intensity: BlurIntensity.heavy),
       'blur',
     ),
     'VirtualBackgroundFilter': (
@@ -61,8 +65,8 @@ void main() {
       test('registers its processor once and attaches it', () async {
         final filter = create();
 
-        await filter.apply(_stream('cam-1'));
-        await filter.apply(_stream('cam-2'));
+        await filter.apply(_input('cam-1'));
+        await filter.apply(_input('cam-2'));
 
         expect(platform.registrations, [registration]);
         expect(attached, [
@@ -73,21 +77,21 @@ void main() {
 
       test('stop detaches it from the track', () async {
         final filter = create();
-        final stream = _stream('cam-1');
+        final input = _input('cam-1');
 
-        final result = await filter.apply(stream);
-        await result.stop!();
+        final result = await filter.apply(input);
+        await result.stop!(_stopDetails);
 
-        expect(result.output, same(stream));
+        expect(result.output, same(input.stream));
         expect(attached.last, 'cam-1: ');
       });
 
       test('registers again after unregisterAllFilters', () async {
         final filter = create();
 
-        await filter.apply(_stream('cam-1'));
+        await filter.apply(_input('cam-1'));
         await StreamVideoFilters().unregisterAllFilters();
-        await filter.apply(_stream('cam-1'));
+        await filter.apply(_input('cam-2'));
 
         expect(platform.registrations, [registration, registration]);
       });
@@ -95,28 +99,79 @@ void main() {
   }
 
   test('CustomVideoFilter registers through its callback once', () async {
-    var registered = 0;
+    final registered = <String>[];
     final filter = CustomVideoFilter(
       'grayscale',
-      onRegister: () async => registered++,
+      onRegister: (registration) async =>
+          registered.add(registration.effectName),
     );
 
-    await filter.apply(_stream('cam-1'));
-    await filter.apply(_stream('cam-2'));
+    await filter.apply(_input('cam-1'));
+    await filter.apply(_input('cam-2'));
 
-    expect(registered, 1);
+    expect(registered, ['grayscale']);
     expect(attached, [
       'cam-1: grayscale',
       'cam-2: grayscale',
     ]);
   });
 
+  group('two filters on one track', () {
+    test('both run, the later one last', () async {
+      final blur = BackgroundBlurFilter();
+      final moderation = FullFrameBlurFilter();
+
+      await blur.apply(_input('cam-1'));
+      await moderation.apply(_input('cam-1'));
+
+      expect(attached.last, 'cam-1: BackgroundBlurMedium,FullFrameBlur');
+    });
+
+    test('stopping one leaves the other attached', () async {
+      final blur = BackgroundBlurFilter();
+      final moderation = FullFrameBlurFilter();
+      await blur.apply(_input('cam-1'));
+      final blurred = await moderation.apply(_input('cam-1'));
+
+      await blurred.stop!(_stopDetails);
+
+      expect(attached.last, 'cam-1: BackgroundBlurMedium');
+    });
+
+    test('a late stop of a replaced filter keeps the new one', () async {
+      final image = VirtualBackgroundFilter('a');
+      final old = await image.apply(_input('cam-1'));
+      await image.apply(_input('cam-1'));
+
+      await old.stop!(_stopDetails);
+
+      expect(attached.last, 'cam-1: VirtualBackground-a');
+    });
+
+    test('a filter that cannot be attached is not kept', () async {
+      final blur = BackgroundBlurFilter();
+      failAttach = true;
+      await expectLater(
+        blur.apply(_input('cam-1')),
+        throwsA(isA<PlatformException>()),
+      );
+      failAttach = false;
+
+      await FullFrameBlurFilter().apply(_input('cam-1'));
+
+      expect(attached.last, 'cam-1: FullFrameBlur');
+    });
+  });
+
   test('a stream without a video track is left alone', () async {
-    final stream = _FakeStream(const []);
+    final input = MediaStreamFilterInput(
+      stream: _FakeStream(const []),
+      source: MediaStreamFilterSource.camera,
+    );
 
-    final result = await BackgroundBlurFilter().apply(stream);
+    final result = await BackgroundBlurFilter().apply(input);
 
-    expect(result.output, same(stream));
+    expect(result.output, same(input.stream));
     expect(platform.registrations, isEmpty);
     expect(attached, isEmpty);
   });
@@ -125,7 +180,7 @@ void main() {
     debugWebRtcCapabilitiesOverride = _capabilities(isWindows: true);
 
     await expectLater(
-      BackgroundBlurFilter().apply(_stream('cam-1')),
+      BackgroundBlurFilter().apply(_input('cam-1')),
       throwsUnsupportedError,
     );
     expect(attached, isEmpty);
@@ -148,40 +203,55 @@ void main() {
     test('is true where both agree', () async {
       expect(await StreamVideoFilters().isSupported(), isTrue);
     });
+
+    test('is false on macOS', () async {
+      debugWebRtcCapabilitiesOverride = _capabilities(isMacOS: true);
+
+      expect(await StreamVideoFilters().isSupported(), isFalse);
+      expect(platform.supportChecks, 0);
+    });
   });
 
   test('filters with the same effect are equal', () {
     expect(
-      BackgroundBlurFilter(BlurIntensity.light),
-      BackgroundBlurFilter(BlurIntensity.light),
+      BackgroundBlurFilter(intensity: BlurIntensity.light),
+      BackgroundBlurFilter(intensity: BlurIntensity.light),
     );
     expect(
-      BackgroundBlurFilter(BlurIntensity.light),
-      isNot(BackgroundBlurFilter(BlurIntensity.heavy)),
+      BackgroundBlurFilter(intensity: BlurIntensity.light),
+      isNot(BackgroundBlurFilter(intensity: BlurIntensity.heavy)),
     );
     expect(VirtualBackgroundFilter('a'), VirtualBackgroundFilter('a'));
     expect(FullFrameBlurFilter(), FullFrameBlurFilter());
     expect(
-      CustomVideoFilter('a', onRegister: () async {}),
-      CustomVideoFilter('a', onRegister: () async {}),
+      CustomVideoFilter('a', onRegister: (_) async {}),
+      CustomVideoFilter('a', onRegister: (_) async {}),
     );
   });
 }
 
 WebRtcCapabilities _capabilities({
   bool isAndroid = false,
+  bool isMacOS = false,
   bool isWindows = false,
 }) {
   return nativeWebRtcCapabilitiesFor(
     isAndroid: isAndroid,
     isIOS: false,
-    isMacOS: false,
+    isMacOS: isMacOS,
     isWindows: isWindows,
     isLinux: false,
   );
 }
 
-MediaStream _stream(String trackId) => _FakeStream([_FakeTrack(trackId)]);
+MediaStreamFilterInput _input(String trackId) => MediaStreamFilterInput(
+  stream: _FakeStream([_FakeTrack(trackId)]),
+  source: MediaStreamFilterSource.camera,
+);
+
+const _stopDetails = MediaStreamFilterStopDetails(
+  reason: MediaStreamFilterStopReason.chainChanged,
+);
 
 class _FakeFiltersPlatform extends StreamVideoFiltersPlatform
     with MockPlatformInterfaceMixin {

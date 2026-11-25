@@ -1,24 +1,36 @@
 import '../stream_video_filters.dart';
-import 'native_video_filter.dart';
 
 /// How strongly [BackgroundBlurFilter] blurs.
-enum BlurIntensity {
-  light('BackgroundBlurLight'),
-  medium('BackgroundBlurMedium'),
-  heavy('BackgroundBlurHeavy');
+final class BlurIntensity {
+  const BlurIntensity._(this.effectName);
 
-  const BlurIntensity(this.name);
-  final String name;
+  /// A light blur.
+  static const light = BlurIntensity._('BackgroundBlurLight');
+
+  /// A medium blur.
+  static const medium = BlurIntensity._('BackgroundBlurMedium');
+
+  /// A heavy blur.
+  static const heavy = BlurIntensity._('BackgroundBlurHeavy');
+
+  /// Every intensity, lightest first.
+  static const values = [light, medium, heavy];
+
+  /// The name the blur processor of this intensity is registered under.
+  final String effectName;
+
+  @override
+  String toString() => 'BlurIntensity($effectName)';
 }
 
 /// Blurs the background behind the person on camera.
-class BackgroundBlurFilter extends NativeVideoFilter {
-  BackgroundBlurFilter([this.intensity = BlurIntensity.medium]);
+final class BackgroundBlurFilter extends NativeVideoFilter {
+  BackgroundBlurFilter({this.intensity = BlurIntensity.medium});
 
   final BlurIntensity intensity;
 
   @override
-  String get effectName => intensity.name;
+  String get effectName => intensity.effectName;
 
   @override
   Future<void> register() {
@@ -38,7 +50,7 @@ class BackgroundBlurFilter extends NativeVideoFilter {
 /// The image is loaded asynchronously. While it is loading, and if it cannot
 /// be loaded, the background is blurred instead so the camera image is never
 /// sent unfiltered.
-class VirtualBackgroundFilter extends NativeVideoFilter {
+final class VirtualBackgroundFilter extends NativeVideoFilter {
   VirtualBackgroundFilter(this.imageUrl);
 
   /// The path of an image asset, or a URL to the image.
@@ -65,8 +77,8 @@ class VirtualBackgroundFilter extends NativeVideoFilter {
 /// Blurs the whole camera frame.
 ///
 /// Pass it to `VideoModerationConfig.blur` to blur the camera while the call
-/// is moderated.
-class FullFrameBlurFilter extends NativeVideoFilter {
+/// is moderated. It runs after the app's own filter.
+final class FullFrameBlurFilter extends NativeVideoFilter {
   FullFrameBlurFilter();
 
   @override
@@ -84,19 +96,30 @@ class FullFrameBlurFilter extends NativeVideoFilter {
   int get hashCode => (FullFrameBlurFilter).hashCode;
 }
 
+/// What [CustomVideoFilter.onRegister] registers.
+final class CustomVideoFilterRegistration {
+  const CustomVideoFilterRegistration({required this.effectName});
+
+  /// The name to register the processor under.
+  final String effectName;
+}
+
 /// Runs a frame processor the app registers natively under [effectName].
 ///
 /// [onRegister] registers it, and runs before the filter is first applied.
-class CustomVideoFilter extends NativeVideoFilter {
+final class CustomVideoFilter extends NativeVideoFilter {
   CustomVideoFilter(this.effectName, {required this.onRegister});
 
   @override
   final String effectName;
 
-  final Future<void> Function() onRegister;
+  final Future<void> Function(CustomVideoFilterRegistration registration)
+  onRegister;
 
   @override
-  Future<void> register() => onRegister();
+  Future<void> register() {
+    return onRegister(CustomVideoFilterRegistration(effectName: effectName));
+  }
 
   @override
   bool operator ==(Object other) =>
