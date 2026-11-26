@@ -194,9 +194,8 @@ class _NativeWebRtcAudio implements WebRtcAudio {
   }
 
   @override
-  Future<void> setStereoPlayoutPreferred(bool preferred) async {
-    if (!WebRTC.platformIsIOS) return;
-    await Helper.setiOSStereoPlayoutPreferred(preferred);
+  Future<void> setStereoPlayoutPreferred(bool preferred) {
+    return Helper.setiOSStereoPlayoutPreferred(preferred);
   }
 
   @override

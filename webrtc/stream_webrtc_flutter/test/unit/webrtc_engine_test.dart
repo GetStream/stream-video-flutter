@@ -1,5 +1,6 @@
 // ignore_for_file: invalid_use_of_visible_for_testing_member
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_webrtc_flutter/src/native/native_webrtc_capabilities.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
@@ -36,6 +37,7 @@ class _FakeEngine extends Fake implements WebRtcEngine {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   tearDown(WebRtcEngine.debugUnregister);
 
   group('WebRtcEngine.instance', () {
@@ -124,6 +126,34 @@ void main() {
         NativeWebRtcEngine().createPeerConnectionFactory(),
         throwsUnsupportedError,
       );
+    });
+
+    // The tests run on a desktop host, never on iOS.
+    test('has no audio session off iOS', () {
+      expect(NativeWebRtcEngine().audio.hasAudioSession, isFalse);
+    });
+
+    test('does not set stereo playout off iOS', () async {
+      final calls = <MethodCall>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+            const MethodChannel('FlutterWebRTC.Method'),
+            (call) async {
+              calls.add(call);
+              return null;
+            },
+          );
+      addTearDown(
+        () => TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(
+              const MethodChannel('FlutterWebRTC.Method'),
+              null,
+            ),
+      );
+
+      await NativeWebRtcEngine().audio.setStereoPlayoutPreferred(true);
+
+      expect(calls, isEmpty);
     });
   });
 }
