@@ -56,22 +56,12 @@ Add the following entry to your _Info.plist_ file, located in `<project root>/io
 
 This entry allows your app to access camera and microphone.
 
-### Note for iOS
+### Note for iOS and macOS
 
-The WebRTC.xframework compiled after the m104 release no longer supports iOS arm devices, so need to add the `config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES'` to your ios/Podfile in your project
+The plugin is distributed as a Swift package only, not through CocoaPods. Swift Package Manager must be enabled in Flutter:
 
-ios/Podfile
-
-```ruby
-post_install do |installer|
-  installer.pods_project.targets.each do |target|
-    flutter_additional_ios_build_settings(target)
-     target.build_configurations.each do |config|
-      # Workaround for https://github.com/flutter/flutter/issues/64502
-      config.build_settings['ONLY_ACTIVE_ARCH'] = 'YES' # <= this line
-     end
-  end
-end
+```bash
+flutter config --enable-swift-package-manager
 ```
 
 ### Android

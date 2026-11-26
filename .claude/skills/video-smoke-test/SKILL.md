@@ -109,7 +109,7 @@ is affected either way.
 ```
 
 Pins the emulator serial (so a plugged-in phone cannot break the run), forces Flutter's Swift
-Package Manager on (the dogfooding iOS app is SPM-only; with it off Flutter falls back to CocoaPods), and pre-grants mic/camera/notification/
+Package Manager on (the SDK plugins are Swift packages only; with it off they do not build), and pre-grants mic/camera/notification/
 phone permissions on both platforms so system dialogs cannot swallow taps. On `FATAL:`, relay that
 line and stop.
 

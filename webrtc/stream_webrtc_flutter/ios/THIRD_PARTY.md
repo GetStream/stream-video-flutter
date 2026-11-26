@@ -15,7 +15,6 @@ Files that are not on this list are Stream code, under the licence in the packag
 ## Files
 
 - `.gitignore`
-- `stream_webrtc_flutter.podspec`
 - `stream_webrtc_flutter/Package.swift`
 - `stream_webrtc_flutter/Sources/stream_webrtc_flutter/AudioManager.m`
 - `stream_webrtc_flutter/Sources/stream_webrtc_flutter/AudioProcessingAdapter.m`

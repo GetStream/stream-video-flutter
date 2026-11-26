@@ -340,6 +340,7 @@
 
 ### ⚠️ Breaking
 
+- [iOS] CocoaPods is no longer supported; enable Flutter's Swift Package Manager.
 - `StreamCallContainer` ends its call when it is disposed, for example when the back button pops its route. Before, the call stayed joined and kept publishing audio and video behind the closed screen. The container joins the call it is given, so it ends that call even when the app joined it first; an incoming call the user has not accepted is rejected as declined, since a leave would not tell the server. `LivestreamPlayer` does the same only for a call it joined itself through an auto-join `joinBehaviour`, as the Swift and JS players do; a call the app joined, or started joining, is still the app's to leave. A left call cannot be joined again, so anything that disposes the widget and builds a new one for the same call now ends the call: a page without keep-alive in a `PageView` or `TabBarView`, an `AnimatedSwitcher`, a parent that changes type, or `pushReplacement` to another screen with the same call. Keep the widget mounted or give it a `GlobalKey`. To keep the call running after the widget is gone, for example in an in-app picture-in-picture overlay, or to run your own cleanup before the leave, pass `leaveCallOnDispose: false` and call `Call.leave` yourself.
 - `LivestreamPlayer.backButtonBuilder` sits at the start of the app bar, and fullscreen hides it.
 - `LivestreamPlayer.livestreamControlsWidgetBuilder`'s controls cover the tile only; the call duration sits in the app bar above it.

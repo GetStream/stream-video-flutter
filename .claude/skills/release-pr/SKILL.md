@@ -127,8 +127,8 @@ melos bs
 - Propagates the root `pubspec.yaml` deps block into every workspace pubspec — each package's intra-package
   `stream_video*` constraints, every `packages/*/example/pubspec.yaml`, and `dogfooding/pubspec.yaml`.
 - Fires the `command.bootstrap.hooks.post: melos run version:update` hook, which runs `tools/generate_version.dart`.
-  It regenerates `streamVideoVersion` in `packages/stream_video/lib/globals.dart` and sets `s.version` in every
-  package's `ios/` and `macos/` podspecs from its pubspec version. (Don't hand-edit `globals.dart` or the podspecs.)
+  It regenerates `streamVideoVersion` in `packages/stream_video/lib/globals.dart` and the dogfooding app version.
+  (Don't hand-edit `globals.dart`.)
 
 Verify the diff shape matches the previous release PR of the same product. Find its number with:
 

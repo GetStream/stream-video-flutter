@@ -1,5 +1,9 @@
 ## Upcoming (major)
 
+### ⚠️ Breaking
+
+- [iOS] CocoaPods is no longer supported; enable Flutter's Swift Package Manager.
+
 ### 🐞 Fixed
 
 - [iOS] Added the missing `FlutterFramework` dependency to the Swift package.
