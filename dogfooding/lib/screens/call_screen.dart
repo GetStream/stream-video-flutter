@@ -335,6 +335,7 @@ class _CallScreenState extends State<CallScreen>
     return CallSidePanelSurface(
       key: _panelKey,
       docked: !fullScreen,
+      dockedPadding: _dockedPanelPadding(context),
       onClose: _closePanel,
       title: switch (panel) {
         CallSidePanel.participants => PartialCallStateBuilder(
@@ -358,6 +359,102 @@ class _CallScreenState extends State<CallScreen>
       },
     );
   }
+
+  /// The room around a docked side panel: the grid's padding on every side
+  /// but the one facing the call, so the card lines up with the tiles beside
+  /// it. The grid's own padding already makes the gap on that side.
+  EdgeInsetsGeometry _dockedPanelPadding(BuildContext context) {
+    final grid =
+        StreamCallParticipantsGridTheme.of(context).padding?.resolve(
+          Directionality.of(context),
+        ) ??
+        EdgeInsets.all(context.streamSpacing.xs);
+
+    // Tabletop docks the panel below the fold, so the call is above it.
+    if (StreamDisplayFold.maybeOf(context)?.posture ==
+        StreamFoldPosture.tabletop) {
+      return grid.copyWith(top: 0);
+    }
+
+    return Directionality.of(context) == TextDirection.rtl
+        ? grid.copyWith(right: 0)
+        : grid.copyWith(left: 0);
+  }
+
+  /// The default tile, with the share card over the local participant's while
+  /// nobody else has joined.
+  Widget _participantTile(
+    BuildContext context,
+    Call call,
+    CallParticipantState participant,
+  ) {
+    final key = Key(participant.uniqueParticipantKey);
+    // A livestream's audience joins from its link rather than the call
+    // screen, and the card would cover the tile's toolbar.
+    if (!participant.isLocal || _isLivestream) {
+      return StreamParticipantTile(
+        key: key,
+        call: call,
+        participant: participant,
+      );
+    }
+
+    return PartialCallStateBuilder(
+      key: key,
+      call: call,
+      selector: _isAlone,
+      builder: (context, isAlone) => LayoutBuilder(
+        builder: (context, constraints) {
+          final inset = context.streamSpacing.xs;
+          // Across most tiles the card runs from edge to edge, as far in as
+          // the labels it covers. A tile at least twice its width has room
+          // for the labels beside it, so it keeps its own width there.
+          final spansTile = constraints.maxWidth < _shareCardWidth * 2;
+          final showToolbar = !isAlone || !spansTile;
+
+          return Stack(
+            fit: StackFit.expand,
+            // An expanded card may grow past the top of a short tile.
+            clipBehavior: Clip.none,
+            children: [
+              StreamParticipantTile(
+                call: call,
+                participant: participant,
+                showParticipantLabel: showToolbar,
+                showConnectionQualityIndicator: showToolbar,
+              ),
+              if (isAlone)
+                Positioned(
+                  left: inset,
+                  right: inset,
+                  bottom: inset,
+                  child: Center(
+                    child: SizedBox(
+                      width: spansTile ? null : _shareCardWidth,
+                      child: ShareCallWelcomeCard(
+                        call: call,
+                        encryptionKey: _encryptionKey,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  /// The share card's width over a tile with room to spare.
+  static const _shareCardWidth = 360.0;
+
+  static bool _isAlone(CallState state) => state.otherParticipants.isEmpty;
+
+  /// Whether a side panel covers the call rather than docking beside it: in a
+  /// small window, unless a half-open fold gives it a half of its own.
+  bool _panelCoversCall(BuildContext context) =>
+      context.streamScreenSize.isSmall &&
+      StreamDisplayFold.maybeOf(context) == null;
 
   // The controls the two bar layouts have in common. Built per call rather
   // than held as fields: they close over the call the content builder hands
@@ -753,10 +850,11 @@ class _CallScreenState extends State<CallScreen>
                   ),
               callParticipantsWidgetBuilder: (context, call) {
                 // A small window has no room beside the grid, so the panel
-                // covers it instead of docking next to it.
-                final fullScreen = context.streamScreenSize.isSmall;
+                // covers it instead of docking next to it. A half-open
+                // foldable docks it in the half past the fold instead.
+                final fullScreen = _panelCoversCall(context);
 
-                return CallSidePanelLayout(
+                final layout = CallSidePanelLayout(
                   animation: _panelAnimation,
                   panel: _panelContent(call, fullScreen: fullScreen),
                   fullScreen: fullScreen,
@@ -764,30 +862,25 @@ class _CallScreenState extends State<CallScreen>
                   // grid so it neither moves nor re-tiles while a panel is up.
                   coveredTopExtent: _panelOnScreen(call) ? kToolbarHeight : 0,
                   child: Stack(
+                    fit: StackFit.expand,
                     children: [
-                      Column(
-                        children: [
-                          Expanded(
-                            child: _isLivestream
-                                // The host sees the same tile as the
-                                // viewers.
-                                ? Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: context.streamSpacing.xs,
-                                    ),
-                                    child: StreamLivestreamTile(
-                                      call: call,
-                                      child: LivestreamContent(call: call),
-                                    ),
-                                  )
-                                : StreamCallParticipants(
-                                    call: call,
-                                    layoutMode: _currentLayoutMode,
-                                  ),
+                      if (_isLivestream)
+                        // The host sees the same tile as the viewers.
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: context.streamSpacing.xs,
                           ),
-                          ClosedCaptionsWidget(call: call),
-                        ],
-                      ),
+                          child: StreamLivestreamTile(
+                            call: call,
+                            child: LivestreamContent(call: call),
+                          ),
+                        )
+                      else
+                        StreamCallParticipants(
+                          call: call,
+                          layoutMode: _currentLayoutMode,
+                          callParticipantBuilder: _participantTile,
+                        ),
                       Align(
                         alignment: Alignment.bottomCenter,
                         child: E2eeKeyNotification(
@@ -796,34 +889,25 @@ class _CallScreenState extends State<CallScreen>
                               setState(() => _encryptionKey = key),
                         ),
                       ),
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: PartialCallStateBuilder(
-                          call: call,
-                          selector: (state) => state.otherParticipants.isEmpty,
-                          // A livestream's audience joins from its link
-                          // rather than the call screen, and the card would
-                          // cover the tile's toolbar.
-                          builder: (context, isEmpty) =>
-                              isEmpty && !_isLivestream
-                              ? ShareCallWelcomeCard(
-                                  call: call,
-                                  encryptionKey: _encryptionKey,
-                                )
-                              : const SizedBox.shrink(),
-                        ),
-                      ),
                     ],
                   ),
+                );
+
+                // Below a docked panel as well as the call, so the two share
+                // a bottom edge. A panel covering the call covers them too.
+                return Column(
+                  children: [
+                    Expanded(child: layout),
+                    if (!fullScreen || !_panelOnScreen(call))
+                      ClosedCaptionsWidget(call: call),
+                  ],
                 );
               },
               callAppBarWidgetBuilder: (context, call) {
                 // A small window gives the whole body to the panel, the app
                 // bar's row included. A zero-height bar rather than null,
                 // because null falls back to the SDK's own.
-                if (context.streamScreenSize.isSmall && _panelOnScreen(call)) {
+                if (_panelCoversCall(context) && _panelOnScreen(call)) {
                   return PreferredSize(
                     preferredSize: Size.zero,
                     // Scaffold sizes this slot from the child rather than the

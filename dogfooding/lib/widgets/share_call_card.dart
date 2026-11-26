@@ -33,81 +33,60 @@ class _ShareCallWelcomeCardState extends State<ShareCallWelcomeCard> {
     final spacing = context.streamSpacing;
     final borderRadius = BorderRadius.all(context.streamRadius.lg);
 
-    // The design puts the card's edges on the participant label's. The label
-    // sits spacing.xs inside the tile, and the tile sits the grid's own
-    // padding inside the call, so the card clears both.
-    final gridPadding =
-        StreamCallParticipantsGridTheme.of(context).padding?.resolve(
-          Directionality.maybeOf(context),
-        ) ??
-        EdgeInsets.all(spacing.xs);
-
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: gridPadding + EdgeInsets.all(spacing.xs),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            // Below the small breakpoint the card spans the whole width
-            // between those insets; a wider window holds it at 360.
-            maxWidth: context.streamScreenSize.isSmall ? double.infinity : 360,
-          ),
-          child: Material(
-            // Elevation rather than a painted shadow, so the card lifts off the
-            // call the same way every other raised Stream surface does.
-            elevation: context.streamElevation.level3,
-            color: colorScheme.backgroundElevation1,
-            shape: RoundedRectangleBorder(borderRadius: borderRadius),
-            clipBehavior: Clip.antiAlias,
-            child: DecoratedBox(
-              // Painted in front, so the tile's own surface does not cover it.
-              position: DecorationPosition.foreground,
-              decoration: BoxDecoration(
-                borderRadius: borderRadius,
-                border: Border.all(color: colorScheme.borderDefault),
-              ),
-              child: ExpansionTile(
-                title: Text(
-                  'Your Meeting is Live!',
-                  style: context.streamTextTheme.headingSm.copyWith(
-                    color: colorScheme.textPrimary,
-                  ),
-                ),
-                // A shape, even an empty one, replaces the tile's default
-                // dividers. BorderSide.none also contributes no padding, which
-                // a transparent side would: its width still counts.
-                shape: const Border(),
-                collapsedShape: const Border(),
-                trailing: Icon(
-                  _isExpanded
-                      ? context.streamIcons.chevronUp
-                      : context.streamIcons.chevronDown,
-                  size: spacing.lg,
-                  color: colorScheme.textPrimary,
-                ),
-                // minTileHeight sizes the row inside tilePadding, so the
-                // 16 above and below the title comes from centring it in 52.
-                tilePadding: EdgeInsets.symmetric(horizontal: spacing.md),
-                minTileHeight: 52,
-                childrenPadding: EdgeInsets.fromLTRB(
-                  spacing.md,
-                  0,
-                  spacing.md,
-                  spacing.md,
-                ),
-                // The content sizes itself to the card, not to its widest row.
-                expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
-                onExpansionChanged: (value) =>
-                    setState(() => _isExpanded = value),
-                children: [
-                  _ShareCardContent(
-                    call: widget.call,
-                    encryptionKey: widget.encryptionKey,
-                  ),
-                ],
-              ),
+    // The caller places and sizes the card over the local participant's
+    // tile.
+    return Material(
+      // Elevation rather than a painted shadow, so the card lifts off the
+      // call the same way every other raised Stream surface does.
+      elevation: context.streamElevation.level3,
+      color: colorScheme.backgroundElevation1,
+      shape: RoundedRectangleBorder(borderRadius: borderRadius),
+      clipBehavior: Clip.antiAlias,
+      child: DecoratedBox(
+        // Painted in front, so the tile's own surface does not cover it.
+        position: DecorationPosition.foreground,
+        decoration: BoxDecoration(
+          borderRadius: borderRadius,
+          border: Border.all(color: colorScheme.borderDefault),
+        ),
+        child: ExpansionTile(
+          title: Text(
+            'Your Meeting is Live!',
+            style: context.streamTextTheme.headingSm.copyWith(
+              color: colorScheme.textPrimary,
             ),
           ),
+          // A shape, even an empty one, replaces the tile's default
+          // dividers. BorderSide.none also contributes no padding, which
+          // a transparent side would: its width still counts.
+          shape: const Border(),
+          collapsedShape: const Border(),
+          trailing: Icon(
+            _isExpanded
+                ? context.streamIcons.chevronUp
+                : context.streamIcons.chevronDown,
+            size: spacing.lg,
+            color: colorScheme.textPrimary,
+          ),
+          // minTileHeight sizes the row inside tilePadding, so the
+          // 16 above and below the title comes from centring it in 52.
+          tilePadding: EdgeInsets.symmetric(horizontal: spacing.md),
+          minTileHeight: 52,
+          childrenPadding: EdgeInsets.fromLTRB(
+            spacing.md,
+            0,
+            spacing.md,
+            spacing.md,
+          ),
+          // The content sizes itself to the card, not to its widest row.
+          expandedCrossAxisAlignment: CrossAxisAlignment.stretch,
+          onExpansionChanged: (value) => setState(() => _isExpanded = value),
+          children: [
+            _ShareCardContent(
+              call: widget.call,
+              encryptionKey: widget.encryptionKey,
+            ),
+          ],
         ),
       ),
     );
