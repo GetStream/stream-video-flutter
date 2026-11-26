@@ -69,7 +69,7 @@ jobs:
       github.event_name != 'pull_request'
       || (startsWith(github.head_ref, 'release/') && github.event.pull_request.draft == false)
     timeout-minutes: 60
-    # select-xcode pins Xcode, so a runner update doesn't change the iOS numbers.
+    # Pinned, so a runner image update doesn't change the iOS numbers.
     runs-on: { group: scaleway-macos }
     steps:
       - name: Git Checkout
@@ -77,6 +77,8 @@ jobs:
 
       - name: Select Xcode
         uses: ./.github/actions/select-xcode
+        with:
+          xcode-version: "26.3.0"
 
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter
