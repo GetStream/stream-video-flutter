@@ -11,7 +11,7 @@ import 'package:stream_video/src/errors/stream_video_exception_composer.dart';
 import 'package:stream_video/src/sfu/sfu_client.dart';
 import 'package:stream_video/src/webrtc/peer_connection.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 import 'package:tart/tart.dart' show Context, TwirpError;
 
 import '../../test_helpers.dart';

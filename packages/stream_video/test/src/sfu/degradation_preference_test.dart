@@ -10,7 +10,7 @@ import 'package:stream_video/src/sfu/data/models/sfu_codec.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_publish_options.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_track_type.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_video_sender.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
 const _testCodec = SfuCodec(
   name: 'vp8',

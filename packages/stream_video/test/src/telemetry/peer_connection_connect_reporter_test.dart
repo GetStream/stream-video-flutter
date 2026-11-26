@@ -5,7 +5,7 @@ import 'package:stream_video/src/telemetry/client_event_reporter.dart';
 import 'package:stream_video/src/telemetry/client_event_transport.dart';
 import 'package:stream_video/src/telemetry/client_event_types.dart';
 import 'package:stream_video/src/telemetry/peer_connection_connect_reporter.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 void main() {
   final cid = StreamCallCid(cid: 'default:call123');
