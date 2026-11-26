@@ -302,9 +302,9 @@ class _FakeEngine extends Fake implements rtc.WebRtcEngine {
   rtc.WebRtcPlatformEvents get events => _native.events;
 }
 
+// ignore: subtype_of_sealed_class, a fake for the tests
 /// Pauses playout through [onSetPlayoutPaused] and reports every other call
 /// to [onCall] by name.
-// ignore: subtype_of_sealed_class, a fake for the tests
 class _FakeAudio extends Fake implements rtc.WebRtcAudio {
   _FakeAudio({required this.onSetPlayoutPaused, required this.onCall});
 

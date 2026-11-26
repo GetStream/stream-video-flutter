@@ -41,13 +41,10 @@ class FakeWebRtcEngine extends Fake implements WebRtcEngine {
   }) async {
     defaultFactoryOptions.add(options);
   }
-
-  @override
-  bool get supportsEncryption => false;
 }
 
-/// The [WebRtcAudio] of a [FakeWebRtcEngine]: records each call by name.
 // ignore: subtype_of_sealed_class, a fake for the tests
+/// The [WebRtcAudio] of a [FakeWebRtcEngine]: records each call by name.
 class FakeWebRtcAudio extends Fake implements WebRtcAudio {
   /// Every call, as its name and, where it has one, its argument.
   final calls = <String>[];
