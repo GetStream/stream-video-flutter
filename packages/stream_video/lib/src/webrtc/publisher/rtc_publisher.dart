@@ -1649,28 +1649,35 @@ class RtcPublisher {
     return out;
   }
 
-  /// Sends [current] again on [transceivers], and keeps the clones it made
-  /// with it while it is still the held track.
+  /// Sends [current] again on each of [transceivers] while it is held, and
+  /// keeps the clones it made with it. A sender that fails keeps the other
+  /// senders' clones.
   Future<void> _sendAgain(
     RtcLocalTrack current,
     List<rtc.RTCRtpTransceiver> transceivers,
   ) async {
-    if (transceivers.isEmpty) return;
-    try {
-      final sent = await current.sendOn(transceivers);
-      final held = tracks[current.trackId];
-      if (held == null || !identical(held.mediaTrack, current.mediaTrack)) {
-        await sent.stopClones();
-        return;
+    final clones = <rtc.MediaStreamTrack>[];
+    for (final transceiver in transceivers) {
+      if (!_isHeld(current)) break;
+      try {
+        final sent = await current.sendOn([transceiver]);
+        clones.addAll(sent.clonedTracks);
+      } catch (e) {
+        _logger.e(
+          () => '[refilterTrack] failed to send ${current.trackId} again: $e',
+        );
       }
-      tracks[current.trackId] = held.copyWith(
-        clonedTracks: [...held.clonedTracks, ...sent.clonedTracks],
-      );
-    } catch (e) {
-      _logger.e(
-        () => '[refilterTrack] failed to send ${current.trackId} again: $e',
-      );
     }
+    if (clones.isEmpty) return;
+
+    final held = tracks[current.trackId];
+    if (held == null || !identical(held.mediaTrack, current.mediaTrack)) {
+      await current.copyWith(clonedTracks: clones).stopClones();
+      return;
+    }
+    tracks[current.trackId] = held.copyWith(
+      clonedTracks: [...held.clonedTracks, ...clones],
+    );
   }
 
   /// Keeps [updated] in place of [current] when [current] is still the held

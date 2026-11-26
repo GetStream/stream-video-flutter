@@ -177,8 +177,17 @@ class FakeSender extends Fake implements rtc.RTCRtpSender {
   /// Thrown, once, by the next `replaceTrack`.
   Exception? replaceTrackError;
 
+  /// The `replaceTrack` calls, counted from 0, that throw.
+  final failingReplaceTrackCalls = <int>{};
+
+  var _replaceTrackCalls = 0;
+
   @override
   Future<void> replaceTrack(rtc.MediaStreamTrack? track) async {
+    final call = _replaceTrackCalls++;
+    if (failingReplaceTrackCalls.contains(call)) {
+      throw Exception('replaceTrack $call');
+    }
     final error = replaceTrackError;
     if (error != null) {
       replaceTrackError = null;
