@@ -24,6 +24,7 @@ import '../../utils/none.dart';
 import '../../utils/result.dart';
 import '../../webrtc/apple_audio_route.dart';
 import '../../webrtc/media/media_constraints.dart';
+import '../../webrtc/media/screen_share_source.dart';
 import '../../webrtc/model/rtc_video_parameters.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_media_device/device_enumeration_trigger.dart';
@@ -31,9 +32,11 @@ import '../../webrtc/rtc_media_device/rtc_media_device.dart';
 import '../../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../../webrtc/rtc_track/rtc_track.dart';
 import '../call_connect_options.dart';
+import '../call_events.dart';
 import '../session/call_session.dart';
 import '../state/call_state_notifier.dart';
 import '../stats/sfu_stats_reporter.dart';
+import 'ios_broadcast_screen_share.dart';
 
 /// Owns a call's connect options and its local media: the camera,
 /// microphone and screen share, and the audio and video devices.
@@ -50,6 +53,8 @@ class LocalMediaController {
     required this._muteAudioWhenInBackground,
     required this._onMicrophoneMuted,
     required this._onAudioOutputDeviceSet,
+    required this._activeCalls,
+    required this._onCallEvent,
     required this._logger,
   });
 
@@ -66,6 +71,13 @@ class LocalMediaController {
   /// Mirrors an output WebRTC now uses into the system call, whose route can
   /// win over WebRTC's. Not awaited.
   final Future<void> Function(RtcMediaDevice device) _onAudioOutputDeviceSet;
+
+  /// The controllers of the client's active calls, which share an iOS
+  /// broadcast no call requested.
+  final List<LocalMediaController> Function() _activeCalls;
+
+  /// Delivers an event this controller raises on the call's events.
+  final void Function(StreamCallEvent event) _onCallEvent;
   final TaggedLogger _logger;
 
   final _multitaskingCameraLock = Lock();
@@ -83,6 +95,22 @@ class LocalMediaController {
   /// Whether the app is in the background, between [onAppPaused] and
   /// [onAppResumed].
   bool _isAppPaused = false;
+
+  /// The screen share through the iOS broadcast extension.
+  late final IosBroadcastScreenShare _broadcast = IosBroadcastScreenShare(
+    stateManager: _stateManager,
+    session: _session,
+    hasApplied: _hasAppliedInCurrentConnect,
+    applyScreenShare: _applyScreenShare,
+    readConnectOptions: () => _connectOptions,
+    writeConnectOptions: (options) => _connectOptions = options,
+    defaultConstraints: _defaultScreenShareConstraints,
+    hasPermission: _hasPermission,
+    rtcMediaDeviceNotifier: _rtcMediaDeviceNotifier,
+    activeCalls: () => [for (final media in _activeCalls()) media._broadcast],
+    onCallEvent: _onCallEvent,
+    logger: _logger,
+  );
 
   /// Whether the platform interrupts the call's audio with the microphone to
   /// be off for it.
@@ -109,6 +137,13 @@ class LocalMediaController {
   /// The session that started applying the options. While it is the call's
   /// session, they can only change through the device methods.
   CallSession? _optionsAppliedBy;
+
+  /// The session that last finished applying the options, also when the
+  /// apply failed.
+  CallSession? _optionsAppliedTo;
+
+  /// The call's status when [_optionsAppliedTo] finished applying them.
+  CallStatus? _optionsAppliedDuring;
 
   /// Whether the connect options' audio output went to the system route on
   /// join. A rejoin or a migration applies it again to WebRTC only: the
@@ -150,20 +185,23 @@ class LocalMediaController {
   }
 
   /// Resolves the connect options for a join from [settings], then merges
-  /// [joinOptions] and an override over them.
+  /// [joinOptions] and an override over them. An iOS broadcast that started
+  /// before keeps its screen share option.
   Future<void> applyJoinSettings(
     CallSettings settings, {
     CallConnectOptions? joinOptions,
   }) async {
-    await applyCallSettings(settings);
+    await _broadcast.keepBroadcastOptionThrough(() async {
+      await applyCallSettings(settings);
 
-    if (joinOptions != null) {
-      _connectOptions = _connectOptions.merge(joinOptions);
-    }
+      if (joinOptions != null) {
+        _connectOptions = _connectOptions.merge(joinOptions);
+      }
 
-    if (_connectOptionsOverride case final override?) {
-      _connectOptions = _connectOptions.merge(override);
-    }
+      if (_connectOptionsOverride case final override?) {
+        _connectOptions = _connectOptions.merge(override);
+      }
+    });
 
     _joinSettingsApplied = true;
   }
@@ -295,6 +333,7 @@ class LocalMediaController {
   }) async {
     _optionsAppliedBy = session;
     _connectOptionsOverride = null;
+    _broadcast.adoptRunningBroadcast();
     _logger.d(
       () =>
           '[applyConnectOptions] connectOptions: $_connectOptions, '
@@ -321,12 +360,6 @@ class LocalMediaController {
       _connectOptions.screenShare,
     );
 
-    // Stopped up front: a screen share picker can keep the apply waiting.
-    for (final track in [...duplicates, ...inherited.values]) {
-      _logger.v(() => '[applyConnectOptions] stopping unused $track');
-      await track.stop();
-    }
-
     // Taken tracks are stopped if the apply fails before they are published.
     final unpublished = {?camera, ?microphone, ?screenShare};
     Future<Result<None>> adopt(RtcLocalTrack track) {
@@ -351,7 +384,14 @@ class LocalMediaController {
       return true;
     }
 
+    var broadcastRanAtScreenShare = false;
     try {
+      // Stopped up front: a screen share picker can keep the apply waiting.
+      for (final track in [...duplicates, ...inherited.values]) {
+        _logger.v(() => '[applyConnectOptions] stopping unused $track');
+        await track.stop();
+      }
+
       // iOS: set the session before capture so WebRTC doesn't rebuild the
       // audio engine.
       if (CurrentPlatform.isIos) await _applyAudioOutputOption();
@@ -385,11 +425,14 @@ class LocalMediaController {
         );
       }
 
+      // A broadcast that starts after this is shared once the apply is done.
+      broadcastRanAtScreenShare = _broadcast.isBroadcasting;
       final screenShareFailed = failed(
         'screenShare',
         screenShare != null
             ? await adopt(screenShare)
             : await _applyScreenShareOption(
+                session,
                 _connectOptions.screenShare,
                 _connectOptions.screenShareTargetResolution,
               ),
@@ -400,10 +443,16 @@ class LocalMediaController {
         );
       }
     } finally {
-      for (final track in unpublished) {
-        _logger.w(() => '[applyConnectOptions] stopping unpublished $track');
-        await track.stop();
+      try {
+        await _stopUnpublished(unpublished);
+      } finally {
+        _optionsAppliedTo = session;
+        _optionsAppliedDuring = _state.status;
       }
+    }
+
+    if (!broadcastRanAtScreenShare) {
+      await _broadcast.shareRunningBroadcast(session);
     }
 
     if (_connectOptions.audioInputDevice != null) {
@@ -505,7 +554,29 @@ class LocalMediaController {
     return const Result.success(none);
   }
 
+  Future<void> _stopUnpublished(Set<RtcLocalTrack> unpublished) async {
+    for (final track in unpublished) {
+      _logger.w(() => '[applyConnectOptions] stopping unpublished $track');
+      await track.stop();
+    }
+  }
+
+  /// Whether [session] applied the connect options, and while a migration or
+  /// a rejoin runs, did so during it: a session that applied before is the
+  /// one being replaced.
+  bool _hasAppliedInCurrentConnect(CallSession session) {
+    if (!identical(_optionsAppliedTo, session)) return false;
+    final applied = _optionsAppliedDuring;
+    return switch (_state.status) {
+      CallStatusMigrating() => applied is CallStatusMigrating,
+      CallStatusReconnecting(isFastReconnectAttempt: false, :final attempt) =>
+        applied is CallStatusReconnecting && applied.attempt == attempt,
+      _ => true,
+    };
+  }
+
   Future<Result<None>> _applyScreenShareOption(
+    CallSession session,
     TrackOption screenShareOption,
     StreamTargetResolution? targetResolution,
   ) async {
@@ -516,6 +587,12 @@ class LocalMediaController {
           screenShareOption.constraints is ScreenShareConstraints
           ? screenShareOption.constraints as ScreenShareConstraints?
           : null;
+
+      if (constraints != null && _broadcast.isRunning(constraints)) {
+        // A session replaced meanwhile leaves the broadcast to the next one.
+        if (!identical(session, _session())) return const Result.success(none);
+        return _broadcast.publish(constraints);
+      }
 
       return setScreenShareEnabled(
         enabled: true,
@@ -646,8 +723,9 @@ class LocalMediaController {
       switch (event) {
         case ScreenSharingStoppedEvent _:
           if (CurrentPlatform.isIos) {
+            _broadcast.onStopped();
             // On iOS only one broadcast extension can be active at a time
-            setScreenShareEnabled(enabled: false);
+            unawaited(_disableScreenShareOnStop());
           } else {
             final trackId = event.trackId;
             final localParticipant = _state.localParticipant;
@@ -658,23 +736,13 @@ class LocalMediaController {
               );
 
               if (track?.mediaTrack.id == trackId) {
-                setScreenShareEnabled(enabled: false);
+                unawaited(_disableScreenShareOnStop());
               }
             }
           }
           break;
         case ScreenSharingStartedEvent _:
-          _stateManager.participantSetScreenShareEnabled(
-            enabled: true,
-          );
-
-          _connectOptions = _connectOptions.copyWith(
-            screenShare: TrackOption.enabled(
-              constraints: const ScreenShareConstraints(
-                useiOSBroadcastExtension: true,
-              ),
-            ),
-          );
+          unawaited(_broadcast.onStarted());
           break;
         case AudioRouteChangedEvent _:
           onAudioRouteChanged(event);
@@ -683,6 +751,14 @@ class LocalMediaController {
           return;
       }
     });
+  }
+
+  /// Turns the screen share off after the platform stopped it.
+  Future<void> _disableScreenShareOnStop() async {
+    final result = await setScreenShareEnabled(enabled: false);
+    if (result case Failure(:final error)) {
+      _logger.w(() => '[onScreenSharingStopped] disable failed: $error');
+    }
   }
 
   /// Whether [setAudioOutputDevice] is applying an output. The system
@@ -1131,40 +1207,55 @@ class LocalMediaController {
       );
     }
 
-    final updatedConstraints = (constraints ?? const ScreenShareConstraints())
-        .copyWith(
-          params:
-              constraints?.params ??
-              _connectOptions.screenShareTargetResolution?.toVideoParams(
-                defaultBitrate: RtcVideoParametersPresets.k1080pBitrate,
-              ),
-        );
+    final updatedConstraints = constraints ?? _defaultScreenShareConstraints();
 
+    if (!enabled) releaseBroadcastRequest();
+
+    if (enabled &&
+        ScreenShareSource.forPlatform().usesBroadcastExtension(
+          updatedConstraints,
+        )) {
+      return _broadcast.request(updatedConstraints);
+    }
+
+    return _applyScreenShare(enabled: enabled, constraints: updatedConstraints);
+  }
+
+  /// Screen share constraints at the call's screen share resolution.
+  ScreenShareConstraints _defaultScreenShareConstraints() {
+    return const ScreenShareConstraints().copyWith(
+      params: _connectOptions.screenShareTargetResolution?.toVideoParams(
+        defaultBitrate: RtcVideoParametersPresets.k1080pBitrate,
+      ),
+    );
+  }
+
+  Future<Result<None>> _applyScreenShare({
+    required bool enabled,
+    required ScreenShareConstraints constraints,
+  }) async {
     final result =
         await _session()?.setScreenShareEnabled(
           enabled,
-          constraints: updatedConstraints,
+          constraints: constraints,
         ) ??
         failureWithError('Call session is null, cannot start screen share');
-
-    // In case of iOS Broadcast Extension, we don't update the state here
-    // We listen to the ScreenShareStarted event instead
-    if (CurrentPlatform.isIos &&
-        constraints is ScreenShareConstraints &&
-        constraints.useiOSBroadcastExtension) {
-      return result.map((_) => none);
-    }
 
     if (result.isSuccess) {
       _onScreenShareEnabled(
         enabled: enabled,
-        constraints: updatedConstraints,
+        constraints: constraints,
         track: result.getDataOrNull(),
       );
     }
 
     return result.map((_) => none);
   }
+
+  /// Forgets this call's request for an iOS broadcast, so a broadcast that
+  /// starts later is not shared with its constraints, and another call can
+  /// take a broadcast nobody requested.
+  void releaseBroadcastRequest() => _broadcast.releaseRequest();
 
   void _onScreenShareEnabled({
     required bool enabled,

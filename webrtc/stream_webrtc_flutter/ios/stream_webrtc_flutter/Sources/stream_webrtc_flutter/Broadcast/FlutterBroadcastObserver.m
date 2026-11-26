@@ -8,6 +8,8 @@ static NSString* const kBroadcastStartedNotification =
     @"io.getstream.video.screen_sharing.broadcastStarted";
 static NSString* const kBroadcastStoppedNotification =
     @"io.getstream.video.screen_sharing.broadcastStopped";
+static NSString* const kBroadcastStopRequestedNotification =
+    @"io.getstream.video.screen_sharing.broadcastStopRequested";
 
 static void FlutterBroadcastNotificationCallback(CFNotificationCenterRef center,
                                                  void* observer,
@@ -42,6 +44,12 @@ static void FlutterBroadcastNotificationCallback(CFNotificationCenterRef center,
                                       CFNotificationSuspensionBehaviorDeliverImmediately);
     }
   });
+}
+
++ (void)requestStop {
+  CFNotificationCenterPostNotification(CFNotificationCenterGetDarwinNotifyCenter(),
+                                       (__bridge CFStringRef)kBroadcastStopRequestedNotification,
+                                       NULL, NULL, true);
 }
 
 @end

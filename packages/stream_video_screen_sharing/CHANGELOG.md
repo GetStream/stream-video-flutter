@@ -5,6 +5,10 @@
 - [iOS] CocoaPods is no longer supported; enable Flutter's Swift Package Manager.
 - The package has no Dart API any more: `StreamVideoScreenSharingPlatform` and `MethodChannelStreamVideoScreenSharing` are removed.
 
+### 🐞 Fixed
+
+- The broadcast ends with an error when the app cannot share it, instead of running on.
+
 ## 1.8.0
 
 - Sync version with `stream_video_flutter` 1.8.0

@@ -14,6 +14,12 @@ NS_ASSUME_NONNULL_BEGIN
 /** Starts observing, once per process. Later calls do nothing. */
 + (void)startObserving;
 
+/**
+ * Asks the broadcast extension to finish the broadcast with an error. The
+ * extension posts its stop notification when it does.
+ */
++ (void)requestStop;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -15,6 +15,7 @@ import 'call/call.dart';
 import 'call/call_host.dart';
 import 'call/call_ringing_state.dart';
 import 'call/call_type.dart';
+import 'call/media/ios_broadcast_screen_share.dart';
 import 'coordinator/coordinator_client.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'coordinator/open_api/coordinator_client_open_api.dart';
@@ -332,6 +333,9 @@ class StreamVideo extends Disposable implements CallHost {
       this,
     );
     _observeSystemManagedCalls();
+    if (setsUpMedia && CurrentPlatform.isIos) {
+      IosBroadcastScreenShare.observeBroadcasts();
+    }
 
     _state.user.value = user;
 

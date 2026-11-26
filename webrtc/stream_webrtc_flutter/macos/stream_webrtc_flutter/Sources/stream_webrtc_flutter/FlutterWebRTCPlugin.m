@@ -14,6 +14,7 @@
 #import "include/stream_webrtc_flutter/FlutterRTCPeerConnection.h"
 #if TARGET_OS_IPHONE
 #import "Broadcast/FlutterBroadcastObserver.h"
+#import "Broadcast/FlutterBroadcastPicker.h"
 #import "include/stream_webrtc_flutter/FlutterRTCMediaRecorder.h"
 #import "include/stream_webrtc_flutter/FlutterRTCVideoPlatformViewController.h"
 #import "include/stream_webrtc_flutter/FlutterRTCVideoPlatformViewFactory.h"
@@ -806,6 +807,30 @@ static FlutterWebRTCPlugin* sharedSingleton;
     NSDictionary* constraints = argsMap[@"constraints"];
     NSString* factoryId = argsMap[@"factoryId"];
     [self getDisplayMedia:constraints factoryId:factoryId result:result];
+  } else if ([@"presentBroadcastPicker" isEqualToString:call.method]) {
+#if TARGET_OS_IPHONE
+    NSError* pickerError = nil;
+    if ([FlutterBroadcastPicker presentWithError:&pickerError]) {
+      result(nil);
+    } else {
+      result([FlutterError errorWithCode:@"BroadcastPickerError"
+                                 message:pickerError.localizedDescription
+                                 details:nil]);
+    }
+#else
+    result([FlutterError errorWithCode:@"UnsupportedPlatformError"
+                               message:@"presentBroadcastPicker is only supported on iOS"
+                               details:nil]);
+#endif
+  } else if ([@"stopBroadcast" isEqualToString:call.method]) {
+#if TARGET_OS_IPHONE
+    [FlutterBroadcastObserver requestStop];
+    result(nil);
+#else
+    result([FlutterError errorWithCode:@"UnsupportedPlatformError"
+                               message:@"stopBroadcast is only supported on iOS"
+                               details:nil]);
+#endif
   } else if ([@"createLocalMediaStream" isEqualToString:call.method]) {
     NSString* factoryId = call.arguments[@"factoryId"];
     [self createLocalMediaStream:factoryId result:result];

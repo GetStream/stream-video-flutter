@@ -239,7 +239,7 @@ void main() {
             isA<NoSuchMethodError>().having(
               (e) => '$e',
               'message',
-              contains('_cancelPendingBroadcast'),
+              contains('_publisher'),
             ),
           ),
         );

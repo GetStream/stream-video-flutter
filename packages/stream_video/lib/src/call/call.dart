@@ -316,7 +316,7 @@ class Call {
 
   /// Owns the connect options and the local camera, microphone and screen
   /// share.
-  late final _media = LocalMediaController(
+  late final LocalMediaController _media = LocalMediaController(
     stateManager: _stateManager,
     session: () => _session,
     sfuStatsReporter: () => _sfuStatsReporter,
@@ -329,6 +329,12 @@ class Call {
         _host.pushNotificationManager?.setCallMutedByCid(callCid.value, muted),
     onAudioOutputDeviceSet: (device) async => _host.pushNotificationManager
         ?.setCallAudioOutputDeviceByCid(callCid.value, device),
+    activeCalls: () => [
+      for (final call in _host.state.activeCalls.value) call._media,
+    ],
+    onCallEvent: (event) {
+      if (!_callEvents.isClosed) _callEvents.emit(event);
+    },
     logger: _logger,
   );
 
@@ -1705,6 +1711,11 @@ class Call {
   Future<bool> requestScreenSharePermission() =>
       _media.requestScreenSharePermission();
 
+  /// Enables or disables the screen share for this call.
+  ///
+  /// With the iOS broadcast extension, enabling returns once the broadcast
+  /// picker is shown, and a later failure to share the broadcast is reported
+  /// as a [StreamCallScreenShareFailedEvent] on [callEvents].
   Future<Result<None>> setScreenShareEnabled({
     required bool enabled,
     ScreenShareConstraints? constraints,

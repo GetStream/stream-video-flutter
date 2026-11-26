@@ -141,6 +141,7 @@
 - Added `CallPermission.sendData` for the `send-data` capability, which used to be read as `CallPermission.unknown` with a warning.
 - Added `CallState.isAudioInterrupted`, whether the platform is interrupting the call's audio, such as for a phone call, an alarm or another app playing audio.
 - Added `CallPreferences.audioInterruptionReaction` and `AudioInterruptionReaction`, what a call does while its audio is interrupted: nothing (the default), or turn the microphone off and back on when the interruption ends, unless the app changed it meanwhile.
+- Added `StreamCallScreenShareFailedEvent` with a `ScreenShareFailureReason`, delivered on `Call.callEvents` when an iOS broadcast that started could not be shared.
 
 ### 🔄 Changed
 
@@ -168,6 +169,9 @@
 
 ### 🐞 Fixed
 
+- [iOS] A screen share broadcast started outside the app, such as from Control Center, is now shared in the active call.
+- [iOS] A screen share broadcast that the call cannot share now ends with an error instead of running on.
+- [iOS] A rejoin shares a running screen share broadcast again instead of showing the broadcast picker.
 - [iOS] When the user chose the speaker or the receiver and the system moves audio between the two on its own, such as after a CallKit hold, the chosen output is put back instead of being replaced by the system's choice. A route to any other device, such as Bluetooth or AirPlay, is followed, and so is the system's route when the chosen output cannot be put back.
 - A muted microphone or camera is announced to the SFU as muted.
 - Joining a call retries sooner when the SFU connection closes before the join response.

@@ -10,6 +10,7 @@ private enum Constants {
     // The extension cannot link that plugin, so each side keeps its own copy of the names.
     static let broadcastStartedNotification = "io.getstream.video.screen_sharing.broadcastStarted"
     static let broadcastStoppedNotification = "io.getstream.video.screen_sharing.broadcastStopped"
+    static let broadcastStopRequestedNotification = "io.getstream.video.screen_sharing.broadcastStopRequested"
 }
 
 open class BroadcastSampleHandler: RPBroadcastSampleHandler {
@@ -48,9 +49,14 @@ open class BroadcastSampleHandler: RPBroadcastSampleHandler {
     override public func broadcastStarted(withSetupInfo setupInfo: [String: NSObject]?) {
         // User has requested to start the broadcast. Setup info from the UI extension can be supplied but optional.
         frameCount = 0
-        
+
+        observeStopRequest()
         postNotification(Constants.broadcastStartedNotification)
         openConnection()
+    }
+
+    deinit {
+        removeStopRequestObserver()
     }
     
     override public func broadcastPaused() {
@@ -63,6 +69,7 @@ open class BroadcastSampleHandler: RPBroadcastSampleHandler {
     
     override public func broadcastFinished() {
         // User has requested to finish the broadcast.
+        removeStopRequestObserver()
         postNotification(Constants.broadcastStoppedNotification)
         clientConnection?.close()
     }
@@ -88,7 +95,35 @@ open class BroadcastSampleHandler: RPBroadcastSampleHandler {
 }
 
 private extension BroadcastSampleHandler {
-  
+
+    /// Finishes the broadcast with an error when the app asks for it, after
+    /// the app could not share the broadcast.
+    func observeStopRequest() {
+        CFNotificationCenterAddObserver(
+            notificationCenter,
+            Unmanaged.passUnretained(self).toOpaque(),
+            { _, observer, _, _, _ in
+                guard let observer else { return }
+                let handler = Unmanaged<BroadcastSampleHandler>.fromOpaque(observer).takeUnretainedValue()
+                let JMScreenSharingFailed = 10002
+                let error = NSError(domain: RPRecordingErrorDomain, code: JMScreenSharingFailed, userInfo: [NSLocalizedDescriptionKey: "The app could not share the screen"])
+                handler.finishBroadcastWithError(error)
+            },
+            Constants.broadcastStopRequestedNotification as CFString,
+            nil,
+            .deliverImmediately
+        )
+    }
+
+    func removeStopRequestObserver() {
+        CFNotificationCenterRemoveObserver(
+            notificationCenter,
+            Unmanaged.passUnretained(self).toOpaque(),
+            CFNotificationName(rawValue: Constants.broadcastStopRequestedNotification as CFString),
+            nil
+        )
+    }
+
     func setupConnection() {
         clientConnection?.didClose = { [weak self] error in
             if let error = error {
