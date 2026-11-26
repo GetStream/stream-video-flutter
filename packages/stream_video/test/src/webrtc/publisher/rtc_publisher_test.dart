@@ -531,6 +531,32 @@ void main() {
         expect(rtcPublisher.tracks[track.trackId]!.mediaTrack, same(filtered));
       });
 
+      test('a failed send puts the held track back on every sender', () async {
+        final rtcPublisher = publisher(
+          publishOptions: [_mic, publishOption(2, SfuTrackType.audio)],
+        );
+        final track = (await rtcPublisher.publishAudioTrack(
+          track: localMic(),
+        )).getDataOrNull()!;
+        final filtered = FakeMediaStreamTrack('filtered', kind: 'audio');
+        rtcPublisher.onLocalCapture = (held, {isCurrent}) async {
+          return held.copyWith(mediaTrack: filtered);
+        };
+        transceivers[1].sender.replaceTrackError = Exception('replace');
+
+        final result = await rtcPublisher.refilterTrack(SfuTrackType.audio);
+
+        expect(result.isFailure, isTrue);
+        final first = transceivers[0].sender.track! as FakeMediaStreamTrack;
+        expect(fakeMediaOf(track).clones, contains(first));
+        expect(first.stopped, isFalse);
+        expect(filtered.clones.every((clone) => clone.stopped), isTrue);
+        expect(
+          rtcPublisher.tracks[track.trackId]!.clonedTracks,
+          contains(first),
+        );
+      });
+
       test('leaves the senders alone when nothing changed', () async {
         final rtcPublisher = publisher();
         final track = (await rtcPublisher.publishAudioTrack(

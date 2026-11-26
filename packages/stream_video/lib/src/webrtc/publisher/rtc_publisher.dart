@@ -1621,27 +1621,56 @@ class RtcPublisher {
 
   /// Sends [filtered] on every sender that carries [current]'s track, for as
   /// long as [current] is held, and returns it with the clones the senders
-  /// made. Stops those clones when a send throws.
+  /// made. When a send throws, sends [current] again on the senders that
+  /// switched and stops [filtered]'s clones.
   Future<RtcLocalTrack> _sendWhileHeld(
     RtcLocalTrack current,
     RtcLocalTrack filtered,
   ) async {
     var out = filtered.copyWith(clonedTracks: const []);
     final clones = <rtc.MediaStreamTrack>[];
+    final switched = <rtc.RTCRtpTransceiver>[];
+    final transceivers = transceiversManager
+        .getTransceiversForTrack(current.trackId)
+        .toList();
     try {
-      for (final transceiver in transceiversManager.getTransceiversForTrack(
-        current.trackId,
-      )) {
+      for (final transceiver in transceivers) {
         if (!_isHeld(current)) break;
         final sent = await out.sendOn([transceiver]);
+        switched.add(transceiver);
         clones.addAll(sent.clonedTracks);
         out = out.copyWith(clonedTracks: [...clones]);
       }
     } catch (_) {
+      await _sendAgain(current, switched);
       await out.stopClones();
       rethrow;
     }
     return out;
+  }
+
+  /// Sends [current] again on [transceivers], and keeps the clones it made
+  /// with it while it is still the held track.
+  Future<void> _sendAgain(
+    RtcLocalTrack current,
+    List<rtc.RTCRtpTransceiver> transceivers,
+  ) async {
+    if (transceivers.isEmpty) return;
+    try {
+      final sent = await current.sendOn(transceivers);
+      final held = tracks[current.trackId];
+      if (held == null || !identical(held.mediaTrack, current.mediaTrack)) {
+        await sent.stopClones();
+        return;
+      }
+      tracks[current.trackId] = held.copyWith(
+        clonedTracks: [...held.clonedTracks, ...sent.clonedTracks],
+      );
+    } catch (e) {
+      _logger.e(
+        () => '[refilterTrack] failed to send ${current.trackId} again: $e',
+      );
+    }
   }
 
   /// Keeps [updated] in place of [current] when [current] is still the held
