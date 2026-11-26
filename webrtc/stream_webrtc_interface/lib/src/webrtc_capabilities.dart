@@ -23,7 +23,7 @@ final class WebRtcCapabilities {
     this.needsRemoteAudioReattach = false,
     this.supportsEncryption = false,
     this.supportsAudioModuleMicrophoneMute = false,
-    required this.supportsVideoEffects,
+    this.supportsVideoEffects = false,
   });
 
   /// Whether each call can build its own peer connection factory, with its

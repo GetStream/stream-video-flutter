@@ -22,6 +22,5 @@ WebRtcCapabilities browserWebRtcCapabilitiesFor({
     reportsAudioInterruptions: false,
     supportsSystemManagedAudioFocus: false,
     needsRemoteAudioReattach: isWebKit,
-    supportsVideoEffects: false,
   );
 }

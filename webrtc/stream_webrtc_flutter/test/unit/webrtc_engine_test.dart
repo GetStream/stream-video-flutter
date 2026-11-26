@@ -109,7 +109,6 @@ void main() {
       usesExactDeviceIdConstraints: false,
       reportsAudioInterruptions: false,
       supportsSystemManagedAudioFocus: false,
-      supportsVideoEffects: false,
     );
 
     tearDown(() => debugWebRtcCapabilitiesOverride = null);
