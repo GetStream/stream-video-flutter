@@ -343,8 +343,11 @@ class IncomingCallBroadcastReceiverTest {
         assertEquals(1, missed["count"])
     }
 
+    /** Whether this app alone was told to close the full-screen screen of this test's call. */
     private fun fullScreenActivityWasToldToClose() = shadowOf(context).broadcastIntents.any {
-        it.action == "${context.packageName}.io.getstream.video.ACTION_ENDED_CALL_INCOMING"
+        it.action == "${context.packageName}.io.getstream.video.ACTION_ENDED_CALL_INCOMING" &&
+            it.`package` == context.packageName &&
+            it.getStringExtra(IncomingCallConstants.EXTRA_CALL_ID) == CALL_ID
     }
 
     /** Compares [body] with the fixture both sides of the channel test against. */

@@ -28,6 +28,8 @@
 - [iOS] `VoIPPushRegistryHandler` no longer conforms to `UNUserNotificationCenterDelegate`, whose methods it never implemented. An app that set `UNUserNotificationCenter.current().delegate = VoIPPushRegistryHandler.shared` no longer compiles; remove that line, or set a delegate of its own.
 - [Android] `IncomingCallBroadcastReceiver.silenceEvents` is removed. Silence ringing events from Dart with `StreamVideoPushNotificationPlatform.silenceEvents()` and `unsilenceEvents()`, as before.
 - [iOS] A `CXStartCallAction` an app requests through its own `CXCallController` is failed. Start outgoing calls with `StreamVideoPushNotificationPlugin.startOutgoingCall(data:)`, which registers them with the plugin first.
+- [Android] `StreamVideoPushNotificationPlatform.hideIncomingCall` is removed, along with the method channel's `hideIncomingCall`. It stopped the ringtone and the notification but left the stored call, its ring timeout and its Telecom call going. End a ring with `StreamVideoPushNotificationPlatform.endCall`, or `StreamVideoPushNotification.endCallByCid` or `dismissRingingCallByCid`.
+- [Android] `IncomingCallActivity`, `IncomingCallBroadcastReceiver` and `IncomingCallNotificationService` are no longer exported, so only the app itself can start or broadcast to them; the app's own intents reach them as before. `IncomingCallActivity.getIntentEnded` is internal.
 
 ### ⚠️ Deprecated
 
@@ -116,6 +118,9 @@
 - `unregisterDevice` always stops registering refreshed tokens.
 - `unregisterDevice` deletes the registered push token from the backend even when the current token cannot be read.
 - A registration still in flight when `unregisterDevice` runs no longer stores its token.
+- [Android] The full-screen incoming call screen shows one call and closes only when that call's ring ends. A ring arriving while it is up now replaces the call it shows, so accept and decline act on the new call; they used to act on the first one. Once that call's ring ends the screen closes, and a call still ringing from before keeps only its notification. Ending, declining or timing out another call, such as the user's own outgoing call, no longer closes it, and no other app can close it.
+- [Android] The full-screen incoming call screen no longer times the ring out on its own; the ring's timeout closes it along with the notification, the ringtone and the Telecom call. A screen whose call's ring is already over when it comes up or comes back to the front closes, so it no longer stays up when the ring ended just before it opened. Recreating the screen, such as on a rotation, keeps the call it shows.
+- [Android 17+] Removing the app from the recent apps while a call rings no longer silences the ringtone while the notification, the stored call and the Telecom call stay. The ring goes on until it is answered, declined, ends or times out.
 
 ## 1.8.0
 

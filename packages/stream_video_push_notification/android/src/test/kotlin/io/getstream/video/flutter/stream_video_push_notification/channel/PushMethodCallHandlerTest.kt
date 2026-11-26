@@ -9,13 +9,11 @@ import androidx.test.core.app.ApplicationProvider
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
-import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationManager
 import io.getstream.video.flutter.stream_video_push_notification.core.CallStore
 import io.getstream.video.flutter.stream_video_push_notification.core.DismissReason
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingController
-import io.getstream.video.flutter.stream_video_push_notification.notification.RingtonePlayer
 import io.getstream.video.flutter.stream_video_push_notification.permissions.FullScreenIntentPermission
 import io.getstream.video.flutter.stream_video_push_notification.permissions.NotificationPermissionFlow
 import io.getstream.video.flutter.stream_video_push_notification.telecom.TelecomIntegration
@@ -41,8 +39,6 @@ class PushMethodCallHandlerTest {
 
     private val controller = mockk<RingingController>(relaxed = true)
     private val store = mockk<CallStore>(relaxed = true)
-    private val notifications = mockk<IncomingCallNotificationManager>(relaxed = true)
-    private val ringtone = mockk<RingtonePlayer>(relaxed = true)
     private val events = mockk<RingingEventDispatcher>(relaxed = true)
     private val telecom = mockk<TelecomIntegration>(relaxed = true)
     private val notificationPermission = mockk<NotificationPermissionFlow>(relaxed = true)
@@ -57,8 +53,6 @@ class PushMethodCallHandlerTest {
             context,
             controller,
             store,
-            notifications,
-            ringtone,
             events,
             telecom,
             notificationPermission,
@@ -240,14 +234,6 @@ class PushMethodCallHandlerTest {
             "notification",
             shown.captured.getString(IncomingCallConstants.EXTRA_CALL_ACTION_FROM),
         )
-    }
-
-    @Test
-    fun `hideIncomingCall stops the ringtone and clears the ring`() {
-        call("hideIncomingCall", mapOf("id" to "call-1"))
-
-        verify { ringtone.stop() }
-        verify { notifications.clearIncomingNotification(any(), false) }
     }
 
     @Test

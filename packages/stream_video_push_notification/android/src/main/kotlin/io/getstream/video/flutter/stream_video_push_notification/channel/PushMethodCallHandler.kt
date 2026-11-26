@@ -6,14 +6,12 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallBroadcastReceiver
 import io.getstream.video.flutter.stream_video_push_notification.IncomingCallConstants
-import io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationManager
 import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
 import io.getstream.video.flutter.stream_video_push_notification.core.CallStore
 import io.getstream.video.flutter.stream_video_push_notification.core.DismissReason
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingCall
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingController
-import io.getstream.video.flutter.stream_video_push_notification.notification.RingtonePlayer
 import io.getstream.video.flutter.stream_video_push_notification.permissions.FullScreenIntentPermission
 import io.getstream.video.flutter.stream_video_push_notification.permissions.NotificationPermissionFlow
 import io.getstream.video.flutter.stream_video_push_notification.telecom.AudioEndpointUtils
@@ -21,15 +19,13 @@ import io.getstream.video.flutter.stream_video_push_notification.telecom.Telecom
 
 /**
  * The method channel of one Flutter engine: reads each call's arguments and hands it to the
- * controller, the call store, the notifications, Telecom or the permission flows. Any exception
- * is answered as an `error` result.
+ * controller, the call store, Telecom or the permission flows. Any exception is answered as an
+ * `error` result.
  */
 internal class PushMethodCallHandler(
     private val context: Context,
     private val controller: RingingController,
     private val store: CallStore,
-    private val notifications: IncomingCallNotificationManager,
-    private val ringtone: RingtonePlayer,
     private val events: RingingEventDispatcher,
     private val telecom: TelecomIntegration,
     private val notificationPermission: NotificationPermissionFlow,
@@ -167,15 +163,6 @@ internal class PushMethodCallHandler(
 
             "canUseFullScreenIntent" -> result.success(fullScreenIntentPermission.canUse())
 
-            "hideIncomingCall" -> {
-                ringtone.stop()
-                notifications.clearIncomingNotification(
-                    CallPayloadMapper.toBundle(callArgument(call)),
-                    false,
-                )
-                result.success(true)
-            }
-
             "ensureFullScreenIntentPermission" -> {
                 fullScreenIntentPermission.request(activity)
                 result.success(true)
@@ -218,8 +205,6 @@ internal class PushMethodCallHandler(
             context = context,
             controller = components.controller,
             store = components.callStore,
-            notifications = components.notifications,
-            ringtone = components.ringtone,
             events = components.events,
             telecom = components.telecom,
             notificationPermission = components.notificationPermission,

@@ -21,7 +21,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import io.getstream.video.flutter.stream_video_push_notification.widgets.RippleRelativeLayout
 import de.hdodenhof.circleimageview.CircleImageView
-import kotlin.math.abs
 import android.view.ViewGroup.MarginLayoutParams
 import android.os.PowerManager
 import android.text.TextUtils
@@ -29,8 +28,17 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import io.getstream.video.flutter.stream_video_push_notification.core.RingingComponents
 import io.getstream.video.flutter.stream_video_push_notification.notification.CallImageLoader
-import io.getstream.video.flutter.stream_video_push_notification.notification.IncomingCallNotificationBuilder
 
+/**
+ * The full-screen incoming call screen. There is one at a time, and it shows one call: a ring
+ * arriving while it is up replaces the call it shows, as the newest ring also takes over the
+ * ringtone. It closes when the ring of the call it shows ends, and only then; a call replaced
+ * while it still rings keeps only its notification.
+ *
+ * It never ends a ring itself. Accept and decline run the [RingingComponents.controller]'s steps,
+ * and every other end of the ring — a timeout, a cancel, an answer elsewhere — reaches it as the
+ * ended broadcast the controller has the notification manager send.
+ */
 class IncomingCallActivity : Activity() {
 
     companion object {
@@ -40,35 +48,60 @@ class IncomingCallActivity : Activity() {
         private const val ACTION_ENDED_CALL_INCOMING =
             "io.getstream.video.ACTION_ENDED_CALL_INCOMING"
 
+        private const val EXTRA_ACCEPTED = "ACCEPTED"
+
+        /** The call the screen shows, kept across a recreation after [onNewIntent] changed it. */
+        private const val STATE_CALL_DATA = "io.getstream.video.STATE_CALL_DATA"
+
+        /** How long the screen stays up after its call was accepted elsewhere. */
+        private const val ACCEPTED_FINISH_DELAY_MS = 1000L
+
         fun getIntent(context: Context, data: Bundle) =
-            Intent(IncomingCallConstants.ACTION_CALL_INCOMING).apply {
+            Intent(context, IncomingCallActivity::class.java).apply {
                 action = "${context.packageName}.${IncomingCallConstants.ACTION_CALL_INCOMING}"
                 putExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA, data)
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
             }
 
-        fun getIntentEnded(context: Context, isAccepted: Boolean): Intent {
-            val intent = Intent("${context.packageName}.${ACTION_ENDED_CALL_INCOMING}")
-            intent.putExtra("ACCEPTED", isAccepted)
-            return intent
-        }
+        /**
+         * Tells the screen showing the call with [callId] that its ring ended, [isAccepted] when
+         * by an accept. A screen showing another call ignores it. Delivered only within this app.
+         */
+        internal fun getIntentEnded(context: Context, callId: String, isAccepted: Boolean) =
+            Intent("${context.packageName}.${ACTION_ENDED_CALL_INCOMING}").apply {
+                setPackage(context.packageName)
+                putExtra(IncomingCallConstants.EXTRA_CALL_ID, callId)
+                putExtra(EXTRA_ACCEPTED, isAccepted)
+            }
+
+        private fun callDataOf(intent: Intent?): Bundle? =
+            intent?.extras?.getBundle(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
+
+        private fun callIdOf(data: Bundle?): String? =
+            data?.getString(IncomingCallConstants.EXTRA_CALL_ID)
     }
 
     inner class EndedIncomingCallBroadcastReceiver : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            if (!isFinishing) {
-                val isAccepted = intent.getBooleanExtra("ACCEPTED", false)
-                if (isAccepted) {
-                    finishDelayed()
-                } else {
-                    finishTask()
-                }
+            if (isFinishing) return
+            val endedCallId = intent.getStringExtra(IncomingCallConstants.EXTRA_CALL_ID)
+            if (endedCallId == null || endedCallId != shownCallId) return
+
+            if (intent.getBooleanExtra(EXTRA_ACCEPTED, false)) {
+                finishDelayed(endedCallId)
+            } else {
+                finishTask()
             }
         }
     }
 
     private var endedIncomingCallBroadcastReceiver = EndedIncomingCallBroadcastReceiver()
     private var isEndedReceiverRegistered = false
+
+    private val handler = Handler(Looper.getMainLooper())
+
+    /** The id of the call the screen shows. */
+    private val shownCallId: String? get() = callIdOf(callDataOf(intent))
 
     private lateinit var ivBackground: ImageView
     private lateinit var llBackgroundAnimation: RippleRelativeLayout
@@ -90,7 +123,11 @@ class IncomingCallActivity : Activity() {
     @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val data = intent.extras?.getBundle(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
+        // A recreated activity gets its launch intent back, not the one onNewIntent set.
+        savedInstanceState?.getBundle(STATE_CALL_DATA)?.let { saved ->
+            intent = Intent(intent).putExtra(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA, saved)
+        }
+        val data = callDataOf(intent)
         if (data == null) {
             finish()
             return
@@ -114,22 +151,60 @@ class IncomingCallActivity : Activity() {
         setContentView(R.layout.activity_incoming_call)
         initView()
         incomingData(data)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(
-                endedIncomingCallBroadcastReceiver,
-                IntentFilter("${packageName}.${ACTION_ENDED_CALL_INCOMING}"),
-                Context.RECEIVER_EXPORTED,
-            )
-        } else {
-            registerReceiver(
-                endedIncomingCallBroadcastReceiver,
-                IntentFilter("${packageName}.${ACTION_ENDED_CALL_INCOMING}")
-            )
-        }
+        // Not exported: only this app's notification manager may close the screen.
+        ContextCompat.registerReceiver(
+            this,
+            endedIncomingCallBroadcastReceiver,
+            IntentFilter("${packageName}.${ACTION_ENDED_CALL_INCOMING}"),
+            ContextCompat.RECEIVER_NOT_EXPORTED,
+        )
         isEndedReceiverRegistered = true
     }
 
+    /**
+     * A ring arriving while the screen is up: the screen shows that call from now on, so accept
+     * and decline act on it, and only its end closes the screen. Without call data, keeps the
+     * call it shows.
+     */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // A screen finishing, for one created without a call, has no views to rebind.
+        if (isFinishing) return
+        val data = callDataOf(intent) ?: return
+        setIntent(intent)
+        // A fresh layout, so nothing the previous call set is left on screen.
+        llBackgroundAnimation.stopRippleAnimation()
+        setContentView(R.layout.activity_incoming_call)
+        initView()
+        incomingData(data)
+        finishIfRingOver()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        callDataOf(intent)?.let { outState.putBundle(STATE_CALL_DATA, it) }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        finishIfRingOver()
+    }
+
+    /**
+     * Closes the screen when the ring of the call it shows is already over: its call is no longer
+     * stored, or was accepted. The ended broadcast misses a screen that was not listening yet,
+     * such as one whose ring ended while it was starting, or before a second ring reached
+     * [onNewIntent]. Reads what the controller left; ends no ring itself.
+     */
+    private fun finishIfRingOver() {
+        if (isFinishing) return
+        val callId = shownCallId ?: return
+        val call = RingingComponents.get(this).callStore.byId(callId)
+        if (call == null || call.isAccepted) finishTask()
+    }
+
     private fun wakeLockRequest(duration: Long) {
+        wakeLock?.takeIf { it.isHeld }?.release()
         val pm = applicationContext.getSystemService(POWER_SERVICE) as PowerManager
         wakeLock = pm.newWakeLock(
             PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.FULL_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
@@ -230,9 +305,8 @@ class IncomingCallActivity : Activity() {
             ivAcceptCall.setImageResource(R.drawable.ic_video)
         }
         val duration = data.getLong(IncomingCallConstants.EXTRA_CALL_DURATION, 0L)
+        // The ring timer, not the screen, times the ring out; this only bounds the wake lock.
         wakeLockRequest(duration)
-
-        finishTimeout(data, duration)
 
         val textAccept = data.getString(IncomingCallConstants.EXTRA_CALL_TEXT_ACCEPT, "")
         tvAccept.text =
@@ -253,20 +327,6 @@ class IncomingCallActivity : Activity() {
         CallImageLoader.resolve(
             data.getString(IncomingCallConstants.EXTRA_CALL_FULL_SCREEN_BACKGROUND_URL, ""),
         )?.let { CallImageLoader.loadInto(ivBackground, it, headers, R.drawable.transparent) }
-    }
-
-    private fun finishTimeout(data: Bundle?, duration: Long) {
-        val currentSystemTime = System.currentTimeMillis()
-        val timeStartCall =
-            data?.getLong(IncomingCallNotificationBuilder.EXTRA_TIME_START_CALL, currentSystemTime)
-                ?: currentSystemTime
-
-        val timeOut = duration - abs(currentSystemTime - timeStartCall)
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (!isFinishing) {
-                finishTask()
-            }
-        }, timeOut)
     }
 
     private fun initView() {
@@ -308,7 +368,7 @@ class IncomingCallActivity : Activity() {
     }
 
     private fun onAcceptClick() {
-        val data = intent.extras?.getBundle(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
+        val data = callDataOf(intent)
 
         // The ring and its timeout stop here. On the lock screen the trampoline, which runs the
         // accept and brings the app forward, may only start once the keyguard is dismissed.
@@ -331,17 +391,18 @@ class IncomingCallActivity : Activity() {
     }
 
     private fun onDeclineClick() {
-        val data = intent.extras?.getBundle(IncomingCallConstants.EXTRA_CALL_INCOMING_DATA)
+        val data = callDataOf(intent)
         if (data != null) {
             RingingComponents.get(this).controller.onDecline(data)
         }
         finishTask()
     }
 
-    private fun finishDelayed() {
-        Handler(Looper.getMainLooper()).postDelayed({
-            finishTask()
-        }, 1000)
+    /** Closes the screen shortly, unless it shows another call by then. */
+    private fun finishDelayed(callId: String) {
+        handler.postDelayed({
+            if (!isFinishing && shownCallId == callId) finishTask()
+        }, ACCEPTED_FINISH_DELAY_MS)
     }
 
     private fun finishTask() {
@@ -353,7 +414,8 @@ class IncomingCallActivity : Activity() {
     }
 
     override fun onDestroy() {
-        wakeLock?.release()
+        handler.removeCallbacksAndMessages(null)
+        wakeLock?.takeIf { it.isHeld }?.release()
         wakeLock = null
         if (isEndedReceiverRegistered) {
             unregisterReceiver(endedIncomingCallBroadcastReceiver)

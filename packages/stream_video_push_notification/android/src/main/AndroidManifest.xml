@@ -34,7 +34,7 @@
             android:turnScreenOn="true"
             android:showWhenLocked="true"
             android:configChanges="orientation"
-            android:exported="true"
+            android:exported="false"
             android:launchMode="singleInstance"
             android:allowTaskReparenting="false"
             android:theme="@style/IncomingCallTheme"
@@ -52,7 +52,7 @@
         <receiver
             android:name="io.getstream.video.flutter.stream_video_push_notification.IncomingCallBroadcastReceiver"
             android:enabled="true"
-            android:exported="true"
+            android:exported="false"
             android:permission="${applicationId}.PERMISSION_CALL">
             <intent-filter>
                 <action android:name="${applicationId}.io.getstream.video.ACTION_CALL_INCOMING" />
@@ -65,7 +65,7 @@
 
         <service
             android:enabled="true"
-            android:exported="true"
+            android:exported="false"
             android:foregroundServiceType="phoneCall"
             android:permission="${applicationId}.PERMISSION_CALL"
             android:name="io.getstream.video.flutter.stream_video_push_notification.IncomingCallNotificationService">

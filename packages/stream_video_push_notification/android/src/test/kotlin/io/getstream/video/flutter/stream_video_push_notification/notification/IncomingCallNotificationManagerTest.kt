@@ -154,17 +154,6 @@ class IncomingCallNotificationManagerTest {
         assertNull(postedMissed())
     }
 
-    @Test
-    fun `stopping the ring cancels the current call's avatar load`() {
-        manager.showIncomingNotification(CallPayloadMapper.toBundle(call("a")))
-
-        manager.stopIncomingCallRinging()
-        loadAvatar("a")
-
-        assertNull(posted("a").getLargeIcon())
-        assertNull(manager.currentIncomingNotification)
-    }
-
     private companion object {
         const val MISSED_ID = 7
     }

@@ -70,7 +70,6 @@ const _iosOnlyMethods = {
 /// the call through `endCallByCid` on iOS instead.
 const _androidOnlyMethods = {
   'showMissCallNotification',
-  'hideIncomingCall',
   'dismissRingingCall',
   'ensureFullScreenIntentPermission',
   'requestNotificationPermission',

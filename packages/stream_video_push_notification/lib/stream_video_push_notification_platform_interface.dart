@@ -56,12 +56,6 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
     );
   }
 
-  /// Hide notification call for Android.
-  /// Only Android
-  Future<void> hideIncomingCall(StreamVideoPushParams params) {
-    throw UnimplementedError('hideIncomingCall() has not been implemented.');
-  }
-
   /// Start an Outgoing call.
   /// On iOS, using Callkit(create a history into the Phone app).
   /// On Android, Nothing(only callback event listener).

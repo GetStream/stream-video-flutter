@@ -61,17 +61,6 @@ class MethodChannelStreamVideoPushNotification
     );
   }
 
-  /// Hide notification call for Android.
-  /// Only Android
-  @override
-  Future<void> hideIncomingCall(StreamVideoPushParams params) async {
-    if (!CurrentPlatform.isAndroid) {
-      return;
-    }
-
-    await methodChannel.invokeMethod('hideIncomingCall', params.toJson());
-  }
-
   /// Start an Outgoing call.
   /// On iOS, using Callkit(create a history into the Phone app).
   /// On Android, Nothing(only callback event listener).
