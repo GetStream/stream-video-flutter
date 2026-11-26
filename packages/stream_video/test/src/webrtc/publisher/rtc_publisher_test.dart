@@ -649,6 +649,48 @@ void main() {
           greaterThan(disposedBefore.length),
         );
       });
+
+      test('a new capture that cannot be sent is reported released', () async {
+        final rtcPublisher = publisher();
+        final released = <String>[];
+        rtcPublisher.onLocalCaptureReleased = (track) async {
+          released.add(track.mediaTrack.id!);
+        };
+        final track = (await rtcPublisher.publishAudioTrack(
+          track: localMic(),
+        )).getDataOrNull()!;
+        await rtcPublisher.muteTrack(trackId: track.trackId);
+        transceivers.single.sender.replaceTrackError = Exception('not sent');
+
+        final unmuted = await rtcPublisher.unmuteTrack(trackId: track.trackId);
+
+        expect(unmuted.isFailure, isTrue);
+        expect(released, hasLength(2));
+        expect(released.first, 'mic');
+        expect(released.last, isNot('mic'));
+      });
+
+      test('a new capture of a track unpublished meanwhile is reported '
+          'released', () async {
+        final rtcPublisher = publisher();
+        final released = <String>[];
+        rtcPublisher.onLocalCaptureReleased = (track) async {
+          released.add(track.mediaTrack.id!);
+        };
+        final track = (await rtcPublisher.publishAudioTrack(
+          track: localMic(),
+        )).getDataOrNull()!;
+        await rtcPublisher.muteTrack(trackId: track.trackId);
+        platform.getUserMediaGate = Completer<void>();
+
+        final unmuting = rtcPublisher.unmuteTrack(trackId: track.trackId);
+        await pumpEventQueue();
+        await rtcPublisher.unpublishTrack(trackId: track.trackId);
+        platform.getUserMediaGate!.complete();
+
+        expect((await unmuting).isFailure, isTrue);
+        expect(released.where((id) => id != 'mic'), hasLength(1));
+      });
     });
   });
 

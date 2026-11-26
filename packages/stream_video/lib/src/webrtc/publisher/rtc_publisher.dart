@@ -287,6 +287,13 @@ class RtcPublisher {
     }
   }
 
+  /// Stops [track], a capture that is not sent, and reports it released.
+  Future<void> _discardCapture(RtcLocalTrack? track) async {
+    if (track == null) return;
+    await track.stop();
+    await _releaseCapture(track);
+  }
+
   Future<void> _releaseCapture(RtcLocalTrack track) async {
     try {
       await onLocalCaptureReleased?.call(track);
@@ -1559,7 +1566,7 @@ class RtcPublisher {
         return await _keepIfStillHeld(current, sending, tag);
       } catch (e, stk) {
         _logger.e(() => '$tag failed for $trackId: $e');
-        await captured?.stop();
+        await _discardCapture(captured);
         return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
       }
     });
@@ -1692,7 +1699,7 @@ class RtcPublisher {
     if (held == null || !identical(held.mediaTrack, current.mediaTrack)) {
       _logger.w(() => '$tag ${current.trackId} is no longer held');
       if (!identical(updated.mediaTrack, current.mediaTrack)) {
-        await updated.stop();
+        await _discardCapture(updated);
       }
       return failureWithError('Track was unpublished while it was changed');
     }
