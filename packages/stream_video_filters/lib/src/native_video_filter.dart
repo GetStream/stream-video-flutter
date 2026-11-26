@@ -12,6 +12,8 @@ import 'video_effect_registry.dart';
 /// [StreamVideoFilters.unregisterAllFilters], and attaches it to the
 /// track next to the processors other filters attached. Stopping it detaches
 /// only its own processor.
+///
+/// A subclass is itself declared `base`, `final` or `sealed`.
 abstract base class NativeVideoFilter extends rtc.VideoFilter {
   NativeVideoFilter();
 
