@@ -74,7 +74,7 @@ class LivestreamPlayer extends StatefulWidget {
     this.includeAnonymousParticipants = true,
     this.showLiveIndicator,
     this.showSpeakerphoneToggle,
-    this.showRecordingsWhenEnded = true,
+    this.showRecordingsWhenEnded = false,
     this.backButtonBuilder,
     this.livestreamEndedWidgetBuilder,
     this.livestreamBackstageWidgetBuilder,
@@ -150,9 +150,10 @@ class LivestreamPlayer extends StatefulWidget {
   /// false.
   final bool? showSpeakerphoneToggle;
 
-  /// Boolean to display list of recordings when the livestream has ended.
+  /// Whether the livestream's recordings are listed when it has ended.
   ///
-  /// Defaults to true.
+  /// When true, each viewer still watching requests the list as the
+  /// livestream ends. Defaults to false.
   final bool showRecordingsWhenEnded;
 
   /// Determines whether the livestream should start in fullscreen mode.

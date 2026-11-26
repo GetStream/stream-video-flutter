@@ -22,6 +22,9 @@ struct CallKitEndOutcome {
 
 /// Every call the plugin tracks, looked up by app id or CallKit uuid.
 ///
+/// A call is forgotten once it ends, however it does, so Dart's later requests for it act on
+/// nothing.
+///
 /// Transitions change the store and return the effects to carry out, in order. The store
 /// itself never talks to CallKit or Dart.
 final class CallKitCallStore {
@@ -174,10 +177,12 @@ final class CallKitCallStore {
         return answeredCall == nil && connectedOutgoingCall == nil
     }
 
-    /// The ring of `options` timed out and was reported to CallKit as unanswered.
+    /// The ring of `options` timed out and was reported to CallKit as unanswered. The call is
+    /// forgotten.
     func timedOut(_ options: CallData) -> [CallKitEffect] {
         guard let call = call(forAppId: options.uuid) else { return [] }
         call.move(to: .ended(.unanswered))
+        remove(call)
         return [.send(event: StreamVideoIncomingCallConstants.ACTION_CALL_TIMEOUT, body: options.toJSON())]
     }
 
@@ -330,9 +335,12 @@ final class CallKitCallStore {
         return (call, effects)
     }
 
-    /// The app reported to CallKit how the call CallKit knows as `uuid` ended.
+    /// The app reported to CallKit how the call CallKit knows as `uuid` ended. The call is
+    /// forgotten.
     func endReported(uuid: UUID, reason: CXCallEndedReason) {
-        call(forCallKit: uuid)?.move(to: .ended(reason))
+        guard let call = call(forCallKit: uuid) else { return }
+        call.move(to: .ended(reason))
+        remove(call)
     }
 
     /// CallKit reset the provider: every tracked call, pending outgoing call and re-registration
