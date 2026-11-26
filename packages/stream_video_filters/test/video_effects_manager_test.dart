@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_implementing_value_types
+// ignore_for_file: avoid_implementing_value_types, implementation_imports, invalid_use_of_visible_for_testing_member
 
 import 'dart:async';
 
@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/stream_video.dart';
+import 'package:stream_video_filters/src/video_effect_registry.dart';
 import 'package:stream_video_filters/stream_video_filters_platform_interface.dart';
 import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
@@ -89,6 +90,7 @@ void main() {
     StreamVideoEffectsManager.isFullFrameBlurRegistered = false;
     StreamVideoEffectsManager.isImageRegistered.clear();
     StreamVideoEffectsManager.isCustomEffectRegistered.clear();
+    VideoEffectRegistry.reset();
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(webRtcChannel, (methodCall) async {
@@ -317,6 +319,28 @@ void main() {
 
       expect(log, ['setVideoEffects:[BackgroundBlurMedium]']);
     });
+
+    test(
+      'keeps the effects filters attached when the camera turns on',
+      () async {
+        await VideoEffectRegistry.attach(trackId, 'FullFrameBlur');
+        final manager = StreamVideoEffectsManager(call);
+        await manager.applyBackgroundBlurFilter(BlurIntensity.medium);
+        await pumpEventQueue();
+        log.clear();
+
+        videoEnabled
+          ..add(false)
+          ..add(true);
+        await pumpEventQueue();
+        await VideoEffectRegistry.detach(trackId, 'FullFrameBlur');
+
+        expect(log, [
+          'setVideoEffects:[BackgroundBlurMedium, FullFrameBlur]',
+          'setVideoEffects:[BackgroundBlurMedium]',
+        ]);
+      },
+    );
 
     test(
       'registers built-in effects again when re-applying after an unregister',

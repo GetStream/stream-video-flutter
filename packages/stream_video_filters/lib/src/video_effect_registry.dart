@@ -11,6 +11,9 @@ class VideoEffectRegistry {
 
   static final _effects = <String, List<String>>{};
 
+  // The effects StreamVideoEffectsManager set on each track.
+  static final _managed = <String, List<String>>{};
+
   /// The effects attached to [trackId], in the order they run.
   static List<String> effectsOf(String trackId) =>
       {...?_effects[trackId]}.toList();
@@ -23,6 +26,37 @@ class VideoEffectRegistry {
     } catch (_) {
       _remove(trackId, effect);
       rethrow;
+    }
+  }
+
+  /// Sets the effects StreamVideoEffectsManager runs on [trackId] to [names],
+  /// in place of the ones it set before. They run before the effects filters
+  /// attached, which stay attached. Keeps the effects as they were when the
+  /// change cannot be sent.
+  static Future<void> setManaged(String trackId, List<String> names) async {
+    final before = [...?_effects[trackId]];
+    final effects = [...before];
+    _managed[trackId]?.forEach(effects.remove);
+    effects.insertAll(0, names);
+    _store(trackId, effects);
+    try {
+      await _send(trackId);
+    } catch (_) {
+      _store(trackId, before);
+      rethrow;
+    }
+    if (names.isEmpty) {
+      _managed.remove(trackId);
+    } else {
+      _managed[trackId] = [...names];
+    }
+  }
+
+  static void _store(String trackId, List<String> effects) {
+    if (effects.isEmpty) {
+      _effects.remove(trackId);
+    } else {
+      _effects[trackId] = effects;
     }
   }
 
@@ -47,5 +81,6 @@ class VideoEffectRegistry {
   @visibleForTesting
   static void reset() {
     _effects.clear();
+    _managed.clear();
   }
 }
