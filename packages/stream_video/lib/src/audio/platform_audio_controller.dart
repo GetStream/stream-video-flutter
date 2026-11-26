@@ -168,8 +168,8 @@ class PlatformAudioController {
       );
 
   /// Creates a detector of the local user's speech while the microphone is
-  /// muted, independent of every other detector. Every platform, the browser
-  /// included.
+  /// muted, independent of every other detector. Android, iOS, macOS and the
+  /// browser; on Windows and Linux it never reports.
   @internal
   rtc.SpeechActivityDetector createSpeechActivityDetector() {
     return platformEvents.createSpeechActivityDetector();

@@ -28,7 +28,8 @@ abstract interface class AudioLevelCapture {
 ///
 /// Reports each transition once on [activity]: [SpeechActivity.started] on the
 /// first sample at or above [audioLevelThreshold], [SpeechActivity.ended] on
-/// the first one below it. A sample that throws stops the sampling.
+/// the first one below it. A sample that throws stops the detector and
+/// releases the capture.
 @internal
 class SampledSpeechActivityDetector implements SpeechActivityDetector {
   SampledSpeechActivityDetector(
@@ -92,9 +93,7 @@ class SampledSpeechActivityDetector implements SpeechActivityDetector {
       level = capture.sample();
     } catch (e) {
       _logger.warning('Speech detection stopped sampling: $e');
-      _detectionTimer?.cancel();
-      _detectionTimer = null;
-      _setSpeaking(false);
+      unawaited(stop());
       return;
     }
 

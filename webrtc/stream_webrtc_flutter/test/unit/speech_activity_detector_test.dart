@@ -147,7 +147,7 @@ void main() {
     });
   });
 
-  test('a sample that throws ends speech and stops sampling', () {
+  test('a sample that throws ends speech and stops the detector', () {
     fakeAsync((async) {
       setUpDetector();
       unawaited(detector.start());
@@ -159,6 +159,15 @@ void main() {
 
       expect(source.sampleCount, 2);
       expect(activity, [SpeechActivity.started, SpeechActivity.ended]);
+      expect(source.captures.single.closed, isTrue);
+
+      // Stopped, so a start opens a new capture.
+      source.sampleError = null;
+      unawaited(detector.start());
+      async.flushMicrotasks();
+      expect(source.captures, hasLength(2));
+      unawaited(detector.stop());
+      async.flushMicrotasks();
     });
   });
 

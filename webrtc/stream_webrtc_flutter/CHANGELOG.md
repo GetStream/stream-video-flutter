@@ -1,7 +1,7 @@
 [Unreleased]
 
 * **Breaking:** [iOS/macOS] CocoaPods is no longer supported; enable Flutter's Swift Package Manager.
-* Added `platformEvents.createSpeechActivityDetector`, which detects speech while the microphone is muted, the browser included.
+* Added `platformEvents.createSpeechActivityDetector`, which detects speech while the microphone is muted on Android, iOS, macOS and the browser.
 * **Breaking:** platform events are typed; listen to `platformEvents`. `eventStream` is no longer exported.
 * **Breaking:** `handleCallInterruptionCallbacks` is removed; call `platformEvents.enableInterruptionEvents` and listen to `platformEvents.onInterruption`. Apps using `stream_video` must not call `enableInterruptionEvents`, since the SDK does.
 * **Breaking:** `NativePeerConnectionFactory.create` takes a `PeerConnectionFactoryOptions` instead of a map. Options without a field of their own, such as `forceSWCodec`, go in its `additionalOptions`.
