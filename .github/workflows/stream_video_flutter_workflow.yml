@@ -62,7 +62,6 @@ jobs:
               - '.github/actions/setup-flutter/**'
               - '.github/actions/setup-melos/**'
               - '.github/actions/select-xcode/**'
-              - '.github/actions/setup-cocoapods/**'
               - '.github/workflows/scripts/**'
               - '.github/workflows/stream_video_flutter_workflow.yml'
 
@@ -270,9 +269,6 @@ jobs:
 
       - name: Select Xcode
         uses: ./.github/actions/select-xcode
-
-      - name: Setup CocoaPods
-        uses: ./.github/actions/setup-cocoapods
 
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter

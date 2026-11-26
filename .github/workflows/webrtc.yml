@@ -65,7 +65,6 @@ jobs:
               - '.github/actions/setup-flutter/**'
               - '.github/actions/setup-melos/**'
               - '.github/actions/select-xcode/**'
-              - '.github/actions/setup-cocoapods/**'
               - '.github/workflows/webrtc.yml'
             android_tests:
               - 'webrtc/stream_webrtc_flutter/android/**'
@@ -131,7 +130,7 @@ jobs:
   build-ios:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
-    name: Build example (iOS, CocoaPods + SPM)
+    name: Build example (iOS)
     timeout-minutes: 45
     runs-on: { group: scaleway-macos }
     steps:
@@ -141,35 +140,18 @@ jobs:
       - name: Select Xcode
         uses: ./.github/actions/select-xcode
 
-      - name: Setup CocoaPods
-        uses: ./.github/actions/setup-cocoapods
-
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter
 
-      - name: Build with CocoaPods
+      - name: Build
         working-directory: ${{ env.example }}
         run: |
-          flutter config --no-enable-swift-package-manager
-          flutter pub get
-          (cd ios && pod repo update && pod install)
+          flutter config --enable-swift-package-manager
           flutter build ios --no-codesign
 
       - name: Unit tests
         if: needs.gate.outputs.ios_tests == 'true'
         run: .github/workflows/scripts/native-tests.sh ios "$package"
-
-      - name: Clean CocoaPods
-        working-directory: ${{ env.example }}
-        run: |
-          rm -rf ios/Pods ios/Podfile.lock
-          flutter clean
-
-      - name: Build with Swift Package Manager
-        working-directory: ${{ env.example }}
-        run: |
-          flutter config --enable-swift-package-manager
-          flutter build ios --no-codesign
 
   build-macos:
     needs: gate
@@ -183,9 +165,6 @@ jobs:
 
       - name: Select Xcode
         uses: ./.github/actions/select-xcode
-
-      - name: Setup CocoaPods
-        uses: ./.github/actions/setup-cocoapods
 
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter
