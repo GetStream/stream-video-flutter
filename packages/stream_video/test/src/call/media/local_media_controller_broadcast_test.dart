@@ -218,6 +218,24 @@ void main() {
       );
     }
 
+    test('shares a broadcast that starts after an apply threw', () async {
+      final next = session = _session();
+      final unused = MockRtcLocalTrack();
+      when(() => unused.trackType).thenReturn(SfuTrackType.audio);
+      when(unused.stop).thenThrow(StateError('stop failed'));
+
+      await expectLater(
+        controller.applyConnectOptions(
+          session: next,
+          inheritedTracks: [unused],
+        ),
+        throwsStateError,
+      );
+      await emit(ScreenSharingStartedEvent());
+
+      expect(enabledOn(next).single?.useiOSBroadcastExtension, isTrue);
+    });
+
     test('a session replaced while it applied does not share', () async {
       stateManager.lifecycleCallConnecting(
         attempt: 1,

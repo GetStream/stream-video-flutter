@@ -360,12 +360,6 @@ class LocalMediaController {
       _connectOptions.screenShare,
     );
 
-    // Stopped up front: a screen share picker can keep the apply waiting.
-    for (final track in [...duplicates, ...inherited.values]) {
-      _logger.v(() => '[applyConnectOptions] stopping unused $track');
-      await track.stop();
-    }
-
     // Taken tracks are stopped if the apply fails before they are published.
     final unpublished = {?camera, ?microphone, ?screenShare};
     Future<Result<None>> adopt(RtcLocalTrack track) {
@@ -391,6 +385,12 @@ class LocalMediaController {
     }
 
     try {
+      // Stopped up front: a screen share picker can keep the apply waiting.
+      for (final track in [...duplicates, ...inherited.values]) {
+        _logger.v(() => '[applyConnectOptions] stopping unused $track');
+        await track.stop();
+      }
+
       // iOS: set the session before capture so WebRTC doesn't rebuild the
       // audio engine.
       if (CurrentPlatform.isIos) await _applyAudioOutputOption();
@@ -439,10 +439,7 @@ class LocalMediaController {
         );
       }
     } finally {
-      for (final track in unpublished) {
-        _logger.w(() => '[applyConnectOptions] stopping unpublished $track');
-        await track.stop();
-      }
+      await _endApplying(session, unpublished);
     }
 
     await _finishApplying(session);
@@ -546,10 +543,26 @@ class LocalMediaController {
     return const Result.success(none);
   }
 
+  /// Stops the [unpublished] tracks of an apply to [session], and ends the
+  /// apply, also when it failed, so a broadcast that starts is not held back
+  /// for it.
+  Future<void> _endApplying(
+    CallSession session,
+    Set<RtcLocalTrack> unpublished,
+  ) async {
+    try {
+      for (final track in unpublished) {
+        _logger.w(() => '[applyConnectOptions] stopping unpublished $track');
+        await track.stop();
+      }
+    } finally {
+      if (identical(_optionsApplyingTo, session)) _optionsApplyingTo = null;
+    }
+  }
+
   /// Records that [session] applied the connect options, and shares a
   /// broadcast that started meanwhile.
   Future<void> _finishApplying(CallSession session) async {
-    if (identical(_optionsApplyingTo, session)) _optionsApplyingTo = null;
     _optionsAppliedTo = session;
     _optionsAppliedDuring = _state.status;
     await _broadcast.sharePending(session);
