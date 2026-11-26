@@ -46,6 +46,7 @@ abstract class WebRtcAudio {
 
   /// Whether the audio device in the group [groupId], as
   /// `MediaDeviceInfo.groupId` or `AudioRoute.groupId` report it, is
-  /// external, such as a headset or a car.
+  /// external, such as a headset or a car. Browsers report an opaque
+  /// `groupId`, so it is rarely true there.
   bool isExternalDevice(String? groupId);
 }
