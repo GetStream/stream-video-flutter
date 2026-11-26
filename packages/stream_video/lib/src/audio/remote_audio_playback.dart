@@ -86,8 +86,14 @@ class RemoteAudioPlayback {
   /// repeat one fact once per participant.
   bool _tracedOutputChangeUnsupported = false;
 
+  /// The track ids that were blocked when the pending re-attach detached
+  /// them. They count as blocked until they are attached again, so the gap
+  /// does not report playback as unblocked.
+  final _blockedDuringReattach = <String>{};
+
   void _notifyBlocked() {
-    final blocked = _renderers.values.any(_isBlocked);
+    final blocked =
+        _blockedDuringReattach.isNotEmpty || _renderers.values.any(_isBlocked);
     if (blocked == _blockedController.value) return;
 
     _blockedController.add(blocked);
@@ -134,6 +140,7 @@ class RemoteAudioPlayback {
     }
 
     _renderers.remove(id);
+    _blockedDuringReattach.remove(id);
     unawaited(_stateSubscriptions.remove(id)?.cancel());
     unawaited(
       renderer.dispose().catchError((Object e, StackTrace stk) {
@@ -218,6 +225,11 @@ class RemoteAudioPlayback {
   /// Recovering renderers are included because the gesture may be exactly
   /// what they were missing, and retrying now beats waiting out the backoff.
   Future<void> resume() async {
+    // Blocked renderers detached by a re-attach can only be resumed once they
+    // are attached again, a few milliseconds from now.
+    final pending = _pendingReattach;
+    if (pending != null && _blockedDuringReattach.isNotEmpty) await pending;
+
     final blocked = _renderers.values.where(_isBlocked).toList();
     final recovering = _renderers.values.where(_isRecovering).toList();
 
@@ -298,6 +310,20 @@ class RemoteAudioPlayback {
       'blockedTracks': _renderers.values.where(_isBlocked).length,
     });
 
+    _blockedDuringReattach.addAll(
+      trackIds.where(
+        (id) => _renderers[id]?.state == rtc.AudioRendererState.blocked,
+      ),
+    );
+    try {
+      await _detachAndAttach(trackIds);
+    } finally {
+      _blockedDuringReattach.clear();
+      _notifyBlocked();
+    }
+  }
+
+  Future<void> _detachAndAttach(List<String> trackIds) async {
     for (final trackId in trackIds) {
       // Contained per track: stopping at one would leave the rest without a
       // re-attach, and the ones already detached silent.

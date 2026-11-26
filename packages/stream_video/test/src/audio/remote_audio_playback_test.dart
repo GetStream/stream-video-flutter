@@ -236,6 +236,44 @@ void main() {
   group('reattach on WebKit', () {
     setUp(onWebKit);
 
+    test('a blocked renderer stays blocked through the gap', () async {
+      final track = _MockTrack();
+      playback.start(alice, track);
+      renderers[alice]!.setBlocked(true);
+      final blocked = <bool>[];
+      final subscription = playback.blockedChanges.skip(1).listen(blocked.add);
+
+      await playback.reattach(reason: 'subscriberOffer');
+      await subscription.cancel();
+
+      expect(renderers[alice]!.state, rtc.AudioRendererState.blocked);
+      expect(blocked, isEmpty);
+    });
+
+    test('resume during the gap resumes the re-attached renderer', () async {
+      final track = _MockTrack();
+      playback.start(alice, track);
+      renderers[alice]!.setBlocked(true);
+
+      final reattach = playback.reattach(reason: 'subscriberOffer');
+      await playback.resume();
+      await reattach;
+
+      expect(renderers[alice]!.resumeCount, 1);
+    });
+
+    test('a renderer stopped during the gap is no longer blocked', () async {
+      final track = _MockTrack();
+      playback.start(alice, track);
+      renderers[alice]!.setBlocked(true);
+
+      final reattach = playback.reattach(reason: 'subscriberOffer');
+      playback.stop(alice, track);
+      await reattach;
+
+      expect(await playback.blockedChanges.first, isFalse);
+    });
+
     test('attaches every renderer again to the track it played', () async {
       final aliceTrack = _MockTrack();
       final bobTrack = _MockTrack();
@@ -415,6 +453,9 @@ class _FakeRenderer implements rtc.RTCAudioRenderer {
   Error? disposeError;
 
   bool _attached = false;
+
+  /// Kept across a detach and re-attach, as the browser's renderer keeps it.
+  bool _blocked = false;
   rtc.AudioRendererState _state = rtc.AudioRendererState.detached;
   final _stateChanges = StreamController<rtc.AudioRendererState>.broadcast(
     sync: true,
@@ -426,9 +467,12 @@ class _FakeRenderer implements rtc.RTCAudioRenderer {
     _stateChanges.add(state);
   }
 
-  void setBlocked(bool blocked) => _setState(
-    blocked ? rtc.AudioRendererState.blocked : rtc.AudioRendererState.playing,
-  );
+  void setBlocked(bool blocked) {
+    _blocked = blocked;
+    _setState(
+      blocked ? rtc.AudioRendererState.blocked : rtc.AudioRendererState.playing,
+    );
+  }
 
   set recovering(bool recovering) => _setState(
     recovering
@@ -447,7 +491,11 @@ class _FakeRenderer implements rtc.RTCAudioRenderer {
     if (attachError case final error?) throw error;
     attached.add(track);
     _attached = true;
-    _setState(rtc.AudioRendererState.playing);
+    _setState(
+      _blocked
+          ? rtc.AudioRendererState.blocked
+          : rtc.AudioRendererState.playing,
+    );
   }
 
   @override
@@ -481,6 +529,7 @@ class _FakeRenderer implements rtc.RTCAudioRenderer {
   @override
   Future<void> dispose() async {
     disposed = true;
+    _blocked = false;
     _attached = false;
     _setState(rtc.AudioRendererState.detached);
     if (disposeError case final error?) throw error;
