@@ -41,7 +41,9 @@ abstract class WebRtcEngine {
     return engine;
   }
 
-  /// Registers [engine], replacing the one registered before.
+  /// Registers [engine], replacing the one registered before. What was built
+  /// on the previous engine keeps using it, so replace it before WebRTC is
+  /// first used.
   static set instance(WebRtcEngine engine) => _instance = engine;
 
   /// Whether an engine is registered.
