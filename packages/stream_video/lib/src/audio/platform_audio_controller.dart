@@ -7,8 +7,8 @@ import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 import '../../stream_video.dart';
 import '../call/stats/trace_tag.dart';
 import '../call/stats/tracer.dart';
-import 'remote_audio_playback.dart';
 import '../webrtc/webrtc_engine.dart';
+import 'remote_audio_playback.dart';
 
 final _logger = taggedLogger(tag: 'SV:PlatformAudioController');
 

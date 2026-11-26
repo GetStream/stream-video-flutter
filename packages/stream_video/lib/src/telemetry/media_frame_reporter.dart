@@ -4,9 +4,9 @@ import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../logger/impl/tagged_logger.dart';
 import '../models/call_cid.dart';
-import '../webrtc/webrtc_engine.dart';
 import '../webrtc/model/stats/rtc_inbound_rtp_audio_stream.dart';
 import '../webrtc/model/stats/rtc_stats.dart';
+import '../webrtc/webrtc_engine.dart';
 import 'client_event.dart';
 import 'client_event_reporter.dart';
 import 'client_event_types.dart';

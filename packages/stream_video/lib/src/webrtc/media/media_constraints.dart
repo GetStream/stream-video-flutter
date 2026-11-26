@@ -1,12 +1,10 @@
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
-import 'package:stream_webrtc_interface/stream_webrtc_interface.dart'
-    as rtc_interface;
 
 import '../../call/stats/trace_tag.dart';
 import '../../call/stats/tracer.dart';
 import '../../logger/stream_log.dart';
-import 'screen_share_constraints.dart';
 import '../webrtc_engine.dart';
+import 'screen_share_constraints.dart';
 
 export 'audio_constraints.dart';
 export 'camera_constraints.dart';
@@ -30,7 +28,7 @@ abstract class MediaConstraints {
   MediaConstraints copyWith();
 }
 
-extension MediaDevices on rtc_interface.MediaDevices {
+extension MediaDevices on rtc.MediaDevices {
   /// Captures media. When [nativeFactory] is non-null, the resulting tracks
   /// are pinned to that per-call native factory. When null, falls through to
   /// the global browser/webrtc entrypoints (used on web, which has no

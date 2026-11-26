@@ -55,6 +55,7 @@ import '../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../webrtc/rtc_track/rtc_track.dart';
 import '../webrtc/sdp/editor/sdp_editor_impl.dart';
 import '../webrtc/sdp/policy/sdp_policy.dart';
+import '../webrtc/webrtc_engine.dart';
 import 'call_connect_options.dart';
 import 'call_events.dart';
 import 'call_host.dart';
@@ -83,7 +84,6 @@ import 'stats/sfu_stats_reporter.dart';
 import 'stats/stats_reporter.dart';
 import 'stats/trace_tag.dart';
 import 'viewport_visibility_registry.dart';
-import '../webrtc/webrtc_engine.dart';
 
 part 'call_actions.dart';
 part 'call_debug.dart';

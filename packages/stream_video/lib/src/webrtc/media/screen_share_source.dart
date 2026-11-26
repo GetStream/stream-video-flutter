@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
-import 'screen_share_constraints.dart';
 import '../webrtc_engine.dart';
+import 'screen_share_constraints.dart';
 
 /// Where a screen share captures from.
 ///

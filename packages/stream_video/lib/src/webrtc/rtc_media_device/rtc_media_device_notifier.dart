@@ -9,8 +9,8 @@ import '../../call/stats/trace_tag.dart';
 import '../../call/stats/tracer.dart';
 import '../../errors/stream_video_exception_composer.dart';
 import '../../utils/extensions.dart';
-import 'device_enumeration_trigger.dart';
 import '../webrtc_engine.dart';
+import 'device_enumeration_trigger.dart';
 
 class RtcMediaDeviceNotifier {
   RtcMediaDeviceNotifier._internal() {
