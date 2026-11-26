@@ -67,7 +67,7 @@ jobs:
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1.7.0
         with:
-          xcode-version: "26.3"
+          xcode-version: "26.3.0"
 
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
