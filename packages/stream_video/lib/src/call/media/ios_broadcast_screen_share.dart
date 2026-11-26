@@ -155,6 +155,16 @@ class IosBroadcastScreenShare {
     _enableOption(_requestedConstraints ?? _broadcastConstraints());
   }
 
+  /// Runs [resolve], which writes the connect options a join resolves, and
+  /// keeps the screen share option of a broadcast that started before it.
+  Future<void> keepBroadcastOptionThrough(
+    Future<void> Function() resolve,
+  ) async {
+    final kept = _broadcast.isRunning ? _broadcastOption() : null;
+    await resolve();
+    if (kept != null && _broadcast.isRunning) _enableOption(kept);
+  }
+
   /// Records that the broadcast stopped, and turns off a screen share option
   /// that captures it, so a later session does not capture a stopped
   /// broadcast.

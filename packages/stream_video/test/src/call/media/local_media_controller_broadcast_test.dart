@@ -344,6 +344,23 @@ void main() {
       },
     );
 
+    test('shares a broadcast that started before the join settings', () async {
+      when(
+        () => notifier.enumerateDevicesFor(any()),
+      ).thenAnswer((_) async => const Result.success([]));
+      session = null;
+      await emit(ScreenSharingStartedEvent());
+
+      await controller.applyJoinSettings(
+        const CallSettings(),
+        joinOptions: const CallConnectOptions(),
+      );
+      final next = session = _session();
+      await controller.applyConnectOptions(session: next);
+
+      expect(enabledOn(next).single?.useiOSBroadcastExtension, isTrue);
+    });
+
     test('does not capture a broadcast that stopped', () async {
       await emit(ScreenSharingStartedEvent());
       await emit(ScreenSharingStoppedEvent());

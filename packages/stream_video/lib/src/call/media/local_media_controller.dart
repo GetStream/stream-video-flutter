@@ -185,20 +185,23 @@ class LocalMediaController {
   }
 
   /// Resolves the connect options for a join from [settings], then merges
-  /// [joinOptions] and an override over them.
+  /// [joinOptions] and an override over them. An iOS broadcast that started
+  /// before keeps its screen share option.
   Future<void> applyJoinSettings(
     CallSettings settings, {
     CallConnectOptions? joinOptions,
   }) async {
-    await applyCallSettings(settings);
+    await _broadcast.keepBroadcastOptionThrough(() async {
+      await applyCallSettings(settings);
 
-    if (joinOptions != null) {
-      _connectOptions = _connectOptions.merge(joinOptions);
-    }
+      if (joinOptions != null) {
+        _connectOptions = _connectOptions.merge(joinOptions);
+      }
 
-    if (_connectOptionsOverride case final override?) {
-      _connectOptions = _connectOptions.merge(override);
-    }
+      if (_connectOptionsOverride case final override?) {
+        _connectOptions = _connectOptions.merge(override);
+      }
+    });
 
     _joinSettingsApplied = true;
   }
