@@ -472,7 +472,7 @@ void main() {
 
       await filters.apply(_track('mic', SfuTrackType.audio, 'audio'));
 
-      expect(log, ['app apply mic', 'nc apply mic']);
+      expect(log, ['app apply mic microphone', 'nc apply mic microphone']);
     });
 
     test('is left out when the processor has none', () async {
@@ -481,7 +481,7 @@ void main() {
 
       await filters.apply(_track('mic', SfuTrackType.audio, 'audio'));
 
-      expect(log, ['app apply mic']);
+      expect(log, ['app apply mic microphone']);
     });
 
     test('does not run on the camera', () async {
