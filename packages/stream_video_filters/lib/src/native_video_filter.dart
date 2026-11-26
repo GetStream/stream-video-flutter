@@ -7,8 +7,9 @@ import 'video_effect_registry.dart';
 /// A [rtc.VideoFilter] that runs a frame processor registered natively under
 /// [effectName], on the captured track itself.
 ///
-/// Applying it registers the processor, unless this filter already did since
-/// the last [StreamVideoFilters.unregisterAllFilters], and attaches it to the
+/// Applying it registers the processor, unless a filter with the same
+/// [effectName] already did since the last
+/// [StreamVideoFilters.unregisterAllFilters], and attaches it to the
 /// track next to the processors other filters attached. Stopping it detaches
 /// only its own processor.
 abstract base class NativeVideoFilter extends rtc.VideoFilter {
@@ -20,8 +21,6 @@ abstract base class NativeVideoFilter extends rtc.VideoFilter {
   /// Registers the processor natively.
   @protected
   Future<void> register();
-
-  int? _registeredIn;
 
   @override
   Future<rtc.MediaStreamFilterResult> apply(
@@ -37,10 +36,9 @@ abstract base class NativeVideoFilter extends rtc.VideoFilter {
     final trackId = stream.getVideoTracks().firstOrNull?.id;
     if (trackId == null) return rtc.MediaStreamFilterResult(stream);
 
-    final registry = VideoEffectRegistry.generation;
-    if (_registeredIn != registry) {
+    if (!VideoEffectRegistry.isRegistered(effectName)) {
       await register();
-      _registeredIn = registry;
+      VideoEffectRegistry.markRegistered(effectName);
     }
 
     await VideoEffectRegistry.attach(trackId, effectName);

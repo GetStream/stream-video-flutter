@@ -5,8 +5,7 @@
 - [iOS] CocoaPods is no longer supported; enable Flutter's Swift Package Manager.
 - `StreamVideoEffectsManager` is removed; filters are `VideoFilter` values for `Call.setVideoFilter`: `BackgroundBlurFilter`, `VirtualBackgroundFilter`, `FullFrameBlurFilter` and `CustomVideoFilter`.
 - The package no longer depends on `stream_video`.
-- `BackgroundBlurFilter` takes a named `intensity`, and `BlurIntensity` is a class with `light`, `medium` and `heavy` presets.
-- `CustomVideoFilter.onRegister` takes a `CustomVideoFilterRegistration`.
+- `BlurIntensity` is a class with `light`, `medium` and `heavy` presets instead of an enum.
 
 ### ✅ Added
 

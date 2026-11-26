@@ -50,7 +50,7 @@ class StreamVideoFilters {
   /// Call it once no call uses the filters any more: a processor still
   /// attached to a track stays alive until that track is released.
   Future<void> unregisterAllFilters() {
-    VideoEffectRegistry.generation++;
+    VideoEffectRegistry.forgetRegistrations();
     return StreamVideoFiltersPlatform.instance.unregisterAllFilters();
   }
 }

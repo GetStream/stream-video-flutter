@@ -39,6 +39,7 @@ void main() {
   });
 
   tearDown(() {
+    failAttach = false;
     debugWebRtcCapabilitiesOverride = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
@@ -98,6 +99,13 @@ void main() {
     });
   }
 
+  test('equal filters register their processor once', () async {
+    await BackgroundBlurFilter().apply(_input('cam-1'));
+    await BackgroundBlurFilter().apply(_input('cam-2'));
+
+    expect(platform.registrations, ['blur']);
+  });
+
   test('CustomVideoFilter registers through its callback once', () async {
     final registered = <String>[];
     final filter = CustomVideoFilter(
@@ -146,6 +154,23 @@ void main() {
       await old.stop!(_stopDetails);
 
       expect(attached.last, 'cam-1: VirtualBackground-a');
+    });
+
+    test('a filter applied again on its track is not sent again', () async {
+      final blur = BackgroundBlurFilter();
+      final moderation = FullFrameBlurFilter();
+      final oldBlur = await blur.apply(_input('cam-1'));
+      final oldModeration = await moderation.apply(_input('cam-1'));
+
+      await blur.apply(_input('cam-1'));
+      await moderation.apply(_input('cam-1'));
+      await oldBlur.stop!(_stopDetails);
+      await oldModeration.stop!(_stopDetails);
+
+      expect(attached, [
+        'cam-1: BackgroundBlurMedium',
+        'cam-1: BackgroundBlurMedium,FullFrameBlur',
+      ]);
     });
 
     test('a filter that cannot be attached is not kept', () async {
