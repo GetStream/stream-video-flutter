@@ -142,6 +142,14 @@ class NativeCallController {
     }
   }
 
+  /// The cids of the calls the Telecom integration holds now; none off
+  /// Android.
+  Future<List<String>> telecomCallCids() async {
+    if (!CurrentPlatform.isAndroid) return const [];
+
+    return _resolvedPlatform.telecomCallCids();
+  }
+
   /// The calls the native side currently shows or tracks; none off mobile.
   Future<List<CallData>> activeCalls() async {
     if (!CurrentPlatform.isMobile) return [];

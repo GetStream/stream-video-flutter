@@ -38,17 +38,14 @@ class StreamPeerConnectionFactory {
   rtc.NativePeerConnectionFactory? _nativeFactory;
   Future<rtc.NativePeerConnectionFactory?>? _nativeFactoryFuture;
 
-  /// Whether the platform exposes the per-call native factory APIs.
-  /// Web / desktop fall through to the global webrtc entrypoints because
-  /// per-call factories aren't a concept there.
+  /// Whether the platform has per-call factories. Elsewhere the global webrtc
+  /// entrypoints are used.
   bool get _isPerCallFactorySupported =>
-      CurrentPlatform.isAndroid ||
-      CurrentPlatform.isIos ||
-      CurrentPlatform.isMacOS;
+      rtc.webRtcCapabilities.supportsPerCallFactory;
 
-  /// The per-call native factory, lazily built on first use. Returns null on
-  /// web (no per-call factory concept) so callers can fall back to the
-  /// global webrtc entrypoints.
+  /// The per-call native factory, lazily built on first use. Returns null where
+  /// the platform has no per-call factory, so callers fall back to the global
+  /// webrtc entrypoints.
   Future<rtc.NativePeerConnectionFactory?> ensureNativeFactory() {
     if (!_isPerCallFactorySupported) {
       return Future.value();
@@ -62,28 +59,11 @@ class StreamPeerConnectionFactory {
   Future<rtc.NativePeerConnectionFactory?> _buildNativeFactory() async {
     try {
       final policy = resolvedAudioConfigurationPolicy;
-      final options = <String, dynamic>{
-        'bypassVoiceProcessing': policy.bypassVoiceProcessing,
-      };
-
-      if (CurrentPlatform.isAndroid) {
-        options['androidAudioConfiguration'] = policy
-            .getAndroidConfiguration()
-            .toMap();
-      }
-
-      if (CurrentPlatform.isIos || CurrentPlatform.isMacOS) {
-        // Applied when the factory is built and again when its audio resumes.
-        // A policy that defaults to the speaker starts on the loudspeaker. On
-        // iOS, `Call.resumeAudio` then re-applies the configuration and output
-        // applied since.
-        options['appleAudioConfiguration'] = policy
-            .getAppleConfiguration(defaultToSpeaker: policy.defaultsToSpeaker)
-            .toMap();
-      }
-
+      // On iOS, the Apple configuration is applied when the factory is built
+      // and again when its audio resumes; `Call.resumeAudio` then re-applies
+      // the configuration and output applied since.
       _nativeFactory = await rtc.NativePeerConnectionFactory.create(
-        options: options,
+        options: policy.toFactoryOptions(),
       );
 
       _logger.i(

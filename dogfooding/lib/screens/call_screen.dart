@@ -9,7 +9,7 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart'
-    hide CurrentPlatform;
+    hide CurrentPlatform, StreamUserAvatar;
 import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart' hide User;
 
@@ -22,6 +22,7 @@ import '../utils/consts.dart';
 import '../utils/feedback_dialog.dart';
 import '../widgets/closed_captions_widget.dart';
 import '../widgets/e2ee_key_notification.dart';
+import '../widgets/livestream_go_live_button.dart';
 import '../widgets/settings_menu/developer_options_menu.dart';
 import '../widgets/settings_menu/more_menu.dart';
 import '../widgets/settings_window/settings_tabs.dart';
@@ -513,6 +514,60 @@ class _CallScreenState extends State<CallScreen>
     ),
   );
 
+  /// The flip camera button, once the call has a local participant to flip.
+  Widget _flipCameraButton(Call call) => PartialCallStateBuilder(
+    call: call,
+    selector: (state) => state.localParticipant != null,
+    builder: (context, hasLocalParticipant) => hasLocalParticipant
+        ? StreamFlipCameraButton(call: call)
+        : const SizedBox.shrink(),
+  );
+
+  /// The app bar on a large screen: the current user, the go live button of
+  /// a livestream host and the flip camera button on the left, and the
+  /// participant count, duration and latency on the right.
+  PreferredSizeWidget _largeAppBar(BuildContext context, Call call) {
+    final spacing = context.streamSpacing;
+    final currentUser = locator.get<UserAuthController>().currentUser;
+
+    // A control's 40 visible box sits inside a 48 tap target, so the bar's
+    // padding leaves it 16 from the edge. Avatars and badges have no tap
+    // target around them, so they take the missing 4 here.
+    final edgeInset = spacing.xxs;
+
+    return CallAppBar(
+      call: call,
+      showLeaveCallAction: false,
+      leading: Padding(
+        padding: EdgeInsetsDirectional.only(start: edgeInset),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (currentUser != null)
+              Flexible(child: _CurrentUserLabel(user: currentUser)),
+            if (_isLivestream) LivestreamGoLiveButton(call: call),
+            if (StreamFlipCameraButton.isSupported) _flipCameraButton(call),
+          ],
+        ),
+      ),
+      title: const SizedBox.shrink(),
+      actions: [
+        Padding(
+          padding: EdgeInsetsDirectional.only(end: edgeInset),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: spacing.xs,
+            children: [
+              StreamCallParticipantsBadge(call: call),
+              StreamCallDurationBadge(call: call),
+              StreamCallLatencyBadge(call: call),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   /// The call's control bar, laid out per screen size.
   Widget _callControls(BuildContext context, Call call) {
     final moreButton = _moreMenu(call, context.streamIcons.moreVerticalFill);
@@ -558,7 +613,8 @@ class _CallScreenState extends State<CallScreen>
         leading: [
           _settingsButton(call),
           if (!kIsProd) _feedbackButton(call),
-          _layoutToggle(),
+          // The livestream tile has one layout.
+          if (!_isLivestream) _layoutToggle(),
           if (!kIsProd)
             DeveloperOptionsMenu(
               call: call,
@@ -599,6 +655,8 @@ class _CallScreenState extends State<CallScreen>
       child: controlBar,
     );
   }
+
+  bool get _isLivestream => widget.call.type == StreamCallType.liveStream();
 
   @override
   Widget build(BuildContext context) {
@@ -709,10 +767,22 @@ class _CallScreenState extends State<CallScreen>
                       Column(
                         children: [
                           Expanded(
-                            child: StreamCallParticipants(
-                              call: call,
-                              layoutMode: _currentLayoutMode,
-                            ),
+                            child: _isLivestream
+                                // The host sees the same tile as the
+                                // viewers.
+                                ? Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: context.streamSpacing.xs,
+                                    ),
+                                    child: StreamLivestreamTile(
+                                      call: call,
+                                      child: LivestreamContent(call: call),
+                                    ),
+                                  )
+                                : StreamCallParticipants(
+                                    call: call,
+                                    layoutMode: _currentLayoutMode,
+                                  ),
                           ),
                           ClosedCaptionsWidget(call: call),
                         ],
@@ -732,7 +802,11 @@ class _CallScreenState extends State<CallScreen>
                         child: PartialCallStateBuilder(
                           call: call,
                           selector: (state) => state.otherParticipants.isEmpty,
-                          builder: (context, isEmpty) => isEmpty
+                          // A livestream's audience joins from its link
+                          // rather than the call screen, and the card would
+                          // cover the tile's toolbar.
+                          builder: (context, isEmpty) =>
+                              isEmpty && !_isLivestream
                               ? ShareCallWelcomeCard(
                                   call: call,
                                   encryptionKey: _encryptionKey,
@@ -766,6 +840,8 @@ class _CallScreenState extends State<CallScreen>
                 // has two ways to hang up a few hundred pixels apart.
                 final isCompact = !context.streamScreenSize.isLarge;
 
+                if (!isCompact) return _largeAppBar(context, call);
+
                 return CallAppBar(
                   call: call,
                   showLeaveCallAction: isCompact,
@@ -775,19 +851,15 @@ class _CallScreenState extends State<CallScreen>
                   leading: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (isCompact)
+                      if (isCompact && !_isLivestream)
                         _layoutToggle(
                           menuDirection: StreamMenuDirection.down,
                         ),
+                      // A livestream host gets the go live button instead of
+                      // the layout toggle.
+                      if (_isLivestream) LivestreamGoLiveButton(call: call),
                       if (StreamFlipCameraButton.isSupported)
-                        PartialCallStateBuilder(
-                          call: call,
-                          selector: (state) => state.localParticipant != null,
-                          builder: (context, hasLocalParticipant) =>
-                              hasLocalParticipant
-                              ? StreamFlipCameraButton(call: call)
-                              : const SizedBox.shrink(),
-                        ),
+                        _flipCameraButton(call),
                     ],
                   ),
                   title: StreamCallDurationBadge(call: call),
@@ -798,6 +870,39 @@ class _CallScreenState extends State<CallScreen>
           },
         ),
       ),
+    );
+  }
+}
+
+/// The current user's avatar and name, for the app bar on a large screen.
+class _CurrentUserLabel extends StatelessWidget {
+  const _CurrentUserLabel({required this.user});
+
+  final UserInfo user;
+
+  @override
+  Widget build(BuildContext context) {
+    final name = user.name.isNotEmpty ? user.name : user.id;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      spacing: context.streamSpacing.sm,
+      children: [
+        StreamAvatarTheme(
+          data: const StreamAvatarThemeData(size: StreamAvatarSize.lg),
+          child: StreamUserAvatar(user: user),
+        ),
+        Flexible(
+          child: Text(
+            name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: context.streamTextTheme.bodyEmphasis.copyWith(
+              color: context.streamColorScheme.textPrimary,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

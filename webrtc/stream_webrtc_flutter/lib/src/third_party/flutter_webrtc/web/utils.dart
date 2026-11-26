@@ -1,3 +1,5 @@
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
+
 class WebRTC {
   static bool get platformIsDesktop => false;
 
@@ -22,6 +24,7 @@ class WebRTC {
 
   static Future<void> initialize({
     Map<String, dynamic>? options,
+    PeerConnectionFactoryOptions? factoryOptions,
     bool refresh = false,
   }) async => throw UnimplementedError('initialize is not supported on web');
 }

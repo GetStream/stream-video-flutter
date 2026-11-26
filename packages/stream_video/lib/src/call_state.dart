@@ -95,6 +95,7 @@ class CallState extends Equatable {
       custom: const {},
       isVideoModerated: false,
       isAudioSuspended: false,
+      isAudioInterrupted: false,
       isWebAudioPlaybackBlocked: false,
       isE2eeEnabled: false,
     );
@@ -141,6 +142,7 @@ class CallState extends Equatable {
     required this.custom,
     required this.isVideoModerated,
     required this.isAudioSuspended,
+    required this.isAudioInterrupted,
     required this.isWebAudioPlaybackBlocked,
     required this.isE2eeEnabled,
   });
@@ -183,7 +185,11 @@ class CallState extends Equatable {
   final DateTime? liveEndedAt;
   final DateTime? timerEndsAt;
   final List<String> blockedUserIds;
+
+  /// How many participants are in the call, anonymous ones included.
   final int participantCount;
+
+  /// How many of [participantCount] are anonymous.
   final int anonymousParticipantCount;
   final bool iOSMultitaskingCameraAccessEnabled;
   final Map<String, Object> custom;
@@ -194,9 +200,23 @@ class CallState extends Equatable {
   /// Whether audio tracks have been suspended for this call.
   final bool isAudioSuspended;
 
+  /// Whether the platform is interrupting this call's audio, such as for a
+  /// phone call, an alarm or another app playing audio.
+  ///
+  /// On Android, the call lost the audio focus it holds while its audio runs;
+  /// on iOS, the audio session was interrupted. Only an interruption that
+  /// starts while the call is joined, active and its audio not suspended is
+  /// reported; with several active calls, each of them reports it. What the
+  /// call does about it is set by `CallPreferences.audioInterruptionReaction`.
+  ///
+  /// On Android, a call Telecom holds reports none: Telecom manages its audio
+  /// focus, and puts it on hold for a phone call, which leaves the call.
+  final bool isAudioInterrupted;
+
   /// Whether the browser's autoplay policy is blocking playback of remote
-  /// audio. Playback resumes only once `Call.resumeWebAudioPlayback()` is
-  /// called from within a user gesture, so show a "tap to enable sound"
+  /// audio. Playback resumes only once
+  /// `PlatformAudioController.instance.resumeWebAudioPlayback()` is called
+  /// from within a user gesture, so show a "tap to enable sound"
   /// affordance while this is `true`.
   ///
   /// Web only; always `false` on every other platform.
@@ -308,6 +328,7 @@ class CallState extends Equatable {
     Map<String, Object>? custom,
     bool? isVideoModerated,
     bool? isAudioSuspended,
+    bool? isAudioInterrupted,
     bool? isWebAudioPlaybackBlocked,
     bool? isE2eeEnabled,
   }) {
@@ -357,6 +378,7 @@ class CallState extends Equatable {
       custom: custom ?? this.custom,
       isVideoModerated: isVideoModerated ?? this.isVideoModerated,
       isAudioSuspended: isAudioSuspended ?? this.isAudioSuspended,
+      isAudioInterrupted: isAudioInterrupted ?? this.isAudioInterrupted,
       isWebAudioPlaybackBlocked:
           isWebAudioPlaybackBlocked ?? this.isWebAudioPlaybackBlocked,
       isE2eeEnabled: isE2eeEnabled ?? this.isE2eeEnabled,
@@ -370,7 +392,8 @@ class CallState extends Equatable {
   }) {
     final capabilities = metadata.details.ownCapabilities.toList();
     // Once joined, the SFU reports the counts; until then the coordinator's
-    // session counts are the only source.
+    // session counts are the only source. Its count by role leaves anonymous
+    // participants out, so they are added to match the SFU's total.
     final countsFromSession = !status.isAlreadyJoined;
 
     return copyWith(
@@ -401,9 +424,10 @@ class CallState extends Equatable {
       timerEndsAt: metadata.session.timerEndsAt,
       participantCount: countsFromSession
           ? math.max(
-              metadata.session.participantsCountByRole.values.sum,
-              metadata.session.participants.length,
-            )
+                  metadata.session.participantsCountByRole.values.sum,
+                  metadata.session.participants.length,
+                ) +
+                metadata.session.anonymousParticipantCount
           : null,
       anonymousParticipantCount: countsFromSession
           ? metadata.session.anonymousParticipantCount
@@ -459,6 +483,7 @@ class CallState extends Equatable {
     custom,
     isVideoModerated,
     isAudioSuspended,
+    isAudioInterrupted,
     isWebAudioPlaybackBlocked,
     isE2eeEnabled,
   ];
@@ -470,6 +495,7 @@ class CallState extends Equatable {
         ' sessionId: $sessionId, isRecording: $isRecording,'
         ' isVideoModerated: $isVideoModerated,'
         ' isAudioSuspended: $isAudioSuspended,'
+        ' isAudioInterrupted: $isAudioInterrupted,'
         ' isWebAudioPlaybackBlocked: $isWebAudioPlaybackBlocked,'
         ' isE2eeEnabled: $isE2eeEnabled,'
         ' settings: $settings, egress: $egress, '

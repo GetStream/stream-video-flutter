@@ -118,6 +118,8 @@ internal class PushMethodCallHandler(
                 result.success(callId?.let { telecom.isMuted(it) } ?: false)
             }
 
+            "telecomCallCids" -> result.success(telecom.registeredCallCids())
+
             "endCall" -> {
                 controller.endCall(callArgument(call).id)
                 result.success(true)

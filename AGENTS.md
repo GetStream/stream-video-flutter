@@ -16,10 +16,25 @@ melos run analyze        # dart analyze --fatal-infos, every package
 melos run format
 melos run generate:flutter   # build_runner, for *.g.theme.dart and friends
 melos run test:all
-melos run test:android:push   # Kotlin unit tests of the push plugin, via its example app
-melos run test:ios:push       # Swift unit tests of the push plugin (RunnerTests), iPhone simulator
+melos run test:native:android   # JVM unit tests (android/src/test), each via its package's example app
+melos run test:native:ios       # RunnerTests of the example apps, iPhone simulator
+melos run test:native:macos     # RunnerTests of the macOS example apps
 melos run webrtc:analyze     # and webrtc:test, webrtc:format:verify: webrtc/ only
 ```
+
+The `test:native:*` scripts ask which package to run; pass `--no-select` for
+all of them. Each runs `.github/workflows/scripts/native-tests.sh`, which CI
+calls directly, and skips a package without tests for that platform. Native
+tests live in the package's `android/src/test`, or in the `RunnerTests` target
+of its example app, which the example's `Runner` scheme has to test.
+
+CI runs a package's native tests only when native code they build changed:
+the `Detect Native Changes` filters in `stream_video_flutter_workflow.yml`,
+and the `*_tests` filters in `webrtc.yml`. A package that gets its first
+`RunnerTests` needs an `ios_<package>` filter there, or CI never runs them, and
+so does a package's first `android/src/test` without an `android_<package>`
+filter. A filter lists native paths only: changes to `pubspec.lock`, the
+setup actions or the workflows don't run native tests.
 
 The `webrtc/` packages include the root `analysis_options.yaml` like the rest,
 but turn off the rules their upstream code doesn't follow yet.
@@ -157,9 +172,7 @@ same way, because this repo shipped a three-icon class of that name; that class
 is gone, so a bare `StreamIcons` is now core's full set and `const StreamIcons()`
 is how a test names the icon a widget will resolve.
 
-Every icon comes from `context.streamIcons`. No `Icons.*` from Material, with one
-documented exception: the livestream fullscreen toggle cross-fades between two
-glyphs and core ships no exit-fullscreen counterpart.
+Every icon comes from `context.streamIcons`. No `Icons.*` from Material.
 
 Shadows come from `StreamElevation` through a `Material`, not a hand-painted
 `BoxShadow`. Material clips with `PhysicalShape`, so draw borders in a
@@ -281,11 +294,14 @@ findings as inline comments.
   `sealed` / `final` / `base` modifiers: those are enforced per library, so the
   implementation could not live in its own file and nothing could mock it. A
   test mock in another package adds `// ignore: subtype_of_sealed_class`.
-- **Platform-specific behaviour sits behind an interface.** When only some
-  platforms have a capability, define an interface for it with one
-  implementation per platform that has it and a no-op for the rest, and pick
-  the implementation once, in a factory constructor. Callers hold the
-  interface and never branch on `CurrentPlatform` or a `…Supported` flag
-  themselves; a condition that is not about the platform (which track, which
-  device) stays inside the implementations. Example: `AdmMicrophoneMute`, with
-  `AppleAdmMicrophoneMute` and `NoAdmMicrophoneMute`.
+- **Platform-specific behaviour sits behind an interface.** When the same
+  platform difference would otherwise be checked in several places, or tangles
+  the code it sits in, define an interface for it with one implementation per
+  behaviour, and pick the implementation once, in a factory constructor that
+  reads `rtc.webRtcCapabilities` (or the platform). Callers hold the interface
+  instead of repeating `if (supported)`; a condition that is not about the
+  platform (which track, which device) stays inside the implementations.
+  Examples: `AdmMicrophoneMute` (`AppleAdmMicrophoneMute`,
+  `NoAdmMicrophoneMute`) and `AudioInputSwitcher`. A single, simple check may
+  read the capability directly, and so may a yes/no question such as
+  `supportsAudioOutputSelection`, to show a control or refuse a request.

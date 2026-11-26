@@ -64,6 +64,7 @@ class AndroidPushConfiguration {
     this.missedCallNotificationChannelName,
     this.showFullScreenOnLockScreen,
     this.telecom,
+    this.reportOutgoingCalls,
   });
 
   factory AndroidPushConfiguration.fromJson(Map<String, dynamic> json) =>
@@ -92,6 +93,23 @@ class AndroidPushConfiguration {
   /// off below it. See [TelecomPushConfiguration.enabled].
   final TelecomPushConfiguration? telecom;
 
+  /// Whether a ringing call the current user starts is registered with
+  /// Telecom as an outgoing call, as long as it rings and until it ends.
+  ///
+  /// Registered, the call gets what an incoming call Telecom holds gets: the
+  /// audio routes Telecom offers, Telecom's management of the call's audio
+  /// focus, and an end when Telecom holds it for a phone call, as the SDK
+  /// leaves a held call. Telecom marks it active as soon as it is registered,
+  /// so a hold while it still rings already leaves it, and it ends with the
+  /// call however it ends. Without the Telecom integration (see
+  /// [telecom]) nothing visible changes; the plugin only tracks the call until
+  /// it ends.
+  ///
+  /// Off when omitted. Leave it off if the app already calls
+  /// [StreamVideoPushNotificationManager.startOutgoingCall] itself, or the call
+  /// is registered twice.
+  final bool? reportOutgoingCalls;
+
   AndroidPushConfiguration copyWith({
     MissedCallNotificationParams? missedCallNotification,
     IncomingCallNotificationParams? incomingCallNotification,
@@ -101,6 +119,7 @@ class AndroidPushConfiguration {
     String? missedCallNotificationChannelName,
     bool? showFullScreenOnLockScreen,
     TelecomPushConfiguration? telecom,
+    bool? reportOutgoingCalls,
   }) {
     return AndroidPushConfiguration(
       missedCallNotification:
@@ -118,6 +137,7 @@ class AndroidPushConfiguration {
       showFullScreenOnLockScreen:
           showFullScreenOnLockScreen ?? this.showFullScreenOnLockScreen,
       telecom: telecom ?? this.telecom,
+      reportOutgoingCalls: reportOutgoingCalls ?? this.reportOutgoingCalls,
     );
   }
 
@@ -135,6 +155,7 @@ class AndroidPushConfiguration {
           other.missedCallNotificationChannelName,
       showFullScreenOnLockScreen: other.showFullScreenOnLockScreen,
       telecom: other.telecom,
+      reportOutgoingCalls: other.reportOutgoingCalls,
     );
   }
 

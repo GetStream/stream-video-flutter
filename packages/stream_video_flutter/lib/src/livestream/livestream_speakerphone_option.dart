@@ -8,10 +8,10 @@ import '../../../stream_video_flutter.dart';
 /// audio, like the speaker button of a video player.
 ///
 /// Muting pauses remote audio playout through
-/// [RtcMediaDeviceNotifier.pauseAudioPlayout]; it does not change the audio
+/// [PlatformAudioController.pauseAudioPlayout]; it does not change the audio
 /// output device, so audio keeps following the system route (speaker,
 /// headphones or Bluetooth). The icon follows
-/// [RtcMediaDeviceNotifier.isAudioPlayoutPaused], so it also reflects playout
+/// [PlatformAudioController.isAudioPlayoutPaused], so it also reflects playout
 /// paused or resumed elsewhere in the app.
 ///
 /// Playout is app-wide. If this widget muted it, it unmutes it again when it
@@ -20,7 +20,7 @@ import '../../../stream_video_flutter.dart';
 /// the controls: a viewer who muted hears the stream again when it goes live.
 ///
 /// Pausing playout is supported on Android, iOS, macOS and web
-/// ([RtcMediaDeviceNotifier.isAudioPlayoutPauseSupported]); elsewhere the
+/// ([PlatformAudioController.isAudioPlayoutPauseSupported]); elsewhere the
 /// button is not shown.
 class LivestreamSpeakerphoneOption extends StatefulWidget {
   /// Creates a new instance of [LivestreamSpeakerphoneOption].
@@ -33,6 +33,8 @@ class LivestreamSpeakerphoneOption extends StatefulWidget {
     this.disabledSpeakerphoneIconTheme = const IconThemeData(
       color: Colors.white,
     ),
+    this.type = StreamButtonType.ghost,
+    this.size = StreamButtonSize.large,
   });
 
   /// Represents a call.
@@ -44,6 +46,16 @@ class LivestreamSpeakerphoneOption extends StatefulWidget {
   /// The theme that is applied while the stream's audio is muted.
   final IconThemeData disabledSpeakerphoneIconTheme;
 
+  /// The variant of the button.
+  ///
+  /// Defaults to [StreamButtonType.ghost].
+  final StreamButtonType type;
+
+  /// The size of the button.
+  ///
+  /// Defaults to [StreamButtonSize.large].
+  final StreamButtonSize size;
+
   @override
   State<LivestreamSpeakerphoneOption> createState() => _ToggleSpeakerState();
 }
@@ -51,10 +63,10 @@ class LivestreamSpeakerphoneOption extends StatefulWidget {
 class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
   late final _logger = taggedLogger(tag: 'SV:LivestreamSpeakerphoneOption');
 
-  final _deviceNotifier = RtcMediaDeviceNotifier.instance;
+  final _audioController = PlatformAudioController.instance;
   StreamSubscription<bool>? _pausedSubscription;
 
-  late var _muted = _deviceNotifier.isAudioPlayoutPaused;
+  late var _muted = _audioController.isAudioPlayoutPaused;
 
   /// Whether this widget is the one that paused playout, so it only undoes
   /// its own mute on dispose. Set before the pause is sent, so leaving while
@@ -69,7 +81,7 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
   @override
   void initState() {
     super.initState();
-    _pausedSubscription = _deviceNotifier.audioPlayoutPausedChanges.listen((
+    _pausedSubscription = _audioController.audioPlayoutPausedChanges.listen((
       paused,
     ) {
       if (!paused) _pausedByThisWidget = false;
@@ -85,8 +97,8 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
     _pausedByThisWidget = mute;
 
     final operation = mute
-        ? _deviceNotifier.pauseAudioPlayout()
-        : _deviceNotifier.resumeAudioPlayout();
+        ? _audioController.pauseAudioPlayout()
+        : _audioController.resumeAudioPlayout();
     _inFlight = operation;
 
     try {
@@ -109,7 +121,7 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
       unawaited(
         inFlight
             .catchError((_) {})
-            .then((_) => _deviceNotifier.resumeAudioPlayout())
+            .then((_) => _audioController.resumeAudioPlayout())
             .catchError((Object e, StackTrace stk) {
               // Playout stays paused for the whole app, so the next call
               // starts silent.
@@ -122,7 +134,7 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_deviceNotifier.isAudioPlayoutPauseSupported) {
+    if (!_audioController.isAudioPlayoutPauseSupported) {
       return const SizedBox.shrink();
     }
 
@@ -132,8 +144,8 @@ class _ToggleSpeakerState extends State<LivestreamSpeakerphoneOption> {
     return StreamButton.icon(
       icon: Icon(_muted ? context.streamIcons.mute : context.streamIcons.audio),
       style: StreamButtonStyle.secondary,
-      type: StreamButtonType.ghost,
-      size: StreamButtonSize.large,
+      type: widget.type,
+      size: widget.size,
       themeStyle: StreamButtonThemeStyle.from(
         foregroundColor: iconTheme.color,
       ),

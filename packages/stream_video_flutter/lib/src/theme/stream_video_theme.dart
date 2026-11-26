@@ -21,6 +21,12 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     CallControlBarThemeData? callControlBarTheme,
     CallAppBarThemeData? callAppBarTheme,
     StreamCallDurationBadgeThemeData? callDurationBadgeTheme,
+    StreamLiveIndicatorThemeData? liveIndicatorTheme,
+    StreamSpectatorsIndicatorThemeData? spectatorsIndicatorTheme,
+    StreamLivestreamTileThemeData? livestreamTileTheme,
+    StreamCallBadgeThemeData? callBadgeTheme,
+    StreamCallParticipantsBadgeThemeData? callParticipantsBadgeTheme,
+    StreamCallLatencyBadgeThemeData? callLatencyBadgeTheme,
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -96,6 +102,12 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callControlBarTheme: callControlBarTheme,
       callAppBarTheme: callAppBarTheme,
       callDurationBadgeTheme: callDurationBadgeTheme,
+      liveIndicatorTheme: liveIndicatorTheme,
+      spectatorsIndicatorTheme: spectatorsIndicatorTheme,
+      livestreamTileTheme: livestreamTileTheme,
+      callBadgeTheme: callBadgeTheme,
+      callParticipantsBadgeTheme: callParticipantsBadgeTheme,
+      callLatencyBadgeTheme: callLatencyBadgeTheme,
       callParticipantTheme: callParticipantTheme,
       localVideoTheme: localVideoTheme,
       incomingCallTheme: incomingCallTheme,
@@ -143,6 +155,13 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     this.callControlBarTheme = const CallControlBarThemeData(),
     this.callAppBarTheme = const CallAppBarThemeData(),
     this.callDurationBadgeTheme = const StreamCallDurationBadgeThemeData(),
+    this.liveIndicatorTheme = const StreamLiveIndicatorThemeData(),
+    this.spectatorsIndicatorTheme = const StreamSpectatorsIndicatorThemeData(),
+    this.livestreamTileTheme = const StreamLivestreamTileThemeData(),
+    this.callBadgeTheme = const StreamCallBadgeThemeData(),
+    this.callParticipantsBadgeTheme =
+        const StreamCallParticipantsBadgeThemeData(),
+    this.callLatencyBadgeTheme = const StreamCallLatencyBadgeThemeData(),
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -354,16 +373,9 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
           fontWeight: FontWeight.bold,
         ),
       ),
+      // Only the deprecated LivestreamInfo reads these.
       livestreamTheme: StreamLivestreamThemeData(
-        playIconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
-        pauseIconTheme: const IconThemeData(
-          color: Colors.white,
-        ),
-        playPauseIconSize: 64,
         liveButtonColor: colorTheme.accentPrimary,
-        backstageButtonColor: colorTheme.accentError,
         callStateButtonTextStyle: const TextStyle(
           color: Colors.white,
         ),
@@ -427,6 +439,26 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
 
   /// Theme for the pill showing how long a call has been running.
   final StreamCallDurationBadgeThemeData callDurationBadgeTheme;
+
+  /// Theme for the pill showing whether a livestream is live or in backstage.
+  final StreamLiveIndicatorThemeData liveIndicatorTheme;
+
+  /// Theme for the pill showing how many people watch a livestream.
+  final StreamSpectatorsIndicatorThemeData spectatorsIndicatorTheme;
+
+  /// Theme for the livestream's video and its toolbar.
+  final StreamLivestreamTileThemeData livestreamTileTheme;
+
+  /// Theme shared by the call badges: duration, participants and latency.
+  ///
+  /// A field a badge's own theme sets wins over the one here.
+  final StreamCallBadgeThemeData callBadgeTheme;
+
+  /// Theme for the pill showing how many people are in a call.
+  final StreamCallParticipantsBadgeThemeData callParticipantsBadgeTheme;
+
+  /// Theme for the pill showing a call's latency.
+  final StreamCallLatencyBadgeThemeData callLatencyBadgeTheme;
 
   /// Theme for the call participant widget.
   ///
@@ -508,7 +540,7 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
   /// Theme for the speaker layouts, where one participant holds the stage.
   final StreamCallParticipantsSpotlightThemeData callParticipantsSpotlightTheme;
 
-  /// Theme for the outgoing call widget.
+  /// Theme for the livestream player.
   final StreamLivestreamThemeData livestreamTheme;
 
   /// Theme for the incoming ringing screen.
@@ -535,6 +567,12 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     CallControlBarThemeData? callControlBarTheme,
     CallAppBarThemeData? callAppBarTheme,
     StreamCallDurationBadgeThemeData? callDurationBadgeTheme,
+    StreamLiveIndicatorThemeData? liveIndicatorTheme,
+    StreamSpectatorsIndicatorThemeData? spectatorsIndicatorTheme,
+    StreamLivestreamTileThemeData? livestreamTileTheme,
+    StreamCallBadgeThemeData? callBadgeTheme,
+    StreamCallParticipantsBadgeThemeData? callParticipantsBadgeTheme,
+    StreamCallLatencyBadgeThemeData? callLatencyBadgeTheme,
     @Deprecated(
       'Use participantTileTheme, participantLabelTheme, '
       'connectionQualityIndicatorTheme and callParticipantsGridTheme instead. '
@@ -587,6 +625,18 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
     callAppBarTheme: this.callAppBarTheme.merge(callAppBarTheme),
     callDurationBadgeTheme: this.callDurationBadgeTheme.merge(
       callDurationBadgeTheme,
+    ),
+    liveIndicatorTheme: this.liveIndicatorTheme.merge(liveIndicatorTheme),
+    spectatorsIndicatorTheme: this.spectatorsIndicatorTheme.merge(
+      spectatorsIndicatorTheme,
+    ),
+    livestreamTileTheme: this.livestreamTileTheme.merge(livestreamTileTheme),
+    callBadgeTheme: this.callBadgeTheme.merge(callBadgeTheme),
+    callParticipantsBadgeTheme: this.callParticipantsBadgeTheme.merge(
+      callParticipantsBadgeTheme,
+    ),
+    callLatencyBadgeTheme: this.callLatencyBadgeTheme.merge(
+      callLatencyBadgeTheme,
     ),
     callParticipantTheme:
         this.callParticipantTheme?.merge(callParticipantTheme) ??
@@ -644,6 +694,18 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
       callAppBarTheme: callAppBarTheme.merge(other.callAppBarTheme),
       callDurationBadgeTheme: callDurationBadgeTheme.merge(
         other.callDurationBadgeTheme,
+      ),
+      liveIndicatorTheme: liveIndicatorTheme.merge(other.liveIndicatorTheme),
+      spectatorsIndicatorTheme: spectatorsIndicatorTheme.merge(
+        other.spectatorsIndicatorTheme,
+      ),
+      livestreamTileTheme: livestreamTileTheme.merge(other.livestreamTileTheme),
+      callBadgeTheme: callBadgeTheme.merge(other.callBadgeTheme),
+      callParticipantsBadgeTheme: callParticipantsBadgeTheme.merge(
+        other.callParticipantsBadgeTheme,
+      ),
+      callLatencyBadgeTheme: callLatencyBadgeTheme.merge(
+        other.callLatencyBadgeTheme,
       ),
       callParticipantTheme:
           callParticipantTheme?.merge(other.callParticipantTheme) ??
@@ -733,6 +795,48 @@ class StreamVideoTheme extends ThemeExtension<StreamVideoTheme> {
             t,
           ) ??
           callDurationBadgeTheme,
+      liveIndicatorTheme:
+          StreamLiveIndicatorThemeData.lerp(
+            liveIndicatorTheme,
+            other.liveIndicatorTheme,
+            t,
+          ) ??
+          liveIndicatorTheme,
+      spectatorsIndicatorTheme:
+          StreamSpectatorsIndicatorThemeData.lerp(
+            spectatorsIndicatorTheme,
+            other.spectatorsIndicatorTheme,
+            t,
+          ) ??
+          spectatorsIndicatorTheme,
+      livestreamTileTheme:
+          StreamLivestreamTileThemeData.lerp(
+            livestreamTileTheme,
+            other.livestreamTileTheme,
+            t,
+          ) ??
+          livestreamTileTheme,
+      callBadgeTheme:
+          StreamCallBadgeThemeData.lerp(
+            callBadgeTheme,
+            other.callBadgeTheme,
+            t,
+          ) ??
+          callBadgeTheme,
+      callParticipantsBadgeTheme:
+          StreamCallParticipantsBadgeThemeData.lerp(
+            callParticipantsBadgeTheme,
+            other.callParticipantsBadgeTheme,
+            t,
+          ) ??
+          callParticipantsBadgeTheme,
+      callLatencyBadgeTheme:
+          StreamCallLatencyBadgeThemeData.lerp(
+            callLatencyBadgeTheme,
+            other.callLatencyBadgeTheme,
+            t,
+          ) ??
+          callLatencyBadgeTheme,
       callParticipantTheme:
           callParticipantTheme != null && other.callParticipantTheme != null
           ? callParticipantTheme!.lerp(other.callParticipantTheme!, t)

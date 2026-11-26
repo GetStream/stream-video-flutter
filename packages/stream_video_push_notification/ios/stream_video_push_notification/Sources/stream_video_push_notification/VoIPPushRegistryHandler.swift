@@ -84,10 +84,10 @@ public class VoIPPushRegistryHandler: NSObject, PKPushRegistryDelegate {
             configuration: self.resolveConfiguration(),
             persistedIconName: UserDefaults.standard.string(forKey: "callKit_iconName"))
 
-        // Show call incoming notification.
-        StreamVideoPushNotificationPlugin.showIncomingCall(data: data)
-
-        completion()
+        // Hold PushKit's completion until CallKit has accepted or refused the call: iOS may
+        // suspend a background-woken app as soon as it runs, before the incoming call has
+        // reached Dart and its ring timeout has been scheduled.
+        StreamVideoPushNotificationPlugin.showIncomingCall(data: data, completion: completion)
     }
 
     /// Builds the call to report to CallKit from the `stream` section of a VoIP push.

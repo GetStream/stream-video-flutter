@@ -113,6 +113,12 @@ class StreamVideoFlutterLocalizationsEn
   String get livestreamEndedStatus => 'The livestream has ended.';
 
   @override
+  String get livestreamEndedTitle => 'Livestream stopped';
+
+  @override
+  String get livestreamEndedSubtitle => 'The broadcaster has gone off air';
+
+  @override
   String get livestreamEndedWatchRecordings => 'Watch the recordings:';
 
   @override
@@ -123,7 +129,19 @@ class StreamVideoFlutterLocalizationsEn
   String get livestreamBackstage => 'Backstage';
 
   @override
+  String get livestreamEnterFullscreen => 'Full screen';
+
+  @override
+  String get livestreamExitFullscreen => 'Exit full screen';
+
+  @override
   String get livestreamLive => 'Live';
+
+  @override
+  String get livestreamLiveIndicatorLive => 'LIVE';
+
+  @override
+  String get livestreamLiveIndicatorBackstage => 'BACKSTAGE';
 
   @override
   String get lobbyMicrophoneSection => 'Microphone';
@@ -234,6 +252,28 @@ class StreamVideoFlutterLocalizationsEn
     );
     return '$_temp0';
   }
+
+  @override
+  String callParticipantsSpoken(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count participants',
+      one: '1 participant',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String callLatencySpoken(int latency) {
+    return 'Latency $latency milliseconds';
+  }
+
+  @override
+  String get callLatencyUnknownSpoken => 'Latency not measured yet';
+
+  @override
+  String get callLatencyUnit => 'ms';
 
   @override
   String get ringingIncomingCall => 'Incoming call';
@@ -520,4 +560,15 @@ class StreamVideoFlutterLocalizationsEn
 
   @override
   String get recordingsRetry => 'Try Again';
+
+  @override
+  String livestreamViewerCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count viewers',
+      one: '1 viewer',
+    );
+    return '$_temp0';
+  }
 }

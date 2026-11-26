@@ -1,12 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../../fixtures/webrtc_capabilities.dart';
 import 'fixtures/call_test_helpers.dart';
 
 /// A [CallPreferences] that is not a [DefaultCallPreferences].
 class _CustomCallPreferences implements CallPreferences {
   @override
   Duration get connectTimeout => const Duration(seconds: 7);
+  @override
+  AudioInterruptionReaction get audioInterruptionReaction =>
+      AudioInterruptionReaction.none;
   @override
   Duration get reconnectTimeout => Duration.zero;
   @override
@@ -190,6 +194,7 @@ void main() {
       // Web has no per-call native factory, so no platform channel is needed.
       CurrentPlatform.debugCurrentPlatformOverride = PlatformType.web;
       addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+      overrideWebRtcCapabilities(platform: PlatformType.web);
 
       final call = createTestCall();
       await call.ensureNativeFactory();
@@ -208,6 +213,7 @@ void main() {
     test('keeps a pre-join factory for an equal policy', () async {
       CurrentPlatform.debugCurrentPlatformOverride = PlatformType.web;
       addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+      overrideWebRtcCapabilities(platform: PlatformType.web);
 
       final call = createTestCall();
       call.setAudioConfigurationPolicy(const AudioConfigurationPolicy.hiFi());
@@ -224,6 +230,7 @@ void main() {
     test('updateCallPreferences leaves a pre-join factory alone', () async {
       CurrentPlatform.debugCurrentPlatformOverride = PlatformType.web;
       addTearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+      overrideWebRtcCapabilities(platform: PlatformType.web);
 
       final call = createTestCall();
       await call.ensureNativeFactory();

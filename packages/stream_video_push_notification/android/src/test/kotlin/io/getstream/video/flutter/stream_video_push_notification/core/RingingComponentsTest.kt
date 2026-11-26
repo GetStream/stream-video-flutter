@@ -64,6 +64,7 @@ class RingingComponentsTest {
     @After
     fun reset() {
         RingingComponents.reset()
+        RingingComponents.silenceEvents = false
     }
 
     private fun ring(id: String, cid: String? = null) {
@@ -100,6 +101,7 @@ class RingingComponentsTest {
         repository.disconnect("call-1", TelecomEventSource.SYS)
 
         val received = events().drop(1)
+            .filterNot { it.first == IncomingCallConstants.ACTION_CALL_CUSTOM }
         assertEquals(
             listOf(
                 IncomingCallConstants.ACTION_CALL_ACCEPT,
@@ -108,6 +110,32 @@ class RingingComponentsTest {
             received.map { it.first },
         )
         assertEquals(true, received.last().second["endedBySystem"])
+    }
+
+    @Test
+    fun `the calls Telecom holds reach Dart as they change`() {
+        ring("call-1", cid = "default:abc")
+        repository.disconnect("call-1", TelecomEventSource.APP)
+
+        val calls = events()
+            .filter { it.first == IncomingCallConstants.ACTION_CALL_CUSTOM }
+            .map { it.second }
+        assertEquals(
+            listOf(
+                mapOf("type" to "telecomCallsChanged", "callCids" to listOf("default:abc")),
+                mapOf("type" to "telecomCallsChanged", "callCids" to emptyList<String>()),
+            ),
+            calls,
+        )
+    }
+
+    @Test
+    fun `the calls Telecom holds reach Dart while events are silenced`() {
+        RingingComponents.silenceEvents = true
+        ring("call-1", cid = "default:abc")
+
+        val calls = events().filter { it.first == IncomingCallConstants.ACTION_CALL_CUSTOM }
+        assertEquals(listOf("default:abc"), calls.single().second["callCids"])
     }
 
     @Test

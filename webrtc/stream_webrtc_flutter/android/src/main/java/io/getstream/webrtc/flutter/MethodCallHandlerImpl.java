@@ -775,30 +775,12 @@ public class MethodCallHandlerImpl implements MethodCallHandler, StateProvider {
         break;
       }
       case "handleCallInterruptionCallbacks": {
-        String interruptionSource = call.argument("androidInterruptionSource");
-        AudioFocusManager.InterruptionSource source;
-
-        switch (interruptionSource) {
-          case "audioFocusOnly":
-            source = AudioFocusManager.InterruptionSource.AUDIO_FOCUS_ONLY;
-            break;
-          case "telephonyOnly":
-            source = AudioFocusManager.InterruptionSource.TELEPHONY_ONLY;
-            break;
-          case "audioFocusAndTelephony":
-            source = AudioFocusManager.InterruptionSource.AUDIO_FOCUS_AND_TELEPHONY;
-            break;
-          default:
-            source = AudioFocusManager.InterruptionSource.AUDIO_FOCUS_AND_TELEPHONY;
-            break;
-        }
-
         if (audioFocusManager != null) {
           audioFocusManager.setAudioFocusChangeListener(null);
           audioFocusManager = null;
         }
 
-        audioFocusManager = new AudioFocusManager(context, source);
+        audioFocusManager = new AudioFocusManager();
 
         audioFocusManager.setAudioFocusChangeListener(new AudioFocusManager.AudioFocusChangeListener() {
           @Override
@@ -1249,10 +1231,38 @@ public class MethodCallHandlerImpl implements MethodCallHandler, StateProvider {
               "AudioSwitch manager is not initialized. Ensure plugin is attached before requesting focus.", result);
           break;
         }
+        // A granted request is reported as a focus gain, which ends the interruption.
         AudioSwitchManager.instance.requestAudioFocus();
-        if (audioFocusManager != null) {
-          audioFocusManager.notifyManualAudioFocusRegain();
+        result.success(null);
+        break;
+      }
+      case "setAndroidAudioFocusManaged": {
+        if (AudioSwitchManager.instance == null) {
+          resultError("setAndroidAudioFocusManaged",
+              "AudioSwitch manager is not initialized. Ensure plugin is attached before switching focus handling.", result);
+          break;
         }
+        Boolean managed = call.argument("managed");
+        if (managed == null) {
+          resultError("setAndroidAudioFocusManaged", "managed is required", result);
+          break;
+        }
+        AudioSwitchManager.instance.setManageAudioFocus(managed);
+        result.success(null);
+        break;
+      }
+      case "setAndroidAudioFocusHandledBySystem": {
+        if (AudioSwitchManager.instance == null) {
+          resultError("setAndroidAudioFocusHandledBySystem",
+              "AudioSwitch manager is not initialized. Ensure plugin is attached first.", result);
+          break;
+        }
+        Boolean handledBySystem = call.argument("handledBySystem");
+        if (handledBySystem == null) {
+          resultError("setAndroidAudioFocusHandledBySystem", "handledBySystem is required", result);
+          break;
+        }
+        AudioSwitchManager.instance.setAudioFocusHandledBySystem(handledBySystem);
         result.success(null);
         break;
       }

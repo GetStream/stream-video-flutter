@@ -194,11 +194,11 @@ class StreamBackgroundService {
 
     _subscriptions.add(1, activeCallSubscription);
 
-    final rtcEventsSubscription = RtcMediaDeviceNotifier.instance
+    final rtcEventsSubscription = PlatformAudioController.instance
         .nativeWebRtcEventsStream()
         .whereType<ScreenSharingStoppedEvent>()
         .listen((event) async {
-          final trackId = event.data?['trackId'] as String?;
+          final trackId = event.trackId;
           if (trackId != null) {
             final call = streamVideo.activeCalls.singleWhereOrNull((call) {
               if (call.state.value.localParticipant == null) {

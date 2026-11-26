@@ -1,3 +1,13 @@
+## Upcoming (major)
+
+### ⚠️ Breaking
+
+- [iOS] CocoaPods is no longer supported; enable Flutter's Swift Package Manager.
+
+### 🐞 Fixed
+
+- [iOS] Added the missing `FlutterFramework` dependency to the Swift package.
+
 ## 1.8.0
 
 - Updated `stream_video` dependency to [`1.8.0`](https://pub.dev/packages/stream_video/changelog).

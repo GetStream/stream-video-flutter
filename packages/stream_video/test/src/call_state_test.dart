@@ -142,7 +142,8 @@ void main() {
         ),
       );
 
-      expect(updated.participantCount, 12001);
+      // The roles leave the anonymous participants out; the total does not.
+      expect(updated.participantCount, 12301);
       expect(updated.anonymousParticipantCount, 300);
     },
   );

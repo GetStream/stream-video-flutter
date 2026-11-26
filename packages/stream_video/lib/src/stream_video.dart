@@ -4,11 +4,12 @@ import 'dart:collection';
 import 'package:collection/collection.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:meta/meta.dart';
-import 'package:rxdart/rxdart.dart' show CompositeSubscription;
+import 'package:rxdart/rxdart.dart' show CompositeSubscription, Rx;
 import 'package:stream_core/stream_core.dart';
 
 import '../globals.dart';
 import '../open_api/video/coordinator/api.dart' hide User;
+import 'audio/platform_audio_controller.dart';
 import 'audio_processing/audio_processor.dart';
 import 'call/call.dart';
 import 'call/call_host.dart';
@@ -60,7 +61,6 @@ import 'token/token_source.dart';
 import 'utils/none.dart';
 import 'utils/result.dart';
 import 'utils/subscriptions.dart';
-import 'webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
 
 const _tag = 'SV:Client';
@@ -331,6 +331,7 @@ class StreamVideo extends Disposable implements CallHost {
       _client,
       this,
     );
+    _observeSystemManagedCalls();
 
     _state.user.value = user;
 
@@ -382,7 +383,7 @@ class StreamVideo extends Disposable implements CallHost {
   Future<void> _configureAudio() async {
     try {
       if (setsUpMedia && (CurrentPlatform.isAndroid || CurrentPlatform.isIos)) {
-        await RtcMediaDeviceNotifier.instance.reinitializeAudioConfiguration(
+        await PlatformAudioController.instance.reinitializeAudioConfiguration(
           _options.audioConfigurationPolicy,
         );
       }
@@ -459,6 +460,50 @@ class StreamVideo extends Disposable implements CallHost {
   }
 
   final _subscriptions = Subscriptions();
+
+  /// Follows whether the system manages the audio focus of an active call;
+  /// lives as long as the client.
+  StreamSubscription<bool>? _systemManagedCallsSubscription;
+
+  /// Tells WebRTC that the system manages Android audio focus while one of
+  /// the active calls is a call whose focus the system manages, such as one
+  /// Telecom holds, and that it no longer does once none is.
+  ///
+  /// The first value is sent too, so a client set up after another that
+  /// told WebRTC the system manages focus, such as before a Flutter engine
+  /// restart, does not leave it at that. Being told the system does not
+  /// manage it leaves the app's own audio configuration as it is.
+  void _observeSystemManagedCalls() {
+    final manager = pushNotificationManager;
+    if (manager == null ||
+        !setsUpMedia ||
+        !PlatformAudioController.isSystemManagedAudioFocusSupported) {
+      return;
+    }
+
+    _systemManagedCallsSubscription =
+        Rx.combineLatest2<Set<String>, List<Call>, bool>(
+          manager.systemManagedCallCids,
+          _state.activeCalls,
+          (cids, calls) =>
+              calls.any((call) => cids.contains(call.callCid.value)),
+        ).distinct().listen(_onSystemManagedCalls);
+  }
+
+  void _onSystemManagedCalls(bool systemManaged) {
+    _logger.i(
+      () => '[observeSystemManagedCalls] systemManaged: $systemManaged',
+    );
+    unawaited(
+      PlatformAudioController.instance
+          .setAndroidAudioFocusHandledBySystem(handledBySystem: systemManaged)
+          .catchError((Object e, StackTrace stk) {
+            _logger.e(
+              () => '[observeSystemManagedCalls] not applied: $e\n$stk',
+            );
+          }),
+    );
+  }
 
   late final CoordinatorClient _client;
 
@@ -650,6 +695,7 @@ class StreamVideo extends Disposable implements CallHost {
     _ringing.dispose();
 
     _subscriptions.cancelAll();
+    await _systemManagedCallsSubscription?.cancel();
     await pushNotificationManager?.dispose();
     _clientEventReporter.dispose();
     await _state.clear();
@@ -1144,7 +1190,7 @@ class StreamVideoOptions {
   ///
   /// Defaults to [BroadcasterAudioPolicy].
   /// Once set it will be applied for all calls.
-  /// To change the audio configuration policy after initial setup, use [RtcMediaDeviceNotifier.reinitializeAudioConfiguration].
+  /// To change the audio configuration policy after initial setup, use [PlatformAudioController.reinitializeAudioConfiguration].
   ///
   /// A ringing call uses [ringingAudioConfigurationPolicy] instead, when set.
   final AudioConfigurationPolicy audioConfigurationPolicy;

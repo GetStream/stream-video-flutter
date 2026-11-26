@@ -2,9 +2,12 @@ part of 'rtc_manager.dart';
 
 extension RtcManagerTrackHelper on RtcManager {
   Future<Result<RtcLocalCameraTrack>> flipCamera() async {
-    if (CurrentPlatform.isWeb) {
-      _logger.e(() => '[switchCamera] rejected (not supported on web)');
-      return failureWithError('Not supported on web');
+    final capabilities = rtc.webRtcCapabilities;
+    if (!capabilities.supportsCameraSwitch) {
+      _logger.e(
+        () => '[switchCamera] rejected (not supported by $capabilities)',
+      );
+      return failureWithError('Not supported on this platform');
     }
 
     final track = getPublisherTrackByType(SfuTrackType.video);
@@ -70,24 +73,12 @@ extension RtcManagerTrackHelper on RtcManager {
 
     final Result<RtcLocalTrack> switched;
     try {
-      // On web the input is a property of the capture, so it is captured
-      // again; elsewhere the platform switches the input of the capture.
-      switched = CurrentPlatform.isWeb
-          ? await _publisher.recapture(
-              track.trackId,
-              tag: '[setAudioInputDevice]',
-              constraintsFor: (current) => (current as RtcLocalAudioTrack)
-                  .mediaConstraints
-                  .copyWith(deviceId: device.id),
-            )
-          : await _publisher.updateHeldTrack(
-              track.trackId,
-              (current) => (current as RtcLocalAudioTrack).selectAudioInput(
-                const [],
-                device,
-              ),
-              tag: '[setAudioInputDevice]',
-            );
+      switched = await _audioInputSwitcher.switchPublished(
+        _publisher,
+        track.trackId,
+        device,
+        tag: '[setAudioInputDevice]',
+      );
     } finally {
       // Switching the input restarts capture, which drops the ADM mute.
       // Reconciled on failure too.
@@ -100,7 +91,7 @@ extension RtcManagerTrackHelper on RtcManager {
   Future<Result<None>> setAudioOutputDevice({
     required RtcMediaDevice device,
   }) async {
-    if (CurrentPlatform.isWeb) {
+    if (rtc.webRtcCapabilities.selectsAudioOutputPerElement) {
       return _subscriber.setAudioSink(device);
     }
 
@@ -168,10 +159,9 @@ extension RtcManagerTrackHelper on RtcManager {
     bool enabled = true,
     ScreenShareConstraints? constraints,
   }) async {
-    if (CurrentPlatform.isIos &&
-        enabled &&
+    if (enabled &&
         constraints is ScreenShareConstraints &&
-        constraints.useiOSBroadcastExtension) {
+        _screenShareSource.usesBroadcastExtension(constraints)) {
       return _startBroadcastShare(constraints);
     }
 
@@ -225,7 +215,7 @@ extension RtcManagerTrackHelper on RtcManager {
   /// participant as not sharing.
   void _awaitBroadcastStart(RtcLocalScreenShareTrack track) {
     _pendingBroadcastTrack = track;
-    _pendingBroadcastSubscription = RtcMediaDeviceNotifier.instance
+    _pendingBroadcastSubscription = PlatformAudioController.instance
         .nativeWebRtcEventsStream()
         .where(
           (it) =>

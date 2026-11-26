@@ -5,6 +5,8 @@ import XCTest
 
 /// Pins how each method-channel call is parsed, including what a call with missing arguments
 /// is answered with.
+///
+/// Run with the example's other RunnerTests by `melos run test:native:ios`.
 final class PushCommandTests: XCTestCase {
 
     private func command(_ method: String, _ arguments: Any? = nil) -> PushCommand {

@@ -985,18 +985,10 @@ packages:
     dependency: transitive
     description:
       name: gal
-      sha256: "969598f986789127fd407a750413249e1352116d4c2be66e81837ffeeaafdfee"
+      sha256: f71e79840fe023a21f2f949771375444b6efcd34b9e625d5f4f5504971380a77
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.2"
-  gallery_saver_plus:
-    dependency: transitive
-    description:
-      name: gallery_saver_plus
-      sha256: "179a2cf0a8d5d61957724e39cf5664a336d5ef28a4222543462dd9fc4c1a6af9"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.2.4"
+    version: "2.3.3"
   get_it:
     dependency: transitive
     description:
@@ -2455,11 +2447,11 @@ packages:
     dependency: "direct overridden"
     description:
       path: "packages/stream_core_flutter"
-      ref: "958a8d30411ae49339a842c0672c03a7d064403c"
-      resolved-ref: "958a8d30411ae49339a842c0672c03a7d064403c"
+      ref: "1553108cc38556a8b427e8ca389b33250c80278f"
+      resolved-ref: "1553108cc38556a8b427e8ca389b33250c80278f"
       url: "https://github.com/GetStream/stream-core-flutter.git"
     source: git
-    version: "0.5.3"
+    version: "0.5.4"
   stream_thumbnail:
     dependency: transitive
     description:

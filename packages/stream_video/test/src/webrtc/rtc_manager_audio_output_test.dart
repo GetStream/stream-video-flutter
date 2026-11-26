@@ -6,6 +6,7 @@ import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/src/webrtc/traced_peer_connection.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../../fixtures/webrtc_capabilities.dart';
 import '../../test_helpers.dart';
 import '../call/fixtures/data.dart';
 
@@ -188,6 +189,41 @@ void main() {
         logger.warnings,
         contains(allOf(contains('earpiece'), contains('session busy'))),
       );
+    });
+  });
+
+  group('RtcManager.setAudioOutputDevice on web', () {
+    test('sets the sink of the remote audio, not the audio session', () async {
+      overrideWebRtcCapabilities(platform: PlatformType.web);
+      final rtcManager = makeRtcManager(
+        const AudioConfigurationPolicy.broadcaster(),
+      );
+
+      final result = await rtcManager.setAudioOutputDevice(
+        device: _output('Speaker'),
+      );
+
+      expect(result.isSuccess, isTrue);
+      expect(rtcManager.applied, isEmpty);
+      expect(selectedOutputs, isEmpty);
+    });
+
+    test('fails where the browser cannot select the output', () async {
+      overrideWebRtcCapabilities(
+        capabilities: webRtcCapabilitiesOf(
+          PlatformType.web,
+        ).copyWith(supportsAudioOutputSelection: false),
+      );
+      final rtcManager = makeRtcManager(
+        const AudioConfigurationPolicy.broadcaster(),
+      );
+
+      final result = await rtcManager.setAudioOutputDevice(
+        device: _output('Speaker'),
+      );
+
+      expect(result.isFailure, isTrue);
+      expect(rtcManager.applied, isEmpty);
     });
   });
 }

@@ -22,6 +22,7 @@ permissions:
 
 env:
   example: webrtc/stream_webrtc_flutter/example
+  package: webrtc/stream_webrtc_flutter
 
 jobs:
   # Centralizes every gating decision for this workflow — path filter,
@@ -37,6 +38,11 @@ jobs:
       group: github-public-amd64
     outputs:
       should_run: ${{ steps.filter.outputs.relevant == 'true' && github.event.pull_request.draft != true }}
+      # The native unit tests of a platform run only when native code for it,
+      # or its tests, changed.
+      android_tests: ${{ steps.filter.outputs.android_tests }}
+      ios_tests: ${{ steps.filter.outputs.ios_tests }}
+      macos_tests: ${{ steps.filter.outputs.macos_tests }}
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v7
@@ -60,6 +66,17 @@ jobs:
               - '.github/actions/setup-melos/**'
               - '.github/actions/select-xcode/**'
               - '.github/workflows/webrtc.yml'
+            android_tests:
+              - 'webrtc/stream_webrtc_flutter/android/**'
+              - 'webrtc/stream_webrtc_flutter/example/android/**'
+            ios_tests:
+              - 'webrtc/stream_webrtc_flutter/ios/**'
+              - 'webrtc/stream_webrtc_flutter/example/ios/**'
+            # The macOS RunnerTests share the iOS ones' source file.
+            macos_tests:
+              - 'webrtc/stream_webrtc_flutter/macos/**'
+              - 'webrtc/stream_webrtc_flutter/example/macos/**'
+              - 'webrtc/stream_webrtc_flutter/example/ios/RunnerTests/**'
 
   analyze:
     needs: gate
@@ -106,12 +123,16 @@ jobs:
         working-directory: ${{ env.example }}
         run: flutter build apk
 
+      - name: Unit tests
+        if: needs.gate.outputs.android_tests == 'true'
+        run: .github/workflows/scripts/native-tests.sh android "$package"
+
   build-ios:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
-    name: Build example (iOS, CocoaPods + SPM)
+    name: Build example (iOS)
     timeout-minutes: 45
-    runs-on: macos-latest
+    runs-on: { group: scaleway-macos }
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
@@ -122,32 +143,22 @@ jobs:
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter
 
-      - name: Build with CocoaPods
-        working-directory: ${{ env.example }}
-        run: |
-          flutter config --no-enable-swift-package-manager
-          flutter pub get
-          (cd ios && pod repo update && pod install)
-          flutter build ios --no-codesign
-
-      - name: Clean CocoaPods
-        working-directory: ${{ env.example }}
-        run: |
-          rm -rf ios/Pods ios/Podfile.lock
-          flutter clean
-
-      - name: Build with Swift Package Manager
+      - name: Build
         working-directory: ${{ env.example }}
         run: |
           flutter config --enable-swift-package-manager
           flutter build ios --no-codesign
+
+      - name: Unit tests
+        if: needs.gate.outputs.ios_tests == 'true'
+        run: .github/workflows/scripts/native-tests.sh ios "$package"
 
   build-macos:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
     name: Build example (macOS)
     timeout-minutes: 45
-    runs-on: macos-latest
+    runs-on: { group: scaleway-macos }
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
@@ -161,6 +172,10 @@ jobs:
       - name: Build
         working-directory: ${{ env.example }}
         run: flutter build macos --release
+
+      - name: Unit tests
+        if: needs.gate.outputs.macos_tests == 'true'
+        run: .github/workflows/scripts/native-tests.sh macos "$package"
 
   build-windows:
     needs: gate

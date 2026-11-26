@@ -81,6 +81,7 @@ const _androidOnlyMethods = {
   'requestNotificationPermission',
   'canUseFullScreenIntent',
   'requestAudioEndpoint',
+  'telecomCallCids',
 };
 
 /// Cases the Android switch has beyond what Dart invokes there.

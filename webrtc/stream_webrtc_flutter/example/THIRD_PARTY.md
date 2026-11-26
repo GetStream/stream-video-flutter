@@ -53,7 +53,6 @@ Files that are not on this list are Stream code, under the licence in the packag
 - `ios/Flutter/AppFrameworkInfo.plist`
 - `ios/Flutter/Debug.xcconfig`
 - `ios/Flutter/Release.xcconfig`
-- `ios/Podfile`
 - `ios/Runner.xcodeproj/project.pbxproj`
 - `ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata`
 - `ios/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist`
@@ -116,7 +115,6 @@ Files that are not on this list are Stream code, under the licence in the packag
 - `macos/Flutter/Flutter-Debug.xcconfig`
 - `macos/Flutter/Flutter-Release.xcconfig`
 - `macos/Flutter/GeneratedPluginRegistrant.swift`
-- `macos/Podfile`
 - `macos/Runner.xcodeproj/project.pbxproj`
 - `macos/Runner.xcodeproj/project.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist`
 - `macos/Runner.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved`

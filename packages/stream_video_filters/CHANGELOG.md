@@ -1,8 +1,13 @@
 ## Upcoming (major)
 
+### ⚠️ Breaking
+
+- [iOS] CocoaPods is no longer supported; enable Flutter's Swift Package Manager.
+
 ### 🐞 Fixed
 
 - Video filters on iOS follow the orientation of the app's window scene, including after it moves to another display.
+- [iOS] Added the missing `FlutterFramework` dependency to the Swift package.
 
 ## 1.8.0
 

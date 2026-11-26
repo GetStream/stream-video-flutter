@@ -1,4 +1,5 @@
 export 'android_call_service_kind.dart';
+export 'audio_interruption_reaction.dart';
 export 'call_cid.dart';
 export 'call_client_publish_options.dart';
 export 'call_closed_caption.dart';

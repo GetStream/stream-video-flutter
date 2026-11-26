@@ -71,9 +71,6 @@ done
 echo "  ios permissions pre-granted for $IOS_BUNDLE"
 
 # --- android permissions, same reason ---------------------------------------
-# READ_PHONE_STATE matters as much as the obvious ones: without it the app
-# raises a "make and manage phone calls" dialog on the first Start New Call,
-# which swallows the tap and derails the run.
 grant_android_permissions
 
 # --- microphone prerequisite -------------------------------------------------

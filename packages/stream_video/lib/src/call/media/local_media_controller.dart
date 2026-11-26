@@ -10,6 +10,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../../open_api/video/coordinator/api.dart' hide User;
+import '../../audio/platform_audio_controller.dart';
 import '../../call_state.dart';
 import '../../errors/stream_video_exception.dart';
 import '../../internal/_background_mute_policy.dart';
@@ -78,6 +79,18 @@ class LocalMediaController {
   /// Whether going to the background turned the microphone off, so coming
   /// back turns it on again.
   bool _microphoneMutedInBackground = false;
+
+  /// Whether the app is in the background, between [onAppPaused] and
+  /// [onAppResumed].
+  bool _isAppPaused = false;
+
+  /// Whether the platform interrupts the call's audio with the microphone to
+  /// be off for it.
+  bool _muteMicrophoneWhileInterrupted = false;
+
+  /// Whether the microphone was turned off for an interruption, and is to be
+  /// turned back on when it ends.
+  bool _microphoneMutedByInterruption = false;
 
   CallConnectOptions _connectOptions = const CallConnectOptions();
 
@@ -625,7 +638,7 @@ class LocalMediaController {
 
   /// Follows the screen share and audio route changes the platform reports.
   StreamSubscription<NativeWebRtcEvent> observeNativeWebRtcEvents() {
-    return RtcMediaDeviceNotifier.instance.nativeWebRtcEventsStream().listen((
+    return PlatformAudioController.instance.nativeWebRtcEventsStream().listen((
       event,
     ) {
       _logger.d(() => '[_onNativeWebRtcEvent] event: $event');
@@ -636,7 +649,7 @@ class LocalMediaController {
             // On iOS only one broadcast extension can be active at a time
             setScreenShareEnabled(enabled: false);
           } else {
-            final trackId = event.data?['trackId'] as String?;
+            final trackId = event.trackId;
             final localParticipant = _state.localParticipant;
             if (trackId != null && localParticipant != null) {
               final track = _session()?.getTrack(
@@ -1035,13 +1048,15 @@ class LocalMediaController {
   }
 
   /// Turns the microphone on or off, and cancels turning it back on after
-  /// the background.
+  /// the background or an interruption.
   Future<Result<None>> setMicrophoneEnabled({
     required bool enabled,
     AudioConstraints? constraints,
     bool? stopTrackOnMute,
   }) {
     _microphoneMutedInBackground = false;
+    _microphoneMutedByInterruption = false;
+    _muteMicrophoneWhileInterrupted = false;
     return _setMicrophoneEnabled(
       enabled: enabled,
       constraints: constraints,
@@ -1266,6 +1281,7 @@ class LocalMediaController {
   /// multitasking, and the microphone when `muteAudioWhenInBackground` is
   /// set. Runs after any [onAppResumed] still in progress.
   Future<void> onAppPaused() => _backgroundLock.synchronized(() async {
+    _isAppPaused = true;
     final localParticipant = _state.localParticipant;
     final isVideoEnabled = localParticipant?.isVideoEnabled ?? false;
     final isAudioEnabled = localParticipant?.isAudioEnabled ?? false;
@@ -1301,6 +1317,7 @@ class LocalMediaController {
   /// tried again on the next resume, unless it is set explicitly before
   /// then. Runs after any [onAppPaused] still in progress.
   Future<void> onAppResumed() => _backgroundLock.synchronized(() async {
+    _isAppPaused = false;
     if (_cameraMutedInBackground &&
         await _backgroundStep(
           'onAppResumed camera',
@@ -1308,7 +1325,11 @@ class LocalMediaController {
         )) {
       _cameraMutedInBackground = false;
     }
-    if (_microphoneMutedInBackground &&
+    if (_microphoneMutedInBackground && _muteMicrophoneWhileInterrupted) {
+      // The interruption turns it back on when it ends.
+      _microphoneMutedInBackground = false;
+      _microphoneMutedByInterruption = true;
+    } else if (_microphoneMutedInBackground &&
         await _backgroundStep(
           'onAppResumed microphone',
           () => _setMicrophoneEnabled(enabled: true),
@@ -1316,6 +1337,59 @@ class LocalMediaController {
       _microphoneMutedInBackground = false;
     }
   });
+
+  /// The platform started interrupting the call's audio. With
+  /// [muteMicrophone], turns the microphone off until the interruption ends.
+  /// Runs after any background mute or restore still in progress.
+  Future<void> onAudioInterruptionStarted({required bool muteMicrophone}) =>
+      _backgroundLock.synchronized(() async {
+        _muteMicrophoneWhileInterrupted = muteMicrophone;
+        if (!muteMicrophone) return;
+
+        if (_microphoneMutedInBackground) {
+          // Already off for the background; the interruption decides when
+          // it comes back.
+          _microphoneMutedInBackground = false;
+          _microphoneMutedByInterruption = true;
+          return;
+        }
+
+        final isAudioEnabled = _state.localParticipant?.isAudioEnabled ?? false;
+        if (isAudioEnabled &&
+            await _backgroundStep(
+              'onAudioInterruptionStarted microphone',
+              () => _setMicrophoneEnabled(enabled: false),
+            )) {
+          _microphoneMutedByInterruption = true;
+        }
+      });
+
+  /// The interruption ended. With [restore], turns back on the microphone it
+  /// turned off: right away in the foreground, or on [onAppResumed] while
+  /// the app is in the background and the microphone is muted there. A
+  /// microphone that cannot be turned on now, such as during a reconnect, is
+  /// turned on by the next session.
+  Future<void> onAudioInterruptionEnded({required bool restore}) =>
+      _backgroundLock.synchronized(() async {
+        _muteMicrophoneWhileInterrupted = false;
+        if (!_microphoneMutedByInterruption) return;
+        _microphoneMutedByInterruption = false;
+        if (!restore) return;
+
+        if (_isAppPaused && _muteAudioWhenInBackground()) {
+          _microphoneMutedInBackground = true;
+          return;
+        }
+
+        if (!await _backgroundStep(
+          'onAudioInterruptionEnded microphone',
+          () => _setMicrophoneEnabled(enabled: true),
+        )) {
+          _connectOptions = _connectOptions.copyWith(
+            microphone: TrackOption.enabled(),
+          );
+        }
+      });
 
   /// Runs one background mute or restore, and answers whether it succeeded.
   /// A failure is logged, and the next step still runs.

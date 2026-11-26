@@ -10,6 +10,8 @@
 	<true/>
        <key>com.apple.security.device.camera</key>
        <true/>
+       <key>com.apple.security.personal-information.photos-library</key>
+       <true/>
        <key>com.apple.security.device.microphone</key>
        <true/>
        <key>com.apple.security.network.client</key>

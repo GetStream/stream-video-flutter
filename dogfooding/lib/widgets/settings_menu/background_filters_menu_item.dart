@@ -47,7 +47,7 @@ class _BackgroundFiltersMenuItemState extends State<BackgroundFiltersMenuItem> {
             _FilterIconWrapper(
               onTap: () => _applyFilter(null),
               isFilterApplied: _isFilterApplied(null),
-              child: const Icon(Icons.close, size: 24),
+              child: Icon(context.streamIcons.xmark, size: 24),
             ),
             ..._filters.map(
               (filter) => _FilterIconWrapper(
@@ -156,7 +156,8 @@ class _BlurFilterOption extends _FilterOption {
   String get name => intensity.name;
 
   @override
-  Widget buildIcon(BuildContext context) => const Icon(Icons.blur_on, size: 24);
+  Widget buildIcon(BuildContext context) =>
+      Icon(context.streamIcons.blurFill, size: 24);
 }
 
 class _ImageFilterOption extends _FilterOption {

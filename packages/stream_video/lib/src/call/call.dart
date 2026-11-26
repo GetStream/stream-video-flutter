@@ -15,6 +15,7 @@ import 'package:synchronized/synchronized.dart';
 import '../../globals.dart';
 import '../../open_api/video/coordinator/api.dart' hide RecordingType, User;
 import '../../protobuf/video/sfu/event/events.pb.dart' show ReconnectDetails;
+import '../audio/platform_audio_controller.dart';
 import '../call_state.dart';
 import '../coordinator/coordinator_client.dart';
 import '../coordinator/models/coordinator_models.dart';
@@ -49,7 +50,6 @@ import '../webrtc/model/rtc_video_dimension.dart';
 import '../webrtc/peer_connection.dart';
 import '../webrtc/peer_connection_factory.dart';
 import '../webrtc/peer_type.dart';
-import '../webrtc/rtc_audio_api/rtc_audio_api.dart' as rtc_audio;
 import '../webrtc/rtc_media_device/rtc_media_device.dart';
 import '../webrtc/rtc_media_device/rtc_media_device_notifier.dart';
 import '../webrtc/rtc_track/rtc_track.dart';
@@ -70,6 +70,7 @@ import 'events/call_closed_captions.dart';
 import 'events/call_coordinator_event_router.dart';
 import 'events/call_reactions.dart';
 import 'events/call_video_moderation.dart';
+import 'media/call_audio_interruptions.dart';
 import 'media/local_media_controller.dart';
 import 'permissions/permissions_manager.dart';
 import 'ringing/call_ringing_controller.dart';
@@ -111,6 +112,7 @@ const _idReconnect = 9;
 const _idNativeWebRtc = 10;
 const _idAudioPlayback = 11;
 const _idAppLifecycle = 12;
+const _idAudioInterruptions = 13;
 
 const _tag = 'SV:Call';
 int _callSeq = 1;
@@ -734,6 +736,21 @@ class Call {
   /// Sets reactions on participants, and clears them after a while.
   late final _reactions = CallReactions(stateManager: _stateManager);
 
+  /// Applies the platform's interruptions of this call's audio.
+  late final _audioInterruptions = CallAudioInterruptions(
+    stateManager: _stateManager,
+    // A suspended call's audio does not run while another call's does.
+    isActive: () =>
+        isActiveCall &&
+        _stateManager.callState.status.isAlreadyJoined &&
+        !_stateManager.callState.isAudioSuspended,
+    reaction: () =>
+        _stateManager.callState.preferences.audioInterruptionReaction,
+    onStarted: _media.onAudioInterruptionStarted,
+    onEnded: _media.onAudioInterruptionEnded,
+    logger: _logger,
+  );
+
   /// Applies and clears video moderation.
   late final _moderation = CallVideoModeration(
     stateManager: _stateManager,
@@ -802,6 +819,7 @@ class Call {
       if (_host.setsUpMedia) {
         _observeNativeWebRtcEventStream();
         _observeWebAudioPlaybackBlocked();
+        _observeAudioInterruptions();
       }
       _observeAppLifecycle();
 
@@ -820,13 +838,30 @@ class Call {
   /// Mirrors the browser's autoplay-policy blocking, reported by the web audio
   /// layer, into [CallState] — so the app can show a "tap to enable sound"
   /// affordance and call
-  /// `RtcMediaDeviceNotifier.instance.resumeWebAudioPlayback()` from the
+  /// `PlatformAudioController.instance.resumeWebAudioPlayback()` from the
   /// gesture.
   void _observeWebAudioPlaybackBlocked() {
     _subscriptions.add(
       _idAudioPlayback,
-      _rtcMediaDeviceNotifier.webAudioPlaybackBlockedChanges.listen((blocked) {
+      PlatformAudioController.instance.webAudioPlaybackBlockedChanges.listen((
+        blocked,
+      ) {
         _stateManager.rtcSetWebAudioPlaybackBlocked(isBlocked: blocked);
+      }),
+    );
+  }
+
+  /// Keeps [CallState.isAudioInterrupted] up to date and reacts to the
+  /// platform's interruptions of this call's audio.
+  void _observeAudioInterruptions() {
+    _subscriptions.add(
+      _idAudioInterruptions,
+      PlatformAudioController.instance.audioInterruptions.listen((
+        interrupted,
+      ) {
+        unawaited(
+          _audioInterruptions.onInterruption(interrupted: interrupted),
+        );
       }),
     );
   }
@@ -1746,7 +1781,7 @@ class Call {
   /// Whether [setAudioOutputDevice] can route audio on this platform. See
   /// [RtcMediaDeviceNotifier.isAudioOutputSelectionSupported].
   bool checkIfAudioOutputChangeSupported() {
-    return rtc_audio.checkIfAudioOutputChangeSupported();
+    return rtc.webRtcCapabilities.supportsAudioOutputSelection;
   }
 
   /// Sets the mirror state for a remote participant's video track.

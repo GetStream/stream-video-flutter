@@ -187,7 +187,7 @@ class RtcSubscriber {
   Future<Result<None>> setAudioSink(RtcMediaDevice device) async {
     final audioTracks = this.audioTracks;
 
-    if (!rtc_audio.checkIfAudioOutputChangeSupported()) {
+    if (!rtc.webRtcCapabilities.supportsAudioOutputSelection) {
       _logger.w(
         () =>
             '[setAudioSink] rejected: Audio Output device change is not supported on this browser.',

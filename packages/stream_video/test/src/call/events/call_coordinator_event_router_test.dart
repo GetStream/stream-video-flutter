@@ -120,7 +120,8 @@ void main() {
       await router.route(countEvent(byRole: const {}));
       await router.route(countEvent(byRole: const {'user': 0}));
 
-      expect(stateManager.callState.participantCount, 0);
+      // Anonymous viewers count, but do not keep the call from being empty.
+      expect(stateManager.callState.participantCount, 2);
       expect(calls, ['noParticipantsLeft', 'noParticipantsLeft']);
     },
   );
@@ -144,7 +145,8 @@ void main() {
 
     await router.route(countEvent());
 
-    expect(stateManager.callState.participantCount, 4);
+    // The roles' sum plus the anonymous participants.
+    expect(stateManager.callState.participantCount, 6);
     expect(stateManager.callState.anonymousParticipantCount, 2);
   });
 

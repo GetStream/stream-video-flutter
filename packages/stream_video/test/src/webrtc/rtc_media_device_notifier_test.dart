@@ -7,6 +7,7 @@ import 'package:stream_video/src/call/stats/trace_tag.dart';
 import 'package:stream_video/src/webrtc/rtc_media_device/device_enumeration_trigger.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import '../../fixtures/webrtc_capabilities.dart';
 
 const _camera = {
   'deviceId': '0',
@@ -182,6 +183,50 @@ void main() {
     expect(getSourcesCalls, 2);
   });
 
+  group('the iOS earpiece', () {
+    bool hasEarpiece(List<RtcMediaDevice> devices) => devices.any(
+      (device) =>
+          device.id == AudioDefaultDevice.earpiece &&
+          device.kind == RtcMediaDeviceKind.audioOutput,
+    );
+
+    test('is added where enumeration leaves it out', () async {
+      overrideWebRtcCapabilities(platform: PlatformType.ios);
+
+      final devices = await notifier.enumerateDevices();
+
+      expect(hasEarpiece(devices.getDataOrNull()!), isTrue);
+    });
+
+    test('is not added twice when enumeration lists it', () async {
+      overrideWebRtcCapabilities(platform: PlatformType.ios);
+      sources = [
+        ..._sources,
+        {
+          'deviceId': AudioDefaultDevice.earpiece,
+          'groupId': 'Receiver',
+          'kind': 'audiooutput',
+          'label': 'Receiver',
+        },
+      ];
+
+      final devices = (await notifier.enumerateDevices()).getDataOrNull()!;
+
+      expect(
+        devices.where((d) => d.id == AudioDefaultDevice.earpiece),
+        hasLength(1),
+      );
+    });
+
+    test('is not added elsewhere', () async {
+      overrideWebRtcCapabilities(platform: PlatformType.android);
+
+      final devices = await notifier.enumerateDevices();
+
+      expect(hasEarpiece(devices.getDataOrNull()!), isFalse);
+    });
+  });
+
   group('errors', () {
     test('an empty device list fails with a message for each call', () async {
       sources = [];
@@ -260,170 +305,6 @@ void main() {
         (record) => record.tag == TraceTag.enumerateDevices,
       );
       expect(results, hasLength(1));
-    });
-  });
-
-  group('audio playout pause', () {
-    late Future<void> Function() originalPause;
-    late Future<void> Function() originalResume;
-    final nativeCalls = <String>[];
-    Exception? pauseError;
-
-    setUp(() {
-      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
-      nativeCalls.clear();
-      pauseError = null;
-      originalPause = notifier.nativePauseAudioPlayout;
-      originalResume = notifier.nativeResumeAudioPlayout;
-      notifier
-        ..nativePauseAudioPlayout = () async {
-          nativeCalls.add('pause');
-          if (pauseError case final error?) throw error;
-        }
-        ..nativeResumeAudioPlayout = () async => nativeCalls.add('resume');
-    });
-
-    tearDown(() async {
-      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
-      pauseError = null;
-      if (notifier.isAudioPlayoutPaused) await notifier.resumeAudioPlayout();
-      notifier
-        ..nativePauseAudioPlayout = originalPause
-        ..nativeResumeAudioPlayout = originalResume;
-      CurrentPlatform.debugCurrentPlatformOverride = null;
-    });
-
-    test('starts unpaused and emits only when the state changes', () async {
-      expect(notifier.isAudioPlayoutPaused, isFalse);
-
-      final emitted = <bool>[];
-      final subscription = notifier.audioPlayoutPausedChanges.listen(
-        emitted.add,
-      );
-
-      await notifier.pauseAudioPlayout();
-      await notifier.pauseAudioPlayout();
-      expect(notifier.isAudioPlayoutPaused, isTrue);
-
-      await notifier.resumeAudioPlayout();
-      await notifier.resumeAudioPlayout();
-      expect(notifier.isAudioPlayoutPaused, isFalse);
-
-      await subscription.cancel();
-      expect(emitted, [false, true, false]);
-      expect(nativeCalls, ['pause', 'pause', 'resume', 'resume']);
-    });
-
-    for (final platform in [PlatformType.windows, PlatformType.linux]) {
-      test('does nothing on ${platform.name}', () async {
-        CurrentPlatform.debugCurrentPlatformOverride = platform;
-
-        expect(notifier.isAudioPlayoutPauseSupported, isFalse);
-        await notifier.pauseAudioPlayout();
-
-        expect(notifier.isAudioPlayoutPaused, isFalse);
-        expect(nativeCalls, isEmpty);
-      });
-    }
-
-    test('a pause that throws leaves the state unchanged', () async {
-      final error = Exception('pause failed');
-      pauseError = error;
-
-      await expectLater(notifier.pauseAudioPlayout(), throwsA(same(error)));
-
-      expect(notifier.isAudioPlayoutPaused, isFalse);
-    });
-  });
-
-  group('AudioRouteChangeReason', () {
-    test('has the AVAudioSessionRouteChangeReason codes', () {
-      expect(
-        {
-          for (final reason in AudioRouteChangeReason.values)
-            reason: reason.code,
-        },
-        {
-          AudioRouteChangeReason.unknown: 0,
-          AudioRouteChangeReason.newDeviceAvailable: 1,
-          AudioRouteChangeReason.oldDeviceUnavailable: 2,
-          AudioRouteChangeReason.categoryChange: 3,
-          AudioRouteChangeReason.override: 4,
-          AudioRouteChangeReason.wakeFromSleep: 6,
-          AudioRouteChangeReason.noSuitableRouteForCategory: 7,
-          AudioRouteChangeReason.routeConfigurationChange: 8,
-        },
-      );
-    });
-
-    test('maps each code back, and an unknown or missing one to unknown', () {
-      for (final reason in AudioRouteChangeReason.values) {
-        expect(AudioRouteChangeReason.fromCode(reason.code), reason);
-      }
-      expect(
-        AudioRouteChangeReason.fromCode(5),
-        AudioRouteChangeReason.unknown,
-      );
-      expect(
-        AudioRouteChangeReason.fromCode(null),
-        AudioRouteChangeReason.unknown,
-      );
-    });
-
-    test(
-      'counts only a category or route configuration change as the system re-routing',
-      () {
-        expect(
-          AudioRouteChangeReason.values.where(
-            (reason) => reason.isSystemReconfiguration,
-          ),
-          [
-            AudioRouteChangeReason.categoryChange,
-            AudioRouteChangeReason.routeConfigurationChange,
-          ],
-        );
-      },
-    );
-  });
-
-  group('the onAudioRouteChange message from the WebRTC plugin', () {
-    test('carries the device and the reason', () {
-      final event = RtcMediaDeviceNotifier.nativeWebRtcEventFrom({
-        'onAudioRouteChange': {
-          'deviceId': 'Speaker',
-          'label': 'Speaker',
-          'reason': 8,
-        },
-      });
-
-      expect(event, isA<AudioRouteChangedEvent>());
-      final routeChange = event! as AudioRouteChangedEvent;
-      expect(routeChange.device.id, 'Speaker');
-      expect(routeChange.device.kind, RtcMediaDeviceKind.audioOutput);
-      expect(
-        routeChange.reason,
-        AudioRouteChangeReason.routeConfigurationChange,
-      );
-    });
-
-    test('without a reason has an unknown one', () {
-      final event = RtcMediaDeviceNotifier.nativeWebRtcEventFrom({
-        'onAudioRouteChange': {'deviceId': 'Receiver'},
-      });
-
-      expect(
-        (event! as AudioRouteChangedEvent).reason,
-        AudioRouteChangeReason.unknown,
-      );
-    });
-
-    test('without a device is dropped', () {
-      expect(
-        RtcMediaDeviceNotifier.nativeWebRtcEventFrom({
-          'onAudioRouteChange': {'reason': 8},
-        }),
-        isNull,
-      );
     });
   });
 }

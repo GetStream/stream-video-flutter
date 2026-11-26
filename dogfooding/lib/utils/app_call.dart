@@ -22,6 +22,7 @@ Call makeAppCall(
       closedCaptionsVisibleCaptions: 3,
       closedCaptionsVisibilityDurationMs: 5000,
       clientPublishOptions: publishOptions,
+      audioInterruptionReaction: AudioInterruptionReaction.muteMicrophone,
     ),
   );
 }

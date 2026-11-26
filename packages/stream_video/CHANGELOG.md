@@ -2,7 +2,14 @@
 
 ### ⚠️ Breaking
 
+- The app-wide audio members of `RtcMediaDeviceNotifier` moved to `PlatformAudioController.instance`: `nativeWebRtcEventsStream`, `speechActivityStream`, `triggeriOSAudioRouteSelectionUI`, `isAudioPlayoutPauseSupported`, `isAudioPlayoutPaused`, `audioPlayoutPausedChanges`, `pauseAudioPlayout`, `resumeAudioPlayout`, `resumeWebAudioPlayback`, `regainAndroidAudioFocus` and `reinitializeAudioConfiguration`.
+- `PlatformAudioController` is `@sealed`, so a test mock that implements it gets a `subtype_of_sealed_class` warning; add `// ignore: subtype_of_sealed_class` to it.
+- `ScreenSharingStoppedEvent` carries a `trackId` instead of a `data` map, and `ScreenSharingStartedEvent` has no `data`.
+- `CallState.participantCount` includes the anonymous participants before the call is joined too, as it already did once joined. `anonymousParticipantCount` says how many of them are anonymous.
+- `RtcMediaDeviceNotifier.handleCallInterruptionCallbacks` is removed: each call reports interruptions of its audio on `CallState.isAudioInterrupted` and reacts as `CallPreferences.audioInterruptionReaction` says, with `AudioInterruptionReaction.muteMicrophone` for what the documented callbacks did. The SDK enables the WebRTC plugin's interruption events, so don't call `platformEvents.enableInterruptionEvents` yourself. On Android an interruption is now only a loss of audio focus, so `READ_PHONE_STATE` is not needed.
+- `CallPreferences` has a new getter, `audioInterruptionReaction`. If your app implements `CallPreferences` directly, add it to your implementation.
 - `PushNotificationManager` has a new method, `setCallAudioOutputDeviceByCid`. A class that `implements` it has to add it; one that `extends` it inherits a no-op.
+- `PushNotificationManager` has a new getter, `systemManagedCallCids`. A class that `implements` it has to add it; one that `extends` it inherits one that reports no calls.
 - `PushNotificationManager` has three new methods that a call uses to tell the native call UI what happened: `onRingEnded` when its ring is over before the user answered it on this device, `onCallLeft` when a call this device joined or accepted is left, and `onCallAccepted` when the user accepts it in the app. A class that `implements` it has to add them; one that `extends` it inherits `onRingEnded` and `onCallLeft` calling `endCallByCid`, silently for `onRingEnded`, and an `onCallAccepted` that does nothing.
 - `RingingEvent` has a new subtype, `ActionCallDismissed`, so an exhaustive `switch` over ringing events needs a case for it. `disposeAfterResolvingRinging` no longer disposes on `ActionCallTimeout`, which iOS sends when CallKit's ring times out and Android now sends when a ring times out natively, so the client's own ring timeout can still reject the call.
 - `PushNotificationManager.showIncomingCall` takes a `ringTimeout`, so a custom implementation has to add it. `handleRingingFlowNotifications` passes the call's `autoRejectTimeout`.
@@ -73,6 +80,7 @@
 - `Call.end` ends the call on the server before leaving it, and a server that refuses the end now leaves the call running. It used to leave this side whatever the server said. A user without the end-call permission, or any other refusal, gets the failure back and stays in the call, so an app that showed "End call" to such users and relied on it acting as a leave has to call `Call.leave` instead. An end the server never decides on, because the device is offline, the request times out after 10 seconds, or the server fails (5xx) or rate limits it (429), still leaves this side, now as `DisconnectReasonLeft`, and returns the failure. An end that succeeds also fails the join stages still in flight, as a leave does, and a second `end()` while one is in flight waits for it rather than asking the server again.
 - `Call.leave` callers in the SDK now pass a reason, and `Call.reject` and `Call.end` take a new optional `initiator`. A class that implements `Call` has to add the parameter, and a test that verifies `call.leave()` with no arguments against the SDK's widgets has to match `reason` too.
 - Enabling the microphone fails, and releases it, when the call has no audio publish option.
+- `RtcLocalScreenShareTrackExt.compareScreenShareMode` is removed.
 
 ### ⚠️ Deprecated
 
@@ -89,6 +97,9 @@
 
 ### ✅ Added
 
+- `CallMetrics.subscriber.latency` holds the round-trip time of the connection this client subscribes on.
+- `AudioConfigurationPolicy.toFactoryOptions` returns the settings a peer connection factory is built with under the policy.
+- Added `PushNotificationManager.systemManagedCallCids`, the calls whose audio focus the system manages, such as Android's Telecom; WebRTC leaves the focus of those calls alone.
 - `StreamVideoOptions.ringingAudioConfigurationPolicy`, the audio configuration policy of ringing calls, incoming and outgoing. It falls back to `audioConfigurationPolicy` when null, the default. A call's own policy, from `CallPreferences.audioConfigurationPolicy` or `Call.setAudioConfigurationPolicy`, still wins. With the push notification package on iOS, a call answered from the CallKit screen gets its audio settings from the start.
 - `StreamVideoOptions.resolvedRingingAudioConfigurationPolicy`, the policy a ringing call without one of its own uses: `ringingAudioConfigurationPolicy`, else `audioConfigurationPolicy`.
 - `Call.audioConfigurationPolicy`, the audio configuration policy in effect for the call.
@@ -128,9 +139,12 @@
 - Added `RetryConfig.rpcTimeout`, how long a coordinator request may wait to connect and then for its response (10 seconds by default).
 - Added `StreamCallStatsReportReadyEvent`, delivered when the stats report of a call session is ready. The `call.stats_report_ready` event used to be dropped as unknown.
 - Added `CallPermission.sendData` for the `send-data` capability, which used to be read as `CallPermission.unknown` with a warning.
+- Added `CallState.isAudioInterrupted`, whether the platform is interrupting the call's audio, such as for a phone call, an alarm or another app playing audio.
+- Added `CallPreferences.audioInterruptionReaction` and `AudioInterruptionReaction`, what a call does while its audio is interrupted: nothing (the default), or turn the microphone off and back on when the interruption ends, unless the app changed it meanwhile.
 
 ### 🔄 Changed
 
+- [Android] `PlatformAudioController.regainAndroidAudioFocus` acts only during a call whose audio focus WebRTC manages, and ends the interruption only when focus is granted.
 - A leave for a failure or an SFU error tells the SFU the error's message, such as `failure: <message>` or `sfu error: <code>: <message>`, rather than the whole error with its stack trace.
 - A failed coordinator request's `StreamVideoException.message` now names the method, host and path, and a request the server never answered ends in a short reason such as `request timed out` or `connection failed` instead of the previous text.
 - Updated `stream_webrtc_flutter` to `^4.0.0`.
