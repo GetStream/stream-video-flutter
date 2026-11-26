@@ -8,7 +8,7 @@ import 'third_party/webrtc_interface/media_stream.dart';
 /// place. A filter that processes frames natively, inside the capture, can
 /// return its input unchanged.
 ///
-/// Extend [VideoFilter] or [AudioFilter] to write one.
+/// Extend [VideoFilter] or [AudioFilter] to write one. A subclass is itself declared `base`, `final` or `sealed`.
 abstract base class MediaStreamFilter {
   const MediaStreamFilter();
 
@@ -22,11 +22,15 @@ abstract base class MediaStreamFilter {
 }
 
 /// A [MediaStreamFilter] for camera and screen share video.
+///
+/// A subclass is itself declared `base`, `final` or `sealed`.
 abstract base class VideoFilter extends MediaStreamFilter {
   const VideoFilter();
 }
 
 /// A [MediaStreamFilter] for microphone audio.
+///
+/// A subclass is itself declared `base`, `final` or `sealed`.
 abstract base class AudioFilter extends MediaStreamFilter {
   const AudioFilter();
 }
