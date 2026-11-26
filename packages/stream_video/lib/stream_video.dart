@@ -7,8 +7,8 @@ library stream_video;
 
 export 'package:stream_core/stream_core.dart' hide LifecycleState, StreamLogger;
 
-/// End-to-end encryption, backed by the native `EncryptionManager`.
-export 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart'
+/// End-to-end encryption, backed by the registered `WebRtcEngine`.
+export 'package:stream_webrtc_interface/stream_webrtc_interface.dart'
     show
         E2eeEvent,
         E2eeEventType,

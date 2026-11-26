@@ -5,12 +5,9 @@ export 'package:stream_webrtc_interface/stream_webrtc_interface.dart'
 
 export 'src/native/ios_broadcast_picker.dart'
     if (dart.library.js_interop) 'src/web/ios_broadcast_picker.dart';
-export 'src/native/native_audio_renderer.dart'
-    if (dart.library.js_interop) 'src/web/web_audio_renderer.dart'
-    show createAudioRenderer, setAudioPlayoutPaused;
+export 'src/native/native_webrtc_engine.dart'
+    if (dart.library.js_interop) 'src/web/web_webrtc_engine.dart';
 export 'src/third_party/flutter_webrtc/desktop_capturer.dart';
-export 'src/third_party/flutter_webrtc/e2ee/encryption_manager.dart';
-export 'src/third_party/flutter_webrtc/e2ee/encryption_types.dart';
 export 'src/third_party/flutter_webrtc/helper.dart';
 export 'src/third_party/flutter_webrtc/media_devices.dart';
 export 'src/third_party/flutter_webrtc/media_recorder.dart';

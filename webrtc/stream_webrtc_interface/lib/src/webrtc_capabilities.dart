@@ -21,6 +21,8 @@ final class WebRtcCapabilities {
     required this.reportsAudioInterruptions,
     required this.supportsSystemManagedAudioFocus,
     this.needsRemoteAudioReattach = false,
+    this.supportsEncryption = false,
+    this.supportsAudioModuleMicrophoneMute = false,
   });
 
   /// Whether each call can build its own peer connection factory, with its
@@ -77,6 +79,14 @@ final class WebRtcCapabilities {
   /// again. WebKit browsers.
   final bool needsRemoteAudioReattach;
 
+  /// Whether outgoing and incoming frames can be end-to-end encrypted, see
+  /// `EncryptionManager`. Android, iOS and macOS.
+  final bool supportsEncryption;
+
+  /// Whether the microphone can be muted in the audio device module, see
+  /// `PeerConnectionFactory.setMicrophoneMuted`. iOS and macOS.
+  final bool supportsAudioModuleMicrophoneMute;
+
   WebRtcCapabilities copyWith({
     bool? supportsPerCallFactory,
     bool? supportsAudioPlayoutPause,
@@ -91,6 +101,8 @@ final class WebRtcCapabilities {
     bool? reportsAudioInterruptions,
     bool? supportsSystemManagedAudioFocus,
     bool? needsRemoteAudioReattach,
+    bool? supportsEncryption,
+    bool? supportsAudioModuleMicrophoneMute,
   }) {
     return WebRtcCapabilities(
       supportsPerCallFactory:
@@ -120,6 +132,10 @@ final class WebRtcCapabilities {
           this.supportsSystemManagedAudioFocus,
       needsRemoteAudioReattach:
           needsRemoteAudioReattach ?? this.needsRemoteAudioReattach,
+      supportsEncryption: supportsEncryption ?? this.supportsEncryption,
+      supportsAudioModuleMicrophoneMute:
+          supportsAudioModuleMicrophoneMute ??
+          this.supportsAudioModuleMicrophoneMute,
     );
   }
 
@@ -139,6 +155,8 @@ final class WebRtcCapabilities {
       'reportsAudioInterruptions': reportsAudioInterruptions,
       'supportsSystemManagedAudioFocus': supportsSystemManagedAudioFocus,
       'needsRemoteAudioReattach': needsRemoteAudioReattach,
+      'supportsEncryption': supportsEncryption,
+      'supportsAudioModuleMicrophoneMute': supportsAudioModuleMicrophoneMute,
     };
     final enabled = [
       for (final MapEntry(:key, :value) in flags.entries)
@@ -165,7 +183,10 @@ final class WebRtcCapabilities {
           other.reportsAudioInterruptions == reportsAudioInterruptions &&
           other.supportsSystemManagedAudioFocus ==
               supportsSystemManagedAudioFocus &&
-          other.needsRemoteAudioReattach == needsRemoteAudioReattach;
+          other.needsRemoteAudioReattach == needsRemoteAudioReattach &&
+          other.supportsEncryption == supportsEncryption &&
+          other.supportsAudioModuleMicrophoneMute ==
+              supportsAudioModuleMicrophoneMute;
 
   @override
   int get hashCode => Object.hash(
@@ -182,6 +203,8 @@ final class WebRtcCapabilities {
     reportsAudioInterruptions,
     supportsSystemManagedAudioFocus,
     needsRemoteAudioReattach,
+    supportsEncryption,
+    supportsAudioModuleMicrophoneMute,
   );
 }
 

@@ -2,10 +2,11 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../call/stats/trace_tag.dart';
 import '../logger/stream_log.dart';
+import '../webrtc/webrtc_engine.dart';
 
 const _tag = 'SV:RemoteAudioPlayback';
 
@@ -26,7 +27,7 @@ typedef AudioRendererFactory =
 /// swap; the gap makes the detach real.
 const _reattachDelay = Duration(milliseconds: 25);
 
-/// Plays the remote audio tracks of every call through the WebRTC plugin's
+/// Plays the remote audio tracks of every call through the WebRTC engine's
 /// [rtc.RTCAudioRenderer]s, one per track id, and decides when to re-attach
 /// them, which tracks are blocked by the browser's autoplay policy and what is
 /// traced.
@@ -34,8 +35,8 @@ const _reattachDelay = Duration(milliseconds: 25);
 class RemoteAudioPlayback {
   RemoteAudioPlayback({
     this.traceHandler,
-    this._createRenderer = rtc.createAudioRenderer,
-  });
+    AudioRendererFactory? createRenderer,
+  }) : _createRenderer = createRenderer ?? webRtcEngine.createAudioRenderer;
 
   static RemoteAudioPlayback? _instance;
 
@@ -155,7 +156,7 @@ class RemoteAudioPlayback {
   /// [id]. Only where the output is selected per renderer; elsewhere the
   /// platform's audio session selects it.
   Future<void> setSinkId(String id, String deviceId) async {
-    final capabilities = rtc.webRtcCapabilities;
+    final capabilities = webRtcEngine.capabilities;
     if (!capabilities.selectsAudioOutputPerElement) return;
 
     if (!capabilities.supportsAudioOutputSelection) {
@@ -248,7 +249,7 @@ class RemoteAudioPlayback {
   /// renegotiation that adds an audio source. True on WebKit only, where such
   /// a renegotiation silences the audio already playing; elsewhere [reattach]
   /// does nothing, so the offers need not be compared at all.
-  bool get needsReattach => rtc.webRtcCapabilities.needsRemoteAudioReattach;
+  bool get needsReattach => webRtcEngine.capabilities.needsRemoteAudioReattach;
 
   /// The re-attach waiting out [_reattachDelay], if one is.
   ///

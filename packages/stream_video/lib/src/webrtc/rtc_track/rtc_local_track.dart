@@ -1,10 +1,11 @@
 import 'package:collection/collection.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../../../stream_video.dart';
 import '../../exceptions/video_exception.dart';
 import '../audio/audio_input_switcher.dart';
 import '../rtc_media_device/device_enumeration_trigger.dart';
+import '../webrtc_engine.dart';
 
 const kLocalTrackIdPrefix = 'local';
 
@@ -31,16 +32,16 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   /// Per-call native factory the track is pinned to. Carried on the track so
   /// [recreate] can target the same factory. Null on web, which has no
   /// per-call factory concept.
-  final rtc.NativePeerConnectionFactory? nativeFactory;
+  final rtc.PeerConnectionFactory? nativeFactory;
 
   static Future<RtcLocalAudioTrack> audio({
     String trackIdPrefix = kLocalTrackIdPrefix,
     AudioConstraints constraints = const AudioConstraints(),
-    rtc.NativePeerConnectionFactory? nativeFactory,
+    rtc.PeerConnectionFactory? nativeFactory,
   }) async {
     streamLog.i(_tag, () => 'Creating audio track');
 
-    final stream = await rtc.navigator.mediaDevices.getMedia(
+    final stream = await webRtcEngine.mediaDevices.getMedia(
       constraints,
       nativeFactory: nativeFactory,
     );
@@ -66,10 +67,10 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   static Future<RtcLocalCameraTrack> camera({
     String trackIdPrefix = kLocalTrackIdPrefix,
     CameraConstraints constraints = const CameraConstraints(),
-    rtc.NativePeerConnectionFactory? nativeFactory,
+    rtc.PeerConnectionFactory? nativeFactory,
   }) async {
     streamLog.i(_tag, () => 'Creating camera track');
-    final stream = await rtc.navigator.mediaDevices.getMedia(
+    final stream = await webRtcEngine.mediaDevices.getMedia(
       constraints,
       nativeFactory: nativeFactory,
     );
@@ -104,11 +105,11 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   static Future<RtcLocalScreenShareTrack> screenShare({
     String trackIdPrefix = kLocalTrackIdPrefix,
     ScreenShareConstraints constraints = const ScreenShareConstraints(),
-    rtc.NativePeerConnectionFactory? nativeFactory,
+    rtc.PeerConnectionFactory? nativeFactory,
   }) async {
     streamLog.i(_tag, () => 'Creating screen share track');
 
-    final stream = await rtc.navigator.mediaDevices.getMedia(
+    final stream = await webRtcEngine.mediaDevices.getMedia(
       constraints,
       nativeFactory: nativeFactory,
     );
@@ -233,7 +234,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     bool? stopTrackOnMute,
     RtcVideoDimension? videoDimension,
     List<rtc.MediaStreamTrack>? clonedTracks,
-    rtc.NativePeerConnectionFactory? nativeFactory,
+    rtc.PeerConnectionFactory? nativeFactory,
   }) {
     return RtcLocalTrack(
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
@@ -272,7 +273,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     await stop();
 
     final constraints = mediaConstraints ?? this.mediaConstraints;
-    final newStream = await rtc.navigator.mediaDevices.getMedia(
+    final newStream = await webRtcEngine.mediaDevices.getMedia(
       constraints,
       nativeFactory: nativeFactory,
     );
@@ -364,7 +365,7 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
   Future<RtcLocalCameraTrack> flipCamera() async {
     streamLog.i(_cameraTag, () => 'Flipping camera');
 
-    final capabilities = rtc.webRtcCapabilities;
+    final capabilities = webRtcEngine.capabilities;
     if (!capabilities.supportsCameraSwitch) {
       streamLog.w(
         _cameraTag,
@@ -375,8 +376,7 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
       );
     }
 
-    // Use the native switchCamera method.
-    final isFrontCamera = await rtc.Helper.switchCamera(mediaTrack);
+    final isFrontCamera = await webRtcEngine.camera.switchCamera(mediaTrack);
 
     final mediaDevicesResult = await RtcMediaDeviceNotifier.instance
         .enumerateDevicesFor(

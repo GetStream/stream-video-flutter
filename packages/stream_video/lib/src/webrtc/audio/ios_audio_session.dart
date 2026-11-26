@@ -1,24 +1,25 @@
 import 'package:meta/meta.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../../../stream_video.dart';
 import '../../errors/stream_video_exception_composer.dart';
 import '../apple_audio_route.dart';
+import '../webrtc_engine.dart';
 import 'audio_session.dart';
 
 /// The iOS audio session of a call and its audio output.
 ///
-/// A thin wrapper over `Helper.setAppleAudioConfiguration` and
-/// `Helper.selectAudioOutput`, which remembers the configuration it applied
+/// A thin wrapper over `WebRtcAudio.setAppleAudioConfiguration` and
+/// `WebRtcAudio.selectAudioOutput`, which remembers the configuration it applied
 /// last so it can be restored.
 @internal
 class IosAudioSession implements AudioSession {
   IosAudioSession({
-    Future<void> Function(rtc.AppleAudioConfiguration) this._apply =
-        rtc.Helper.setAppleAudioConfiguration,
-    Future<void> Function(String deviceId) this._selectAudioOutput =
-        rtc.Helper.selectAudioOutput,
-  });
+    Future<void> Function(rtc.AppleAudioConfiguration)? apply,
+    Future<void> Function(String deviceId)? selectAudioOutput,
+  }) : _apply = apply ?? webRtcEngine.audio.setAppleAudioConfiguration,
+       _selectAudioOutput =
+           selectAudioOutput ?? webRtcEngine.audio.selectAudioOutput;
 
   /// Sends a configuration to the platform.
   final Future<void> Function(rtc.AppleAudioConfiguration) _apply;
