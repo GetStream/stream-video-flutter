@@ -23,6 +23,7 @@ import '../utils/feedback_dialog.dart';
 import '../widgets/closed_captions_widget.dart';
 import '../widgets/e2ee_key_notification.dart';
 import '../widgets/livestream_go_live_button.dart';
+import '../widgets/minimum_top_inset.dart';
 import '../widgets/settings_menu/developer_options_menu.dart';
 import '../widgets/settings_menu/more_menu.dart';
 import '../widgets/settings_window/settings_tabs.dart';
@@ -676,7 +677,7 @@ class _CallScreenState extends State<CallScreen>
     }
 
     // ignore: deprecated_member_use
-    return WillPopScope(
+    final screen = WillPopScope(
       onWillPop: () async {
         // Any panel the screen is holding, not just one being painted: a
         // panel is still visible while it animates out, and through a
@@ -871,6 +872,10 @@ class _CallScreenState extends State<CallScreen>
         ),
       ),
     );
+
+    // Keeps the call app bar clear of a rounded display corner where iOS
+    // reports no top inset, as the home and lobby screens do.
+    return MinimumTopInset(child: screen);
   }
 }
 
