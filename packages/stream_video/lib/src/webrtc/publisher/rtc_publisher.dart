@@ -1595,16 +1595,7 @@ class RtcPublisher {
           return const Result.success(none);
         }
 
-        var out = sending = filtered.copyWith(clonedTracks: const []);
-        final clones = <rtc.MediaStreamTrack>[];
-        for (final transceiver in transceiversManager.getTransceiversForTrack(
-          trackId,
-        )) {
-          if (!_isHeld(current)) break;
-          final sent = await out.sendOn([transceiver]);
-          clones.addAll(sent.clonedTracks);
-          out = sending = out.copyWith(clonedTracks: [...clones]);
-        }
+        final out = sending = await _sendWhileHeld(current, filtered);
         if (!current.mediaTrack.enabled) out.disable();
 
         if (!_isHeld(current)) {
@@ -1626,6 +1617,31 @@ class RtcPublisher {
         return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
       }
     });
+  }
+
+  /// Sends [filtered] on every sender that carries [current]'s track, for as
+  /// long as [current] is held, and returns it with the clones the senders
+  /// made. Stops those clones when a send throws.
+  Future<RtcLocalTrack> _sendWhileHeld(
+    RtcLocalTrack current,
+    RtcLocalTrack filtered,
+  ) async {
+    var out = filtered.copyWith(clonedTracks: const []);
+    final clones = <rtc.MediaStreamTrack>[];
+    try {
+      for (final transceiver in transceiversManager.getTransceiversForTrack(
+        current.trackId,
+      )) {
+        if (!_isHeld(current)) break;
+        final sent = await out.sendOn([transceiver]);
+        clones.addAll(sent.clonedTracks);
+        out = out.copyWith(clonedTracks: [...clones]);
+      }
+    } catch (_) {
+      await out.stopClones();
+      rethrow;
+    }
+    return out;
   }
 
   /// Keeps [updated] in place of [current] when [current] is still the held
