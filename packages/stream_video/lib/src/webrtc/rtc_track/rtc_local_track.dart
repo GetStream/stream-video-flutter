@@ -284,17 +284,24 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     await _release();
 
     final constraints = mediaConstraints ?? this.mediaConstraints;
+    final newStream = await _captureOrDisable(constraints);
+
+    return copyWith(
+      mediaTrack: newStream.getTracks().first,
+      mediaStream: newStream,
+      mediaConstraints: constraints,
+      clonedTracks: const [],
+    );
+  }
+
+  /// Captures a stream with [constraints] on the same per-call factory.
+  /// When that fails nothing replaces the released capture, so this track
+  /// is disabled like any stopped track.
+  Future<rtc.MediaStream> _captureOrDisable(T constraints) async {
     try {
-      final newStream = await rtc.navigator.mediaDevices.getMedia(
+      return await rtc.navigator.mediaDevices.getMedia(
         constraints,
         nativeFactory: nativeFactory,
-      );
-
-      return copyWith(
-        mediaTrack: newStream.getTracks().first,
-        mediaStream: newStream,
-        mediaConstraints: constraints,
-        clonedTracks: const [],
       );
     } catch (_) {
       disable();

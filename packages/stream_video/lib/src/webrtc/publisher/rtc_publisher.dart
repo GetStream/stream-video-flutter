@@ -1511,13 +1511,23 @@ class RtcPublisher {
         return await _keepIfStillHeld(current, sending, tag);
       } catch (e, stk) {
         _logger.e(() => '$tag failed for $trackId: $e');
-        await captured?.stop();
-        // The old capture is released either way, so a track still held
-        // reads, and is announced, as muted, and unmuting captures it again.
-        if (_isHeld(current)) current.disable();
+        await _releaseFailedRecapture(current, captured);
         return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
       }
     });
+  }
+
+  /// Stops [captured], the new capture of a recapture that failed, if it got
+  /// that far.
+  ///
+  /// The old capture of [current] is released either way, so a track still
+  /// held reads, and is announced, as muted, and unmuting captures it again.
+  Future<void> _releaseFailedRecapture(
+    RtcLocalTrack current,
+    RtcLocalTrack? captured,
+  ) async {
+    await captured?.stop();
+    if (_isHeld(current)) current.disable();
   }
 
   /// Keeps [updated] in place of [current] when [current] is still the held
