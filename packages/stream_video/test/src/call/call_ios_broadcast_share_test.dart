@@ -57,10 +57,24 @@ Matcher _isDefaultBroadcast(Call call) => isA<ScreenShareConstraints>()
 
 /// Pins how a call shares the screen through the iOS broadcast extension:
 /// enabling only shows the picker, and the share starts with the broadcast.
+
+/// A mock RTC manager whose audio session setup succeeds.
+MockRtcManager _rtcManager() {
+  final manager = MockRtcManager();
+  when(
+    () => manager.configureAudioSession(
+      policy: any(named: 'policy'),
+      speakerOn: any(named: 'speakerOn'),
+    ),
+  ).thenAnswer((_) async => const Result.success(none));
+  return manager;
+}
+
 void main() {
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
     registerMockFallbackValues();
+    registerFallbackValue(const AudioConfigurationPolicy.broadcaster());
     registerFallbackValue(const ScreenShareConstraints());
   });
 
@@ -153,6 +167,10 @@ void main() {
     IosBroadcastScreenShare.resetOwnership();
     // A second call that joins gets the second session.
     harness = ConnectionHarness(sessionCount: 2);
+    for (final session in harness.sessions) {
+      final manager = _rtcManager();
+      when(() => session.rtcManager).thenReturn(manager);
+    }
     final clientState = harness.streamVideo.state;
     when(() => clientState.setActiveCall(any())).thenAnswer((
       invocation,

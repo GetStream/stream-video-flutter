@@ -316,10 +316,11 @@ class IosBroadcastScreenShare {
     return owns;
   }
 
-  /// Whether a share now would reach a session that is applying the connect
-  /// options, or one being replaced that has not applied them.
+  /// Whether a share now would reach a session that has not joined the SFU,
+  /// is applying the connect options, or is being replaced without having
+  /// applied them.
   bool _awaitsSession(CallSession session) {
-    if (_isApplying(session)) return true;
+    if (session.rtcManager == null || _isApplying(session)) return true;
     if (_hasApplied(session)) return false;
     final status = _state.status;
     return status.isMigrating ||

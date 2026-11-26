@@ -32,6 +32,8 @@ class _BroadcastEventsController extends MockPlatformAudioController {
 
 MockCallSession _session() {
   final session = MockCallSession();
+  final manager = _rtcManager();
+  when(() => session.rtcManager).thenReturn(manager);
   final track = MockRtcLocalTrack();
   when(() => track.mediaTrack).thenReturn(_FakeMediaStreamTrack());
   when(
@@ -45,9 +47,23 @@ MockCallSession _session() {
 
 /// Pins how a call's connect options carry an iOS broadcast from one session
 /// to the next.
+
+/// A mock RTC manager whose audio session setup succeeds.
+MockRtcManager _rtcManager() {
+  final manager = MockRtcManager();
+  when(
+    () => manager.configureAudioSession(
+      policy: any(named: 'policy'),
+      speakerOn: any(named: 'speakerOn'),
+    ),
+  ).thenAnswer((_) async => const Result.success(none));
+  return manager;
+}
+
 void main() {
   setUpAll(() {
     registerMockFallbackValues();
+    registerFallbackValue(const AudioConfigurationPolicy.broadcaster());
     registerFallbackValue(const ScreenShareConstraints());
   });
 
@@ -235,6 +251,53 @@ void main() {
 
       expect(enabledOn(next).single?.useiOSBroadcastExtension, isTrue);
     });
+
+    test(
+      'parks a broadcast that starts before the session has its RTC manager',
+      () async {
+        final next = session = _session();
+        final manager = next.rtcManager;
+        when(() => next.rtcManager).thenReturn(null);
+
+        await emit(ScreenSharingStartedEvent());
+
+        verifyNotEnabledOn(next);
+        verifyNever(notifier.stopiOSBroadcast);
+
+        when(() => next.rtcManager).thenReturn(manager);
+        await controller.applyConnectOptions(session: next);
+
+        expect(enabledOn(next).single?.useiOSBroadcastExtension, isTrue);
+      },
+    );
+
+    test(
+      'keeps a broadcast that started during a failed apply for the next one',
+      () async {
+        final failing = session = _session();
+        final stopping = Completer<void>();
+        final unused = MockRtcLocalTrack();
+        when(() => unused.trackType).thenReturn(SfuTrackType.audio);
+        when(unused.stop).thenAnswer((_) => stopping.future);
+
+        final applying = controller.applyConnectOptions(
+          session: failing,
+          inheritedTracks: [unused],
+        );
+        await pumpEventQueue();
+        await emit(ScreenSharingStartedEvent());
+        stopping.completeError(StateError('stop failed'));
+        await expectLater(applying, throwsStateError);
+
+        verifyNotEnabledOn(failing);
+        verifyNever(notifier.stopiOSBroadcast);
+
+        final next = session = _session();
+        await controller.applyConnectOptions(session: next);
+
+        expect(enabledOn(next).single?.useiOSBroadcastExtension, isTrue);
+      },
+    );
 
     test('a session replaced while it applied does not share', () async {
       stateManager.lifecycleCallConnecting(
