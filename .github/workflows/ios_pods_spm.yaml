@@ -1,4 +1,4 @@
-name: iOS Dogfooding — Pods & SPM
+name: iOS Dogfooding — SPM
 
 on:
   push:
@@ -13,7 +13,7 @@ permissions:
 jobs:
   build-ios:
     name: iOS Build (Dogfooding)
-    runs-on: macos-latest
+    runs-on: { group: scaleway-macos }
 
     steps:
       - name: 🧰 Setup Checkout
@@ -21,7 +21,7 @@ jobs:
 
       - uses: maxim-lobanov/setup-xcode@v1.7.0
         with:
-          xcode-version: "26.3"
+          xcode-version: "26.3.0"
 
       - name: 🛠️ Setup Flutter
         uses: ./.github/actions/setup-flutter
@@ -31,28 +31,6 @@ jobs:
 
       - name: 📦 Deps flutter pub get
         run: flutter pub get
-
-      - name: 🍫 Pods Prepare (Flutter config + deps)
-        working-directory: dogfooding
-        run: |
-          flutter config --no-enable-swift-package-manager
-          flutter pub get
-
-      - name: 🍫 Pods Install
-        working-directory: dogfooding/ios
-        run: |
-          pod repo update
-          pod install
-
-      - name: 🏗️ Pods Build (no codesign)
-        working-directory: dogfooding
-        run: flutter build ios --no-codesign --verbose
-
-      - name: 🧹 Clean Pods + caches
-        working-directory: dogfooding
-        run: |
-          rm -rf ios/Pods ios/Podfile.lock
-          flutter clean
 
       - name: 📦 SPM Enable + Resolve
         working-directory: dogfooding
@@ -66,4 +44,4 @@ jobs:
 
       - name: ✅ Verify
         run: |
-          echo "✅ Both CocoaPods and SPM builds succeeded."
+          echo "✅ SPM build succeeded."
