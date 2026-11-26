@@ -17,7 +17,7 @@ dependencies:
     sdk: flutter
   flutter_background: ^1.0.0
   # Required for MediaRecorder example
-  gallery_saver_plus: 3.2.4
+  gal: ^2.3.2
   path_provider: ^2.0.2
   permission_handler: ^12.0.1
   sdp_transform: ^0.3.2

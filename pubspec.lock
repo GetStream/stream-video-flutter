@@ -989,14 +989,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
-  gallery_saver_plus:
-    dependency: transitive
-    description:
-      name: gallery_saver_plus
-      sha256: "179a2cf0a8d5d61957724e39cf5664a336d5ef28a4222543462dd9fc4c1a6af9"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.2.4"
   get_it:
     dependency: transitive
     description:
