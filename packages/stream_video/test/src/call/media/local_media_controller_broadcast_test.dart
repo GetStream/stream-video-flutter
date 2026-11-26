@@ -329,6 +329,21 @@ void main() {
       expect(enabledOn(next).single?.useiOSBroadcastExtension, isTrue);
     });
 
+    test(
+      'does not share a broadcast the user stopped sharing in the app',
+      () async {
+        await emit(ScreenSharingStartedEvent());
+        expect(enabledOn(session!).single?.useiOSBroadcastExtension, isTrue);
+        await controller.setScreenShareEnabled(enabled: false);
+
+        final next = session = _session();
+        await controller.applyConnectOptions(session: next);
+
+        verifyNotEnabledOn(next);
+        verifyNever(notifier.presentiOSBroadcastPicker);
+      },
+    );
+
     test('does not capture a broadcast that stopped', () async {
       await emit(ScreenSharingStartedEvent());
       await emit(ScreenSharingStoppedEvent());

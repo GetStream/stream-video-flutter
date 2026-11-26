@@ -545,6 +545,18 @@ void main() {
       expect(calls.single.$2?.useiOSBroadcastExtension, isTrue);
     });
 
+    test('is not shared by a second call that joins', () async {
+      await emit(ScreenSharingStartedEvent());
+      await joinedCall();
+      activeCalls().value = [];
+
+      final second = await joinedCall();
+      expect(activeCalls().value, [second]);
+
+      verifyNoScreenShare(harness.sessions[1]);
+      expect(sharing(second), isFalse);
+    });
+
     test('that stopped is not shared by the call that joins', () async {
       await emit(ScreenSharingStartedEvent());
       await emit(ScreenSharingStoppedEvent());

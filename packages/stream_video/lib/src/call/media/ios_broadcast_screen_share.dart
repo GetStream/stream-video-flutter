@@ -141,12 +141,15 @@ class IosBroadcastScreenShare {
         ScreenShareSource.forPlatform().usesBroadcastExtension(constraints);
   }
 
-  /// Turns the screen share option on for a broadcast that runs while
-  /// nobody requested it, when this is the client's only active call, so the
-  /// session applying the options shares it.
+  /// Turns the screen share option on for a running broadcast no call has
+  /// taken yet, when this call owns it, so the session applying the options
+  /// shares it. A broadcast a call took, and maybe stopped sharing since, is
+  /// left alone.
   void adoptRunningBroadcast() {
-    if (!_broadcast.isRunning || !_ownsBroadcast()) return;
-    if (_broadcastOption() != null) return;
+    if (!_broadcast.isRunning || _broadcast.isTaken || !_ownsBroadcast()) {
+      return;
+    }
+    _broadcast.isTaken = true;
 
     _logger.d(() => '[applyConnectOptions] sharing the running broadcast');
     _enableOption(_requestedConstraints ?? _broadcastConstraints());
@@ -175,6 +178,7 @@ class IosBroadcastScreenShare {
       _logger.v(() => '[onBroadcastStarted] shared by another call');
       return;
     }
+    _broadcast.isTaken = true;
     if (_state.localParticipant?.isScreenShareEnabled ?? false) {
       _logger.w(() => '[onBroadcastStarted] skipped: a screen share is live');
       return;
@@ -191,13 +195,14 @@ class IosBroadcastScreenShare {
   }
 
   /// Shares the running broadcast the screen share option asks for on
-  /// [session], when it is still the call's session. Called once a session
-  /// has applied the connect options, for a broadcast that started after the
-  /// apply passed the screen share.
+  /// [session], when it is still the call's session and the call is not
+  /// sharing yet. Called once a session has applied the connect options, for
+  /// a broadcast that started after the apply passed the screen share.
   Future<void> shareRunningBroadcast(CallSession session) async {
     final constraints = _broadcastOption();
     if (constraints == null || !_broadcast.isRunning) return;
     if (!identical(session, _session())) return;
+    if (_state.localParticipant?.isScreenShareEnabled ?? false) return;
 
     _logger.d(() => '[shareRunningBroadcast] sharing the running broadcast');
     await publish(constraints);
@@ -306,6 +311,10 @@ class _Broadcast {
   /// The call that showed the picker last, until the broadcast stops.
   Object? requester;
 
+  /// Whether a call took the running broadcast, so no other call, nor the
+  /// same one after the user stopped sharing it, takes it again.
+  bool isTaken = false;
+
   /// Follows the broadcast starts and stops in [events]. Does nothing when
   /// already following.
   void observe(Stream<NativeWebRtcEvent> events) {
@@ -321,10 +330,17 @@ class _Broadcast {
     });
   }
 
-  void onStarted() => isRunning = true;
+  /// Records a running broadcast. A start while it runs, which each call
+  /// also reports, changes nothing.
+  void onStarted() {
+    if (isRunning) return;
+    isRunning = true;
+    isTaken = false;
+  }
 
   void onStopped() {
     isRunning = false;
+    isTaken = false;
     requester = null;
   }
 
