@@ -262,7 +262,7 @@ jobs:
       matrix:
         package: ${{ fromJSON(needs.gate.outputs.ios_test_packages) }}
     timeout-minutes: 45
-    runs-on: macos-latest
+    runs-on: { group: scaleway-macos }
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
