@@ -221,7 +221,7 @@ melos:
         dirExists: test
 
     test:flutter:
-      run: melos exec -c 4 --fail-fast -- "flutter test --coverage"
+      run: melos exec -c 2 --fail-fast -- "flutter test --coverage"
       description: Run Flutter tests for a specific package in this project.
       packageFilters:
         flutter: true
