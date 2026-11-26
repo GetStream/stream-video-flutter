@@ -167,6 +167,14 @@ class PlatformAudioController {
         },
       );
 
+  /// Creates a detector of the local user's speech while the microphone is
+  /// muted, independent of every other detector. Android, iOS, macOS and the
+  /// browser; on Windows and Linux it never reports.
+  @internal
+  rtc.SpeechActivityDetector createSpeechActivityDetector() {
+    return platformEvents.createSpeechActivityDetector();
+  }
+
   /// The events the WebRTC plugin reports. Replaceable in tests, because the
   /// plugin reports interruptions only on Android and iOS hosts.
   /// A replacement does not reach the audio processing trace, which listens

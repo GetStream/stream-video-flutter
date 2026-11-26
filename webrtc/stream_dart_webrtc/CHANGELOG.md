@@ -3,7 +3,7 @@
 --------------------------------------------
 [Unreleased]
 
-* Added `platformEvents`, whose streams never emit in the browser.
+* Added `platformEvents`, whose `createSpeechActivityDetector` detects speech from a microphone capture; its streams never emit.
 * First version as `stream_dart_webrtc`, Stream's fork of `dart_webrtc` 1.8.2.
 * Licensed under the Stream licence; the code from upstream keeps its MIT licence (see `LICENSE`).
 * Added `webRtcCapabilities`, the capabilities of the browser.

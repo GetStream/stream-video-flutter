@@ -1,5 +1,7 @@
 import 'package:meta/meta.dart';
 
+import 'speech_activity_detector.dart';
+
 /// The audio output route the platform switched to.
 @immutable
 class AudioRoute {
@@ -135,8 +137,13 @@ abstract class WebRtcPlatformEvents {
   Stream<AudioRoute> get onAudioRouteChanged;
 
   /// The local user started or stopped speaking while the microphone is
-  /// muted. Android, iOS and macOS.
+  /// muted, reported by the audio device module. Android, iOS and macOS.
   Stream<SpeechActivity> get onSpeechActivity;
+
+  /// Creates a detector of the local user's speech while the microphone is
+  /// muted, independent of every other detector. Android, iOS, macOS and the
+  /// browser; on Windows and Linux it never reports.
+  SpeechActivityDetector createSpeechActivityDetector();
 
   /// The audio device module changed its audio processing. iOS and macOS.
   Stream<AudioProcessingState> get onAudioProcessingStateChanged;
