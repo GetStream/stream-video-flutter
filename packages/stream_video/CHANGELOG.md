@@ -9,7 +9,7 @@
 - The unused `InterruptionEvent`, `InterruptionBeginEvent` and `InterruptionEndEvent` are removed, and `NativeWebRtcEvent` is sealed.
 - `Call.ensureNativeFactory`, `RtcLocalTrack` and `MediaDevices.getMedia` take and return the `PeerConnectionFactory` contract instead of `NativePeerConnectionFactory`.
 - `EncryptionManager.create` throws `UnsupportedError` on web instead of returning a manager whose operations throw.
-- `AudioProcessor` comes from `stream_webrtc_interface`, still exported here, and its methods return `Future<bool>` and `Future<void>` that throw instead of a `Result`.
+- `AudioProcessor` moved to `stream_webrtc_interface`, still exported here, and its methods throw instead of returning a `Result`.
 - `AudioProcessor` is an `abstract base class`; extend it instead of implementing it.
 - `VideoModerationConfig.applyBlur` and `Call.setModerationBlurEffectHandlers` are removed; pass the blur to `VideoModerationConfig.blur(filter:)`, such as `FullFrameBlurFilter` from `stream_video_filters`.
 - `VideoModerationConfig` is a `final class`.

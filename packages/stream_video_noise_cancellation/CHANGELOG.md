@@ -3,7 +3,7 @@
 ### ⚠️ Breaking
 
 - [iOS] CocoaPods is no longer supported; enable Flutter's Swift Package Manager.
-- `NoiseCancellationAudioProcessor` returns plain futures: `setEnabled` throws where noise cancellation is not supported.
+- `NoiseCancellationAudioProcessor.isEnabled` and `deviceSupportsAdvancedAudioProcessing` throw on a native error, and `setEnabled(true)` throws where noise cancellation is not supported.
 - `NoiseCancellationAudioProcessor` is a `final class`.
 
 ### 🐞 Fixed

@@ -60,6 +60,12 @@ void main() {
       await expectLater(processor.setEnabled(true), throwsUnsupportedError);
     });
 
+    test('where unsupported, turning it off does nothing', () async {
+      platform.error = UnsupportedError('unsupported');
+
+      await NoiseCancellationAudioProcessor().setEnabled(false);
+    });
+
     test('a native error is reported, not read as unsupported', () async {
       platform.error = PlatformException(code: 'native');
       final processor = NoiseCancellationAudioProcessor();
@@ -98,6 +104,28 @@ void main() {
       await processor.setEnabled(true);
 
       expect(await processor.isEnabled(), isTrue);
+    });
+
+    test('a failed registration is tried again by the next call', () async {
+      platform.registerError = PlatformException(code: 'native');
+      final processor = NoiseCancellationAudioProcessor();
+      await Future<void>.delayed(Duration.zero);
+      platform.registerError = null;
+
+      await processor.setEnabled(true);
+      await processor.isEnabled();
+
+      expect(platform.registerProcessorCallCount, 2);
+    });
+
+    test('an unsupported registration is not tried again', () async {
+      platform.registerError = UnsupportedError('unsupported');
+      final processor = NoiseCancellationAudioProcessor();
+
+      await processor.isEnabled();
+      await processor.isEnabled();
+
+      expect(platform.registerProcessorCallCount, 1);
     });
 
     test('runs natively, with no microphone filter', () {

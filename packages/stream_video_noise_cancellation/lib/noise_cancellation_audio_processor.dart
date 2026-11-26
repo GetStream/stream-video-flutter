@@ -1,4 +1,5 @@
 /// Noise cancellation audio processor for Stream Video.
+///
 /// This library provides real-time noise cancellation capabilities
 /// during video calls.
 library;
@@ -13,16 +14,19 @@ import 'stream_video_noise_cancellation.dart';
 /// An [AudioProcessor] implementation that provides real-time noise cancellation.
 ///
 /// Noise cancellation runs natively on Android and iOS. Elsewhere
-/// [isEnabled] and [deviceSupportsAdvancedAudioProcessing] report false and
-/// [setEnabled] throws.
+/// [isEnabled] and [deviceSupportsAdvancedAudioProcessing] report false,
+/// turning it off does nothing and turning it on throws.
 final class NoiseCancellationAudioProcessor extends AudioProcessor {
   /// Creates a new [NoiseCancellationAudioProcessor] instance, and registers
-  /// the native processor.
+  /// the native processor. A registration that fails is tried again by the
+  /// next call.
   NoiseCancellationAudioProcessor() {
-    _registration = _register();
+    _registered().ignore();
   }
 
-  late final Future<void> _registration;
+  Future<void>? _registration;
+
+  Future<void> _registered() => _registration ??= _register();
 
   Future<void> _register() async {
     try {
@@ -30,20 +34,21 @@ final class NoiseCancellationAudioProcessor extends AudioProcessor {
     } catch (e, stk) {
       if (_isUnsupported(e)) {
         _log('Noise cancellation is not supported on this platform: $e');
-      } else {
-        _log(
-          'Failed to register noise cancellation: $e',
-          error: e,
-          stackTrace: stk,
-        );
+        return;
       }
+      _registration = null;
+      _log(
+        'Failed to register noise cancellation: $e',
+        error: e,
+        stackTrace: stk,
+      );
     }
   }
 
   /// Returns whether noise cancellation is currently enabled.
   @override
   Future<bool> isEnabled() async {
-    await _registration;
+    await _registered();
     try {
       return await StreamVideoNoiseCancellation().isEnabled() ?? false;
     } catch (e, stk) {
@@ -53,15 +58,17 @@ final class NoiseCancellationAudioProcessor extends AudioProcessor {
     }
   }
 
-  /// Enables or disables noise cancellation. Throws where it is not
-  /// supported.
+  /// Enables or disables noise cancellation. Where it is not supported,
+  /// enabling throws and disabling does nothing.
   @override
   Future<void> setEnabled(bool enabled) async {
-    await _registration;
+    await _registered();
     try {
       await StreamVideoNoiseCancellation().setEnabled(enabled);
     } catch (e, stk) {
-      if (!_isUnsupported(e)) {
+      final unsupported = _isUnsupported(e);
+      if (unsupported && !enabled) return;
+      if (!unsupported) {
         _log(
           'Failed to turn noise cancellation ${enabled ? 'on' : 'off'}: $e',
           error: e,
@@ -75,7 +82,7 @@ final class NoiseCancellationAudioProcessor extends AudioProcessor {
   /// Checks if the current device supports advanced audio processing.
   @override
   Future<bool> deviceSupportsAdvancedAudioProcessing() async {
-    await _registration;
+    await _registered();
     try {
       return await StreamVideoNoiseCancellation()
               .deviceSupportsAdvancedAudioProcessing() ??

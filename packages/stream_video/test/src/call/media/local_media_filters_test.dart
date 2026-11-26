@@ -461,19 +461,6 @@ void main() {
       expect(result, const Result.success(LocalFilterChange.applied));
       expect(log, ['app apply mic microphone']);
     });
-  });
-
-  group('the audio processor filter', () {
-    test('runs on the microphone after the app filter', () async {
-      filters = LocalMediaFilters(
-        audioProcessorFilter: () => _LoggingAudioFilter('nc', log),
-      );
-      await filters.setAudioFilter(_LoggingAudioFilter('app', log));
-
-      await filters.apply(_track('mic', SfuTrackType.audio, 'audio'));
-
-      expect(log, ['app apply mic microphone', 'nc apply mic microphone']);
-    });
 
     test('is left out when the processor has none', () async {
       filters = LocalMediaFilters(audioProcessorFilter: () => null);

@@ -25,6 +25,6 @@ abstract base class AudioProcessor {
   /// the app's own microphone filter. Null for a processor installed
   /// natively.
   ///
-  /// Return the same filter on every call.
+  /// Return the same filter each time it is invoked.
   AudioFilter? toFilter() => null;
 }
