@@ -8,6 +8,8 @@ import 'media_stream_filter.dart';
 /// Android, `AudioManager.audioProcessingModule` on iOS) and turns it on and
 /// off here. An implementation that processes the stream itself returns a
 /// filter from [toFilter] instead.
+///
+/// A subclass is itself declared `base`, `final` or `sealed`.
 abstract base class AudioProcessor {
   const AudioProcessor();
 
