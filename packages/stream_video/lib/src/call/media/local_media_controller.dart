@@ -962,7 +962,7 @@ class LocalMediaController {
     }
 
     try {
-      await webRtcEngine.camera.setZoom(localTrack.mediaTrack, zoomLevel);
+      await webRtcEngine.camera.setZoom(_cameraTrackOf(localTrack), zoomLevel);
       return const Result.success(none);
     } catch (error, stackTrace) {
       _logger.e(() => '[setZoom] Failed to set zoom: $error');
@@ -990,14 +990,9 @@ class LocalMediaController {
     }
 
     try {
-      await webRtcEngine.camera.setFocusPoint(
-        localTrack.mediaTrack,
-        focusPoint,
-      );
-      await webRtcEngine.camera.setExposurePoint(
-        localTrack.mediaTrack,
-        focusPoint,
-      );
+      final camera = _cameraTrackOf(localTrack);
+      await webRtcEngine.camera.setFocusPoint(camera, focusPoint);
+      await webRtcEngine.camera.setExposurePoint(camera, focusPoint);
     } catch (error, stackTrace) {
       _logger.e(() => '[focus] Failed to set focus: $error');
       return failureWithError('Failed to set focus', stackTrace: stackTrace);
@@ -1537,4 +1532,9 @@ class LocalMediaController {
       return false;
     }
   }
+}
+
+/// The track the camera captures for [track], before any filter.
+rtc.MediaStreamTrack _cameraTrackOf(RtcTrack track) {
+  return track is RtcLocalTrack ? track.capturedTrack : track.mediaTrack;
 }
