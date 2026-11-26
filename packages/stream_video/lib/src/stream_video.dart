@@ -6,7 +6,7 @@ import 'package:internet_connection_checker_plus/internet_connection_checker_plu
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart' show CompositeSubscription, Rx;
 import 'package:stream_core/stream_core.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart'
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart'
     show AudioProcessor;
 
 import '../globals.dart';
