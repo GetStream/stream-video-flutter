@@ -2,7 +2,10 @@ import 'dart:async';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:fluent_ui/fluent_ui.dart' as fluent show FluentLocalizations;
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/material.dart';
+import 'package:foldable/foldable.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shad/shad.dart' show GlobalShadLocalizations;
 import 'package:stream_chat_flutter/stream_chat_flutter.dart'
@@ -238,7 +241,18 @@ class _StreamDogFoodingAppContentState
               builders: _componentBuildersFor(design),
               // Above the router, so a snackbar shown from any route has a
               // messenger to reach and outlives the screen that showed it.
-              child: StreamSnackbarScope(child: child!),
+              child: StreamSnackbarScope(
+                // Publishes the iPhone Duo's fold in MediaQuery, as Flutter
+                // does on Android, so the SDK's layouts keep off it. Off
+                // elsewhere, where the package asserts rather than publish
+                // a fold Flutter already reports.
+                child: FoldableProvider(
+                  bridgeMode: defaultTargetPlatform == TargetPlatform.iOS
+                      ? DisplayFeatureBridgeMode.full
+                      : DisplayFeatureBridgeMode.none,
+                  child: child!,
+                ),
+              ),
             ),
           );
         },
