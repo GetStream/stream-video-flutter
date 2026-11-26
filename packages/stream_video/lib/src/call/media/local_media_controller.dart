@@ -158,6 +158,13 @@ class LocalMediaController {
   late final filters = LocalMediaFilters(logger: _logger)
     ..onOutputChanged = _refilterSent;
 
+  /// Stops [track], a capture the call does not keep, and drops the filter
+  /// chain run on it.
+  Future<void> _stopAndRelease(RtcLocalTrack track) async {
+    await track.stop();
+    await filters.release(track);
+  }
+
   Future<Result<None>> _refilterSent(SfuTrackType kind) async {
     return await _session()?.refilterLocalTrack(kind) ??
         const Result.success(none);
@@ -423,7 +430,7 @@ class LocalMediaController {
       // Stopped up front: a screen share picker can keep the apply waiting.
       for (final track in [...duplicates, ...inherited.values]) {
         _logger.v(() => '[applyConnectOptions] stopping unused $track');
-        await track.stop();
+        await _stopAndRelease(track);
       }
 
       // iOS: set the session before capture so WebRTC doesn't rebuild the
@@ -591,7 +598,7 @@ class LocalMediaController {
   Future<void> _stopUnpublished(Set<RtcLocalTrack> unpublished) async {
     for (final track in unpublished) {
       _logger.w(() => '[applyConnectOptions] stopping unpublished $track');
-      await track.stop();
+      await _stopAndRelease(track);
     }
   }
 
@@ -684,13 +691,13 @@ class LocalMediaController {
         result = await target.setLocalTrack(track);
       }
     } catch (_) {
-      await track.stop();
+      await _stopAndRelease(track);
       rethrow;
     }
 
     _logger.v(() => '[adoptInheritedTrack] completed: $result');
     if (result.isFailure) {
-      await track.stop();
+      await _stopAndRelease(track);
       return result;
     }
 
