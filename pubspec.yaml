@@ -99,7 +99,7 @@ melos:
 
     analyze:
       run: |
-        melos exec -c 5 --ignore="*example*" -- \
+        melos exec -c 2 --ignore="*example*" -- \
           dart analyze --fatal-infos .
       description: |
         Run `dart analyze` in all packages.
@@ -107,7 +107,7 @@ melos:
 
     analyze:warning:
       run: |
-        melos exec -c 5 --ignore="*example*" -- \
+        melos exec -c 2 --ignore="*example*" -- \
           dart analyze --fatal-warnings .
       description: |
         Run `dart analyze` in all packages.
@@ -115,7 +115,7 @@ melos:
 
     analyze:error:
       run: |
-        melos exec -c 5 --ignore="*example*" -- \
+        melos exec -c 2 --ignore="*example*" -- \
           dart analyze --no-fatal-warnings .
       description: |
         Run `dart analyze` in all packages.
