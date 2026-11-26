@@ -613,6 +613,40 @@ void main() {
         expect(transceivers.single.sender.track, same(after.clones.single));
       });
 
+      test(
+        'a change while a first publish filters refilters the published '
+        'track',
+        () async {
+          final rtcPublisher = publisher();
+          final before = FakeMediaStreamTrack('before', kind: 'audio');
+          final after = FakeMediaStreamTrack('after', kind: 'audio');
+          final filtering = Completer<void>();
+          var calls = 0;
+          rtcPublisher.onLocalCapture = (track, {isCurrent}) async {
+            if (calls++ == 0) {
+              await filtering.future;
+              return track.copyWith(mediaTrack: before);
+            }
+            return track.copyWith(mediaTrack: after);
+          };
+
+          final publishing = rtcPublisher.publishAudioTrack(
+            track: localMic(),
+          );
+          await pumpEventQueue();
+          final refiltering = rtcPublisher.refilterTrack(SfuTrackType.audio);
+          await pumpEventQueue();
+          filtering.complete();
+          final published = (await publishing).getDataOrNull()!;
+          await refiltering;
+
+          expect(
+            rtcPublisher.tracks[published.trackId]!.mediaTrack,
+            same(after),
+          );
+        },
+      );
+
       test('leaves the senders alone when nothing changed', () async {
         final rtcPublisher = publisher();
         final track = (await rtcPublisher.publishAudioTrack(
