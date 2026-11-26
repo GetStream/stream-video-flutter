@@ -93,7 +93,7 @@ void main() {
     logger: taggedLogger(tag: 'test'),
   );
 
-  setUp(() {
+  setUp(() async {
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
     overrideWebRtcCapabilities(platform: PlatformType.ios);
     IosBroadcastScreenShare.resetOwnership();
@@ -110,6 +110,8 @@ void main() {
     controller = buildController();
     activeCalls = [controller];
     subscription = controller.observeNativeWebRtcEvents();
+    // A session shares once it has applied the options, as on a join.
+    await controller.applyConnectOptions(session: session!);
   });
 
   tearDown(() async {
@@ -383,10 +385,8 @@ void main() {
     });
   });
 
-  test(
-    'a broadcast nobody requested while several calls are active is not '
-    'taken by a later session',
-    () async {
+  group('a broadcast nobody requested', () {
+    test('is taken by the session of the only active call', () async {
       activeCalls = [controller, buildController()];
       await emit(ScreenSharingStartedEvent());
       verifyNotEnabledOn(session!);
@@ -395,10 +395,20 @@ void main() {
       final next = session = _session();
       await controller.applyConnectOptions(session: next);
 
-      verifyNotEnabledOn(next);
+      expect(enabledOn(next).single?.useiOSBroadcastExtension, isTrue);
       verifyNever(notifier.presentiOSBroadcastPicker);
-    },
-  );
+    });
+
+    test('is not taken by a session while another call is active', () async {
+      activeCalls = [controller, buildController()];
+      await emit(ScreenSharingStartedEvent());
+
+      final next = session = _session();
+      await controller.applyConnectOptions(session: next);
+
+      verifyNotEnabledOn(next);
+    });
+  });
 
   test('a broadcast that could not be shared is no longer running', () async {
     when(

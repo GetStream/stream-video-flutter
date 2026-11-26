@@ -100,11 +100,11 @@ class LocalMediaController {
   late final IosBroadcastScreenShare _broadcast = IosBroadcastScreenShare(
     stateManager: _stateManager,
     session: _session,
-    isApplying: (session) => identical(_optionsApplyingTo, session),
     hasApplied: _hasAppliedInCurrentConnect,
     applyScreenShare: _applyScreenShare,
     readConnectOptions: () => _connectOptions,
     writeConnectOptions: (options) => _connectOptions = options,
+    defaultConstraints: _defaultScreenShareConstraints,
     hasPermission: _hasPermission,
     rtcMediaDeviceNotifier: _rtcMediaDeviceNotifier,
     activeCalls: () => [for (final media in _activeCalls()) media._broadcast],
@@ -138,10 +138,8 @@ class LocalMediaController {
   /// session, they can only change through the device methods.
   CallSession? _optionsAppliedBy;
 
-  /// The session applying the options, until it has applied them.
-  CallSession? _optionsApplyingTo;
-
-  /// The session that finished applying the options.
+  /// The session that last finished applying the options, also when the
+  /// apply failed.
   CallSession? _optionsAppliedTo;
 
   /// The call's status when [_optionsAppliedTo] finished applying them.
@@ -331,9 +329,8 @@ class LocalMediaController {
     List<RtcLocalTrack> inheritedTracks = const [],
   }) async {
     _optionsAppliedBy = session;
-    _optionsApplyingTo = session;
     _connectOptionsOverride = null;
-    _broadcast.takePending();
+    _broadcast.adoptRunningBroadcast();
     _logger.d(
       () =>
           '[applyConnectOptions] connectOptions: $_connectOptions, '
@@ -384,6 +381,7 @@ class LocalMediaController {
       return true;
     }
 
+    var broadcastRanAtScreenShare = false;
     try {
       // Stopped up front: a screen share picker can keep the apply waiting.
       for (final track in [...duplicates, ...inherited.values]) {
@@ -424,11 +422,14 @@ class LocalMediaController {
         );
       }
 
+      // A broadcast that starts after this is shared once the apply is done.
+      broadcastRanAtScreenShare = _broadcast.isBroadcasting;
       final screenShareFailed = failed(
         'screenShare',
         screenShare != null
             ? await adopt(screenShare)
             : await _applyScreenShareOption(
+                session,
                 _connectOptions.screenShare,
                 _connectOptions.screenShareTargetResolution,
               ),
@@ -439,10 +440,17 @@ class LocalMediaController {
         );
       }
     } finally {
-      await _endApplying(session, unpublished);
+      try {
+        await _stopUnpublished(unpublished);
+      } finally {
+        _optionsAppliedTo = session;
+        _optionsAppliedDuring = _state.status;
+      }
     }
 
-    await _finishApplying(session);
+    if (!broadcastRanAtScreenShare) {
+      await _broadcast.shareRunningBroadcast(session);
+    }
 
     if (_connectOptions.audioInputDevice != null) {
       await setAudioInputDevice(_connectOptions.audioInputDevice!);
@@ -543,29 +551,11 @@ class LocalMediaController {
     return const Result.success(none);
   }
 
-  /// Stops the [unpublished] tracks of an apply to [session], and ends the
-  /// apply, also when it failed, so a broadcast that starts is not held back
-  /// for it.
-  Future<void> _endApplying(
-    CallSession session,
-    Set<RtcLocalTrack> unpublished,
-  ) async {
-    try {
-      for (final track in unpublished) {
-        _logger.w(() => '[applyConnectOptions] stopping unpublished $track');
-        await track.stop();
-      }
-    } finally {
-      if (identical(_optionsApplyingTo, session)) _optionsApplyingTo = null;
+  Future<void> _stopUnpublished(Set<RtcLocalTrack> unpublished) async {
+    for (final track in unpublished) {
+      _logger.w(() => '[applyConnectOptions] stopping unpublished $track');
+      await track.stop();
     }
-  }
-
-  /// Records that [session] applied the connect options, and shares a
-  /// broadcast that started meanwhile.
-  Future<void> _finishApplying(CallSession session) async {
-    _optionsAppliedTo = session;
-    _optionsAppliedDuring = _state.status;
-    await _broadcast.sharePending(session);
   }
 
   /// Whether [session] applied the connect options, and while a migration or
@@ -583,6 +573,7 @@ class LocalMediaController {
   }
 
   Future<Result<None>> _applyScreenShareOption(
+    CallSession session,
     TrackOption screenShareOption,
     StreamTargetResolution? targetResolution,
   ) async {
@@ -595,7 +586,9 @@ class LocalMediaController {
           : null;
 
       if (constraints != null && _broadcast.isRunning(constraints)) {
-        return _broadcast.recapture(constraints);
+        // A session replaced meanwhile leaves the broadcast to the next one.
+        if (!identical(session, _session())) return const Result.success(none);
+        return _broadcast.publish(constraints);
       }
 
       return setScreenShareEnabled(
