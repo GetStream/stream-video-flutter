@@ -4,7 +4,7 @@
 * Added `NativeWebRtcEngine`, the `WebRtcEngine` of the native platforms.
 * The end-to-end encryption types moved to `stream_webrtc_interface`; this package still exports them.
 * **Breaking:** `EncryptionManager.create` needs a registered `WebRtcEngine` and throws `UnsupportedError` on web; `isSupported` is false without one.
-* Added `createAudioRenderer` and `setAudioPlayoutPaused` for every platform; native renderers do nothing.
+* The native engine's audio renderers do nothing; the platform plays remote audio.
 * Added `platformEvents.createSpeechActivityDetector`, which detects speech while the microphone is muted on Android, iOS, macOS and the browser.
 * **Breaking:** platform events are typed; listen to `platformEvents`. `eventStream` is no longer exported.
 * **Breaking:** `handleCallInterruptionCallbacks` is removed; call `platformEvents.enableInterruptionEvents` and listen to `platformEvents.onInterruption`. Apps using `stream_video` must not call `enableInterruptionEvents`, since the SDK does.

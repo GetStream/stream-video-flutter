@@ -76,7 +76,7 @@ final class NativeWebRtcEngine implements WebRtcEngine {
   @override
   Future<FirstFrameWatcher> watchFirstFrame(
     MediaStream stream, {
-    required void Function(FirstVideoFrame frame) onFirstFrame,
+    required void Function() onFirstFrame,
   }) async {
     final renderer = RTCVideoRenderer();
     try {
@@ -86,12 +86,7 @@ final class NativeWebRtcEngine implements WebRtcEngine {
         ..onFirstFrameRendered = () {
           if (reported) return;
           reported = true;
-          onFirstFrame(
-            FirstVideoFrame(
-              width: renderer.videoWidth,
-              height: renderer.videoHeight,
-            ),
-          );
+          onFirstFrame();
         }
         ..srcObject = stream;
     } catch (_) {
@@ -211,9 +206,8 @@ class _NativeWebRtcCamera implements WebRtcCamera {
   const _NativeWebRtcCamera();
 
   @override
-  Future<CameraSwitchResult> switchCamera(MediaStreamTrack track) async {
-    final isFrontFacing = await Helper.switchCamera(track);
-    return CameraSwitchResult(isFrontFacing: isFrontFacing);
+  Future<bool> switchCamera(MediaStreamTrack track) {
+    return Helper.switchCamera(track);
   }
 
   @override

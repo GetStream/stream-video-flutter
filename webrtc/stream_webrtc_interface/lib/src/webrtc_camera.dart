@@ -4,36 +4,16 @@ import 'package:meta/meta.dart';
 
 import 'third_party/webrtc_interface/media_stream_track.dart';
 
-/// The camera [WebRtcCamera.switchCamera] switched to.
-@immutable
-final class CameraSwitchResult {
-  const CameraSwitchResult({this.isFrontFacing});
-
-  /// Whether the camera in use now faces the user. Null where the platform
-  /// does not say.
-  final bool? isFrontFacing;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is CameraSwitchResult && other.isFrontFacing == isFrontFacing;
-
-  @override
-  int get hashCode => isFrontFacing.hashCode;
-
-  @override
-  String toString() => 'CameraSwitchResult(isFrontFacing: $isFrontFacing)';
-}
-
 /// Controls a running camera capture.
 ///
 /// Implemented by the WebRTC packages only.
 @sealed
 abstract class WebRtcCamera {
   /// Switches the camera of the video [track]: between front and back on
-  /// mobile, to the next camera on desktop. Throws where
+  /// mobile, to the next camera on desktop. Returns whether the camera in use
+  /// now faces the user. Throws where
   /// `WebRtcCapabilities.supportsCameraSwitch` is false.
-  Future<CameraSwitchResult> switchCamera(MediaStreamTrack track);
+  Future<bool> switchCamera(MediaStreamTrack track);
 
   /// Sets the zoom of the camera capturing the video [track].
   Future<void> setZoom(MediaStreamTrack track, double zoomLevel);

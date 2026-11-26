@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_core/stream_core.dart';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
-import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../globals.dart';
@@ -352,7 +351,7 @@ class Call {
     logger: _logger,
   );
 
-  /// Attaches, resolves and releases this call's [EncryptionManager].
+  /// Attaches, resolves and releases this call's [rtc.EncryptionManager].
   late final _e2ee = CallE2ee(
     callCid: callCid,
     state: () => state.value,
@@ -1121,12 +1120,12 @@ class Call {
 
   /// The end-to-end encryption manager attached via [setE2EEManager].
   /// `null` when the call is unencrypted.
-  EncryptionManager? get e2eeManager => _e2ee.manager;
+  rtc.EncryptionManager? get e2eeManager => _e2ee.manager;
 
   /// Turns on end-to-end encryption for this call.
   /// Must run **before** [join]. The call's encryption mode must allow it.
   ///
-  /// [EncryptionManager] takes raw key bytes — 16 for AES-128, 32 for
+  /// [rtc.EncryptionManager] takes raw key bytes — 16 for AES-128, 32 for
   /// AES-256 — and has no opinion on how participants agreed on them. Deriving
   /// them from a passphrase, or distributing them over your own channel, is up
   /// to the app.
@@ -1141,7 +1140,7 @@ class Call {
   ///
   /// The manager is released and disposed when the call is left, so a fresh
   /// one is needed per call.
-  Future<void> setE2EEManager(EncryptionManager manager) =>
+  Future<void> setE2EEManager(rtc.EncryptionManager manager) =>
       _e2ee.attach(manager);
 
   /// Detaches the E2EE manager and releases it, so later joins are unencrypted

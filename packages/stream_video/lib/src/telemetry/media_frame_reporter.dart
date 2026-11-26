@@ -74,7 +74,7 @@ class MediaFrameReporter {
     try {
       final watcher = await webRtcEngine.watchFirstFrame(
         stream,
-        onFirstFrame: (_) => _reportVideo(trackId),
+        onFirstFrame: () => _reportVideo(trackId),
       );
 
       // State may have changed while the watch started.

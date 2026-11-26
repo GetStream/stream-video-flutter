@@ -3,7 +3,6 @@ import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 import '../../call/stats/trace_tag.dart';
 import '../../call/stats/tracer.dart';
 import '../../logger/stream_log.dart';
-import '../webrtc_engine.dart';
 import 'screen_share_constraints.dart';
 
 export 'audio_constraints.dart';
@@ -58,14 +57,14 @@ extension MediaDevices on rtc.MediaDevices {
 
         stream = nativeFactory != null
             ? await nativeFactory.getDisplayMedia(constraintsMap)
-            : await webRtcEngine.mediaDevices.getDisplayMedia(constraintsMap);
+            : await getDisplayMedia(constraintsMap);
       } else {
         tag = TraceTag.getUserMedia;
         tracer?.trace('$tag.$sequence', constraintsMap);
 
         stream = nativeFactory != null
             ? await nativeFactory.getUserMedia(constraintsMap)
-            : await webRtcEngine.mediaDevices.getUserMedia(constraintsMap);
+            : await getUserMedia(constraintsMap);
       }
     } catch (e) {
       tracer?.trace('$tag.failure.$sequence', e.toString());

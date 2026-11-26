@@ -13,6 +13,4 @@ export 'src/third_party/dart_webrtc/media_stream_impl.dart';
 export 'src/third_party/dart_webrtc/media_stream_track_impl.dart';
 export 'src/third_party/dart_webrtc/rtc_video_element.dart';
 export 'src/user_agent.dart';
-export 'src/web_audio_renderer.dart'
-    show createAudioRenderer, setAudioPlayoutPaused;
 export 'src/web_capabilities.dart' show webRtcCapabilities;

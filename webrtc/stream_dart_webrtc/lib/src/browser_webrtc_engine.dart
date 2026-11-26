@@ -70,7 +70,7 @@ final class BrowserWebRtcEngine implements WebRtcEngine {
   @override
   Future<FirstFrameWatcher> watchFirstFrame(
     MediaStream stream, {
-    required void Function(FirstVideoFrame frame) onFirstFrame,
+    required void Function() onFirstFrame,
   }) async {
     return _VideoElementFirstFrameWatcher(stream, onFirstFrame);
   }
@@ -142,7 +142,7 @@ class _BrowserWebRtcCamera implements WebRtcCamera {
   const _BrowserWebRtcCamera();
 
   @override
-  Future<CameraSwitchResult> switchCamera(MediaStreamTrack track) async {
+  Future<bool> switchCamera(MediaStreamTrack track) async {
     throw UnsupportedError('Capture the other camera instead');
   }
 
@@ -193,18 +193,13 @@ class _VideoElementFirstFrameWatcher implements FirstFrameWatcher {
   }
 
   final web.HTMLVideoElement _element = web.HTMLVideoElement();
-  final void Function(FirstVideoFrame frame) _onFirstFrame;
+  final void Function() _onFirstFrame;
   StreamSubscription<web.Event>? _loaded;
 
   void _report() {
     _loaded?.cancel();
     _loaded = null;
-    _onFirstFrame(
-      FirstVideoFrame(
-        width: _element.videoWidth,
-        height: _element.videoHeight,
-      ),
-    );
+    _onFirstFrame();
   }
 
   @override

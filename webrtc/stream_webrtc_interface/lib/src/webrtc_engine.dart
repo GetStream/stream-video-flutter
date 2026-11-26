@@ -103,7 +103,7 @@ abstract class WebRtcEngine {
   /// is decoded.
   Future<FirstFrameWatcher> watchFirstFrame(
     MediaStream stream, {
-    required void Function(FirstVideoFrame frame) onFirstFrame,
+    required void Function() onFirstFrame,
   });
 
   /// Builds an [EncryptionManager] that encrypts outgoing frames as [userId].

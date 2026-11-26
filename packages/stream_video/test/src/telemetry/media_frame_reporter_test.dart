@@ -117,10 +117,8 @@ void main() {
       );
       await flush();
 
-      engine.onFirstFrames.first(
-        const FirstVideoFrame(width: 640, height: 480),
-      );
-      engine.onFirstFrames.last(const FirstVideoFrame(width: 640, height: 480));
+      engine.onFirstFrames.first();
+      engine.onFirstFrames.last();
       await flush();
 
       final event = captured.single;
@@ -175,7 +173,7 @@ class _FakeWatcher implements FirstFrameWatcher {
 // ignore: subtype_of_sealed_class, a fake for the tests
 class _WatchingEngine extends Fake implements WebRtcEngine {
   final watchers = <_FakeWatcher>[];
-  final onFirstFrames = <void Function(FirstVideoFrame)>[];
+  final onFirstFrames = <void Function()>[];
 
   /// When set, watches start once it completes.
   Completer<void>? gate;
@@ -183,7 +181,7 @@ class _WatchingEngine extends Fake implements WebRtcEngine {
   @override
   Future<FirstFrameWatcher> watchFirstFrame(
     MediaStream stream, {
-    required void Function(FirstVideoFrame frame) onFirstFrame,
+    required void Function() onFirstFrame,
   }) async {
     if (gate case final gate?) await gate.future;
     onFirstFrames.add(onFirstFrame);
