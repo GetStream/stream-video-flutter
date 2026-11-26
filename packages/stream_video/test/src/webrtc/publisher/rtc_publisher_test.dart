@@ -647,6 +647,31 @@ void main() {
         },
       );
 
+      test('waits for every publish of its kind that is running', () async {
+        final rtcPublisher = publisher();
+        final filtering = Completer<void>();
+        var calls = 0;
+        rtcPublisher.onLocalCapture = (track, {isCurrent}) async {
+          if (calls++ == 0) await filtering.future;
+          return track;
+        };
+
+        final first = rtcPublisher.publishAudioTrack(track: localMic());
+        await pumpEventQueue();
+        await rtcPublisher.publishAudioTrack(track: localMic());
+        var refiltered = false;
+        final refiltering = rtcPublisher
+            .refilterTrack(SfuTrackType.audio)
+            .whenComplete(() => refiltered = true);
+        await pumpEventQueue();
+
+        expect(refiltered, isFalse);
+        filtering.complete();
+        await first;
+        await refiltering;
+        expect(refiltered, isTrue);
+      });
+
       test('leaves the senders alone when nothing changed', () async {
         final rtcPublisher = publisher();
         final track = (await rtcPublisher.publishAudioTrack(

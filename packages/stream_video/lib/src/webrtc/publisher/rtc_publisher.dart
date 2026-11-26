@@ -141,7 +141,7 @@ class RtcPublisher {
   final _recaptures = <String, Completer<void>>{};
 
   /// The publishes running, by track type.
-  final _publishes = <SfuTrackType, Completer<void>>{};
+  final _publishes = <SfuTrackType, Set<Completer<void>>>{};
 
   OnLocalTrackMuted? onLocalTrackMuted;
   OnLocalTrackPublished? onLocalTrackPublished;
@@ -815,7 +815,7 @@ class RtcPublisher {
   }) async {
     final trackType = captured.trackType;
     final done = Completer<void>();
-    _publishes[trackType] = done;
+    final running = _publishes.putIfAbsent(trackType, () => {})..add(done);
     try {
       return await _filterAndPublish(
         captured,
@@ -824,7 +824,8 @@ class RtcPublisher {
         beforeSend: beforeSend,
       );
     } finally {
-      if (identical(_publishes[trackType], done)) _publishes.remove(trackType);
+      running.remove(done);
+      if (running.isEmpty) _publishes.remove(trackType);
       done.complete();
     }
   }
@@ -1616,14 +1617,14 @@ class RtcPublisher {
   /// such track is held, or the result is the track already sent. A publish
   /// of the track that is running finishes first.
   Future<Result<None>> refilterTrack(SfuTrackType trackType) async {
-    await _publishesOf(trackType);
+    if (_isPublishing(trackType)) await _publishesOf(trackType);
     final held = getPublisherTrackByType(trackType);
     if (held == null) return const Result.success(none);
     final trackId = held.trackId;
 
     return _oneRecaptureAtATime(trackId, () async {
       // A publish that started while this waited for a recapture.
-      await _publishesOf(trackType);
+      if (_isPublishing(trackType)) await _publishesOf(trackType);
       final current = tracks[trackId];
       if (current == null) return const Result.success(none);
 
@@ -1662,12 +1663,15 @@ class RtcPublisher {
   /// the filters made of its capture then, so a filter change refilters the
   /// track the publish keeps.
   Future<void> _publishesOf(SfuTrackType trackType) async {
-    var publishing = _publishes[trackType];
-    while (publishing != null) {
-      await publishing.future;
-      publishing = _publishes[trackType];
+    while (_isPublishing(trackType)) {
+      await Future.wait([
+        for (final publish in _publishes[trackType]!) publish.future,
+      ]);
     }
   }
+
+  bool _isPublishing(SfuTrackType trackType) =>
+      _publishes[trackType]?.isNotEmpty ?? false;
 
   /// Sends [filtered] on every sender that carries [current]'s track, for as
   /// long as [current] is held, and returns it with the clones the senders
