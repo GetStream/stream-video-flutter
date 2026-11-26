@@ -140,6 +140,9 @@ class RtcPublisher {
   /// The recapture running for each track id.
   final _recaptures = <String, Completer<void>>{};
 
+  /// The publishes running, by track id.
+  final _publishes = <String, Completer<void>>{};
+
   OnLocalTrackMuted? onLocalTrackMuted;
   OnLocalTrackPublished? onLocalTrackPublished;
 
@@ -801,7 +804,35 @@ class RtcPublisher {
   /// without a publish option fails, and so does a publish that cannot send
   /// on one of them or that is still running when disposing starts: each
   /// stops the track and keeps nothing.
+  ///
+  /// A filter change of the track waits until the publish is done, see
+  /// [refilterTrack].
   Future<Result<RtcLocalTrack>> _publish(
+    RtcLocalTrack captured, {
+    required String tag,
+    RtcTrackPublishOptions Function()? trackPublishOptions,
+    Future<void> Function(RtcLocalTrack track)? beforeSend,
+  }) async {
+    final prefix = captured.trackIdPrefix == kLocalTrackIdPrefix
+        ? publisherId
+        : captured.trackIdPrefix;
+    final trackId = '$prefix:${captured.trackType}';
+    final done = Completer<void>();
+    _publishes[trackId] = done;
+    try {
+      return await _filterAndPublish(
+        captured,
+        tag: tag,
+        trackPublishOptions: trackPublishOptions,
+        beforeSend: beforeSend,
+      );
+    } finally {
+      if (identical(_publishes[trackId], done)) _publishes.remove(trackId);
+      done.complete();
+    }
+  }
+
+  Future<Result<RtcLocalTrack>> _filterAndPublish(
     RtcLocalTrack captured, {
     required String tag,
     RtcTrackPublishOptions Function()? trackPublishOptions,
@@ -1585,11 +1616,20 @@ class RtcPublisher {
 
   /// Sends what [onLocalCapture] now makes of the held track of [trackType]
   /// on every sender that carried it, and keeps it. Does nothing when no
-  /// such track is held, or the result is the track already sent.
+  /// such track is held, or the result is the track already sent. A publish
+  /// of the track that is running finishes first.
   Future<Result<None>> refilterTrack(SfuTrackType trackType) async {
     final held = getPublisherTrackByType(trackType);
     if (held == null) return const Result.success(none);
     final trackId = held.trackId;
+
+    // A publish of the track sends what the filters made of it then, so the
+    // change refilters the track it keeps.
+    var publishing = _publishes[trackId];
+    while (publishing != null) {
+      await publishing.future;
+      publishing = _publishes[trackId];
+    }
 
     return _oneRecaptureAtATime(trackId, () async {
       final current = tracks[trackId];

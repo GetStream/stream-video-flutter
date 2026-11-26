@@ -584,6 +584,35 @@ void main() {
         expect(first.stopped, isFalse);
       });
 
+      test('a change during a publish refilters the published track', () async {
+        final rtcPublisher = publisher();
+        final before = FakeMediaStreamTrack('before', kind: 'audio');
+        final after = FakeMediaStreamTrack('after', kind: 'audio');
+        var filtered = before;
+        rtcPublisher.onLocalCapture = (track, {isCurrent}) async {
+          return track.copyWith(mediaTrack: filtered);
+        };
+        final sending = Completer<void>();
+        addAudioAnswers = [
+          (transceiver) async {
+            await sending.future;
+            return Result.success(transceiver);
+          },
+        ];
+
+        final publishing = rtcPublisher.publishAudioTrack(track: localMic());
+        await pumpEventQueue();
+        filtered = after;
+        final refiltering = rtcPublisher.refilterTrack(SfuTrackType.audio);
+        await pumpEventQueue();
+        sending.complete();
+        final published = (await publishing).getDataOrNull()!;
+        await refiltering;
+
+        expect(rtcPublisher.tracks[published.trackId]!.mediaTrack, same(after));
+        expect(transceivers.single.sender.track, same(after.clones.single));
+      });
+
       test('leaves the senders alone when nothing changed', () async {
         final rtcPublisher = publisher();
         final track = (await rtcPublisher.publishAudioTrack(
