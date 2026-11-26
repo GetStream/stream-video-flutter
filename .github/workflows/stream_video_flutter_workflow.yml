@@ -62,6 +62,7 @@ jobs:
               - '.github/actions/setup-flutter/**'
               - '.github/actions/setup-melos/**'
               - '.github/actions/select-xcode/**'
+              - '.github/actions/setup-cocoapods/**'
               - '.github/workflows/scripts/**'
               - '.github/workflows/stream_video_flutter_workflow.yml'
 
@@ -262,13 +263,16 @@ jobs:
       matrix:
         package: ${{ fromJSON(needs.gate.outputs.ios_test_packages) }}
     timeout-minutes: 45
-    runs-on: macos-latest
+    runs-on: { group: scaleway-macos }
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
 
       - name: Select Xcode
         uses: ./.github/actions/select-xcode
+
+      - name: Setup CocoaPods
+        uses: ./.github/actions/setup-cocoapods
 
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter

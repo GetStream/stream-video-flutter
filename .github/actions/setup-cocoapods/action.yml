@@ -1,0 +1,13 @@
+name: Setup CocoaPods
+description: "Installs CocoaPods when the runner does not have it."
+
+runs:
+  using: "composite"
+  steps:
+    - name: 🍫 Install CocoaPods
+      shell: bash
+      run: |
+        if ! command -v pod >/dev/null; then
+          brew install cocoapods
+        fi
+        pod --version

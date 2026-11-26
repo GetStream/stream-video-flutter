@@ -65,6 +65,7 @@ jobs:
               - '.github/actions/setup-flutter/**'
               - '.github/actions/setup-melos/**'
               - '.github/actions/select-xcode/**'
+              - '.github/actions/setup-cocoapods/**'
               - '.github/workflows/webrtc.yml'
             android_tests:
               - 'webrtc/stream_webrtc_flutter/android/**'
@@ -132,13 +133,16 @@ jobs:
     if: needs.gate.outputs.should_run == 'true'
     name: Build example (iOS, CocoaPods + SPM)
     timeout-minutes: 45
-    runs-on: macos-latest
+    runs-on: { group: scaleway-macos }
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
 
       - name: Select Xcode
         uses: ./.github/actions/select-xcode
+
+      - name: Setup CocoaPods
+        uses: ./.github/actions/setup-cocoapods
 
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter
@@ -172,13 +176,16 @@ jobs:
     if: needs.gate.outputs.should_run == 'true'
     name: Build example (macOS)
     timeout-minutes: 45
-    runs-on: macos-latest
+    runs-on: { group: scaleway-macos }
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
 
       - name: Select Xcode
         uses: ./.github/actions/select-xcode
+
+      - name: Setup CocoaPods
+        uses: ./.github/actions/setup-cocoapods
 
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter
