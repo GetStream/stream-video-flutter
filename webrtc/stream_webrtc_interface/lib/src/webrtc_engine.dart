@@ -34,8 +34,8 @@ abstract class WebRtcEngine {
     final engine = _instance;
     if (engine == null) {
       throw StateError(
-        'No WebRtcEngine is registered. Add stream_video_flutter to the app, '
-        'or set WebRtcEngine.instance before using WebRTC.',
+        'No WebRtcEngine is registered. Create a StreamVideo client before '
+        'using WebRTC, or set WebRtcEngine.instance.',
       );
     }
     return engine;

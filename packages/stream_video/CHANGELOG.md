@@ -3,6 +3,7 @@
 ### ⚠️ Breaking
 
 - `Call.ensureNativeFactory`, `RtcLocalTrack` and `MediaDevices.getMedia` take and return the `PeerConnectionFactory` contract instead of `NativePeerConnectionFactory`.
+- `EncryptionManager.create` throws `UnsupportedError` on web instead of returning a manager whose operations throw.
 - The app-wide audio members of `RtcMediaDeviceNotifier` moved to `PlatformAudioController.instance`: `nativeWebRtcEventsStream`, `speechActivityStream`, `triggeriOSAudioRouteSelectionUI`, `isAudioPlayoutPauseSupported`, `isAudioPlayoutPaused`, `audioPlayoutPausedChanges`, `pauseAudioPlayout`, `resumeAudioPlayout`, `resumeWebAudioPlayback`, `regainAndroidAudioFocus` and `reinitializeAudioConfiguration`.
 - `PlatformAudioController` is `@sealed`, so a test mock that implements it gets a `subtype_of_sealed_class` warning; add `// ignore: subtype_of_sealed_class` to it.
 - `PlatformAudioController.nativePauseAudioPlayout` and `nativeResumeAudioPlayout` are removed; use `pauseAudioPlayout` and `resumeAudioPlayout`.
