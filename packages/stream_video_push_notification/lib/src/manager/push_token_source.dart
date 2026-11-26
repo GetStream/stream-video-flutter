@@ -18,11 +18,28 @@ abstract class PushTokenSource {
   Stream<String> get onRefresh;
 
   /// The current token, when there is one, followed by every refresh.
+  ///
+  /// Refreshes are listened to before the current token is read, and held
+  /// until it is emitted, so one the platform sends while the read is in
+  /// flight is not lost and still comes after the token it replaces. A read
+  /// that fails ends the stream, so the next registration reads again.
   Stream<String> get tokens async* {
-    final current = await token();
-    if (current != null) yield current;
+    final refreshes = ReplaySubject<String>();
+    final subscription = onRefresh.listen(
+      refreshes.add,
+      onError: refreshes.addError,
+      onDone: refreshes.close,
+    );
 
-    yield* onRefresh;
+    try {
+      final current = await token();
+      if (current != null) yield current;
+
+      yield* refreshes;
+    } finally {
+      await subscription.cancel();
+      await refreshes.close();
+    }
   }
 }
 

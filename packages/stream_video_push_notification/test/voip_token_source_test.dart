@@ -14,6 +14,9 @@ class _FakePushPlatform extends StreamVideoPushNotificationPlatform {
 
   final String storedToken;
 
+  /// When set, reading the stored token waits for it.
+  Completer<void>? readGate;
+
   // Closed in the test's tearDown.
   // ignore: close_sinks
   final events = StreamController<RingingEvent?>.broadcast();
@@ -22,7 +25,10 @@ class _FakePushPlatform extends StreamVideoPushNotificationPlatform {
   Stream<RingingEvent?> get onEvent => events.stream;
 
   @override
-  Future<String> getDevicePushTokenVoIP() async => storedToken;
+  Future<String> getDevicePushTokenVoIP() async {
+    await readGate?.future;
+    return storedToken;
+  }
 }
 
 void main() {
@@ -66,6 +72,30 @@ void main() {
 
     expect(await collect(['first']), ['first']);
   });
+
+  test(
+    'a refresh sent while the stored token is read follows it',
+    () async {
+      platform = _FakePushPlatform('stored')..readGate = Completer<void>();
+      StreamVideoPushNotificationPlatform.instance = platform;
+
+      final tokens = <String>[];
+      final subscription = const VoIPTokenSource().tokens.listen(tokens.add);
+      await pumpEventQueue();
+
+      platform.events.add(
+        const ActionDidUpdateDevicePushTokenVoip(token: 'rotated'),
+      );
+      await pumpEventQueue();
+      expect(tokens, isEmpty);
+
+      platform.readGate!.complete();
+      await pumpEventQueue();
+      await subscription.cancel();
+
+      expect(tokens, ['stored', 'rotated']);
+    },
+  );
 
   test('emits nothing off iOS', () async {
     CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
