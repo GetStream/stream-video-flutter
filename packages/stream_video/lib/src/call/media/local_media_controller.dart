@@ -5,6 +5,8 @@ import 'package:async/async.dart' show CancelableOperation;
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_core/stream_core.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../../open_api/video/coordinator/api.dart' hide User;

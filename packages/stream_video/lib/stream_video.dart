@@ -24,7 +24,7 @@ export 'package:stream_webrtc_interface/stream_webrtc_interface.dart'
         WebRtcEngine;
 
 /// Filters that process local media before it is sent.
-export 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart'
+export 'package:stream_webrtc_interface/stream_webrtc_interface.dart'
     show
         AudioFilter,
         MediaStream,

@@ -7,9 +7,9 @@ import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../logger/impl/test_logger.dart';
+import '../webrtc/fixtures/rtc_manager_fakes.dart';
 import 'fixtures/call_test_helpers.dart';
 import 'fixtures/data.dart';
-import '../webrtc/fixtures/rtc_manager_fakes.dart';
 
 void main() {
   setUpAll(() {

@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
 /// Configures how the SDK handles `call.moderation` events.
 ///

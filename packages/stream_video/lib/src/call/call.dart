@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_core/stream_core.dart';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../globals.dart';
