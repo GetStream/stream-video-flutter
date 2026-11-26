@@ -91,7 +91,7 @@ void main() {
       final filtered = await filters.apply(camera('cam-1'));
 
       expect(filtered.mediaTrack.id, 'cam-1');
-      expect(log, ['replace apply cam-1', 'replace stop captureReleased']);
+      expect(log, ['replace apply cam-1', 'replace stop rejected']);
     });
 
     test('is not sent while the moderation filter fails on it', () async {
@@ -101,7 +101,7 @@ void main() {
       await expectLater(filters.apply(camera('cam-1')), throwsException);
       expect(log, [
         'blur apply cam-1 camera',
-        'blur stop cam-1 captureReleased',
+        'blur stop cam-1 rejected',
       ]);
     });
 
@@ -226,15 +226,44 @@ void main() {
       expect(sent, 0);
     });
 
-    test('fails when the new stream cannot be sent', () async {
+    test('keeps the old chain when the new stream cannot be sent', () async {
       filters.onOutputChanged = (_) async => failureWithError('not sent');
-      await filters.apply(camera('cam-1'));
+      final capture = camera('cam-1');
+      await filters.setVideoFilter(_LoggingFilter('blur', log));
+      await filters.apply(capture);
 
       final result = await filters.setVideoFilter(
         _ReplacingFilter(_stream('out', 'video'), log),
       );
+      final held = await filters.apply(capture);
 
       expect(result.isFailure, isTrue);
+      expect(held.mediaStream, same(capture.mediaStream));
+      expect(log, [
+        'blur apply cam-1 camera',
+        'replace apply cam-1',
+        'replace stop rejected',
+      ]);
+    });
+
+    test('keeps the old chain when the moderation filter fails', () async {
+      final capture = camera('cam-1');
+      final moderation = _FlakyFilter('mod', log);
+      await filters.setModerationFilter(moderation);
+      await filters.apply(capture);
+      moderation.fails = true;
+
+      final result = await filters.setVideoFilter(_LoggingFilter('img', log));
+      await filters.setModerationFilter(null);
+
+      expect(result.isFailure, isTrue);
+      expect(log, [
+        'mod apply cam-1 camera',
+        'img apply cam-1 camera',
+        'img stop cam-1 rejected',
+        'img apply cam-1 camera',
+        'mod stop cam-1 chainChanged',
+      ]);
     });
 
     test('after the capture is released waits for the next one', () async {
@@ -426,6 +455,25 @@ final class _FailingFilter extends VideoFilter {
   @override
   Future<MediaStreamFilterResult> apply(MediaStreamFilterInput input) async {
     throw Exception('filter failed');
+  }
+}
+
+final class _FlakyFilter extends VideoFilter {
+  _FlakyFilter(this.name, this.log);
+
+  final String name;
+  final List<String> log;
+  bool fails = false;
+
+  @override
+  Future<MediaStreamFilterResult> apply(MediaStreamFilterInput input) async {
+    if (fails) throw Exception('$name failed');
+    final id = _firstTrackId(input.stream);
+    log.add('$name apply $id ${input.source.name}');
+    return MediaStreamFilterResult(
+      input.stream,
+      stop: (details) => log.add('$name stop $id ${details.reason.name}'),
+    );
   }
 }
 

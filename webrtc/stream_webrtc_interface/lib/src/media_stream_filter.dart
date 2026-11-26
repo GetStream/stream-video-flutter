@@ -65,6 +65,10 @@ enum MediaStreamFilterStopReason {
 
   /// The chain the filter is part of changed, and was applied again.
   chainChanged,
+
+  /// What the filter made is not sent: a filter of the chain failed where it
+  /// must apply, the new stream could not be sent, or the output had no track.
+  rejected,
 }
 
 /// Details of a [MediaStreamFilterResult.stop] call.

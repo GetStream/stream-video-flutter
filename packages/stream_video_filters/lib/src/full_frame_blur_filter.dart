@@ -1,11 +1,12 @@
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../stream_video_filters.dart';
+import 'video_effect_registry.dart';
 
 /// Blurs the whole camera frame, natively, before it is sent.
 ///
 /// Pass it to `VideoModerationConfig.blur` to blur the camera while the call
-/// is moderated.
+/// is moderated. Stopping it detaches only the blur it attached.
 final class FullFrameBlurFilter extends rtc.VideoFilter {
   const FullFrameBlurFilter();
 
@@ -19,12 +20,13 @@ final class FullFrameBlurFilter extends rtc.VideoFilter {
     final track = stream.getVideoTracks().firstOrNull;
     if (track == null) return rtc.MediaStreamFilterResult(stream);
 
+    final trackId = track.id!;
     await StreamVideoFilters().registerFullFrameBlurEffectProcessor();
-    await rtc.setVideoEffects(track.id!, names: [_name]);
+    await VideoEffectRegistry.attach(trackId, _name);
 
     return rtc.MediaStreamFilterResult(
       stream,
-      stop: (_) => rtc.setVideoEffects(track.id!, names: []),
+      stop: (_) => VideoEffectRegistry.detach(trackId, _name),
     );
   }
 

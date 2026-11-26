@@ -169,10 +169,7 @@ class LocalMediaFilters {
         logger: _logger,
       );
       if (applied.requiredFailure case final failure?) {
-        await applied.stop(
-          rtc.MediaStreamFilterStopReason.captureReleased,
-          _logger,
-        );
+        await applied.stop(rtc.MediaStreamFilterStopReason.rejected, _logger);
         Error.throwWithStackTrace(failure.error, failure.stackTrace);
       }
 
@@ -199,12 +196,15 @@ class LocalMediaFilters {
   /// Changes a chain, then runs it again on the capture of that kind in use.
   ///
   /// The new chain is applied before the old one is stopped, and its output
-  /// is sent first when it is another stream.
+  /// is sent first when it is another stream. When the moderation blur fails
+  /// on the capture, or the new stream cannot be sent, the new chain is
+  /// stopped and the old one stays applied.
   Future<Result<LocalFilterChange>> _change(
     SfuTrackType kind,
     void Function() change,
   ) async {
-    final changed = await _lockFor(kind).synchronized(() async {
+    final lock = _lockFor(kind);
+    final changed = await lock.synchronized(() async {
       change();
 
       final current = _applied[kind];
@@ -218,7 +218,7 @@ class LocalMediaFilters {
         knownTrackIds: current.knownTrackIds,
         logger: _logger,
       );
-      _applied[kind] = applied;
+      if (applied.requiredFailure == null) _applied[kind] = applied;
       return (applied: applied, retired: current);
     });
     if (changed == null) {
@@ -226,23 +226,55 @@ class LocalMediaFilters {
     }
 
     final (:applied, :retired) = changed;
-    var sent = const Result<None>.success(none);
-    if (!identical(applied.output, retired.output)) {
-      sent = await _sendOutput(kind);
+    if (applied.requiredFailure case final failure?) {
+      await lock.synchronized(
+        () => applied.stop(rtc.MediaStreamFilterStopReason.rejected, _logger),
+      );
+      return _failureOf(failure);
     }
 
-    await _lockFor(kind).synchronized(
+    if (!identical(applied.output, retired.output)) {
+      final sent = await _sendOutput(kind);
+      if (sent case final Failure failure) {
+        await lock.synchronized(() => _restore(kind, applied, retired));
+        return failure;
+      }
+    }
+
+    await lock.synchronized(
       () => retired.stop(rtc.MediaStreamFilterStopReason.chainChanged, _logger),
     );
 
     if (applied.failures.firstOrNull case final failure?) {
-      return Result.failure(
-        StreamVideoExceptions.compose(failure.error, failure.stackTrace),
-        failure.stackTrace,
-      );
+      return _failureOf(failure);
     }
-    if (sent case final Failure failure) return failure;
     return const Result.success(LocalFilterChange.applied);
+  }
+
+  /// Puts [retired] back in place of [applied], whose output was not sent.
+  /// When a new capture replaced [applied] meanwhile, [retired] is stopped
+  /// instead.
+  Future<void> _restore(
+    SfuTrackType kind,
+    _AppliedChain applied,
+    _AppliedChain retired,
+  ) async {
+    if (!identical(_applied[kind], applied)) {
+      await retired.stop(
+        rtc.MediaStreamFilterStopReason.chainChanged,
+        _logger,
+      );
+      return;
+    }
+    _applied[kind] = retired;
+    await applied.stop(rtc.MediaStreamFilterStopReason.rejected, _logger);
+  }
+
+  static Result<LocalFilterChange> _failureOf(_FilterFailure failure) {
+    return Result.failure(
+      StreamVideoExceptions.compose(failure.error, failure.stackTrace),
+      failure.stackTrace,
+    );
   }
 
   Future<Result<None>> _sendOutput(SfuTrackType kind) async {
@@ -331,7 +363,7 @@ class _AppliedChain {
         if (outputTrack == null) {
           await result.stop?.call(
             const rtc.MediaStreamFilterStopDetails(
-              reason: rtc.MediaStreamFilterStopReason.captureReleased,
+              reason: rtc.MediaStreamFilterStopReason.rejected,
             ),
           );
           throw StateError('${filter.runtimeType} made a stream with no track');

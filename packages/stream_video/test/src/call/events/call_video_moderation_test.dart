@@ -162,6 +162,25 @@ void main() {
       expect(applied, 1);
     });
 
+    test('a blur that fails while the camera cannot turn off', () async {
+      final logger = installRecordingLogger();
+      var applied = 0;
+      setUpModeration(
+        VideoModerationConfig(filter: _blur, onApply: () => applied++),
+        filterResult: failureWithError('blur failed'),
+        cameraResult: failureWithError('camera stuck'),
+      );
+
+      await moderation.onBlur(blur());
+
+      expect(toggles, ['camera: false']);
+      expect(logger.errors, [
+        contains('blur failed'),
+        contains('camera stuck'),
+      ]);
+      expect(applied, 0);
+    });
+
     test('a blur with no camera capture keeps the camera off', () async {
       setUpModeration(
         const VideoModerationConfig.blur(filter: _blur),

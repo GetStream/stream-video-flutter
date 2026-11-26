@@ -36,7 +36,8 @@ class CallVideoModeration {
 
   Timer? _videoModerationTimer;
 
-  /// Whether [VideoModerationConfig.filter] is on the camera.
+  /// Whether [VideoModerationConfig.filter] was set on the camera's filter
+  /// chain.
   bool _blurApplied = false;
 
   /// Bumped by every [onBlur] and [clear], so one that awaited meanwhile
@@ -59,7 +60,8 @@ class CallVideoModeration {
   /// logged, and the rest of the moderation is still applied.
   ///
   /// When the blur filter cannot be applied to the camera in use, the camera
-  /// is turned off instead.
+  /// is turned off instead. [VideoModerationConfig.onApply] is not called when
+  /// the camera cannot be turned off either.
   Future<void> onBlur(StreamCallModerationBlurEvent event) async {
     final config = _stateManager.callState.preferences.videoModerationConfig;
     if (config.isDisabled || event.userId != _currentUserId()) {
@@ -91,27 +93,35 @@ class CallVideoModeration {
     if (epoch != _epoch) return;
 
     if (config.filter case final filter?) {
-      _blurApplied = true;
-      final result = await _setModerationFilter(filter);
-      if (epoch != _epoch) return;
-      switch (result) {
-        case Success(data: LocalFilterChange.applied):
-          config.onApply?.call();
-          return;
-        case Success(data: LocalFilterChange.deferred):
-          _logger.i(() => '[onBlur] no camera capture, keeping the camera off');
-        case Failure():
-          _logger.e(
-            () => '[onBlur] blur failed, turning the camera off: $result',
-          );
-      }
-      final muted = await _setCameraEnabled(enabled: false);
-      if (muted.isFailure) {
-        _logger.e(() => '[onBlur] failed to turn the camera off: $muted');
-      }
-      if (epoch != _epoch) return;
+      if (!await _applyBlur(filter, epoch)) return;
     }
     config.onApply?.call();
+  }
+
+  /// Sets [filter] on the camera, and turns the camera off when it cannot be
+  /// applied to the capture in use. Whether the moderation counts as applied
+  /// and [epoch] is still the latest.
+  Future<bool> _applyBlur(VideoFilter filter, int epoch) async {
+    _blurApplied = true;
+    final result = await _setModerationFilter(filter);
+    if (epoch != _epoch) return false;
+    switch (result) {
+      case Success(data: LocalFilterChange.applied):
+        return true;
+      case Success(data: LocalFilterChange.deferred):
+        _logger.i(() => '[onBlur] no camera capture, keeping the camera off');
+      case Failure():
+        _logger.e(
+          () => '[onBlur] blur failed, turning the camera off: $result',
+        );
+    }
+
+    final muted = await _setCameraEnabled(enabled: false);
+    if (muted.isFailure) {
+      _logger.e(() => '[onBlur] failed to turn the camera off: $muted');
+      return false;
+    }
+    return epoch == _epoch;
   }
 
   /// Cancels a pending timed clear, then clears the moderation action if the
