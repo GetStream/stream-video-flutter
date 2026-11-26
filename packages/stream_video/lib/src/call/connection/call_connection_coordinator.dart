@@ -1619,12 +1619,12 @@ class CallConnectionCoordinator {
       'strategy': event.error.reconnectStrategy.name,
     });
 
-    // The livestream went back to backstage. A user who may stay there
-    // keeps the call whatever strategy the error names; anyone else is
-    // disconnected as if the call ended.
+    // The livestream went back to backstage. Anyone who may not stay there
+    // is disconnected as if the call ended; a user who stays follows the
+    // strategy the error names.
     if (event.error.code == SfuErrorCode.liveEnded) {
       _call._stateManager.sfuLiveEnded();
-      return;
+      if (_call.state.value.status.isDisconnected) return;
     }
 
     // SFU_FULL, SFU_SHUTTING_DOWN, CALL_PARTICIPANT_LIMIT_REACHED are join
