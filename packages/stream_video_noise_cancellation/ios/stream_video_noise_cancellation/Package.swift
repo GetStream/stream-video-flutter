@@ -12,8 +12,9 @@ let package = Package(
             targets: ["stream_video_noise_cancellation"])
     ],
     dependencies: [
-        // When built via Flutter's SPM integration, this package lives as a sibling under
+        // When built via Flutter's SPM integration, these packages live as siblings under
         // ios/Flutter/ephemeral/Packages/.packages/
+        .package(name: "FlutterFramework", path: "../FlutterFramework"),
         .package(name: "stream_webrtc_flutter", path: "../stream_webrtc_flutter"),
         .package(
             url: "https://github.com/GetStream/stream-video-noise-cancellation-swift.git",
@@ -24,6 +25,7 @@ let package = Package(
         .target(
             name: "stream_video_noise_cancellation",
             dependencies: [
+                .product(name: "FlutterFramework", package: "FlutterFramework"),
                 .product(name: "stream-webrtc-flutter", package: "stream_webrtc_flutter"),
                 .product(
                     name: "StreamVideoNoiseCancellation",
