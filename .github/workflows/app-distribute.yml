@@ -72,6 +72,9 @@ jobs:
 
       - name: Select Xcode
         uses: ./.github/actions/select-xcode
+        with:
+          # Pinned, so a runner image update doesn't change the Xcode that uploads to TestFlight.
+          xcode-version: "26.3.0"
 
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
@@ -136,6 +139,9 @@ jobs:
 
       - name: Select Xcode
         uses: ./.github/actions/select-xcode
+        with:
+          # Pinned, so a runner image update doesn't change the Xcode that uploads to TestFlight.
+          xcode-version: "26.3.0"
 
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
