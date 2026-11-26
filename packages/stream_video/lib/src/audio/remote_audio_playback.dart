@@ -86,10 +86,11 @@ class RemoteAudioPlayback {
   /// repeat one fact once per participant.
   bool _tracedOutputChangeUnsupported = false;
 
-  /// The track ids that were blocked when the pending re-attach detached
-  /// them. They count as blocked until they are attached again, so the gap
-  /// does not report playback as unblocked.
-  final _blockedDuringReattach = <String>{};
+  /// The track ids that were blocked when a re-attach detached them, with
+  /// how many running re-attaches did. They count as blocked until the last
+  /// of those attaches them again, so the gap does not report playback as
+  /// unblocked.
+  final _blockedDuringReattach = <String, int>{};
 
   void _notifyBlocked() {
     final blocked =
@@ -314,12 +315,29 @@ class RemoteAudioPlayback {
       'blockedTracks': blocked.length,
     });
 
-    _blockedDuringReattach.addAll(blocked);
+    for (final id in blocked) {
+      _blockedDuringReattach.update(
+        id,
+        (count) => count + 1,
+        ifAbsent: () => 1,
+      );
+    }
     try {
       await _detachAndAttach(trackIds);
     } finally {
-      _blockedDuringReattach.removeAll(blocked);
+      blocked.forEach(_releaseBlocked);
       _notifyBlocked();
+    }
+  }
+
+  /// Ends one re-attach's hold on the blocked track [id].
+  void _releaseBlocked(String id) {
+    final count = _blockedDuringReattach[id];
+    if (count == null) return;
+    if (count > 1) {
+      _blockedDuringReattach[id] = count - 1;
+    } else {
+      _blockedDuringReattach.remove(id);
     }
   }
 
