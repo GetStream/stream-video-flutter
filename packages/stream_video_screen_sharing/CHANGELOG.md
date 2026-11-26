@@ -1,3 +1,9 @@
+## Upcoming (major)
+
+### ⚠️ Breaking
+
+- [iOS] CocoaPods is no longer supported; enable Flutter's Swift Package Manager.
+
 ## 1.8.0
 
 - Sync version with `stream_video_flutter` 1.8.0
