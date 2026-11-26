@@ -263,6 +263,8 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       return await captured.sendOn(transceivers);
     } catch (_) {
       await captured.stop();
+      // This capture is released too, so it reads as muted.
+      disable();
       rethrow;
     }
   }
@@ -274,7 +276,8 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   /// The track is replaced, not muted, so it stays enabled while the new
   /// capture is acquired: an announce made meanwhile reads it as enabled and
   /// tells the SFU it is unmuted. If the capture fails nothing replaces it,
-  /// and it is disabled like any stopped track.
+  /// and it is disabled like any stopped track. A caller that fails after
+  /// the capture succeeded disables it the same way.
   Future<RtcLocalTrack<T>> recapture({T? mediaConstraints}) async {
     streamLog.i(_tag, () => 'Recapturing track: $trackId');
 

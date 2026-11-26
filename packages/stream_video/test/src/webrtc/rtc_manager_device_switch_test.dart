@@ -526,6 +526,67 @@ void main() {
       },
     );
 
+    test(
+      'on web, a microphone whose new capture cannot be sent reads as muted, '
+      'and unmuting captures it again',
+      () async {
+        overrideWebRtcCapabilities(platform: PlatformType.web);
+        final microphone = await publishMicrophone();
+        final sender = fixture.transceivers.single.sender
+          ..replaceTrackError = StateError('peer connection closed');
+
+        final result = await fixture.manager.setAudioInputDevice(
+          device: _otherMicrophone,
+        );
+
+        expect(result.isFailure, isTrue);
+        final held = storedMicrophone(microphone.trackId);
+        expect(held.mediaTrack, same(microphone.mediaTrack));
+        expect(held.mediaTrack.enabled, isFalse);
+        expect(
+          (await fixture.manager.getAnnouncedTracks(
+            sdp: audioOffer(),
+          ))!.single.muted,
+          isTrue,
+        );
+
+        sender.replaceTrackError = null;
+        final unmuted = await fixture.manager.unmuteTrack(
+          trackId: microphone.trackId,
+        );
+
+        expect(unmuted.isSuccess, isTrue);
+        expect(platform.callsOf('getUserMedia'), hasLength(2));
+        final after = storedMicrophone(microphone.trackId);
+        expect(after.mediaTrack.id, isNot(microphone.mediaTrack.id));
+        expect(after.mediaTrack.enabled, isTrue);
+      },
+    );
+
+    test(
+      'a track recreated on a sender that fails reads as muted',
+      () async {
+        overrideWebRtcCapabilities(platform: PlatformType.web);
+        final microphone = await publishMicrophone();
+        fixture.transceivers.single.sender.replaceTrackError = StateError(
+          'peer connection closed',
+        );
+
+        await expectLater(
+          microphone.recreate(
+            fixture.transceivers,
+            mediaConstraints: microphone.mediaConstraints.copyWith(
+              deviceId: _otherMicrophone.id,
+            ),
+          ),
+          throwsStateError,
+        );
+
+        expect(fakeMediaOf(microphone).stopped, isTrue);
+        expect(microphone.mediaTrack.enabled, isFalse);
+      },
+    );
+
     test('on web, captures the microphone again on the device', () async {
       overrideWebRtcCapabilities(platform: PlatformType.web);
       final microphone = await publishMicrophone();

@@ -1512,6 +1512,9 @@ class RtcPublisher {
       } catch (e, stk) {
         _logger.e(() => '$tag failed for $trackId: $e');
         await captured?.stop();
+        // The old capture is released either way, so a track still held
+        // reads, and is announced, as muted, and unmuting captures it again.
+        if (_isHeld(current)) current.disable();
         return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
       }
     });
