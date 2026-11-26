@@ -1680,7 +1680,8 @@ class Call {
     return result;
   }
 
-  /// Stops audio processing for the call.
+  /// Stops audio processing for the call. The SFU is told only when the
+  /// call was processing audio.
   Future<Result<None>> stopAudioProcessing() async {
     if (!_host.isAudioProcessorConfigured()) {
       _logger.w(() => '[stopAudioProcessing] rejected (not configured)');
@@ -1689,10 +1690,11 @@ class Call {
       );
     }
 
+    final wasProcessing = _stateManager.callState.isAudioProcessing;
     final result = await _host.setAudioProcessingEnabled(false);
 
     if (result.isSuccess) {
-      await _session?.notifyNoiseCancellationStopped();
+      if (wasProcessing) await _session?.notifyNoiseCancellationStopped();
       _stateManager.setCallAudioProcessing(isAudioProcessing: false);
     }
 

@@ -393,6 +393,30 @@ void main() {
         verify(callSession.notifyNoiseCancellationStopped).called(1);
       });
 
+      test('does not notify SFU when audio processing never started', () async {
+        when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(true);
+        when(
+          () => mockStreamVideo.setAudioProcessingEnabled(false),
+        ).thenAnswer((_) async => const Result.success(none));
+
+        final call = createTestCall(
+          networkMonitor: setupMockInternetConnection(
+            statusStream: internetStatusController,
+          ),
+          coordinatorClient: coordinatorClient,
+          sessionFactory: setupMockSessionFactory(callSession: callSession),
+          streamVideo: mockStreamVideo,
+        );
+
+        await call.join();
+
+        final result = await call.stopAudioProcessing();
+
+        expect(result.isSuccess, isTrue);
+        expect(call.state.value.isAudioProcessing, isFalse);
+        verifyNever(callSession.notifyNoiseCancellationStopped);
+      });
+
       test(
         'does not notify SFU or update state when disable fails',
         () async {
