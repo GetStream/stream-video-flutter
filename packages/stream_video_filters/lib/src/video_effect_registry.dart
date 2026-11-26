@@ -5,7 +5,8 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 /// The native effects attached to each local video track, and the effects
 /// whose processors are registered.
 ///
-/// Each filter attaches and detaches only its own effect. A change that
+/// Each filter attaches and detaches only its own effect. An effect attached
+/// more than once runs at the place it was attached last. A change that
 /// leaves a track's list of effects as it was is not sent.
 @internal
 class VideoEffectRegistry {
@@ -13,20 +14,35 @@ class VideoEffectRegistry {
 
   static final _effects = <String, List<String>>{};
   static final _registered = <String>{};
+  static var _generation = 0;
+
+  /// Changes each time the registrations are forgotten.
+  static int get generation => _generation;
 
   /// Whether the processor of [effect] is registered.
   static bool isRegistered(String effect) => _registered.contains(effect);
 
-  /// Records that the processor of [effect] is registered.
-  static void markRegistered(String effect) => _registered.add(effect);
+  /// Records that the processor of [effect] is registered, unless the
+  /// registrations were forgotten since [generation].
+  static void markRegistered(String effect, {required int generation}) {
+    if (generation == _generation) _registered.add(effect);
+  }
 
   /// Forgets every registration, so each filter registers its processor
   /// again the next time it is applied.
-  static void forgetRegistrations() => _registered.clear();
+  static void forgetRegistrations() {
+    _registered.clear();
+    _generation++;
+  }
 
   /// The effects attached to [trackId], in the order they run.
-  static List<String> effectsOf(String trackId) =>
-      {...?_effects[trackId]}.toList();
+  static List<String> effectsOf(String trackId) {
+    final effects = _effects[trackId] ?? const <String>[];
+    return [
+      for (final (index, effect) in effects.indexed)
+        if (effects.lastIndexOf(effect) == index) effect,
+    ];
+  }
 
   /// Attaches [effect] to [trackId], after the effects already on it.
   static Future<void> attach(String trackId, String effect) async {
@@ -35,23 +51,29 @@ class VideoEffectRegistry {
     try {
       await _sendIfChanged(trackId, before);
     } catch (_) {
-      _remove(trackId, effect);
+      _remove(trackId, effect, newest: true);
       rethrow;
     }
   }
 
-  /// Detaches one [effect] attached by [attach] from [trackId].
+  /// Detaches the oldest [effect] attached by [attach] from [trackId], so an
+  /// effect attached again later keeps its place.
   static Future<void> detach(String trackId, String effect) async {
     final before = effectsOf(trackId);
-    if (!_remove(trackId, effect)) return;
+    if (!_remove(trackId, effect, newest: false)) return;
     await _sendIfChanged(trackId, before);
   }
 
-  /// Removes the last [effect] attached to [trackId], so the effects attached
-  /// before it keep their place.
-  static bool _remove(String trackId, String effect) {
+  /// Removes the newest or the oldest [effect] attached to [trackId].
+  static bool _remove(
+    String trackId,
+    String effect, {
+    required bool newest,
+  }) {
     final effects = _effects[trackId];
-    final index = effects?.lastIndexOf(effect) ?? -1;
+    final index =
+        (newest ? effects?.lastIndexOf(effect) : effects?.indexOf(effect)) ??
+        -1;
     if (index < 0) return false;
     effects!.removeAt(index);
     if (effects.isEmpty) _effects.remove(trackId);
@@ -71,5 +93,6 @@ class VideoEffectRegistry {
   static void reset() {
     _effects.clear();
     _registered.clear();
+    _generation = 0;
   }
 }

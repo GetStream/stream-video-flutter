@@ -39,8 +39,9 @@ abstract base class NativeVideoFilter extends rtc.VideoFilter {
     if (trackId == null) return rtc.MediaStreamFilterResult(stream);
 
     if (!VideoEffectRegistry.isRegistered(effectName)) {
+      final generation = VideoEffectRegistry.generation;
       await register();
-      VideoEffectRegistry.markRegistered(effectName);
+      VideoEffectRegistry.markRegistered(effectName, generation: generation);
     }
 
     await VideoEffectRegistry.attach(trackId, effectName);

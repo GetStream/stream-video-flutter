@@ -1,5 +1,7 @@
 // ignore_for_file: implementation_imports, invalid_use_of_visible_for_testing_member
 
+import 'dart:async';
+
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
@@ -87,6 +89,21 @@ void main() {
         expect(attached.last, 'cam-1: ');
       });
 
+      test('registers again after an unregister during its register', () async {
+        final filter = create();
+        platform.registering = Completer<void>();
+
+        final applying = filter.apply(_input('cam-1'));
+        await pumpEventQueue();
+        await StreamVideoFilters().unregisterAllFilters();
+        platform.registering!.complete();
+        platform.registering = null;
+        await applying;
+        await filter.apply(_input('cam-2'));
+
+        expect(platform.registrations, [registration, registration]);
+      });
+
       test('registers again after unregisterAllFilters', () async {
         final filter = create();
 
@@ -156,21 +173,32 @@ void main() {
       expect(attached.last, 'cam-1: VirtualBackground-a');
     });
 
-    test('a filter applied again on its track is not sent again', () async {
+    test('stopping the filters applied before sends nothing', () async {
       final blur = BackgroundBlurFilter();
       final moderation = FullFrameBlurFilter();
       final oldBlur = await blur.apply(_input('cam-1'));
       final oldModeration = await moderation.apply(_input('cam-1'));
-
       await blur.apply(_input('cam-1'));
       await moderation.apply(_input('cam-1'));
-      await oldBlur.stop!(_stopDetails);
-      await oldModeration.stop!(_stopDetails);
+      final sent = attached.length;
 
-      expect(attached, [
-        'cam-1: BackgroundBlurMedium',
-        'cam-1: BackgroundBlurMedium,FullFrameBlur',
-      ]);
+      await oldModeration.stop!(_stopDetails);
+      await oldBlur.stop!(_stopDetails);
+
+      expect(attached, hasLength(sent));
+      expect(attached.last, 'cam-1: BackgroundBlurMedium,FullFrameBlur');
+    });
+
+    test('changing the first filter keeps the second one last', () async {
+      final oldBlur = await BackgroundBlurFilter().apply(_input('cam-1'));
+      final oldModeration = await FullFrameBlurFilter().apply(_input('cam-1'));
+
+      await VirtualBackgroundFilter('a').apply(_input('cam-1'));
+      await FullFrameBlurFilter().apply(_input('cam-1'));
+      await oldModeration.stop!(_stopDetails);
+      await oldBlur.stop!(_stopDetails);
+
+      expect(attached.last, 'cam-1: VirtualBackground-a,FullFrameBlur');
     });
 
     test('a filter that cannot be attached is not kept', () async {
@@ -229,6 +257,14 @@ void main() {
       expect(await StreamVideoFilters().isSupported(), isTrue);
     });
 
+    test('unregisterAllFilters skips the plugin there', () async {
+      debugWebRtcCapabilitiesOverride = _capabilities(isWindows: true);
+
+      await StreamVideoFilters().unregisterAllFilters();
+
+      expect(platform.unregisters, 0);
+    });
+
     test('is false on macOS', () async {
       debugWebRtcCapabilitiesOverride = _capabilities(isMacOS: true);
 
@@ -283,6 +319,10 @@ class _FakeFiltersPlatform extends StreamVideoFiltersPlatform
   final registrations = <String>[];
   bool supported = true;
   int supportChecks = 0;
+  int unregisters = 0;
+
+  /// When set, a registration waits for it before completing.
+  Completer<void>? registering;
 
   @override
   Future<bool?> isBackgroundEffectSupported() async {
@@ -293,6 +333,7 @@ class _FakeFiltersPlatform extends StreamVideoFiltersPlatform
   @override
   Future<void> registerBlurEffectProcessors() async {
     registrations.add('blur');
+    await registering?.future;
   }
 
   @override
@@ -300,15 +341,19 @@ class _FakeFiltersPlatform extends StreamVideoFiltersPlatform
     required String backgroundImageUrl,
   }) async {
     registrations.add('image $backgroundImageUrl');
+    await registering?.future;
   }
 
   @override
   Future<void> registerFullFrameBlurEffectProcessor() async {
     registrations.add('full frame blur');
+    await registering?.future;
   }
 
   @override
-  Future<void> unregisterAllFilters() async {}
+  Future<void> unregisterAllFilters() async {
+    unregisters++;
+  }
 }
 
 class _FakeTrack extends Fake implements MediaStreamTrack {
