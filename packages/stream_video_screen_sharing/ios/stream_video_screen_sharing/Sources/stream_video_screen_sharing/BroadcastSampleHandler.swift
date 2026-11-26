@@ -6,6 +6,8 @@ let broadcastLogger = OSLog(subsystem: "io.getstream.video.screen_sharing.broadc
 private enum Constants {
     static let appGroupIdentifier = "RTCAppGroupIdentifier"
     static let broadcastSharePath = "rtc_SSFD"
+    // Darwin notifications shared with the stream_webrtc_flutter plugin in the app.
+    // The extension cannot link that plugin, so each side keeps its own copy of the names.
     static let broadcastStartedNotification = "io.getstream.video.screen_sharing.broadcastStarted"
     static let broadcastStoppedNotification = "io.getstream.video.screen_sharing.broadcastStopped"
 }
