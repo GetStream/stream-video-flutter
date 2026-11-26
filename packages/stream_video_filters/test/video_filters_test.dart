@@ -201,6 +201,22 @@ void main() {
       expect(attached.last, 'cam-1: VirtualBackground-a,FullFrameBlur');
     });
 
+    test('a rejected chain keeps the order of the one applied', () async {
+      await VirtualBackgroundFilter('a').apply(_input('cam-1'));
+      await FullFrameBlurFilter().apply(_input('cam-1'));
+
+      final image = await VirtualBackgroundFilter('a').apply(_input('cam-1'));
+      failAttach = true;
+      await expectLater(
+        FullFrameBlurFilter().apply(_input('cam-1')),
+        throwsA(isA<PlatformException>()),
+      );
+      failAttach = false;
+      await image.stop!(_stopDetails);
+
+      expect(attached.last, 'cam-1: VirtualBackground-a,FullFrameBlur');
+    });
+
     test('a filter that cannot be attached is not kept', () async {
       final blur = BackgroundBlurFilter();
       failAttach = true;

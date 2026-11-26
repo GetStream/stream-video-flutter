@@ -5,14 +5,14 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 /// The native effects attached to each local video track, and the effects
 /// whose processors are registered.
 ///
-/// Each filter attaches and detaches only its own effect. An effect attached
-/// more than once runs at the place it was attached last. A change that
-/// leaves a track's list of effects as it was is not sent.
+/// Each filter attaches its effect and detaches that same attachment. An
+/// effect attached more than once runs at the place it was attached last. A
+/// change that leaves a track's list of effects as it was is not sent.
 @internal
 class VideoEffectRegistry {
   VideoEffectRegistry._();
 
-  static final _effects = <String, List<String>>{};
+  static final _effects = <String, List<_Attachment>>{};
   static final _registered = <String>{};
   static var _generation = 0;
 
@@ -37,45 +37,41 @@ class VideoEffectRegistry {
 
   /// The effects attached to [trackId], in the order they run.
   static List<String> effectsOf(String trackId) {
-    final effects = _effects[trackId] ?? const <String>[];
+    final names = [
+      for (final attachment in _effects[trackId] ?? const <_Attachment>[])
+        attachment.effect,
+    ];
     return [
-      for (final (index, effect) in effects.indexed)
-        if (effects.lastIndexOf(effect) == index) effect,
+      for (final (index, effect) in names.indexed)
+        if (names.lastIndexOf(effect) == index) effect,
     ];
   }
 
-  /// Attaches [effect] to [trackId], after the effects already on it.
-  static Future<void> attach(String trackId, String effect) async {
+  /// Attaches [effect] to [trackId], after the effects already on it, and
+  /// returns the attachment that [detach] removes.
+  static Future<Object> attach(String trackId, String effect) async {
     final before = effectsOf(trackId);
-    (_effects[trackId] ??= []).add(effect);
+    final attachment = _Attachment(effect);
+    (_effects[trackId] ??= []).add(attachment);
     try {
       await _sendIfChanged(trackId, before);
     } catch (_) {
-      _remove(trackId, effect, newest: true);
+      _remove(trackId, attachment);
       rethrow;
     }
+    return attachment;
   }
 
-  /// Detaches the oldest [effect] attached by [attach] from [trackId], so an
-  /// effect attached again later keeps its place.
-  static Future<void> detach(String trackId, String effect) async {
+  /// Removes [attachment], returned by [attach], from [trackId].
+  static Future<void> detach(String trackId, Object attachment) async {
     final before = effectsOf(trackId);
-    if (!_remove(trackId, effect, newest: false)) return;
+    if (!_remove(trackId, attachment)) return;
     await _sendIfChanged(trackId, before);
   }
 
-  /// Removes the newest or the oldest [effect] attached to [trackId].
-  static bool _remove(
-    String trackId,
-    String effect, {
-    required bool newest,
-  }) {
+  static bool _remove(String trackId, Object attachment) {
     final effects = _effects[trackId];
-    final index =
-        (newest ? effects?.lastIndexOf(effect) : effects?.indexOf(effect)) ??
-        -1;
-    if (index < 0) return false;
-    effects!.removeAt(index);
+    if (effects == null || !effects.remove(attachment)) return false;
     if (effects.isEmpty) _effects.remove(trackId);
     return true;
   }
@@ -95,4 +91,11 @@ class VideoEffectRegistry {
     _registered.clear();
     _generation = 0;
   }
+}
+
+/// One [VideoEffectRegistry.attach] of an effect, compared by identity.
+class _Attachment {
+  _Attachment(this.effect);
+
+  final String effect;
 }

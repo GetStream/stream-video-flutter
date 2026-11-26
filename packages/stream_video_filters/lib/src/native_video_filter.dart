@@ -44,11 +44,11 @@ abstract base class NativeVideoFilter extends rtc.VideoFilter {
       VideoEffectRegistry.markRegistered(effectName, generation: generation);
     }
 
-    await VideoEffectRegistry.attach(trackId, effectName);
+    final attachment = await VideoEffectRegistry.attach(trackId, effectName);
 
     return rtc.MediaStreamFilterResult(
       stream,
-      stop: (_) => VideoEffectRegistry.detach(trackId, effectName),
+      stop: (_) => VideoEffectRegistry.detach(trackId, attachment),
     );
   }
 
