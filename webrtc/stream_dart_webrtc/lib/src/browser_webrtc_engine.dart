@@ -128,9 +128,7 @@ class _BrowserWebRtcAudio implements WebRtcAudio {
   }
 
   @override
-  Future<void> setStereoPlayoutPreferred(bool preferred) async {
-    throw UnsupportedError('Stereo playout is set on iOS only');
-  }
+  Future<void> setStereoPlayoutPreferred(bool preferred) async {}
 
   @override
   Future<void> regainAndroidAudioFocus() async {

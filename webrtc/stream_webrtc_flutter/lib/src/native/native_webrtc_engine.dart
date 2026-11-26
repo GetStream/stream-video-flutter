@@ -41,15 +41,6 @@ final class NativeWebRtcEngine implements WebRtcEngine {
     bool refresh = false,
   }) async {
     await WebRTC.initialize(factoryOptions: options, refresh: refresh);
-    await _applyStereoPlayoutPreference(options);
-  }
-
-  Future<void> _applyStereoPlayoutPreference(
-    PeerConnectionFactoryOptions? options,
-  ) async {
-    final preferred = options?.preferStereoPlayout;
-    if (preferred == null || !WebRTC.platformIsIOS) return;
-    await Helper.setiOSStereoPlayoutPreferred(preferred);
   }
 
   @override
@@ -67,7 +58,6 @@ final class NativeWebRtcEngine implements WebRtcEngine {
     if (!capabilities.supportsPerCallFactory) {
       throw UnsupportedError('Per-call factories are not supported here');
     }
-    await _applyStereoPlayoutPreference(options);
     final native = await NativePeerConnectionFactory.create(options: options);
     return _NativePerCallFactory(native);
   }
@@ -204,8 +194,9 @@ class _NativeWebRtcAudio implements WebRtcAudio {
   }
 
   @override
-  Future<void> setStereoPlayoutPreferred(bool preferred) {
-    return Helper.setiOSStereoPlayoutPreferred(preferred);
+  Future<void> setStereoPlayoutPreferred(bool preferred) async {
+    if (!WebRTC.platformIsIOS) return;
+    await Helper.setiOSStereoPlayoutPreferred(preferred);
   }
 
   @override

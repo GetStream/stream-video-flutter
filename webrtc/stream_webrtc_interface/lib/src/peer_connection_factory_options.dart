@@ -13,7 +13,6 @@ class PeerConnectionFactoryOptions {
     this.bypassVoiceProcessing = false,
     this.androidAudioConfiguration,
     this.appleAudioConfiguration,
-    this.preferStereoPlayout,
     this.additionalOptions = const {},
   });
 
@@ -29,11 +28,6 @@ class PeerConnectionFactoryOptions {
   /// platform's defaults.
   final AppleAudioConfiguration? appleAudioConfiguration;
 
-  /// Whether stereo playout is preferred, which bypasses voice processing.
-  /// The preference is app-wide and stays for the factories built after.
-  /// Applied on iOS; null leaves it as it is.
-  final bool? preferStereoPlayout;
-
   /// Other options the platform reads when it builds a factory, such as
   /// `forceSWCodec` or `networkIgnoreMask`, sent as they are. The fields
   /// above win over an entry with the same key.
@@ -45,6 +39,5 @@ class PeerConnectionFactoryOptions {
       'bypassVoiceProcessing: $bypassVoiceProcessing, '
       'androidAudioConfiguration: ${androidAudioConfiguration?.toMap()}, '
       'appleAudioConfiguration: ${appleAudioConfiguration?.toMap()}, '
-      'preferStereoPlayout: $preferStereoPlayout, '
       'additionalOptions: $additionalOptions)';
 }

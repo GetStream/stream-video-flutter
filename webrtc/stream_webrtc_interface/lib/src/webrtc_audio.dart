@@ -29,7 +29,7 @@ abstract class WebRtcAudio {
   );
 
   /// Whether stereo playout is preferred, which bypasses voice processing.
-  /// iOS.
+  /// The preference is app-wide. Applied on iOS; does nothing elsewhere.
   Future<void> setStereoPlayoutPreferred(bool preferred);
 
   /// Requests Android audio focus again for the call's audio after a loss.

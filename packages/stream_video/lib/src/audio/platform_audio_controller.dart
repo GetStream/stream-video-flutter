@@ -357,8 +357,10 @@ class PlatformAudioController {
       options: rtc.PeerConnectionFactoryOptions(
         bypassVoiceProcessing: options.bypassVoiceProcessing,
         androidAudioConfiguration: options.androidAudioConfiguration,
-        preferStereoPlayout: policy.bypassVoiceProcessing,
       ),
+    );
+    await _engine.audio.setStereoPlayoutPreferred(
+      policy.bypassVoiceProcessing,
     );
   }
 }

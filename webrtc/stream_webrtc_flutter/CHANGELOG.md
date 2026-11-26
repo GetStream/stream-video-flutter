@@ -1,7 +1,6 @@
 [Unreleased]
 
 * **Breaking:** [iOS/macOS] CocoaPods is no longer supported; enable Flutter's Swift Package Manager.
-* [iOS] `NativeWebRtcEngine` applies `PeerConnectionFactoryOptions.preferStereoPlayout`.
 * Added `NativeWebRtcEngine`, the `WebRtcEngine` of the native platforms.
 * The end-to-end encryption types moved to `stream_webrtc_interface`; this package still exports them.
 * **Breaking:** `EncryptionManager.create` needs a registered `WebRtcEngine` and throws `UnsupportedError` on web; `isSupported` is false without one.

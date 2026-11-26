@@ -363,8 +363,8 @@ void main() {
       );
 
       expect(
-        engine.defaultFactoryOptions.map((o) => o?.preferStereoPlayout),
-        [true, false],
+        engine.audio.calls.where((c) => c.startsWith('setStereoPlayout')),
+        ['setStereoPlayoutPreferred true', 'setStereoPlayoutPreferred false'],
       );
     });
   });
