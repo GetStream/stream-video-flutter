@@ -6,3 +6,13 @@ ignore:
   - "webrtc/**"
   - "dogfooding/**"
   - "packages/stream_video/lib/protobuf/**"
+
+# Codecov only stores the uploads. The coverage job in
+# stream_video_flutter_workflow.yml reports on pull requests.
+coverage:
+  status:
+    project: off
+    patch: off
+comment: false
+github_checks:
+  annotations: false

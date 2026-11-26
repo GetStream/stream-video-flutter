@@ -258,9 +258,13 @@ final class StreamVideoCallkitManager: NSObject, CXProviderDelegate {
         }
     }
 
+    /// Reports the ring of `data` to CallKit as unanswered and tells Dart it timed out.
     func callEndTimeout(_ data: CallData) {
-        self.saveEndCall(data.uuid, 3)
-        apply(store.timedOut(data))
+        guard let uuid = store.call(forAppId: data.uuid)?.identity.callKitUUID else { return }
+        sharedProvider?.reportCall(with: uuid, endedAt: Date(), reason: .unanswered)
+        let effects = store.timedOut(data)
+        callsRemoved()
+        apply(effects)
     }
 
     func getHandleType(_ handleType: String?) -> CXHandle.HandleType {

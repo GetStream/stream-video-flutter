@@ -12,6 +12,8 @@ import org.robolectric.RobolectricTestRunner
 /**
  * Pins every conversion of [CallPayloadMapper]: from the method-channel map, through a Bundle,
  * into an event body and through the stored active-calls entry.
+ *
+ * Run with the plugin's other JVM tests by `melos run test:native:android`.
  */
 @RunWith(RobolectricTestRunner::class)
 class CallPayloadMapperTest {
