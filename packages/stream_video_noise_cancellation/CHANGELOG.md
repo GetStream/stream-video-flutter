@@ -1,3 +1,9 @@
+## Upcoming (major)
+
+### 🐞 Fixed
+
+- [iOS] Added the missing `FlutterFramework` dependency to the Swift package.
+
 ## 1.8.0
 
 - Updated `stream_video` dependency to [`1.8.0`](https://pub.dev/packages/stream_video/changelog).
