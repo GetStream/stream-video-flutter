@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 import '../../l10n/localization_extension.dart';
+import 'participant_fold_layout.dart';
 import 'participants_navigation_button.dart';
 
 /// Defines the alignment of the participants bar.
@@ -22,6 +23,12 @@ enum ParticipantsBarAlignment { top, bottom, left, right }
 /// They are centred while they fit, and once they do not the bar runs to the
 /// edge of the view and scrolls, with a button at either end of it for the
 /// tiles that way.
+///
+/// On a half-open foldable the speaker takes one side of the fold and
+/// everybody else the other, with the layout centred on the fold. The others
+/// are arranged as a grid while their tiles are no smaller than
+/// [StreamFoldLayoutStyle.minTileSize], and scroll past that. See
+/// [StreamCallParticipantsSpotlightThemeData.foldStyle] to tune it.
 class CallParticipantsSpotlightView extends StatelessWidget {
   const CallParticipantsSpotlightView({
     super.key,
@@ -83,6 +90,176 @@ class CallParticipantsSpotlightView extends StatelessWidget {
       Directionality.maybeOf(context),
     );
     final spacing = this.spacing ?? style.spacing;
+    final foldStyle = StreamCallParticipantsSpotlightTheme.of(
+      context,
+    ).foldStyle;
+
+    return StreamFoldBuilder(
+      enabled: foldStyle?.avoidFold ?? true,
+      builder: (context, measurement) {
+        // Nothing until the fold has been measured, so each tile appears
+        // once, at its final size.
+        if (measurement.pending) return const SizedBox.expand();
+
+        final fold = measurement.local?.inset(padding);
+        if (fold == null) {
+          return _buildUnfolded(context, style, padding, spacing);
+        }
+
+        return Padding(
+          padding: padding,
+          child: LayoutBuilder(
+            builder: (context, constraints) => _buildFolded(
+              context,
+              style: style,
+              foldStyle: foldStyle,
+              fold: fold,
+              size: constraints.biggest,
+              spacing: spacing,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  /// The speaker on one side of [fold] and everybody else on the other.
+  Widget _buildFolded(
+    BuildContext context, {
+    required _StreamCallParticipantsSpotlightStyleDefaults style,
+    required StreamFoldLayoutStyle? foldStyle,
+    required StreamLocalFold fold,
+    required Size size,
+    required double spacing,
+  }) {
+    final minTileSize = foldStyle?.minTileSize ?? style.barTileSize;
+    final regions = resolveFoldRegions(
+      size: size,
+      fold: fold,
+      gap: foldStyle?.foldGap ?? spacing,
+      minTileSize: minTileSize,
+      centerOnFold: foldStyle?.centerOnFold ?? true,
+      textDirection: Directionality.of(context),
+    );
+
+    switch (regions) {
+      case FoldRegionsSingle(:final rect):
+        return Stack(
+          children: [
+            Positioned.fromRect(
+              rect: rect,
+              child: _buildUnfolded(context, style, EdgeInsets.zero, spacing),
+            ),
+          ],
+        );
+      case final FoldRegionsSplit split:
+        // The speaker stays on the side the bar layout puts them: a bar along
+        // the top or the left puts them after the fold.
+        final speakerFirst = !barAlignment.barComesFirst;
+        final (speakerRect, othersRect) = speakerFirst
+            ? (split.start, split.end)
+            : (split.end, split.start);
+
+        return Stack(
+          children: [
+            Positioned.fromRect(
+              rect: speakerRect,
+              child: _buildSpotlight(context, style.maxSpotlightAspectRatio),
+            ),
+            if (participants.isNotEmpty)
+              Positioned.fromRect(
+                rect: othersRect,
+                child: _buildFoldedOthers(
+                  context,
+                  size: othersRect.size,
+                  axis: fold.axis,
+                  minTileSize: minTileSize,
+                  maxTileAspectRatio: style.maxSpotlightAspectRatio,
+                  spacing: spacing,
+                ),
+              ),
+          ],
+        );
+    }
+  }
+
+  /// Everybody but the speaker, filling one side of a fold: a grid while its
+  /// tiles are at least [minTileSize], and a scrolling list of tiles that size
+  /// past that.
+  Widget _buildFoldedOthers(
+    BuildContext context, {
+    required Size size,
+    required Axis axis,
+    required Size minTileSize,
+    required double maxTileAspectRatio,
+    required double spacing,
+  }) {
+    final tiles = participants.toList(growable: false);
+    final arrangement = solveParticipantGrid(
+      StreamParticipantGridDetails(
+        box: size,
+        count: tiles.length,
+        mainAxisSpacing: spacing,
+        crossAxisSpacing: spacing,
+        maxTileAspectRatio: maxTileAspectRatio,
+        screenSize: context.streamScreenSize,
+      ),
+    );
+
+    final fits =
+        arrangement.tileSize.width >= minTileSize.width &&
+        arrangement.tileSize.height >= minTileSize.height;
+    if (fits) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        spacing: spacing,
+        children: [
+          for (var row = 0; row < arrangement.rows; row++)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              spacing: spacing,
+              children: [
+                for (final participant
+                    in tiles
+                        .skip(
+                          row * arrangement.columns,
+                        )
+                        .take(arrangement.columns))
+                  SizedBox.fromSize(
+                    size: arrangement.tileSize,
+                    child: participantBuilder(context, call, participant),
+                  ),
+              ],
+            ),
+        ],
+      );
+    }
+
+    // Too many to fit: the list runs across the side, along the fold, and
+    // each tile spans the side the other way at the minimum tile's shape.
+    final scrollsHorizontally = axis == Axis.vertical;
+    final tileSize = scrollsHorizontally
+        ? Size(size.height * minTileSize.aspectRatio, size.height)
+        : Size(size.width, size.width / minTileSize.aspectRatio);
+
+    return _ParticipantsBar(
+      call: call,
+      participants: tiles,
+      participantBuilder: participantBuilder,
+      tileSize: tileSize,
+      spacing: spacing,
+      listPadding: EdgeInsets.zero,
+      isHorizontal: scrollsHorizontally,
+    );
+  }
+
+  /// The layout with no fold to avoid: the stage, and the bar along its edge.
+  Widget _buildUnfolded(
+    BuildContext context,
+    _StreamCallParticipantsSpotlightStyleDefaults style,
+    EdgeInsets padding,
+    double spacing,
+  ) {
     final isHorizontal = barAlignment.toAxis() == Axis.horizontal;
 
     // The bar runs to the edge of the view along the axis it scrolls on, and

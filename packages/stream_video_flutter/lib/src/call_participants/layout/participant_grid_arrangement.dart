@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/widgets.dart';
 
 import '../../utils/screen_size.dart';
+import 'participant_fold_layout.dart';
 
 /// How a page of the participants grid is arranged.
 @immutable
@@ -58,6 +59,7 @@ class StreamParticipantGridDetails {
     required this.crossAxisSpacing,
     required this.maxTileAspectRatio,
     required this.screenSize,
+    this.fold,
   });
 
   /// The space the tiles have, already inset by the grid's padding.
@@ -79,6 +81,13 @@ class StreamParticipantGridDetails {
   ///
   /// Carried for an override's benefit; the default rule does not read it.
   final StreamScreenSize screenSize;
+
+  /// The fold this page is arranged beside, or null when no fold splits the
+  /// layout.
+  ///
+  /// With a fold the grid arranges each side on its own, so [box] and [count]
+  /// are those of one side.
+  final StreamParticipantFoldDetails? fold;
 }
 
 /// Returns how many columns a page should use, or null to keep the default.

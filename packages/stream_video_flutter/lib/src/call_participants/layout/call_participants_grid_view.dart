@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
 import '../../l10n/localization_extension.dart';
+import 'participant_fold_layout.dart';
 import 'participants_navigation_button.dart';
 
 /// Arranges every participant in a grid, a page at a time.
@@ -19,6 +20,12 @@ import 'participants_navigation_button.dart';
 ///
 /// See [solveParticipantGrid] for the rule, and
 /// [StreamCallParticipantsGridThemeData.columnResolver] to override it.
+///
+/// On a half-open foldable the grid keeps its tiles off the fold: it centres
+/// itself on the fold and shares each page between the two sides, as
+/// [solveParticipantFoldSplit] decides. A participant alone in the call takes
+/// the start side, with [foldPlaceholderBuilder] on the other. See
+/// [StreamCallParticipantsGridThemeData.foldStyle] to tune it.
 class CallParticipantsGridView extends StatefulWidget {
   const CallParticipantsGridView({
     super.key,
@@ -28,6 +35,7 @@ class CallParticipantsGridView extends StatefulWidget {
     this.padding,
     this.mainAxisSpacing,
     this.crossAxisSpacing,
+    this.foldPlaceholderBuilder,
   });
 
   /// Represents a call.
@@ -53,6 +61,12 @@ class CallParticipantsGridView extends StatefulWidget {
   ///
   /// Overrides [StreamCallParticipantsGridThemeData.padding].
   final EdgeInsetsGeometry? padding;
+
+  /// Builds what fills the empty side of a fold while one participant is in
+  /// the grid.
+  ///
+  /// Defaults to [StreamWaitingForParticipants].
+  final WidgetBuilder? foldPlaceholderBuilder;
 
   @override
   State<CallParticipantsGridView> createState() =>
@@ -196,46 +210,178 @@ class _CallParticipantsGridViewState extends State<CallParticipantsGridView> {
           ),
         );
       },
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return PageView.builder(
-            itemCount: pages.length,
-            controller: _pageController,
-            // A page at a time rather than the platform's own physics, so a
-            // drag, a wheel or a trackpad settles on a page boundary.
-            physics: const PageScrollPhysics(),
-            onPageChanged: (page) => _currentPage.value = page,
-            itemBuilder: (context, index) {
-              final page = pages[index];
+      child: StreamFoldBuilder(
+        enabled: theme.foldStyle?.avoidFold ?? true,
+        builder: (context, fold) => LayoutBuilder(
+          builder: (context, constraints) {
+            return PageView.builder(
+              itemCount: pages.length,
+              controller: _pageController,
+              // A page at a time rather than the platform's own physics, so a
+              // drag, a wheel or a trackpad settles on a page boundary.
+              physics: const PageScrollPhysics(),
+              onPageChanged: (page) => _currentPage.value = page,
+              itemBuilder: (context, index) {
+                // Nothing until the fold has been measured, so each tile
+                // appears once, at its final size.
+                if (fold.pending) return const SizedBox.shrink();
 
-              final details = StreamParticipantGridDetails(
-                box: constraints.biggest,
-                count: page.length,
-                mainAxisSpacing: mainAxisSpacing,
-                crossAxisSpacing: crossAxisSpacing,
-                maxTileAspectRatio: maxTileAspectRatio,
-                screenSize: screenSize,
-              );
+                final page = pages[index];
+                final regions = resolveFoldRegions(
+                  size: constraints.biggest,
+                  fold: fold.local,
+                  gap:
+                      theme.foldStyle?.foldGap ??
+                      switch (fold.local?.axis) {
+                        Axis.vertical => mainAxisSpacing,
+                        _ => crossAxisSpacing,
+                      },
+                  minTileSize: _minTileSize(context, theme),
+                  centerOnFold: theme.foldStyle?.centerOnFold ?? true,
+                  textDirection: Directionality.of(context),
+                );
 
-              final columns = theme.columnResolver?.call(details);
-              final arrangement = columns == null
-                  ? solveParticipantGrid(details)
-                  : arrangeParticipantGrid(details, columns);
+                StreamParticipantGridArrangement arrange(
+                  StreamParticipantGridDetails details,
+                ) {
+                  final columns = theme.columnResolver?.call(details);
+                  return columns == null
+                      ? solveParticipantGrid(details)
+                      : arrangeParticipantGrid(details, columns);
+                }
 
-              return _GridPage(
-                call: widget.call,
-                participants: page,
-                itemBuilder: widget.itemBuilder,
-                arrangement: arrangement,
-                mainAxisSpacing: mainAxisSpacing,
-                crossAxisSpacing: crossAxisSpacing,
-              );
-            },
-          );
-        },
+                Widget side(
+                  List<CallParticipantState> participants,
+                  StreamParticipantGridDetails details,
+                ) => _GridPage(
+                  call: widget.call,
+                  participants: participants,
+                  itemBuilder: widget.itemBuilder,
+                  arrangement: arrange(details),
+                  mainAxisSpacing: mainAxisSpacing,
+                  crossAxisSpacing: crossAxisSpacing,
+                );
+
+                StreamParticipantGridDetails details(
+                  Size box,
+                  int count, [
+                  StreamParticipantFoldDetails? fold,
+                ]) => StreamParticipantGridDetails(
+                  box: box,
+                  count: count,
+                  mainAxisSpacing: mainAxisSpacing,
+                  crossAxisSpacing: crossAxisSpacing,
+                  maxTileAspectRatio: maxTileAspectRatio,
+                  screenSize: screenSize,
+                  fold: fold,
+                );
+
+                switch (regions) {
+                  case FoldRegionsSingle(:final rect):
+                    final grid = side(page, details(rect.size, page.length));
+                    if (rect.size == constraints.biggest) return grid;
+                    return Stack(
+                      children: [Positioned.fromRect(rect: rect, child: grid)],
+                    );
+
+                  case final FoldRegionsSplit split:
+                    final splitDetails = StreamParticipantFoldSplitDetails(
+                      count: page.length,
+                      startSize: split.start.size,
+                      endSize: split.end.size,
+                      posture: split.fold.posture,
+                      foldBounds: split.foldBounds,
+                      reportedExtent: split.fold.extent,
+                      mainAxisSpacing: mainAxisSpacing,
+                      crossAxisSpacing: crossAxisSpacing,
+                      maxTileAspectRatio: maxTileAspectRatio,
+                      minTileSize: _minTileSize(context, theme),
+                      maxExtraTilesOnSmallerSide:
+                          theme.maxExtraTilesOnSmallerSide ?? 2,
+                      screenSize: screenSize,
+                    );
+                    final startCount =
+                        (theme.foldSplitResolver?.call(splitDetails) ??
+                                solveParticipantFoldSplit(splitDetails))
+                            .clamp(0, page.length);
+                    final start = page.sublist(0, startCount);
+                    final end = page.sublist(startCount);
+
+                    Widget sideOrPlaceholder(
+                      StreamFoldSide which,
+                      List<CallParticipantState> participants,
+                      int otherCount,
+                    ) {
+                      final rect = which == StreamFoldSide.start
+                          ? split.start
+                          : split.end;
+                      if (participants.isNotEmpty) {
+                        return side(
+                          participants,
+                          details(
+                            rect.size,
+                            participants.length,
+                            split.details(which, otherCount),
+                          ),
+                        );
+                      }
+                      // Somebody alone in the call gets a placeholder on the
+                      // other side, rather than half the screen left blank.
+                      if (widget.participants.length != 1) {
+                        return const SizedBox.shrink();
+                      }
+                      // Shaped like the tile it stands in for.
+                      final tile = solveParticipantGrid(
+                        details(rect.size, 1),
+                      ).tileSize;
+                      return Center(
+                        child: SizedBox.fromSize(
+                          size: tile,
+                          child:
+                              widget.foldPlaceholderBuilder?.call(context) ??
+                              const StreamWaitingForParticipants(),
+                        ),
+                      );
+                    }
+
+                    return Stack(
+                      children: [
+                        Positioned.fromRect(
+                          rect: split.start,
+                          child: sideOrPlaceholder(
+                            StreamFoldSide.start,
+                            start,
+                            end.length,
+                          ),
+                        ),
+                        Positioned.fromRect(
+                          rect: split.end,
+                          child: sideOrPlaceholder(
+                            StreamFoldSide.end,
+                            end,
+                            start.length,
+                          ),
+                        ),
+                      ],
+                    );
+                }
+              },
+            );
+          },
+        ),
       ),
     );
   }
+
+  /// The smallest a tile next to a fold may be: the fold style's, or the
+  /// spotlight's bar tile.
+  static Size _minTileSize(
+    BuildContext context,
+    StreamCallParticipantsGridThemeData theme,
+  ) =>
+      theme.foldStyle?.minTileSize ??
+      StreamCallParticipantsSpotlightTheme.of(context).style?.barTileSize ??
+      const Size(222, 125);
 }
 
 /// One page of tiles, laid out to [arrangement].

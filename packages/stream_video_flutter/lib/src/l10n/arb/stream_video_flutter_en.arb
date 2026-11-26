@@ -107,6 +107,10 @@
   "@participantsNext": {
     "description": "Tooltip of the button that moves a participant layout on — the bar towards its last tile, the grid to the page after"
   },
+  "participantsWaitingForOthers": "Waiting for others to join",
+  "@participantsWaitingForOthers": {
+    "description": "Shown on the empty side of a half-open foldable while the local participant is alone in the call"
+  },
   "livestreamBackstageStartingSoon": "Livestream will start soon",
   "@livestreamBackstageStartingSoon": {
     "description": "Label for livestream backstage when live stream will soon start"

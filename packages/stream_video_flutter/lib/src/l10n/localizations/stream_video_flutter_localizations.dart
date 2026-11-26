@@ -263,6 +263,12 @@ abstract class StreamVideoFlutterLocalizations {
   /// **'Next participants'**
   String get participantsNext;
 
+  /// Shown on the empty side of a half-open foldable while the local participant is alone in the call
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for others to join'**
+  String get participantsWaitingForOthers;
+
   /// Label for livestream backstage when live stream will soon start
   ///
   /// In en, this message translates to:

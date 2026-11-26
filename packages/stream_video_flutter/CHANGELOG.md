@@ -3,6 +3,11 @@
 ### ✅ Added
 
 - Added `StreamDisplayFold`, `StreamFoldBuilder` and `SplitAtFold`, which find and measure the fold of a half-open foldable in both the book and the tabletop posture.
+- Added `StreamFoldLayoutStyle`, as `foldStyle` on `StreamCallParticipantsGridThemeData` and `StreamCallParticipantsSpotlightThemeData`, to tune how the participant layouts keep off a fold.
+- Added `StreamCallParticipantsGridThemeData.maxExtraTilesOnSmallerSide` and `foldSplitResolver`, and `solveParticipantFoldSplit`, the default rule for sharing a page between the sides of a fold.
+- Added `StreamParticipantGridDetails.fold`, the fold a side of the grid is arranged beside.
+- Added `StreamWaitingForParticipants` and `StreamCallParticipants.foldPlaceholderBuilder`, shown beside the local participant on a half-open foldable while they are alone in the call.
+- Added `participantsWaitingForOthers` to the localizations, in English and Dutch.
 - Added `livestreamEndedTitle` and `livestreamEndedSubtitle` to the localizations, in English and Dutch.
 - Added `livestreamEnterFullscreen` and `livestreamExitFullscreen` to the localizations, in English and Dutch.
 - Added `includeAnonymousParticipants`, `showLiveIndicator` and `showSpeakerphoneToggle` to `LivestreamPlayer`.
@@ -227,6 +232,7 @@
 ### 🔄 Changed
 
 - On a half-open foldable the call app bar moves its title to the trailing half, and the lobby and the ringing screens split at the fold, in both the book and the tabletop posture.
+- The participant layouts keep every tile off the fold of a half-open foldable, centred on it, in both the book and the tabletop posture; `auto` gives everybody a tile there instead of floating the self-view.
 - `LivestreamInfo`'s fullscreen toggle uses the design system's `fullscreen` and `fullscreenExit` icons instead of Material's.
 - [Android] A call runs in the foreground service of the audio policy it uses, `Call.audioConfigurationPolicy`, so a ringing call follows `StreamVideoOptions.ringingAudioConfigurationPolicy`. An app whose `audioConfigurationPolicy` is `AudioConfigurationPolicy.viewer` and whose ringing policy is `AudioConfigurationPolicy.broadcaster` rings its calls in the `phoneCall` service rather than the `mediaPlayback` one.
 - `LivestreamPlayer` follows the new design: the video sits in a `StreamLivestreamTile` under a `CallAppBar` with the call duration, fullscreen fills the screen, and the ended, backstage and waiting states are drawn on the tile's surface.

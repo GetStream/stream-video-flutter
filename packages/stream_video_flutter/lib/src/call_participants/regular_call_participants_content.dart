@@ -15,6 +15,7 @@ class RegularCallParticipantsContent extends StatelessWidget {
     this.enableFloatingSelfView,
     this.floatingSelfViewBuilder,
     this.layoutMode = ParticipantLayoutMode.auto,
+    this.foldPlaceholderBuilder,
   });
 
   /// Represents a call.
@@ -45,6 +46,12 @@ class RegularCallParticipantsContent extends StatelessWidget {
   /// The layout mode used to display the participants.
   final ParticipantLayoutMode layoutMode;
 
+  /// Builds what fills the empty side of a fold while the local participant
+  /// is alone in the call.
+  ///
+  /// Defaults to [StreamWaitingForParticipants].
+  final WidgetBuilder? foldPlaceholderBuilder;
+
   /// The most other participants [ParticipantLayoutMode.auto] floats a
   /// self-view over on mobile.
   ///
@@ -73,11 +80,15 @@ class RegularCallParticipantsContent extends StatelessWidget {
     // ParticipantLayoutMode.auto follows the call: one person on the other end
     // is a conversation and gets their face full-frame, anything else is a
     // group and gets a grid.
+    //
+    // On a half-open foldable a full-frame face, or a self-view floating over
+    // the grid, would sit on the fold, so auto gives everybody a tile.
+    final folded = _avoidsFold(context);
     final requested = layoutMode.canonical;
     final isAuto = requested == ParticipantLayoutMode.auto;
     final effective = switch (isAuto) {
       false => requested,
-      true when remoteParticipants.length == 1 =>
+      true when remoteParticipants.length == 1 && !folded =>
         ParticipantLayoutMode.speakerOneToOne,
       true => ParticipantLayoutMode.grid,
     };
@@ -93,6 +104,7 @@ class RegularCallParticipantsContent extends StatelessWidget {
     // call entirely. auto's grid follows the platform and the size of the
     // call instead.
     final floatsSelfView = switch (effective) {
+      _ when folded => false,
       ParticipantLayoutMode.speakerOneToOne => enableFloatingSelfView ?? true,
       ParticipantLayoutMode.grid when isAuto =>
         enableFloatingSelfView ??
@@ -122,10 +134,16 @@ class RegularCallParticipantsContent extends StatelessWidget {
       }
 
       // speakerOneToOne shows the speaker alone. The spotlight view hides an
-      // empty bar and gives its space to the spotlight.
-      final barParticipants = effective.barAlignment == null
-          ? const <CallParticipantState>[]
-          : ([...participants]..remove(spotlight));
+      // empty bar and gives its space to the spotlight. Under a fold it has
+      // no self-view to float, so the local participant takes the other side.
+      final barParticipants = switch (effective.barAlignment) {
+        null when folded && localParticipant != null =>
+          spotlight == localParticipant
+              ? const <CallParticipantState>[]
+              : [localParticipant],
+        null => const <CallParticipantState>[],
+        _ => [...participants]..remove(spotlight),
+      };
 
       child = CallParticipantsSpotlightView(
         call: call,
@@ -142,6 +160,7 @@ class RegularCallParticipantsContent extends StatelessWidget {
         call: call,
         participants: gridParticipants,
         itemBuilder: callParticipantBuilder,
+        foldPlaceholderBuilder: foldPlaceholderBuilder,
       );
     }
 
@@ -155,5 +174,12 @@ class RegularCallParticipantsContent extends StatelessWidget {
     }
 
     return child;
+  }
+
+  /// Whether the window has a fold the participant layouts keep off.
+  static bool _avoidsFold(BuildContext context) {
+    if (StreamDisplayFold.maybeOf(context) == null) return false;
+    return StreamCallParticipantsGridTheme.of(context).foldStyle?.avoidFold ??
+        true;
   }
 }

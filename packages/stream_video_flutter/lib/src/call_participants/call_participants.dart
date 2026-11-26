@@ -137,6 +137,7 @@ class StreamCallParticipants extends StatefulWidget {
     this.screenShareContentBuilder,
     this.screenShareParticipantBuilder = _defaultParticipantBuilder,
     this.layoutMode = ParticipantLayoutMode.auto,
+    this.foldPlaceholderBuilder,
   }) : sort = sort ?? layoutMode.sorting;
 
   /// Represents a call.
@@ -183,6 +184,12 @@ class StreamCallParticipants extends StatefulWidget {
 
   /// The layout mode used to display the participants.
   final ParticipantLayoutMode layoutMode;
+
+  /// Builds what fills the empty side of a half-open foldable while the local
+  /// participant is alone in the call.
+  ///
+  /// Defaults to [StreamWaitingForParticipants].
+  final WidgetBuilder? foldPlaceholderBuilder;
 
   // The default participant filter.
   static bool _defaultFilter(CallParticipantState participant) => true;
@@ -367,6 +374,7 @@ class _StreamCallParticipantsState extends State<StreamCallParticipants>
       // Not keyed: the self-view draws the local participant while the layout
       // leaves them out, so a shared key would be two tiles claiming one.
       floatingSelfViewBuilder: widget.floatingSelfViewBuilder,
+      foldPlaceholderBuilder: widget.foldPlaceholderBuilder,
     );
   }
 }
