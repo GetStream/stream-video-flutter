@@ -356,6 +356,87 @@ void main() {
     }
   });
 
+  testWidgets('a book fold puts the title leading and the rest trailing', (
+    tester,
+  ) async {
+    tester.view
+      ..physicalSize = const Size(951, 669)
+      ..devicePixelRatio = 1
+      ..displayFeatures = const [
+        DisplayFeature(
+          bounds: Rect.fromLTWH(475.5, 0, 0, 669),
+          type: DisplayFeatureType.fold,
+          state: DisplayFeatureState.postureHalfOpened,
+        ),
+      ];
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StreamLobbyView.withController(
+            controller: controller,
+            actions: StreamLobbyActions.regular(),
+            onJoinCallPressed: (_) => true,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(
+      tester.getRect(find.byType(StreamLobbyHeader)).right,
+      lessThan(475.5),
+    );
+    for (final finder in [
+      find.byType(StreamParticipantTile),
+      find.byType(StreamButton).last,
+    ]) {
+      expect(tester.getRect(finder).left, greaterThan(475.5));
+    }
+  });
+
+  testWidgets('a tabletop fold puts the preview above and the rest below', (
+    tester,
+  ) async {
+    const foldY = 600.0;
+    tester.view
+      ..physicalSize = const Size(840, 1200)
+      ..devicePixelRatio = 1
+      ..displayFeatures = const [
+        DisplayFeature(
+          bounds: Rect.fromLTWH(0, foldY, 840, 0),
+          type: DisplayFeatureType.fold,
+          state: DisplayFeatureState.postureHalfOpened,
+        ),
+      ];
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: StreamLobbyView.withController(
+            controller: controller,
+            actions: StreamLobbyActions.regular(),
+            onJoinCallPressed: (_) => true,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(
+      tester.getRect(find.byType(StreamParticipantTile)).bottom,
+      lessThan(foldY),
+    );
+    expect(
+      tester.getRect(find.byType(StreamButton).last).top,
+      greaterThan(foldY),
+    );
+  });
+
   testWidgets('the settings lane is not drawn when it is empty', (
     tester,
   ) async {

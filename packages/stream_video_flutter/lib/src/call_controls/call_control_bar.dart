@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
-import '../utils/display_fold.dart';
 
 /// Which controls a [CallControlBar] shows, in three slots.
 ///
@@ -198,7 +197,9 @@ class CallControlBar extends StatelessWidget {
     var layout = layoutFor(context.streamScreenSize);
     // A fold down the middle of the window runs through the centre slot, so
     // its controls join the two sides instead, half on either.
-    if (layout.center.isNotEmpty && verticalFoldOf(context) != null) {
+    if (layout.center.isNotEmpty &&
+        StreamDisplayFold.maybeOf(context, posture: StreamFoldPosture.book) !=
+            null) {
       final half = (layout.center.length / 2).ceil();
       layout = CallControlBarLayout(
         leading: [...layout.leading, ...layout.center.take(half)],

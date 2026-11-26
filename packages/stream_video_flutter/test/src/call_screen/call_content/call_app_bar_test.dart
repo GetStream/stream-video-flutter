@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -336,5 +338,35 @@ void main() {
 
       expect(popped, isTrue);
     });
+  });
+
+  testWidgets('moves the title to the trailing half on a book fold', (
+    tester,
+  ) async {
+    tester.view
+      ..devicePixelRatio = 1.0
+      ..physicalSize = const Size(951, 669)
+      ..displayFeatures = const [
+        DisplayFeature(
+          bounds: Rect.fromLTWH(475.5, 0, 0, 669),
+          type: DisplayFeatureType.fold,
+          state: DisplayFeatureState.postureHalfOpened,
+        ),
+      ];
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      TestWrapper(
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: bar(actions: [const SizedBox(key: Key('leave'), width: 40)]),
+        ),
+      ),
+    );
+
+    final title = tester.getRect(find.text('title'));
+    final leave = tester.getRect(find.byKey(const Key('leave')));
+    expect(title.left, greaterThan(475.5));
+    expect(title.right, lessThanOrEqualTo(leave.left));
   });
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
@@ -285,4 +286,47 @@ void main() {
       ),
     );
   }
+
+  group('on a half-open foldable', () {
+    for (final (name, fold) in [
+      ('book', const Rect.fromLTWH(475.5, 0, 0, 669)),
+      ('tabletop', const Rect.fromLTWH(0, 334.5, 951, 0)),
+    ]) {
+      testWidgets('keeps the caller and the buttons on opposite sides, $name', (
+        tester,
+      ) async {
+        tester.view
+          ..physicalSize = const Size(951, 669)
+          ..devicePixelRatio = 1
+          ..displayFeatures = [
+            DisplayFeature(
+              bounds: fold,
+              type: DisplayFeatureType.fold,
+              state: DisplayFeatureState.postureHalfOpened,
+            ),
+          ];
+        addTearDown(tester.view.reset);
+
+        await tester.pumpWidget(
+          TestWrapper(
+            child: StreamIncomingCallContent(call: ringing(['Tammy']).call),
+          ),
+        );
+        await tester.pump();
+
+        final caller = tester.getRect(find.text('Tammy'));
+        final accept = tester.getRect(find.text('Accept'));
+        final decline = tester.getRect(find.text('Decline'));
+        if (name == 'book') {
+          expect(caller.right, lessThan(fold.left));
+          expect(accept.left, greaterThan(fold.left));
+          expect(decline.left, greaterThan(fold.left));
+        } else {
+          expect(caller.bottom, lessThan(fold.top));
+          expect(accept.top, greaterThan(fold.top));
+          expect(decline.top, greaterThan(fold.top));
+        }
+      });
+    }
+  });
 }

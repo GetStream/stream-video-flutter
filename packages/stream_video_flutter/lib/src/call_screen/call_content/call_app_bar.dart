@@ -178,20 +178,34 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
             StreamLeaveCallButton(call: call, onLeaveCallTap: onLeaveCallTap),
         ];
 
-    // No trailing slot when there is nothing to put in it.
-    final trailingSlot = actionSlot.isEmpty
-        ? null
-        : Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: resolved.controlSpacing,
-            children: actionSlot,
-          );
-
-    final middleSlot = DefaultTextStyle.merge(
+    final titleSlot = DefaultTextStyle.merge(
       style: resolved.titleTextStyle,
       textAlign: TextAlign.center,
       child: title ?? Text(call.state.value.status.toStatusString()),
     );
+
+    // A fold down the middle of the window runs through the title, so it
+    // joins the actions in the trailing half instead.
+    final folded =
+        StreamDisplayFold.maybeOf(context, posture: StreamFoldPosture.book) !=
+        null;
+    // The title has no tap target to pad it, so it keeps a gap of its own
+    // from the actions it joins.
+    final trailingActions = [
+      if (folded) ...[titleSlot, SizedBox(width: context.streamSpacing.xs)],
+      ...actionSlot,
+    ];
+
+    // No trailing slot when there is nothing to put in it.
+    final trailingSlot = trailingActions.isEmpty
+        ? null
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: resolved.controlSpacing,
+            children: trailingActions,
+          );
+
+    final middleSlot = folded ? null : titleSlot;
 
     // The slots are centred in what the padding leaves of the bar's height, so
     // one height covers both a control's tap target and its smaller visible
