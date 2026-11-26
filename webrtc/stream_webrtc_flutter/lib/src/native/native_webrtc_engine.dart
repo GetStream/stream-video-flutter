@@ -3,6 +3,14 @@ import 'dart:math';
 
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
+import '../../stream_webrtc_flutter.dart'
+    show
+        androidWebRTCVersion,
+        iosWebRTCVersion,
+        linuxWebRTCVersion,
+        macOsWebRTCVersion,
+        windowsWebRTCVersion;
+
 import '../third_party/flutter_webrtc/helper.dart';
 import '../third_party/flutter_webrtc/native/encryption_manager_impl.dart'
     as e2ee;
@@ -22,6 +30,16 @@ final class NativeWebRtcEngine implements WebRtcEngine {
 
   @override
   WebRtcCapabilities get capabilities => rtc.webRtcCapabilities;
+
+  @override
+  String? get webRtcVersion {
+    if (WebRTC.platformIsAndroid) return androidWebRTCVersion;
+    if (WebRTC.platformIsIOS) return iosWebRTCVersion;
+    if (WebRTC.platformIsMacOS) return macOsWebRTCVersion;
+    if (WebRTC.platformIsWindows) return windowsWebRTCVersion;
+    if (WebRTC.platformIsLinux) return linuxWebRTCVersion;
+    return null;
+  }
 
   @override
   WebRtcPlatformEvents get events => rtc.platformEvents;

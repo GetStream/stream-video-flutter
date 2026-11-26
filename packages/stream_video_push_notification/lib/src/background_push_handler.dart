@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:meta/meta.dart';
@@ -105,6 +106,9 @@ class StreamVideoPushHandler {
     ResolveExistingClient? existingClient,
     FutureOr<void> Function()? onDispose,
   }) {
+    // Registers the Dart side of the plugins, such as stream_video_flutter's
+    // WebRTC engine, in case the isolate that runs this did not.
+    DartPluginRegistrant.ensureInitialized();
     return _router.handle(
       message.data,
       createStreamVideo: createStreamVideo,

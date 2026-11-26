@@ -8,6 +8,20 @@ import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
 import 'webrtc_capabilities.dart';
 
+/// Registers [engine] for the running test, and the engine registered before
+/// once it is done.
+void registerWebRtcEngine(WebRtcEngine engine) {
+  final previous = WebRtcEngine.isRegistered ? WebRtcEngine.instance : null;
+  WebRtcEngine.instance = engine;
+  addTearDown(() {
+    if (previous == null) {
+      WebRtcEngine.debugUnregister();
+    } else {
+      WebRtcEngine.instance = previous;
+    }
+  });
+}
+
 // ignore: subtype_of_sealed_class, a fake for the tests
 /// A [WebRtcEngine] that records what the SDK asks of it. Members a test
 /// does not set up throw.

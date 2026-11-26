@@ -20,6 +20,7 @@ import '../../webrtc/peer_connection_factory.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
+import '../../webrtc/webrtc_engine.dart';
 import '../state/call_state_notifier.dart';
 import '../stats/stats_reporter.dart';
 import '../stats/trace_tag.dart';
@@ -461,14 +462,7 @@ class CallSession extends Disposable with _CallSessionMedia {
     final environment = ClientEnvironment(
       sfu: config.sfuUrl,
       sdkVersion: streamVideoVersion,
-      webRtcVersion: switch (CurrentPlatform.type) {
-        PlatformType.android => androidWebRTCVersion,
-        PlatformType.ios => iosWebRTCVersion,
-        PlatformType.macOS => macOsWebRTCVersion,
-        PlatformType.windows => windowsWebRTCVersion,
-        PlatformType.linux => linuxWebRTCVersion,
-        _ => '',
-      },
+      webRtcVersion: webRtcEngine.webRtcVersion ?? '',
     );
 
     return StatsReporter(

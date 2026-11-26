@@ -20,6 +20,9 @@ final class BrowserWebRtcEngine implements WebRtcEngine {
   WebRtcCapabilities get capabilities => webRtcCapabilities;
 
   @override
+  String? get webRtcVersion => null;
+
+  @override
   WebRtcPlatformEvents get events => DartWebRtcPlatformEvents.instance;
 
   @override

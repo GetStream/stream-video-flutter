@@ -2,8 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/webrtc/audio/audio_session.dart';
 import 'package:stream_video/src/webrtc/audio/ios_audio_session.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_webrtc_interface/stream_webrtc_interface.dart'
-    show WebRtcEngine;
 
 import '../../../fixtures/fake_webrtc_engine.dart';
 
@@ -154,8 +152,7 @@ void main() {
   group('AudioSession.forPlatform', () {
     late FakeWebRtcEngine engine;
 
-    setUp(() => WebRtcEngine.instance = engine = FakeWebRtcEngine());
-    tearDown(WebRtcEngine.debugUnregister);
+    setUp(() => registerWebRtcEngine(engine = FakeWebRtcEngine()));
 
     test('is the Apple session where the engine has an audio session', () {
       engine.audio.hasAudioSession = true;

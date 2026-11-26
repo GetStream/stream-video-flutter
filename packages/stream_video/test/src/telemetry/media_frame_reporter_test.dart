@@ -9,6 +9,7 @@ import 'package:stream_video/src/telemetry/media_frame_reporter.dart';
 import 'package:stream_video/src/webrtc/model/stats/rtc_inbound_rtp_audio_stream.dart';
 import 'package:stream_video/src/webrtc/model/stats/rtc_stats.dart';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
+import '../../fixtures/fake_webrtc_engine.dart';
 
 void main() {
   final cid = StreamCallCid(cid: 'default:call123');
@@ -103,10 +104,8 @@ void main() {
 
     setUp(() {
       engine = _WatchingEngine();
-      WebRtcEngine.instance = engine;
+      registerWebRtcEngine(engine);
     });
-
-    tearDown(WebRtcEngine.debugUnregister);
 
     test('fires once on the first frame and stops every watch', () async {
       unawaited(

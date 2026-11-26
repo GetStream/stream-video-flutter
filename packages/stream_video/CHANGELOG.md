@@ -2,6 +2,8 @@
 
 ### ⚠️ Breaking
 
+- `stream_video` no longer depends on `stream_webrtc_flutter`; off the web, it needs the `WebRtcEngine` that `stream_video_flutter` registers, which a test sets as `WebRtcEngine.instance`.
+- `androidWebRTCVersion`, `iosWebRTCVersion`, `macOsWebRTCVersion`, `linuxWebRTCVersion` and `windowsWebRTCVersion` moved to `stream_video_flutter`.
 - `AudioRouteChangeReason` comes from `stream_webrtc_interface`; `stream_video` still exports it.
 - `RtcMediaDevice.iOSExternalPorts` and `RtcMediaDevice.androidExternalAudioDeviceType` are removed; `RtcMediaDevice.isExternal` asks the WebRTC engine.
 - The unused `InterruptionEvent`, `InterruptionBeginEvent` and `InterruptionEndEvent` are removed, and `NativeWebRtcEvent` is sealed.

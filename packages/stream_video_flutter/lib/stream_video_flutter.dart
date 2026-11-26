@@ -8,6 +8,14 @@ library stream_video_flutter;
 
 export 'package:stream_core_flutter/core.dart' hide StreamTextTheme;
 export 'package:stream_video/stream_video.dart';
+export 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart'
+    show
+        androidWebRTCVersion,
+        iosWebRTCVersion,
+        linuxWebRTCVersion,
+        macOsWebRTCVersion,
+        NativeWebRtcEngine,
+        windowsWebRTCVersion;
 export 'src/call_background/background_service.dart';
 export 'src/call_background/model/notification_options.dart';
 export 'src/call_background/model/notification_payload.dart';

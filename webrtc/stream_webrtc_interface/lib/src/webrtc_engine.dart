@@ -34,8 +34,9 @@ abstract class WebRtcEngine {
     final engine = _instance;
     if (engine == null) {
       throw StateError(
-        'No WebRtcEngine is registered. Create a StreamVideo client before '
-        'using WebRTC, or set WebRtcEngine.instance.',
+        'No WebRtcEngine is registered. Add stream_video_flutter to the app; '
+        'in a test, set WebRtcEngine.instance, such as to a NativeWebRtcEngine '
+        'from stream_video_flutter.',
       );
     }
     return engine;
@@ -55,6 +56,10 @@ abstract class WebRtcEngine {
 
   /// What this implementation can do.
   WebRtcCapabilities get capabilities;
+
+  /// The version of the WebRTC library this engine runs. Null where the
+  /// platform's own WebRTC runs, as in a browser.
+  String? get webRtcVersion;
 
   /// The events the platform reports outside of a peer connection, a track or
   /// a renderer.

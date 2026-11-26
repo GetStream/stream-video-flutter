@@ -1,12 +1,10 @@
-import 'dart:typed_data';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_video/src/logger/impl/tagged_logger.dart';
 import 'package:stream_video/src/webrtc/e2ee/call_e2ee.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
+import '../../../fixtures/fake_webrtc_engine.dart';
 import '../../../fixtures/webrtc_capabilities.dart';
 
 class _MockCallState extends Mock implements CallState {}
@@ -39,7 +37,7 @@ void main() {
 
   setUp(() {
     engine = _EngineWithoutEncryption();
-    WebRtcEngine.instance = engine;
+    registerWebRtcEngine(engine);
 
     final state = _MockCallState();
     when(() => state.currentUserId).thenReturn('alice');
@@ -57,8 +55,6 @@ void main() {
       logger: taggedLogger(tag: 'test'),
     );
   });
-
-  tearDown(WebRtcEngine.debugUnregister);
 
   test(
     'a key for an engine that cannot encrypt fails the join instead of '
