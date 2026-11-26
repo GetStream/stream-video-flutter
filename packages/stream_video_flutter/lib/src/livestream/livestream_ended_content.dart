@@ -21,6 +21,27 @@ class LivestreamEndedContent extends StatefulWidget {
 }
 
 class _LivestreamEndedContentState extends State<LivestreamEndedContent> {
+  Future<Result<List<CallRecording>>>? _recordings;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchRecordingsIfShown();
+  }
+
+  @override
+  void didUpdateWidget(LivestreamEndedContent oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.call != oldWidget.call) _recordings = null;
+    _fetchRecordingsIfShown();
+  }
+
+  /// Lists the call's recordings when they are shown and not fetched yet.
+  void _fetchRecordingsIfShown() {
+    if (!widget.showRecordings) return;
+    _recordings ??= widget.call.listRecordings();
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = StreamVideoTheme.of(context);
@@ -39,7 +60,7 @@ class _LivestreamEndedContentState extends State<LivestreamEndedContent> {
             ),
             if (widget.showRecordings)
               FutureBuilder(
-                future: widget.call.listRecordings(),
+                future: _recordings,
                 builder: (context, snapshot) {
                   if (snapshot.hasData && snapshot.data!.isSuccess) {
                     final recordings = snapshot.requireData.getDataOrNull();

@@ -1,3 +1,9 @@
+## Upcoming
+
+### 🐞 Fixed
+
+- `LivestreamPlayer` no longer lists the call's recordings again each time its ended view rebuilds.
+
 ## 1.8.0
 
 ### ✅ Added
