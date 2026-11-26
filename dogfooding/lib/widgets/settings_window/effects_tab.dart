@@ -3,6 +3,7 @@ import 'package:stream_video_filters/stream_video_filters.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../dogfooding_app_channel.dart';
+import '../../utils/video_filters.dart';
 
 const _backgroundAssets = [
   'assets/bg1.jpg',
@@ -32,7 +33,7 @@ StreamEffectsSettingsTab effectsTab(
       id: filter.effectName,
       label: label,
       icon: icon,
-      onSelected: () => call.setVideoFilter(filter),
+      onSelected: () => applyVideoFilter(call, filter),
     );
   }
 
@@ -66,10 +67,11 @@ StreamEffectsSettingsTab effectsTab(
           id: VirtualBackgroundFilter(asset).effectName,
           label: 'Background ${index + 1}',
           image: AssetImage(asset),
-          onSelected: () => call.setVideoFilter(VirtualBackgroundFilter(asset)),
+          onSelected: () =>
+              applyVideoFilter(call, VirtualBackgroundFilter(asset)),
         ),
     ],
-    onClear: () => call.setVideoFilter(null),
+    onClear: () => applyVideoFilter(call, null),
     selected: () => switch (call.videoFilter) {
       final NativeVideoFilter filter => filter.effectName,
       _ => null,
