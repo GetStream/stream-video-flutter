@@ -59,6 +59,7 @@ jobs:
               - 'analysis_options.yaml'
               - 'all_lint_rules.yaml'
               - 'tools/*.dart'
+              - 'codecov.yml'
               - '.github/actions/setup-flutter/**'
               - '.github/actions/setup-melos/**'
               - '.github/actions/select-xcode/**'
@@ -164,6 +165,23 @@ jobs:
         with:
           use_oidc: true
           files: packages/*/coverage/lcov.info
+      - name: "Keep Coverage for the Report"
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: lcov
+          path: packages/*/coverage/lcov.info
+          retention-days: 1
+      # Pull requests into main and v2 compare against this total.
+      - name: "Save Coverage Total"
+        if: github.event_name == 'push'
+        run: dart tools/coverage_report.dart --save-total coverage-total.json
+      - name: "Cache Coverage Total"
+        if: github.event_name == 'push'
+        uses: actions/cache/save@v5
+        with:
+          path: coverage-total.json
+          key: coverage-total-${{ github.ref_name }}-${{ github.sha }}
       - name: "Test dart fixes"
         run: melos run test:fixes
       - name: "Browser Test"
@@ -279,37 +297,96 @@ jobs:
       - name: iOS Unit Tests
         run: .github/workflows/scripts/native-tests.sh ios "packages/${{ matrix.package }}"
 
-  # codecov/patch is a required check, but Codecov only reports it for a
-  # commit with an upload. When the gate skips the tests, an empty upload
-  # makes Codecov report it as passed.
-  coverage-skipped:
-    needs: gate
-    if: needs.gate.outputs.should_run != 'true' && github.event_name == 'pull_request' && github.event.pull_request.draft != true
+  # Reports the coverage of the lines a PR changes, and of the whole branch
+  # against the target branch, as a PR comment. Fails when the changed lines
+  # are covered less than the target branch. Codecov only stores the uploads.
+  coverage:
+    needs: [gate, analyze]
+    if: needs.gate.outputs.should_run == 'true' && github.event_name == 'pull_request'
     timeout-minutes: 5
     runs-on:
       group: github-public-amd64
     permissions:
       contents: read
-      pull-requests: read
-      # Codecov authenticates the empty upload with a GitHub OIDC token.
-      id-token: write
+      pull-requests: write
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
-
-      - name: Report Skipped Coverage
-        uses: codecov/codecov-action@v7
         with:
-          use_oidc: true
-          run_command: empty-upload
-          force: true
-          fail_ci_if_error: true
+          fetch-depth: 0
+
+      - name: Install Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Download Coverage
+        uses: actions/download-artifact@v8
+        with:
+          name: lcov
+          path: packages
+
+      # A stacked PR compares against the trunk its stack starts from: main or
+      # v2, whichever the branch left most recently.
+      - name: Find Trunk
+        id: trunk
+        env:
+          BASE: ${{ github.base_ref }}
+        run: |
+          if [[ "$BASE" == main || "$BASE" == v2 ]]; then
+            trunk="$BASE"
+          else
+            main_ahead=$(git rev-list --count "$(git merge-base origin/main HEAD)..HEAD")
+            v2_ahead=$(git rev-list --count "$(git merge-base origin/v2 HEAD)..HEAD")
+            if (( v2_ahead < main_ahead )); then trunk=v2; else trunk=main; fi
+          fi
+          echo "name=$trunk" >> "$GITHUB_OUTPUT"
+          echo "merge-base=$(git merge-base "origin/$trunk" HEAD)" >> "$GITHUB_OUTPUT"
+
+      # Saved by the trunk's push runs. A stacked PR can't read v2's cache, and
+      # a miss falls back to Codecov.
+      - name: Restore Trunk Coverage
+        uses: actions/cache/restore@v5
+        with:
+          path: coverage-total.json
+          key: coverage-total-${{ steps.trunk.outputs.name }}-${{ steps.trunk.outputs.merge-base }}
+          restore-keys: coverage-total-${{ steps.trunk.outputs.name }}-
+
+      - name: Report Coverage
+        env:
+          BASE: ${{ github.base_ref }}
+          TRUNK: ${{ steps.trunk.outputs.name }}
+        run: |
+          dart tools/coverage_report.dart \
+            --base "origin/$BASE" \
+            --trunk "origin/$TRUNK" \
+            --base-total coverage-total.json \
+            --output coverage.md
+
+      - name: Add Report to Summary
+        if: ${{ !cancelled() && hashFiles('coverage.md') != '' }}
+        run: cat coverage.md >> "$GITHUB_STEP_SUMMARY"
+
+      # A fork's token can't comment, so its report stays in the summary.
+      - name: Comment Report
+        if: ${{ !cancelled() && hashFiles('coverage.md') != '' && github.event.pull_request.head.repo.full_name == github.repository }}
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const body = require('fs').readFileSync('coverage.md', 'utf8');
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
+            const existing = comments.find((c) => c.user.type === 'Bot' && c.body.includes('<!-- coverage-report -->'));
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
 
   # The one check to mark as required: it passes when every check above
   # passed or was skipped by the gate.
   sdk-verified:
     if: always()
-    needs: [gate, analyze, complexity, build, coverage-skipped, ios-unit-tests]
+    needs: [gate, analyze, complexity, build, coverage, ios-unit-tests]
     timeout-minutes: 5
     runs-on:
       group: github-public-amd64
