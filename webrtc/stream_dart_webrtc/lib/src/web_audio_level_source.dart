@@ -10,13 +10,12 @@ import 'speech_activity_detector.dart';
 
 final _logger = Logger('WebAudioLevelSource');
 
+const _fftSize = 128;
+
 /// An [AudioLevelSource] that opens a microphone capture of its own, sampled
-/// through a Web Audio `AnalyserNode` with an FFT size of [fftSize].
+/// through a Web Audio `AnalyserNode` with an FFT size of [_fftSize].
 @internal
-Future<AudioLevelCapture> openWebAudioLevelCapture({
-  String? deviceId,
-  int fftSize = 128,
-}) async {
+Future<AudioLevelCapture> openWebAudioLevelCapture({String? deviceId}) async {
   final stream = await web.window.navigator.mediaDevices
       .getUserMedia(
         web.MediaStreamConstraints(
@@ -33,7 +32,7 @@ Future<AudioLevelCapture> openWebAudioLevelCapture({
   try {
     audioContext = web.AudioContext();
     final source = audioContext.createMediaStreamSource(stream);
-    final analyser = audioContext.createAnalyser()..fftSize = fftSize;
+    final analyser = audioContext.createAnalyser()..fftSize = _fftSize;
     source.connect(analyser);
     return _WebAudioLevelCapture(stream, audioContext, analyser);
   } catch (_) {

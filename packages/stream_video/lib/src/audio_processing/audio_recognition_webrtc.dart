@@ -47,19 +47,8 @@ class AudioRecognitionWebRTC implements AudioRecognition {
               );
             }
 
-            // Every `started` re-arms the fallback. The platforms deliver a
-            // matching `ended` (which arms a much shorter timer below), but
-            // not reliably: a `started` without one would otherwise latch the
-            // speaking state for the rest of the mute, and consumers that
-            // react to the transition — a banner, a snackbar — would never
-            // fire again until the user unmuted and muted once more.
-            final maxSpeechDuration = config.maxSpeechDuration;
-            if (maxSpeechDuration != null) {
-              _armSilence(maxSpeechDuration, onSoundStateChanged);
-            } else {
-              _silenceTimer?.cancel();
-              _silenceTimer = null;
-            }
+            // Every `started` re-arms the fallback for a missing `ended`.
+            _armSilence(config.maxSpeechDuration, onSoundStateChanged);
 
           case rtc.SpeechActivity.ended:
             // Native side may emit `ended` immediately on a brief pause.
@@ -77,9 +66,12 @@ class AudioRecognitionWebRTC implements AudioRecognition {
     }
   }
 
-  /// (Re)arms the single timer that ends the speaking state after [delay].
-  void _armSilence(Duration delay, SoundStateChangedCallback onChanged) {
+  /// (Re)arms the single timer that ends the speaking state after [delay];
+  /// a null [delay] only cancels it.
+  void _armSilence(Duration? delay, SoundStateChangedCallback onChanged) {
     _silenceTimer?.cancel();
+    _silenceTimer = null;
+    if (delay == null) return;
     _silenceTimer = Timer(delay, () {
       _silenceTimer = null;
       if (!_isSpeaking) return;
@@ -121,8 +113,7 @@ class AudioRecognitionConfig {
   }
 
   /// Trailing silence duration before a `started`→`ended` transition is
-  /// surfaced to the consumer. Mirrors the debounce of the previous
-  /// stats-polling implementation so callers see a similar cadence.
+  /// surfaced to the consumer.
   final Duration speechTimeout;
 
   /// How long a `started` with no matching `ended` keeps the speaking state

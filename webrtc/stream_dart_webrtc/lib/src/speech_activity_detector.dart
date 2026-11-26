@@ -27,24 +27,20 @@ abstract interface class AudioLevelCapture {
 /// A [SpeechActivityDetector] that samples an [AudioLevelCapture] on a timer.
 ///
 /// Reports each transition once on [activity]: [SpeechActivity.started] on the
-/// first sample at or above [audioLevelThreshold], [SpeechActivity.ended] on
+/// first sample at or above [_audioLevelThreshold], [SpeechActivity.ended] on
 /// the first one below it. A sample that throws stops the detector and
 /// releases the capture.
 @internal
 class SampledSpeechActivityDetector implements SpeechActivityDetector {
-  SampledSpeechActivityDetector(
-    this._openCapture, {
-    this.detectionInterval = const Duration(milliseconds: 500),
-    this.audioLevelThreshold = 150,
-  });
-
-  final AudioLevelSource _openCapture;
+  SampledSpeechActivityDetector(this._openCapture);
 
   /// How often the capture is sampled.
-  final Duration detectionInterval;
+  static const _detectionInterval = Duration(milliseconds: 500);
 
   /// A sample at or above this value (0 to 255) counts as speech.
-  final int audioLevelThreshold;
+  static const _audioLevelThreshold = 150;
+
+  final AudioLevelSource _openCapture;
 
   final _activity = StreamController<SpeechActivity>.broadcast();
 
@@ -81,7 +77,7 @@ class SampledSpeechActivityDetector implements SpeechActivityDetector {
     }
 
     _capture = capture;
-    _detectionTimer = Timer.periodic(detectionInterval, (_) => _sample());
+    _detectionTimer = Timer.periodic(_detectionInterval, (_) => _sample());
   }
 
   void _sample() {
@@ -97,7 +93,7 @@ class SampledSpeechActivityDetector implements SpeechActivityDetector {
       return;
     }
 
-    _setSpeaking(level >= audioLevelThreshold);
+    _setSpeaking(level >= _audioLevelThreshold);
   }
 
   void _setSpeaking(bool speaking) {
