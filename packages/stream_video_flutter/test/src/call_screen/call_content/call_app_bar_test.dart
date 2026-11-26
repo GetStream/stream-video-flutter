@@ -369,4 +369,79 @@ void main() {
     expect(title.left, greaterThan(475.5));
     expect(title.right, lessThanOrEqualTo(leave.left));
   });
+
+  group('a status pill reported as a cutout in a top corner', () {
+    // The iPhone Duo held upright: an 82 inset across the top, and the pill
+    // that causes it in the top-right corner.
+    Future<void> pumpDuo(WidgetTester tester) async {
+      tester.view
+        ..devicePixelRatio = 1.0
+        ..physicalSize = const Size(669, 951)
+        ..padding = const FakeViewPadding(top: 82)
+        ..displayFeatures = const [
+          DisplayFeature(
+            bounds: Rect.fromLTRB(535, 0, 669, 82),
+            type: DisplayFeatureType.cutout,
+            state: DisplayFeatureState.unknown,
+          ),
+        ];
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        TestWrapper(
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: bar(actions: [const SizedBox(key: Key('leave'), width: 40)]),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('runs the bar along the top beside the pill on iOS', (
+      tester,
+    ) async {
+      await pumpDuo(tester);
+
+      final barRect = tester.getRect(find.byType(CallAppBar));
+      expect(barRect.top, 0);
+      expect(barRect.height, 72);
+      expect(
+        tester.getRect(find.byKey(const Key('leave'))).right,
+        lessThanOrEqualTo(535),
+      );
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
+
+    testWidgets(
+      'keeps the top inset beside a pill inside the side rail on iOS',
+      (tester) async {
+        tester.view
+          ..devicePixelRatio = 1.0
+          ..physicalSize = const Size(951, 669)
+          ..padding = const FakeViewPadding(top: 12, right: 84)
+          ..displayFeatures = const [
+            DisplayFeature(
+              bounds: Rect.fromLTRB(867, 0, 951, 120),
+              type: DisplayFeatureType.cutout,
+              state: DisplayFeatureState.unknown,
+            ),
+          ];
+        addTearDown(tester.view.reset);
+
+        await tester.pumpWidget(
+          TestWrapper(
+            child: Align(alignment: Alignment.topCenter, child: bar()),
+          ),
+        );
+
+        expect(tester.getSize(find.byType(CallAppBar)).height, 72 + 12);
+      },
+      variant: TargetPlatformVariant.only(TargetPlatform.iOS),
+    );
+
+    testWidgets('keeps the whole inset on Android', (tester) async {
+      await pumpDuo(tester);
+
+      expect(tester.getSize(find.byType(CallAppBar)).height, 72 + 82);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.android));
+  });
 }

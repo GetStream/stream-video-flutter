@@ -231,6 +231,7 @@
 
 ### 🔄 Changed
 
+- `CallAppBar` runs along the top edge beside a status pill reported as a cutout in a top corner, as on an iPhone Duo held upright, rather than below the full-width top inset.
 - On a half-open foldable the call app bar moves its title to the trailing half, and the lobby and the ringing screens split at the fold, in both the book and the tabletop posture.
 - The participant layouts keep every tile off the fold of a half-open foldable, centred on it, in both the book and the tabletop posture; `auto` gives everybody a tile there instead of floating the self-view.
 - `LivestreamInfo`'s fullscreen toggle uses the design system's `fullscreen` and `fullscreenExit` icons instead of Material's.
