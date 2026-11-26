@@ -292,6 +292,9 @@ class Call {
   late final _subscriptions = Subscriptions();
   late final _callInitLock = Lock();
 
+  /// Runs the starts and stops of audio processing one at a time.
+  late final _audioProcessingLock = Lock();
+
   final CoordinatorClient _coordinatorClient;
   final CallHost _host;
   final RetryPolicy _retryPolicy;
@@ -1634,9 +1637,21 @@ class Call {
   /// [startAudioProcessing] fails.
   bool get isAudioProcessorConfigured => _host.isAudioProcessorConfigured();
 
-  /// Starts audio processing for the call.
+  /// Starts audio processing for the call, after the start or stop that is
+  /// running.
   Future<Result<None>> startAudioProcessing({
     bool requireAdvancedAudioProcessingSupport = false,
+  }) {
+    return _audioProcessingLock.synchronized(
+      () => _startAudioProcessing(
+        requireAdvancedAudioProcessingSupport:
+            requireAdvancedAudioProcessingSupport,
+      ),
+    );
+  }
+
+  Future<Result<None>> _startAudioProcessing({
+    required bool requireAdvancedAudioProcessingSupport,
   }) async {
     if (!_host.isAudioProcessorConfigured()) {
       _logger.w(() => '[startAudioProcessing] rejected (not configured)');
@@ -1680,9 +1695,13 @@ class Call {
     return result;
   }
 
-  /// Stops audio processing for the call. The SFU is told only when the
-  /// call was processing audio.
-  Future<Result<None>> stopAudioProcessing() async {
+  /// Stops audio processing for the call, after the start or stop that is
+  /// running. The SFU is told only when the call was processing audio.
+  Future<Result<None>> stopAudioProcessing() {
+    return _audioProcessingLock.synchronized(_stopAudioProcessing);
+  }
+
+  Future<Result<None>> _stopAudioProcessing() async {
     if (!_host.isAudioProcessorConfigured()) {
       _logger.w(() => '[stopAudioProcessing] rejected (not configured)');
       return failureWithError(

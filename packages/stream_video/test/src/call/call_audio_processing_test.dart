@@ -1,3 +1,5 @@
+import 'dart:async';
+
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'package:flutter_test/flutter_test.dart';
@@ -392,6 +394,54 @@ void main() {
         ).called(1);
         verify(callSession.notifyNoiseCancellationStopped).called(1);
       });
+
+      test(
+        'notifies SFU when it stops during a start that is running',
+        () async {
+          final enabling = Completer<Result<None>>();
+          when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(true);
+          when(
+            () => mockPermissionsManager.hasPermission(
+              CallPermission.enableNoiseCancellation,
+            ),
+          ).thenReturn(true);
+          when(
+            () => mockStreamVideo.setAudioProcessingEnabled(true),
+          ).thenAnswer((_) => enabling.future);
+          when(
+            () => mockStreamVideo.setAudioProcessingEnabled(false),
+          ).thenAnswer((_) async => const Result.success(none));
+          when(
+            callSession.notifyNoiseCancellationStarted,
+          ).thenAnswer((_) async => const Result.success(none));
+          when(
+            callSession.notifyNoiseCancellationStopped,
+          ).thenAnswer((_) async => const Result.success(none));
+
+          final call = createTestCall(
+            networkMonitor: setupMockInternetConnection(
+              statusStream: internetStatusController,
+            ),
+            coordinatorClient: coordinatorClient,
+            sessionFactory: setupMockSessionFactory(callSession: callSession),
+            streamVideo: mockStreamVideo,
+            permissionManager: mockPermissionsManager,
+          );
+
+          await call.join();
+
+          final start = call.startAudioProcessing();
+          await pumpEventQueue();
+          final stop = call.stopAudioProcessing();
+          enabling.complete(const Result.success(none));
+          await start;
+          await stop;
+
+          expect(call.state.value.isAudioProcessing, isFalse);
+          verify(callSession.notifyNoiseCancellationStarted).called(1);
+          verify(callSession.notifyNoiseCancellationStopped).called(1);
+        },
+      );
 
       test('does not notify SFU when audio processing never started', () async {
         when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(true);
