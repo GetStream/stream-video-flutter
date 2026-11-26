@@ -384,7 +384,6 @@ void main() {
         LivestreamPlayer(
           call: call,
           joinBehaviour: LivestreamJoinBehaviour.manualJoin,
-          showRecordingsWhenEnded: false,
           onCallDisconnected: (_) {},
         ),
       );
@@ -413,7 +412,6 @@ void main() {
         LivestreamPlayer(
           call: call,
           joinBehaviour: LivestreamJoinBehaviour.manualJoin,
-          showRecordingsWhenEnded: false,
         ),
       );
 
