@@ -478,19 +478,23 @@ void main() {
     },
   );
 
-  test('a disable before the start clears the requested constraints', () async {
-    final call = await joinedCall();
-    await call.setScreenShareEnabled(enabled: true, constraints: _requested);
-    await call.setScreenShareEnabled(enabled: false);
-    clearInteractions(harness.session);
+  test(
+    'a disable before the start still shares the broadcast, with the default '
+    'broadcast constraints',
+    () async {
+      final call = await joinedCall();
+      await call.setScreenShareEnabled(enabled: true, constraints: _requested);
+      await call.setScreenShareEnabled(enabled: false);
+      clearInteractions(harness.session);
 
-    await emit(ScreenSharingStartedEvent());
+      await emit(ScreenSharingStartedEvent());
 
-    final calls = screenShareCalls();
-    expect(calls, hasLength(1));
-    expect(calls.single.$2, isNot(_requested));
-    expect(calls.single.$2?.useiOSBroadcastExtension, isTrue);
-  });
+      final calls = screenShareCalls();
+      expect(calls, hasLength(1));
+      expect(calls.single.$1, isTrue);
+      expect(calls.single.$2, _isDefaultBroadcast(call));
+    },
+  );
 
   test('a broadcast started before the call is joined is shared on the '
       'join', () async {
