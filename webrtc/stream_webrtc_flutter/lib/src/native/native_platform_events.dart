@@ -45,7 +45,9 @@ class NativeWebRtcPlatformEvents implements WebRtcPlatformEvents {
               deviceId: deviceId,
               label: payload['label'] as String? ?? deviceId,
               groupId: payload['groupId'] as String?,
-              reasonCode: payload['reason'] as int?,
+              reason: AudioRouteChangeReason.fromCode(
+                payload['reason'] as int?,
+              ),
             );
           });
 

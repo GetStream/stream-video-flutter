@@ -10,6 +10,7 @@ import '../third_party/flutter_webrtc/native/factory_impl.dart' as rtc;
 import '../third_party/flutter_webrtc/native/native_peer_connection_factory.dart';
 import '../third_party/flutter_webrtc/native/rtc_video_renderer_impl.dart';
 import '../third_party/flutter_webrtc/native/utils.dart';
+import 'external_audio_device.dart';
 import 'ios_broadcast_picker.dart';
 import 'native_audio_renderer.dart' as audio_renderer;
 
@@ -38,8 +39,8 @@ final class NativeWebRtcEngine implements WebRtcEngine {
   Future<void> configureDefaultFactory({
     PeerConnectionFactoryOptions? options,
     bool refresh = false,
-  }) {
-    return WebRTC.initialize(factoryOptions: options, refresh: refresh);
+  }) async {
+    await WebRTC.initialize(factoryOptions: options, refresh: refresh);
   }
 
   @override
@@ -183,6 +184,9 @@ class _NativeWebRtcAudio implements WebRtcAudio {
   }
 
   @override
+  bool get hasAudioSession => WebRTC.platformIsIOS;
+
+  @override
   Future<void> setAppleAudioConfiguration(
     AppleAudioConfiguration configuration,
   ) {
@@ -206,6 +210,9 @@ class _NativeWebRtcAudio implements WebRtcAudio {
   Future<void> showAudioRoutePicker() {
     return Helper.triggeriOSAudioRouteSelectionUI();
   }
+
+  @override
+  bool isExternalDevice(String? groupId) => isExternalAudioDevice(groupId);
 }
 
 // ignore: subtype_of_sealed_class, the plugin implements its own contract

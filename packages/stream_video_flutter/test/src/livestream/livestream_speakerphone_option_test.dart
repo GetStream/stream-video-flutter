@@ -21,8 +21,7 @@ void main() {
 
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  final controller = PlatformAudioController.instance;
-  final originalSetPlayoutPaused = controller.setPlayoutPaused;
+  late PlatformAudioController controller;
   final webrtcCalls = <String>[];
 
   /// Every native pause and resume, in order.
@@ -51,15 +50,20 @@ void main() {
     nativeCalls.clear();
     pauseGate = null;
     pauseError = null;
-    controller.setPlayoutPaused = (paused) async {
-      if (!paused) {
-        nativeCalls.add('resume');
-        return;
-      }
-      nativeCalls.add('pause');
-      await pauseGate?.future;
-      if (pauseError case final error?) throw error;
-    };
+    final audio = _FakeAudio(
+      onSetPlayoutPaused: (paused) async {
+        if (!paused) {
+          nativeCalls.add('resume');
+          return;
+        }
+        nativeCalls.add('pause');
+        await pauseGate?.future;
+        if (pauseError case final error?) throw error;
+      },
+      onCall: webrtcCalls.add,
+    );
+    controller = PlatformAudioController.instance =
+        PlatformAudioController.withEngine(_FakeEngine(audio));
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_webrtcChannel, (call) async {
           webrtcCalls.add(call.method);
@@ -73,7 +77,7 @@ void main() {
     pauseGate = null;
     pauseError = null;
     if (controller.isAudioPlayoutPaused) await controller.resumeAudioPlayout();
-    controller.setPlayoutPaused = originalSetPlayoutPaused;
+    PlatformAudioController.instance = null;
     CurrentPlatform.debugCurrentPlatformOverride = null;
     rtc.debugWebRtcCapabilitiesOverride = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -278,4 +282,40 @@ rtc.WebRtcCapabilities _capabilities({required bool pauseSupported}) {
     isWindows: false,
     isLinux: false,
   ).copyWith(supportsAudioPlayoutPause: pauseSupported);
+}
+
+// ignore: subtype_of_sealed_class, a fake for the tests
+/// The plugin's engine with the audio of [_FakeAudio].
+class _FakeEngine extends Fake implements rtc.WebRtcEngine {
+  _FakeEngine(this._audio);
+
+  final rtc.WebRtcAudio _audio;
+  final _native = rtc.NativeWebRtcEngine();
+
+  @override
+  rtc.WebRtcAudio get audio => _audio;
+
+  @override
+  rtc.WebRtcCapabilities get capabilities => _native.capabilities;
+
+  @override
+  rtc.WebRtcPlatformEvents get events => _native.events;
+}
+
+// ignore: subtype_of_sealed_class, a fake for the tests
+/// Pauses playout through [onSetPlayoutPaused] and reports every other call
+/// to [onCall] by name.
+class _FakeAudio extends Fake implements rtc.WebRtcAudio {
+  _FakeAudio({required this.onSetPlayoutPaused, required this.onCall});
+
+  final Future<void> Function(bool paused) onSetPlayoutPaused;
+  final void Function(String method) onCall;
+
+  @override
+  Future<void> setPlayoutPaused(bool paused) => onSetPlayoutPaused(paused);
+
+  @override
+  Future<void> selectAudioOutput(String deviceId) async {
+    onCall('selectAudioOutput');
+  }
 }

@@ -118,6 +118,9 @@ class _BrowserWebRtcAudio implements WebRtcAudio {
   }
 
   @override
+  bool get hasAudioSession => false;
+
+  @override
   Future<void> setAppleAudioConfiguration(
     AppleAudioConfiguration configuration,
   ) async {
@@ -125,9 +128,7 @@ class _BrowserWebRtcAudio implements WebRtcAudio {
   }
 
   @override
-  Future<void> setStereoPlayoutPreferred(bool preferred) async {
-    throw UnsupportedError('Stereo playout is set on iOS only');
-  }
+  Future<void> setStereoPlayoutPreferred(bool preferred) async {}
 
   @override
   Future<void> regainAndroidAudioFocus() async {
@@ -145,6 +146,10 @@ class _BrowserWebRtcAudio implements WebRtcAudio {
   Future<void> showAudioRoutePicker() async {
     throw UnsupportedError('The audio route picker is on iOS only');
   }
+
+  @override
+  bool isExternalDevice(String? groupId) =>
+      groupId?.toLowerCase().contains('bluetooth') ?? false;
 }
 
 // ignore: subtype_of_sealed_class, the plugin implements its own contract

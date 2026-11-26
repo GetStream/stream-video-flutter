@@ -6,15 +6,18 @@ import 'package:stream_video/src/audio_processing/audio_recognition_webrtc.dart'
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
+import '../../fixtures/fake_webrtc_engine.dart';
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late _FakePlatformEvents platformEvents;
 
   setUp(() {
-    PlatformAudioController.instance = null;
     platformEvents = _FakePlatformEvents();
-    PlatformAudioController.instance.platformEvents = platformEvents;
+    PlatformAudioController.instance = PlatformAudioController.withEngine(
+      FakeWebRtcEngine(events: platformEvents),
+    );
   });
 
   tearDown(() {

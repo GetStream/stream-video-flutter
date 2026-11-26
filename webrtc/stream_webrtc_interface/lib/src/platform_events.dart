@@ -9,7 +9,7 @@ class AudioRoute {
     required this.deviceId,
     required this.label,
     this.groupId,
-    this.reasonCode,
+    this.reason = AudioRouteChangeReason.unknown,
   });
 
   /// The output's identifier. Never empty: a change without one is not
@@ -22,9 +22,9 @@ class AudioRoute {
   /// The kind of output (the port type on iOS).
   final String? groupId;
 
-  /// Why the route changed: the raw `AVAudioSessionRouteChangeReason` on iOS.
-  /// Null when the platform does not report it.
-  final int? reasonCode;
+  /// Why the route changed, or [AudioRouteChangeReason.unknown] when the
+  /// platform does not report it.
+  final AudioRouteChangeReason reason;
 
   @override
   bool operator ==(Object other) =>
@@ -33,15 +33,61 @@ class AudioRoute {
           other.deviceId == deviceId &&
           other.label == label &&
           other.groupId == groupId &&
-          other.reasonCode == reasonCode;
+          other.reason == reason;
 
   @override
-  int get hashCode => Object.hash(deviceId, label, groupId, reasonCode);
+  int get hashCode => Object.hash(deviceId, label, groupId, reason);
 
   @override
   String toString() =>
       'AudioRoute(deviceId: $deviceId, label: $label, groupId: $groupId, '
-      'reasonCode: $reasonCode)';
+      'reason: ${reason.name})';
+}
+
+/// Why the audio route changed: iOS's `AVAudioSessionRouteChangeReason`.
+enum AudioRouteChangeReason {
+  /// The reason is not known.
+  unknown(0),
+
+  /// A device became available, such as headphones that were plugged in.
+  newDeviceAvailable(1),
+
+  /// The device in use became unavailable, such as headphones that were
+  /// unplugged.
+  oldDeviceUnavailable(2),
+
+  /// The audio session's category changed.
+  categoryChange(3),
+
+  /// The app overrode the route, such as to the loudspeaker.
+  override(4),
+
+  /// The device woke from sleep.
+  wakeFromSleep(6),
+
+  /// No route suits the audio session's category.
+  noSuitableRouteForCategory(7),
+
+  /// The route's configuration changed without a device being added or
+  /// removed, such as when the audio unit is rebuilt after a CallKit hold.
+  routeConfigurationChange(8);
+
+  const AudioRouteChangeReason(this.code);
+
+  /// The `AVAudioSessionRouteChangeReason` raw value.
+  final int code;
+
+  /// The reason with [code], or [unknown] for a code it does not know.
+  static AudioRouteChangeReason fromCode(int? code) => values.firstWhere(
+    (reason) => reason.code == code,
+    orElse: () => AudioRouteChangeReason.unknown,
+  );
+
+  /// Whether the system re-routed on its own, with no device added or
+  /// removed: after a category change, or when the audio unit was rebuilt,
+  /// such as after a CallKit hold.
+  bool get isSystemReconfiguration =>
+      this == categoryChange || this == routeConfigurationChange;
 }
 
 /// Whether the local user started or stopped speaking, reported by the audio
