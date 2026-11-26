@@ -318,7 +318,7 @@ class RemoteAudioPlayback {
     try {
       await _detachAndAttach(trackIds);
     } finally {
-      _blockedDuringReattach.clear();
+      _blockedDuringReattach.removeAll(blocked);
       _notifyBlocked();
     }
   }

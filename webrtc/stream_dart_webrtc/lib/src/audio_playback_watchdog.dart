@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
-final _logger = Logger('AudioPlaybackWatchdog');
+import 'log.dart';
+
+const _logger = WebRtcLogger('AudioPlaybackWatchdog');
 
 /// Number of consecutive failed recovery attempts after which the outage is
 /// reported as sustained.
@@ -147,7 +148,7 @@ class AudioPlaybackWatchdog {
       if (_attempt <= _maxRecoveryAttempts) {
         _logger.warning(failureMessage());
       } else {
-        _logger.fine(failureMessage);
+        _logger.verbose(failureMessage());
       }
 
       // The autoplay policy will keep rejecting until a user gesture, so stop
@@ -213,7 +214,7 @@ class AudioPlaybackWatchdog {
     // routine — don't report it as an outage.
     final skipReason = _computeSkipReason();
     if (skipReason != null) {
-      _logger.fine('Ignoring $reason for track $trackId ($skipReason)');
+      _logger.verbose('Ignoring $reason for track $trackId ($skipReason)');
       return;
     }
 
@@ -233,7 +234,7 @@ class AudioPlaybackWatchdog {
 
     final skipReason = _computeSkipReason();
     if (skipReason != null) {
-      _logger.fine('Recovery skipped for track $trackId ($skipReason)');
+      _logger.verbose('Recovery skipped for track $trackId ($skipReason)');
 
       // There is nothing to recover, so leave the machine re-armed. A latched
       // [_degraded] with no timer pending would swallow every later outage.

@@ -37,6 +37,7 @@ import 'logger/impl/external_logger.dart';
 import 'logger/impl/tagged_logger.dart';
 import 'logger/logger_api.dart';
 import 'logger/stream_log.dart';
+import 'logger/webrtc_log_bridge.dart';
 import 'models/audio_configuration_policy.dart';
 import 'models/call_cid.dart';
 import 'models/call_metadata.dart';
@@ -1089,6 +1090,7 @@ void _setupLogger(Priority logPriority, LogHandlerFunction logHandlerFunction) {
     ]);
 
     installCoreLogBridge(logPriority);
+    installWebRtcLogBridge();
   }
 }
 

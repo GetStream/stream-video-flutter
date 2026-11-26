@@ -3,6 +3,7 @@
 --------------------------------------------
 [Unreleased]
 
+* Added `webRtcLogHandler`, which receives the log records of the WebRTC packages.
 * Added `RTCAudioRenderer`, which plays a remote audio track, with its `AudioRendererState` and `AudioRendererTrace`.
 * Added `WebRtcPlatformEvents`, its event types and `SpeechActivityDetector`, and `PeerConnectionFactoryOptions`.
 * Added the Android and Apple audio configuration types, moved from `stream_webrtc_flutter`.

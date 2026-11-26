@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:js_interop';
 import 'dart:typed_data';
 
-import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:web/web.dart' as web;
 
+import 'log.dart';
 import 'speech_activity_detector.dart';
 
-final _logger = Logger('WebAudioLevelSource');
+const _logger = WebRtcLogger('WebAudioLevelSource');
 
 const _fftSize = 128;
 

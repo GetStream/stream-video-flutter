@@ -1,10 +1,11 @@
 import 'dart:async';
 
-import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
-final _logger = Logger('SpeechActivityDetector');
+import 'log.dart';
+
+const _logger = WebRtcLogger('SpeechActivityDetector');
 
 /// Opens a capture of the microphone [deviceId], or the default microphone
 /// when it is null, whose loudness can be sampled. Releases whatever it opened

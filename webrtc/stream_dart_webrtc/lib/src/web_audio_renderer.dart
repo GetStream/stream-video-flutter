@@ -2,15 +2,15 @@ import 'dart:async';
 import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 
-import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 import 'package:web/web.dart' as web;
 
 import 'audio_playback_watchdog.dart';
+import 'log.dart';
 import 'third_party/dart_webrtc/media_stream_track_impl.dart';
 
-final _logger = Logger('WebAudioRenderer');
+const _logger = WebRtcLogger('WebAudioRenderer');
 
 /// The id of the hidden element that holds the remote audio elements.
 const audioContainerId = 'stream_audio_container';
