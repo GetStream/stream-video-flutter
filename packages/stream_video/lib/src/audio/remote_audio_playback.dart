@@ -304,17 +304,17 @@ class RemoteAudioPlayback {
           'Re-attaching ${trackIds.length} remote audio renderer(s) '
           'after $reason',
     );
+    final blocked = [
+      for (final id in trackIds)
+        if (_renderers[id] case final renderer? when _isBlocked(renderer)) id,
+    ];
     _trace(TraceTag.audioPlaybackReattach, {
       'reason': reason,
       'tracks': trackIds.length,
-      'blockedTracks': _renderers.values.where(_isBlocked).length,
+      'blockedTracks': blocked.length,
     });
 
-    _blockedDuringReattach.addAll(
-      trackIds.where(
-        (id) => _renderers[id]?.state == rtc.AudioRendererState.blocked,
-      ),
-    );
+    _blockedDuringReattach.addAll(blocked);
     try {
       await _detachAndAttach(trackIds);
     } finally {
@@ -337,11 +337,8 @@ class RemoteAudioPlayback {
       }
     }
 
-    try {
-      await Future<void>.delayed(_reattachDelay);
-    } finally {
-      _pendingReattach = null;
-    }
+    await Future<void>.delayed(_reattachDelay);
+    _pendingReattach = null;
 
     for (final trackId in trackIds) {
       final renderer = _renderers[trackId];
