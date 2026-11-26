@@ -12,7 +12,8 @@
 - Added `StreamCallBadgeThemeData` on `StreamVideoTheme`, and `StreamCallBadgeTheme`, to restyle the duration, participants and latency badges in one place.
 - Added `callParticipantsSpoken`, `callLatencySpoken`, `callLatencyUnknownSpoken` and `callLatencyUnit` to the localizations, in English and Dutch.
 - Registers the WebRTC plugin's `WebRtcEngine` for `stream_video` on Android, iOS, macOS, Windows and Linux.
-- Exports the native WebRTC version constants, `androidWebRTCVersion` and the others, which moved here from `stream_video`.
+- Exports the native WebRTC version constants, which moved here from `stream_video`.
+- Exports `NativeWebRtcEngine`, for a test to register as `WebRtcEngine.instance`.
 - Added `StreamMediaDevicesController.supportsAudioOutputSelection`; `audioOutputs` is empty where it is false.
 - Added `anchorPoint` to `showStreamModalDialog`, which picks the half of a folded window the dialog goes to.
 - Added `StreamCallConnectionBanner`, which says what the call's connection is doing while it reconnects.

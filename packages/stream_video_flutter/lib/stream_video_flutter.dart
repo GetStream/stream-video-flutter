@@ -14,6 +14,7 @@ export 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart'
         iosWebRTCVersion,
         linuxWebRTCVersion,
         macOsWebRTCVersion,
+        NativeWebRtcEngine,
         windowsWebRTCVersion;
 export 'src/call_background/background_service.dart';
 export 'src/call_background/model/notification_options.dart';

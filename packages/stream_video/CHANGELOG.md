@@ -2,7 +2,7 @@
 
 ### ⚠️ Breaking
 
-- `stream_video` no longer depends on `stream_webrtc_flutter`. On Android, iOS, macOS, Windows and Linux it needs a registered `WebRtcEngine`, which `stream_video_flutter` registers; without one, WebRTC calls throw a `StateError`. On web it uses `stream_dart_webrtc`'s engine.
+- `stream_video` no longer depends on `stream_webrtc_flutter`; off the web, it needs the `WebRtcEngine` that `stream_video_flutter` registers, which a test sets as `WebRtcEngine.instance`.
 - `androidWebRTCVersion`, `iosWebRTCVersion`, `macOsWebRTCVersion`, `linuxWebRTCVersion` and `windowsWebRTCVersion` moved to `stream_video_flutter`.
 - `AudioRouteChangeReason` comes from `stream_webrtc_interface`; `stream_video` still exports it.
 - `RtcMediaDevice.iOSExternalPorts` and `RtcMediaDevice.androidExternalAudioDeviceType` are removed; `RtcMediaDevice.isExternal` asks the WebRTC engine.

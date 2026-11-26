@@ -20,6 +20,7 @@ import '../../webrtc/peer_connection_factory.dart';
 import '../../webrtc/rtc_manager.dart';
 import '../../webrtc/rtc_manager_factory.dart';
 import '../../webrtc/sdp/editor/sdp_editor.dart';
+import '../../webrtc/webrtc_engine.dart';
 import '../state/call_state_notifier.dart';
 import '../stats/stats_reporter.dart';
 import '../stats/trace_tag.dart';
@@ -31,7 +32,6 @@ import 'session_signaling.dart';
 import 'session_track_controller.dart';
 import 'sfu_event_router.dart';
 import 'sfu_join_request_builder.dart';
-import '../../webrtc/webrtc_engine.dart';
 
 part 'call_session_media.dart';
 

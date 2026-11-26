@@ -11,11 +11,11 @@ import '../../../protobuf/video/sfu/models/models.pb.dart' as sfu_models;
 import '../../../protobuf/video/sfu/models/models.pb.dart';
 import '../../../stream_video.dart';
 import '../../extensions/thermal_status_ext.dart';
+import '../../webrtc/webrtc_engine.dart';
 import '../session/call_session.dart';
 import 'trace_record.dart';
 import 'trace_tag.dart';
 import 'tracer.dart';
-import '../../webrtc/webrtc_engine.dart';
 
 class SfuStatsReporter {
   SfuStatsReporter({

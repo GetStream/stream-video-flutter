@@ -39,7 +39,7 @@
 
 ### 🔄 Changed
 
-- `StreamVideoPushHandler.handleBackgroundMessage` registers the Dart side of the plugins in its isolate, so the WebRTC engine is there.
+- `StreamVideoPushHandler.handleBackgroundMessage` registers the Dart plugins in its isolate.
 - `stream_video` now tells this package when a call's ring is over, when a call is left and when the user accepts a call in the app. That covers, as before, the app leaving a call, a ring the backend ends, the caller cancels or another device answers, and a call accepted in the app. A ring that is over ends without being reported as declined, unless the user answered it on the native call screen; a call accepted in the app has its ring dismissed while the native side still shows it unanswered, and on Android stays with the Telecom stack.
 - [iOS] `dismissRingingCallByCid` ends the CallKit call silently: its end is no longer reported as `ActionCallDecline` or `ActionCallEnded`.
 - [Android] A call accepted in the app now reaches `onRingingEvent` listeners as `ActionCallDismissed` with `CallDismissReason.accepted`. iOS reports nothing for it.

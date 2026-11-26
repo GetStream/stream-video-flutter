@@ -56,13 +56,19 @@ class RtcMediaDevice extends Equatable {
     };
   }
 
+  /// Whether [isExternal] already warned that no engine is registered.
+  static bool _warnedNoEngine = false;
+
   /// Whether this device is an external audio device, such as a headset or a
   /// car, as the WebRTC engine reports it. False while no engine is
   /// registered.
   bool get isExternal {
     ensureWebRtcEngine();
     if (!WebRtcEngine.isRegistered) {
-      streamLog.w('SV:RtcMediaDevice', () => 'No WebRtcEngine registered');
+      if (!_warnedNoEngine) {
+        _warnedNoEngine = true;
+        streamLog.w('SV:RtcMediaDevice', () => 'No WebRtcEngine registered');
+      }
       return false;
     }
     return WebRtcEngine.instance.audio.isExternalDevice(groupId);
