@@ -43,6 +43,7 @@ class LocalMediaFilters {
   Future<Result<None>> Function(SfuTrackType kind)? onOutputChanged;
 
   final _locks = <SfuTrackType, Lock>{};
+  final _changeLocks = <SfuTrackType, Lock>{};
   final _applied = <SfuTrackType, _AppliedChain>{};
 
   rtc.VideoFilter? _videoFilter;
@@ -204,10 +205,24 @@ class LocalMediaFilters {
   /// on the capture, or the new stream cannot be sent, the new chain is
   /// stopped and the old one stays applied. Fails too when another filter of
   /// the chain fails, unless [failOnOptional] is false.
+  ///
+  /// Changes of a kind run one at a time, each until its stream is sent.
   Future<Result<LocalFilterChange>> _change(
     SfuTrackType kind,
     void Function() change, {
     bool failOnOptional = true,
+  }) {
+    return _changeLocks
+        .putIfAbsent(kind, Lock.new)
+        .synchronized(
+          () => _changeChain(kind, change, failOnOptional: failOnOptional),
+        );
+  }
+
+  Future<Result<LocalFilterChange>> _changeChain(
+    SfuTrackType kind,
+    void Function() change, {
+    required bool failOnOptional,
   }) async {
     final lock = _lockFor(kind);
     final changed = await lock.synchronized(() async {

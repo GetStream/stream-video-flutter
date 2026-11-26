@@ -246,6 +246,37 @@ void main() {
       ]);
     });
 
+    test('overlapping with another whose stream cannot be sent either keeps '
+        'the old chain', () async {
+      filters.onOutputChanged = (_) async {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        return failureWithError('not sent');
+      };
+      final capture = camera('cam-1');
+      await filters.setVideoFilter(_LoggingFilter('blur', log));
+      await filters.apply(capture);
+
+      final results = await Future.wait([
+        filters.setVideoFilter(
+          _ReplacingFilter(_stream('out-1', 'video'), log),
+        ),
+        filters.setVideoFilter(
+          _ReplacingFilter(_stream('out-2', 'video'), log),
+        ),
+      ]);
+      final held = await filters.apply(capture);
+
+      expect(results.every((result) => result.isFailure), isTrue);
+      expect(held.mediaStream, same(capture.mediaStream));
+      expect(log, [
+        'blur apply cam-1 camera',
+        'replace apply cam-1',
+        'replace stop rejected',
+        'replace apply cam-1',
+        'replace stop rejected',
+      ]);
+    });
+
     test('keeps the old chain when the moderation filter fails', () async {
       final capture = camera('cam-1');
       final moderation = _FlakyFilter('mod', log);
