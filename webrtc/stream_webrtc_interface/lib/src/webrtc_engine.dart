@@ -93,6 +93,14 @@ abstract class WebRtcEngine {
   /// it. Android; throws elsewhere.
   Future<bool> requestCapturePermission({bool fullScreenOnly = false});
 
+  /// Shows the system picker of the app's broadcast upload extension, without
+  /// starting a capture. iOS; throws [UnsupportedError] elsewhere.
+  Future<void> presentBroadcastPicker();
+
+  /// Asks the app's broadcast upload extension to finish its broadcast. iOS;
+  /// throws [UnsupportedError] elsewhere.
+  Future<void> stopBroadcast();
+
   /// Creates the renderer of the remote audio track [id].
   RTCAudioRenderer createAudioRenderer(
     String id, {

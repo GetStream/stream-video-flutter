@@ -60,6 +60,16 @@ final class BrowserWebRtcEngine implements WebRtcEngine {
   }
 
   @override
+  Future<void> presentBroadcastPicker() async {
+    throw UnsupportedError('The broadcast picker is only supported on iOS');
+  }
+
+  @override
+  Future<void> stopBroadcast() async {
+    throw UnsupportedError('The broadcast is only supported on iOS');
+  }
+
+  @override
   RTCAudioRenderer createAudioRenderer(
     String id, {
     AudioRendererTraceHandler? onTrace,

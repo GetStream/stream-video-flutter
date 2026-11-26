@@ -10,6 +10,7 @@ import '../third_party/flutter_webrtc/native/factory_impl.dart' as rtc;
 import '../third_party/flutter_webrtc/native/native_peer_connection_factory.dart';
 import '../third_party/flutter_webrtc/native/rtc_video_renderer_impl.dart';
 import '../third_party/flutter_webrtc/native/utils.dart';
+import 'ios_broadcast_picker.dart';
 import 'native_audio_renderer.dart' as audio_renderer;
 
 // ignore: subtype_of_sealed_class, the plugin implements its own contract
@@ -64,6 +65,12 @@ final class NativeWebRtcEngine implements WebRtcEngine {
   Future<bool> requestCapturePermission({bool fullScreenOnly = false}) {
     return Helper.requestCapturePermission(fullScreenOnly: fullScreenOnly);
   }
+
+  @override
+  Future<void> presentBroadcastPicker() => presentiOSBroadcastPicker();
+
+  @override
+  Future<void> stopBroadcast() => stopiOSBroadcast();
 
   @override
   RTCAudioRenderer createAudioRenderer(

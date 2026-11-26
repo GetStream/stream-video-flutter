@@ -197,13 +197,13 @@ class RtcMediaDeviceNotifier {
   /// capture. Throws an [UnsupportedError] on other platforms.
   @internal
   Future<void> presentiOSBroadcastPicker() {
-    return rtc.presentiOSBroadcastPicker();
+    return webRtcEngine.presentBroadcastPicker();
   }
 
   /// Asks the iOS broadcast extension to finish its broadcast. Throws an
   /// [UnsupportedError] on other platforms.
   @internal
   Future<void> stopiOSBroadcast() {
-    return rtc.stopiOSBroadcast();
+    return webRtcEngine.stopBroadcast();
   }
 }
