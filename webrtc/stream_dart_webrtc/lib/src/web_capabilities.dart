@@ -22,7 +22,18 @@ WebRtcCapabilities get webRtcCapabilities {
 // ignore: invalid_use_of_visible_for_testing_member, the browser's own value
 final WebRtcCapabilities _browserCapabilities = browserWebRtcCapabilitiesFor(
   supportsAudioOutputSelection: _probeAudioOutputSelection(),
+  isWebKit: _probeWebKit(),
 );
+
+/// Whether this browser runs on WebKit. False where the browser cannot be
+/// probed.
+bool _probeWebKit() {
+  try {
+    return isWebKitUserAgent(web.window.navigator.userAgent);
+  } catch (_) {
+    return false;
+  }
+}
 
 /// Whether this browser supports audio output selection. False where the
 /// browser cannot be probed, such as outside a window.

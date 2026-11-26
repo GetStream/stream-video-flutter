@@ -22,8 +22,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   final controller = PlatformAudioController.instance;
-  final originalNativePause = controller.nativePauseAudioPlayout;
-  final originalNativeResume = controller.nativeResumeAudioPlayout;
+  final originalSetPlayoutPaused = controller.setPlayoutPaused;
   final webrtcCalls = <String>[];
 
   /// Every native pause and resume, in order.
@@ -52,13 +51,15 @@ void main() {
     nativeCalls.clear();
     pauseGate = null;
     pauseError = null;
-    controller
-      ..nativePauseAudioPlayout = () async {
-        nativeCalls.add('pause');
-        await pauseGate?.future;
-        if (pauseError case final error?) throw error;
+    controller.setPlayoutPaused = (paused) async {
+      if (!paused) {
+        nativeCalls.add('resume');
+        return;
       }
-      ..nativeResumeAudioPlayout = () async => nativeCalls.add('resume');
+      nativeCalls.add('pause');
+      await pauseGate?.future;
+      if (pauseError case final error?) throw error;
+    };
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(_webrtcChannel, (call) async {
           webrtcCalls.add(call.method);
@@ -72,9 +73,7 @@ void main() {
     pauseGate = null;
     pauseError = null;
     if (controller.isAudioPlayoutPaused) await controller.resumeAudioPlayout();
-    controller
-      ..nativePauseAudioPlayout = originalNativePause
-      ..nativeResumeAudioPlayout = originalNativeResume;
+    controller.setPlayoutPaused = originalSetPlayoutPaused;
     CurrentPlatform.debugCurrentPlatformOverride = null;
     rtc.debugWebRtcCapabilitiesOverride = null;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger

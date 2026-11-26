@@ -2,6 +2,7 @@ library stream_webrtc_interface;
 
 export 'src/peer_connection_factory_options.dart';
 export 'src/platform_events.dart';
+export 'src/rtc_audio_renderer.dart';
 export 'src/speech_activity_detector.dart';
 export 'src/third_party/flutter_webrtc/android_audio_configuration.dart';
 export 'src/third_party/flutter_webrtc/apple_audio_configuration.dart';
@@ -29,3 +30,4 @@ export 'src/third_party/webrtc_interface/rtc_stats_report.dart';
 export 'src/third_party/webrtc_interface/rtc_track_event.dart';
 export 'src/third_party/webrtc_interface/rtc_video_renderer.dart';
 export 'src/webrtc_capabilities.dart';
+export 'src/webrtc_log.dart';

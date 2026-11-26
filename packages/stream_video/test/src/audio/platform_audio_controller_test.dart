@@ -41,8 +41,7 @@ void main() {
   });
 
   group('audio playout pause', () {
-    late Future<void> Function() originalPause;
-    late Future<void> Function() originalResume;
+    late Future<void> Function(bool paused) originalSetPlayoutPaused;
     final nativeCalls = <String>[];
     Exception? pauseError;
 
@@ -50,14 +49,13 @@ void main() {
       overrideWebRtcCapabilities(platform: PlatformType.android);
       nativeCalls.clear();
       pauseError = null;
-      originalPause = controller.nativePauseAudioPlayout;
-      originalResume = controller.nativeResumeAudioPlayout;
-      controller
-        ..nativePauseAudioPlayout = () async {
-          nativeCalls.add('pause');
+      originalSetPlayoutPaused = controller.setPlayoutPaused;
+      controller.setPlayoutPaused = (paused) async {
+        nativeCalls.add(paused ? 'pause' : 'resume');
+        if (paused) {
           if (pauseError case final error?) throw error;
         }
-        ..nativeResumeAudioPlayout = () async => nativeCalls.add('resume');
+      };
     });
 
     tearDown(() async {
@@ -68,9 +66,7 @@ void main() {
       if (controller.isAudioPlayoutPaused) {
         await controller.resumeAudioPlayout();
       }
-      controller
-        ..nativePauseAudioPlayout = originalPause
-        ..nativeResumeAudioPlayout = originalResume;
+      controller.setPlayoutPaused = originalSetPlayoutPaused;
       rtc.debugWebRtcCapabilitiesOverride = null;
     });
 

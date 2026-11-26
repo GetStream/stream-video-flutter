@@ -4,6 +4,7 @@
 
 - The app-wide audio members of `RtcMediaDeviceNotifier` moved to `PlatformAudioController.instance`: `nativeWebRtcEventsStream`, `speechActivityStream`, `triggeriOSAudioRouteSelectionUI`, `isAudioPlayoutPauseSupported`, `isAudioPlayoutPaused`, `audioPlayoutPausedChanges`, `pauseAudioPlayout`, `resumeAudioPlayout`, `resumeWebAudioPlayback`, `regainAndroidAudioFocus` and `reinitializeAudioConfiguration`.
 - `PlatformAudioController` is `@sealed`, so a test mock that implements it gets a `subtype_of_sealed_class` warning; add `// ignore: subtype_of_sealed_class` to it.
+- `PlatformAudioController.nativePauseAudioPlayout` and `nativeResumeAudioPlayout` are removed; use `pauseAudioPlayout` and `resumeAudioPlayout`.
 - `ScreenSharingStoppedEvent` carries a `trackId` instead of a `data` map, and `ScreenSharingStartedEvent` has no `data`.
 - `CallState.participantCount` includes the anonymous participants before the call is joined too, as it already did once joined. `anonymousParticipantCount` says how many of them are anonymous.
 - `RtcMediaDeviceNotifier.handleCallInterruptionCallbacks` is removed: each call reports interruptions of its audio on `CallState.isAudioInterrupted` and reacts as `CallPreferences.audioInterruptionReaction` says, with `AudioInterruptionReaction.muteMicrophone` for what the documented callbacks did. The SDK enables the WebRTC plugin's interruption events, so don't call `platformEvents.enableInterruptionEvents` yourself. On Android an interruption is now only a loss of audio focus, so `READ_PHONE_STATE` is not needed.
