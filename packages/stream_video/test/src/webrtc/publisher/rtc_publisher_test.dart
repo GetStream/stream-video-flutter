@@ -574,6 +574,28 @@ void main() {
         expect(captured, ['mic', recaptured.mediaTrack.id]);
         expect(recaptured.mediaTrack.id, isNot('mic'));
       });
+
+      test('a new capture the filters reject is stopped, not sent', () async {
+        final rtcPublisher = publisher();
+        final track = (await rtcPublisher.publishAudioTrack(
+          track: localMic(),
+        )).getDataOrNull()!;
+        await rtcPublisher.muteTrack(trackId: track.trackId);
+        final sent = transceivers.single.sender.track;
+        final disposedBefore = [...platform.disposedTrackIds];
+        rtcPublisher.onLocalCapture = (_, {isCurrent}) async {
+          throw Exception('filter');
+        };
+
+        final unmuted = await rtcPublisher.unmuteTrack(trackId: track.trackId);
+
+        expect(unmuted.isFailure, isTrue);
+        expect(transceivers.single.sender.track, same(sent));
+        expect(
+          platform.disposedTrackIds.length,
+          greaterThan(disposedBefore.length),
+        );
+      });
     });
   });
 

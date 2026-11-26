@@ -66,12 +66,16 @@ class LocalMediaFilters {
 
   /// Sets the moderation blur, which runs after the app's camera filter.
   ///
-  /// Fails when a filter of the chain fails. A new capture is not sent while
-  /// the blur fails on it.
+  /// Fails when the blur fails; a failure of the app's filter is logged. A
+  /// new capture is not sent while the blur fails on it.
   Future<Result<LocalFilterChange>> setModerationFilter(
     rtc.VideoFilter? filter,
   ) {
-    return _change(SfuTrackType.video, () => _moderationFilter = filter);
+    return _change(
+      SfuTrackType.video,
+      () => _moderationFilter = filter,
+      failOnOptional: false,
+    );
   }
 
   /// Sets the screen share filter. Fails when a filter of the chain fails.
@@ -198,11 +202,13 @@ class LocalMediaFilters {
   /// The new chain is applied before the old one is stopped, and its output
   /// is sent first when it is another stream. When the moderation blur fails
   /// on the capture, or the new stream cannot be sent, the new chain is
-  /// stopped and the old one stays applied.
+  /// stopped and the old one stays applied. Fails too when another filter of
+  /// the chain fails, unless [failOnOptional] is false.
   Future<Result<LocalFilterChange>> _change(
     SfuTrackType kind,
-    void Function() change,
-  ) async {
+    void Function() change, {
+    bool failOnOptional = true,
+  }) async {
     final lock = _lockFor(kind);
     final changed = await lock.synchronized(() async {
       change();
@@ -245,8 +251,10 @@ class LocalMediaFilters {
       () => retired.stop(rtc.MediaStreamFilterStopReason.chainChanged, _logger),
     );
 
-    if (applied.failures.firstOrNull case final failure?) {
-      return _failureOf(failure);
+    if (failOnOptional) {
+      if (applied.failures.firstOrNull case final failure?) {
+        return _failureOf(failure);
+      }
     }
     return const Result.success(LocalFilterChange.applied);
   }

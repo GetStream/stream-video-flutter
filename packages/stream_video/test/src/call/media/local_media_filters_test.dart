@@ -292,6 +292,18 @@ void main() {
       expect(log, ['blur apply cam-1 camera', 'mod apply cam-1 camera']);
     });
 
+    test('applies when only the app filter fails', () async {
+      await filters.setVideoFilter(_FailingFilter());
+      await filters.apply(camera('cam-1'));
+
+      final result = await filters.setModerationFilter(
+        _LoggingFilter('mod', log),
+      );
+
+      expect(result, const Result.success(LocalFilterChange.applied));
+      expect(log, ['mod apply cam-1 camera']);
+    });
+
     test('leaves the app filter applied once removed', () async {
       await filters.setVideoFilter(_LoggingFilter('blur', log));
       await filters.apply(camera('cam-1'));
