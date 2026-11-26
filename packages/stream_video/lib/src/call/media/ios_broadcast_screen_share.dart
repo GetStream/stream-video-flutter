@@ -77,6 +77,9 @@ class IosBroadcastScreenShare {
   /// The constraints of the last request, used once the broadcast starts.
   ScreenShareConstraints? _requestedConstraints;
 
+  /// How many broadcast starts this call took.
+  int _startsTaken = 0;
+
   CallState get _state => _stateManager.callState;
 
   /// Records the broadcast starts and stops of the app, also while no call
@@ -156,13 +159,21 @@ class IosBroadcastScreenShare {
   }
 
   /// Runs [resolve], which writes the connect options a join resolves, and
-  /// keeps the screen share option of a broadcast that started before it.
+  /// keeps the screen share option of a broadcast that started before it or
+  /// while it ran.
   Future<void> keepBroadcastOptionThrough(
     Future<void> Function() resolve,
   ) async {
     final kept = _broadcast.isRunning ? _broadcastOption() : null;
+    final startsTaken = _startsTaken;
     await resolve();
-    if (kept != null && _broadcast.isRunning) _enableOption(kept);
+    if (!_broadcast.isRunning) return;
+
+    if (kept != null) {
+      _enableOption(kept);
+    } else if (_startsTaken != startsTaken) {
+      _enableOption(_requestedConstraints ?? _broadcastConstraints());
+    }
   }
 
   /// Records that the broadcast stopped, and turns off a screen share option
@@ -194,6 +205,7 @@ class IosBroadcastScreenShare {
       return;
     }
 
+    _startsTaken++;
     _enableOption(_requestedConstraints ?? _broadcastConstraints());
 
     final session = _session();

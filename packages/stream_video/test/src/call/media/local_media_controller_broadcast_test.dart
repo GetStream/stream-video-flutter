@@ -361,6 +361,28 @@ void main() {
       expect(enabledOn(next).single?.useiOSBroadcastExtension, isTrue);
     });
 
+    test('shares a broadcast that started during the join settings', () async {
+      final enumerating = Completer<Result<List<RtcMediaDevice>>>();
+      when(
+        () => notifier.enumerateDevicesFor(any()),
+      ).thenAnswer((_) => enumerating.future);
+      session = null;
+
+      final applying = controller.applyJoinSettings(
+        const CallSettings(),
+        joinOptions: const CallConnectOptions(),
+      );
+      await pumpEventQueue();
+      await emit(ScreenSharingStartedEvent());
+      enumerating.complete(const Result.success([]));
+      await applying;
+
+      final next = session = _session();
+      await controller.applyConnectOptions(session: next);
+
+      expect(enabledOn(next).single?.useiOSBroadcastExtension, isTrue);
+    });
+
     test('does not capture a broadcast that stopped', () async {
       await emit(ScreenSharingStartedEvent());
       await emit(ScreenSharingStoppedEvent());
