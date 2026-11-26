@@ -45,9 +45,6 @@ MockCallSession _session() {
   return session;
 }
 
-/// Pins how a call's connect options carry an iOS broadcast from one session
-/// to the next.
-
 /// A mock RTC manager whose audio session setup succeeds.
 MockRtcManager _rtcManager() {
   final manager = MockRtcManager();
@@ -60,6 +57,8 @@ MockRtcManager _rtcManager() {
   return manager;
 }
 
+/// Pins how a call's connect options carry an iOS broadcast from one session
+/// to the next.
 void main() {
   setUpAll(() {
     registerMockFallbackValues();

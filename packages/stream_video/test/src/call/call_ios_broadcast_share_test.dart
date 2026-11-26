@@ -55,9 +55,6 @@ Matcher _isDefaultBroadcast(Call call) => isA<ScreenShareConstraints>()
       ),
     );
 
-/// Pins how a call shares the screen through the iOS broadcast extension:
-/// enabling only shows the picker, and the share starts with the broadcast.
-
 /// A mock RTC manager whose audio session setup succeeds.
 MockRtcManager _rtcManager() {
   final manager = MockRtcManager();
@@ -70,6 +67,8 @@ MockRtcManager _rtcManager() {
   return manager;
 }
 
+/// Pins how a call shares the screen through the iOS broadcast extension:
+/// enabling only shows the picker, and the share starts with the broadcast.
 void main() {
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
