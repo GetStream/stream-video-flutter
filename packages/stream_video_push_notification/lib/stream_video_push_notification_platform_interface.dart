@@ -69,9 +69,12 @@ abstract class StreamVideoPushNotificationPlatform extends PlatformInterface {
     throw UnimplementedError('startCall() has not been implemented.');
   }
 
-  /// Muting an Ongoing call.
-  /// On iOS, using Callkit(update the ongoing call ui).
-  /// On Android, Nothing(only callback event listener).
+  /// Mutes or unmutes an ongoing call on the system call UI.
+  ///
+  /// On iOS through CallKit, which reports an [ActionCallToggleMute] once it
+  /// has changed the mute state. On Android it does nothing: Telecom takes no
+  /// mute request. There an [ActionCallToggleMute] comes only from Telecom,
+  /// when the system UI mutes or unmutes a call the Telecom integration holds.
   Future<void> muteCall(String id, {bool isMuted = true}) {
     throw UnimplementedError('muteCall() has not been implemented.');
   }

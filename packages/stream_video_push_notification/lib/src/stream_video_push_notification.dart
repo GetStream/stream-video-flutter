@@ -294,6 +294,10 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   Future<void> holdCall(String uuid, {bool isOnHold = true}) =>
       _controller.holdCall(uuid, isOnHold: isOnHold);
 
+  /// Mutes or unmutes the call in the system call UI.
+  ///
+  /// On iOS through CallKit. On Android it does nothing: Telecom takes no
+  /// mute request.
   @override
   Future<void> muteCall(String uuid, {bool isMuted = true}) =>
       _controller.muteCall(uuid, isMuted: isMuted);
