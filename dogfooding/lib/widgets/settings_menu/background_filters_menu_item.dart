@@ -3,7 +3,6 @@ import 'package:stream_video_filters/stream_video_filters.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../dogfooding_app_channel.dart';
-import '../../utils/video_filters.dart';
 
 const _iconSize = 40.0;
 
@@ -63,11 +62,7 @@ class _BackgroundFiltersMenuItemState extends State<BackgroundFiltersMenuItem> {
     final next = filter == null || _isFilterApplied(filter)
         ? null
         : filter.filter;
-    final result = await setVideoFilterOrRevert(
-      next,
-      current: widget.call.videoFilter,
-      setVideoFilter: widget.call.setVideoFilter,
-    );
+    final result = await widget.call.setVideoFilter(next);
     if (!mounted) return;
     setState(() {});
     if (result.isFailure) {

@@ -12,7 +12,6 @@ import '../utils/app_features.dart';
 import '../utils/call_encryption.dart';
 import '../utils/e2ee.dart';
 import '../utils/random_words.dart';
-import '../utils/video_filters.dart';
 import '../widgets/lobby_encryption.dart';
 import '../widgets/lobby_hifi_audio.dart';
 import '../widgets/minimum_top_inset.dart';
@@ -475,11 +474,7 @@ class _BlurToggle extends StatelessWidget {
   static final _blur = BackgroundBlurFilter();
 
   Future<void> _setEnabled(StreamLobbyController lobby, bool enabled) async {
-    final result = await setVideoFilterOrRevert(
-      enabled ? _blur : null,
-      current: lobby.videoFilter,
-      setVideoFilter: lobby.setVideoFilter,
-    );
+    final result = await lobby.setVideoFilter(enabled ? _blur : null);
     if (result case Failure(:final error)) {
       _logger.e(() => 'Could not change the background blur: $error');
     }
