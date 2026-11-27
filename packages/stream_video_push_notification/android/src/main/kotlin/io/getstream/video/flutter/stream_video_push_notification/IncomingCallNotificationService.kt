@@ -216,18 +216,7 @@ class IncomingCallNotificationService : Service() {
         return null
     }
 
-
-    override fun onTaskRemoved(rootIntent: Intent?) {
-        super.onTaskRemoved(rootIntent)
-        incomingCallNotificationManager.stopIncomingCallRinging()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            stopForeground(STOP_FOREGROUND_REMOVE)
-        }else {
-            stopForeground(true)
-        }
-        stopSelf()
-    }
-
-
-
+    // No onTaskRemoved: removing the app from recents is not an answer to the call. The ring goes
+    // on, with its notification, until the user accepts or declines it, the ring times out or the
+    // call ends, each through the RingingController, which stops this service.
 }

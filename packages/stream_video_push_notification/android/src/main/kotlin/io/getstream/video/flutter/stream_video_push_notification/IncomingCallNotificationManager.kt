@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.core.app.NotificationManagerCompat
 import coil.target.Target
+import io.getstream.video.flutter.stream_video_push_notification.core.CallPayloadMapper
 import io.getstream.video.flutter.stream_video_push_notification.notification.CallImageLoader
 import io.getstream.video.flutter.stream_video_push_notification.notification.IncomingCallNotificationBuilder
 import io.getstream.video.flutter.stream_video_push_notification.notification.MissedCallNotificationBuilder
@@ -76,8 +77,9 @@ internal class IncomingCallNotificationManager(
     }
 
     /**
-     * Removes the incoming notification of the call in [data] and tells the full-screen activity
-     * to close. The ringtone and the ringing service stop only when this call owns them.
+     * Removes the incoming notification of the call in [data] and closes the full-screen activity
+     * if it shows this call. The ringtone and the ringing service stop only when this call owns
+     * them.
      */
     fun clearIncomingNotification(data: Bundle, isAccepted: Boolean) {
         val notificationId = NotificationIds.incoming(data)
@@ -94,7 +96,14 @@ internal class IncomingCallNotificationManager(
             IncomingCallNotificationService.stopService(context)
         }
 
-        context.sendBroadcast(IncomingCallActivity.getIntentEnded(context, isAccepted))
+        // Closes the full-screen screen only if it shows this call.
+        context.sendBroadcast(
+            IncomingCallActivity.getIntentEnded(
+                context,
+                CallPayloadMapper.fromBundle(data).id,
+                isAccepted,
+            ),
+        )
 
         notificationManager.cancel(notificationId)
         incomingAvatarTargets.remove(notificationId)?.isCancelled = true
@@ -122,16 +131,6 @@ internal class IncomingCallNotificationManager(
     /** Rings from [IncomingCallNotificationService], once it is in the foreground. */
     internal fun playIncomingCallSound(data: Bundle) {
         ringtone.play(data)
-    }
-
-    /**
-     * Stops the ringtone when the ringing notification goes away without passing through
-     * [clearIncomingNotification], e.g. the ringing service being torn down with the task.
-     */
-    internal fun stopIncomingCallRinging() {
-        ringtone.stop()
-        currentIncomingNotification?.let { incomingAvatarTargets.remove(it.id)?.isCancelled = true }
-        currentIncomingNotification = null
     }
 
     /**
