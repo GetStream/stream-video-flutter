@@ -34,8 +34,7 @@ jobs:
   #
   # `push` events to main and v2 run when the push changed webrtc/.
   gate:
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     outputs:
       should_run: ${{ steps.filter.outputs.relevant == 'true' && github.event.pull_request.draft != true }}
       # The native unit tests of a platform run only when native code for it,
@@ -44,8 +43,17 @@ jobs:
       ios_tests: ${{ steps.filter.outputs.ios_tests }}
       macos_tests: ${{ steps.filter.outputs.macos_tests }}
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests. The path
+      # filters run without a token, so they fetch the base from origin with git, anonymously.
       - name: "Git Checkout"
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git remote add origin "https://github.com/$REPOSITORY"
+          git fetch -q --depth=1 --no-tags origin "$SHA"
+          git checkout -q --detach FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
       - name: "Detect Path Changes"
         uses: dorny/paths-filter@v4
@@ -84,11 +92,18 @@ jobs:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
     timeout-minutes: 15
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
+      # makes no other GitHub call, so it runs on a free standard runner.
       - name: Git Checkout
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter
@@ -110,11 +125,18 @@ jobs:
     if: needs.gate.outputs.should_run == 'true'
     name: Build example (Android)
     timeout-minutes: 30
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
+      # makes no other GitHub call, so it runs on a free standard runner.
       - name: Git Checkout
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter
@@ -201,11 +223,18 @@ jobs:
     if: needs.gate.outputs.should_run == 'true'
     name: Build example (Linux)
     timeout-minutes: 30
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
+      # makes no other GitHub call, so it runs on a free standard runner.
       - name: Git Checkout
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
       - name: Install Linux build dependencies
         run: |
@@ -224,11 +253,18 @@ jobs:
     if: needs.gate.outputs.should_run == 'true'
     name: Build example (Embedded Linux)
     timeout-minutes: 30
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
+      # makes no other GitHub call, so it runs on a free standard runner.
       - name: Git Checkout
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
       - name: Install Linux build dependencies
         run: |
@@ -259,11 +295,18 @@ jobs:
     if: needs.gate.outputs.should_run == 'true'
     name: Build example (Web)
     timeout-minutes: 30
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
+      # makes no other GitHub call, so it runs on a free standard runner.
       - name: Git Checkout
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter

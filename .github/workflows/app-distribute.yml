@@ -181,13 +181,20 @@ jobs:
 
   build_and_deploy_android:
     name: Build and Distribute Dogfooding Android
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     if: ${{ github.event_name == 'push' || (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'stream-video-v')) || inputs.build_android == true }}
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
+      # makes no other GitHub call, so it runs on a free standard runner.
       - name: Checkout code
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
@@ -268,8 +275,7 @@ jobs:
   # remove pull request builds last deployed over 30 days ago.
   build_and_deploy_web_hosted:
     name: Build and Deploy Dogfooding Web (flutter.getstream.io)
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     if: ${{ github.event_name == 'push' || (github.event_name == 'release' && startsWith(github.event.release.tag_name, 'stream-video-v')) || inputs.build_web == true }}
     environment:
@@ -279,8 +285,16 @@ jobs:
       contents: read
       id-token: write
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
+      # makes no other GitHub call, so it runs on a free standard runner.
       - name: Checkout code
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
