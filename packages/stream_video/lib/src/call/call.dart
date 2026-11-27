@@ -292,8 +292,9 @@ class Call {
   late final _subscriptions = Subscriptions();
   late final _callInitLock = Lock();
 
-  /// Runs the starts and stops of audio processing one at a time.
-  late final _audioProcessingLock = Lock();
+  /// Runs the starts and stops of audio processing one at a time, across
+  /// every call, since they share the client's audio processor.
+  static final _audioProcessingLock = Lock();
 
   final CoordinatorClient _coordinatorClient;
   final CallHost _host;
@@ -1699,6 +1700,30 @@ class Call {
   /// running. The SFU is told only when the call was processing audio.
   Future<Result<None>> stopAudioProcessing() {
     return _audioProcessingLock.synchronized(_stopAudioProcessing);
+  }
+
+  /// Stops audio processing as this call leaves, unless another active call
+  /// is processing audio or is set to start it automatically.
+  Future<Result<None>> _stopAudioProcessingOnLeave() {
+    return _audioProcessingLock.synchronized(() {
+      final shared = _host.state.activeCalls.value.any(
+        (other) =>
+            other.callCid != callCid &&
+            other.state.value.status is! CallStatusDisconnected &&
+            (other.state.value.isAudioProcessing ||
+                other.state.value.settings.audio.noiseCancellation?.mode ==
+                    FeatureActivationMode.autoOn),
+      );
+      if (shared) {
+        _logger.d(
+          () =>
+              '[clear] keeping audio processing on '
+              '(another active call uses it)',
+        );
+        return Future.value(const Result.success(none));
+      }
+      return _stopAudioProcessing();
+    });
   }
 
   Future<Result<None>> _stopAudioProcessing() async {

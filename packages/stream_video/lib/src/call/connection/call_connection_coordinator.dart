@@ -2770,32 +2770,18 @@ class CallConnectionCoordinator {
 
       // The audio processor is owned by StreamVideo, not by an individual
       // Call, so stopping it on this call's teardown would silently drop noise
-      // cancellation on any other still-active call that also wants it. Only
-      // stop the global processor when no other active call is configured for
+      // cancellation on any other still-active call that also uses it. The
+      // stop is skipped when another active call is processing audio or is
+      // set to start it automatically.
       if (_call._host.isAudioProcessorConfigured() &&
           _call.state.value.settings.audio.noiseCancellation?.mode ==
               FeatureActivationMode.autoOn) {
-        final anotherCallWantsAutoOn = _call._host.state.activeCalls.value.any(
-          (other) =>
-              other.callCid != _call.callCid &&
-              other.state.value.status is! CallStatusDisconnected &&
-              other.state.value.settings.audio.noiseCancellation?.mode ==
-                  FeatureActivationMode.autoOn,
+        unawaited(
+          _call._stopAudioProcessingOnLeave().catchError((Object e) {
+            _call._logger.w(() => '[clear] stopAudioProcessing failed: $e');
+            return const Result.success(none);
+          }),
         );
-        if (!anotherCallWantsAutoOn) {
-          unawaited(
-            _call.stopAudioProcessing().catchError((Object e) {
-              _call._logger.w(() => '[clear] stopAudioProcessing failed: $e');
-              return const Result.success(none);
-            }),
-          );
-        } else {
-          _call._logger.d(
-            () =>
-                '[clear] keeping audio processor running '
-                '(another active call has autoOn)',
-          );
-        }
       }
 
       _call._resetStereoPlayoutPreference();

@@ -1140,6 +1140,102 @@ void main() {
           ).called(greaterThanOrEqualTo(1));
         },
       );
+
+      test(
+        'keeps audio processing on leave while another call is processing audio',
+        () async {
+          const autoOnSettings = CallSettings(
+            audio: StreamAudioSettings(
+              noiseCancellation: StreamNoiceCancellingSettings(
+                mode: FeatureActivationMode.autoOn,
+              ),
+            ),
+          );
+
+          final activeCallsEmitter = MutableStateEmitter<List<Call>>(
+            [],
+            sync: true,
+          );
+
+          final clientState = setupMockClientState();
+          when(
+            () => clientState.activeCalls,
+          ).thenAnswer((_) => activeCallsEmitter);
+
+          final streamVideo = setupMockCallHost(clientState: clientState);
+          when(streamVideo.isAudioProcessorConfigured).thenReturn(true);
+          when(
+            () => streamVideo.setAudioProcessingEnabled(false),
+          ).thenAnswer((_) async => const Result.success(none));
+          when(
+            () => streamVideo.setAudioProcessingEnabled(true),
+          ).thenAnswer((_) async => const Result.success(none));
+
+          when(
+            () => mockPermissionsManager.hasPermission(
+              CallPermission.enableNoiseCancellation,
+            ),
+          ).thenReturn(true);
+          when(
+            callSession.notifyNoiseCancellationStarted,
+          ).thenAnswer((_) async => const Result.success(none));
+          when(
+            callSession.notifyNoiseCancellationStopped,
+          ).thenAnswer((_) async => const Result.success(none));
+
+          when(
+            () => coordinatorClient.joinCall(
+              callCid: any(named: 'callCid'),
+              create: any(named: 'create'),
+              migratingFrom: any(named: 'migratingFrom'),
+              migratingFromList: any(named: 'migratingFromList'),
+              video: any(named: 'video'),
+              membersLimit: any(named: 'membersLimit'),
+              e2ee: any(named: 'e2ee'),
+            ),
+          ).thenAnswer(
+            (_) async => Result.success(
+              _joinedWithSettings(
+                autoOnSettings,
+                ownCapabilities: [CallPermission.enableNoiseCancellation],
+              ),
+            ),
+          );
+
+          when(
+            streamVideo.deviceSupportsAdvancedAudioProcessing,
+          ).thenAnswer((_) async => const Result.success(true));
+
+          final call = createTestCall(
+            networkMonitor: setupMockInternetConnection(
+              statusStream: internetStatusController,
+            ),
+            coordinatorClient: coordinatorClient,
+            sessionFactory: setupMockSessionFactory(callSession: callSession),
+            streamVideo: streamVideo,
+            permissionManager: mockPermissionsManager,
+          );
+
+          await call.join();
+          await Future<void>.delayed(Duration.zero);
+
+          // Started by hand in the other call, which is not set to autoOn.
+          final other = MockCall();
+          when(
+            () => other.callCid,
+          ).thenReturn(StreamCallCid(cid: 'default:other'));
+          final otherState = MutableStateEmitter(
+            createActiveCallState().copyWith(isAudioProcessing: true),
+          );
+          when(() => other.state).thenAnswer((_) => otherState);
+          activeCallsEmitter.value = [call, other];
+
+          await call.leave();
+          await Future<void>.delayed(Duration.zero);
+
+          verifyNever(() => streamVideo.setAudioProcessingEnabled(false));
+        },
+      );
     });
 
     // ---------------------------------------------------------------
