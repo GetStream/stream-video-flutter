@@ -3,7 +3,14 @@
 --------------------------------------------
 [Unreleased]
 
-* Added `WebRtcPlatformEvents` and its event types, and `PeerConnectionFactoryOptions`.
+* Added `webRtcLogHandler`, which receives the log records of the WebRTC packages.
+* Added `WebRtcEngine.webRtcVersion`.
+* **Breaking:** `AudioRoute.reasonCode` is replaced by a typed `reason`, an `AudioRouteChangeReason`.
+* Added `hasAudioSession` and `isExternalDevice` to `WebRtcAudio`.
+* Added `WebRtcEngine`, the contract of a platform's WebRTC implementation, with `PeerConnectionFactory`, `WebRtcAudio`, `WebRtcCamera`, `FirstFrameWatcher` and their result types.
+* Added the end-to-end encryption types, moved from `stream_webrtc_flutter`; `EncryptionManager.create` and `isSupported` use the registered `WebRtcEngine`.
+* Added `RTCAudioRenderer`, which plays a remote audio track, with its `AudioRendererState` and `AudioRendererTrace`.
+* Added `WebRtcPlatformEvents`, its event types and `SpeechActivityDetector`, and `PeerConnectionFactoryOptions`.
 * Added the Android and Apple audio configuration types, moved from `stream_webrtc_flutter`.
 * First version as `stream_webrtc_interface`, Stream's fork of `webrtc_interface` 1.5.1.
 * Licensed under the Stream licence; the code from upstream keeps its MIT licence (see `LICENSE`).

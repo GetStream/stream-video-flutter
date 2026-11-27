@@ -1,6 +1,6 @@
 # Attribution
 
-The code in this directory moved here from `stream_webrtc_flutter`'s `lib/src/third_party/flutter_webrtc/native/` (the Android and Apple audio configuration types). It comes from [flutter-webrtc](https://github.com/flutter-webrtc/flutter-webrtc), through Stream's fork [GetStream/webrtc-flutter](https://github.com/GetStream/webrtc-flutter). The fork's changes are under the same MIT licence.
+The code in this directory moved here from `stream_webrtc_flutter`'s `lib/src/third_party/flutter_webrtc/native/` (the Android and Apple audio configuration types) and `lib/src/third_party/flutter_webrtc/e2ee/` (the end-to-end encryption types). It comes from [flutter-webrtc](https://github.com/flutter-webrtc/flutter-webrtc), through Stream's fork [GetStream/webrtc-flutter](https://github.com/GetStream/webrtc-flutter). The fork's changes are under the same MIT licence.
 
 - Upstream: https://github.com/flutter-webrtc/flutter-webrtc
 - Baseline: flutter-webrtc v1.5.2, through GetStream/webrtc-flutter at `9b4f503` (stream_webrtc_flutter 4.0.0)

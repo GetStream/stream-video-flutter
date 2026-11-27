@@ -1633,6 +1633,50 @@ class StreamCallSessionParticipantLeftEvent extends StreamCallEvent {
   ];
 }
 
+/// Why a screen share failed to start.
+///
+/// More reasons may be added in a minor release, so keep a wildcard (`_`)
+/// branch when switching over it.
+extension type const ScreenShareFailureReason(String value) implements String {
+  /// Publishing the screen share track failed.
+  static const publishFailed = ScreenShareFailureReason('publish_failed');
+
+  /// The user lacks the screenshare permission in this call.
+  static const missingPermission = ScreenShareFailureReason(
+    'missing_permission',
+  );
+}
+
+/// Delivered on `Call.callEvents` when an iOS broadcast started, through the
+/// broadcast picker or Control Center, but the call could not share it.
+///
+/// The local participant is not sharing. The SDK asks the broadcast
+/// extension to finish the broadcast; if that request fails, the broadcast
+/// can keep running until the user stops it.
+///
+/// This event is created on the device, so `StreamVideo.events` does not
+/// carry it.
+final class StreamCallScreenShareFailedEvent extends StreamCallEvent {
+  const StreamCallScreenShareFailedEvent(
+    super.callCid, {
+    required this.reason,
+    this.error,
+  });
+
+  /// Why the share failed.
+  final ScreenShareFailureReason reason;
+
+  /// The error that made the share fail, when there was one.
+  final Object? error;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    reason,
+    error,
+  ];
+}
+
 extension StreamCallEventX on StreamCallEvent? {
   StreamCallEvent? emitIfNotNull(
     MutableSharedEmitter<StreamCallEvent> emitter,

@@ -1,10 +1,11 @@
 import 'package:collection/collection.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../../../stream_video.dart';
 import '../../exceptions/video_exception.dart';
 import '../audio/audio_input_switcher.dart';
 import '../rtc_media_device/device_enumeration_trigger.dart';
+import '../webrtc_engine.dart';
 
 const kLocalTrackIdPrefix = 'local';
 
@@ -31,16 +32,16 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   /// Per-call native factory the track is pinned to. Carried on the track so
   /// [recreate] can target the same factory. Null on web, which has no
   /// per-call factory concept.
-  final rtc.NativePeerConnectionFactory? nativeFactory;
+  final rtc.PeerConnectionFactory? nativeFactory;
 
   static Future<RtcLocalAudioTrack> audio({
     String trackIdPrefix = kLocalTrackIdPrefix,
     AudioConstraints constraints = const AudioConstraints(),
-    rtc.NativePeerConnectionFactory? nativeFactory,
+    rtc.PeerConnectionFactory? nativeFactory,
   }) async {
     streamLog.i(_tag, () => 'Creating audio track');
 
-    final stream = await rtc.navigator.mediaDevices.getMedia(
+    final stream = await webRtcEngine.mediaDevices.getMedia(
       constraints,
       nativeFactory: nativeFactory,
     );
@@ -66,10 +67,10 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   static Future<RtcLocalCameraTrack> camera({
     String trackIdPrefix = kLocalTrackIdPrefix,
     CameraConstraints constraints = const CameraConstraints(),
-    rtc.NativePeerConnectionFactory? nativeFactory,
+    rtc.PeerConnectionFactory? nativeFactory,
   }) async {
     streamLog.i(_tag, () => 'Creating camera track');
-    final stream = await rtc.navigator.mediaDevices.getMedia(
+    final stream = await webRtcEngine.mediaDevices.getMedia(
       constraints,
       nativeFactory: nativeFactory,
     );
@@ -104,11 +105,11 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   static Future<RtcLocalScreenShareTrack> screenShare({
     String trackIdPrefix = kLocalTrackIdPrefix,
     ScreenShareConstraints constraints = const ScreenShareConstraints(),
-    rtc.NativePeerConnectionFactory? nativeFactory,
+    rtc.PeerConnectionFactory? nativeFactory,
   }) async {
     streamLog.i(_tag, () => 'Creating screen share track');
 
-    final stream = await rtc.navigator.mediaDevices.getMedia(
+    final stream = await webRtcEngine.mediaDevices.getMedia(
       constraints,
       nativeFactory: nativeFactory,
     );
@@ -155,8 +156,12 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   Future<void> stop() async {
     // Disable the track.
     disable();
+    await _release();
+  }
 
-    // Stop the track.
+  /// Stops [mediaTrack], its clones and [mediaStream], leaving `enabled` as
+  /// it is.
+  Future<void> _release() async {
     streamLog.i(_tag, () => 'Stopping track: $trackId');
     try {
       await mediaTrack.stop();
@@ -233,7 +238,7 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
     bool? stopTrackOnMute,
     RtcVideoDimension? videoDimension,
     List<rtc.MediaStreamTrack>? clonedTracks,
-    rtc.NativePeerConnectionFactory? nativeFactory,
+    rtc.PeerConnectionFactory? nativeFactory,
   }) {
     return RtcLocalTrack(
       trackIdPrefix: trackIdPrefix ?? this.trackIdPrefix,
@@ -259,6 +264,8 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       return await captured.sendOn(transceivers);
     } catch (_) {
       await captured.stop();
+      // This capture is released too, so it reads as muted.
+      disable();
       rethrow;
     }
   }
@@ -266,16 +273,19 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
   /// Stops this track and captures it again with [mediaConstraints], or its
   /// own when null, on the same per-call factory. The new capture has no
   /// clones and is on no sender yet.
+  ///
+  /// The track is replaced, not muted, so it stays enabled while the new
+  /// capture is acquired: an announce made meanwhile reads it as enabled and
+  /// tells the SFU it is unmuted. If the capture fails nothing replaces it,
+  /// and it is disabled like any stopped track. A caller that fails after
+  /// the capture succeeded disables it the same way.
   Future<RtcLocalTrack<T>> recapture({T? mediaConstraints}) async {
     streamLog.i(_tag, () => 'Recapturing track: $trackId');
 
-    await stop();
+    await _release();
 
     final constraints = mediaConstraints ?? this.mediaConstraints;
-    final newStream = await rtc.navigator.mediaDevices.getMedia(
-      constraints,
-      nativeFactory: nativeFactory,
-    );
+    final newStream = await _captureOrDisable(constraints);
 
     return copyWith(
       mediaTrack: newStream.getTracks().first,
@@ -283,6 +293,21 @@ class RtcLocalTrack<T extends MediaConstraints> extends RtcTrack {
       mediaConstraints: constraints,
       clonedTracks: const [],
     );
+  }
+
+  /// Captures a stream with [constraints] on the same per-call factory.
+  /// When that fails nothing replaces the released capture, so this track
+  /// is disabled like any stopped track.
+  Future<rtc.MediaStream> _captureOrDisable(T constraints) async {
+    try {
+      return await webRtcEngine.mediaDevices.getMedia(
+        constraints,
+        nativeFactory: nativeFactory,
+      );
+    } catch (_) {
+      disable();
+      rethrow;
+    }
   }
 
   /// Sends a clone of this track on every one of [transceivers] that is
@@ -364,7 +389,7 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
   Future<RtcLocalCameraTrack> flipCamera() async {
     streamLog.i(_cameraTag, () => 'Flipping camera');
 
-    final capabilities = rtc.webRtcCapabilities;
+    final capabilities = webRtcEngine.capabilities;
     if (!capabilities.supportsCameraSwitch) {
       streamLog.w(
         _cameraTag,
@@ -375,8 +400,7 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
       );
     }
 
-    // Use the native switchCamera method.
-    final isFrontCamera = await rtc.Helper.switchCamera(mediaTrack);
+    final isFrontCamera = await webRtcEngine.camera.switchCamera(mediaTrack);
 
     final mediaDevicesResult = await RtcMediaDeviceNotifier.instance
         .enumerateDevicesFor(

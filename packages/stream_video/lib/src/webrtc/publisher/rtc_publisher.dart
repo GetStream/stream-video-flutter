@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
-import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../../../stream_video.dart';
 import '../../call/stats/trace_tag.dart';
@@ -176,9 +175,9 @@ class RtcPublisher {
       final track = tracks[trackId];
       if (track == null) continue;
 
-      // Checked once this recapture's turn starts: a recapture still running
-      // has disabled the capture it replaces, and a track muted meanwhile
-      // stays muted.
+      // Checked once this recapture's turn starts: a recapture that ran
+      // before it and failed has disabled the capture it replaced, and a
+      // track muted meanwhile stays muted.
       // A track already capturing with these constraints is left alone, so
       // re-requesting the current profile does not restart the microphone.
       final recaptured = await recapture(
@@ -1181,7 +1180,7 @@ class RtcPublisher {
   }
 
   Future<void> _updateTransceiver(
-    RTCRtpTransceiver transceiver,
+    rtc.RTCRtpTransceiver transceiver,
     RtcLocalTrack? track,
     SfuTrackType trackType, {
     RtcTrackPublishOptions? trackPublishOptions,
@@ -1198,7 +1197,7 @@ class RtcPublisher {
 
   /// Stops [transceiver] so its m-line becomes recyclable, reporting whether
   /// it actually stopped.
-  Future<bool> _stopTransceiver(RTCRtpTransceiver transceiver) async {
+  Future<bool> _stopTransceiver(rtc.RTCRtpTransceiver transceiver) async {
     try {
       await transceiver.stop();
       return true;
@@ -1511,10 +1510,23 @@ class RtcPublisher {
         return await _keepIfStillHeld(current, sending, tag);
       } catch (e, stk) {
         _logger.e(() => '$tag failed for $trackId: $e');
-        await captured?.stop();
+        await _releaseFailedRecapture(current, captured);
         return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
       }
     });
+  }
+
+  /// Stops [captured], the new capture of a recapture that failed, if it got
+  /// that far.
+  ///
+  /// The old capture of [current] is released either way, so a track still
+  /// held reads, and is announced, as muted, and unmuting captures it again.
+  Future<void> _releaseFailedRecapture(
+    RtcLocalTrack current,
+    RtcLocalTrack? captured,
+  ) async {
+    await captured?.stop();
+    if (_isHeld(current)) current.disable();
   }
 
   /// Keeps [updated] in place of [current] when [current] is still the held

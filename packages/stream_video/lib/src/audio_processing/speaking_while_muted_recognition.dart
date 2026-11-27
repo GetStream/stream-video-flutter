@@ -4,8 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:state_notifier/state_notifier.dart';
 
 import '../../stream_video.dart';
-import 'audio_recognition_factory_io.dart'
-    if (dart.library.js_interop) 'audio_recognition_factory_web.dart';
+import 'audio_recognition_webrtc.dart';
 
 /// The [SpeakingWhileMutedRecognition.stream] emits state changes when an increase in audio volume
 /// is detected while the user is muted.
@@ -79,11 +78,10 @@ class SpeakingWhileMutedRecognition
   }) : super(const SpeakingWhileMutedState._(isSpeakingWhileMuted: false)) {
     _audioRecognition =
         audioRecognition ??
-        createPlatformAudioRecognition(
-          // Resolved lazily at each detection start so the web recognizer
-          // always monitors the currently selected microphone.
-          audioInputDeviceIdProvider: () =>
-              call.state.value.audioInputDevice?.id,
+        AudioRecognitionWebRTC(
+          // Resolved at each detection start, so the browser's detection
+          // follows the selected microphone.
+          deviceIdProvider: () => call.state.value.audioInputDevice?.id,
         );
     _init();
   }

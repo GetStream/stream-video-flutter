@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
+import '../webrtc_engine.dart';
 import 'screen_share_constraints.dart';
 
 /// Where a screen share captures from.
@@ -12,7 +12,7 @@ import 'screen_share_constraints.dart';
 abstract interface class ScreenShareSource {
   /// The source of the current platform.
   factory ScreenShareSource.forPlatform() {
-    final capabilities = rtc.webRtcCapabilities;
+    final capabilities = webRtcEngine.capabilities;
     if (capabilities.supportsBroadcastExtension) {
       return const BroadcastExtensionScreenShareSource();
     }
@@ -30,7 +30,8 @@ abstract interface class ScreenShareSource {
   void addTo(Map<String, dynamic> video, ScreenShareConstraints constraints);
 }
 
-/// Captures through the iOS broadcast extension when asked to.
+/// Captures through the iOS broadcast extension when asked to. The capture
+/// shows no picker: it is shown on its own before the broadcast starts.
 @internal
 class BroadcastExtensionScreenShareSource implements ScreenShareSource {
   const BroadcastExtensionScreenShareSource();
@@ -42,7 +43,9 @@ class BroadcastExtensionScreenShareSource implements ScreenShareSource {
 
   @override
   void addTo(Map<String, dynamic> video, ScreenShareConstraints constraints) {
-    if (constraints.useiOSBroadcastExtension) video['deviceId'] = 'broadcast';
+    if (constraints.useiOSBroadcastExtension) {
+      video['deviceId'] = 'broadcast-manual';
+    }
   }
 }
 

@@ -1,6 +1,8 @@
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:meta/meta.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart'
+    show WebRtcEngine;
 import 'package:system_info2/system_info2.dart';
 
 import '../globals.dart';
@@ -43,7 +45,11 @@ class VideoEnvironmentCollector {
       String? deviceVersion;
       String? browserName;
       String? browserVersion;
-      String? webrtcVersion;
+
+      // The registered engine's, if any.
+      final webrtcVersion = WebRtcEngine.isRegistered
+          ? WebRtcEngine.instance.webRtcVersion
+          : null;
 
       try {
         if (CurrentPlatform.isAndroid) {
@@ -51,12 +57,10 @@ class VideoEnvironmentCollector {
           osVersion = info.version.release;
           osArchitecture = SysInfo.rawKernelArchitecture;
           deviceModel = '${info.manufacturer} ${info.model}';
-          webrtcVersion = androidWebRTCVersion;
         } else if (CurrentPlatform.isIos) {
           final info = await DeviceInfoPlugin().iosInfo;
           osVersion = info.systemVersion;
           deviceModel = info.utsname.machine;
-          webrtcVersion = iosWebRTCVersion;
         } else if (CurrentPlatform.isMacOS) {
           final info = await DeviceInfoPlugin().macOsInfo;
           osVersion =
@@ -64,17 +68,14 @@ class VideoEnvironmentCollector {
           osArchitecture = info.arch;
           deviceModel = info.model;
           deviceVersion = info.osRelease;
-          webrtcVersion = macOsWebRTCVersion;
         } else if (CurrentPlatform.isWindows) {
           final info = await DeviceInfoPlugin().windowsInfo;
           osVersion =
               '${info.majorVersion}.${info.minorVersion}.${info.buildNumber}';
           osArchitecture = info.buildLabEx;
-          webrtcVersion = windowsWebRTCVersion;
         } else if (CurrentPlatform.isLinux) {
           final info = await DeviceInfoPlugin().linuxInfo;
           osVersion = '${info.name} ${info.version}';
-          webrtcVersion = linuxWebRTCVersion;
         } else if (CurrentPlatform.isWeb) {
           final info = await DeviceInfoPlugin().webBrowserInfo;
           browserName = info.browserName.name;

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../../stream_video.dart';
 import '../call/state/call_state_notifier.dart';
@@ -18,7 +18,6 @@ import 'audio/ios_audio_session.dart';
 import 'e2ee/remote_track_decryptor.dart';
 import 'media/capture_dimension.dart';
 import 'media/local_track_acquirer.dart';
-import 'media/screen_share_source.dart';
 import 'model/rtc_tracks_info.dart';
 import 'peer_connection.dart';
 import 'peer_connection_factory.dart';
@@ -27,6 +26,7 @@ import 'rtc_parser.dart';
 import 'subscriber/rtc_subscriber.dart';
 import 'traced_peer_connection.dart';
 import 'transceiver_cache.dart';
+import 'webrtc_engine.dart';
 
 export '../errors/track_missing_exception.dart';
 export 'publisher/announced_tracks.dart' show resolveTrackMid;
@@ -264,30 +264,6 @@ class RtcManager extends Disposable {
     _telemetry?.onSubscriberStats(stats);
   }
 
-  /// The iOS broadcast share created but not started yet.
-  RtcLocalScreenShareTrack? _pendingBroadcastTrack;
-
-  /// Waits for [_pendingBroadcastTrack]'s broadcast to start or stop.
-  StreamSubscription<NativeWebRtcEvent>? _pendingBroadcastSubscription;
-
-  /// Bumped by every cancel, so a broadcast still being created can tell it
-  /// was cancelled meanwhile.
-  int _broadcastGeneration = 0;
-
-  /// Cancels a broadcast that was created but has not started, stopping its
-  /// track, and one that is still being created.
-  Future<void> _cancelPendingBroadcast() async {
-    _broadcastGeneration++;
-    final track = _pendingBroadcastTrack;
-    _pendingBroadcastTrack = null;
-
-    // A broadcast still being created sees the new generation and stops its
-    // track, so none starts waiting meanwhile.
-    await _pendingBroadcastSubscription?.cancel();
-    _pendingBroadcastSubscription = null;
-    await track?.stop();
-  }
-
   /// Whether subscriber offers have to be compared for new audio sources.
   /// WebKit only: everywhere else the offers are neither kept nor parsed.
   /// Swappable so a test on the VM can take the WebKit path.
@@ -410,8 +386,6 @@ class RtcManager extends Disposable {
     _logger.d(() => '[dispose] no args');
     _publisher.beginDispose();
 
-    await _cancelPendingBroadcast();
-
     onRemoteTrackReceived = null;
     _telemetry?.dispose();
 
@@ -466,9 +440,6 @@ class RtcManager extends Disposable {
 
   late final AudioInputSwitcher _audioInputSwitcher =
       AudioInputSwitcher.forPlatform();
-
-  late final ScreenShareSource _screenShareSource =
-      ScreenShareSource.forPlatform();
 
   /// Applies [policy]'s audio session configuration, asking for the
   /// loudspeaker as the built-in output when [speakerOn]. Does nothing on a

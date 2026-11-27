@@ -13,7 +13,7 @@ import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/src/webrtc/traced_peer_connection.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../../../test_helpers.dart';
 import '../../call/fixtures/call_test_helpers.dart';
@@ -159,8 +159,12 @@ class FakeSender extends Fake implements rtc.RTCRtpSender {
   /// The tracks of every `replaceTrack` call, in order.
   final replacedTracks = <rtc.MediaStreamTrack?>[];
 
+  /// When set, `replaceTrack` throws it, as on a closed peer connection.
+  Error? replaceTrackError;
+
   @override
   Future<void> replaceTrack(rtc.MediaStreamTrack? track) async {
+    if (replaceTrackError case final error?) throw error;
     replacedTracks.add(track);
     this.track = track;
   }

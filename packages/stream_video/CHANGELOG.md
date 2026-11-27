@@ -2,8 +2,16 @@
 
 ### ⚠️ Breaking
 
+- `stream_video` no longer depends on `stream_webrtc_flutter`; off the web, it needs the `WebRtcEngine` that `stream_video_flutter` registers, which a test sets as `WebRtcEngine.instance`.
+- `androidWebRTCVersion`, `iosWebRTCVersion`, `macOsWebRTCVersion`, `linuxWebRTCVersion` and `windowsWebRTCVersion` moved to `stream_video_flutter`.
+- `AudioRouteChangeReason` comes from `stream_webrtc_interface`; `stream_video` still exports it.
+- `RtcMediaDevice.iOSExternalPorts` and `RtcMediaDevice.androidExternalAudioDeviceType` are removed; `RtcMediaDevice.isExternal` asks the WebRTC engine.
+- The unused `InterruptionEvent`, `InterruptionBeginEvent` and `InterruptionEndEvent` are removed, and `NativeWebRtcEvent` is sealed.
+- `Call.ensureNativeFactory`, `RtcLocalTrack` and `MediaDevices.getMedia` take and return the `PeerConnectionFactory` contract instead of `NativePeerConnectionFactory`.
+- `EncryptionManager.create` throws `UnsupportedError` on web instead of returning a manager whose operations throw.
 - The app-wide audio members of `RtcMediaDeviceNotifier` moved to `PlatformAudioController.instance`: `nativeWebRtcEventsStream`, `speechActivityStream`, `triggeriOSAudioRouteSelectionUI`, `isAudioPlayoutPauseSupported`, `isAudioPlayoutPaused`, `audioPlayoutPausedChanges`, `pauseAudioPlayout`, `resumeAudioPlayout`, `resumeWebAudioPlayback`, `regainAndroidAudioFocus` and `reinitializeAudioConfiguration`.
 - `PlatformAudioController` is `@sealed`, so a test mock that implements it gets a `subtype_of_sealed_class` warning; add `// ignore: subtype_of_sealed_class` to it.
+- `PlatformAudioController.nativePauseAudioPlayout` and `nativeResumeAudioPlayout` are removed; use `pauseAudioPlayout` and `resumeAudioPlayout`.
 - `ScreenSharingStoppedEvent` carries a `trackId` instead of a `data` map, and `ScreenSharingStartedEvent` has no `data`.
 - `CallState.participantCount` includes the anonymous participants before the call is joined too, as it already did once joined. `anonymousParticipantCount` says how many of them are anonymous.
 - `RtcMediaDeviceNotifier.handleCallInterruptionCallbacks` is removed: each call reports interruptions of its audio on `CallState.isAudioInterrupted` and reacts as `CallPreferences.audioInterruptionReaction` says, with `AudioInterruptionReaction.muteMicrophone` for what the documented callbacks did. The SDK enables the WebRTC plugin's interruption events, so don't call `platformEvents.enableInterruptionEvents` yourself. On Android an interruption is now only a loss of audio focus, so `READ_PHONE_STATE` is not needed.
@@ -141,9 +149,12 @@
 - Added `CallPermission.sendData` for the `send-data` capability, which used to be read as `CallPermission.unknown` with a warning.
 - Added `CallState.isAudioInterrupted`, whether the platform is interrupting the call's audio, such as for a phone call, an alarm or another app playing audio.
 - Added `CallPreferences.audioInterruptionReaction` and `AudioInterruptionReaction`, what a call does while its audio is interrupted: nothing (the default), or turn the microphone off and back on when the interruption ends, unless the app changed it meanwhile.
+- Added `StreamCallScreenShareFailedEvent` with a `ScreenShareFailureReason`, delivered on `Call.callEvents` when an iOS broadcast that started could not be shared.
 
 ### 🔄 Changed
 
+- WebRTC is reached through the `WebRtcEngine` contract of `stream_webrtc_interface`; the E2EE types are exported from there with the same names.
+- On web, speaking while muted is detected by the WebRTC plugin, and `SoundState.audioLevel` is 1 while speaking and 0 otherwise.
 - [Android] `PlatformAudioController.regainAndroidAudioFocus` acts only during a call whose audio focus WebRTC manages, and ends the interruption only when focus is granted.
 - A leave for a failure or an SFU error tells the SFU the error's message, such as `failure: <message>` or `sfu error: <code>: <message>`, rather than the whole error with its stack trace.
 - A failed coordinator request's `StreamVideoException.message` now names the method, host and path, and a request the server never answered ends in a short reason such as `request timed out` or `connection failed` instead of the previous text.
@@ -168,8 +179,12 @@
 
 ### 🐞 Fixed
 
+- [iOS] A screen share broadcast started outside the app, such as from Control Center, is now shared in the active call.
+- [iOS] A screen share broadcast that the call cannot share now ends with an error instead of running on.
+- [iOS] A rejoin shares a running screen share broadcast again instead of showing the broadcast picker.
 - [iOS] When the user chose the speaker or the receiver and the system moves audio between the two on its own, such as after a CallKit hold, the chosen output is put back instead of being replaced by the system's choice. A route to any other device, such as Bluetooth or AirPlay, is followed, and so is the system's route when the chosen output cannot be put back.
 - A muted microphone or camera is announced to the SFU as muted.
+- A microphone or camera that is being captured again, such as when switching the microphone on web, is no longer announced to the SFU as muted while the new capture is acquired. On web, joining with the microphone on could leave it muted at the SFU for the whole call, so nobody heard the user while their own controls showed the microphone on.
 - Joining a call retries sooner when the SFU connection closes before the join response.
 - On iOS, a call that defaults to the loudspeaker now starts on it, instead of switching to it after the microphone is already recording.
 - A fast reconnect no longer hangs when the network drops while it is reopening the SFU connection. The attempt fails after five seconds and the call rejoins, where before it stayed reconnecting until the operating system gave up on the connection.

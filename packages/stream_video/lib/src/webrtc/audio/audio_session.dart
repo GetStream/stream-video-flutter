@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../../../stream_video.dart';
+import '../webrtc_engine.dart';
 import 'ios_audio_session.dart';
 
 /// The audio session of a call and its audio output.
@@ -11,10 +11,10 @@ import 'ios_audio_session.dart';
 /// themselves.
 @internal
 abstract interface class AudioSession {
-  /// The audio session of the current platform: the iOS one on iOS, the
-  /// default one elsewhere.
+  /// The audio session of the current platform: the iOS one where the
+  /// WebRTC engine has an audio session, the default one elsewhere.
   factory AudioSession.forPlatform() {
-    if (CurrentPlatform.isIos) return IosAudioSession();
+    if (webRtcEngine.audio.hasAudioSession) return IosAudioSession();
     return const DefaultAudioSession();
   }
 
@@ -50,6 +50,6 @@ class DefaultAudioSession implements AudioSession {
 
   @override
   Future<void> selectOutput(RtcMediaDevice device) {
-    return rtc.Helper.selectAudioOutput(device.id);
+    return webRtcEngine.audio.selectAudioOutput(device.id);
   }
 }

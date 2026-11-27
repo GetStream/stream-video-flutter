@@ -6,6 +6,7 @@ import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 
 import '../third_party/flutter_webrtc/native/event_channel.dart';
 import '../third_party/flutter_webrtc/native/utils.dart';
+import 'native_speech_activity_detector.dart';
 
 // ignore: subtype_of_sealed_class, the plugin implements its own contract
 /// The [WebRtcPlatformEvents] read from the plugin's `FlutterWebRTC.Event`
@@ -44,7 +45,9 @@ class NativeWebRtcPlatformEvents implements WebRtcPlatformEvents {
               deviceId: deviceId,
               label: payload['label'] as String? ?? deviceId,
               groupId: payload['groupId'] as String?,
-              reasonCode: payload['reason'] as int?,
+              reason: AudioRouteChangeReason.fromCode(
+                payload['reason'] as int?,
+              ),
             );
           });
 
@@ -100,6 +103,11 @@ class NativeWebRtcPlatformEvents implements WebRtcPlatformEvents {
         },
       )
       .whereType<AudioInterruption>();
+
+  @override
+  SpeechActivityDetector createSpeechActivityDetector() {
+    return NativeSpeechActivityDetector(onSpeechActivity);
+  }
 
   @override
   Future<void> enableInterruptionEvents() async {

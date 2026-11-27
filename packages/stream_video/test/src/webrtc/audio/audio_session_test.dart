@@ -3,6 +3,8 @@ import 'package:stream_video/src/webrtc/audio/audio_session.dart';
 import 'package:stream_video/src/webrtc/audio/ios_audio_session.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../../../fixtures/fake_webrtc_engine.dart';
+
 import '../fixtures/rtc_manager_fakes.dart';
 
 RtcMediaDevice _output(String id, {String? groupId}) => RtcMediaDevice(
@@ -148,16 +150,18 @@ void main() {
   });
 
   group('AudioSession.forPlatform', () {
-    tearDown(() => CurrentPlatform.debugCurrentPlatformOverride = null);
+    late FakeWebRtcEngine engine;
 
-    test('is the Apple session on iOS', () {
-      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
+    setUp(() => registerWebRtcEngine(engine = FakeWebRtcEngine()));
+
+    test('is the Apple session where the engine has an audio session', () {
+      engine.audio.hasAudioSession = true;
 
       expect(AudioSession.forPlatform(), isA<IosAudioSession>());
     });
 
     test('is the default session elsewhere', () {
-      CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+      engine.audio.hasAudioSession = false;
 
       expect(AudioSession.forPlatform(), isA<DefaultAudioSession>());
     });

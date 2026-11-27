@@ -3,7 +3,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../../test_helpers.dart';
 
@@ -20,7 +20,7 @@ void main() {
     when(call.suspendAudio).thenAnswer((_) async {});
     when(call.resumeAudio).thenAnswer((_) async {});
     when(call.ensureNativeFactory).thenAnswer(
-      (_) async => null as rtc.NativePeerConnectionFactory?,
+      (_) async => null as rtc.PeerConnectionFactory?,
     );
   }
 

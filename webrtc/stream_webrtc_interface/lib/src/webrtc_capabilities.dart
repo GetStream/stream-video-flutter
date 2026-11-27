@@ -3,9 +3,10 @@ import 'package:meta/meta.dart';
 /// What the WebRTC implementation on this platform can do.
 ///
 /// The WebRTC packages build the value for the platform the app runs on; a
-/// test builds one with the capabilities it needs.
+/// test builds one with the capabilities it needs. A capability added later
+/// defaults to `false`.
 @immutable
-class WebRtcCapabilities {
+final class WebRtcCapabilities {
   const WebRtcCapabilities({
     required this.supportsPerCallFactory,
     required this.supportsAudioPlayoutPause,
@@ -19,6 +20,9 @@ class WebRtcCapabilities {
     required this.usesExactDeviceIdConstraints,
     required this.reportsAudioInterruptions,
     required this.supportsSystemManagedAudioFocus,
+    this.needsRemoteAudioReattach = false,
+    this.supportsEncryption = false,
+    this.supportsAudioModuleMicrophoneMute = false,
   });
 
   /// Whether each call can build its own peer connection factory, with its
@@ -70,6 +74,19 @@ class WebRtcCapabilities {
   /// leaves the focus to it. Android.
   final bool supportsSystemManagedAudioFocus;
 
+  /// Whether remote audio goes silent after a subscriber renegotiation that
+  /// adds an audio source, until each audio renderer is detached and attached
+  /// again. WebKit browsers.
+  final bool needsRemoteAudioReattach;
+
+  /// Whether outgoing and incoming frames can be end-to-end encrypted, see
+  /// `EncryptionManager`. Android, iOS and macOS.
+  final bool supportsEncryption;
+
+  /// Whether the microphone can be muted in the audio device module, see
+  /// `PeerConnectionFactory.setMicrophoneMuted`. iOS and macOS.
+  final bool supportsAudioModuleMicrophoneMute;
+
   WebRtcCapabilities copyWith({
     bool? supportsPerCallFactory,
     bool? supportsAudioPlayoutPause,
@@ -83,6 +100,9 @@ class WebRtcCapabilities {
     bool? usesExactDeviceIdConstraints,
     bool? reportsAudioInterruptions,
     bool? supportsSystemManagedAudioFocus,
+    bool? needsRemoteAudioReattach,
+    bool? supportsEncryption,
+    bool? supportsAudioModuleMicrophoneMute,
   }) {
     return WebRtcCapabilities(
       supportsPerCallFactory:
@@ -110,6 +130,12 @@ class WebRtcCapabilities {
       supportsSystemManagedAudioFocus:
           supportsSystemManagedAudioFocus ??
           this.supportsSystemManagedAudioFocus,
+      needsRemoteAudioReattach:
+          needsRemoteAudioReattach ?? this.needsRemoteAudioReattach,
+      supportsEncryption: supportsEncryption ?? this.supportsEncryption,
+      supportsAudioModuleMicrophoneMute:
+          supportsAudioModuleMicrophoneMute ??
+          this.supportsAudioModuleMicrophoneMute,
     );
   }
 
@@ -128,6 +154,9 @@ class WebRtcCapabilities {
       'usesExactDeviceIdConstraints': usesExactDeviceIdConstraints,
       'reportsAudioInterruptions': reportsAudioInterruptions,
       'supportsSystemManagedAudioFocus': supportsSystemManagedAudioFocus,
+      'needsRemoteAudioReattach': needsRemoteAudioReattach,
+      'supportsEncryption': supportsEncryption,
+      'supportsAudioModuleMicrophoneMute': supportsAudioModuleMicrophoneMute,
     };
     final enabled = [
       for (final MapEntry(:key, :value) in flags.entries)
@@ -153,7 +182,11 @@ class WebRtcCapabilities {
           other.usesExactDeviceIdConstraints == usesExactDeviceIdConstraints &&
           other.reportsAudioInterruptions == reportsAudioInterruptions &&
           other.supportsSystemManagedAudioFocus ==
-              supportsSystemManagedAudioFocus;
+              supportsSystemManagedAudioFocus &&
+          other.needsRemoteAudioReattach == needsRemoteAudioReattach &&
+          other.supportsEncryption == supportsEncryption &&
+          other.supportsAudioModuleMicrophoneMute ==
+              supportsAudioModuleMicrophoneMute;
 
   @override
   int get hashCode => Object.hash(
@@ -169,6 +202,9 @@ class WebRtcCapabilities {
     usesExactDeviceIdConstraints,
     reportsAudioInterruptions,
     supportsSystemManagedAudioFocus,
+    needsRemoteAudioReattach,
+    supportsEncryption,
+    supportsAudioModuleMicrophoneMute,
   );
 }
 
