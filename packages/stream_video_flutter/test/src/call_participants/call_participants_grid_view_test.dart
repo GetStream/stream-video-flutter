@@ -9,6 +9,7 @@ import 'package:stream_video_flutter/src/call_participants/layout/call_participa
 import 'package:stream_video_flutter/src/call_participants/layout/participants_navigation_button.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart' hide Finder;
 
+import '../../test_utils/chevron_direction.dart';
 import '../../test_utils/test_wrapper.dart';
 import '../mocks.dart';
 
@@ -464,11 +465,16 @@ void main() {
       );
 
       // On the first page only the way on shows, on the left, pointing left.
-      final on = find.ancestor(
-        of: find.byIcon(StreamIconData.chevronLeft),
+      Finder button(IconData icon) => find.ancestor(
+        of: find.byIcon(icon),
         matching: find.byType(ParticipantsNavigationButton),
       );
+      final back = button(StreamIconData.chevronLeft);
+      final on = button(StreamIconData.chevronRight);
       expect(tester.getCenter(on).dx, lessThan(200));
+      expect(chevronPointsLeft(tester, on), isTrue);
+      expect(tester.getCenter(back).dx, greaterThan(200));
+      expect(chevronPointsLeft(tester, back), isFalse);
       expect(_chevronScales(tester), [0.0, 1.0]);
 
       await tester.tap(on);

@@ -353,11 +353,10 @@ class _PageNavigation extends StatelessWidget {
   }) {
     final icons = context.streamIcons;
     final translations = context.translations;
-    final pointsLeft =
-        isBack != (Directionality.of(context) == TextDirection.rtl);
 
+    // The chevrons mirror themselves under RTL.
     return ParticipantsNavigationButton(
-      icon: pointsLeft ? icons.chevronLeft : icons.chevronRight,
+      icon: isBack ? icons.chevronLeft : icons.chevronRight,
       tooltip: isBack
           ? translations.participantsPrevious
           : translations.participantsNext,

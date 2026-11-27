@@ -585,13 +585,11 @@ class _ParticipantsBarState extends State<_ParticipantsBar> {
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
     final inset = context.streamSpacing.sm;
-    final isRtl = Directionality.of(context) == TextDirection.rtl;
 
-    final (startIcon, endIcon) = switch ((widget.isHorizontal, isRtl)) {
-      (false, _) => (icons.chevronUp, icons.chevronDown),
-      (true, false) => (icons.chevronLeft, icons.chevronRight),
-      (true, true) => (icons.chevronRight, icons.chevronLeft),
-    };
+    // The left and right chevrons mirror themselves under RTL.
+    final (startIcon, endIcon) = widget.isHorizontal
+        ? (icons.chevronLeft, icons.chevronRight)
+        : (icons.chevronUp, icons.chevronDown);
 
     return ValueListenableBuilder<_BarEdges>(
       valueListenable: _edges,

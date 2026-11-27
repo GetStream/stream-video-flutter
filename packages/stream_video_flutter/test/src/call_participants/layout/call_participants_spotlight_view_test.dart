@@ -5,6 +5,7 @@ import 'package:mocktail/mocktail.dart';
 // flutter_test is about.
 import 'package:stream_video_flutter/stream_video_flutter.dart' hide Finder;
 
+import '../../../test_utils/chevron_direction.dart';
 import '../../../test_utils/test_wrapper.dart';
 import '../../mocks.dart';
 
@@ -545,12 +546,14 @@ void main() {
     ) async {
       await pumpBar(tester, textDirection: TextDirection.rtl);
 
-      // The bar starts at its right-hand edge, so the button pointing further
-      // along it is the one on the left.
-      expect(_buttonScale(tester, StreamIconData.chevronLeft), 1);
-      expect(_buttonScale(tester, StreamIconData.chevronRight), 0);
+      // The bar starts at its right-hand edge, so the button further along it
+      // is the one on the left, pointing left.
+      final on = find.byIcon(StreamIconData.chevronRight);
+      expect(_buttonScale(tester, StreamIconData.chevronRight), 1);
+      expect(_buttonScale(tester, StreamIconData.chevronLeft), 0);
+      expect(chevronPointsLeft(tester, on), isTrue);
 
-      await tester.tap(find.byIcon(StreamIconData.chevronLeft));
+      await tester.tap(on);
       await tester.pumpAndSettle();
 
       // Measured from the right, the second tile now starts where the first
@@ -563,17 +566,21 @@ void main() {
       tester,
     ) async {
       await pumpBar(tester, textDirection: TextDirection.rtl);
-      await tester.tap(find.byIcon(StreamIconData.chevronLeft));
+      await tester.tap(find.byIcon(StreamIconData.chevronRight));
       await tester.pumpAndSettle();
 
       // The start is on the right, so the chevron back along the bar is the
-      // right-hand one.
+      // right-hand one, pointing right.
       final bar = tester.getRect(find.byType(ListView));
-      final back = tester.getCenter(find.byIcon(StreamIconData.chevronRight));
-      final on = tester.getCenter(find.byIcon(StreamIconData.chevronLeft));
+      final backButton = find.byIcon(StreamIconData.chevronLeft);
+      final onButton = find.byIcon(StreamIconData.chevronRight);
+      final back = tester.getCenter(backButton);
+      final on = tester.getCenter(onButton);
 
       expect(bar.right - back.dx, 32);
       expect(on.dx - bar.left, 32);
+      expect(chevronPointsLeft(tester, backButton), isFalse);
+      expect(chevronPointsLeft(tester, onButton), isTrue);
     });
 
     testWidgets('sit at the ends of a vertical bar', (tester) async {
