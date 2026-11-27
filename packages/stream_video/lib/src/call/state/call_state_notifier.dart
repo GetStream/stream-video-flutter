@@ -6,6 +6,7 @@ import 'package:stream_core/stream_core.dart';
 import '../../call_state.dart';
 import '../../logger/impl/tagged_logger.dart';
 import '../../models/models.dart';
+import 'call_duration_timer.dart';
 import 'call_state_selection.dart';
 import 'mixins/state_call_actions_mixin.dart';
 import 'mixins/state_coordinator_mixin.dart';
@@ -24,13 +25,13 @@ class CallStateNotifier extends StateNotifier<CallState>
         StateRtcMixin,
         StateSfuMixin,
         StateCallActionsMixin {
-  CallStateNotifier(CallState initialState) : super(initialState) {
+  CallStateNotifier(CallState initialState)
+    : _durationTimer = CallDurationTimer(initialState),
+      super(initialState) {
     callStateStream = MutableStateEmitter<CallState>(
       initialState,
       sync: true,
     );
-    _durationTimerController = StreamController<Duration>.broadcast();
-    _setupDurationTimer();
   }
 
   final _logger = taggedLogger(tag: 'CallStateNotifier');
@@ -59,11 +60,11 @@ class CallStateNotifier extends StateNotifier<CallState>
     return callStateStream.map(selector).distinct(isSameCallStateSelection);
   }
 
-  Stream<Duration> get durationStream =>
-      _durationTimerController.stream.distinct();
+  Stream<Duration> get durationStream => _durationTimer.durationStream;
 
-  late final StreamController<Duration> _durationTimerController;
-  Timer? _durationTimer;
+  Stream<Duration> get liveDurationStream => _durationTimer.liveDurationStream;
+
+  final CallDurationTimer _durationTimer;
 
   /// Stays readable after [dispose]: it is the last state set.
   @override
@@ -84,24 +85,7 @@ class CallStateNotifier extends StateNotifier<CallState>
     super.state = value;
     callStateStream.value = value;
 
-    _setupDurationTimer();
-  }
-
-  void _setupDurationTimer() {
-    if (state.liveEndedAt != null) {
-      _durationTimer?.cancel();
-      _durationTimer = null;
-      return;
-    }
-
-    if (state.startedAt == null || _durationTimer != null) return;
-
-    _durationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (state.startedAt == null) return;
-
-      final duration = DateTime.now().difference(state.startedAt!);
-      _durationTimerController.add(duration);
-    });
+    _durationTimer.update(value);
   }
 
   void updateCallPreferences(CallPreferences preferences) {
@@ -113,8 +97,6 @@ class CallStateNotifier extends StateNotifier<CallState>
   void dispose() {
     super.dispose();
     callStateStream.close();
-    _durationTimer?.cancel();
-    _durationTimer = null;
-    _durationTimerController.close();
+    _durationTimer.dispose();
   }
 }

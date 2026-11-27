@@ -89,6 +89,7 @@
 - `Call.leave` callers in the SDK now pass a reason, and `Call.reject` and `Call.end` take a new optional `initiator`. A class that implements `Call` has to add the parameter, and a test that verifies `call.leave()` with no arguments against the SDK's widgets has to match `reason` too.
 - Enabling the microphone fails, and releases it, when the call has no audio publish option.
 - `RtcLocalScreenShareTrackExt.compareScreenShareMode` is removed.
+- `CallState.startedAt` no longer falls back to `liveStartedAt`.
 
 ### ⚠️ Deprecated
 
@@ -150,6 +151,7 @@
 - Added `CallState.isAudioInterrupted`, whether the platform is interrupting the call's audio, such as for a phone call, an alarm or another app playing audio.
 - Added `CallPreferences.audioInterruptionReaction` and `AudioInterruptionReaction`, what a call does while its audio is interrupted: nothing (the default), or turn the microphone off and back on when the interruption ends, unless the app changed it meanwhile.
 - Added `StreamCallScreenShareFailedEvent` with a `ScreenShareFailureReason`, delivered on `Call.callEvents` when an iOS broadcast that started could not be shared.
+- Added `Call.liveDurationStream`, how long the call has been live.
 
 ### 🔄 Changed
 
@@ -255,6 +257,7 @@
 - An incoming ring is marked active only once accepted, so joining it while it rings, as `StreamCallContainer` does when it opens, no longer replaces the active call or cancels your outgoing ring. Until then it is not in `StreamVideo.activeCalls`, so anything keyed off them, such as the Android ongoing-call service, starts on accept.
 - Declining a ring in the app no longer rejects it a second time when the native call screen reports its end as a decline.
 - An incoming call reports the microphone and camera its call settings turn on in `connectOptions` before it is joined. They used to read as off until the join, which then turned them on. Changing only the microphone through `setConnectOptions` before the join no longer turns the camera off and switches it to the front camera when the call settings turn it on and face it back.
+- `CallState` clears `startedAt`, `liveStartedAt`, `liveEndedAt` and `timerEndsAt` when the server no longer sets them, so `liveEndedAt` clears when a livestream goes live again.
 
 ## 1.8.0
 

@@ -42,6 +42,7 @@ class StreamCallDurationBadge extends StatelessWidget {
     this.showEncryption = true,
     this.showRecording = true,
     this.showScreenShare = true,
+    this.liveDuration = false,
     this.style,
   });
 
@@ -56,6 +57,13 @@ class StreamCallDurationBadge extends StatelessWidget {
 
   /// Whether a call somebody is presenting to is marked as one.
   final bool showScreenShare;
+
+  /// Whether the time shown is how long the call has been live, from
+  /// [Call.liveDurationStream], rather than how long it has been running.
+  ///
+  /// The live time stays at its last value once the live ends, and starts
+  /// again from zero when the call goes live again.
+  final bool liveDuration;
 
   /// The visual style applied to this badge.
   ///
@@ -99,7 +107,11 @@ class StreamCallDurationBadge extends StatelessWidget {
                   recording: showRecording && status.recording,
                   presenting: showScreenShare && status.presenting,
                 )),
-                _Duration(call: call, style: resolved),
+                _Duration(
+                  call: call,
+                  live: liveDuration,
+                  style: resolved,
+                ),
               ],
             ),
           ),
@@ -182,15 +194,20 @@ class _Indicator extends StatelessWidget {
 }
 
 class _Duration extends StatelessWidget {
-  const _Duration({required this.call, required this.style});
+  const _Duration({
+    required this.call,
+    required this.live,
+    required this.style,
+  });
 
   final Call call;
+  final bool live;
   final _StreamCallDurationBadgeStyleDefaults style;
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<Duration>(
-      stream: call.callDurationStream,
+      stream: live ? call.liveDurationStream : call.callDurationStream,
       builder: (context, snapshot) {
         // A device clock behind the server's `startedAt` makes the difference
         // negative, which has no reading as elapsed time.

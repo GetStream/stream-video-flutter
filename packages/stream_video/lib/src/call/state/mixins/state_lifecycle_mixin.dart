@@ -64,42 +64,39 @@ mixin StateLifecycleMixin on StateNotifier<CallState> {
         ? state.callParticipants
         : data.metadata.toCallParticipants(state);
 
-    state = state.copyWith(
-      status: data.toCallStatus(state: state, ringing: ringing),
-      isRingingWithVideo: ringing ? video : null,
-      isBackstage: data.metadata.details.backstage,
-      isRecording: data.metadata.details.recording,
-      isTranscribing: data.metadata.details.transcribing,
-      isCaptioning: data.metadata.details.captioning,
-      isBroadcasting: data.metadata.details.broadcasting,
-      blockedUserIds: changedOrNull(
-        state.blockedUserIds,
-        data.metadata.details.blockedUserIds.toList(),
-      ),
-      createdAt: data.metadata.details.createdAt,
-      updatedAt: data.metadata.details.updatedAt,
-      startsAt: data.metadata.details.startsAt,
-      endedAt: data.metadata.details.endedAt,
-      startedAt:
-          data.metadata.session.startedAt ??
-          data.metadata.session.liveStartedAt,
-      createdByUser: data.metadata.details.createdBy,
-      custom: changedOrNull(state.custom, data.metadata.details.custom),
-      egress: data.metadata.details.egress,
-      rtmpIngress: data.metadata.details.rtmpIngress,
-      settings: data.metadata.settings,
-      ownCapabilities: changedOrNull(
-        state.ownCapabilities,
-        data.metadata.details.ownCapabilities.toList(),
-      ),
-      callParticipants: callParticipants,
-      liveStartedAt: data.metadata.session.liveStartedAt,
-      liveEndedAt: data.metadata.session.liveEndedAt,
-      callMembers: changedOrNull(
-        state.callMembers,
-        data.metadata.toCallMembers(),
-      ),
-    );
+    state = state
+        .copyWith(
+          status: data.toCallStatus(state: state, ringing: ringing),
+          isRingingWithVideo: ringing ? video : null,
+          isBackstage: data.metadata.details.backstage,
+          isRecording: data.metadata.details.recording,
+          isTranscribing: data.metadata.details.transcribing,
+          isCaptioning: data.metadata.details.captioning,
+          isBroadcasting: data.metadata.details.broadcasting,
+          blockedUserIds: changedOrNull(
+            state.blockedUserIds,
+            data.metadata.details.blockedUserIds.toList(),
+          ),
+          createdAt: data.metadata.details.createdAt,
+          updatedAt: data.metadata.details.updatedAt,
+          startsAt: data.metadata.details.startsAt,
+          endedAt: data.metadata.details.endedAt,
+          createdByUser: data.metadata.details.createdBy,
+          custom: changedOrNull(state.custom, data.metadata.details.custom),
+          egress: data.metadata.details.egress,
+          rtmpIngress: data.metadata.details.rtmpIngress,
+          settings: data.metadata.settings,
+          ownCapabilities: changedOrNull(
+            state.ownCapabilities,
+            data.metadata.details.ownCapabilities.toList(),
+          ),
+          callParticipants: callParticipants,
+          callMembers: changedOrNull(
+            state.callMembers,
+            data.metadata.toCallMembers(),
+          ),
+        )
+        .copyWithSessionTimes(data.metadata.session);
   }
 
   void updateFromCallCreatedData(

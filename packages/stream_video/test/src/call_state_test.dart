@@ -214,4 +214,73 @@ void main() {
       expect(updated.anonymousParticipantCount, 310);
     },
   );
+
+  group('session times', () {
+    CallMetadata withSession(CallSessionData session) {
+      final base = metadata();
+      return CallMetadata(
+        cid: base.cid,
+        details: base.details,
+        settings: base.settings,
+        session: session,
+        users: base.users,
+        members: base.members,
+      );
+    }
+
+    final sessionStart = DateTime.utc(2026, 11, 20, 10);
+    final firstLive = DateTime.utc(2026, 11, 20, 10, 5);
+    final firstEnd = DateTime.utc(2026, 11, 20, 10, 15);
+    final secondLive = DateTime.utc(2026, 11, 20, 10, 20);
+
+    final ended = initial.copyFromMetadata(
+      withSession(
+        CallSessionData(
+          startedAt: sessionStart,
+          liveStartedAt: firstLive,
+          liveEndedAt: firstEnd,
+          timerEndsAt: DateTime.utc(2026, 11, 20, 11),
+        ),
+      ),
+    );
+
+    test(
+      'CallState.copyFromMetadata clears liveEndedAt on going live again',
+      () {
+        final live = ended.copyFromMetadata(
+          withSession(
+            CallSessionData(startedAt: sessionStart, liveStartedAt: secondLive),
+          ),
+        );
+
+        expect(live.startedAt, sessionStart);
+        expect(live.liveStartedAt, secondLive);
+        expect(live.liveEndedAt, isNull);
+        expect(live.timerEndsAt, isNull);
+      },
+    );
+
+    test('CallState.copyFromMetadata clears the times of an ended session', () {
+      final updated = ended.copyFromMetadata(
+        withSession(const CallSessionData()),
+      );
+
+      expect(updated.startedAt, isNull);
+      expect(updated.liveStartedAt, isNull);
+      expect(updated.liveEndedAt, isNull);
+      expect(updated.timerEndsAt, isNull);
+    });
+
+    test(
+      'CallState.copyFromMetadata keeps startedAt apart from liveStartedAt',
+      () {
+        final updated = initial.copyFromMetadata(
+          withSession(CallSessionData(liveStartedAt: firstLive)),
+        );
+
+        expect(updated.startedAt, isNull);
+        expect(updated.liveStartedAt, firstLive);
+      },
+    );
+  });
 }

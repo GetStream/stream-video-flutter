@@ -602,6 +602,15 @@ class Call {
 
   StateEmitter<CallState> get state => _stateManager.callStateStream;
   Stream<Duration> get callDurationStream => _stateManager.durationStream;
+
+  /// How long the call has been live: from [CallState.liveStartedAt] to
+  /// [CallState.liveEndedAt], or to now while it is live.
+  ///
+  /// Emits the current value on listen, then once a second while live. When
+  /// the live ends it emits the final length and stops, and it starts again
+  /// from zero when the call goes live again.
+  Stream<Duration> get liveDurationStream =>
+      _stateManager.liveDurationStream.distinct();
   StatsReporter? get statsReporter => _session?.statsReporter;
 
   /// Emits the value [selector] returns from the call state: the current value
@@ -1211,8 +1220,8 @@ class Call {
   /// Leaves the call if it joined and has not been left, then closes its
   /// streams:
   /// [state], [partialState], [participantsStream], [callEvents], [stats],
-  /// [closedCaptions] and [callDurationStream] complete, and later state
-  /// changes are dropped. [state] keeps its last value.
+  /// [closedCaptions], [callDurationStream] and [liveDurationStream] complete,
+  /// and later state changes are dropped. [state] keeps its last value.
   ///
   /// A call that is still ringing is reported disconnected and its native
   /// call ends. An outgoing ring is cancelled as by [leave]; an incoming ring
