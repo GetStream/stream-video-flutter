@@ -17,6 +17,7 @@
 - Two filters on one camera, such as a virtual background and the moderation blur, both apply.
 - Video filters on iOS follow the orientation of the app's window scene, including after it moves to another display.
 - [iOS] Added the missing `FlutterFramework` dependency to the Swift package.
+- [iOS] Below iOS 15, the built-in filters fail to apply instead of reporting success while sending the frames unprocessed.
 
 ## 1.8.0
 
