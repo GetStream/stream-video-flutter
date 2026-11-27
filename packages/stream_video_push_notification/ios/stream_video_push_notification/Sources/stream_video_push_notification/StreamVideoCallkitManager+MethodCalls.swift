@@ -54,8 +54,8 @@ extension StreamVideoCallkitManager {
             result(true)
         case .ignored(let reply):
             result(reply)
-        case .initData, .getDevicePushTokenVoIP, .notImplemented:
-            // The plugin answers the first two before the manager sees a call.
+        case .initData, .getDevicePushTokenVoIP, .getPushToken, .notImplemented:
+            // The plugin answers the first three before the manager sees a call.
             result(FlutterMethodNotImplemented)
         }
     }

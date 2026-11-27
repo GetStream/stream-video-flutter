@@ -87,7 +87,11 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       final configuration = _defaultPushConfiguration.merge(pushConfiguration);
 
       StreamVideoPushNotificationPlatform.instance.init(
-        _nativePushConfiguration(configuration, streamVideo.options),
+        _nativePushConfiguration(
+          configuration,
+          streamVideo.options,
+          registerApnDeviceToken: registerApnDeviceToken,
+        ),
       );
 
       return StreamVideoPushNotificationManager._(
@@ -354,13 +358,15 @@ const _defaultPushConfiguration = StreamVideoPushConfiguration(
 );
 
 // The push configuration native code gets: [configuration] with, under `ios`,
-// the Apple audio configuration of the ringing calls' policy. Native code
-// keeps it, so a VoIP push that arrives before Dart runs has it too, and
-// applies it when CallKit answers a call the app has not joined yet.
+// the Apple audio configuration of the ringing calls' policy and whether to
+// register with APNs. Native code keeps the audio configuration, so a VoIP
+// push that arrives before Dart runs has it too, and applies it when CallKit
+// answers a call the app has not joined yet.
 Map<String, dynamic> _nativePushConfiguration(
   StreamVideoPushConfiguration configuration,
-  StreamVideoOptions options,
-) {
+  StreamVideoOptions options, {
+  required bool registerApnDeviceToken,
+}) {
   final json = configuration.toJson();
   final policy = options.resolvedRingingAudioConfigurationPolicy;
   final audioConfiguration = policy.getAppleConfiguration(
@@ -371,6 +377,7 @@ Map<String, dynamic> _nativePushConfiguration(
     'ios': <String, dynamic>{
       ...?json['ios'] as Map<String, dynamic>?,
       'ringingAudioConfiguration': audioConfiguration.toMap(),
+      'registerApnDeviceToken': registerApnDeviceToken,
     },
   };
 }

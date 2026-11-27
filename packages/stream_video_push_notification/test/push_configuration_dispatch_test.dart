@@ -36,11 +36,13 @@ Map<String, dynamic> _dispatch(
   _CapturingPlatform platform,
   StreamVideoPushConfiguration? configuration, {
   StreamVideoOptions? options,
+  bool registerApnDeviceToken = false,
 }) {
   final provider = StreamVideoPushNotificationManager.create(
     iosPushProvider: const StreamVideoPushProvider.apn(name: 'apn'),
     androidPushProvider: const StreamVideoPushProvider.firebase(name: 'fcm'),
     pushConfiguration: configuration,
+    registerApnDeviceToken: registerApnDeviceToken,
   );
 
   provider(_MockCoordinatorClient(), _MockStreamVideo(options));
@@ -246,6 +248,26 @@ void main() {
       final ios = configuration['ios'] as Map<String, dynamic>;
       expect(ios['iconName'], 'CallIcon');
       expect(ios['ringingAudioConfiguration'], isNotNull);
+    });
+  });
+
+  group('registering with APNs', () {
+    bool? registersApns(Map<String, dynamic> configuration) =>
+        (configuration['ios'] as Map<String, dynamic>)['registerApnDeviceToken']
+            as bool?;
+
+    test('is asked for when the app registers the APN device token', () {
+      final configuration = _dispatch(
+        platform,
+        null,
+        registerApnDeviceToken: true,
+      );
+
+      expect(registersApns(configuration), isTrue);
+    });
+
+    test('is turned down by default', () {
+      expect(registersApns(_dispatch(platform, null)), isFalse);
     });
   });
 }
