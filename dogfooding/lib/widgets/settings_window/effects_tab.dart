@@ -1,9 +1,8 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_filters/stream_video_filters.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../../dogfooding_app_channel.dart';
+import '../../utils/grayscale_filter.dart';
 import '../../utils/video_filters.dart';
 
 const _backgroundAssets = [
@@ -15,8 +14,7 @@ const _backgroundAssets = [
 const _grayscale = 'grayscale';
 
 /// The settings window's effects tab: three strengths of background blur, a
-/// grayscale filter (not on web) and the app's background images, applied to
-/// [call].
+/// grayscale filter and the app's background images, applied to [call].
 ///
 /// Add it only where `StreamVideoFilters.isSupported()` says the device can
 /// apply them.
@@ -27,12 +25,13 @@ StreamEffectsSettingsTab effectsTab(
   final blur = context.streamIcons.blurFill;
 
   StreamVideoFilter option(
-    NativeVideoFilter filter, {
+    VideoFilter filter, {
+    required String id,
     required String label,
     required Widget icon,
   }) {
     return StreamVideoFilter(
-      id: filter.effectName,
+      id: id,
       label: label,
       icon: icon,
       onSelected: () => applyVideoFilter(call, filter),
@@ -50,19 +49,16 @@ StreamEffectsSettingsTab effectsTab(
       ])
         option(
           BackgroundBlurFilter(intensity: intensity),
+          id: intensity.effectName,
           label: label,
           icon: Icon(blur, size: size),
         ),
-      // A custom effect the app registers natively, to try that path out.
-      if (!kIsWeb)
-        option(
-          CustomVideoFilter(
-            _grayscale,
-            onRegister: (_) => DogfoodingAppChannel().registerGreyscaleEffect(),
-          ),
-          label: 'Grayscale',
-          icon: const Icon(Icons.filter_b_and_w),
-        ),
+      option(
+        grayscaleFilter,
+        id: _grayscale,
+        label: 'Grayscale',
+        icon: const Icon(Icons.filter_b_and_w),
+      ),
     ],
     backgrounds: [
       for (final (index, asset) in _backgroundAssets.indexed)
@@ -76,6 +72,7 @@ StreamEffectsSettingsTab effectsTab(
     ],
     onClear: () => applyVideoFilter(call, null),
     selected: () => switch (call.videoFilter) {
+      final filter? when filter == grayscaleFilter => _grayscale,
       final NativeVideoFilter filter => filter.effectName,
       _ => null,
     },

@@ -159,8 +159,7 @@ void main() {
     final registered = <String>[];
     final filter = CustomVideoFilter(
       'grayscale',
-      onRegister: (registration) async =>
-          registered.add(registration.effectName),
+      onRegister: () async => registered.add('grayscale'),
     );
 
     await filter.apply(_input('cam-1'));
@@ -333,8 +332,8 @@ void main() {
     expect(VirtualBackgroundFilter('a'), VirtualBackgroundFilter('a'));
     expect(FullFrameBlurFilter(), FullFrameBlurFilter());
     expect(
-      CustomVideoFilter('a', onRegister: (_) async {}),
-      CustomVideoFilter('a', onRegister: (_) async {}),
+      CustomVideoFilter('a', onRegister: () async {}),
+      CustomVideoFilter('a', onRegister: () async {}),
     );
   });
 
@@ -356,7 +355,7 @@ void main() {
     );
     expect(FullFrameBlurFilter().browserEffect, isA<BrowserFullFrameBlur>());
     expect(
-      CustomVideoFilter('a', onRegister: (_) async {}).browserEffect,
+      CustomVideoFilter('a', onRegister: () async {}).browserEffect,
       isNull,
     );
   });
