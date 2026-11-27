@@ -6,6 +6,7 @@ import UIKit
 ///
 /// The plugin forwards the app delegate's remote notification callbacks here, whoever asked iOS
 /// to register: the plugin, when `registerApnDeviceToken` is on, or the app or another plugin.
+/// Flutter forwards them only when the app delegate is a `FlutterAppDelegate`.
 /// The token is stored next to the VoIP token and sent to Dart once per process: every
 /// registration of the plugin, one per Flutter engine, forwards the same callback, and iOS hands
 /// the token over again on every registration. An event that was dropped, because Dart had
@@ -43,7 +44,8 @@ final class RemoteNotificationTokenHandler {
         self.registerForRemoteNotifications = registerForRemoteNotifications
     }
 
-    /// The stored token, or empty when APNs has not issued one.
+    /// The stored token, or empty when APNs has not issued one. It is kept when the app turns
+    /// `registerApnDeviceToken` off, so it is only meaningful while that is on.
     var token: String {
         return defaults.string(forKey: Self.tokenKey) ?? ""
     }
@@ -61,9 +63,11 @@ final class RemoteNotificationTokenHandler {
         return ios?["registerApnDeviceToken"] as? Bool == true
     }
 
-    /// Stores `deviceToken`, as hex, and tells Dart, unless this process already sent it.
+    /// Stores `deviceToken`, as uppercase hex, and tells Dart, unless this process already sent
+    /// it. Uppercase is how Firebase Messaging reports the token, so a device registered with
+    /// Firebase's token keeps the same id.
     func didRegister(deviceToken: Data) {
-        let token = deviceToken.map { String(format: "%02x", $0) }.joined()
+        let token = deviceToken.map { String(format: "%02X", $0) }.joined()
         guard token != sentToken else { return }
 
         sentToken = token

@@ -12,8 +12,9 @@ class CallEvent {
 enum Event {
   actionDidUpdateDevicePushTokenVoip,
 
-  /// A push token other than the VoIP one changed, with its `kind` and
-  /// `token` in the body. Not read yet; the token is not registered from it.
+  /// A push token other than the VoIP one, with its `kind` and `token` in the
+  /// body, sent once per process and again when it changes. Not read yet; the
+  /// token is not registered from it.
   actionDidUpdatePushToken,
   actionCallIncoming,
   actionCallIncomingFailed,

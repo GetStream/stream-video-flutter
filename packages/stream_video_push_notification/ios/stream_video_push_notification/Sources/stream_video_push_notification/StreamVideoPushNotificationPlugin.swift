@@ -4,6 +4,9 @@ import UIKit
 public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
     private static let devicePushTokenVoIPKey = "DevicePushTokenVoIP"
 
+    /// The token kind in `getPushToken` for the PushKit VoIP token.
+    static let voipTokenKind = "voip"
+
     let persistentState: UserDefaults = UserDefaults.standard
 
     private(set) static var sharedInstance: StreamVideoPushNotificationPlugin?
@@ -156,7 +159,7 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
         kind: String, voipIn defaults: UserDefaults, apns: RemoteNotificationTokenHandler
     ) -> String {
         switch kind {
-        case "voip":
+        case voipTokenKind:
             return devicePushTokenVoIP(in: defaults)
         case RemoteNotificationTokenHandler.kind:
             return apns.token

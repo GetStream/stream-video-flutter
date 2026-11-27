@@ -77,17 +77,17 @@ final class RemoteNotificationTokenHandlerTests: XCTestCase {
         XCTAssertEqual(handler.token, "")
     }
 
-    func testAnIssuedTokenIsStoredAsHexAndSentToDart() {
+    func testAnIssuedTokenIsStoredAsUppercaseHexAndSentToDart() {
         // Sent before Dart listens, as when APNs answers during launch: held until it does.
         handler.didRegister(deviceToken: Data([0x0a, 0xbc, 0xff]))
         drainMainQueue()
         let received = listen()
 
-        XCTAssertEqual(handler.token, "0abcff")
+        XCTAssertEqual(handler.token, "0ABCFF")
         XCTAssertEqual(
             received().map { $0["event"] as? String },
             ["io.getstream.video.DID_UPDATE_PUSH_TOKEN"])
-        XCTAssertEqual(bodies(received()), [["kind": "apns", "token": "0abcff"]])
+        XCTAssertEqual(bodies(received()), [["kind": "apns", "token": "0ABCFF"]])
     }
 
     func testTheSameTokenAgainIsNotSentAgain() {
@@ -175,7 +175,7 @@ final class RemoteNotificationTokenHandlerTests: XCTestCase {
         func token(_ kind: String) -> String {
             StreamVideoPushNotificationPlugin.pushToken(kind: kind, voipIn: defaults, apns: handler)
         }
-        XCTAssertEqual(token("apns"), "ab")
+        XCTAssertEqual(token("apns"), "AB")
         XCTAssertEqual(token("voip"), "voip-token")
         XCTAssertEqual(token("fcm"), "")
     }
@@ -193,7 +193,7 @@ final class RemoteNotificationTokenHandlerTests: XCTestCase {
                 FlutterMethodCall(methodName: "getPushToken", arguments: ["kind": "fcm"])
             ) { fcm = $0 }
 
-            XCTAssertEqual(apns as? String, "ab")
+            XCTAssertEqual(apns as? String, "AB")
             XCTAssertEqual(fcm as? String, "")
         }
 
@@ -211,6 +211,19 @@ final class RemoteNotificationTokenHandlerTests: XCTestCase {
                 didFailToRegisterForRemoteNotificationsWithError: NSError(domain: "APNs", code: 1))
         }
 
-        XCTAssertEqual(handler.token, "0c")
+        XCTAssertEqual(handler.token, "0C")
+    }
+
+    func testFlutterAppDelegateHandsTheTokenToThePlugin() throws {
+        // The plugin registered as an application delegate, so Flutter's app delegate forwards
+        // the callback iOS makes to it.
+        let appDelegate = try XCTUnwrap(UIApplication.shared.delegate as? FlutterAppDelegate)
+
+        try withPlugin { _ in
+            appDelegate.application(
+                UIApplication.shared, didRegisterForRemoteNotificationsWithDeviceToken: Data([0x0d]))
+        }
+
+        XCTAssertEqual(handler.token, "0D")
     }
 }
