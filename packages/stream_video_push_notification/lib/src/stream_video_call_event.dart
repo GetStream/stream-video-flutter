@@ -11,6 +11,10 @@ class CallEvent {
 
 enum Event {
   actionDidUpdateDevicePushTokenVoip,
+
+  /// A push token other than the VoIP one changed, with its `kind` and
+  /// `token` in the body. Not read yet; the token is not registered from it.
+  actionDidUpdatePushToken,
   actionCallIncoming,
   actionCallIncomingFailed,
   actionCallStart,
@@ -47,6 +51,8 @@ extension EventX on Event {
     switch (this) {
       case Event.actionDidUpdateDevicePushTokenVoip:
         return 'io.getstream.video.DID_UPDATE_DEVICE_PUSH_TOKEN_VOIP';
+      case Event.actionDidUpdatePushToken:
+        return 'io.getstream.video.DID_UPDATE_PUSH_TOKEN';
       case Event.actionCallIncoming:
         return 'io.getstream.video.ACTION_CALL_INCOMING';
       case Event.actionCallIncomingFailed:

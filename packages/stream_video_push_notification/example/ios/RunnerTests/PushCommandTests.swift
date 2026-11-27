@@ -57,6 +57,22 @@ final class PushCommandTests: XCTestCase {
         }
     }
 
+    func testGetPushToken() {
+        guard case .getPushToken(let kind) = command("getPushToken", ["kind": "apns"]) else {
+            return XCTFail("not getPushToken")
+        }
+        XCTAssertEqual(kind, "apns")
+    }
+
+    func testGetPushTokenWithoutAKindAnswersEmpty() {
+        for arguments: Any? in [nil, "apns", [String: Any](), ["kind": 1]] {
+            guard let reply = ignoredReply(command("getPushToken", arguments)) else {
+                return XCTFail("getPushToken with \(String(describing: arguments)) is not ignored")
+            }
+            XCTAssertEqual(reply as? String, "")
+        }
+    }
+
     // MARK: - Calls
 
     func testShowIncomingCall() {

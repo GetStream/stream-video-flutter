@@ -280,6 +280,8 @@ class MethodChannelStreamVideoPushNotification
         ),
         Event.actionCallCallback => ActionCallCallback(data: callData),
         Event.actionCallConnected => ActionCallConnected(data: callData),
+        // Not a ringing event; nothing reads the token from it yet.
+        Event.actionDidUpdatePushToken => null,
         Event.actionDidUpdateDevicePushTokenVoip =>
           ActionDidUpdateDevicePushTokenVoip(
             token: body['deviceTokenVoIP'] as String,

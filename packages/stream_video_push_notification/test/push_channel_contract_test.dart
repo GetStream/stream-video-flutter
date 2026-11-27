@@ -84,6 +84,13 @@ const _androidOnlyMethods = {
   'telecomCallCids',
 };
 
+/// Cases the iOS switch has beyond what Dart invokes there. `getPushToken`
+/// answers the stored VoIP or APNs token; Dart still reads the VoIP one with
+/// `getDevicePushTokenVoIP` and the APNs one from Firebase Messaging.
+const _iosExtraHandledMethods = {
+  'getPushToken',
+};
+
 /// Cases the Android switch has beyond what Dart invokes there.
 /// `getDevicePushTokenVoIP` answers an empty string and Dart short-circuits
 /// before asking.
@@ -94,6 +101,7 @@ const _androidExtraHandledMethods = {
 /// Events only the iOS plugin declares.
 const _iosOnlyEvents = {
   Event.actionDidUpdateDevicePushTokenVoip,
+  Event.actionDidUpdatePushToken,
   Event.actionCallIncomingFailed,
   Event.actionCallToggleDtmf,
   Event.actionCallToggleAudioSession,
@@ -240,6 +248,7 @@ void main() {
         equals({
           ..._sharedMethods,
           ..._iosOnlyMethods,
+          ..._iosExtraHandledMethods,
         }),
         reason:
             'the iOS method switch changed; update the contract sets at the '

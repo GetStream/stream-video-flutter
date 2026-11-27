@@ -6,6 +6,8 @@ enum PushCommand {
     /// `nil` when the arguments are missing or not a map.
     case initData([String: Any]?)
     case getDevicePushTokenVoIP
+    /// The stored push token of `kind`: `voip` or `apns`.
+    case getPushToken(kind: String)
     case showIncomingCall(CallData)
     case startCall(CallData)
     /// `nil` when arguments were sent but are not a map.
@@ -38,6 +40,13 @@ extension PushCommand {
             return .initData(call.arguments as? [String: Any])
         case "getDevicePushTokenVoIP":
             return .getDevicePushTokenVoIP
+        case "getPushToken":
+            guard let args = call.arguments as? [String: Any],
+                let kind = args["kind"] as? String
+            else {
+                return .ignored(reply: "")
+            }
+            return .getPushToken(kind: kind)
         case "showIncomingCall":
             guard let args = call.arguments as? [String: Any] else {
                 return .ignored(reply: true)

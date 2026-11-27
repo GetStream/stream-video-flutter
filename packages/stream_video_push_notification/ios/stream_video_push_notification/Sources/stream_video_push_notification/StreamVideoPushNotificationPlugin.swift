@@ -10,6 +10,9 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
 
     private var callKitManager: StreamVideoCallkitManager
 
+    /// Where this registration hands the APNs token and `registerApnDeviceToken`.
+    var apnsTokens: RemoteNotificationTokenHandler = .shared
+
     private override init() {
         self.callKitManager = StreamVideoCallkitManager.shared
         super.init()
@@ -26,8 +29,12 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
 
         StreamVideoCallkitManager.shared.setEventHandler(eventsHandler)
 
-        sharedInstance = StreamVideoPushNotificationPlugin()
-        registrar.addMethodCallDelegate(sharedInstance!, channel: mainChannel)
+        let instance = StreamVideoPushNotificationPlugin()
+        sharedInstance = instance
+        registrar.addMethodCallDelegate(instance, channel: mainChannel)
+        // For the APNs token: Flutter's app delegate forwards its remote notification
+        // callbacks to the plugins that registered as application delegates.
+        registrar.addApplicationDelegate(instance)
 
         VoIPPushRegistryHandler.shared.initChannel(mainChannel: mainChannel)
     }
@@ -50,6 +57,7 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
 
                 VoIPPushRegistryHandler.shared.initData(data: arguments)
                 callKitManager.initCallkitProvider(CallData(args: arguments))
+                apnsTokens.configure(with: arguments)
                 result(nil)
             } else {
                 result(
@@ -58,6 +66,8 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
             }
         case .getDevicePushTokenVoIP:
             result(self.getDevicePushTokenVoIP())
+        case .getPushToken(let kind):
+            result(self.pushToken(kind: kind))
         case let command:
             callKitManager.handle(command, result: result)
         }
@@ -134,5 +144,40 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
 
     func getDevicePushTokenVoIP() -> String {
         return Self.devicePushTokenVoIP(in: persistentState)
+    }
+
+    func pushToken(kind: String) -> String {
+        return Self.pushToken(kind: kind, voipIn: persistentState, apns: apnsTokens)
+    }
+
+    /// The stored token of `kind`, `voip` or `apns`; empty for a kind iOS has no token of, or
+    /// one not issued yet.
+    static func pushToken(
+        kind: String, voipIn defaults: UserDefaults, apns: RemoteNotificationTokenHandler
+    ) -> String {
+        switch kind {
+        case "voip":
+            return devicePushTokenVoIP(in: defaults)
+        case RemoteNotificationTokenHandler.kind:
+            return apns.token
+        default:
+            return ""
+        }
+    }
+
+    // MARK: - Remote notifications
+
+    public func application(
+        _ application: UIApplication,
+        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+    ) {
+        apnsTokens.didRegister(deviceToken: deviceToken)
+    }
+
+    public func application(
+        _ application: UIApplication,
+        didFailToRegisterForRemoteNotificationsWithError error: Error
+    ) {
+        apnsTokens.didFailToRegister(error: error)
     }
 }

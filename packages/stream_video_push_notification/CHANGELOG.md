@@ -39,6 +39,7 @@
 
 ### 🔄 Changed
 
+- [iOS] With `registerApnDeviceToken` on, the plugin registers the app for remote notifications itself. Whoever registered it, the plugin stores the APNs token iOS issues, which it receives through the app delegate: an `AppDelegate` that overrides `application(_:didRegisterForRemoteNotificationsWithDeviceToken:)` has to call `super` for the plugin to get it. The token registered with Stream is still the one Firebase Messaging reports.
 - `StreamVideoPushHandler.handleBackgroundMessage` registers the Dart plugins in its isolate.
 - `stream_video` now tells this package when a call's ring is over, when a call is left and when the user accepts a call in the app. That covers, as before, the app leaving a call, a ring the backend ends, the caller cancels or another device answers, and a call accepted in the app. A ring that is over ends without being reported as declined, unless the user answered it on the native call screen; a call accepted in the app has its ring dismissed while the native side still shows it unanswered, and on Android stays with the Telecom stack.
 - [iOS] `dismissRingingCallByCid` ends the CallKit call silently: its end is no longer reported as `ActionCallDecline` or `ActionCallEnded`.

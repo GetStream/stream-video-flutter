@@ -7,6 +7,8 @@ struct StreamVideoIncomingCallConstants {
     // MARK: - Push Token Events
     static let ACTION_DID_UPDATE_DEVICE_PUSH_TOKEN_VOIP =
         "io.getstream.video.DID_UPDATE_DEVICE_PUSH_TOKEN_VOIP"
+    /// A push token other than the VoIP one changed; the body carries its `kind` and `token`.
+    static let ACTION_DID_UPDATE_PUSH_TOKEN = "io.getstream.video.DID_UPDATE_PUSH_TOKEN"
 
     // MARK: - Call Events
     static let ACTION_CALL_INCOMING = "io.getstream.video.ACTION_CALL_INCOMING"

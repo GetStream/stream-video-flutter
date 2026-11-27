@@ -216,6 +216,18 @@ void main() {
       expect(event.token, 'abc123');
     });
 
+    test('APNs token update is not a ringing event', () async {
+      final events = await receive([
+        _message(Event.actionDidUpdatePushToken, {
+          'kind': 'apns',
+          'token': 'abc123',
+        }),
+        _message(Event.actionCallAccept, _iosCallBody),
+      ]);
+
+      expect(events, [isNull, isA<ActionCallAccept>()]);
+    });
+
     test('hold', () async {
       final events = await receive([
         _message(Event.actionCallToggleHold, {
