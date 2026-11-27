@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../../stream_video_flutter.dart';
@@ -72,27 +73,18 @@ class CallParticipantsSpotlightView extends StatelessWidget {
   /// The alignment of the participants bar.
   final ParticipantsBarAlignment barAlignment;
 
-  /// The most of the view the bar may take.
-  ///
-  /// Its tiles have a size of their own rather than a share of the view, so a
-  /// window short enough would otherwise leave the stage nothing. Past this
-  /// the tiles scale down with the view instead.
-  static const _maxBarFraction = 1 / 3;
-
   @override
   Widget build(BuildContext context) {
+    final theme = StreamCallParticipantsSpotlightTheme.of(context);
     final style = _StreamCallParticipantsSpotlightStyleDefaults(
       context,
-      StreamCallParticipantsSpotlightTheme.of(context).style,
+      theme.style,
     );
-
     final padding = (this.padding ?? style.padding).resolve(
       Directionality.maybeOf(context),
     );
     final spacing = this.spacing ?? style.spacing;
-    final foldStyle = StreamCallParticipantsSpotlightTheme.of(
-      context,
-    ).foldStyle;
+    final foldStyle = theme.foldStyle;
 
     return StreamFoldBuilder(
       enabled: foldStyle?.avoidFold ?? true,
@@ -103,98 +95,324 @@ class CallParticipantsSpotlightView extends StatelessWidget {
 
         final fold = measurement.local?.inset(padding);
         if (fold == null) {
-          return _buildUnfolded(context, style, padding, spacing);
+          return _BarLayout(
+            view: this,
+            style: style,
+            padding: padding,
+            spacing: spacing,
+          );
         }
 
         return Padding(
           padding: padding,
-          child: LayoutBuilder(
-            builder: (context, constraints) => _buildFolded(
-              context,
-              style: style,
-              foldStyle: foldStyle,
-              fold: fold,
-              size: constraints.biggest,
-              spacing: spacing,
-            ),
+          child: _FoldLayout(
+            view: this,
+            style: style,
+            foldStyle: foldStyle,
+            fold: fold,
+            spacing: spacing,
           ),
         );
       },
     );
   }
+}
 
-  /// The speaker on one side of [fold] and everybody else on the other.
-  Widget _buildFolded(
-    BuildContext context, {
-    required _StreamCallParticipantsSpotlightStyleDefaults style,
-    required StreamFoldLayoutStyle? foldStyle,
-    required StreamLocalFold fold,
-    required Size size,
-    required double spacing,
-  }) {
-    final minTileSize = foldStyle?.minTileSize ?? style.barTileSize;
-    final regions = resolveFoldRegions(
-      size: size,
-      fold: fold,
-      gap: foldStyle?.foldGap ?? spacing,
-      minTileSize: minTileSize,
-      centerOnFold: foldStyle?.centerOnFold ?? true,
-      textDirection: Directionality.of(context),
-    );
+/// The speaker, filling the room they are given up to
+/// [maxAspectRatio], centred in the rest.
+class _Spotlight extends StatelessWidget {
+  const _Spotlight({required this.view, required this.maxAspectRatio});
 
-    switch (regions) {
-      case FoldRegionsSingle(:final rect):
-        return Stack(
-          children: [
-            Positioned.fromRect(
-              rect: rect,
-              child: _buildUnfolded(context, style, EdgeInsets.zero, spacing),
-            ),
-          ],
+  final CallParticipantsSpotlightView view;
+  final double maxAspectRatio;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final height = constraints.maxHeight;
+        // Fills the room the bar leaves, except that it never gets wider than
+        // the ratio allows — a view wider than that keeps the stage centred in
+        // it rather than stretching it.
+        final width = math.min(constraints.maxWidth, height * maxAspectRatio);
+
+        return Center(
+          child: SizedBox(
+            width: width,
+            height: height,
+            child: view.spotlightBuilder(context, view.call, view.spotlight),
+          ),
         );
-      case final FoldRegionsSplit split:
-        // The speaker stays on the side the bar layout puts them: a bar along
-        // the top or the left puts them after the fold.
-        final speakerFirst = !barAlignment.barComesFirst;
-        final (speakerRect, othersRect) = speakerFirst
-            ? (split.start, split.end)
-            : (split.end, split.start);
+      },
+    );
+  }
+}
 
-        return Stack(
-          children: [
-            Positioned.fromRect(
-              rect: speakerRect,
-              child: _buildSpotlight(context, style.maxSpotlightAspectRatio),
-            ),
-            if (participants.isNotEmpty)
-              Positioned.fromRect(
-                rect: othersRect,
-                child: _buildFoldedOthers(
-                  context,
-                  size: othersRect.size,
-                  axis: fold.axis,
-                  minTileSize: minTileSize,
-                  maxTileAspectRatio: style.maxSpotlightAspectRatio,
-                  spacing: spacing,
+/// The layout with no fold to avoid: the stage, and the bar along its edge.
+class _BarLayout extends StatelessWidget {
+  const _BarLayout({
+    required this.view,
+    required this.style,
+    required this.padding,
+    required this.spacing,
+  });
+
+  final CallParticipantsSpotlightView view;
+  final _StreamCallParticipantsSpotlightStyleDefaults style;
+  final EdgeInsets padding;
+  final double spacing;
+
+  @override
+  Widget build(BuildContext context) {
+    final alignment = view.barAlignment;
+    final isHorizontal = alignment.toAxis() == Axis.horizontal;
+
+    // The bar runs to the edge of the view along the axis it scrolls on, and
+    // carries the padding of that axis inside its list instead: a tile leaving
+    // the view should slide off the edge rather than stop short of it. Only
+    // the other axis insets the bar from outside.
+    final outer = isHorizontal
+        ? EdgeInsets.only(top: padding.top, bottom: padding.bottom)
+        : EdgeInsets.only(left: padding.left, right: padding.right);
+    final stagePadding = isHorizontal
+        ? EdgeInsets.only(left: padding.left, right: padding.right)
+        : EdgeInsets.only(top: padding.top, bottom: padding.bottom);
+
+    return Padding(
+      padding: outer,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // The stage is always a flex child, so it is measured the same way
+          // whether or not anybody is in the bar.
+          final children = <Widget>[
+            Expanded(
+              child: Padding(
+                padding: stagePadding,
+                child: _Spotlight(
+                  view: view,
+                  maxAspectRatio: style.maxSpotlightAspectRatio,
                 ),
               ),
-          ],
-        );
-    }
+            ),
+            if (view.participants.isNotEmpty) ...[
+              SizedBox.square(dimension: spacing),
+              _EdgeBar(
+                view: view,
+                tileSize: style.barTileSize,
+                spacing: spacing,
+                padding: padding,
+                constraints: constraints,
+                isHorizontal: isHorizontal,
+              ),
+            ],
+          ];
+
+          return Flex(
+            direction: isHorizontal ? Axis.vertical : Axis.horizontal,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: alignment.barComesFirst
+                ? children.reversed.toList()
+                : children,
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// The bar along the stage's edge, centred on the whole view while its tiles
+/// fit.
+class _EdgeBar extends StatelessWidget {
+  const _EdgeBar({
+    required this.view,
+    required this.tileSize,
+    required this.spacing,
+    required this.padding,
+    required this.constraints,
+    required this.isHorizontal,
+  });
+
+  final CallParticipantsSpotlightView view;
+
+  /// The bar's tile size before it is scaled to fit.
+  final Size tileSize;
+  final double spacing;
+  final EdgeInsets padding;
+  final BoxConstraints constraints;
+  final bool isHorizontal;
+
+  /// The most of the view the bar may take.
+  ///
+  /// Its tiles have a size of their own rather than a share of the view, so a
+  /// window short enough would otherwise leave the stage nothing. Past this
+  /// the tiles scale down with the view instead.
+  static const _maxBarFraction = 1 / 3;
+
+  @override
+  Widget build(BuildContext context) {
+    final tileSize = _scaledTileSize();
+    final tileExtent = isHorizontal ? tileSize.width : tileSize.height;
+    final viewport = isHorizontal
+        ? constraints.maxWidth
+        : constraints.maxHeight;
+
+    final tiles = view.participants.toList(growable: false);
+    final content = tiles.length * tileExtent + (tiles.length - 1) * spacing;
+
+    // Centred on the whole view while the tiles fit. Once they do not, the
+    // list falls back to the padding and the rest runs off both edges.
+    final slack = viewport.isFinite ? (viewport - content) / 2 : 0.0;
+    final (start, end) = isHorizontal
+        ? (padding.left, padding.right)
+        : (padding.top, padding.bottom);
+    final (listStart, listEnd) = (
+      math.max(start, slack),
+      math.max(end, slack),
+    );
+
+    return SizedBox(
+      width: isHorizontal ? constraints.maxWidth : tileSize.width,
+      height: isHorizontal ? tileSize.height : constraints.maxHeight,
+      child: _ParticipantsBar(
+        call: view.call,
+        participants: tiles,
+        participantBuilder: view.participantBuilder,
+        tileSize: tileSize,
+        spacing: spacing,
+        listPadding: isHorizontal
+            ? EdgeInsets.only(left: listStart, right: listEnd)
+            : EdgeInsets.only(top: listStart, bottom: listEnd),
+        isHorizontal: isHorizontal,
+      ),
+    );
   }
 
-  /// Everybody but the speaker, filling one side of a fold: a grid while its
-  /// tiles are at least [minTileSize], and a scrolling list of tiles that size
-  /// past that.
-  Widget _buildFoldedOthers(
-    BuildContext context, {
-    required Size size,
-    required Axis axis,
-    required Size minTileSize,
-    required double maxTileAspectRatio,
-    required double spacing,
-  }) {
-    final tiles = participants.toList(growable: false);
+  /// [tileSize], scaled down where it would leave the stage too little room.
+  Size _scaledTileSize() {
+    final available = isHorizontal
+        ? constraints.maxHeight
+        : constraints.maxWidth;
+    final extent = isHorizontal ? tileSize.height : tileSize.width;
+    assert(
+      extent > 0,
+      'A bar tile of zero or less hides every participant in the bar.',
+    );
+    if (!available.isFinite || extent <= 0) return tileSize;
+
+    final maxExtent = available * _maxBarFraction;
+    if (extent <= maxExtent) return tileSize;
+
+    return tileSize * (maxExtent / extent);
+  }
+}
+
+/// The speaker on one side of [fold] and everybody else on the other.
+class _FoldLayout extends StatelessWidget {
+  const _FoldLayout({
+    required this.view,
+    required this.style,
+    required this.foldStyle,
+    required this.fold,
+    required this.spacing,
+  });
+
+  final CallParticipantsSpotlightView view;
+  final _StreamCallParticipantsSpotlightStyleDefaults style;
+  final StreamFoldLayoutStyle? foldStyle;
+  final StreamLocalFold fold;
+  final double spacing;
+
+  @override
+  Widget build(BuildContext context) {
+    final minTileSize = foldStyle?.minTileSize ?? style.barTileSize;
+    final maxAspectRatio = style.maxSpotlightAspectRatio;
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final regions = resolveFoldRegions(
+          size: constraints.biggest,
+          fold: fold,
+          gap: foldStyle?.foldGap ?? spacing,
+          minTileSize: minTileSize,
+          centerOnFold: foldStyle?.centerOnFold ?? true,
+          textDirection: Directionality.of(context),
+        );
+
+        switch (regions) {
+          case FoldRegionsSingle(:final rect):
+            return Stack(
+              children: [
+                Positioned.fromRect(
+                  rect: rect,
+                  child: _BarLayout(
+                    view: view,
+                    style: style,
+                    padding: EdgeInsets.zero,
+                    spacing: spacing,
+                  ),
+                ),
+              ],
+            );
+
+          case final FoldRegionsSplit split:
+            // The speaker stays on the side the bar layout puts them: a bar
+            // along the top or the left puts them after the fold.
+            final (speakerRect, othersRect) = view.barAlignment.barComesFirst
+                ? (split.end, split.start)
+                : (split.start, split.end);
+
+            return Stack(
+              children: [
+                Positioned.fromRect(
+                  rect: speakerRect,
+                  child: _Spotlight(
+                    view: view,
+                    maxAspectRatio: maxAspectRatio,
+                  ),
+                ),
+                if (view.participants.isNotEmpty)
+                  Positioned.fromRect(
+                    rect: othersRect,
+                    child: _FoldedOthers(
+                      view: view,
+                      size: othersRect.size,
+                      axis: fold.axis,
+                      minTileSize: minTileSize,
+                      maxTileAspectRatio: maxAspectRatio,
+                      spacing: spacing,
+                    ),
+                  ),
+              ],
+            );
+        }
+      },
+    );
+  }
+}
+
+/// Everybody but the speaker, filling one side of a fold: a grid while its
+/// tiles are at least [minTileSize], and a scrolling list of tiles that size
+/// past that.
+class _FoldedOthers extends StatelessWidget {
+  const _FoldedOthers({
+    required this.view,
+    required this.size,
+    required this.axis,
+    required this.minTileSize,
+    required this.maxTileAspectRatio,
+    required this.spacing,
+  });
+
+  final CallParticipantsSpotlightView view;
+  final Size size;
+  final Axis axis;
+  final Size minTileSize;
+  final double maxTileAspectRatio;
+  final double spacing;
+
+  @override
+  Widget build(BuildContext context) {
+    final tiles = view.participants.toList(growable: false);
     final arrangement = solveParticipantGrid(
       StreamParticipantGridDetails(
         box: size,
@@ -214,20 +432,19 @@ class CallParticipantsSpotlightView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         spacing: spacing,
         children: [
-          for (var row = 0; row < arrangement.rows; row++)
+          for (final row in tiles.slices(arrangement.columns))
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               spacing: spacing,
               children: [
-                for (final participant
-                    in tiles
-                        .skip(
-                          row * arrangement.columns,
-                        )
-                        .take(arrangement.columns))
+                for (final participant in row)
                   SizedBox.fromSize(
                     size: arrangement.tileSize,
-                    child: participantBuilder(context, call, participant),
+                    child: view.participantBuilder(
+                      context,
+                      view.call,
+                      participant,
+                    ),
                   ),
               ],
             ),
@@ -243,184 +460,14 @@ class CallParticipantsSpotlightView extends StatelessWidget {
         : Size(size.width, size.width / minTileSize.aspectRatio);
 
     return _ParticipantsBar(
-      call: call,
+      call: view.call,
       participants: tiles,
-      participantBuilder: participantBuilder,
+      participantBuilder: view.participantBuilder,
       tileSize: tileSize,
       spacing: spacing,
       listPadding: EdgeInsets.zero,
       isHorizontal: scrollsHorizontally,
     );
-  }
-
-  /// The layout with no fold to avoid: the stage, and the bar along its edge.
-  Widget _buildUnfolded(
-    BuildContext context,
-    _StreamCallParticipantsSpotlightStyleDefaults style,
-    EdgeInsets padding,
-    double spacing,
-  ) {
-    final isHorizontal = barAlignment.toAxis() == Axis.horizontal;
-
-    // The bar runs to the edge of the view along the axis it scrolls on, and
-    // carries the padding of that axis inside its list instead: a tile leaving
-    // the view should slide off the edge rather than stop short of it. Only
-    // the other axis insets the bar from outside.
-    final outer = isHorizontal
-        ? EdgeInsets.only(top: padding.top, bottom: padding.bottom)
-        : EdgeInsets.only(left: padding.left, right: padding.right);
-    final stagePadding = isHorizontal
-        ? EdgeInsets.only(left: padding.left, right: padding.right)
-        : EdgeInsets.only(top: padding.top, bottom: padding.bottom);
-
-    return Padding(
-      padding: outer,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final stage = Expanded(
-            child: Padding(
-              padding: stagePadding,
-              child: _buildSpotlight(context, style.maxSpotlightAspectRatio),
-            ),
-          );
-
-          if (participants.isEmpty) {
-            // A flex of one, so the stage is measured the same way whether or
-            // not anybody is in the bar.
-            return isHorizontal
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [stage],
-                  )
-                : Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [stage],
-                  );
-          }
-
-          final tileSize = _resolveBarTileSize(
-            style.barTileSize,
-            constraints,
-            isHorizontal: isHorizontal,
-          );
-
-          final children = <Widget>[
-            stage,
-            SizedBox.square(dimension: spacing),
-            _buildParticipantsBar(
-              context,
-              tileSize: tileSize,
-              spacing: spacing,
-              padding: padding,
-              constraints: constraints,
-              isHorizontal: isHorizontal,
-            ),
-          ];
-
-          final ordered = barAlignment.barComesFirst
-              ? children.reversed.toList()
-              : children;
-
-          return isHorizontal
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: ordered,
-                )
-              : Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: ordered,
-                );
-        },
-      ),
-    );
-  }
-
-  Widget _buildSpotlight(BuildContext context, double maxAspectRatio) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final height = constraints.maxHeight;
-        // Fills the room the bar leaves, except that it never gets wider than
-        // the ratio allows — a view wider than that keeps the stage centred in
-        // it rather than stretching it.
-        final width = math.min(constraints.maxWidth, height * maxAspectRatio);
-
-        return Center(
-          child: SizedBox(
-            width: width,
-            height: height,
-            child: spotlightBuilder.call(context, call, spotlight),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildParticipantsBar(
-    BuildContext context, {
-    required Size tileSize,
-    required double spacing,
-    required EdgeInsets padding,
-    required BoxConstraints constraints,
-    required bool isHorizontal,
-  }) {
-    final tileExtent = isHorizontal ? tileSize.width : tileSize.height;
-    final viewport = isHorizontal
-        ? constraints.maxWidth
-        : constraints.maxHeight;
-
-    final tiles = participants.toList(growable: false);
-    final content = tiles.length * tileExtent + (tiles.length - 1) * spacing;
-
-    // Centred on the whole view while the tiles fit. Once they do not, the
-    // list falls back to the padding and the rest runs off both edges.
-    final slack = viewport.isFinite ? (viewport - content) / 2 : 0.0;
-    final (start, end) = isHorizontal
-        ? (padding.left, padding.right)
-        : (padding.top, padding.bottom);
-
-    return SizedBox(
-      width: isHorizontal ? constraints.maxWidth : tileSize.width,
-      height: isHorizontal ? tileSize.height : constraints.maxHeight,
-      child: _ParticipantsBar(
-        call: call,
-        participants: tiles,
-        participantBuilder: participantBuilder,
-        tileSize: tileSize,
-        spacing: spacing,
-        listPadding: isHorizontal
-            ? EdgeInsets.only(
-                left: math.max(start, slack),
-                right: math.max(end, slack),
-              )
-            : EdgeInsets.only(
-                top: math.max(start, slack),
-                bottom: math.max(end, slack),
-              ),
-        isHorizontal: isHorizontal,
-      ),
-    );
-  }
-
-  /// [tileSize], scaled down where it would leave the stage too little room.
-  Size _resolveBarTileSize(
-    Size tileSize,
-    BoxConstraints constraints, {
-    required bool isHorizontal,
-  }) {
-    final available = isHorizontal
-        ? constraints.maxHeight
-        : constraints.maxWidth;
-    final extent = isHorizontal ? tileSize.height : tileSize.width;
-    assert(
-      extent > 0,
-      'A bar tile of zero or less hides every participant in the bar.',
-    );
-    if (!available.isFinite || extent <= 0) return tileSize;
-
-    final maxExtent = available * _maxBarFraction;
-    if (extent <= maxExtent) return tileSize;
-
-    return tileSize * (maxExtent / extent);
   }
 }
 
