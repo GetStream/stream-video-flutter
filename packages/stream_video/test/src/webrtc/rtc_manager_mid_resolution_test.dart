@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 class _FakeMediaStreamTrack extends Fake implements rtc.MediaStreamTrack {
   _FakeMediaStreamTrack(this.id, this.kind);

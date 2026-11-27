@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_core/stream_core.dart';
 import 'package:stream_video/src/models/call_cid.dart';
@@ -6,6 +8,8 @@ import 'package:stream_video/src/telemetry/client_event_transport.dart';
 import 'package:stream_video/src/telemetry/media_frame_reporter.dart';
 import 'package:stream_video/src/webrtc/model/stats/rtc_inbound_rtp_audio_stream.dart';
 import 'package:stream_video/src/webrtc/model/stats/rtc_stats.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
+import '../../fixtures/fake_webrtc_engine.dart';
 
 void main() {
   final cid = StreamCallCid(cid: 'default:call123');
@@ -94,4 +98,94 @@ void main() {
     await flush();
     expect(captured, isEmpty);
   });
+
+  group('FirstVideoFrame', () {
+    late _WatchingEngine engine;
+
+    setUp(() {
+      engine = _WatchingEngine();
+      registerWebRtcEngine(engine);
+    });
+
+    test('fires once on the first frame and stops every watch', () async {
+      unawaited(
+        mfr.onRemoteVideoTrack(stream: _FakeStream(), trackId: 'track-v1'),
+      );
+      unawaited(
+        mfr.onRemoteVideoTrack(stream: _FakeStream(), trackId: 'track-v2'),
+      );
+      await flush();
+
+      engine.onFirstFrames.first();
+      engine.onFirstFrames.last();
+      await flush();
+
+      final event = captured.single;
+      expect(event['stage'], 'FirstVideoFrame');
+      expect(event['track_id'], 'track-v1');
+      expect(engine.watchers.map((w) => w.disposed), [true, true]);
+    });
+
+    test('two calls for one track start one watch', () async {
+      final gate = engine.gate = Completer<void>();
+      unawaited(
+        mfr.onRemoteVideoTrack(stream: _FakeStream(), trackId: 'track-v1'),
+      );
+      unawaited(
+        mfr.onRemoteVideoTrack(stream: _FakeStream(), trackId: 'track-v1'),
+      );
+      gate.complete();
+      await flush();
+
+      expect(engine.watchers, hasLength(1));
+    });
+
+    test('a watch that fails to dispose does not throw', () async {
+      unawaited(
+        mfr.onRemoteVideoTrack(stream: _FakeStream(), trackId: 'track-v1'),
+      );
+      await flush();
+      engine.watchers.single.disposeError = StateError('dispose failed');
+
+      mfr.dispose();
+      await flush();
+
+      expect(engine.watchers.single.disposed, isTrue);
+    });
+  });
+}
+
+class _FakeStream extends Fake implements MediaStream {}
+
+// ignore: subtype_of_sealed_class, a fake for the tests
+class _FakeWatcher implements FirstFrameWatcher {
+  bool disposed = false;
+  Error? disposeError;
+
+  @override
+  Future<void> dispose() async {
+    disposed = true;
+    if (disposeError case final error?) throw error;
+  }
+}
+
+// ignore: subtype_of_sealed_class, a fake for the tests
+class _WatchingEngine extends Fake implements WebRtcEngine {
+  final watchers = <_FakeWatcher>[];
+  final onFirstFrames = <void Function()>[];
+
+  /// When set, watches start once it completes.
+  Completer<void>? gate;
+
+  @override
+  Future<FirstFrameWatcher> watchFirstFrame(
+    MediaStream stream, {
+    required void Function() onFirstFrame,
+  }) async {
+    if (gate case final gate?) await gate.future;
+    onFirstFrames.add(onFirstFrame);
+    final watcher = _FakeWatcher();
+    watchers.add(watcher);
+    return watcher;
+  }
 }

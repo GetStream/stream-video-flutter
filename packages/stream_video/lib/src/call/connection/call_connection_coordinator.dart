@@ -2758,6 +2758,7 @@ class CallConnectionCoordinator {
       _call._ringing.stopRingStatePolling();
 
       await _call._media.cancelSfuStatsTimers();
+      _call._media.releaseBroadcastRequest();
 
       await _flushAndStopSfuStatsReporter();
       _cancelables.cancelAll();

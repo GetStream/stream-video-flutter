@@ -99,7 +99,7 @@ melos:
 
     analyze:
       run: |
-        melos exec -c 5 --ignore="*example*" -- \
+        melos exec -c 2 --ignore="*example*" -- \
           dart analyze --fatal-infos .
       description: |
         Run `dart analyze` in all packages.
@@ -107,7 +107,7 @@ melos:
 
     analyze:warning:
       run: |
-        melos exec -c 5 --ignore="*example*" -- \
+        melos exec -c 2 --ignore="*example*" -- \
           dart analyze --fatal-warnings .
       description: |
         Run `dart analyze` in all packages.
@@ -115,7 +115,7 @@ melos:
 
     analyze:error:
       run: |
-        melos exec -c 5 --ignore="*example*" -- \
+        melos exec -c 2 --ignore="*example*" -- \
           dart analyze --no-fatal-warnings .
       description: |
         Run `dart analyze` in all packages.
@@ -221,7 +221,7 @@ melos:
         dirExists: test
 
     test:flutter:
-      run: melos exec -c 4 --fail-fast -- "flutter test --coverage"
+      run: melos exec -c 2 --fail-fast -- "flutter test --coverage"
       description: Run Flutter tests for a specific package in this project.
       packageFilters:
         flutter: true

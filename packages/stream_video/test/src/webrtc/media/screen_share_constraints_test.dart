@@ -62,7 +62,7 @@ void main() {
 
       final video = subject.toMap()['video'] as Map<String, dynamic>;
 
-      expect(video['deviceId'], 'broadcast');
+      expect(video['deviceId'], 'broadcast-manual');
     });
 
     test('does not ask for the broadcast extension where there is none', () {

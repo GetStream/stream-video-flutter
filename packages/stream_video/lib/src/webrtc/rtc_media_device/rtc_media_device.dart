@@ -1,6 +1,9 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../stream_video.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
+
+import '../../logger/stream_log.dart';
+import '../webrtc_engine.dart';
 
 enum RtcMediaDeviceKind {
   audioInput('audioinput'),
@@ -53,43 +56,22 @@ class RtcMediaDevice extends Equatable {
     };
   }
 
-  /// The set of external audio ports that are considered external outputs
-  static const Set<String> iOSExternalPorts = {
-    'bluetoothA2DP',
-    'bluetoothLE',
-    'bluetoothHFP',
-    'carAudio',
-    'headphones',
-  };
+  /// Whether [isExternal] already warned that no engine is registered.
+  static bool _warnedNoEngine = false;
 
-  /// The set of external audio device types that are considered external outputs
-  static const Set<String> androidExternalAudioDeviceType = {
-    'bluetooth',
-    'wired-headset',
-  };
-
-  /// Whether this device represents an external audio output.
-  /// Checks if the device label contains any of the external port types.
+  /// Whether this device is an external audio device, such as a headset or a
+  /// car, as the WebRTC engine reports it. False while no engine is
+  /// registered.
   bool get isExternal {
-    if (groupId == null) {
+    ensureWebRtcEngine();
+    if (!WebRtcEngine.isRegistered) {
+      if (!_warnedNoEngine) {
+        _warnedNoEngine = true;
+        streamLog.w('SV:RtcMediaDevice', () => 'No WebRtcEngine registered');
+      }
       return false;
     }
-
-    if (CurrentPlatform.isIos) {
-      return iOSExternalPorts.any(
-        (port) => groupId!.toLowerCase().contains(
-          port.toLowerCase(),
-        ),
-      );
-    } else if (CurrentPlatform.isAndroid) {
-      return androidExternalAudioDeviceType.any(
-        (type) => groupId!.toLowerCase().contains(
-          type.toLowerCase(),
-        ),
-      );
-    } else {
-      return groupId!.toLowerCase().contains('bluetooth');
-    }
+    return WebRtcEngine.instance.audio.isExternalDevice(groupId);
   }
 
   bool get isSpeaker => id.toLowerCase() == 'speaker';

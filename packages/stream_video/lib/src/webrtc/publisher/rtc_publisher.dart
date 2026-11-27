@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
-import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../../../stream_video.dart';
 import '../../call/stats/trace_tag.dart';
@@ -1181,7 +1180,7 @@ class RtcPublisher {
   }
 
   Future<void> _updateTransceiver(
-    RTCRtpTransceiver transceiver,
+    rtc.RTCRtpTransceiver transceiver,
     RtcLocalTrack? track,
     SfuTrackType trackType, {
     RtcTrackPublishOptions? trackPublishOptions,
@@ -1198,7 +1197,7 @@ class RtcPublisher {
 
   /// Stops [transceiver] so its m-line becomes recyclable, reporting whether
   /// it actually stopped.
-  Future<bool> _stopTransceiver(RTCRtpTransceiver transceiver) async {
+  Future<bool> _stopTransceiver(rtc.RTCRtpTransceiver transceiver) async {
     try {
       await transceiver.stop();
       return true;

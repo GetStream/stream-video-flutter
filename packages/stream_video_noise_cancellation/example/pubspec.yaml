@@ -12,6 +12,8 @@ dependencies:
   flutter:
     sdk: flutter
   stream_video: ^2.0.0-alpha
+  # Registers the WebRTC engine stream_video uses.
+  stream_video_flutter: ^2.0.0-alpha
   stream_video_noise_cancellation: ^2.0.0-alpha
 
 dev_dependencies:

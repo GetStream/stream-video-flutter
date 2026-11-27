@@ -6,7 +6,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_video/src/coordinator/models/coordinator_models.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../../fixtures/webrtc_capabilities.dart';
 import '../../test_helpers.dart';

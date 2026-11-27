@@ -8,7 +8,7 @@ import 'package:stream_video/src/webrtc/media/capture_dimension.dart';
 import 'package:stream_video/src/webrtc/peer_connection.dart';
 import 'package:stream_video/src/webrtc/publisher/rtc_publisher.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../fixtures/rtc_manager_fakes.dart';
 

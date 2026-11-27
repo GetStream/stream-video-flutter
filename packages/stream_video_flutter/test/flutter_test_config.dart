@@ -3,8 +3,12 @@ import 'dart:io';
 
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_video_flutter/src/webrtc_engine_registrant.dart';
 
 Future<void> testExecutable(FutureOr<void> Function() testMain) async {
+  // What Flutter's plugin registrant does in an app.
+  StreamVideoFlutterEngineRegistrant.registerWith();
+
   final isRunningInCi =
       Platform.environment.containsKey('CI') ||
       Platform.environment.containsKey('GITHUB_ACTIONS');

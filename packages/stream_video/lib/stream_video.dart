@@ -7,9 +7,11 @@ library stream_video;
 
 export 'package:stream_core/stream_core.dart' hide LifecycleState, StreamLogger;
 
-/// End-to-end encryption, backed by the native `EncryptionManager`.
-export 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart'
+/// End-to-end encryption, backed by the registered `WebRtcEngine`, why an
+/// audio route changed, and the engine itself, for a test to register.
+export 'package:stream_webrtc_interface/stream_webrtc_interface.dart'
     show
+        AudioRouteChangeReason,
         E2eeEvent,
         E2eeEventType,
         E2eeKeyState,
@@ -18,7 +20,8 @@ export 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart'
         E2eeTrackType,
         E2eeUserKey,
         EncryptionAlgorithm,
-        EncryptionManager;
+        EncryptionManager,
+        WebRtcEngine;
 
 export 'open_api/video/coordinator/api.dart' hide RecordingType, Role, User;
 export 'open_api/video/coordinator_aliases.dart';

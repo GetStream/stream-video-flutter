@@ -9,7 +9,7 @@ import 'package:stream_video/src/webrtc/peer_connection_factory.dart';
 import 'package:stream_video/src/webrtc/rtc_manager.dart';
 import 'package:stream_video/src/webrtc/rtc_track/rtc_local_track.dart';
 import 'package:stream_video/src/webrtc/traced_peer_connection.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../call/fixtures/call_test_helpers.dart';
 import '../call/fixtures/data.dart';

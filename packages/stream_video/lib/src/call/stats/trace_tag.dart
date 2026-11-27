@@ -122,15 +122,6 @@ abstract class TraceTag {
   // is unrelated to [resumeAudioPlayout] above, which unmutes playout paused
   // via [pauseAudioPlayout].
   static const String resumeAudio = 'resumeAudio';
-  static const String mediaPlaybackPaused = 'mediaPlayback.paused';
-  static const String audioPlaybackBlocked = 'audioPlaybackBlocked';
-  static const String mediaPlaybackRecoverSuccess =
-      'mediaPlayback.recover.success';
-
-  /// Reported once when playback recovery has failed enough times in a row to
-  /// count as a sustained outage; retries continue at the capped interval.
-  static const String mediaPlaybackRecoverStalled =
-      'mediaPlayback.recover.stalled';
 
   /// Reported when every remote audio element is detached and given a fresh
   /// stream after a subscriber renegotiation brought in a new audio source.

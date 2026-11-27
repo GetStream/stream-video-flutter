@@ -15,6 +15,7 @@ import 'call/call.dart';
 import 'call/call_host.dart';
 import 'call/call_ringing_state.dart';
 import 'call/call_type.dart';
+import 'call/media/ios_broadcast_screen_share.dart';
 import 'coordinator/coordinator_client.dart';
 import 'coordinator/models/coordinator_events.dart';
 import 'coordinator/open_api/coordinator_client_open_api.dart';
@@ -36,6 +37,7 @@ import 'logger/impl/external_logger.dart';
 import 'logger/impl/tagged_logger.dart';
 import 'logger/logger_api.dart';
 import 'logger/stream_log.dart';
+import 'logger/webrtc_log_bridge.dart';
 import 'models/audio_configuration_policy.dart';
 import 'models/call_cid.dart';
 import 'models/call_metadata.dart';
@@ -62,6 +64,7 @@ import 'utils/none.dart';
 import 'utils/result.dart';
 import 'utils/subscriptions.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
+import 'webrtc/webrtc_engine.dart';
 
 const _tag = 'SV:Client';
 
@@ -280,6 +283,7 @@ class StreamVideo extends Disposable implements CallHost {
          allowMultipleActiveCalls: options.allowMultipleActiveCalls,
          multiCallAudioPolicy: options.multiCallAudioPolicy,
        ) {
+    ensureWebRtcEngine();
     _networkMonitor = networkMonitor ?? _options.networkMonitorSettings.build();
 
     _clientEventReporter = ClientEventReporter.create(
@@ -332,6 +336,9 @@ class StreamVideo extends Disposable implements CallHost {
       this,
     );
     _observeSystemManagedCalls();
+    if (setsUpMedia && CurrentPlatform.isIos) {
+      IosBroadcastScreenShare.observeBroadcasts();
+    }
 
     _state.user.value = user;
 
@@ -1085,6 +1092,7 @@ void _setupLogger(Priority logPriority, LogHandlerFunction logHandlerFunction) {
     ]);
 
     installCoreLogBridge(logPriority);
+    installWebRtcLogBridge();
   }
 }
 

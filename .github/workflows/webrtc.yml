@@ -58,6 +58,8 @@ jobs:
           filters: |
             relevant:
               - 'webrtc/**'
+              # A unit test reads the broadcast extension's notification names.
+              - 'packages/stream_video_screen_sharing/**'
               - 'pubspec.yaml'
               - 'pubspec.lock'
               - 'analysis_options.yaml'

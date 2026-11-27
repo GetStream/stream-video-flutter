@@ -1,6 +1,4 @@
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
-import 'package:stream_webrtc_interface/stream_webrtc_interface.dart'
-    as rtc_interface;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
 
 import '../../call/stats/trace_tag.dart';
 import '../../call/stats/tracer.dart';
@@ -18,13 +16,8 @@ export 'video_constraints.dart';
 abstract class MediaConstraints {
   const MediaConstraints({this.deviceId});
 
-  /// The deviceId of the capture device to use.
-  /// Available deviceIds can be obtained through `flutter_webrtc`:
-  /// <pre>
-  /// import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
-  ///
-  /// List<MediaDeviceInfo> devices = await rtc.navigator.mediaDevices.enumerateDevices();
-  /// </pre>
+  /// The deviceId of the capture device to use, as listed by
+  /// `RtcMediaDeviceNotifier.enumerateDevices`.
   final String? deviceId;
 
   // All subclasses must be able to report constraints
@@ -34,14 +27,14 @@ abstract class MediaConstraints {
   MediaConstraints copyWith();
 }
 
-extension MediaDevices on rtc_interface.MediaDevices {
+extension MediaDevices on rtc.MediaDevices {
   /// Captures media. When [nativeFactory] is non-null, the resulting tracks
   /// are pinned to that per-call native factory. When null, falls through to
   /// the global browser/webrtc entrypoints (used on web, which has no
   /// per-call factory concept).
   Future<rtc.MediaStream> getMedia(
     MediaConstraints constraints, {
-    rtc.NativePeerConnectionFactory? nativeFactory,
+    rtc.PeerConnectionFactory? nativeFactory,
   }) async {
     final constraintsMap = constraints.toMap();
     streamLog.i(
@@ -64,14 +57,14 @@ extension MediaDevices on rtc_interface.MediaDevices {
 
         stream = nativeFactory != null
             ? await nativeFactory.getDisplayMedia(constraintsMap)
-            : await rtc.navigator.mediaDevices.getDisplayMedia(constraintsMap);
+            : await getDisplayMedia(constraintsMap);
       } else {
         tag = TraceTag.getUserMedia;
         tracer?.trace('$tag.$sequence', constraintsMap);
 
         stream = nativeFactory != null
             ? await nativeFactory.getUserMedia(constraintsMap)
-            : await rtc.navigator.mediaDevices.getUserMedia(constraintsMap);
+            : await getUserMedia(constraintsMap);
       }
     } catch (e) {
       tracer?.trace('$tag.failure.$sequence', e.toString());

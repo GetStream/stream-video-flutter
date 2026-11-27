@@ -117,7 +117,7 @@ jobs:
   analyze:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
-    timeout-minutes: 25
+    timeout-minutes: 40
     # Goldens compare pixels, so this matches the image update_goldens.yml
     # renders them on.
     runs-on:

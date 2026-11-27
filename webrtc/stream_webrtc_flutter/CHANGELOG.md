@@ -1,6 +1,11 @@
 [Unreleased]
 
 * **Breaking:** [iOS/macOS] CocoaPods is no longer supported; enable Flutter's Swift Package Manager.
+* Added `NativeWebRtcEngine`, the `WebRtcEngine` of the native platforms.
+* The end-to-end encryption types moved to `stream_webrtc_interface`; this package still exports them.
+* **Breaking:** `EncryptionManager.create` needs a registered `WebRtcEngine` and throws `UnsupportedError` on web; `isSupported` is false without one.
+* The native engine's audio renderers do nothing; the platform plays remote audio.
+* Added `platformEvents.createSpeechActivityDetector`, which detects speech while the microphone is muted on Android, iOS, macOS and the browser.
 * **Breaking:** platform events are typed; listen to `platformEvents`. `eventStream` is no longer exported.
 * **Breaking:** `handleCallInterruptionCallbacks` is removed; call `platformEvents.enableInterruptionEvents` and listen to `platformEvents.onInterruption`. Apps using `stream_video` must not call `enableInterruptionEvents`, since the SDK does.
 * **Breaking:** `NativePeerConnectionFactory.create` takes a `PeerConnectionFactoryOptions` instead of a map. Options without a field of their own, such as `forceSWCodec`, go in its `additionalOptions`.
@@ -22,6 +27,9 @@
 * [Android] fix: `regainAndroidAudioFocus` requests audio focus again during a call whose focus WebRTC manages, and does nothing otherwise.
 * [Android] Added `Helper.setAndroidAudioFocusManaged`, to switch WebRTC's audio focus handling during a call; `manageAudioFocus` in `setAndroidAudioConfiguration` now switches it too.
 * [Android] Added `Helper.setAndroidAudioFocusHandledBySystem`, to tell WebRTC that the system, such as Telecom, manages the call's audio focus.
+* [iOS] The plugin reports the broadcast extension's start and stop as `onScreenSharingStarted` and `onScreenSharingStopped`.
+* [iOS] Added `presentiOSBroadcastPicker`, which shows the broadcast extension's picker without starting a capture.
+* [iOS] Added `stopiOSBroadcast`, which asks the broadcast extension to finish its broadcast.
 
 [4.0.1] - 2026.10.22
 
