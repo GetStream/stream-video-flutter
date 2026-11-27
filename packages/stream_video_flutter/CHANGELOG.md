@@ -229,7 +229,7 @@
 - [Android] A call runs in the foreground service of the audio policy it uses, `Call.audioConfigurationPolicy`, so a ringing call follows `StreamVideoOptions.ringingAudioConfigurationPolicy`. An app whose `audioConfigurationPolicy` is `AudioConfigurationPolicy.viewer` and whose ringing policy is `AudioConfigurationPolicy.broadcaster` rings its calls in the `phoneCall` service rather than the `mediaPlayback` one.
 - `LivestreamPlayer` follows the new design: the video sits in a `StreamLivestreamTile` under a `CallAppBar` with the call duration, fullscreen fills the screen, and the ended, backstage and waiting states are drawn on the tile's surface.
 - `LivestreamPlayer.videoFit` and `LivestreamContent.videoFit` default to `VideoFit.adaptive`. Pass `VideoFit.contain` to keep the previous fit.
-- `LivestreamPlayer` shows the ended screen when the call disconnects because it ended, if `onCallDisconnected` keeps it on screen.
+- `LivestreamPlayer` shows the ended screen when the call disconnects because it ended, and by default stays on it instead of closing the route. Without a `backButtonBuilder`, the ended screen shows a back button.
 - The ended screen shows `livestreamEndedTitle` and `livestreamEndedSubtitle`; `livestreamEndedStatus` is no longer shown.
 - Back leaves the `LivestreamPlayer`'s fullscreen before it leaves the screen.
 - `LivestreamPlayer` shows the hosts' avatars while none of them has video; `livestreamHostsUnavailableBuilder` now only shows while no host is in the call.

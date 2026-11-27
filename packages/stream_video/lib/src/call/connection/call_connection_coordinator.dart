@@ -1603,48 +1603,65 @@ class CallConnectionCoordinator {
     }
     // error event
     else if (sfuEvent is SfuErrorEvent) {
-      _session?.trace(TraceTag.sfuSocketError, {
-        'code': sfuEvent.error.code.name,
-        'error': sfuEvent.error.message,
-        'strategy': sfuEvent.error.reconnectStrategy.name,
-      });
+      await _onSfuError(sfuEvent, session: session);
+    }
+  }
 
-      // SFU_FULL, SFU_SHUTTING_DOWN, CALL_PARTICIPANT_LIMIT_REACHED are join
-      // errors. Although they may specify a `migrate` strategy, they should be
-      // handled by the join retry logic in the join flow with a REJOIN to a new SFU instead.
-      if (sfuEvent.error.code.isJoinErrorCode) {
+  /// Handles an error the SFU reports on [session]: a reconnect, a leave or
+  /// nothing, as the error asks.
+  Future<void> _onSfuError(
+    SfuErrorEvent event, {
+    required CallSession session,
+  }) async {
+    _session?.trace(TraceTag.sfuSocketError, {
+      'code': event.error.code.name,
+      'error': event.error.message,
+      'strategy': event.error.reconnectStrategy.name,
+    });
+
+    // The livestream went back to backstage. Anyone who may not stay there
+    // is disconnected as if the call ended; a user who stays follows the
+    // strategy the error names.
+    if (event.error.code == SfuErrorCode.liveEnded) {
+      _call._stateManager.sfuLiveEnded();
+      if (_call.state.value.status.isDisconnected) return;
+    }
+
+    // SFU_FULL, SFU_SHUTTING_DOWN, CALL_PARTICIPANT_LIMIT_REACHED are join
+    // errors. Although they may specify a `migrate` strategy, they should be
+    // handled by the join retry logic in the join flow with a REJOIN to a new SFU instead.
+    if (event.error.code.isJoinErrorCode) {
+      _call._logger.w(
+        () => '[onSfuEvent] skipping join error code: ${event.error.code}',
+      );
+      return;
+    }
+
+    switch (event.error.reconnectStrategy) {
+      case SfuReconnectionStrategy.rejoin:
+      case SfuReconnectionStrategy.fast:
+      case SfuReconnectionStrategy.migrate:
         _call._logger.w(
-          () => '[onSfuEvent] skipping join error code: ${sfuEvent.error.code}',
+          () =>
+              '[onSfuEvent] SFU error: ${event.error}, reconnect strategy: ${event.error.reconnectStrategy}',
         );
-        return;
-      }
 
-      switch (sfuEvent.error.reconnectStrategy) {
-        case SfuReconnectionStrategy.rejoin:
-        case SfuReconnectionStrategy.fast:
-        case SfuReconnectionStrategy.migrate:
-          _call._logger.w(
-            () =>
-                '[onSfuEvent] SFU error: ${sfuEvent.error}, reconnect strategy: ${sfuEvent.error.reconnectStrategy}',
-          );
-
-          await _reconnect(
-            sfuEvent.error.reconnectStrategy,
-            reconnectReason: 'sfu error: ${sfuEvent.error.message}',
-            trigger: _sfuErrorTrigger(sfuEvent.error, session: session),
-            source: session,
-          );
-          break;
-        case SfuReconnectionStrategy.disconnect:
-          _call._logger.w(
-            () => '[onSfuEvent] SFU error: ${sfuEvent.error}, leaving call',
-          );
-          await leave(reason: DisconnectReason.sfuError(sfuEvent.error));
-          break;
-        case SfuReconnectionStrategy.unspecified:
-          _call._logger.w(() => '[onSfuEvent] SFU error: ${sfuEvent.error}');
-          break;
-      }
+        await _reconnect(
+          event.error.reconnectStrategy,
+          reconnectReason: 'sfu error: ${event.error.message}',
+          trigger: _sfuErrorTrigger(event.error, session: session),
+          source: session,
+        );
+        break;
+      case SfuReconnectionStrategy.disconnect:
+        _call._logger.w(
+          () => '[onSfuEvent] SFU error: ${event.error}, leaving call',
+        );
+        await leave(reason: DisconnectReason.sfuError(event.error));
+        break;
+      case SfuReconnectionStrategy.unspecified:
+        _call._logger.w(() => '[onSfuEvent] SFU error: ${event.error}');
+        break;
     }
   }
 

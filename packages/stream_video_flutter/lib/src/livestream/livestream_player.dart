@@ -164,7 +164,8 @@ class LivestreamPlayer extends StatefulWidget {
 
   /// [WidgetBuilder] used to build a back or close button.
   ///
-  /// It is shown at the start of the app bar, which fullscreen hides.
+  /// It is shown at the start of the app bar, which fullscreen hides. When
+  /// null, the ended view shows a default back button that closes the player.
   final WidgetBuilder? backButtonBuilder;
 
   /// The builder used to create a custom widget when the livestream has ended.
@@ -213,7 +214,12 @@ class LivestreamPlayer extends StatefulWidget {
   /// If [showMultipleHosts] is false, only the first host is shown.
   final LivestreamHostsParticipantsFilter? livestreamHostsParticipantsFilter;
 
-  /// The action to perform when the call is disconnected. By default, it pops the current route.
+  /// The action to perform when the call is disconnected.
+  ///
+  /// By default, it leaves the call and pops the current route, except when
+  /// the call disconnects because it ended: then the player stays and shows
+  /// the ended view, with a back button unless [backButtonBuilder] builds
+  /// one.
   final void Function(CallDisconnectedProperties)? onCallDisconnected;
 
   /// The action to perform when the recording shown when livestream is ended is tapped.
@@ -407,6 +413,10 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
           );
 
           widget.onCallDisconnected?.call(disconnectedProperties);
+        } else if (status case CallStatusDisconnected(
+          reason: DisconnectReasonEnded(),
+        )) {
+          _logger.d(() => '[onDisconnected] call ended, staying');
         } else {
           _leave();
         }
@@ -497,6 +507,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
                   showRecordings: widget.showRecordingsWhenEnded,
                   onRecordingTapped: widget.onRecordingTapped,
                 ),
+                showBackButton: true,
               );
         }
 
@@ -623,6 +634,7 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
     BuildContext context, {
     required Widget body,
     bool fullscreen = false,
+    bool showBackButton = false,
   }) {
     final colorScheme = context.streamColorScheme;
     final spacing = context.streamSpacing;
@@ -639,7 +651,8 @@ class _LivestreamPlayerState extends State<LivestreamPlayer>
             ? null
             : CallAppBar(
                 call: call,
-                showBackButton: false,
+                showBackButton: showBackButton,
+                onBackPressed: () => unawaited(_leave()),
                 showLeaveCallAction: false,
                 leading: widget.backButtonBuilder?.call(context),
                 // Repaints once a second, so it doesn't repaint the video

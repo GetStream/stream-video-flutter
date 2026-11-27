@@ -597,4 +597,110 @@ void main() {
       expect(aroundControls.difference(aroundContent), isNotEmpty);
     },
   );
+
+  group('the call ends', () {
+    late FakeLivestreamCall call;
+
+    setUp(() {
+      // In backstage, with no `endedAt`: only the disconnect says it ended.
+      call = FakeLivestreamCall(liveCall.copyWith(isBackstage: true));
+      when(
+        () => call.leave(reason: any(named: 'reason')),
+      ).thenAnswer((_) async => const Result.success(none));
+    });
+
+    testWidgets('by default, it stays on the ended view', (tester) async {
+      await pumpWidget(
+        tester,
+        LivestreamPlayer(
+          call: call,
+          joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+          showRecordingsWhenEnded: false,
+        ),
+      );
+      expect(find.byType(LivestreamEndedContent), findsNothing);
+
+      call.callState = call.callState.copyWith(
+        status: CallStatus.disconnected(const DisconnectReason.ended()),
+      );
+      await tester.pump();
+
+      expect(find.byType(LivestreamEndedContent), findsOneWidget);
+      verifyNever(() => call.leave(reason: any(named: 'reason')));
+    });
+
+    testWidgets('the ended view has a back button that leaves', (
+      tester,
+    ) async {
+      await pumpWidget(
+        tester,
+        LivestreamPlayer(
+          call: call,
+          joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+          showRecordingsWhenEnded: false,
+        ),
+      );
+      final backButton = find.byTooltip('Back');
+      expect(backButton, findsNothing);
+
+      call.callState = call.callState.copyWith(
+        status: CallStatus.disconnected(const DisconnectReason.ended()),
+      );
+      await tester.pump();
+
+      await tester.tap(backButton);
+      await tester.pump();
+
+      verify(
+        () => call.leave(
+          reason: const DisconnectReason.left(initiator: LeaveInitiator.app),
+        ),
+      ).called(1);
+    });
+
+    testWidgets('a backButtonBuilder replaces the default back button', (
+      tester,
+    ) async {
+      await pumpWidget(
+        tester,
+        LivestreamPlayer(
+          call: call,
+          joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+          showRecordingsWhenEnded: false,
+          backButtonBuilder: (_) => const Text('custom back'),
+        ),
+      );
+
+      call.callState = call.callState.copyWith(
+        status: CallStatus.disconnected(const DisconnectReason.ended()),
+      );
+      await tester.pump();
+
+      expect(find.text('custom back'), findsOneWidget);
+      expect(find.byTooltip('Back'), findsNothing);
+    });
+
+    testWidgets('a custom onCallDisconnected gets the ended reason', (
+      tester,
+    ) async {
+      final disconnects = <CallDisconnectedProperties>[];
+      await pumpWidget(
+        tester,
+        LivestreamPlayer(
+          call: call,
+          joinBehaviour: LivestreamJoinBehaviour.manualJoin,
+          onCallDisconnected: disconnects.add,
+          showRecordingsWhenEnded: false,
+        ),
+      );
+
+      call.callState = call.callState.copyWith(
+        status: CallStatus.disconnected(const DisconnectReason.ended()),
+      );
+      await tester.pump();
+
+      expect(disconnects.single.reason, isA<DisconnectReasonEnded>());
+      verifyNever(() => call.leave(reason: any(named: 'reason')));
+    });
+  });
 }

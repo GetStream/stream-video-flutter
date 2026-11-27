@@ -176,6 +176,7 @@
   - A caller whose callee accepted keeps the call, even if that callee also shows up as having rejected.
 - An incoming ring is now dismissed when the caller cancels, even if another callee has already accepted. `CallMetadata.ringingStateFor` and `StreamVideo.ringing.getCallRingingState` report it as rejected rather than ringing.
 - `ClientState.removeActiveCall` removes only the `Call` it is given. Another `Call` instance for the same call stays active and watched. `ClientState.watchedCalls` likewise tracks each instance, so two `Call`s for the same call can both be in it. A `Call` watched through `get` or `getOrCreate` and then dropped without `leave()` or `dispose()` stays in it until the client is disposed; before, a screen that got the same call again each time it opened kept a single entry.
+- On a call with backstage enabled, a user with the `join-backstage` capability stays in the call in backstage when the livestream ends; everyone else leaves.
 
 ### 🐞 Fixed
 
