@@ -202,9 +202,9 @@ class RtcPublisher {
       final track = tracks[trackId];
       if (track == null) continue;
 
-      // Checked once this recapture's turn starts: a recapture still running
-      // has disabled the capture it replaces, and a track muted meanwhile
-      // stays muted.
+      // Checked once this recapture's turn starts: a recapture that ran
+      // before it and failed has disabled the capture it replaced, and a
+      // track muted meanwhile stays muted.
       // A track already capturing with these constraints is left alone, so
       // re-requesting the current profile does not restart the microphone.
       final recaptured = await recapture(
@@ -1595,7 +1595,7 @@ class RtcPublisher {
         return await _keepIfStillHeld(current, sending, tag);
       } catch (e, stk) {
         _logger.e(() => '$tag failed for $trackId: $e');
-        await _discardCapture(captured);
+        await _releaseFailedRecapture(current, captured);
         return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
       }
     });
@@ -1732,6 +1732,19 @@ class RtcPublisher {
     tracks[current.trackId] = held.copyWith(
       clonedTracks: [...held.clonedTracks, ...clones],
     );
+  }
+
+  /// Stops [captured], the new capture of a recapture that failed, if it got
+  /// that far, and drops the filters run on it.
+  ///
+  /// The old capture of [current] is released either way, so a track still
+  /// held reads, and is announced, as muted, and unmuting captures it again.
+  Future<void> _releaseFailedRecapture(
+    RtcLocalTrack current,
+    RtcLocalTrack? captured,
+  ) async {
+    await _discardCapture(captured);
+    if (_isHeld(current)) current.disable();
   }
 
   /// Keeps [updated] in place of [current] when [current] is still the held

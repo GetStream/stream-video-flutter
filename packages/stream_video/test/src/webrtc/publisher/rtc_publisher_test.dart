@@ -542,7 +542,7 @@ void main() {
         rtcPublisher.onLocalCapture = (held, {isCurrent}) async {
           return held.copyWith(mediaTrack: filtered);
         };
-        transceivers[1].sender.replaceTrackError = Exception('replace');
+        transceivers[1].sender.nextReplaceTrackError = Exception('replace');
 
         final result = await rtcPublisher.refilterTrack(SfuTrackType.audio);
 
@@ -748,7 +748,9 @@ void main() {
           track: localMic(),
         )).getDataOrNull()!;
         await rtcPublisher.muteTrack(trackId: track.trackId);
-        transceivers.single.sender.replaceTrackError = Exception('not sent');
+        transceivers.single.sender.nextReplaceTrackError = Exception(
+          'not sent',
+        );
 
         final unmuted = await rtcPublisher.unmuteTrack(trackId: track.trackId);
 
