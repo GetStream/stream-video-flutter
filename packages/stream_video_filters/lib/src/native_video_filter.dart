@@ -23,6 +23,10 @@ abstract base class NativeVideoFilter extends rtc.VideoFilter {
   /// Registers the processor natively.
   ///
   /// Throws when the processor cannot run on this device.
+  ///
+  /// The filters' registering, attaching and detaching wait for it, so it
+  /// has to complete, and must not call
+  /// [StreamVideoFilters.unregisterAllFilters], which waits for it too.
   @protected
   Future<void> register();
 

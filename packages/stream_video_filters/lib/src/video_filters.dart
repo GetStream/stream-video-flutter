@@ -112,6 +112,9 @@ final class CustomVideoFilterRegistration {
 /// Runs a frame processor the app registers natively under [effectName].
 ///
 /// [onRegister] registers it, and runs before the filter is first applied.
+/// Every filter's registering, attaching and detaching waits for it, so it
+/// has to complete, and must not call
+/// [StreamVideoFilters.unregisterAllFilters], which waits for it too.
 final class CustomVideoFilter extends NativeVideoFilter {
   CustomVideoFilter(this.effectName, {required this.onRegister});
 
