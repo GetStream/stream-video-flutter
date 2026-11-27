@@ -74,23 +74,26 @@ final class VideoModerationConfig {
   final VoidCallback? onClear;
 
   /// A copy of this config with the given fields replaced.
+  ///
+  /// The nullable fields take a function returning the new value, so they
+  /// can be cleared: `copyWith(filter: () => null)` removes the filter.
   VideoModerationConfig copyWith({
     bool? muteAudio,
     bool? muteVideo,
-    VideoFilter? filter,
-    Duration? duration,
-    VoidCallback? onApply,
-    void Function(String)? onWarning,
-    VoidCallback? onClear,
+    VideoFilter? Function()? filter,
+    Duration? Function()? duration,
+    VoidCallback? Function()? onApply,
+    void Function(String)? Function()? onWarning,
+    VoidCallback? Function()? onClear,
   }) {
     return VideoModerationConfig(
       muteAudio: muteAudio ?? this.muteAudio,
       muteVideo: muteVideo ?? this.muteVideo,
-      filter: filter ?? this.filter,
-      duration: duration ?? this.duration,
-      onApply: onApply ?? this.onApply,
-      onWarning: onWarning ?? this.onWarning,
-      onClear: onClear ?? this.onClear,
+      filter: filter != null ? filter() : this.filter,
+      duration: duration != null ? duration() : this.duration,
+      onApply: onApply != null ? onApply() : this.onApply,
+      onWarning: onWarning != null ? onWarning() : this.onWarning,
+      onClear: onClear != null ? onClear() : this.onClear,
     );
   }
 

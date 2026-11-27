@@ -109,7 +109,7 @@
 
 - `CallMetrics.subscriber.latency` holds the round-trip time of the connection this client subscribes on.
 - Added `Call.setVideoFilter` and `Call.setAudioFilter`, which filter the camera and microphone before they are sent, and report a filter that fails.
-- Added `VideoModerationConfig.copyWith`.
+- Added `VideoModerationConfig.copyWith`, whose nullable fields take a function so they can be cleared.
 - A moderation blur that cannot be applied turns the camera off.
 - `AudioConfigurationPolicy.toFactoryOptions` returns the settings a peer connection factory is built with under the policy.
 - Added `PushNotificationManager.systemManagedCallCids`, the calls whose audio focus the system manages, such as Android's Telecom; WebRTC leaves the focus of those calls alone.
