@@ -1,9 +1,11 @@
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_video/src/call/ringing/call_drop_if_alone.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/src/sfu/data/events/sfu_events.dart';
 import 'package:stream_video/src/sfu/data/models/sfu_participant.dart';
@@ -16,7 +18,9 @@ import 'fixtures/data.dart';
 
 // A ringing call ends itself when the last other participant leaves and
 // `CallPreferences.dropIfAloneInRingingFlow` is on. The check runs on the
-// participant list the call holds when the SFU's left event arrives.
+// participant list the call holds when the SFU's left event arrives, and again
+// once `CallDropIfAlone.gracePeriod` has passed, so a participant who rejoins
+// with a new session does not end the call.
 
 final _me = SampleCallData.defaultUserInfo.id;
 
@@ -58,11 +62,30 @@ void main() {
     registerMockFallbackValues();
   });
 
+  // The call runs in fake time, so the grace period passes without waiting.
+  // The test itself runs in real time: some futures the call awaits complete
+  // in the root zone, so [elapse] yields to the event loop between steps.
+  late FakeAsync fake;
   late BehaviorSubject<InternetStatus> internetStatus;
   late MockCallSession callSession;
   late MockPermissionsManager permissionsManager;
   late CallStateNotifier stateManager;
   late Call call;
+
+  const grace = CallDropIfAlone.gracePeriod;
+
+  Future<void> elapse(Duration duration) async {
+    const step = Duration(milliseconds: 100);
+    var left = duration;
+    do {
+      final next = left < step ? left : step;
+      fake.elapse(next);
+      left -= next;
+      for (var i = 0; i < 5; i++) {
+        await Future<void>.delayed(Duration.zero);
+      }
+    } while (left > Duration.zero);
+  }
 
   /// Joins a call that holds [participants], ringing or not.
   Future<void> joinWith({
@@ -70,26 +93,34 @@ void main() {
     bool ringing = true,
     bool dropIfAlone = true,
   }) async {
-    stateManager = CallStateNotifier(
-      CallState(
-        preferences: DefaultCallPreferences(
-          dropIfAloneInRingingFlow: dropIfAlone,
+    Result<None>? joinResult;
+    fake.run((_) {
+      stateManager = CallStateNotifier(
+        CallState(
+          preferences: DefaultCallPreferences(
+            dropIfAloneInRingingFlow: dropIfAlone,
+          ),
+          currentUserId: _me,
+          callCid: SampleCallData.defaultCid,
         ),
-        currentUserId: _me,
-        callCid: SampleCallData.defaultCid,
-      ),
-    );
+      );
 
-    call = createTestCall(
-      networkMonitor: setupMockInternetConnection(statusStream: internetStatus),
-      sessionFactory: setupMockSessionFactory(callSession: callSession),
-      streamVideo: setupMockCallHost(),
-      permissionManager: permissionsManager,
-      stateManager: stateManager,
-    );
+      call = createTestCall(
+        networkMonitor: setupMockInternetConnection(
+          statusStream: internetStatus,
+        ),
+        sessionFactory: setupMockSessionFactory(callSession: callSession),
+        streamVideo: setupMockCallHost(),
+        permissionManager: permissionsManager,
+        stateManager: stateManager,
+      );
 
-    final joinResult = await call.join();
-    expect(joinResult.isSuccess, isTrue);
+      unawaited(call.join().then((result) => joinResult = result));
+    });
+    for (var i = 0; i < 20 && joinResult == null; i++) {
+      await elapse(const Duration(milliseconds: 100));
+    }
+    expect(joinResult?.isSuccess, isTrue);
 
     stateManager.state = stateManager.state.copyWith(
       isRingingFlow: ringing,
@@ -97,25 +128,59 @@ void main() {
     );
   }
 
-  Future<void> emitLeft(SfuParticipant participant) async {
-    (callSession.events as MutableSharedEmitter<SfuEvent>).emit(
-      SfuParticipantLeftEvent(
-        callCid: SampleCallData.defaultCid.value,
-        participant: participant,
+  /// Has the SFU send a left event for [participant], then drops its session
+  /// from the participant list, as the session's event router does after the
+  /// call has seen the event.
+  Future<void> emitLeft(
+    SfuParticipant participant, {
+    String? callCid,
+  }) async {
+    fake.run(
+      (_) => (callSession.events as MutableSharedEmitter<SfuEvent>).emit(
+        SfuParticipantLeftEvent(
+          callCid: callCid ?? SampleCallData.defaultCid.value,
+          participant: participant,
+        ),
       ),
     );
+    await elapse(Duration.zero);
+    if (callCid != null) return;
 
-    // Let the async handler and the end flow run.
-    for (var i = 0; i < 10; i++) {
-      await Future<void>.delayed(Duration.zero);
-    }
+    stateManager.state = stateManager.state.copyWith(
+      callParticipants: [
+        for (final it in stateManager.state.callParticipants)
+          if (it.userId != participant.userId ||
+              it.sessionId != participant.sessionId)
+            it,
+      ],
+    );
+  }
+
+  /// Lets what the call started, such as an end or a leave, finish.
+  Future<void> settle() => elapse(const Duration(seconds: 1));
+
+  /// Lets the grace period run out, and the end flow run.
+  Future<void> elapseGrace() async {
+    await elapse(grace);
+    await settle();
+  }
+
+  /// Sets the participant list as the SFU's left and joined events, or a join
+  /// response, would.
+  void setParticipants(List<CallParticipantState> participants) {
+    stateManager.state = stateManager.state.copyWith(
+      callParticipants: participants,
+    );
   }
 
   setUp(() {
-    internetStatus = BehaviorSubject<InternetStatus>.seeded(
-      InternetStatus.connected,
-    );
-    callSession = setupMockCallSession();
+    fake = FakeAsync();
+    fake.run((_) {
+      internetStatus = BehaviorSubject<InternetStatus>.seeded(
+        InternetStatus.connected,
+      );
+      callSession = setupMockCallSession();
+    });
     permissionsManager = MockPermissionsManager();
     when(permissionsManager.endCall).thenAnswer(
       (_) async => const Result.success(none),
@@ -131,6 +196,7 @@ void main() {
       await joinWith(participants: [_participant(_me), _participant('bob')]);
 
       await emitLeft(_sfuParticipant('bob'));
+      await elapseGrace();
 
       verify(permissionsManager.endCall).called(1);
       expect(call.state.value.status.isDisconnected, isTrue);
@@ -140,6 +206,7 @@ void main() {
       await joinWith(participants: [_participant(_me), _participant('bob')]);
 
       await emitLeft(_sfuParticipant('bob'));
+      await elapseGrace();
 
       expect(
         (call.state.value.status as CallStatusDisconnected).reason,
@@ -164,6 +231,7 @@ void main() {
         await joinWith(participants: [_participant(_me), _participant('bob')]);
 
         await emitLeft(_sfuParticipant('bob'));
+        await elapseGrace();
 
         expect(
           (call.state.value.status as CallStatusDisconnected).reason,
@@ -185,6 +253,7 @@ void main() {
       );
 
       await emitLeft(_sfuParticipant('bob'));
+      await elapseGrace();
 
       verifyNever(permissionsManager.endCall);
       expect(call.state.value.status.isDisconnected, isFalse);
@@ -200,6 +269,7 @@ void main() {
       );
 
       await emitLeft(_sfuParticipant('bob'));
+      await elapseGrace();
 
       verifyNever(permissionsManager.endCall);
       expect(call.state.value.status.isDisconnected, isFalse);
@@ -217,6 +287,7 @@ void main() {
         );
 
         await emitLeft(_sfuParticipant('bob', sessionId: 'bob-tablet'));
+        await elapseGrace();
 
         verifyNever(permissionsManager.endCall);
         expect(call.state.value.status.isDisconnected, isFalse);
@@ -234,6 +305,7 @@ void main() {
         );
 
         await emitLeft(_sfuParticipant('bob', sessionId: 'bob-tablet'));
+        await elapseGrace();
 
         verify(permissionsManager.endCall).called(1);
         expect(call.state.value.status.isDisconnected, isTrue);
@@ -244,6 +316,7 @@ void main() {
       await joinWith(participants: [_participant(_me), _participant('bob')]);
 
       await emitLeft(_sfuParticipant(_me));
+      await elapseGrace();
 
       verifyNever(permissionsManager.endCall);
     });
@@ -252,6 +325,7 @@ void main() {
       await joinWith(participants: [_participant('bob')]);
 
       await emitLeft(_sfuParticipant('bob'));
+      await elapseGrace();
 
       verifyNever(permissionsManager.endCall);
     });
@@ -260,6 +334,7 @@ void main() {
       await joinWith(participants: [_participant(_me), _participant('bob')]);
 
       await emitLeft(_sfuParticipant('ghost'));
+      await elapseGrace();
 
       verifyNever(permissionsManager.endCall);
     });
@@ -271,6 +346,7 @@ void main() {
       );
 
       await emitLeft(_sfuParticipant('bob'));
+      await elapseGrace();
 
       verifyNever(permissionsManager.endCall);
       expect(call.state.value.status.isDisconnected, isFalse);
@@ -283,6 +359,7 @@ void main() {
       );
 
       await emitLeft(_sfuParticipant('bob'));
+      await elapseGrace();
 
       verifyNever(permissionsManager.endCall);
       expect(call.state.value.status.isDisconnected, isFalse);
@@ -291,15 +368,8 @@ void main() {
     test('ignores a left for another call', () async {
       await joinWith(participants: [_participant(_me), _participant('bob')]);
 
-      (callSession.events as MutableSharedEmitter<SfuEvent>).emit(
-        SfuParticipantLeftEvent(
-          callCid: 'default:another-call',
-          participant: _sfuParticipant('bob'),
-        ),
-      );
-      for (var i = 0; i < 10; i++) {
-        await Future<void>.delayed(Duration.zero);
-      }
+      await emitLeft(_sfuParticipant('bob'), callCid: 'default:another-call');
+      await elapseGrace();
 
       verifyNever(permissionsManager.endCall);
     });
@@ -315,6 +385,7 @@ void main() {
             participants: [_participant(_me), _participant('bob')],
           );
           await emitLeft(_sfuParticipant('bob'));
+          await elapseGrace();
         },
         (error, _) => uncaught.add(error),
       );
@@ -322,10 +393,137 @@ void main() {
       expect(uncaught, isEmpty);
       expect(
         logger.errors,
-        contains(
-          allOf(contains('SfuParticipantLeftEvent'), contains('boom')),
-        ),
+        contains(allOf(contains('[dropIfAlone]'), contains('boom'))),
       );
     });
+  });
+
+  group('grace period', () {
+    test('waits the whole grace period before ending', () async {
+      await joinWith(participants: [_participant(_me), _participant('bob')]);
+
+      await emitLeft(_sfuParticipant('bob'));
+
+      await elapse(grace - const Duration(milliseconds: 1));
+      verifyNever(permissionsManager.endCall);
+      expect(call.state.value.status.isDisconnected, isFalse);
+
+      await elapse(const Duration(milliseconds: 1));
+      verify(permissionsManager.endCall).called(1);
+      await settle();
+      expect(call.state.value.status.isDisconnected, isTrue);
+    });
+
+    test(
+      'keeps the call when the participant rejoins with a new session',
+      () async {
+        await joinWith(participants: [_participant(_me), _participant('bob')]);
+
+        // A rejoin: the old session leaves before the new one joins.
+        await emitLeft(_sfuParticipant('bob'));
+        await elapse(grace ~/ 2);
+        setParticipants([
+          _participant(_me),
+          _participant('bob', sessionId: 'bob-rejoined'),
+        ]);
+
+        await elapse(grace * 2);
+
+        verifyNever(permissionsManager.endCall);
+        expect(call.state.value.status.isDisconnected, isFalse);
+      },
+    );
+
+    test('counts the grace period from the last left', () async {
+      await joinWith(participants: [_participant(_me), _participant('bob')]);
+
+      await emitLeft(_sfuParticipant('bob'));
+      await elapse(grace ~/ 2);
+
+      // Back with a new session, and gone again.
+      setParticipants([
+        _participant(_me),
+        _participant('bob', sessionId: 'bob-rejoined'),
+      ]);
+      await emitLeft(_sfuParticipant('bob', sessionId: 'bob-rejoined'));
+
+      await elapse(grace - const Duration(milliseconds: 1));
+      verifyNever(permissionsManager.endCall);
+
+      await elapse(const Duration(milliseconds: 1));
+      verify(permissionsManager.endCall).called(1);
+    });
+
+    test('does not end a call left during the grace period', () async {
+      await joinWith(participants: [_participant(_me), _participant('bob')]);
+
+      await emitLeft(_sfuParticipant('bob'));
+      await elapse(grace ~/ 2);
+
+      fake.run((_) => unawaited(call.leave()));
+      await settle();
+      expect(call.state.value.status.isDisconnected, isTrue);
+      expect(
+        fake.pendingTimers.where((timer) => timer.duration == grace),
+        isEmpty,
+        reason: 'the leave cancels the pending check',
+      );
+
+      await elapse(grace * 2);
+
+      verifyNever(permissionsManager.endCall);
+      expect(
+        (call.state.value.status as CallStatusDisconnected).reason,
+        isA<DisconnectReasonLeft>(),
+      );
+    });
+
+    for (final (label, status) in [
+      ('reconnecting', const CallStatusReconnecting(attempt: 1)),
+      ('migrating', CallStatus.migrating()),
+      ('joining', CallStatus.joining()),
+    ]) {
+      test('waits while $label before checking again', () async {
+        await joinWith(participants: [_participant(_me), _participant('bob')]);
+
+        await emitLeft(_sfuParticipant('bob'));
+
+        stateManager.state = stateManager.state.copyWith(status: status);
+        await elapseGrace();
+        verifyNever(permissionsManager.endCall);
+
+        // Connected again, and still alone.
+        stateManager.state = stateManager.state.copyWith(
+          status: CallStatus.connected(),
+        );
+        await elapseGrace();
+        verify(permissionsManager.endCall).called(1);
+      });
+    }
+
+    test('keeps the call when the same session comes back', () async {
+      await joinWith(participants: [_participant(_me), _participant('bob')]);
+
+      await emitLeft(_sfuParticipant('bob'));
+      await elapse(grace ~/ 2);
+      setParticipants([_participant(_me), _participant('bob')]);
+
+      await elapse(grace * 2);
+
+      verifyNever(permissionsManager.endCall);
+      expect(call.state.value.status.isDisconnected, isFalse);
+    });
+
+    test(
+      'ends the call when the list dropped the session before its left event',
+      () async {
+        await joinWith(participants: [_participant(_me)]);
+
+        await emitLeft(_sfuParticipant('bob'));
+        await elapseGrace();
+
+        verify(permissionsManager.endCall).called(1);
+      },
+    );
   });
 }

@@ -2754,6 +2754,7 @@ class CallConnectionCoordinator {
       _call._closedCaptions.reset();
       await _call._audioInterruptions.reset();
       _call._moderation.cancelTimer();
+      _call._dropIfAlone.cancel();
 
       _call._ringing.stopRingStatePolling();
 
