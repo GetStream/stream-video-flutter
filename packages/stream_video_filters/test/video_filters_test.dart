@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:stream_video_filters/src/video_effect_registry.dart';
+import 'package:stream_video_filters/src/web/browser_effect.dart';
 import 'package:stream_video_filters/stream_video_filters.dart';
 import 'package:stream_video_filters/stream_video_filters_platform_interface.dart';
 import 'package:stream_webrtc_flutter/src/native/native_webrtc_capabilities.dart';
@@ -334,6 +335,29 @@ void main() {
     expect(
       CustomVideoFilter('a', onRegister: (_) async {}),
       CustomVideoFilter('a', onRegister: (_) async {}),
+    );
+  });
+
+  test('the filters run their browser counterpart on web', () {
+    expect(
+      [
+        for (final intensity in BlurIntensity.values)
+          (BackgroundBlurFilter(intensity: intensity).browserEffect
+                  as BrowserBackgroundBlur)
+              .level,
+      ],
+      ['low', 'medium', 'high'],
+    );
+    expect(
+      (VirtualBackgroundFilter('assets/bg.jpg').browserEffect
+              as BrowserBackgroundImage)
+          .imageUrl,
+      'assets/bg.jpg',
+    );
+    expect(FullFrameBlurFilter().browserEffect, isA<BrowserFullFrameBlur>());
+    expect(
+      CustomVideoFilter('a', onRegister: (_) async {}).browserEffect,
+      isNull,
     );
   });
 }
