@@ -159,8 +159,12 @@ class FakeSender extends Fake implements rtc.RTCRtpSender {
   /// The tracks of every `replaceTrack` call, in order.
   final replacedTracks = <rtc.MediaStreamTrack?>[];
 
+  /// When set, `replaceTrack` throws it, as on a closed peer connection.
+  Error? replaceTrackError;
+
   @override
   Future<void> replaceTrack(rtc.MediaStreamTrack? track) async {
+    if (replaceTrackError case final error?) throw error;
     replacedTracks.add(track);
     this.track = track;
   }

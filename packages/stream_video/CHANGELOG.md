@@ -184,6 +184,7 @@
 - [iOS] A rejoin shares a running screen share broadcast again instead of showing the broadcast picker.
 - [iOS] When the user chose the speaker or the receiver and the system moves audio between the two on its own, such as after a CallKit hold, the chosen output is put back instead of being replaced by the system's choice. A route to any other device, such as Bluetooth or AirPlay, is followed, and so is the system's route when the chosen output cannot be put back.
 - A muted microphone or camera is announced to the SFU as muted.
+- A microphone or camera that is being captured again, such as when switching the microphone on web, is no longer announced to the SFU as muted while the new capture is acquired. On web, joining with the microphone on could leave it muted at the SFU for the whole call, so nobody heard the user while their own controls showed the microphone on.
 - Joining a call retries sooner when the SFU connection closes before the join response.
 - On iOS, a call that defaults to the loudspeaker now starts on it, instead of switching to it after the microphone is already recording.
 - A fast reconnect no longer hangs when the network drops while it is reopening the SFU connection. The attempt fails after five seconds and the call rejoins, where before it stayed reconnecting until the operating system gave up on the connection.
