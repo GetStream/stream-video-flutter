@@ -21,8 +21,15 @@ abstract base class NativeVideoFilter extends rtc.VideoFilter {
   String get effectName;
 
   /// Registers the processor natively.
+  ///
+  /// Throws when the processor cannot run on this device.
   @protected
   Future<void> register();
+
+  /// The names whose processors [register] registers: [effectName], and any
+  /// others it registers along with it.
+  @protected
+  Iterable<String> get registeredEffectNames => [effectName];
 
   @override
   Future<rtc.MediaStreamFilterResult> apply(
@@ -38,17 +45,19 @@ abstract base class NativeVideoFilter extends rtc.VideoFilter {
     final trackId = stream.getVideoTracks().firstOrNull?.id;
     if (trackId == null) return rtc.MediaStreamFilterResult(stream);
 
-    if (!VideoEffectRegistry.isRegistered(effectName)) {
-      final generation = VideoEffectRegistry.generation;
-      await register();
-      VideoEffectRegistry.markRegistered(effectName, generation: generation);
-    }
-
-    final attachment = await VideoEffectRegistry.attach(trackId, effectName);
+    final attachment = await VideoEffectRegistry.run(() async {
+      if (!VideoEffectRegistry.isRegistered(effectName)) {
+        await register();
+        VideoEffectRegistry.markRegistered(registeredEffectNames);
+      }
+      return VideoEffectRegistry.attach(trackId, effectName);
+    });
 
     return rtc.MediaStreamFilterResult(
       stream,
-      stop: (_) => VideoEffectRegistry.detach(trackId, attachment),
+      stop: (_) => VideoEffectRegistry.run(
+        () => VideoEffectRegistry.detach(trackId, attachment),
+      ),
     );
   }
 

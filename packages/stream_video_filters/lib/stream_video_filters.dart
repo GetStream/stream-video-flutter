@@ -51,8 +51,10 @@ class StreamVideoFilters {
   /// attached to a track stays alive until that track is released. Where
   /// video effects are not supported, nothing is unregistered natively.
   Future<void> unregisterAllFilters() {
-    VideoEffectRegistry.forgetRegistrations();
-    if (!rtc.webRtcCapabilities.supportsVideoEffects) return Future.value();
-    return StreamVideoFiltersPlatform.instance.unregisterAllFilters();
+    return VideoEffectRegistry.run(() async {
+      VideoEffectRegistry.forgetRegistrations();
+      if (!rtc.webRtcCapabilities.supportsVideoEffects) return;
+      await StreamVideoFiltersPlatform.instance.unregisterAllFilters();
+    });
   }
 }

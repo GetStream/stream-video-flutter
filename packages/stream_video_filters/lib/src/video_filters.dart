@@ -38,6 +38,11 @@ final class BackgroundBlurFilter extends NativeVideoFilter {
   }
 
   @override
+  Iterable<String> get registeredEffectNames => [
+    for (final intensity in BlurIntensity.values) intensity.effectName,
+  ];
+
+  @override
   bool operator ==(Object other) =>
       other is BackgroundBlurFilter && other.intensity == intensity;
 

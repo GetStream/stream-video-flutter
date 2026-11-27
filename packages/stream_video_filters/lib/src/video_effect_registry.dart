@@ -8,32 +8,36 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 /// Each filter attaches its effect and detaches that same attachment. An
 /// effect attached more than once runs at the place it was attached last. A
 /// change that leaves a track's list of effects as it was is not sent.
+///
+/// Registering, attaching, detaching and unregistering run one at a time,
+/// through [run], so an unregister never lands between a registration and
+/// the attach that relies on it.
 @internal
 class VideoEffectRegistry {
   VideoEffectRegistry._();
 
   static final _effects = <String, List<_Attachment>>{};
   static final _registered = <String>{};
-  static var _generation = 0;
+  static Future<void> _queue = Future.value();
 
-  /// Changes each time the registrations are forgotten.
-  static int get generation => _generation;
+  /// Runs [action] once every action run before it has completed.
+  static Future<T> run<T>(Future<T> Function() action) {
+    final result = _queue.then((_) => action());
+    _queue = result.then<void>((_) {}, onError: (_) {});
+    return result;
+  }
 
   /// Whether the processor of [effect] is registered.
   static bool isRegistered(String effect) => _registered.contains(effect);
 
-  /// Records that the processor of [effect] is registered, unless the
-  /// registrations were forgotten since [generation].
-  static void markRegistered(String effect, {required int generation}) {
-    if (generation == _generation) _registered.add(effect);
+  /// Records that the processors of [effects] are registered.
+  static void markRegistered(Iterable<String> effects) {
+    _registered.addAll(effects);
   }
 
   /// Forgets every registration, so each filter registers its processor
   /// again the next time it is applied.
-  static void forgetRegistrations() {
-    _registered.clear();
-    _generation++;
-  }
+  static void forgetRegistrations() => _registered.clear();
 
   /// The effects attached to [trackId], in the order they run.
   static List<String> effectsOf(String trackId) {
@@ -89,7 +93,7 @@ class VideoEffectRegistry {
   static void reset() {
     _effects.clear();
     _registered.clear();
-    _generation = 0;
+    _queue = Future.value();
   }
 }
 

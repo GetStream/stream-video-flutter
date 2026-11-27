@@ -89,19 +89,39 @@ void main() {
         expect(attached.last, 'cam-1: ');
       });
 
-      test('registers again after an unregister during its register', () async {
+      test('an unregister during its register waits for the attach', () async {
         final filter = create();
         platform.registering = Completer<void>();
 
         final applying = filter.apply(_input('cam-1'));
         await pumpEventQueue();
-        await StreamVideoFilters().unregisterAllFilters();
+        final unregistering = StreamVideoFilters().unregisterAllFilters();
+        await pumpEventQueue();
+        expect(platform.unregisters, 0);
+
         platform.registering!.complete();
         platform.registering = null;
         await applying;
+        await unregistering;
         await filter.apply(_input('cam-2'));
 
+        expect(platform.unregisters, 1);
+        expect(attached.first, 'cam-1: ${filter.effectName}');
         expect(platform.registrations, [registration, registration]);
+      });
+
+      test('fails, attaching nothing, when it cannot register', () async {
+        final filter = create();
+        platform.registerError = PlatformException(code: 'UNSUPPORTED');
+
+        await expectLater(
+          filter.apply(_input('cam-1')),
+          throwsA(isA<PlatformException>()),
+        );
+        platform.registerError = null;
+        await filter.apply(_input('cam-2'));
+
+        expect(attached, ['cam-2: ${filter.effectName}']);
       });
 
       test('registers again after unregisterAllFilters', () async {
@@ -115,6 +135,17 @@ void main() {
       });
     });
   }
+
+  test('one blur registration covers every intensity', () async {
+    await BackgroundBlurFilter(
+      intensity: BlurIntensity.heavy,
+    ).apply(_input('cam-1'));
+    await BackgroundBlurFilter(
+      intensity: BlurIntensity.light,
+    ).apply(_input('cam-2'));
+
+    expect(platform.registrations, ['blur']);
+  });
 
   test('equal filters register their processor once', () async {
     await BackgroundBlurFilter().apply(_input('cam-1'));
@@ -340,6 +371,16 @@ class _FakeFiltersPlatform extends StreamVideoFiltersPlatform
   /// When set, a registration waits for it before completing.
   Completer<void>? registering;
 
+  /// When set, a registration throws it.
+  Exception? registerError;
+
+  Future<void> _register(String registration) async {
+    final error = registerError;
+    if (error != null) throw error;
+    registrations.add(registration);
+    await registering?.future;
+  }
+
   @override
   Future<bool?> isBackgroundEffectSupported() async {
     supportChecks++;
@@ -347,24 +388,16 @@ class _FakeFiltersPlatform extends StreamVideoFiltersPlatform
   }
 
   @override
-  Future<void> registerBlurEffectProcessors() async {
-    registrations.add('blur');
-    await registering?.future;
-  }
+  Future<void> registerBlurEffectProcessors() => _register('blur');
 
   @override
   Future<void> registerImageEffectProcessors({
     required String backgroundImageUrl,
-  }) async {
-    registrations.add('image $backgroundImageUrl');
-    await registering?.future;
-  }
+  }) => _register('image $backgroundImageUrl');
 
   @override
-  Future<void> registerFullFrameBlurEffectProcessor() async {
-    registrations.add('full frame blur');
-    await registering?.future;
-  }
+  Future<void> registerFullFrameBlurEffectProcessor() =>
+      _register('full frame blur');
 
   @override
   Future<void> unregisterAllFilters() async {
