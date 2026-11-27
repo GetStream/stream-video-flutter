@@ -517,7 +517,7 @@ extension RtcLocalCameraTrackHardwareExt on RtcLocalCameraTrack {
     required FacingMode fallback,
   }) {
     final facingMode = _detectFacingModeFromTrack(
-      mediaTrack,
+      capturedTrack,
       fallbackFacingMode: fallback,
       deviceLabel: device.label,
     );
