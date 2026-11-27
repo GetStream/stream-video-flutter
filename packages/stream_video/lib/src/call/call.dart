@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_core/stream_core.dart';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../globals.dart';
@@ -762,6 +763,7 @@ class Call {
   /// Applies and clears video moderation.
   late final _moderation = CallVideoModeration(
     stateManager: _stateManager,
+    setModerationFilter: _media.filters.setModerationFilter,
     currentUserId: () => _host.currentUser.id,
     setMicrophoneEnabled: setMicrophoneEnabled,
     setCameraEnabled: setCameraEnabled,
@@ -957,15 +959,45 @@ class Call {
   /// until the user manually re-enables them.
   void clearModerationBlur() => _moderation.clear();
 
-  /// Registers handlers for the native blur effect pipeline.
+  /// The filter applied to the camera, set through [setVideoFilter].
+  VideoFilter? get videoFilter => _media.videoFilter;
+
+  /// Applies [filter] to the camera, to the capture in use and to every later
+  /// one, before it is sent. Null removes it.
   ///
-  /// Called automatically by `StreamVideoEffectsManager` from
-  /// `stream_video_filters` when [VideoModerationConfig.applyBlur] is true.
+  /// With the camera off, the filter is applied when it is next turned on.
+  /// Fails when a filter on the camera fails to apply, and the previous
+  /// filter stays in place.
+  ///
+  /// A moderation blur set through [VideoModerationConfig.blur] runs after
+  /// it while active.
+  Future<Result<None>> setVideoFilter(VideoFilter? filter) =>
+      _media.setVideoFilter(filter);
+
+  /// The filter applied to the microphone, set through [setAudioFilter].
+  AudioFilter? get audioFilter => _media.audioFilter;
+
+  /// Applies [filter] to the microphone, to the capture in use and to every
+  /// later one, before it is sent. Null removes it.
+  ///
+  /// With the microphone off, the filter is applied when it is next turned
+  /// on. Fails when a filter on the microphone fails to apply, and the
+  /// previous filter stays in place.
+  Future<Result<None>> setAudioFilter(AudioFilter? filter) =>
+      _media.setAudioFilter(filter);
+
+  /// Runs this call's filters on [track], a capture made outside the call,
+  /// such as a lobby preview, returning the track to show and send. Publishing
+  /// that track later does not filter it again.
   @internal
-  void setModerationBlurEffectHandlers({
-    required void Function() onApply,
-    required void Function() onClear,
-  }) => _moderation.setBlurEffectHandlers(onApply: onApply, onClear: onClear);
+  Future<RtcLocalTrack> applyLocalFilters(RtcLocalTrack track) =>
+      _media.filters.apply(track);
+
+  /// Stops the filters run on [track] by [applyLocalFilters], once its
+  /// capture is stopped.
+  @internal
+  Future<void> releaseLocalFilters(RtcLocalTrack track) =>
+      _media.filters.release(track);
 
   @internal
   void traceSessionLog(String tag, dynamic data) {

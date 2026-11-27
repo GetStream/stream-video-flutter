@@ -3,6 +3,11 @@
 ### ⚠️ Breaking
 
 - [iOS] CocoaPods is no longer supported; enable Flutter's Swift Package Manager.
+- `StreamVideoEffectsManager` no longer applies the moderation blur; pass `FullFrameBlurFilter` to `VideoModerationConfig.blur(filter:)`.
+
+### ✅ Added
+
+- Added `FullFrameBlurFilter`, a `VideoFilter` that blurs the whole camera frame.
 
 ### 🐞 Fixed
 

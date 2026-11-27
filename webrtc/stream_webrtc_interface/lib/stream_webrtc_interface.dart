@@ -1,5 +1,6 @@
 library stream_webrtc_interface;
 
+export 'src/media_stream_filter.dart';
 export 'src/peer_connection_factory_options.dart';
 export 'src/platform_events.dart';
 export 'src/rtc_audio_renderer.dart';

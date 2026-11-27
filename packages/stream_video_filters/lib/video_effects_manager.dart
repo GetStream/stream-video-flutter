@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:stream_video/stream_video.dart';
-import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+
+import 'src/video_effect_registry.dart';
 import 'stream_video_filters.dart';
 
 const _tag = 'SVF:BackgroundFilters';
@@ -19,15 +20,7 @@ enum BlurIntensity {
 }
 
 class StreamVideoEffectsManager {
-  StreamVideoEffectsManager(this.call) {
-    if (call.state.value.preferences.videoModerationConfig.applyBlur) {
-      // ignore: invalid_use_of_internal_member
-      call.setModerationBlurEffectHandlers(
-        onApply: applyFullFrameBlurFilter,
-        onClear: disableAllFilters,
-      );
-    }
-  }
+  StreamVideoEffectsManager(this.call);
 
   static bool isBlurRegistered = false;
   static bool isFullFrameBlurRegistered = false;
@@ -220,7 +213,7 @@ class StreamVideoEffectsManager {
               await _registerBuiltInEffectsIfNeeded(names);
               final trackId = await _getTrackId();
               if (trackId != null) {
-                await rtc.setVideoEffects(trackId, names: names);
+                await VideoEffectRegistry.setManaged(trackId, names);
               }
             }).catchError((Object e, StackTrace stk) async {
               _logger.e(
@@ -243,10 +236,7 @@ class StreamVideoEffectsManager {
     }
 
     try {
-      await rtc.setVideoEffects(
-        trackId,
-        names: names,
-      );
+      await VideoEffectRegistry.setManaged(trackId, names);
     } catch (_) {
       // Nothing was attached: do not report the effects or re-apply them.
       if (identical(_appliedVideoEffects, names)) {
@@ -332,10 +322,7 @@ class StreamVideoEffectsManager {
         return;
       }
 
-      await rtc.setVideoEffects(
-        trackId,
-        names: [],
-      );
+      await VideoEffectRegistry.setManaged(trackId, const []);
     });
 
     // Also right away, so appliedVideoEffects reports the change at once.
@@ -418,7 +405,7 @@ class StreamVideoEffectsManager {
       _explicitTrackId = null;
       for (final trackId in trackIds) {
         try {
-          await rtc.setVideoEffects(trackId, names: []);
+          await VideoEffectRegistry.setManaged(trackId, const []);
         } on PlatformException catch (e, stk) {
           // Best effort: right after leave() the track's factory is already
           // gone and the detach fails. The registry is still cleaned up below.

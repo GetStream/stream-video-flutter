@@ -1,3 +1,6 @@
+// The lobby runs the call filters through an internal member.
+// ignore_for_file: invalid_use_of_internal_member
+
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -598,6 +601,78 @@ void main() {
       });
     });
 
+    group('video filter', () {
+      test('runs the call filters on the open preview', () async {
+        final tracks = fakeTracks();
+        final filtered = MockRtcLocalCameraTrack();
+        when(filtered.stop).thenAnswer((_) async {});
+        const filter = _NoopVideoFilter();
+        when(
+          () => call.setVideoFilter(filter),
+        ).thenAnswer((_) async => const Result.success(none));
+        final controller = build(openCameraTrack: (_) async => tracks.camera);
+        await controller.toggleCamera();
+        when(
+          () => call.applyLocalFilters(tracks.camera),
+        ).thenAnswer((_) async => filtered);
+
+        final result = await controller.setVideoFilter(filter);
+
+        verify(() => call.setVideoFilter(filter)).called(1);
+        expect(result.isSuccess, isTrue);
+        expect(controller.cameraTrack, filtered);
+      });
+
+      test('reports a filter that fails', () async {
+        const filter = _NoopVideoFilter();
+        when(
+          () => call.setVideoFilter(filter),
+        ).thenAnswer((_) async => failureWithError('filter failed'));
+        final controller = build();
+
+        final result = await controller.setVideoFilter(filter);
+
+        expect(result.isFailure, isTrue);
+      });
+
+      test('runs a newly opened preview through the call filters', () async {
+        final tracks = fakeTracks();
+        final filtered = MockRtcLocalCameraTrack();
+        when(filtered.stop).thenAnswer((_) async {});
+        when(
+          () => call.applyLocalFilters(tracks.camera),
+        ).thenAnswer((_) async => filtered);
+        final controller = build(openCameraTrack: (_) async => tracks.camera);
+
+        await controller.toggleCamera();
+
+        expect(controller.cameraTrack, filtered);
+      });
+
+      test('stops the preview when the filters reject it', () async {
+        final tracks = fakeTracks();
+        when(
+          () => call.applyLocalFilters(tracks.camera),
+        ).thenThrow(Exception('blur failed'));
+        final controller = build(openCameraTrack: (_) async => tracks.camera);
+
+        await controller.toggleCamera();
+
+        expect(controller.cameraTrack, isNull);
+        verify(tracks.camera.stop).called(1);
+      });
+
+      test('releases the filters of a closed preview', () async {
+        final tracks = fakeTracks();
+        final controller = build(openCameraTrack: (_) async => tracks.camera);
+        await controller.toggleCamera();
+
+        await controller.toggleCamera();
+
+        verify(() => call.releaseLocalFilters(tracks.camera)).called(1);
+      });
+    });
+
     group('switching camera', () {
       test('opens the newly picked device', () async {
         final tracks = fakeTracks();
@@ -927,4 +1002,13 @@ void main() {
       expect(() => devices.addListener(() {}), throwsFlutterError);
     });
   });
+}
+
+final class _NoopVideoFilter extends VideoFilter {
+  const _NoopVideoFilter();
+
+  @override
+  Future<MediaStreamFilterResult> apply(MediaStreamFilterInput input) async {
+    return MediaStreamFilterResult(input.stream);
+  }
 }

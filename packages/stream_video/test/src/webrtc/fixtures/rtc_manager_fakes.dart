@@ -132,7 +132,22 @@ class FakeMediaStreamTrack extends Fake implements rtc.MediaStreamTrack {
 }
 
 class FakeMediaStream extends Fake implements rtc.MediaStream {
+  FakeMediaStream([this.tracks = const []]);
+
+  final List<rtc.MediaStreamTrack> tracks;
+
   int disposeCount = 0;
+
+  @override
+  List<rtc.MediaStreamTrack> getTracks() => tracks;
+
+  @override
+  List<rtc.MediaStreamTrack> getAudioTracks() =>
+      tracks.where((it) => it.kind == 'audio').toList();
+
+  @override
+  List<rtc.MediaStreamTrack> getVideoTracks() =>
+      tracks.where((it) => it.kind == 'video').toList();
 
   @override
   String get id => 'fake-stream';
@@ -162,9 +177,26 @@ class FakeSender extends Fake implements rtc.RTCRtpSender {
   /// When set, `replaceTrack` throws it, as on a closed peer connection.
   Error? replaceTrackError;
 
+  /// Thrown, once, by the next `replaceTrack`.
+  Exception? nextReplaceTrackError;
+
+  /// The `replaceTrack` calls, counted from 0, that throw.
+  final failingReplaceTrackCalls = <int>{};
+
+  var _replaceTrackCalls = 0;
+
   @override
   Future<void> replaceTrack(rtc.MediaStreamTrack? track) async {
+    final call = _replaceTrackCalls++;
     if (replaceTrackError case final error?) throw error;
+    if (failingReplaceTrackCalls.contains(call)) {
+      throw Exception('replaceTrack $call');
+    }
+    final next = nextReplaceTrackError;
+    if (next != null) {
+      nextReplaceTrackError = null;
+      throw next;
+    }
     replacedTracks.add(track);
     this.track = track;
   }

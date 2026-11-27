@@ -5,6 +5,8 @@ import 'package:async/async.dart' show CancelableOperation;
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_core/stream_core.dart';
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart' as rtc;
+import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../../open_api/video/coordinator/api.dart' hide User;
@@ -36,6 +38,7 @@ import '../session/call_session.dart';
 import '../state/call_state_notifier.dart';
 import '../stats/sfu_stats_reporter.dart';
 import 'ios_broadcast_screen_share.dart';
+import 'local_media_filters.dart';
 
 /// Owns a call's connect options and its local media: the camera,
 /// microphone and screen share, and the audio and video devices.
@@ -150,6 +153,45 @@ class LocalMediaController {
   bool _audioOutputRoutedOnJoin = false;
 
   CallState get _state => _stateManager.callState;
+
+  /// The filter chains run on every local capture.
+  late final filters = LocalMediaFilters(logger: _logger)
+    ..onOutputChanged = _refilterSent;
+
+  /// Stops [track], a capture the call does not keep, and drops the filter
+  /// chain run on it.
+  Future<void> _stopAndRelease(RtcLocalTrack track) async {
+    await track.stop();
+    await filters.release(track);
+  }
+
+  Future<Result<None>> _refilterSent(SfuTrackType kind) async {
+    return await _session()?.refilterLocalTrack(kind) ??
+        const Result.success(none);
+  }
+
+  /// The app's camera filter.
+  VideoFilter? get videoFilter => filters.videoFilter;
+
+  /// The app's microphone filter.
+  AudioFilter? get audioFilter => filters.audioFilter;
+
+  /// Sets the app's camera filter, applied to the camera in use and to every
+  /// later capture. Null removes it.
+  Future<Result<None>> setVideoFilter(VideoFilter? filter) async {
+    final result = await filters.setVideoFilter(filter);
+    return result.map((_) => none);
+  }
+
+  /// Sets the app's microphone filter, applied to the microphone in use and
+  /// to every later capture. Null removes it.
+  Future<Result<None>> setAudioFilter(AudioFilter? filter) async {
+    final result = await filters.setAudioFilter(filter);
+    return result.map((_) => none);
+  }
+
+  /// Stops the filters on the local captures, before they are released.
+  Future<void> releaseFilters() => filters.stopAll();
 
   /// The options the next session starts with: an override set before the
   /// join, or the options the call resolved.
@@ -388,7 +430,7 @@ class LocalMediaController {
       // Stopped up front: a screen share picker can keep the apply waiting.
       for (final track in [...duplicates, ...inherited.values]) {
         _logger.v(() => '[applyConnectOptions] stopping unused $track');
-        await track.stop();
+        await _stopAndRelease(track);
       }
 
       // iOS: set the session before capture so WebRTC doesn't rebuild the
@@ -556,7 +598,7 @@ class LocalMediaController {
   Future<void> _stopUnpublished(Set<RtcLocalTrack> unpublished) async {
     for (final track in unpublished) {
       _logger.w(() => '[applyConnectOptions] stopping unpublished $track');
-      await track.stop();
+      await _stopAndRelease(track);
     }
   }
 
@@ -649,13 +691,13 @@ class LocalMediaController {
         result = await target.setLocalTrack(track);
       }
     } catch (_) {
-      await track.stop();
+      await _stopAndRelease(track);
       rethrow;
     }
 
     _logger.v(() => '[adoptInheritedTrack] completed: $result');
     if (result.isFailure) {
-      await track.stop();
+      await _stopAndRelease(track);
       return result;
     }
 
@@ -929,7 +971,7 @@ class LocalMediaController {
     }
 
     try {
-      await webRtcEngine.camera.setZoom(localTrack.mediaTrack, zoomLevel);
+      await webRtcEngine.camera.setZoom(_cameraTrackOf(localTrack), zoomLevel);
       return const Result.success(none);
     } catch (error, stackTrace) {
       _logger.e(() => '[setZoom] Failed to set zoom: $error');
@@ -957,14 +999,9 @@ class LocalMediaController {
     }
 
     try {
-      await webRtcEngine.camera.setFocusPoint(
-        localTrack.mediaTrack,
-        focusPoint,
-      );
-      await webRtcEngine.camera.setExposurePoint(
-        localTrack.mediaTrack,
-        focusPoint,
-      );
+      final camera = _cameraTrackOf(localTrack);
+      await webRtcEngine.camera.setFocusPoint(camera, focusPoint);
+      await webRtcEngine.camera.setExposurePoint(camera, focusPoint);
     } catch (error, stackTrace) {
       _logger.e(() => '[focus] Failed to set focus: $error');
       return failureWithError('Failed to set focus', stackTrace: stackTrace);
@@ -1504,4 +1541,9 @@ class LocalMediaController {
       return false;
     }
   }
+}
+
+/// The track the camera captures for [track], before any filter.
+rtc.MediaStreamTrack _cameraTrackOf(RtcTrack track) {
+  return track is RtcLocalTrack ? track.capturedTrack : track.mediaTrack;
 }

@@ -3,6 +3,7 @@
 --------------------------------------------
 [Unreleased]
 
+* Added `MediaStreamFilter`, `VideoFilter` and `AudioFilter`, filters that process a local stream before it is sent, with `MediaStreamFilterInput`, `MediaStreamFilterResult` and `MediaStreamFilterStopDetails`.
 * Added `webRtcLogHandler`, which receives the log records of the WebRTC packages.
 * Added `WebRtcEngine.webRtcVersion`.
 * **Breaking:** `AudioRoute.reasonCode` is replaced by a typed `reason`, an `AudioRouteChangeReason`.

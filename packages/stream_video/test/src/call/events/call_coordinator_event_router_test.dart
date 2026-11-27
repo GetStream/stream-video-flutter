@@ -3,6 +3,7 @@ import 'package:stream_video/src/call/events/call_closed_captions.dart';
 import 'package:stream_video/src/call/events/call_coordinator_event_router.dart';
 import 'package:stream_video/src/call/events/call_reactions.dart';
 import 'package:stream_video/src/call/events/call_video_moderation.dart';
+import 'package:stream_video/src/call/media/local_media_filters.dart';
 import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/stream_video.dart';
 
@@ -34,6 +35,8 @@ void main() {
             const Result.success(none),
         setCameraEnabled: ({required enabled}) async =>
             const Result.success(none),
+        setModerationFilter: (_) async =>
+            const Result.success(LocalFilterChange.applied),
         logger: taggedLogger(tag: 'test'),
       ),
       onPermissionRequest: (_) => calls.add('permissionRequest'),

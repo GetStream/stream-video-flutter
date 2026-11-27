@@ -356,7 +356,7 @@ class StreamLobbyController extends ChangeNotifier {
       }
       _cameraTrack = null;
       _notify();
-      await track.stop();
+      await _stopCamera(track);
       return;
     }
 
@@ -374,11 +374,13 @@ class StreamLobbyController extends ChangeNotifier {
     _notify();
     final requested = devices.selectedVideoInput?.id;
     try {
-      final track = await _openCameraTrackFor(requested);
+      final track = await _filterCamera(
+        await _openCameraTrackFor(requested),
+      );
       // See setMicrophoneEnabled.
       if (_disposed || !_cameraDesired) {
         _openingCamera = false;
-        await track.stop();
+        await _stopCamera(track);
         return false;
       }
 
@@ -401,6 +403,56 @@ class StreamLobbyController extends ChangeNotifier {
     return true;
   }
 
+  /// The call's camera filter, applied to the preview and to the camera the
+  /// call publishes.
+  VideoFilter? get videoFilter => call.videoFilter;
+
+  /// Applies [filter] to the preview and to the camera of the call. Null
+  /// removes it.
+  ///
+  /// The call publishes the preview without filtering it a second time.
+  /// Fails when a filter on the camera fails to apply.
+  Future<Result<None>> setVideoFilter(VideoFilter? filter) async {
+    final result = await call.setVideoFilter(filter);
+
+    // The preview shows what the chain now makes of the capture.
+    final track = _cameraTrack;
+    if (track != null) {
+      try {
+        // ignore: invalid_use_of_internal_member
+        final filtered = await call.applyLocalFilters(track);
+        if (_cameraTrack == track) {
+          _cameraTrack = filtered as RtcLocalCameraTrack;
+        }
+      } catch (e, stk) {
+        _logger.e(() => 'Error filtering the camera preview: $e\n$stk');
+        _notify();
+        return Result.failure(e.toVideoError(stk), stk);
+      }
+    }
+    _notify();
+    return result;
+  }
+
+  /// [track] as the call's filters make it. Stops [track] when they fail.
+  Future<RtcLocalCameraTrack> _filterCamera(RtcLocalCameraTrack track) async {
+    try {
+      // ignore: invalid_use_of_internal_member
+      final filtered = await call.applyLocalFilters(track);
+      return filtered as RtcLocalCameraTrack;
+    } catch (_) {
+      await track.stop();
+      rethrow;
+    }
+  }
+
+  /// Stops [track] and the filters run on it.
+  Future<void> _stopCamera(RtcLocalCameraTrack track) async {
+    await track.stop();
+    // ignore: invalid_use_of_internal_member
+    await call.releaseLocalFilters(track);
+  }
+
   /// Reopens the preview on the newly picked camera, reporting whether it
   /// ended up there.
   ///
@@ -417,7 +469,7 @@ class StreamLobbyController extends ChangeNotifier {
     _cameraTrack = null;
     _notify();
     try {
-      await track.stop();
+      await _stopCamera(track);
     } catch (e, stk) {
       // Failing to stop the old track must not cost the user the new one.
       _logger.e(() => 'Error stopping the camera track: $e\n$stk');
@@ -631,9 +683,12 @@ class StreamLobbyController extends ChangeNotifier {
     _microphoneTrack?.stop().onError((e, stk) {
       _logger.e(() => 'Error stopping the microphone track: $e\n$stk');
     });
-    _cameraTrack?.stop().onError((e, stk) {
-      _logger.e(() => 'Error stopping the camera track: $e\n$stk');
-    });
+    final cameraTrack = _cameraTrack;
+    if (cameraTrack != null) {
+      _stopCamera(cameraTrack).onError((e, stk) {
+        _logger.e(() => 'Error stopping the camera track: $e\n$stk');
+      });
+    }
     _microphoneTrack = null;
     _cameraTrack = null;
   }

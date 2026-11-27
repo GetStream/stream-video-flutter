@@ -32,6 +32,24 @@ typedef OnLocalTrackMuted = void Function(RtcLocalTrack track, bool muted);
 /// {@endtemplate}
 typedef OnLocalTrackPublished = void Function(RtcLocalTrack track);
 
+/// {@template OnLocalCapture}
+/// Called with every new local capture before it is sent, returning the
+/// track to send in its place. Throws when the capture must not be sent.
+///
+/// [isCurrent] says whether the capture still replaces the one held under its
+/// id.
+/// {@endtemplate}
+typedef OnLocalCapture =
+    Future<RtcLocalTrack> Function(
+      RtcLocalTrack track, {
+      bool Function()? isCurrent,
+    });
+
+/// {@template OnLocalCaptureReleased}
+/// Called with a local track once its capture is stopped.
+/// {@endtemplate}
+typedef OnLocalCaptureReleased = Future<void> Function(RtcLocalTrack track);
+
 final _logger = taggedLogger(tag: 'SV:RtcPublisher');
 
 /// How long [RtcPublisher.getAnnouncedTracks] waits for in-flight transceiver
@@ -122,8 +140,17 @@ class RtcPublisher {
   /// The recapture running for each track id.
   final _recaptures = <String, Completer<void>>{};
 
+  /// The publishes running, by track type.
+  final _publishes = <SfuTrackType, Set<Completer<void>>>{};
+
   OnLocalTrackMuted? onLocalTrackMuted;
   OnLocalTrackPublished? onLocalTrackPublished;
+
+  /// {@macro OnLocalCapture}
+  OnLocalCapture? onLocalCapture;
+
+  /// {@macro OnLocalCaptureReleased}
+  OnLocalCaptureReleased? onLocalCaptureReleased;
 
   /// Runs [create] as the single acquire-and-publish in flight for
   /// [trackType], returning the already-running one when there is one.
@@ -259,6 +286,22 @@ class RtcPublisher {
       await track.stopClones();
     } else {
       await track.stop();
+      await _releaseCapture(track);
+    }
+  }
+
+  /// Stops [track], a capture that is not sent, and reports it released.
+  Future<void> _discardCapture(RtcLocalTrack? track) async {
+    if (track == null) return;
+    await track.stop();
+    await _releaseCapture(track);
+  }
+
+  Future<void> _releaseCapture(RtcLocalTrack track) async {
+    try {
+      await onLocalCaptureReleased?.call(track);
+    } catch (e, stk) {
+      _logger.w(() => '[releaseCapture] failed for ${track.trackId}: $e\n$stk');
     }
   }
 
@@ -702,6 +745,7 @@ class RtcPublisher {
     }
 
     await acquired.stop();
+    await _releaseCapture(acquired);
   }
 
   /// Publishes a microphone or screen share audio track.
@@ -752,18 +796,54 @@ class RtcPublisher {
     }
   }
 
-  /// Publishes [track] on every publish option of its type and keeps it.
+  /// Publishes what the local media filters make of [captured] on every
+  /// publish option of its type and keeps it. A capture the filters reject is
+  /// stopped and fails.
   ///
   /// A track with the local prefix gets the publisher id. A track type
   /// without a publish option fails, and so does a publish that cannot send
   /// on one of them or that is still running when disposing starts: each
   /// stops the track and keeps nothing.
+  ///
+  /// A filter change of the track waits until the publish is done, see
+  /// [refilterTrack].
   Future<Result<RtcLocalTrack>> _publish(
-    RtcLocalTrack track, {
+    RtcLocalTrack captured, {
     required String tag,
     RtcTrackPublishOptions Function()? trackPublishOptions,
     Future<void> Function(RtcLocalTrack track)? beforeSend,
   }) async {
+    final trackType = captured.trackType;
+    final done = Completer<void>();
+    final running = _publishes.putIfAbsent(trackType, () => {})..add(done);
+    try {
+      return await _filterAndPublish(
+        captured,
+        tag: tag,
+        trackPublishOptions: trackPublishOptions,
+        beforeSend: beforeSend,
+      );
+    } finally {
+      running.remove(done);
+      if (running.isEmpty) _publishes.remove(trackType);
+      done.complete();
+    }
+  }
+
+  Future<Result<RtcLocalTrack>> _filterAndPublish(
+    RtcLocalTrack captured, {
+    required String tag,
+    RtcTrackPublishOptions Function()? trackPublishOptions,
+    Future<void> Function(RtcLocalTrack track)? beforeSend,
+  }) async {
+    final RtcLocalTrack track;
+    try {
+      track = await _filterCapture(captured);
+    } catch (e, stk) {
+      _logger.e(() => '$tag filtering failed, not sent: $e');
+      await captured.stop();
+      return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
+    }
     final registered = track.trackIdPrefix == kLocalTrackIdPrefix
         ? track.copyWith(trackIdPrefix: publisherId)
         : track;
@@ -1263,6 +1343,7 @@ class RtcPublisher {
     } else if (track.stopTrackOnMute) {
       // Releases the track and stops the permission indicator.
       await track.stop();
+      await _releaseCapture(track);
     }
 
     onLocalTrackMuted?.call(track, true);
@@ -1484,8 +1565,12 @@ class RtcPublisher {
 
       RtcLocalTrack? captured;
       try {
-        var sending = captured = await current.recapture(
+        captured = await current.recapture(
           mediaConstraints: constraintsFor?.call(current),
+        );
+        var sending = captured = await _filterCapture(
+          captured,
+          isCurrent: () => _isHeld(current),
         );
 
         // Sender by sender, each only while the track is still held, so a
@@ -1516,8 +1601,141 @@ class RtcPublisher {
     });
   }
 
+  /// [track] as [onLocalCapture] filters it. Throws when it must not be
+  /// sent.
+  Future<RtcLocalTrack> _filterCapture(
+    RtcLocalTrack track, {
+    bool Function()? isCurrent,
+  }) async {
+    final filter = onLocalCapture;
+    if (filter == null) return track;
+    return filter(track, isCurrent: isCurrent);
+  }
+
+  /// Sends what [onLocalCapture] now makes of the held track of [trackType]
+  /// on every sender that carried it, and keeps it. Does nothing when no
+  /// such track is held, or the result is the track already sent. A publish
+  /// of the track that is running finishes first.
+  Future<Result<None>> refilterTrack(SfuTrackType trackType) async {
+    if (_isPublishing(trackType)) await _publishesOf(trackType);
+    final held = getPublisherTrackByType(trackType);
+    if (held == null) return const Result.success(none);
+    final trackId = held.trackId;
+
+    return _oneRecaptureAtATime(trackId, () async {
+      // A publish that started while this waited for a recapture.
+      if (_isPublishing(trackType)) await _publishesOf(trackType);
+      final current = tracks[trackId];
+      if (current == null) return const Result.success(none);
+
+      RtcLocalTrack? sending;
+      try {
+        final filtered = await _filterCapture(current);
+        if (identical(filtered.mediaTrack, current.mediaTrack)) {
+          return const Result.success(none);
+        }
+
+        final out = sending = await _sendWhileHeld(current, filtered);
+        if (!current.mediaTrack.enabled) out.disable();
+
+        if (!_isHeld(current)) {
+          _logger.w(() => '[refilterTrack] $trackId is no longer held');
+          await out.stopClones();
+          return failureWithError(
+            'Track was unpublished while it was filtered',
+          );
+        }
+
+        await current.stopClones();
+        tracks[trackId] = out.copyWith(
+          stopTrackOnMute: current.stopTrackOnMute,
+        );
+        return const Result.success(none);
+      } catch (e, stk) {
+        _logger.e(() => '[refilterTrack] failed for $trackId: $e');
+        await sending?.stopClones();
+        return Result.failure(StreamVideoExceptions.compose(e, stk), stk);
+      }
+    });
+  }
+
+  /// Waits until no publish of [trackType] is running. A publish sends what
+  /// the filters made of its capture then, so a filter change refilters the
+  /// track the publish keeps.
+  Future<void> _publishesOf(SfuTrackType trackType) async {
+    while (_isPublishing(trackType)) {
+      await Future.wait([
+        for (final publish in _publishes[trackType]!) publish.future,
+      ]);
+    }
+  }
+
+  bool _isPublishing(SfuTrackType trackType) =>
+      _publishes[trackType]?.isNotEmpty ?? false;
+
+  /// Sends [filtered] on every sender that carries [current]'s track, for as
+  /// long as [current] is held, and returns it with the clones the senders
+  /// made. When a send throws, sends [current] again on the senders that
+  /// switched and stops [filtered]'s clones.
+  Future<RtcLocalTrack> _sendWhileHeld(
+    RtcLocalTrack current,
+    RtcLocalTrack filtered,
+  ) async {
+    var out = filtered.copyWith(clonedTracks: const []);
+    final clones = <rtc.MediaStreamTrack>[];
+    final switched = <rtc.RTCRtpTransceiver>[];
+    final transceivers = transceiversManager
+        .getTransceiversForTrack(current.trackId)
+        .toList();
+    try {
+      for (final transceiver in transceivers) {
+        if (!_isHeld(current)) break;
+        final sent = await out.sendOn([transceiver]);
+        switched.add(transceiver);
+        clones.addAll(sent.clonedTracks);
+        out = out.copyWith(clonedTracks: [...clones]);
+      }
+    } catch (_) {
+      await _sendAgain(current, switched);
+      await out.stopClones();
+      rethrow;
+    }
+    return out;
+  }
+
+  /// Sends [current] again on each of [transceivers] while it is held, and
+  /// keeps the clones it made with it. A sender that fails keeps the other
+  /// senders' clones.
+  Future<void> _sendAgain(
+    RtcLocalTrack current,
+    List<rtc.RTCRtpTransceiver> transceivers,
+  ) async {
+    final clones = <rtc.MediaStreamTrack>[];
+    for (final transceiver in transceivers) {
+      if (!_isHeld(current)) break;
+      try {
+        final sent = await current.sendOn([transceiver]);
+        clones.addAll(sent.clonedTracks);
+      } catch (e) {
+        _logger.e(
+          () => '[refilterTrack] failed to send ${current.trackId} again: $e',
+        );
+      }
+    }
+    if (clones.isEmpty) return;
+
+    final held = tracks[current.trackId];
+    if (held == null || !identical(held.mediaTrack, current.mediaTrack)) {
+      await current.copyWith(clonedTracks: clones).stopClones();
+      return;
+    }
+    tracks[current.trackId] = held.copyWith(
+      clonedTracks: [...held.clonedTracks, ...clones],
+    );
+  }
+
   /// Stops [captured], the new capture of a recapture that failed, if it got
-  /// that far.
+  /// that far, and drops the filters run on it.
   ///
   /// The old capture of [current] is released either way, so a track still
   /// held reads, and is announced, as muted, and unmuting captures it again.
@@ -1525,7 +1743,7 @@ class RtcPublisher {
     RtcLocalTrack current,
     RtcLocalTrack? captured,
   ) async {
-    await captured?.stop();
+    await _discardCapture(captured);
     if (_isHeld(current)) current.disable();
   }
 
@@ -1541,7 +1759,7 @@ class RtcPublisher {
     if (held == null || !identical(held.mediaTrack, current.mediaTrack)) {
       _logger.w(() => '$tag ${current.trackId} is no longer held');
       if (!identical(updated.mediaTrack, current.mediaTrack)) {
-        await updated.stop();
+        await _discardCapture(updated);
       }
       return failureWithError('Track was unpublished while it was changed');
     }
@@ -1647,6 +1865,8 @@ class RtcPublisher {
 
     onLocalTrackMuted = null;
     onLocalTrackPublished = null;
+    onLocalCapture = null;
+    onLocalCaptureReleased = null;
 
     await pc?.dispose();
   }

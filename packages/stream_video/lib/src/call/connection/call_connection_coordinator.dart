@@ -866,6 +866,9 @@ class CallConnectionCoordinator {
         clientPublishOptions:
             _call._stateManager.callState.preferences.clientPublishOptions,
       );
+      session
+        ..onLocalCapture = _call._media.filters.apply
+        ..onLocalCaptureReleased = _call._media.filters.release;
       // The teardown has already released the sessions it knows about.
       if (_isLeftOrLeaving) {
         _call._logger.w(
@@ -2759,6 +2762,8 @@ class CallConnectionCoordinator {
 
       await _call._media.cancelSfuStatsTimers();
       _call._media.releaseBroadcastRequest();
+      // Before the session stops the captures the filters run on.
+      await _call._media.releaseFilters();
 
       await _flushAndStopSfuStatsReporter();
       _cancelables.cancelAll();

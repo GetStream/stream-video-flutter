@@ -226,6 +226,12 @@ class CallSession extends Disposable with _CallSessionMedia {
   /// its tracking map.
   final void Function(String trackId) onSuspendedAudioTrackRecorded;
 
+  /// {@macro OnLocalCapture}
+  OnLocalCapture? onLocalCapture;
+
+  /// {@macro OnLocalCaptureReleased}
+  OnLocalCaptureReleased? onLocalCaptureReleased;
+
   bool _isLeavingOrClosed = false;
 
   SharedEmitter<SfuEvent> get events => sfuWS.events;
@@ -440,10 +446,25 @@ class CallSession extends Disposable with _CallSessionMedia {
       ..onSubscriberIceCandidate = _signaling.onLocalIceCandidate
       ..onLocalTrackMuted = _signaling.sendMuteState
       ..onLocalTrackPublished = _tracks.onLocalTrackPublished
+      ..onLocalCapture = _filterLocalCapture
+      ..onLocalCaptureReleased = _releaseLocalCapture
       ..onReconnectionNeeded = onReconnectionNeeded
       ..onIceConnected = onIceConnected
       ..onRenegotiationNeeded = _negotiator.negotiateOrRecover
       ..onRemoteTrackReceived = _tracks.onRemoteTrackReceived;
+  }
+
+  Future<RtcLocalTrack> _filterLocalCapture(
+    RtcLocalTrack track, {
+    bool Function()? isCurrent,
+  }) async {
+    final filter = onLocalCapture;
+    if (filter == null) return track;
+    return filter(track, isCurrent: isCurrent);
+  }
+
+  Future<void> _releaseLocalCapture(RtcLocalTrack track) async {
+    await onLocalCaptureReleased?.call(track);
   }
 
   /// The track lookup prefix the SFU gave this session's participant.

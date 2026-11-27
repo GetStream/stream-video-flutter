@@ -443,6 +443,347 @@ void main() {
     });
   });
 
+  group('onLocalCapture', () {
+    test('runs on a published capture before it is sent', () async {
+      final rtcPublisher = publisher();
+      final filtered = FakeMediaStreamTrack('filtered', kind: 'audio');
+      final captured = <String>[];
+      rtcPublisher.onLocalCapture = (track, {isCurrent}) async {
+        captured.add(track.mediaTrack.id!);
+        return track.copyWith(mediaTrack: filtered);
+      };
+
+      final result = await rtcPublisher.publishAudioTrack(track: localMic());
+
+      expect(captured, ['mic']);
+      expect(result.getDataOrNull()!.mediaTrack, same(filtered));
+      expect(transceivers.single.sender.track, same(filtered.clones.single));
+    });
+
+    test('a capture the filters reject is stopped, not sent', () async {
+      final rtcPublisher = publisher();
+      rtcPublisher.onLocalCapture = (_, {isCurrent}) async {
+        throw Exception('filter');
+      };
+      final mic = localMic();
+
+      final result = await rtcPublisher.publishAudioTrack(track: mic);
+
+      expect(result.isFailure, isTrue);
+      expect(transceivers, isEmpty);
+      expect(fakeMediaOf(mic).stopped, isTrue);
+    });
+
+    test('a filtered track stops the capture it was made of', () async {
+      final rtcPublisher = publisher();
+      final mic = localMic();
+      final filtered = FakeMediaStreamTrack('filtered', kind: 'audio');
+      rtcPublisher.onLocalCapture = (track, {isCurrent}) async {
+        return track.withMedia(
+          stream: FakeMediaStream([filtered]),
+          track: filtered,
+          capturedStream: FakeMediaStream([track.mediaTrack]),
+        );
+      };
+      final published = (await rtcPublisher.publishAudioTrack(
+        track: mic,
+      )).getDataOrNull()!;
+
+      await rtcPublisher.unpublishTrack(trackId: published.trackId);
+
+      expect(filtered.stopped, isTrue);
+      expect(fakeMediaOf(mic).stopped, isTrue);
+    });
+
+    test('a stopped capture is reported released', () async {
+      final rtcPublisher = publisher();
+      final released = <String>[];
+      rtcPublisher.onLocalCaptureReleased = (track) async {
+        released.add(track.mediaTrack.id!);
+      };
+      final track = (await rtcPublisher.publishAudioTrack(
+        track: localMic(),
+      )).getDataOrNull()!;
+
+      await rtcPublisher.muteTrack(trackId: track.trackId);
+
+      expect(released, ['mic']);
+    });
+
+    group('refilterTrack', () {
+      test('sends what the filters now make of the held track', () async {
+        final rtcPublisher = publisher();
+        final track = (await rtcPublisher.publishAudioTrack(
+          track: localMic(),
+        )).getDataOrNull()!;
+        final oldClone = fakeMediaOf(track).clones.single;
+        final filtered = FakeMediaStreamTrack('filtered', kind: 'audio');
+        rtcPublisher.onLocalCapture = (held, {isCurrent}) async {
+          return held.copyWith(mediaTrack: filtered);
+        };
+
+        final result = await rtcPublisher.refilterTrack(SfuTrackType.audio);
+
+        expect(result.isSuccess, isTrue);
+        expect(transceivers.single.sender.track, same(filtered.clones.single));
+        expect(oldClone.stopped, isTrue);
+        expect(fakeMediaOf(track).stopped, isFalse);
+        expect(rtcPublisher.tracks[track.trackId]!.mediaTrack, same(filtered));
+      });
+
+      test('a failed send puts the held track back on every sender', () async {
+        final rtcPublisher = publisher(
+          publishOptions: [_mic, publishOption(2, SfuTrackType.audio)],
+        );
+        final track = (await rtcPublisher.publishAudioTrack(
+          track: localMic(),
+        )).getDataOrNull()!;
+        final filtered = FakeMediaStreamTrack('filtered', kind: 'audio');
+        rtcPublisher.onLocalCapture = (held, {isCurrent}) async {
+          return held.copyWith(mediaTrack: filtered);
+        };
+        transceivers[1].sender.nextReplaceTrackError = Exception('replace');
+
+        final result = await rtcPublisher.refilterTrack(SfuTrackType.audio);
+
+        expect(result.isFailure, isTrue);
+        final first = transceivers[0].sender.track! as FakeMediaStreamTrack;
+        expect(fakeMediaOf(track).clones, contains(first));
+        expect(first.stopped, isFalse);
+        expect(filtered.clones.every((clone) => clone.stopped), isTrue);
+        expect(
+          rtcPublisher.tracks[track.trackId]!.clonedTracks,
+          contains(first),
+        );
+      });
+
+      test('a sender that fails the put-back leaves the others', () async {
+        final rtcPublisher = publisher(
+          publishOptions: [
+            _mic,
+            publishOption(2, SfuTrackType.audio),
+            publishOption(3, SfuTrackType.audio),
+          ],
+        );
+        final track = (await rtcPublisher.publishAudioTrack(
+          track: localMic(),
+        )).getDataOrNull()!;
+        final filtered = FakeMediaStreamTrack('filtered', kind: 'audio');
+        rtcPublisher.onLocalCapture = (held, {isCurrent}) async {
+          return held.copyWith(mediaTrack: filtered);
+        };
+        // The forward send fails on the third sender, and putting the held
+        // track back fails on the second.
+        transceivers[2].sender.failingReplaceTrackCalls.add(0);
+        transceivers[1].sender.failingReplaceTrackCalls.add(1);
+
+        await rtcPublisher.refilterTrack(SfuTrackType.audio);
+
+        final first = transceivers[0].sender.track! as FakeMediaStreamTrack;
+        expect(fakeMediaOf(track).clones, contains(first));
+        expect(first.stopped, isFalse);
+      });
+
+      test('a change during a publish refilters the published track', () async {
+        final rtcPublisher = publisher();
+        final before = FakeMediaStreamTrack('before', kind: 'audio');
+        final after = FakeMediaStreamTrack('after', kind: 'audio');
+        var filtered = before;
+        rtcPublisher.onLocalCapture = (track, {isCurrent}) async {
+          return track.copyWith(mediaTrack: filtered);
+        };
+        final sending = Completer<void>();
+        addAudioAnswers = [
+          (transceiver) async {
+            await sending.future;
+            return Result.success(transceiver);
+          },
+        ];
+
+        final publishing = rtcPublisher.publishAudioTrack(track: localMic());
+        await pumpEventQueue();
+        filtered = after;
+        final refiltering = rtcPublisher.refilterTrack(SfuTrackType.audio);
+        await pumpEventQueue();
+        sending.complete();
+        final published = (await publishing).getDataOrNull()!;
+        await refiltering;
+
+        expect(rtcPublisher.tracks[published.trackId]!.mediaTrack, same(after));
+        expect(transceivers.single.sender.track, same(after.clones.single));
+      });
+
+      test(
+        'a change while a first publish filters refilters the published '
+        'track',
+        () async {
+          final rtcPublisher = publisher();
+          final before = FakeMediaStreamTrack('before', kind: 'audio');
+          final after = FakeMediaStreamTrack('after', kind: 'audio');
+          final filtering = Completer<void>();
+          var calls = 0;
+          rtcPublisher.onLocalCapture = (track, {isCurrent}) async {
+            if (calls++ == 0) {
+              await filtering.future;
+              return track.copyWith(mediaTrack: before);
+            }
+            return track.copyWith(mediaTrack: after);
+          };
+
+          final publishing = rtcPublisher.publishAudioTrack(
+            track: localMic(),
+          );
+          await pumpEventQueue();
+          final refiltering = rtcPublisher.refilterTrack(SfuTrackType.audio);
+          await pumpEventQueue();
+          filtering.complete();
+          final published = (await publishing).getDataOrNull()!;
+          await refiltering;
+
+          expect(
+            rtcPublisher.tracks[published.trackId]!.mediaTrack,
+            same(after),
+          );
+        },
+      );
+
+      test('waits for every publish of its kind that is running', () async {
+        final rtcPublisher = publisher();
+        final filtering = Completer<void>();
+        var calls = 0;
+        rtcPublisher.onLocalCapture = (track, {isCurrent}) async {
+          if (calls++ == 0) await filtering.future;
+          return track;
+        };
+
+        final first = rtcPublisher.publishAudioTrack(track: localMic());
+        await pumpEventQueue();
+        await rtcPublisher.publishAudioTrack(track: localMic());
+        var refiltered = false;
+        final refiltering = rtcPublisher
+            .refilterTrack(SfuTrackType.audio)
+            .whenComplete(() => refiltered = true);
+        await pumpEventQueue();
+
+        expect(refiltered, isFalse);
+        filtering.complete();
+        await first;
+        await refiltering;
+        expect(refiltered, isTrue);
+      });
+
+      test('leaves the senders alone when nothing changed', () async {
+        final rtcPublisher = publisher();
+        final track = (await rtcPublisher.publishAudioTrack(
+          track: localMic(),
+        )).getDataOrNull()!;
+        final clone = fakeMediaOf(track).clones.single;
+        rtcPublisher.onLocalCapture = (held, {isCurrent}) async => held;
+
+        await rtcPublisher.refilterTrack(SfuTrackType.audio);
+
+        expect(transceivers.single.sender.track, same(clone));
+        expect(clone.stopped, isFalse);
+      });
+    });
+
+    group('on a recapture', () {
+      late FakeWebRtcPlatform platform;
+
+      setUp(() {
+        TestWidgetsFlutterBinding.ensureInitialized();
+        platform = FakeWebRtcPlatform()..install();
+      });
+
+      tearDown(() => platform.uninstall());
+
+      test('runs on the new capture before it is sent', () async {
+        final rtcPublisher = publisher();
+        final captured = <String>[];
+        rtcPublisher.onLocalCapture = (track, {isCurrent}) async {
+          captured.add(track.mediaTrack.id!);
+          return track;
+        };
+        final track = (await rtcPublisher.publishAudioTrack(
+          track: localMic(),
+        )).getDataOrNull()!;
+        await rtcPublisher.muteTrack(trackId: track.trackId);
+
+        final unmuted = await rtcPublisher.unmuteTrack(trackId: track.trackId);
+
+        final recaptured = unmuted.getDataOrNull()!;
+        expect(captured, ['mic', recaptured.mediaTrack.id]);
+        expect(recaptured.mediaTrack.id, isNot('mic'));
+      });
+
+      test('a new capture the filters reject is stopped, not sent', () async {
+        final rtcPublisher = publisher();
+        final track = (await rtcPublisher.publishAudioTrack(
+          track: localMic(),
+        )).getDataOrNull()!;
+        await rtcPublisher.muteTrack(trackId: track.trackId);
+        final sent = transceivers.single.sender.track;
+        final disposedBefore = [...platform.disposedTrackIds];
+        rtcPublisher.onLocalCapture = (_, {isCurrent}) async {
+          throw Exception('filter');
+        };
+
+        final unmuted = await rtcPublisher.unmuteTrack(trackId: track.trackId);
+
+        expect(unmuted.isFailure, isTrue);
+        expect(transceivers.single.sender.track, same(sent));
+        expect(
+          platform.disposedTrackIds.length,
+          greaterThan(disposedBefore.length),
+        );
+      });
+
+      test('a new capture that cannot be sent is reported released', () async {
+        final rtcPublisher = publisher();
+        final released = <String>[];
+        rtcPublisher.onLocalCaptureReleased = (track) async {
+          released.add(track.mediaTrack.id!);
+        };
+        final track = (await rtcPublisher.publishAudioTrack(
+          track: localMic(),
+        )).getDataOrNull()!;
+        await rtcPublisher.muteTrack(trackId: track.trackId);
+        transceivers.single.sender.nextReplaceTrackError = Exception(
+          'not sent',
+        );
+
+        final unmuted = await rtcPublisher.unmuteTrack(trackId: track.trackId);
+
+        expect(unmuted.isFailure, isTrue);
+        expect(released, hasLength(2));
+        expect(released.first, 'mic');
+        expect(released.last, isNot('mic'));
+      });
+
+      test('a new capture of a track unpublished meanwhile is reported '
+          'released', () async {
+        final rtcPublisher = publisher();
+        final released = <String>[];
+        rtcPublisher.onLocalCaptureReleased = (track) async {
+          released.add(track.mediaTrack.id!);
+        };
+        final track = (await rtcPublisher.publishAudioTrack(
+          track: localMic(),
+        )).getDataOrNull()!;
+        await rtcPublisher.muteTrack(trackId: track.trackId);
+        platform.getUserMediaGate = Completer<void>();
+
+        final unmuting = rtcPublisher.unmuteTrack(trackId: track.trackId);
+        await pumpEventQueue();
+        await rtcPublisher.unpublishTrack(trackId: track.trackId);
+        platform.getUserMediaGate!.complete();
+
+        expect((await unmuting).isFailure, isTrue);
+        expect(released.where((id) => id != 'mic'), hasLength(1));
+      });
+    });
+  });
+
   test('republishing a video track keeps its stopTrackOnMute', () async {
     when(
       () => pc.addVideoTransceiver(

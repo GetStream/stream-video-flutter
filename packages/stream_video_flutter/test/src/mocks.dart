@@ -96,6 +96,14 @@ MutableSharedEmitter<StreamCallEvent> stubLobbyCall(
   when(() => call.state).thenAnswer(
     (_) => MutableStateEmitter<CallState>(state, sync: true),
   );
+  // The preview passes through the call's filters unchanged.
+  registerFallbackValue(MockRtcLocalCameraTrack());
+  // ignore: invalid_use_of_internal_member
+  when(() => call.applyLocalFilters(any())).thenAnswer(
+    (invocation) async => invocation.positionalArguments.first as RtcLocalTrack,
+  );
+  // ignore: invalid_use_of_internal_member
+  when(() => call.releaseLocalFilters(any())).thenAnswer((_) async {});
 
   return events;
 }
