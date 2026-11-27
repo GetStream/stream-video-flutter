@@ -18,11 +18,28 @@ abstract class PushTokenSource {
   Stream<String> get onRefresh;
 
   /// The current token, when there is one, followed by every refresh.
+  ///
+  /// Refreshes are listened to before the current token is read, and held
+  /// until it is emitted, so one the platform sends while the read is in
+  /// flight is not lost and still comes after the token it replaces. A read
+  /// that fails ends the stream, so the next registration reads again.
   Stream<String> get tokens async* {
-    final current = await token();
-    if (current != null) yield current;
+    final refreshes = ReplaySubject<String>();
+    final subscription = onRefresh.listen(
+      refreshes.add,
+      onError: refreshes.addError,
+      onDone: refreshes.close,
+    );
 
-    yield* onRefresh;
+    try {
+      final current = await token();
+      if (current != null) yield current;
+
+      yield* refreshes;
+    } finally {
+      await subscription.cancel();
+      await refreshes.close();
+    }
   }
 }
 
@@ -42,13 +59,17 @@ final class VoIPTokenSource extends PushTokenSource {
     return token;
   }
 
+  /// Emits each new token PushKit issues. PushKit invalidating the token
+  /// arrives as an empty one, which is left out: there is nothing to register
+  /// until PushKit issues the next.
   @override
   Stream<String> get onRefresh {
     if (!CurrentPlatform.isIos) return const Stream.empty();
 
     return RingingEventBroadcaster.shared.onEvent
         .whereType<ActionDidUpdateDevicePushTokenVoip>()
-        .map((event) => event.token);
+        .map((event) => event.token)
+        .where((token) => token.isNotEmpty);
   }
 }
 

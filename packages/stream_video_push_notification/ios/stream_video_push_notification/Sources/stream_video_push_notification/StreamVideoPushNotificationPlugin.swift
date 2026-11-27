@@ -63,8 +63,31 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
         }
     }
 
+    /// Stores `deviceToken` as this device's PushKit VoIP token and tells Dart it changed. An
+    /// empty token means PushKit invalidated the last one.
+    ///
+    /// Works before the plugin registers, as when an app delegate registers PushKit in
+    /// `application(_:didFinishLaunchingWithOptions:)`: the token is stored straight away, and
+    /// the event is held until Dart listens. While Dart has silenced events, the event is dropped
+    /// like any other; the stored token is still registered the next time the device is.
     @objc public static func setDevicePushTokenVoIP(deviceToken: String) {
-        sharedInstance?.setDevicePushTokenVoIP(deviceToken: deviceToken)
+        setDevicePushTokenVoIP(
+            deviceToken,
+            in: UserDefaults.standard,
+            notifying: StreamVideoCallkitManager.shared.eventSink)
+    }
+
+    static func setDevicePushTokenVoIP(
+        _ deviceToken: String, in defaults: UserDefaults, notifying sink: RingingEventSink
+    ) {
+        defaults.set(deviceToken, forKey: devicePushTokenVoIPKey)
+        sink.send(
+            StreamVideoIncomingCallConstants.ACTION_DID_UPDATE_DEVICE_PUSH_TOKEN_VOIP,
+            ["deviceTokenVoIP": deviceToken])
+    }
+
+    static func devicePushTokenVoIP(in defaults: UserDefaults) -> String {
+        return defaults.string(forKey: devicePushTokenVoIPKey) ?? ""
     }
 
     /// Asks CallKit to start `data` as an outgoing call.
@@ -109,11 +132,7 @@ public class StreamVideoPushNotificationPlugin: NSObject, FlutterPlugin {
         return StreamVideoCallkitManager.shared.activeCalls()
     }
 
-    func setDevicePushTokenVoIP(deviceToken: String) {
-        persistentState.set(deviceToken, forKey: Self.devicePushTokenVoIPKey)
-    }
-
     func getDevicePushTokenVoIP() -> String {
-        return persistentState.string(forKey: Self.devicePushTokenVoIPKey) ?? ""
+        return Self.devicePushTokenVoIP(in: persistentState)
     }
 }

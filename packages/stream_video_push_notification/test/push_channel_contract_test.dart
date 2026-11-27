@@ -13,11 +13,16 @@ import 'package:stream_video_push_notification/src/stream_video_call_event.dart'
 // that renames or drops one on purpose updates these sets in the same change;
 // a PR that does it by accident fails here.
 //
-// What it does not pin: that an event is actually sent (a declared constant
-// passes even when no `sendEvent` uses it), and the keys of method arguments
-// and event bodies. The body of the call events is pinned separately, by the
-// per-platform payloads in `test/fixtures/ringing_events/` that both sides of
-// the channel test against.
+// On iOS it also pins which declared events the plugin uses outside the
+// constants file, so an event Dart listens for cannot be declared and never
+// sent. That check is by reference: it does not prove the code path that
+// sends one runs. Android builds its event names into intents and is not
+// checked that way.
+//
+// What it does not pin: the keys of method arguments and event bodies. The
+// body of the call events is pinned separately, by the per-platform payloads
+// in `test/fixtures/ringing_events/` that both sides of the channel test
+// against.
 //
 // "Handled" means the native switch has a case for the name, not that the
 // case does anything: a few iOS cases answer `true` and stop.
@@ -92,6 +97,13 @@ const _iosOnlyEvents = {
   Event.actionCallIncomingFailed,
   Event.actionCallToggleDtmf,
   Event.actionCallToggleAudioSession,
+};
+
+/// Events the iOS plugin declares but never sends. Dart handles them for
+/// Android, where they are sent; `actionCallCustom` is sent by neither.
+const _iosDeclaredNotSentEvents = {
+  Event.actionCallConnected,
+  Event.actionCallCustom,
 };
 
 /// Events only the Android plugin declares.
@@ -171,6 +183,31 @@ Map<String, String> _declaredEvents(String path) {
   };
 }
 
+/// The `ACTION_*` constants the Swift sources reference outside the constants
+/// file, as `StreamVideoIncomingCallConstants.ACTION_*`. Comments are left
+/// out, so a constant only mentioned in one does not count as sent.
+Set<String> _swiftReferencedEvents() {
+  final constantsFile = File(_swiftConstants).absolute.path;
+  final files = Directory(_swiftSources)
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((file) => file.path.endsWith('.swift'))
+      .where((file) => file.absolute.path != constantsFile);
+  return {
+    for (final file in files)
+      for (final match in RegExp(
+        r'StreamVideoIncomingCallConstants\.(ACTION_[A-Z_]+)',
+      ).allMatches(_withoutComments(file.readAsStringSync())))
+        match.group(1)!,
+  };
+}
+
+/// [source] with its `//` and `/* */` comments removed. Good enough for the
+/// plugin's sources, which have no `//` or `/*` inside string literals.
+String _withoutComments(String source) => source
+    .replaceAll(RegExp(r'/\*[\s\S]*?\*/'), '')
+    .replaceAll(RegExp('//.*'), '');
+
 void main() {
   group('method channel contract', () {
     test('Dart invokes exactly the documented methods', () {
@@ -236,6 +273,10 @@ void main() {
       expect(_sharedMethods.intersection(_androidOnlyMethods), isEmpty);
       expect(_iosOnlyMethods.intersection(_androidOnlyMethods), isEmpty);
       expect(_iosOnlyEvents.intersection(_androidOnlyEvents), isEmpty);
+      expect(
+        _iosDeclaredNotSentEvents.intersection(_androidOnlyEvents),
+        isEmpty,
+      );
     });
   });
 
@@ -273,6 +314,34 @@ void main() {
         reason:
             'the iOS event constants and the Dart events drifted apart; '
             'update the contract sets at the top of this test in the same PR',
+      );
+    });
+
+    test('iOS sends every event it declares, except the documented ones', () {
+      final declared = _declaredEvents(_swiftConstants);
+      final referenced = _swiftReferencedEvents();
+      expect(
+        referenced,
+        contains('ACTION_CALL_INCOMING'),
+        reason: 'the event references could not be read out of $_swiftSources',
+      );
+      expect(
+        referenced.difference(declared.keys.toSet()),
+        isEmpty,
+        reason: 'the Swift sources reference an undeclared event constant',
+      );
+      expect(
+        {for (final name in referenced) declared[name]},
+        equals({
+          for (final event in Event.values)
+            if (!_androidOnlyEvents.contains(event) &&
+                !_iosDeclaredNotSentEvents.contains(event))
+              event.wireName,
+        }),
+        reason:
+            'an iOS event is declared but never sent, or sent but listed as '
+            'never sent; update the contract sets at the top of this test in '
+            'the same PR',
       );
     });
 
