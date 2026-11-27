@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_video/src/call/media/local_media_filters.dart';
 import 'package:stream_video/stream_video.dart';
@@ -315,6 +317,26 @@ void main() {
         expect(log.last, 'blur apply cam-2 camera');
       },
     );
+
+    test('a send that fails after the capture is released reverts the '
+        'filter', () async {
+      final sending = Completer<Result<None>>();
+      filters.onOutputChanged = (_) => sending.future;
+      final blur = _LoggingFilter('blur', log);
+      final capture = camera('cam-1');
+      await filters.setVideoFilter(blur);
+      await filters.apply(capture);
+
+      final changing = filters.setVideoFilter(
+        _ReplacingFilter(_stream('out', 'video'), log),
+      );
+      await pumpEventQueue();
+      await filters.release(capture);
+      sending.complete(failureWithError('not sent'));
+
+      expect((await changing).isFailure, isTrue);
+      expect(filters.videoFilter, same(blur));
+    });
 
     test('keeps the old chain when the moderation filter fails', () async {
       final capture = camera('cam-1');

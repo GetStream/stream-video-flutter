@@ -219,7 +219,7 @@ class LocalMediaFilters {
   /// is true, or the new stream cannot be sent, the new chain is stopped, the
   /// old one stays applied and the undo that [change] returns, if any, runs.
   /// A new capture that started with the new chain while its stream was being
-  /// sent keeps it.
+  /// sent keeps it; a capture released meanwhile does not.
   ///
   /// Changes of a kind run one at a time, each until its stream is sent.
   Future<Result<LocalFilterChange>> _change(
@@ -254,7 +254,9 @@ class LocalMediaFilters {
       final sent = await _sendOutput(kind);
       if (sent case final Failure failure) {
         await lock.synchronized(() async {
-          if (await _restore(kind, applied, retired)) revert?.call();
+          final restored = await _restore(kind, applied, retired);
+          // Kept only by a newer capture that already runs it.
+          if (restored || _applied[kind] == null) revert?.call();
         });
         return failure;
       }
