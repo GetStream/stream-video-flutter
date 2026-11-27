@@ -240,38 +240,14 @@ class LocalMediaFilters {
     required bool failOnOptional,
   }) async {
     final lock = _lockFor(kind);
-    void Function()? revert;
-    final changed = await lock.synchronized(() async {
-      revert = change();
-
-      final current = _applied[kind];
-      if (current == null) return null;
-
-      final applied = await _AppliedChain.run(
-        _chainFor(kind),
-        source: current.input.source,
-        capture: current.capture,
-        captureTrack: current.captureTrack,
-        knownTrackIds: current.knownTrackIds,
-        logger: _logger,
-      );
-      final rejection =
-          applied.requiredFailure ??
-          (failOnOptional ? applied.failures.firstOrNull : null);
-      if (rejection != null) {
-        // Undone before the lock is released, so no new capture runs it.
-        revert?.call();
-        await applied.stop(rtc.MediaStreamFilterStopReason.rejected, _logger);
-      } else {
-        _applied[kind] = applied;
-      }
-      return (applied: applied, retired: current, rejection: rejection);
-    });
+    final changed = await lock.synchronized(
+      () => _runChange(kind, change, failOnOptional: failOnOptional),
+    );
     if (changed == null) {
       return const Result.success(LocalFilterChange.deferred);
     }
 
-    final (:applied, :retired, :rejection) = changed;
+    final (:applied, :retired, :rejection, :revert) = changed;
     if (rejection != null) return _failureOf(rejection);
 
     if (!identical(applied.output, retired.output)) {
@@ -288,6 +264,54 @@ class LocalMediaFilters {
       () => retired.stop(rtc.MediaStreamFilterStopReason.chainChanged, _logger),
     );
     return const Result.success(LocalFilterChange.applied);
+  }
+
+  /// Makes [change] and runs the changed chain on the capture of [kind] in
+  /// use, under its lock. A rejected chain is stopped and [change] undone
+  /// before the lock is released, so no new capture runs it. Null when no
+  /// capture is in use; otherwise the undo [change] returned comes with the
+  /// chains.
+  Future<
+    ({
+      _AppliedChain applied,
+      _AppliedChain retired,
+      _FilterFailure? rejection,
+      void Function()? revert,
+    })?
+  >
+  _runChange(
+    SfuTrackType kind,
+    void Function()? Function() change, {
+    required bool failOnOptional,
+  }) async {
+    final revert = change();
+
+    final current = _applied[kind];
+    if (current == null) return null;
+
+    final applied = await _AppliedChain.run(
+      _chainFor(kind),
+      source: current.input.source,
+      capture: current.capture,
+      captureTrack: current.captureTrack,
+      knownTrackIds: current.knownTrackIds,
+      logger: _logger,
+    );
+    final rejection =
+        applied.requiredFailure ??
+        (failOnOptional ? applied.failures.firstOrNull : null);
+    if (rejection == null) {
+      _applied[kind] = applied;
+    } else {
+      revert?.call();
+      await applied.stop(rtc.MediaStreamFilterStopReason.rejected, _logger);
+    }
+    return (
+      applied: applied,
+      retired: current,
+      rejection: rejection,
+      revert: revert,
+    );
   }
 
   /// Puts [retired] back in place of [applied], whose output was not sent,
