@@ -19,11 +19,18 @@ permissions:
 
 jobs:
   stream_video:
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
+      # makes no other GitHub call, so it runs on a free standard runner.
       - name: 📚 Git Checkout
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
@@ -34,11 +41,16 @@ jobs:
           min_score: 50
 
   stream_video_flutter:
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     steps:
       - name: 📚 Git Checkout
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
@@ -54,11 +66,16 @@ jobs:
           min_score: 50
 
   stream_video_push_notification:
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     steps:
       - name: 📚 Git Checkout
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
@@ -73,11 +90,16 @@ jobs:
           min_score: 55
 
   stream_video_screen_sharing:
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     steps:
       - name: 📚 Git Checkout
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
@@ -88,11 +110,16 @@ jobs:
           min_score: 135
 
   stream_video_noise_cancellation:
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     steps:
       - name: 📚 Git Checkout
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
       - name: 📊 Verify Pana Score
         uses: ./.github/actions/pana
         with:
