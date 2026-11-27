@@ -2,7 +2,7 @@
 // ../../web_files, from the versions pinned in package-lock.json. The package
 // ships them as web-only assets.
 //
-//   npm ci && npm run build
+// Run through `melos run update:web_filters`, see update.sh.
 
 import { build } from 'esbuild';
 import { cpSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -32,7 +32,7 @@ await build({
   target: 'es2022',
   minify: true,
   legalComments: 'eof',
-  logLevel: 'info',
+  logLevel: 'warning',
 });
 
 // The WebAssembly runtime and the default segmentation model the package
