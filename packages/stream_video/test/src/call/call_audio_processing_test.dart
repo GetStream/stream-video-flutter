@@ -1054,6 +1054,53 @@ void main() {
     // clear() audio processing teardown
     // ---------------------------------------------------------------
     group('clear() audio processing teardown', () {
+      test('stops audio processing on leave after a manual start', () async {
+        final activeCallsEmitter = MutableStateEmitter<List<Call>>(
+          [],
+          sync: true,
+        );
+        final clientState = setupMockClientState();
+        when(
+          () => clientState.activeCalls,
+        ).thenAnswer((_) => activeCallsEmitter);
+
+        final streamVideo = setupMockCallHost(clientState: clientState);
+        when(streamVideo.isAudioProcessorConfigured).thenReturn(true);
+        when(
+          () => streamVideo.setAudioProcessingEnabled(any()),
+        ).thenAnswer((_) async => const Result.success(none));
+        when(
+          () => mockPermissionsManager.hasPermission(
+            CallPermission.enableNoiseCancellation,
+          ),
+        ).thenReturn(true);
+        when(
+          callSession.notifyNoiseCancellationStarted,
+        ).thenAnswer((_) async => const Result.success(none));
+        when(
+          callSession.notifyNoiseCancellationStopped,
+        ).thenAnswer((_) async => const Result.success(none));
+
+        final call = createTestCall(
+          networkMonitor: setupMockInternetConnection(
+            statusStream: internetStatusController,
+          ),
+          coordinatorClient: coordinatorClient,
+          sessionFactory: setupMockSessionFactory(callSession: callSession),
+          streamVideo: streamVideo,
+          permissionManager: mockPermissionsManager,
+        );
+
+        await call.join();
+        await call.startAudioProcessing();
+        activeCallsEmitter.value = [call];
+
+        await call.leave();
+        await Future<void>.delayed(Duration.zero);
+
+        verify(() => streamVideo.setAudioProcessingEnabled(false)).called(1);
+      });
+
       test(
         'stops audio processing on leave when autoOn and no other call needs it',
         () async {

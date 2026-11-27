@@ -2774,8 +2774,9 @@ class CallConnectionCoordinator {
       // stop is skipped when another active call is processing audio or is
       // set to start it automatically.
       if (_call._host.isAudioProcessorConfigured() &&
-          _call.state.value.settings.audio.noiseCancellation?.mode ==
-              FeatureActivationMode.autoOn) {
+          (_call.state.value.isAudioProcessing ||
+              _call.state.value.settings.audio.noiseCancellation?.mode ==
+                  FeatureActivationMode.autoOn)) {
         unawaited(
           _call._stopAudioProcessingOnLeave().catchError((Object e) {
             _call._logger.w(() => '[clear] stopAudioProcessing failed: $e');
