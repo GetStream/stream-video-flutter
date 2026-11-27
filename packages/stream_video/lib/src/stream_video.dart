@@ -63,6 +63,7 @@ import 'token/token_source.dart';
 import 'utils/none.dart';
 import 'utils/result.dart';
 import 'utils/subscriptions.dart';
+import 'webrtc/rtc_media_device/rtc_media_device.dart';
 import 'webrtc/sdp/policy/sdp_policy.dart';
 import 'webrtc/webrtc_engine.dart';
 
@@ -339,6 +340,7 @@ class StreamVideo extends Disposable implements CallHost {
     if (setsUpMedia && CurrentPlatform.isIos) {
       IosBroadcastScreenShare.observeBroadcasts();
     }
+    _observeSystemAudioOutputs();
 
     _state.user.value = user;
 
@@ -509,6 +511,41 @@ class StreamVideo extends Disposable implements CallHost {
               () => '[observeSystemManagedCalls] not applied: $e\n$stk',
             );
           }),
+    );
+  }
+
+  /// Follows the outputs the system routes calls to; lives as long as the
+  /// client.
+  StreamSubscription<({String callCid, RtcMediaDevice device})>?
+  _systemAudioOutputsSubscription;
+
+  /// Has each active call follow the output the system routes it to, Telecom
+  /// on Android; see [PushNotificationManager.systemAudioOutputs].
+  void _observeSystemAudioOutputs() {
+    final manager = pushNotificationManager;
+    if (manager == null || !setsUpMedia || !CurrentPlatform.isAndroid) return;
+
+    _systemAudioOutputsSubscription = manager.systemAudioOutputs.listen(
+      (output) {
+        final calls = _state.activeCalls.value.where(
+          (call) => call.callCid.value == output.callCid,
+        );
+        for (final call in calls) {
+          unawaited(
+            call.followSystemAudioOutput(output.device).catchError((
+              Object e,
+              StackTrace stk,
+            ) {
+              _logger.e(
+                () => '[observeSystemAudioOutputs] not followed: $e\n$stk',
+              );
+            }),
+          );
+        }
+      },
+      onError: (Object e, StackTrace stk) {
+        _logger.e(() => '[observeSystemAudioOutputs] failed: $e\n$stk');
+      },
     );
   }
 
@@ -703,6 +740,7 @@ class StreamVideo extends Disposable implements CallHost {
 
     _subscriptions.cancelAll();
     await _systemManagedCallsSubscription?.cancel();
+    await _systemAudioOutputsSubscription?.cancel();
     await pushNotificationManager?.dispose();
     _clientEventReporter.dispose();
     await _state.clear();

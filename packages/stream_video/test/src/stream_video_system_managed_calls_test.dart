@@ -58,6 +58,9 @@ void main() {
       () => push.systemManagedCallCids,
     ).thenAnswer((_) => systemManaged.stream);
     when(() => push.onCallEvent).thenAnswer((_) => const Stream.empty());
+    when(
+      () => push.systemAudioOutputs,
+    ).thenAnswer((_) => const Stream.empty());
     when(push.dispose).thenAnswer((_) async {});
   });
 

@@ -149,6 +149,11 @@ class LocalMediaController {
   /// system may have moved the route since, to a car or a headset.
   bool _audioOutputRoutedOnJoin = false;
 
+  /// Whether a session has applied the connect options' audio output, after
+  /// which the call follows the output the system routes it to. Before, the
+  /// system's route is its default, which the join is about to replace.
+  bool _audioOutputOptionApplied = false;
+
   CallState get _state => _stateManager.callState;
 
   /// The options the next session starts with: an override set before the
@@ -460,6 +465,7 @@ class LocalMediaController {
 
     if (!CurrentPlatform.isIos) {
       await _applyAudioOutputOption();
+      _audioOutputOptionApplied = true;
     } else if (_connectOptions.audioInputDevice != null &&
         _connectOptions.audioOutputDevice != null) {
       // Picking the input can change the route, which drops the speaker
@@ -830,6 +836,36 @@ class LocalMediaController {
           '${route.id}',
     );
     _followAudioRoute(route);
+  }
+
+  /// Follows [device], the output the system routed the call to on Android,
+  /// such as one the user picked in Telecom's output switcher or a headset
+  /// that connected: WebRTC switches to it, and the call's output and connect
+  /// options name it, without asking the system to route the call again.
+  /// When WebRTC cannot switch, such as to a headset it does not list yet,
+  /// the output and options name it all the same, so a rejoin applies it.
+  ///
+  /// Ignored until a session has applied the connect options' output, and
+  /// once the call has no session.
+  Future<void> followSystemAudioOutput(RtcMediaDevice device) async {
+    if (!CurrentPlatform.isAndroid) return;
+    if (!_audioOutputOptionApplied || _session() == null) return;
+
+    final selected = _state.audioOutputDevice;
+    if (selected?.id.equalsIgnoreCase(device.id) ?? false) return;
+
+    _logger.d(
+      () => '[followSystemAudioOutput] ${device.id}, selected: ${selected?.id}',
+    );
+    final result = await _setAudioOutputDevice(device, routeSystem: false);
+    if (result is Failure) {
+      _logger.w(
+        () =>
+            '[followSystemAudioOutput] WebRTC not switched to ${device.id}: '
+            '${result.error}',
+      );
+      _followAudioRoute(device);
+    }
   }
 
   void _followAudioRoute(RtcMediaDevice device) {

@@ -262,4 +262,31 @@ enum TelecomAudioEndpoint {
       _ => null,
     };
   }
+
+  /// The endpoint the `telecomAudioEndpointsChanged` event calls [wireName],
+  /// or null for one it does not know.
+  static TelecomAudioEndpoint? fromWireName(String wireName) {
+    for (final endpoint in values) {
+      if (endpoint.wireName == wireName) return endpoint;
+    }
+    return null;
+  }
+
+  /// The Android audio output of this endpoint, as [fromAudioOutput] reads
+  /// one. [name], such as a Bluetooth headset's, labels it; the output's id
+  /// does when there is none.
+  RtcMediaDevice toAudioOutput({String? name}) {
+    final id = switch (this) {
+      earpiece => 'earpiece',
+      speaker => 'speaker',
+      wiredHeadset => 'wired-headset',
+      bluetooth => 'bluetooth',
+    };
+    return RtcMediaDevice(
+      id: id,
+      label: name ?? id,
+      groupId: id,
+      kind: RtcMediaDeviceKind.audioOutput,
+    );
+  }
 }

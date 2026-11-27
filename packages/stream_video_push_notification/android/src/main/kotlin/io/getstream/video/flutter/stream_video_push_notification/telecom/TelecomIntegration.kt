@@ -555,6 +555,7 @@ internal class TelecomIntegration(
                 IncomingCallConstants.ACTION_CALL_CUSTOM,
                 callId,
                 "type" to CUSTOM_EVENT_AUDIO_ENDPOINTS,
+                "callCid" to trackedCalls[callId]?.callCid,
                 "audio" to snapshot,
             )
         }

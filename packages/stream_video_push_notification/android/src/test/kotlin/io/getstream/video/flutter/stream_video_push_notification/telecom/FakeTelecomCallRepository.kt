@@ -105,6 +105,11 @@ internal class FakeTelecomCallRepository : TelecomCallRepository {
         calls.getValue(callId).closeActionSource()
     }
 
+    /** Telecom reports the call's endpoints, as [AudioEndpointUtils.snapshot] makes them. */
+    fun endpointsChanged(callId: String, snapshot: Map<String, Any?>) {
+        listener?.onCallAudioEndpointsChanged(callId, snapshot)
+    }
+
     fun setMuted(callId: String, isMuted: Boolean) {
         calls[callId] = calls.getValue(callId).copy(isMuted = isMuted)
     }

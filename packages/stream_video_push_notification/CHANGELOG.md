@@ -72,6 +72,7 @@
 
 ### ✅ Added
 
+- [Android] `StreamVideoPushNotificationManager.systemAudioOutputs` reports the output Telecom routes each call it holds to. `TelecomAudioEndpoint.fromWireName` and `toAudioOutput` map Telecom's endpoints back to Android audio outputs.
 - [Android] `AndroidPushConfiguration.reportOutgoingCalls` registers the ringing calls the current user starts with Telecom as outgoing calls, as `IOSPushConfiguration.reportOutgoingCalls` reports them to CallKit. They then get Telecom's audio routes and audio focus management like incoming calls, and a Telecom hold leaves them. Off by default; leave it off if the app calls `startOutgoingCall` itself.
 - [Android] `StreamVideoPushNotificationManager.systemManagedCallCids` reports the calls the Telecom integration holds: those already held when the manager starts, such as a call answered while the app was not running, and every change after. The client uses it to leave the audio focus of those calls to Telecom.
 - `StreamVideoPushNotificationPlatform.requestAudioEndpoint` and `TelecomAudioEndpoint`: on Android, asks Telecom to route the audio of a call it holds to the earpiece, the speaker, a wired headset or a Bluetooth headset, the one with the given `name` among several, and answers whether it did. Always `false` on iOS.
@@ -83,6 +84,7 @@
 ### 🐞 Fixed
 
 - [iOS] A new or rotated PushKit VoIP token is registered with Stream as soon as PushKit issues it, rather than on the next launch, and a token PushKit issues before the plugin registers, as when the app delegate registers PushKit in `didFinishLaunching`, is no longer dropped.
+- [Android] An output Telecom routes a call to by itself, from the system's output switcher or a headset that connects, reaches the call, which `stream_video` follows.
 - [iOS] A VoIP push now calls PushKit's completion only once CallKit has accepted or refused the incoming call. It used to run right away, and iOS could suspend an app woken in the background before the call reached Dart or its ring timeout was scheduled.
 - [iOS] When CallKit activates the audio session again, such as when a call comes off hold after a phone call, the ended interruption the plugin posts now reaches the WebRTC plugin, so the call learns its interruption ended. It was posted from the plugin's CallKit manager, which the WebRTC plugin does not listen to. It is now posted from the shared `AVAudioSession`, so other code that listens to that session's interruptions also gets it on each CallKit activation.
 - [Android] WebRTC no longer requests audio focus for a call the Telecom integration holds; Telecom manages the call's focus.

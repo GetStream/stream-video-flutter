@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_video/stream_video.dart';
 
+import '../../stream_video_push_notification_platform_interface.dart';
 import 'native_call_controller.dart';
 
 const _idRinging = 2;
@@ -11,9 +12,14 @@ const _idRinging = 2;
 /// Type of the custom event naming the calls Telecom holds.
 const _telecomCallsChanged = 'telecomCallsChanged';
 
+/// Type of the custom event with the endpoints Telecom offers a call, and
+/// the one it routes the call to.
+const _telecomAudioEndpointsChanged = 'telecomAudioEndpointsChanged';
+
 /// Applies what the native call UI reports and core does not handle itself:
 /// opens the coordinator connection when a call rings, mirrors a native mute
-/// onto the call's microphone, and on Android leaves a call Telecom holds.
+/// onto the call's microphone, and on Android leaves a call Telecom holds and
+/// passes on the calls Telecom holds and where it routes their audio.
 ///
 /// Core ends the native call whenever it leaves a call, and dismisses its
 /// ring when the user accepts it in the app. Nothing is observed after
@@ -26,6 +32,7 @@ class RingingSyncObserver {
     required this._controller,
     required this._ringingEvents,
     this._onTelecomCallsChanged,
+    this._onTelecomAudioOutput,
   });
 
   final StreamVideo _streamVideo;
@@ -33,6 +40,8 @@ class RingingSyncObserver {
   final NativeCallController _controller;
   final Stream<RingingEvent> _ringingEvents;
   final void Function(Set<String> callCids)? _onTelecomCallsChanged;
+  final void Function(String callCid, RtcMediaDevice device)?
+  _onTelecomAudioOutput;
 
   final _logger = taggedLogger(tag: 'SV:PNSync');
 
@@ -61,6 +70,9 @@ class RingingSyncObserver {
       case ActionCallCustom(:final body?)
           when body['type'] == _telecomCallsChanged:
         _onTelecomCalls(body);
+      case ActionCallCustom(:final body?)
+          when body['type'] == _telecomAudioEndpointsChanged:
+        _onTelecomAudioEndpoints(body);
       default:
         break;
     }
@@ -179,6 +191,30 @@ class RingingSyncObserver {
     final callCids = cids.whereType<String>().toSet();
     _logger.d(() => '[onCallEvent] Telecom holds $callCids');
     _onTelecomCallsChanged?.call(callCids);
+  }
+
+  /// Passes on the endpoint Telecom routes a call to, as the call's audio
+  /// output. A report without the call's cid, or without a current endpoint
+  /// of a known type, is dropped.
+  void _onTelecomAudioEndpoints(Map<String, Object?> body) {
+    if (body case {
+      'callCid': final String cid,
+      'audio': {
+        'currentEndpoint': {'type': final String type} && final current,
+      },
+    }) {
+      final endpoint = TelecomAudioEndpoint.fromWireName(type);
+      if (endpoint != null) {
+        final name = current['name'];
+        final device = endpoint.toAudioOutput(
+          name: name is String && name.isNotEmpty ? name : null,
+        );
+        _logger.d(() => '[onCallEvent] Telecom routes $cid to ${device.id}');
+        _onTelecomAudioOutput?.call(cid, device);
+        return;
+      }
+    }
+    _logger.d(() => '[onCallEvent] Telecom route not followed: $body');
   }
 
   /// Stops observing.
