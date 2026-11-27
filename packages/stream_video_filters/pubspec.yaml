@@ -33,6 +33,15 @@ platforms:
   web:
 
 flutter:
+  # The browser implementation of the web filters, built by tool/web_bundle.
+  # Web only, so it is not bundled into the other platforms' apps.
+  assets:
+    - path: web_files/
+      platforms: [web]
+    - path: web_files/mediapipe/wasm/
+      platforms: [web]
+    - path: web_files/mediapipe/models/
+      platforms: [web]
   plugin:
     platforms:
       android:

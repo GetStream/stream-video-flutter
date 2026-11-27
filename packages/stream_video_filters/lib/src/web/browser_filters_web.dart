@@ -20,7 +20,7 @@ import 'web_video_filters_options.dart';
 /// browsers drop their oldest context when too many are created.
 Future<bool> isBrowserEffectSupported(WebVideoFiltersOptions options) {
   final key = (
-    options.moduleUrl,
+    options.baseUrl,
     options.forceSafariSupport,
     options.forceMobileSupport,
   );
@@ -31,7 +31,7 @@ final _supported = <(String, bool, bool), Future<bool>>{};
 
 Future<bool> _checkSupported(WebVideoFiltersOptions options) async {
   try {
-    final module = await _load(options.moduleUrl);
+    final module = await _load(options);
     final supported = await module
         .isMediaPipePlatformSupported(
           _SupportFlags(
@@ -46,7 +46,7 @@ Future<bool> _checkSupported(WebVideoFiltersOptions options) async {
     // A module that failed to load is tried again on the next check.
     unawaited(
       _supported.remove((
-        options.moduleUrl,
+        options.baseUrl,
         options.forceSafariSupport,
         options.forceMobileSupport,
       )),
@@ -60,21 +60,19 @@ Future<bool> _checkSupported(WebVideoFiltersOptions options) async {
 /// flags; failures are logged.
 Future<void> preloadBrowserEffects(WebVideoFiltersOptions options) {
   final key = (
-    options.moduleUrl,
-    options.basePath,
-    options.modelPath,
+    options.baseUrl,
     options.forceSafariSupport,
     options.forceMobileSupport,
   );
   return _preloads[key] ??= _preload(options);
 }
 
-final _preloads = <(String, String?, String?, bool, bool), Future<void>>{};
+final _preloads = <(String, bool, bool), Future<void>>{};
 
 Future<void> _preload(WebVideoFiltersOptions options) async {
   try {
     if (!await isBrowserEffectSupported(options)) return;
-    final module = await _load(options.moduleUrl);
+    final module = await _load(options);
 
     final canvas = web.HTMLCanvasElement()
       ..width = 2
@@ -87,8 +85,7 @@ Future<void> _preload(WebVideoFiltersOptions options) async {
     final processor = module.createVirtualBackground(
       blank,
       _BackgroundOptions(
-        basePath: options.basePath,
-        modelPath: options.modelPath,
+        basePath: _url(options, 'mediapipe'),
         backgroundFilter: 'blur',
         backgroundBlurLevel: 'low',
       ),
@@ -143,7 +140,7 @@ Future<rtc.MediaStreamFilterResult> _applyFullFrameBlur(
   web.MediaStreamTrack track,
   WebVideoFiltersOptions options,
 ) async {
-  final module = await _load(options.moduleUrl);
+  final module = await _load(options);
   final processor = module.fullScreenBlur.callAsConstructor<_Processor>(
     track,
     JSObject(),
@@ -225,12 +222,11 @@ class _SharedBackground {
     WebVideoFiltersOptions options,
     _BackgroundEffect effect,
   ) async {
-    final module = await _load(options.moduleUrl);
+    final module = await _load(options);
     final processor = module.createVirtualBackground(
       track,
       _BackgroundOptions(
-        basePath: options.basePath,
-        modelPath: options.modelPath,
+        basePath: _url(options, 'mediapipe'),
         backgroundFilter: effect.filter,
         backgroundBlurLevel: effect.blurLevel,
         backgroundImage: effect.image,
@@ -367,18 +363,30 @@ Future<String?> _objectUrlOfAsset(String key) async {
   return web.URL.createObjectURL(blob);
 }
 
+/// [path] in the folder of [options], as an absolute URL: the worker some
+/// browsers run the filters in cannot resolve relative ones.
+String _url(WebVideoFiltersOptions options, String path) {
+  final base = options.baseUrl.endsWith('/')
+      ? options.baseUrl
+      : '${options.baseUrl}/';
+  return web.URL(path, web.URL(base, web.document.baseURI).href).href;
+}
+
 final _modules = <String, Future<_FiltersModule>>{};
 
-/// The module at [url], loaded once. A failed load is tried again on the
-/// next call.
-Future<_FiltersModule> _load(String url) => _modules[url] ??= _import(url);
+/// The module in the folder of [options], loaded once. A failed load is
+/// tried again on the next call.
+Future<_FiltersModule> _load(WebVideoFiltersOptions options) {
+  final url = _url(options, 'video_filters_web.js');
+  return _modules[url] ??= _import(url);
+}
 
 Future<_FiltersModule> _import(String url) async {
   try {
     return await importModule(url.toJS).toDart as _FiltersModule;
-  } catch (_) {
+  } catch (e) {
     unawaited(_modules.remove(url));
-    rethrow;
+    throw StateError('Could not load $url: $e');
   }
 }
 
@@ -412,7 +420,6 @@ extension type _SupportFlags._(JSObject _) implements JSObject {
 extension type _BackgroundOptions._(JSObject _) implements JSObject {
   external factory _BackgroundOptions({
     String? basePath,
-    String? modelPath,
     String backgroundFilter,
     String? backgroundBlurLevel,
     String? backgroundImage,

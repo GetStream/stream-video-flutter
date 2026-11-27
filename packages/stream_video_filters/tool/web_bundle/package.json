@@ -1,0 +1,15 @@
+{
+  "name": "stream-video-filters-web-bundle",
+  "private": true,
+  "description": "Builds the browser files that stream_video_filters loads on web.",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@stream-io/video-filters-web": "1.0.0-beta.3"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12"
+  }
+}
