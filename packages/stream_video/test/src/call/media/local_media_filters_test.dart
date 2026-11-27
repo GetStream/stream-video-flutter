@@ -5,6 +5,7 @@ import 'package:stream_video/src/call/media/local_media_filters.dart';
 import 'package:stream_video/stream_video.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
+import '../../logger/impl/test_logger.dart';
 import '../../webrtc/fixtures/rtc_manager_fakes.dart';
 
 void main() {
@@ -76,13 +77,14 @@ void main() {
       expect(log, ['replace apply cam-1']);
     });
 
-    test('skips a filter that fails', () async {
+    test('skips a filter that fails and runs the rest of the chain', () async {
       await filters.setVideoFilter(_FailingFilter());
-      await filters.setAudioFilter(_LoggingAudioFilter('nc', log));
+      await filters.setModerationFilter(_LoggingFilter('mod', log));
 
       final filtered = await filters.apply(camera('cam-1'));
 
       expect(filtered.mediaTrack.id, 'cam-1');
+      expect(log, ['mod apply cam-1 camera']);
     });
 
     test('skips a filter whose output has no track of its kind', () async {
@@ -479,12 +481,14 @@ void main() {
   });
 
   test('a failing stop is logged and the next capture still applies', () async {
+    final logger = installRecordingLogger();
     await filters.setVideoFilter(_FailingStopFilter(log));
 
     await filters.apply(camera('cam-1'));
     await filters.apply(camera('cam-2'));
 
     expect(log, ['apply cam-1', 'apply cam-2']);
+    expect(logger.warnings, [contains('stop')]);
   });
 }
 
