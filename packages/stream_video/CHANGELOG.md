@@ -254,6 +254,7 @@
 - A join or fast reconnect fails when the device makes no generic SDP offer, instead of joining with an empty one.
 - An incoming ring is marked active only once accepted, so joining it while it rings, as `StreamCallContainer` does when it opens, no longer replaces the active call or cancels your outgoing ring. Until then it is not in `StreamVideo.activeCalls`, so anything keyed off them, such as the Android ongoing-call service, starts on accept.
 - Declining a ring in the app no longer rejects it a second time when the native call screen reports its end as a decline.
+- A ringing call no longer ends for everyone when the other participant rejoins or migrates. With `CallPreferences.dropIfAloneInRingingFlow` on, a call with nobody else in it now waits 3 seconds, and ends only if it is still connected, not left, and nobody else is in it by then. It waits longer while it is itself joining or reconnecting.
 - An incoming call reports the microphone and camera its call settings turn on in `connectOptions` before it is joined. They used to read as off until the join, which then turned them on. Changing only the microphone through `setConnectOptions` before the join no longer turns the camera off and switches it to the front camera when the call settings turn it on and face it back.
 
 ## 1.8.0

@@ -30,7 +30,6 @@ import '../sfu/data/models/sfu_audio_bitrate.dart';
 import '../sfu/data/models/sfu_client_capability.dart';
 import '../sfu/data/models/sfu_error.dart';
 import '../sfu/data/models/sfu_goaway_reason.dart';
-import '../sfu/data/models/sfu_participant.dart';
 import '../sfu/data/models/sfu_track_type.dart';
 import '../stream_video.dart';
 import '../telemetry/client_event_error_mapper.dart';
@@ -73,6 +72,7 @@ import 'events/call_video_moderation.dart';
 import 'media/call_audio_interruptions.dart';
 import 'media/local_media_controller.dart';
 import 'permissions/permissions_manager.dart';
+import 'ringing/call_drop_if_alone.dart';
 import 'ringing/call_ringing_controller.dart';
 import 'session/call_session.dart';
 import 'session/call_session_factory.dart';
@@ -768,6 +768,16 @@ class Call {
     logger: _logger,
   );
 
+  /// Ends the call once the current user is left alone in a ringing flow.
+  late final _dropIfAlone = CallDropIfAlone(
+    stateManager: _stateManager,
+    currentUserId: () => _host.currentUser.id,
+    isLeftOrLeaving: () => _connection._isLeftOrLeaving,
+    end: end,
+    leave: leave,
+    logger: _logger,
+  );
+
   /// Applies coordinator events for this call to its state.
   late final _eventRouter = CallCoordinatorEventRouter(
     stateManager: _stateManager,
@@ -1305,25 +1315,6 @@ class Call {
     );
   }
 
-  /// Whether exactly one participant, a session of the current user, remains
-  /// once [leaving] is removed.
-  bool _isAloneAfterLeave(SfuParticipant leaving) {
-    final currentUserId = _host.currentUser.id;
-    var remaining = 0;
-
-    for (final participant in state.value.callParticipants) {
-      if (participant.userId == leaving.userId &&
-          participant.sessionId == leaving.sessionId) {
-        continue;
-      }
-      if (participant.userId != currentUserId || ++remaining > 1) {
-        return false;
-      }
-    }
-
-    return remaining == 1;
-  }
-
   /// Handles [sfuEvent], sent by [session].
   Future<void> _onSfuEvent(
     SfuEvent sfuEvent, {
@@ -1332,22 +1323,7 @@ class Call {
     if (sfuEvent is SfuParticipantLeftEvent) {
       if (sfuEvent.callCid != callCid.value) return;
 
-      if (state.value.isRingingFlow &&
-          _stateManager.callState.preferences.dropIfAloneInRingingFlow &&
-          _isAloneAfterLeave(sfuEvent.participant)) {
-        final endResult = await end(
-          reason: 'last participant left the call (ringing flow)',
-          initiator: LeaveInitiator.app,
-        );
-
-        if (endResult.isFailure) {
-          _logger.w(
-            () =>
-                '[onSfuEvent] auto-end failed while alone in ringing flow: $endResult',
-          );
-          await leave(reason: DisconnectReason.lastParticipantLeft());
-        }
-      }
+      _dropIfAlone.onParticipantLeft(sfuEvent.participant);
     } else if (sfuEvent is SfuHealthCheckResponseEvent) {
       _stateManager.setParticipantsCount(
         totalCount: sfuEvent.participantCount.total,

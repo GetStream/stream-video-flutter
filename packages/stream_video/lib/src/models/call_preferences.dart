@@ -47,8 +47,12 @@ abstract class CallPreferences {
   /// Whether to automatically drop the call if the user is alone
   /// in the ringing flow.
   ///
-  /// When true, if all participants leave the call initiated by ringing,
-  /// the call will be automatically ended.
+  /// When true, once the last other participant leaves a call initiated by
+  /// ringing, the call is ended for everyone.
+  ///
+  /// The call ends a few seconds after that participant left, and only if
+  /// nobody else is in it by then, so a participant who rejoins or migrates
+  /// with a new session does not end it.
   bool get dropIfAloneInRingingFlow;
 
   /// Configuration options for client-side publishing settings.
