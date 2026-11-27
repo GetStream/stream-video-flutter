@@ -80,9 +80,6 @@ class MethodChannelStreamVideoPushNotification
     await methodChannel.invokeMethod('startCall', params.toJson());
   }
 
-  /// Muting an Ongoing call.
-  /// On iOS, using Callkit(update the ongoing call ui).
-  /// On Android, Nothing(only callback event listener).
   @override
   Future<void> muteCall(String id, {bool isMuted = true}) async {
     await methodChannel.invokeMethod('muteCall', {

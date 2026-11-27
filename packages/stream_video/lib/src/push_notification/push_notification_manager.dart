@@ -84,7 +84,8 @@ abstract class PushNotificationManager {
     bool hasVideo = true,
   });
 
-  /// Mutes or unmutes the call.
+  /// Mutes or unmutes the call in the system call UI, where the platform
+  /// lets the app ask for it.
   ///
   /// [uuid] is the unique identifier for the call.
   /// [isMuted] indicates whether the call is muted (default is true).

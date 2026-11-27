@@ -79,10 +79,9 @@ internal class PushMethodCallHandler(
                 result.success(true)
             }
 
-            "muteCall" -> {
-                events.send(IncomingCallConstants.ACTION_CALL_TOGGLE_MUTE, mapArgument(call))
-                result.success(true)
-            }
+            // Telecom takes no mute request, so there is nothing to change: the mute event comes
+            // only from Telecom, when the system UI mutes a call the Telecom integration holds.
+            "muteCall" -> result.success(true)
 
             // The hold event follows once Telecom has held or resumed the call.
             "holdCall" -> {
