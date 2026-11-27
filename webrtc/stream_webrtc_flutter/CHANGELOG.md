@@ -6,6 +6,7 @@
 * **Breaking:** `EncryptionManager.create` needs a registered `WebRtcEngine` and throws `UnsupportedError` on web; `isSupported` is false without one.
 * The native engine's audio renderers do nothing; the platform plays remote audio.
 * Added `platformEvents.createSpeechActivityDetector`, which detects speech while the microphone is muted on Android, iOS, macOS and the browser.
+* The README lists the native audio and video processing hooks as public API.
 * **Breaking:** platform events are typed; listen to `platformEvents`. `eventStream` is no longer exported.
 * **Breaking:** `handleCallInterruptionCallbacks` is removed; call `platformEvents.enableInterruptionEvents` and listen to `platformEvents.onInterruption`. Apps using `stream_video` must not call `enableInterruptionEvents`, since the SDK does.
 * **Breaking:** `NativePeerConnectionFactory.create` takes a `PeerConnectionFactoryOptions` instead of a map. Options without a field of their own, such as `forceSWCodec`, go in its `additionalOptions`.

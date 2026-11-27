@@ -3,6 +3,8 @@
 --------------------------------------------
 [Unreleased]
 
+* Added `AudioProcessor`, moved from `stream_video`, with `toFilter` for a processor that filters the microphone stream itself.
+* Added `WebRtcCapabilities.supportsAudioProcessingModule`, whether a native audio processing module can be installed.
 * Added `WebRtcCapabilities.supportsVideoEffects`, whether named frame processors can be attached to a local video track.
 * Added `MediaStreamFilter`, `VideoFilter` and `AudioFilter`, filters that process a local stream before it is sent, with `MediaStreamFilterInput`, `MediaStreamFilterResult` and `MediaStreamFilterStopDetails`.
 * Added `webRtcLogHandler`, which receives the log records of the WebRTC packages.

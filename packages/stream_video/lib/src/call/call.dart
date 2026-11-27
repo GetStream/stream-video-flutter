@@ -292,6 +292,10 @@ class Call {
   late final _subscriptions = Subscriptions();
   late final _callInitLock = Lock();
 
+  /// Runs the starts and stops of audio processing one at a time, across
+  /// every call, since they share the client's audio processor.
+  static final _audioProcessingLock = Lock();
+
   final CoordinatorClient _coordinatorClient;
   final CallHost _host;
   final RetryPolicy _retryPolicy;
@@ -337,6 +341,7 @@ class Call {
       if (!_callEvents.isClosed) _callEvents.emit(event);
     },
     logger: _logger,
+    audioProcessorFilter: () => _host.options.audioProcessor?.toFilter(),
   );
 
   /// Accepts and rejects this call's ring, and waits for it to be answered.
@@ -1633,9 +1638,21 @@ class Call {
   /// [startAudioProcessing] fails.
   bool get isAudioProcessorConfigured => _host.isAudioProcessorConfigured();
 
-  /// Starts audio processing for the call.
+  /// Starts audio processing for the call, after the start or stop that is
+  /// running.
   Future<Result<None>> startAudioProcessing({
     bool requireAdvancedAudioProcessingSupport = false,
+  }) {
+    return _audioProcessingLock.synchronized(
+      () => _startAudioProcessing(
+        requireAdvancedAudioProcessingSupport:
+            requireAdvancedAudioProcessingSupport,
+      ),
+    );
+  }
+
+  Future<Result<None>> _startAudioProcessing({
+    required bool requireAdvancedAudioProcessingSupport,
   }) async {
     if (!_host.isAudioProcessorConfigured()) {
       _logger.w(() => '[startAudioProcessing] rejected (not configured)');
@@ -1679,8 +1696,37 @@ class Call {
     return result;
   }
 
-  /// Stops audio processing for the call.
-  Future<Result<None>> stopAudioProcessing() async {
+  /// Stops audio processing for the call, after the start or stop that is
+  /// running. The SFU is told only when the call was processing audio.
+  Future<Result<None>> stopAudioProcessing() {
+    return _audioProcessingLock.synchronized(_stopAudioProcessing);
+  }
+
+  /// Stops audio processing as this call leaves, unless another active call
+  /// is processing audio or is set to start it automatically.
+  Future<Result<None>> _stopAudioProcessingOnLeave() {
+    return _audioProcessingLock.synchronized(() {
+      final shared = _host.state.activeCalls.value.any(
+        (other) =>
+            other.callCid != callCid &&
+            other.state.value.status is! CallStatusDisconnected &&
+            (other.state.value.isAudioProcessing ||
+                other.state.value.settings.audio.noiseCancellation?.mode ==
+                    FeatureActivationMode.autoOn),
+      );
+      if (shared) {
+        _logger.d(
+          () =>
+              '[clear] keeping audio processing on '
+              '(another active call uses it)',
+        );
+        return Future.value(const Result.success(none));
+      }
+      return _stopAudioProcessing();
+    });
+  }
+
+  Future<Result<None>> _stopAudioProcessing() async {
     if (!_host.isAudioProcessorConfigured()) {
       _logger.w(() => '[stopAudioProcessing] rejected (not configured)');
       return failureWithError(
@@ -1688,10 +1734,11 @@ class Call {
       );
     }
 
+    final wasProcessing = _stateManager.callState.isAudioProcessing;
     final result = await _host.setAudioProcessingEnabled(false);
 
     if (result.isSuccess) {
-      await _session?.notifyNoiseCancellationStopped();
+      if (wasProcessing) await _session?.notifyNoiseCancellationStopped();
       _stateManager.setCallAudioProcessing(isAudioProcessing: false);
     }
 

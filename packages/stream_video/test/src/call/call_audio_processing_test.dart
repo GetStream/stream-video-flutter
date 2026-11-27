@@ -1,3 +1,5 @@
+import 'dart:async';
+
 // ignore_for_file: avoid_redundant_argument_values
 
 import 'package:flutter_test/flutter_test.dart';
@@ -391,6 +393,78 @@ void main() {
           () => mockStreamVideo.setAudioProcessingEnabled(false),
         ).called(1);
         verify(callSession.notifyNoiseCancellationStopped).called(1);
+      });
+
+      test(
+        'notifies SFU when it stops during a start that is running',
+        () async {
+          final enabling = Completer<Result<None>>();
+          when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(true);
+          when(
+            () => mockPermissionsManager.hasPermission(
+              CallPermission.enableNoiseCancellation,
+            ),
+          ).thenReturn(true);
+          when(
+            () => mockStreamVideo.setAudioProcessingEnabled(true),
+          ).thenAnswer((_) => enabling.future);
+          when(
+            () => mockStreamVideo.setAudioProcessingEnabled(false),
+          ).thenAnswer((_) async => const Result.success(none));
+          when(
+            callSession.notifyNoiseCancellationStarted,
+          ).thenAnswer((_) async => const Result.success(none));
+          when(
+            callSession.notifyNoiseCancellationStopped,
+          ).thenAnswer((_) async => const Result.success(none));
+
+          final call = createTestCall(
+            networkMonitor: setupMockInternetConnection(
+              statusStream: internetStatusController,
+            ),
+            coordinatorClient: coordinatorClient,
+            sessionFactory: setupMockSessionFactory(callSession: callSession),
+            streamVideo: mockStreamVideo,
+            permissionManager: mockPermissionsManager,
+          );
+
+          await call.join();
+
+          final start = call.startAudioProcessing();
+          await pumpEventQueue();
+          final stop = call.stopAudioProcessing();
+          enabling.complete(const Result.success(none));
+          await start;
+          await stop;
+
+          expect(call.state.value.isAudioProcessing, isFalse);
+          verify(callSession.notifyNoiseCancellationStarted).called(1);
+          verify(callSession.notifyNoiseCancellationStopped).called(1);
+        },
+      );
+
+      test('does not notify SFU when audio processing never started', () async {
+        when(mockStreamVideo.isAudioProcessorConfigured).thenReturn(true);
+        when(
+          () => mockStreamVideo.setAudioProcessingEnabled(false),
+        ).thenAnswer((_) async => const Result.success(none));
+
+        final call = createTestCall(
+          networkMonitor: setupMockInternetConnection(
+            statusStream: internetStatusController,
+          ),
+          coordinatorClient: coordinatorClient,
+          sessionFactory: setupMockSessionFactory(callSession: callSession),
+          streamVideo: mockStreamVideo,
+        );
+
+        await call.join();
+
+        final result = await call.stopAudioProcessing();
+
+        expect(result.isSuccess, isTrue);
+        expect(call.state.value.isAudioProcessing, isFalse);
+        verifyNever(callSession.notifyNoiseCancellationStopped);
       });
 
       test(
@@ -980,6 +1054,53 @@ void main() {
     // clear() audio processing teardown
     // ---------------------------------------------------------------
     group('clear() audio processing teardown', () {
+      test('stops audio processing on leave after a manual start', () async {
+        final activeCallsEmitter = MutableStateEmitter<List<Call>>(
+          [],
+          sync: true,
+        );
+        final clientState = setupMockClientState();
+        when(
+          () => clientState.activeCalls,
+        ).thenAnswer((_) => activeCallsEmitter);
+
+        final streamVideo = setupMockCallHost(clientState: clientState);
+        when(streamVideo.isAudioProcessorConfigured).thenReturn(true);
+        when(
+          () => streamVideo.setAudioProcessingEnabled(any()),
+        ).thenAnswer((_) async => const Result.success(none));
+        when(
+          () => mockPermissionsManager.hasPermission(
+            CallPermission.enableNoiseCancellation,
+          ),
+        ).thenReturn(true);
+        when(
+          callSession.notifyNoiseCancellationStarted,
+        ).thenAnswer((_) async => const Result.success(none));
+        when(
+          callSession.notifyNoiseCancellationStopped,
+        ).thenAnswer((_) async => const Result.success(none));
+
+        final call = createTestCall(
+          networkMonitor: setupMockInternetConnection(
+            statusStream: internetStatusController,
+          ),
+          coordinatorClient: coordinatorClient,
+          sessionFactory: setupMockSessionFactory(callSession: callSession),
+          streamVideo: streamVideo,
+          permissionManager: mockPermissionsManager,
+        );
+
+        await call.join();
+        await call.startAudioProcessing();
+        activeCallsEmitter.value = [call];
+
+        await call.leave();
+        await Future<void>.delayed(Duration.zero);
+
+        verify(() => streamVideo.setAudioProcessingEnabled(false)).called(1);
+      });
+
       test(
         'stops audio processing on leave when autoOn and no other call needs it',
         () async {
@@ -1064,6 +1185,102 @@ void main() {
           verify(
             () => streamVideo.setAudioProcessingEnabled(false),
           ).called(greaterThanOrEqualTo(1));
+        },
+      );
+
+      test(
+        'keeps audio processing on leave while another call is processing audio',
+        () async {
+          const autoOnSettings = CallSettings(
+            audio: StreamAudioSettings(
+              noiseCancellation: StreamNoiceCancellingSettings(
+                mode: FeatureActivationMode.autoOn,
+              ),
+            ),
+          );
+
+          final activeCallsEmitter = MutableStateEmitter<List<Call>>(
+            [],
+            sync: true,
+          );
+
+          final clientState = setupMockClientState();
+          when(
+            () => clientState.activeCalls,
+          ).thenAnswer((_) => activeCallsEmitter);
+
+          final streamVideo = setupMockCallHost(clientState: clientState);
+          when(streamVideo.isAudioProcessorConfigured).thenReturn(true);
+          when(
+            () => streamVideo.setAudioProcessingEnabled(false),
+          ).thenAnswer((_) async => const Result.success(none));
+          when(
+            () => streamVideo.setAudioProcessingEnabled(true),
+          ).thenAnswer((_) async => const Result.success(none));
+
+          when(
+            () => mockPermissionsManager.hasPermission(
+              CallPermission.enableNoiseCancellation,
+            ),
+          ).thenReturn(true);
+          when(
+            callSession.notifyNoiseCancellationStarted,
+          ).thenAnswer((_) async => const Result.success(none));
+          when(
+            callSession.notifyNoiseCancellationStopped,
+          ).thenAnswer((_) async => const Result.success(none));
+
+          when(
+            () => coordinatorClient.joinCall(
+              callCid: any(named: 'callCid'),
+              create: any(named: 'create'),
+              migratingFrom: any(named: 'migratingFrom'),
+              migratingFromList: any(named: 'migratingFromList'),
+              video: any(named: 'video'),
+              membersLimit: any(named: 'membersLimit'),
+              e2ee: any(named: 'e2ee'),
+            ),
+          ).thenAnswer(
+            (_) async => Result.success(
+              _joinedWithSettings(
+                autoOnSettings,
+                ownCapabilities: [CallPermission.enableNoiseCancellation],
+              ),
+            ),
+          );
+
+          when(
+            streamVideo.deviceSupportsAdvancedAudioProcessing,
+          ).thenAnswer((_) async => const Result.success(true));
+
+          final call = createTestCall(
+            networkMonitor: setupMockInternetConnection(
+              statusStream: internetStatusController,
+            ),
+            coordinatorClient: coordinatorClient,
+            sessionFactory: setupMockSessionFactory(callSession: callSession),
+            streamVideo: streamVideo,
+            permissionManager: mockPermissionsManager,
+          );
+
+          await call.join();
+          await Future<void>.delayed(Duration.zero);
+
+          // Started by hand in the other call, which is not set to autoOn.
+          final other = MockCall();
+          when(
+            () => other.callCid,
+          ).thenReturn(StreamCallCid(cid: 'default:other'));
+          final otherState = MutableStateEmitter(
+            createActiveCallState().copyWith(isAudioProcessing: true),
+          );
+          when(() => other.state).thenAnswer((_) => otherState);
+          activeCallsEmitter.value = [call, other];
+
+          await call.leave();
+          await Future<void>.delayed(Duration.zero);
+
+          verifyNever(() => streamVideo.setAudioProcessingEnabled(false));
         },
       );
     });

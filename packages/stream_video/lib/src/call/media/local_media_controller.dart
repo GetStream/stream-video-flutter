@@ -58,7 +58,8 @@ class LocalMediaController {
     required this._activeCalls,
     required this._onCallEvent,
     required this._logger,
-  });
+    AudioFilter? Function()? audioProcessorFilter,
+  }) : _audioProcessorFilter = audioProcessorFilter;
 
   final CallStateNotifier _stateManager;
   final CallSession? Function() _session;
@@ -81,6 +82,10 @@ class LocalMediaController {
   /// Delivers an event this controller raises on the call's events.
   final void Function(StreamCallEvent event) _onCallEvent;
   final TaggedLogger _logger;
+
+  /// The filter of the client's audio processor, run after the app's
+  /// microphone filter.
+  final AudioFilter? Function()? _audioProcessorFilter;
 
   final _multitaskingCameraLock = Lock();
   final _backgroundLock = Lock();
@@ -155,8 +160,10 @@ class LocalMediaController {
   CallState get _state => _stateManager.callState;
 
   /// The filter chains run on every local capture.
-  late final filters = LocalMediaFilters(logger: _logger)
-    ..onOutputChanged = _refilterSent;
+  late final filters = LocalMediaFilters(
+    audioProcessorFilter: _audioProcessorFilter,
+    logger: _logger,
+  )..onOutputChanged = _refilterSent;
 
   /// Stops [track], a capture the call does not keep, and drops the filter
   /// chain run on it.
