@@ -114,6 +114,26 @@ class TelecomIntegrationTest {
     }
 
     @Test
+    fun `a call's endpoints are sent with its cid`() {
+        val telecom = integration().apply { init(enabled()) }
+        telecom.registerIncomingCall(call)
+        repository.completeRegistration(CALL_ID)
+        val snapshot = mapOf("currentEndpoint" to null, "endpoints" to emptyList<Any>())
+
+        repository.endpointsChanged(CALL_ID, snapshot)
+
+        assertEquals(
+            IncomingCallConstants.ACTION_CALL_CUSTOM to mapOf(
+                "id" to CALL_ID,
+                "type" to "telecomAudioEndpointsChanged",
+                "callCid" to "default:abc",
+                "audio" to snapshot,
+            ),
+            events.last(),
+        )
+    }
+
+    @Test
     fun `an outgoing call is activated once it is registered`() {
         val telecom = integration().apply { init(enabled()) }
 

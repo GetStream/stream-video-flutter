@@ -47,6 +47,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
       controller: _controller,
       ringingEvents: onCallEvent,
       onTelecomCallsChanged: _onTelecomCallsChanged,
+      onTelecomAudioOutput: _onTelecomAudioOutput,
     )..start();
 
     if (CurrentPlatform.isAndroid) unawaited(_readTelecomCalls());
@@ -136,6 +137,18 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   @override
   Stream<Set<String>> get systemManagedCallCids =>
       _telecomCallCids.stream.distinct(const SetEquality<String>().equals);
+
+  final _telecomAudioOutputs =
+      StreamController<({String callCid, RtcMediaDevice device})>.broadcast();
+
+  @override
+  Stream<({String callCid, RtcMediaDevice device})> get systemAudioOutputs =>
+      _telecomAudioOutputs.stream;
+
+  void _onTelecomAudioOutput(String callCid, RtcMediaDevice device) {
+    if (_telecomAudioOutputs.isClosed) return;
+    _telecomAudioOutputs.add((callCid: callCid, device: device));
+  }
 
   void _onTelecomCallsChanged(Set<String> callCids) {
     _telecomCallsReported = true;
@@ -316,6 +329,7 @@ class StreamVideoPushNotificationManager implements PushNotificationManager {
   Future<void> dispose() async {
     _observer?.dispose();
     await _telecomCallCids.close();
+    await _telecomAudioOutputs.close();
     await _registrar.dispose();
     await _outgoingCallReporter?.dispose();
     _outgoingCallReporter = null;

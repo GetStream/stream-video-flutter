@@ -52,6 +52,43 @@ void main() {
     });
   });
 
+  group('TelecomAudioEndpoint.fromWireName', () {
+    test('reads each name the native side sends', () {
+      for (final endpoint in TelecomAudioEndpoint.values) {
+        expect(TelecomAudioEndpoint.fromWireName(endpoint.wireName), endpoint);
+      }
+    });
+
+    test('reads a name it does not know as none', () {
+      expect(TelecomAudioEndpoint.fromWireName('unknown'), isNull);
+    });
+  });
+
+  group('TelecomAudioEndpoint.toAudioOutput', () {
+    test('is the Android output fromAudioOutput maps back to it', () {
+      for (final endpoint in TelecomAudioEndpoint.values) {
+        expect(
+          TelecomAudioEndpoint.fromAudioOutput(endpoint.toAudioOutput()),
+          endpoint,
+        );
+      }
+    });
+
+    test('is the output Android lists, with the id as its label', () {
+      expect(
+        TelecomAudioEndpoint.wiredHeadset.toAudioOutput(),
+        _output('wired-headset'),
+      );
+    });
+
+    test('is labelled with the name it is given', () {
+      expect(
+        TelecomAudioEndpoint.bluetooth.toAudioOutput(name: 'Car').label,
+        'Car',
+      );
+    });
+  });
+
   group('requestAudioEndpoint', () {
     final platform = MethodChannelStreamVideoPushNotification();
     final calls = <MethodCall>[];

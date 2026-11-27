@@ -313,6 +313,111 @@ void main() {
         expect(result.isSuccess, isTrue);
       });
     });
+
+    group('follows the output the system routes the call to', () {
+      const speaker = RtcMediaDevice(
+        id: 'speaker',
+        label: 'Speaker',
+        kind: RtcMediaDeviceKind.audioOutput,
+      );
+      const bluetooth = RtcMediaDevice(
+        id: 'bluetooth',
+        label: 'Headset',
+        groupId: 'bluetooth',
+        kind: RtcMediaDeviceKind.audioOutput,
+      );
+
+      late _MockPushNotificationManager pushManager;
+      late MockCallHost streamVideo;
+
+      setUp(() {
+        CurrentPlatform.debugCurrentPlatformOverride = PlatformType.android;
+        overrideWebRtcCapabilities(platform: PlatformType.android);
+        final messenger =
+            TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+        for (final channel in ['thermal', 'thermal/events']) {
+          messenger.setMockMethodCallHandler(
+            MethodChannel(channel),
+            (_) async => null,
+          );
+        }
+        addTearDown(() {
+          CurrentPlatform.debugCurrentPlatformOverride = null;
+          for (final channel in ['thermal', 'thermal/events']) {
+            messenger.setMockMethodCallHandler(MethodChannel(channel), null);
+          }
+        });
+
+        pushManager = _MockPushNotificationManager();
+        when(
+          () => pushManager.setCallAudioOutputDeviceByCid(any(), any()),
+        ).thenAnswer((_) async {});
+        streamVideo = setupMockCallHost();
+        when(() => streamVideo.pushNotificationManager).thenReturn(pushManager);
+        when(
+          () => callSession.setAudioOutputDevice(any()),
+        ).thenAnswer((_) async => const Result.success(none));
+      });
+
+      test('once joined, in WebRTC, the call state and the connect options, '
+          'without routing the system again', () async {
+        final call = await joinWith(
+          const CallConnectOptions(audioOutputDevice: speaker),
+          streamVideo: streamVideo,
+        );
+
+        await call.followSystemAudioOutput(bluetooth);
+
+        verify(() => callSession.setAudioOutputDevice(bluetooth)).called(1);
+        expect(call.state.value.audioOutputDevice, bluetooth);
+        expect(call.connectOptions.audioOutputDevice, bluetooth);
+        verifyNever(
+          () => pushManager.setCallAudioOutputDeviceByCid(any(), bluetooth),
+        );
+      });
+
+      test('not while the join has yet to apply its own output', () async {
+        // The join applies its options unawaited; the audio input, applied
+        // just before the output, holds them up.
+        const microphone = RtcMediaDevice(
+          id: 'microphone',
+          label: 'Microphone',
+          kind: RtcMediaDeviceKind.audioInput,
+        );
+        final input = Completer<Result<None>>();
+        when(
+          () => callSession.setAudioInputDevice(any()),
+        ).thenAnswer((_) => input.future);
+        final call = await joinWith(
+          const CallConnectOptions(
+            audioInputDevice: microphone,
+            audioOutputDevice: speaker,
+          ),
+          streamVideo: streamVideo,
+        );
+
+        // Telecom's default route, before the join asked for its own.
+        await call.followSystemAudioOutput(bluetooth);
+        input.complete(const Result.success(none));
+        await pumpEventQueue();
+
+        verifyNever(() => callSession.setAudioOutputDevice(bluetooth));
+        verify(() => callSession.setAudioOutputDevice(speaker)).called(1);
+        expect(call.state.value.audioOutputDevice, speaker);
+      });
+
+      test('not off Android', () async {
+        final call = await joinWith(
+          const CallConnectOptions(audioOutputDevice: speaker),
+          streamVideo: streamVideo,
+        );
+        CurrentPlatform.debugCurrentPlatformOverride = PlatformType.ios;
+
+        await call.followSystemAudioOutput(bluetooth);
+
+        expect(call.state.value.audioOutputDevice, speaker);
+      });
+    });
   });
 
   group('a rejoin with an audio output', () {
@@ -379,6 +484,36 @@ void main() {
         verify(
           () => pushManager.setCallAudioOutputDeviceByCid(any(), speaker),
         ).called(1);
+      },
+      timeout: const Timeout(Duration(seconds: 30)),
+    );
+
+    test(
+      'applies the output the system routed the call to since',
+      () async {
+        const bluetooth = RtcMediaDevice(
+          id: 'bluetooth',
+          label: 'Headset',
+          groupId: 'bluetooth',
+          kind: RtcMediaDeviceKind.audioOutput,
+        );
+        final [_, second, _] = harness.sessions;
+        final call = harness.buildCall();
+        await call.join(
+          connectOptions: const CallConnectOptions(audioOutputDevice: speaker),
+        );
+        await pumpEventQueue();
+        await call.followSystemAudioOutput(bluetooth);
+
+        harness.requestReconnect(0, SfuReconnectionStrategy.rejoin);
+        await waitUntil(() => harness.reconnectionCallbacks.length == 2);
+        await waitUntil(() => call.state.value.status is CallStatusConnected);
+        await pumpEventQueue();
+
+        verify(() => second.setAudioOutputDevice(bluetooth)).called(1);
+        verifyNever(
+          () => pushManager.setCallAudioOutputDeviceByCid(any(), bluetooth),
+        );
       },
       timeout: const Timeout(Duration(seconds: 30)),
     );

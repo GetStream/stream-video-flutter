@@ -1738,6 +1738,14 @@ class Call {
   Future<Result<None>> setAudioOutputDevice(RtcMediaDevice device) =>
       _media.setAudioOutputDevice(device);
 
+  /// Follows [device], the output the system routed this call to, such as one
+  /// the user picked in Android Telecom's output switcher; see
+  /// `PushNotificationManager.systemAudioOutputs`. The system is not asked
+  /// to route the call again.
+  @internal
+  Future<void> followSystemAudioOutput(RtcMediaDevice device) =>
+      _media.followSystemAudioOutput(device);
+
   /// Sets the audio bitrate profile used to publish the microphone.
   ///
   /// [SfuAudioBitrateProfile.musicHighQuality] turns voice processing and

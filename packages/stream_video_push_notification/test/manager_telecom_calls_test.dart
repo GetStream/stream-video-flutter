@@ -89,6 +89,36 @@ void main() {
     CurrentPlatform.debugCurrentPlatformOverride = null;
   });
 
+  test('passes on the output Telecom routes a call to', () async {
+    final routed = <({String callCid, RtcMediaDevice device})>[];
+    final subscription = manager.systemAudioOutputs.listen(routed.add);
+    addTearDown(subscription.cancel);
+
+    platform.events.add(
+      const ActionCallCustom({
+        'type': 'telecomAudioEndpointsChanged',
+        'callCid': 'default:c1',
+        'audio': {
+          'currentEndpoint': {'id': '1', 'name': 'Speaker', 'type': 'speaker'},
+        },
+      }),
+    );
+    await pumpEventQueue();
+
+    expect(routed.map((output) => (output.callCid, output.device.id)), [
+      ('default:c1', 'speaker'),
+    ]);
+  });
+
+  test('closes the outputs Telecom routes calls to when disposed', () async {
+    final done = Completer<void>();
+    manager.systemAudioOutputs.listen(null, onDone: done.complete);
+
+    await manager.dispose();
+
+    await done.future.timeout(const Duration(seconds: 1));
+  });
+
   test('reads the calls Telecom already holds as it starts', () async {
     platform.heldCids.complete(['default:c1']);
     await pumpEventQueue();

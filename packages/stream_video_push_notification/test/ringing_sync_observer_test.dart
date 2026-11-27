@@ -530,6 +530,103 @@ void main() {
     });
   });
 
+  group('the endpoint Telecom routes a call to', () {
+    late List<(String, RtcMediaDevice)> routed;
+
+    setUp(() {
+      routed = [];
+      observer.dispose();
+      observer = RingingSyncObserver(
+        streamVideo: streamVideo,
+        client: client,
+        controller: controller,
+        ringingEvents: broadcaster.onEvent,
+        onTelecomAudioOutput: (cid, device) => routed.add((cid, device)),
+      );
+      addTearDown(observer.dispose);
+    });
+
+    Future<void> endpoints(Map<String, Object?> body) async {
+      platform.emit(
+        ActionCallCustom({'type': 'telecomAudioEndpointsChanged', ...body}),
+      );
+      await pumpEventQueue();
+    }
+
+    Map<String, Object?> endpoint(String type, String name) => {
+      'id': '00000000-0000-0000-0000-000000000001',
+      'name': name,
+      'type': type,
+    };
+
+    test('is passed on as the output of the call it names', () async {
+      await start();
+
+      await endpoints({
+        'id': 'u1',
+        'callCid': 'default:c1',
+        'audio': {
+          'currentEndpoint': endpoint('bluetooth', 'Car'),
+          'endpoints': [endpoint('earpiece', 'Earpiece')],
+        },
+      });
+
+      expect(routed, [
+        (
+          'default:c1',
+          const RtcMediaDevice(
+            id: 'bluetooth',
+            label: 'Car',
+            groupId: 'bluetooth',
+            kind: RtcMediaDeviceKind.audioOutput,
+          ),
+        ),
+      ]);
+    });
+
+    test('is labelled with its id when Telecom names it nothing', () async {
+      await start();
+
+      await endpoints({
+        'callCid': 'default:c1',
+        'audio': {'currentEndpoint': endpoint('speaker', '')},
+      });
+
+      expect(routed.single.$2.label, 'speaker');
+    });
+
+    for (final (what, body) in [
+      (
+        'without the call cid',
+        <String, Object?>{
+          'audio': {'currentEndpoint': endpoint('speaker', 'Speaker')},
+        },
+      ),
+      (
+        'without a current endpoint',
+        <String, Object?>{
+          'callCid': 'default:c1',
+          'audio': {'currentEndpoint': null, 'endpoints': <Object?>[]},
+        },
+      ),
+      (
+        'of a type it does not know',
+        <String, Object?>{
+          'callCid': 'default:c1',
+          'audio': {'currentEndpoint': endpoint('unknown', 'Stream')},
+        },
+      ),
+    ]) {
+      test('is not passed on $what', () async {
+        await start();
+
+        await endpoints(body);
+
+        expect(routed, isEmpty);
+      });
+    }
+  });
+
   group('the calls Telecom holds', () {
     late List<Set<String>> reported;
 

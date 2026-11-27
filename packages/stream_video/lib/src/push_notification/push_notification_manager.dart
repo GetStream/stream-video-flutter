@@ -168,6 +168,17 @@ abstract class PushNotificationManager {
   /// active calls is among them. None by default.
   Stream<Set<String>> get systemManagedCallCids => Stream.value(const {});
 
+  /// The audio outputs the system routes calls to, for the calls whose audio
+  /// route the system manages: on Android, the calls the Telecom integration
+  /// holds. Each names its call by cid, and one comes as the user picks an
+  /// output in the system's switcher or a headset connects.
+  ///
+  /// A joined call follows them in `CallState.audioOutputDevice` and its
+  /// connect options, without asking the system to route it again. None by
+  /// default.
+  Stream<({String callCid, RtcMediaDevice device})> get systemAudioOutputs =>
+      const Stream.empty();
+
   /// Retrieves a list of active calls.
   Future<List<CallData>> activeCalls();
 
