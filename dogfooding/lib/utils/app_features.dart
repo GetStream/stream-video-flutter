@@ -23,10 +23,10 @@ enum AppFeature {
   /// Blurring whatever is behind the user, in the lobby preview and in the
   /// call.
   ///
-  /// `stream_video_filters` drives the platform's own segmentation pipeline,
-  /// and only Android and iOS ship one — on desktop and web setting the
-  /// filter fails.
-  backgroundBlur({PlatformType.android, PlatformType.ios});
+  /// `stream_video_filters` drives the platform's own segmentation pipeline
+  /// on Android and iOS, and MediaPipe in the browser — on desktop setting
+  /// the filter fails, and so it does in a browser MediaPipe cannot run in.
+  backgroundBlur({PlatformType.android, PlatformType.ios, PlatformType.web});
 
   const AppFeature(this.supportedPlatforms);
 

@@ -1,8 +1,11 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:meta/meta.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import '../stream_video_filters.dart';
 import 'video_effect_registry.dart';
+import 'web/browser_effect.dart';
+import 'web/browser_filters.dart';
 
 /// A [rtc.VideoFilter] that runs a frame processor registered natively under
 /// [effectName], on the captured track itself.
@@ -12,6 +15,10 @@ import 'video_effect_registry.dart';
 /// [StreamVideoFilters.unregisterAllFilters], and attaches it to the
 /// track next to the processors other filters attached. Stopping it detaches
 /// only its own processor.
+///
+/// On web, the filters of this package that have a browser counterpart run
+/// it instead, see [StreamVideoFilters.webOptions]; the others are not
+/// supported there.
 ///
 /// A subclass is itself declared `base`, `final` or `sealed`.
 abstract base class NativeVideoFilter extends rtc.VideoFilter {
@@ -35,10 +42,22 @@ abstract base class NativeVideoFilter extends rtc.VideoFilter {
   @protected
   Iterable<String> get registeredEffectNames => [effectName];
 
+  /// The effect this filter runs on web, or null where it has none.
+  @internal
+  BrowserEffect? get browserEffect => null;
+
   @override
   Future<rtc.MediaStreamFilterResult> apply(
     rtc.MediaStreamFilterInput input,
   ) async {
+    if (kIsWeb) {
+      final effect = browserEffect;
+      if (effect == null) {
+        throw UnsupportedError('$this is not supported on web');
+      }
+      return applyBrowserEffect(input, effect, StreamVideoFilters.webOptions);
+    }
+
     if (!rtc.webRtcCapabilities.supportsVideoEffects) {
       throw UnsupportedError(
         'Video effects are not supported on this platform',

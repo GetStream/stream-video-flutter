@@ -201,6 +201,10 @@ melos:
       run: bash packages/stream_video/generate-protobuf.sh
       description: Regenerate the SFU protobuf models from GetStream/protocol (requires protoc; set PROTOCOL_REF for a branch other than main).
 
+    update:web_filters:
+      run: bash packages/stream_video_filters/tool/web_bundle/update.sh
+      description: Rebuild the web video filter files of stream_video_filters; pass a @stream-io/video-filters-web version after -- to move to it.
+
     gen-l10n: >
       melos exec -c 1 --fail-fast --depends-on=flutter_localizations -- \
        "flutter gen-l10n && dart format ."

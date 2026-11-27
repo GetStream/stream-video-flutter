@@ -2,26 +2,51 @@
 /// custom effects, as `VideoFilter` values for `Call.setVideoFilter`.
 library;
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/services.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 
 import 'src/video_effect_registry.dart';
+import 'src/video_filters.dart';
+import 'src/web/browser_filters.dart';
+import 'src/web/web_video_filters_options.dart';
 import 'stream_video_filters_platform_interface.dart';
 
 export 'src/native_video_filter.dart';
 export 'src/video_filters.dart';
+export 'src/web/web_video_filters_options.dart';
 
-/// The native side of the filters: whether the device runs them, and the
-/// registration of their processors.
+/// Whether the device runs the filters, the registration of their native
+/// processors, and where the web filters load from.
 abstract final class StreamVideoFilters {
+  /// Where the filters load their browser implementation from, and on which
+  /// browsers they run. Read when a filter is applied on web.
+  static WebVideoFiltersOptions webOptions = const WebVideoFiltersOptions();
+
   /// Whether this device can run the filters of this package.
+  ///
+  /// On web, whether the browser can run [BackgroundBlurFilter],
+  /// [VirtualBackgroundFilter] and [FullFrameBlurFilter]; a
+  /// [CustomVideoFilter] runs on Android and iOS only. Loads the browser
+  /// implementation, and is false when it cannot be loaded.
   static Future<bool> isSupported() async {
+    if (kIsWeb) return isBrowserEffectSupported(webOptions);
     if (!rtc.webRtcCapabilities.supportsVideoEffects) return false;
     try {
       return await isBackgroundEffectSupported() ?? false;
     } on MissingPluginException {
       return false;
     }
+  }
+
+  /// Downloads and prepares what the filters need ahead of their first use,
+  /// so the first filter applies faster.
+  ///
+  /// On web, loads the browser implementation, MediaPipe and the
+  /// segmentation model where [isSupported] is true; it runs once for the
+  /// [webOptions] in use, and a failure is logged. Elsewhere it does nothing.
+  static Future<void> preload() async {
+    if (kIsWeb) await preloadBrowserEffects(webOptions);
   }
 
   static Future<bool?> isBackgroundEffectSupported() {

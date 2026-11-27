@@ -6,6 +6,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 // 📦 Package imports:
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart';
 import 'package:marionette_flutter/marionette_flutter.dart';
+import 'package:stream_video_filters/stream_video_filters.dart';
 
 // 🌎 Project imports:
 import 'app/app.dart';
@@ -41,6 +42,11 @@ Future<void> main() async {
   // Reads the device's accent color, which Material 3 Expressive takes by
   // default.
   await M3EDesign.loadDeviceAccent();
+
+  // Runs the background effects on Safari too, in a worker on Safari 18+.
+  StreamVideoFilters.webOptions = const WebVideoFiltersOptions(
+    forceSafariSupport: true,
+  );
 
   // Web URLs carry the route as a path (`/join/<id>`) rather than after a `#`.
   if (!_kWebHashUrls) usePathUrlStrategy();

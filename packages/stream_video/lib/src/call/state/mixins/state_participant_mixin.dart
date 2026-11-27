@@ -285,6 +285,31 @@ mixin StateParticipantMixin on StateNotifier<CallState> {
     );
   }
 
+  /// Records [mediaTrackId] as the media track the local participant sends
+  /// for [trackType], so what renders it picks it up.
+  void participantSetLocalMediaTrack({
+    required SfuTrackType trackType,
+    required String mediaTrackId,
+  }) {
+    state = state.copyWith(
+      callParticipants: state.callParticipants.map((participant) {
+        if (participant.isLocal) {
+          final trackState = participant.publishedTracks[trackType];
+          if (trackState is LocalTrackState &&
+              trackState.mediaTrackId != mediaTrackId) {
+            return participant.copyWith(
+              publishedTracks: {
+                ...participant.publishedTracks,
+                trackType: trackState.copyWith(mediaTrackId: mediaTrackId),
+              },
+            );
+          }
+        }
+        return participant;
+      }).toList(),
+    );
+  }
+
   void participantSetAudioInputDevice({
     required RtcMediaDevice device,
   }) {

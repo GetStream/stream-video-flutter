@@ -1,23 +1,29 @@
+import 'package:meta/meta.dart';
+
 import '../stream_video_filters.dart';
+import 'web/browser_effect.dart';
 
 /// How strongly [BackgroundBlurFilter] blurs.
 final class BlurIntensity {
-  const BlurIntensity._(this.effectName);
+  const BlurIntensity._(this.effectName, this._webLevel);
 
   /// A light blur.
-  static const light = BlurIntensity._('BackgroundBlurLight');
+  static const light = BlurIntensity._('BackgroundBlurLight', 'low');
 
   /// A medium blur.
-  static const medium = BlurIntensity._('BackgroundBlurMedium');
+  static const medium = BlurIntensity._('BackgroundBlurMedium', 'medium');
 
   /// A heavy blur.
-  static const heavy = BlurIntensity._('BackgroundBlurHeavy');
+  static const heavy = BlurIntensity._('BackgroundBlurHeavy', 'high');
 
   /// Every intensity, lightest first.
   static const values = [light, medium, heavy];
 
   /// The name the blur processor of this intensity is registered under.
   final String effectName;
+
+  /// The `backgroundBlurLevel` of `@stream-io/video-filters-web`.
+  final String _webLevel;
 
   @override
   String toString() => 'BlurIntensity($effectName)';
@@ -31,6 +37,10 @@ final class BackgroundBlurFilter extends NativeVideoFilter {
 
   @override
   String get effectName => intensity.effectName;
+
+  @internal
+  @override
+  BrowserEffect get browserEffect => BrowserBackgroundBlur(intensity._webLevel);
 
   @override
   Future<void> register() {
@@ -64,6 +74,10 @@ final class VirtualBackgroundFilter extends NativeVideoFilter {
   @override
   String get effectName => 'VirtualBackground-$imageUrl';
 
+  @internal
+  @override
+  BrowserEffect get browserEffect => BrowserBackgroundImage(imageUrl);
+
   @override
   Future<void> register() {
     return StreamVideoFilters.registerImageEffectProcessors(
@@ -88,6 +102,10 @@ final class FullFrameBlurFilter extends NativeVideoFilter {
 
   @override
   String get effectName => 'FullFrameBlur';
+
+  @internal
+  @override
+  BrowserEffect get browserEffect => const BrowserFullFrameBlur();
 
   @override
   Future<void> register() {
@@ -115,6 +133,7 @@ final class CustomVideoFilterRegistration {
 /// Every filter's registering, attaching and detaching waits for it, so it
 /// has to complete, and must not call
 /// [StreamVideoFilters.unregisterAllFilters], which waits for it too.
+/// Android and iOS only.
 final class CustomVideoFilter extends NativeVideoFilter {
   CustomVideoFilter(this.effectName, {required this.onRegister});
 

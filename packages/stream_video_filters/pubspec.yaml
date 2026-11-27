@@ -17,7 +17,9 @@ dependencies:
     sdk: flutter
   meta: ^1.16.0
   plugin_platform_interface: ^2.0.2
+  stream_dart_webrtc: ^1.0.0
   stream_webrtc_flutter: ^5.0.0
+  web: ^1.0.0
 
 dev_dependencies:
   flutter_lints: ^6.0.0
@@ -28,8 +30,18 @@ dev_dependencies:
 platforms:
   android:
   ios:
+  web:
 
 flutter:
+  # The browser implementation of the web filters, built by tool/web_bundle.
+  # Web only, so it is not bundled into the other platforms' apps.
+  assets:
+    - path: web_files/
+      platforms: [web]
+    - path: web_files/mediapipe/wasm/
+      platforms: [web]
+    - path: web_files/mediapipe/models/
+      platforms: [web]
   plugin:
     platforms:
       android:

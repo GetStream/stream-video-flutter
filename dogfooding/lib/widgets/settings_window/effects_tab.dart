@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_video_filters/stream_video_filters.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
@@ -14,7 +15,8 @@ const _backgroundAssets = [
 const _grayscale = 'grayscale';
 
 /// The settings window's effects tab: three strengths of background blur, a
-/// grayscale filter and the app's background images, applied to [call].
+/// grayscale filter (not on web) and the app's background images, applied to
+/// [call].
 ///
 /// Add it only where `StreamVideoFilters.isSupported()` says the device can
 /// apply them.
@@ -52,14 +54,15 @@ StreamEffectsSettingsTab effectsTab(
           icon: Icon(blur, size: size),
         ),
       // A custom effect the app registers natively, to try that path out.
-      option(
-        CustomVideoFilter(
-          _grayscale,
-          onRegister: (_) => DogfoodingAppChannel().registerGreyscaleEffect(),
+      if (!kIsWeb)
+        option(
+          CustomVideoFilter(
+            _grayscale,
+            onRegister: (_) => DogfoodingAppChannel().registerGreyscaleEffect(),
+          ),
+          label: 'Grayscale',
+          icon: const Icon(Icons.filter_b_and_w),
         ),
-        label: 'Grayscale',
-        icon: const Icon(Icons.filter_b_and_w),
-      ),
     ],
     backgrounds: [
       for (final (index, asset) in _backgroundAssets.indexed)

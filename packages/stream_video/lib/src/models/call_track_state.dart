@@ -68,6 +68,7 @@ class LocalTrackState extends TrackState {
     required super.muted,
     this.sourceDevice,
     this.cameraPosition,
+    this.mediaTrackId,
   });
 
   /// The deviceId of the capture device to use.
@@ -76,8 +77,17 @@ class LocalTrackState extends TrackState {
   /// The camera position of the track in case it is a video track.
   final CameraPosition? cameraPosition;
 
+  /// The id of the media track sent, set when a filter change sends another
+  /// one.
+  final String? mediaTrackId;
+
   @override
-  List<Object?> get props => [muted, sourceDevice, cameraPosition];
+  List<Object?> get props => [
+    muted,
+    sourceDevice,
+    cameraPosition,
+    mediaTrackId,
+  ];
 
   @override
   String toString() {
@@ -99,11 +109,13 @@ class LocalTrackState extends TrackState {
     bool? muted,
     RtcMediaDevice? sourceDevice,
     CameraPosition? cameraPosition,
+    String? mediaTrackId,
   }) {
     return LocalTrackState._(
       muted: muted ?? this.muted,
       sourceDevice: sourceDevice ?? this.sourceDevice,
       cameraPosition: cameraPosition ?? this.cameraPosition,
+      mediaTrackId: mediaTrackId ?? this.mediaTrackId,
     );
   }
 }

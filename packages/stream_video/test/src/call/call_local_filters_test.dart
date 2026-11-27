@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_video/src/call/state/call_state_notifier.dart';
 import 'package:stream_video/stream_video.dart';
 
 import '../../test_helpers.dart';
@@ -116,6 +117,52 @@ void main() {
 
     expect(result.isSuccess, isTrue);
     verify(() => session.refilterLocalTrack(SfuTrackType.video)).called(1);
+  });
+
+  test('a filter replacing the published stream updates the local '
+      'participant, so its video renders the new stream', () async {
+    final stateManager = CallStateNotifier(
+      CallState(
+        preferences: DefaultCallPreferences(),
+        currentUserId: SampleCallData.defaultUserInfo.id,
+        callCid: SampleCallData.defaultCid,
+      ),
+    );
+    final call = createTestCall(
+      coordinatorClient: setupMockCoordinatorClient(events: events),
+      sessionFactory: setupMockSessionFactory(callSession: session),
+      streamVideo: setupMockCallHost(),
+      stateManager: stateManager,
+    );
+    await call.join();
+    final capture =
+        verify(
+              () => session.onLocalCapture = captureAny(),
+            ).captured.last
+            as _Capture;
+    await capture(fakeCameraTrack('cam'));
+    stateManager.state = stateManager.callState.copyWith(
+      callParticipants: [
+        CallParticipantState(
+          userId: stateManager.callState.currentUserId,
+          roles: const [],
+          name: 'me',
+          custom: const {},
+          sessionId: 'session-0',
+          trackIdPrefix: 'me',
+          isLocal: true,
+          publishedTracks: {SfuTrackType.video: TrackState.local()},
+        ),
+      ],
+    );
+    when(
+      () => session.getTrack('me', SfuTrackType.video),
+    ).thenReturn(fakeCameraTrack('out'));
+
+    await call.setVideoFilter(_ReplacingFilter());
+
+    final videoTrack = call.state.value.localParticipant!.videoTrack;
+    expect((videoTrack! as LocalTrackState).mediaTrackId, 'out');
   });
 }
 
