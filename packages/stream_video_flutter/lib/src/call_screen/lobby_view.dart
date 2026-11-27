@@ -270,15 +270,8 @@ class _LobbyBody extends StatelessWidget {
       StreamLobbyViewTheme.of(context).style,
     );
 
-    // A short window in landscape has no height for the preview and the rest
-    // stacked under it, so the two go side by side. So does a window folded
-    // down the middle, one on either side, so nothing sits on the fold.
     final fold = StreamDisplayFold.maybeOf(context);
-    final sideBySide =
-        fold?.posture == StreamFoldPosture.book ||
-        (fold == null &&
-            windowSize.height < StreamLobbyView.sideBySideMaxHeight &&
-            windowSize.width > windowSize.height);
+    final sideBySide = _isSideBySide(fold, windowSize);
 
     // The overlaid row is centred on a preview whose bottom-start corner is
     // taken by the participant label, so a long row runs into it. Past that
@@ -311,34 +304,46 @@ class _LobbyBody extends StatelessWidget {
     );
 
     return SafeArea(
-      child: fold != null
-          ? _atFold(
-              context,
-              parts,
-              posture: fold.posture,
-              previewMaxWidth: style.expandedPreviewSize.width,
-              endMaxWidth: style.joinButtonWidth,
-            )
-          : sideBySide
-          ? _sideBySide(
-              context,
-              parts,
-              previewMaxWidth: style.expandedPreviewSize.width,
-              endMaxWidth: style.joinButtonWidth,
-            )
-          : _stacked(
-              context,
-              parts,
-              isSmall: isSmall,
-              previewMaxWidth: isSmall
-                  ? compactPreviewMaxHeight * style.compactPreviewAspectRatio
-                  : style.expandedPreviewSize.width,
-              joinButtonWidth: isSmall
-                  ? double.infinity
-                  : style.joinButtonWidth,
-            ),
+      child: switch ((fold, sideBySide)) {
+        (final fold?, _) => _atFold(
+          context,
+          parts,
+          posture: fold.posture,
+          previewMaxWidth: style.expandedPreviewSize.width,
+          endMaxWidth: style.joinButtonWidth,
+        ),
+        (null, true) => _sideBySide(
+          context,
+          parts,
+          previewMaxWidth: style.expandedPreviewSize.width,
+          endMaxWidth: style.joinButtonWidth,
+        ),
+        (null, false) => _stacked(
+          context,
+          parts,
+          isSmall: isSmall,
+          previewMaxWidth: isSmall
+              ? compactPreviewMaxHeight * style.compactPreviewAspectRatio
+              : style.expandedPreviewSize.width,
+          joinButtonWidth: isSmall ? double.infinity : style.joinButtonWidth,
+        ),
+      },
     );
   }
+
+  /// Whether the preview and the rest go side by side rather than stacked.
+  ///
+  /// A short window in landscape has no height for the preview and the rest
+  /// stacked under it, so the two go side by side. So does a window folded
+  /// down the middle, one on either side, so nothing sits on the fold.
+  static bool _isSideBySide(StreamDisplayFold? fold, Size windowSize) =>
+      switch (fold?.posture) {
+        StreamFoldPosture.book => true,
+        StreamFoldPosture.tabletop => false,
+        null =>
+          windowSize.height < StreamLobbyView.sideBySideMaxHeight &&
+              windowSize.width > windowSize.height,
+      };
 
   /// The controls in a row, or null when there are none.
   Widget? _controlRow() {

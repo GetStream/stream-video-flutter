@@ -463,14 +463,11 @@ class SplitAtFold extends StatelessWidget {
               children: [first, _extent(axis, gap, null), second],
             );
           }
-          final even = math.max(0, (length - gap) / 2).toDouble();
-          final (firstEnd, secondStart) = switch (measurement.local) {
-            final local? => local.clearance(gap),
-            null => (even, even + gap),
-          };
-          final (firstLength, between) = firstEnd > 0 && secondStart < length
-              ? (firstEnd, secondStart - firstEnd)
-              : (even, gap);
+          final (firstLength, between) = _firstAndBetween(
+            length,
+            gap,
+            measurement.local,
+          );
 
           return Flex(
             direction: axis,
@@ -484,6 +481,19 @@ class SplitAtFold extends StatelessWidget {
         },
       ),
     );
+  }
+
+  /// How long the first side is, and the room between the two, splitting
+  /// [length] at [fold]; split evenly when there is no fold inside it.
+  static (double, double) _firstAndBetween(
+    double length,
+    double gap,
+    StreamLocalFold? fold,
+  ) {
+    final even = math.max(0, (length - gap) / 2).toDouble();
+    final (firstEnd, secondStart) = fold?.clearance(gap) ?? (even, even + gap);
+    if (firstEnd <= 0 || secondStart >= length) return (even, gap);
+    return (firstEnd, secondStart - firstEnd);
   }
 
   static Widget _extent(Axis axis, double length, Widget? child) =>

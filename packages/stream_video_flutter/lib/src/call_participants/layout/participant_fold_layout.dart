@@ -150,68 +150,115 @@ int solveParticipantFoldSplit(StreamParticipantFoldSplitDetails details) {
   final count = details.count;
   if (count <= 1) return count;
 
+  // Splits with tiles on both sides come first; one side is left empty only
+  // when none of those fits.
+  final bothSides = _splits(details, bothSides: true);
+  final oneSide = _splits(details, bothSides: false);
+
+  return _bestFitting(bothSides, details.minTileSize) ??
+      _bestFitting(oneSide, details.minTileSize) ??
+      _largestSmallestTile([...bothSides, ...oneSide]) ??
+      count;
+}
+
+/// A candidate split: how many go on the start side, and the tile size on
+/// each side that has any.
+typedef _Split = ({int start, List<Size> tiles});
+
+/// The splits to consider, fewest on the start side first: those with tiles
+/// on both sides within the extra-tile limit, or those with one side empty.
+List<_Split> _splits(
+  StreamParticipantFoldSplitDetails details, {
+  required bool bothSides,
+}) => [
+  for (var start = 0; start <= details.count; start++)
+    if (_isCandidate(details, start, bothSides: bothSides))
+      (start: start, tiles: _sideTiles(details, start)),
+];
+
+bool _isCandidate(
+  StreamParticipantFoldSplitDetails details,
+  int start, {
+  required bool bothSides,
+}) {
+  final end = details.count - start;
+  final empty = start == 0 || end == 0;
+  if (empty == bothSides) return false;
+  return !bothSides || _withinLimit(details, start, end);
+}
+
+/// Whether the smaller side holds no more than the limit's extra tiles.
+bool _withinLimit(
+  StreamParticipantFoldSplitDetails details,
+  int start,
+  int end,
+) {
   final startLength = _length(details.startSize, details.posture);
   final endLength = _length(details.endSize, details.posture);
+  final extra = details.maxExtraTilesOnSmallerSide;
+  return switch (startLength.compareTo(endLength)) {
+    < 0 => start <= end + extra,
+    > 0 => end <= start + extra,
+    _ => (start - end).abs() <= extra,
+  };
+}
 
-  bool withinLimit(int start, int end) {
-    final extra = details.maxExtraTilesOnSmallerSide;
-    if (startLength < endLength) return start <= end + extra;
-    if (endLength < startLength) return end <= start + extra;
-    return (start - end).abs() <= extra;
-  }
+List<Size> _sideTiles(StreamParticipantFoldSplitDetails details, int start) {
+  final end = details.count - start;
+  return [
+    if (start > 0)
+      solveParticipantGrid(
+        details.sideDetails(StreamFoldSide.start, start),
+      ).tileSize,
+    if (end > 0)
+      solveParticipantGrid(
+        details.sideDetails(StreamFoldSide.end, end),
+      ).tileSize,
+  ];
+}
 
+/// The split among [splits] whose tiles all fit [minTileSize] and come closest
+/// in aspect ratio across the fold; the first on a tie.
+int? _bestFitting(List<_Split> splits, Size minTileSize) {
   int? best;
   var bestScore = double.infinity;
-  int? fallback;
-  var fallbackSmallest = -1.0;
+  for (final split in splits) {
+    final fits = split.tiles.every(
+      (tile) =>
+          tile.width >= minTileSize.width && tile.height >= minTileSize.height,
+    );
+    if (!fits) continue;
 
-  for (final bothSides in [true, false]) {
-    for (var start = 0; start <= count; start++) {
-      final end = count - start;
-      final empty = start == 0 || end == 0;
-      if (empty == bothSides) continue;
-      if (bothSides && !withinLimit(start, end)) continue;
-
-      final tiles = [
-        if (start > 0)
-          solveParticipantGrid(
-            details.sideDetails(StreamFoldSide.start, start),
-          ).tileSize,
-        if (end > 0)
-          solveParticipantGrid(
-            details.sideDetails(StreamFoldSide.end, end),
-          ).tileSize,
-      ];
-
-      final smallest = tiles
-          .map((tile) => math.min(tile.width, tile.height))
-          .reduce(math.min);
-      if (smallest > fallbackSmallest) {
-        fallbackSmallest = smallest;
-        fallback = start;
-      }
-
-      final fits = tiles.every(
-        (tile) =>
-            tile.width >= details.minTileSize.width &&
-            tile.height >= details.minTileSize.height,
-      );
-      if (!fits) continue;
-
-      final score = tiles.length < 2
-          ? 0.0
-          : (math.log(_aspectRatio(tiles[0])) -
-                    math.log(_aspectRatio(tiles[1])))
-                .abs();
-      if (score < bestScore) {
-        bestScore = score;
-        best = start;
-      }
+    final score = _shapeMismatch(split.tiles);
+    if (score < bestScore) {
+      bestScore = score;
+      best = split.start;
     }
-    if (best != null) return best;
   }
+  return best;
+}
 
-  return fallback ?? count;
+/// How far apart the two sides' tiles are in shape; 0 for a single side.
+double _shapeMismatch(List<Size> tiles) => tiles.length < 2
+    ? 0
+    : (math.log(_aspectRatio(tiles[0])) - math.log(_aspectRatio(tiles[1])))
+          .abs();
+
+/// The split among [splits] whose smallest tile edge is largest; the first on
+/// a tie.
+int? _largestSmallestTile(List<_Split> splits) {
+  int? best;
+  var bestSmallest = -1.0;
+  for (final split in splits) {
+    final smallest = split.tiles
+        .map((tile) => math.min(tile.width, tile.height))
+        .reduce(math.min);
+    if (smallest > bestSmallest) {
+      bestSmallest = smallest;
+      best = split.start;
+    }
+  }
+  return best;
 }
 
 double _aspectRatio(Size tile) =>
