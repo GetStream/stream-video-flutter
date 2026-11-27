@@ -282,6 +282,40 @@ void main() {
       ]);
     });
 
+    test('a failed change queued behind another keeps the filter of the one '
+        'before it', () async {
+      final blur = _LoggingFilter('blur', log);
+      await filters.apply(camera('cam-1'));
+
+      // The first change holds the lock, so the other two wait for it.
+      final results = await Future.wait([
+        filters.setVideoFilter(_LoggingFilter('image', log)),
+        filters.setVideoFilter(blur),
+        filters.setVideoFilter(_FailingFilter()),
+      ]);
+
+      expect(results[1].isSuccess, isTrue);
+      expect(results[2].isFailure, isTrue);
+      expect(filters.videoFilter, same(blur));
+    });
+
+    test(
+      'a capture during a rejected change runs the previous filter',
+      () async {
+        final blur = _LoggingFilter('blur', log);
+        await filters.setVideoFilter(blur);
+        await filters.apply(camera('cam-1'));
+
+        final changing = filters.setVideoFilter(_FailingFilter());
+        final next = filters.apply(camera('cam-2'));
+        await changing;
+        await next;
+
+        expect(filters.videoFilter, same(blur));
+        expect(log.last, 'blur apply cam-2 camera');
+      },
+    );
+
     test('keeps the old chain when the moderation filter fails', () async {
       final capture = camera('cam-1');
       final moderation = _FlakyFilter('mod', log);

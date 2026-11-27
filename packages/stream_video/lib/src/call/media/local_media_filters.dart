@@ -63,12 +63,11 @@ class LocalMediaFilters {
   /// Sets the app's camera filter. Fails when a filter of the chain fails,
   /// keeping the previous filter.
   Future<Result<LocalFilterChange>> setVideoFilter(rtc.VideoFilter? filter) {
-    final previous = _videoFilter;
-    return _change(
-      SfuTrackType.video,
-      () => _videoFilter = filter,
-      revert: () => _videoFilter = previous,
-    );
+    return _change(SfuTrackType.video, () {
+      final previous = _videoFilter;
+      _videoFilter = filter;
+      return () => _videoFilter = previous;
+    });
   }
 
   /// Sets the moderation blur, which runs after the app's camera filter.
@@ -78,11 +77,10 @@ class LocalMediaFilters {
   Future<Result<LocalFilterChange>> setModerationFilter(
     rtc.VideoFilter? filter,
   ) {
-    return _change(
-      SfuTrackType.video,
-      () => _moderationFilter = filter,
-      failOnOptional: false,
-    );
+    return _change(SfuTrackType.video, () {
+      _moderationFilter = filter;
+      return null;
+    }, failOnOptional: false);
   }
 
   /// Sets the screen share filter. Fails when a filter of the chain fails,
@@ -90,23 +88,21 @@ class LocalMediaFilters {
   Future<Result<LocalFilterChange>> setScreenShareFilter(
     rtc.VideoFilter? filter,
   ) {
-    final previous = _screenShareFilter;
-    return _change(
-      SfuTrackType.screenShare,
-      () => _screenShareFilter = filter,
-      revert: () => _screenShareFilter = previous,
-    );
+    return _change(SfuTrackType.screenShare, () {
+      final previous = _screenShareFilter;
+      _screenShareFilter = filter;
+      return () => _screenShareFilter = previous;
+    });
   }
 
   /// Sets the app's microphone filter. Fails when a filter of the chain
   /// fails, keeping the previous filter.
   Future<Result<LocalFilterChange>> setAudioFilter(rtc.AudioFilter? filter) {
-    final previous = _audioFilter;
-    return _change(
-      SfuTrackType.audio,
-      () => _audioFilter = filter,
-      revert: () => _audioFilter = previous,
-    );
+    return _change(SfuTrackType.audio, () {
+      final previous = _audioFilter;
+      _audioFilter = filter;
+      return () => _audioFilter = previous;
+    });
   }
 
   List<_ChainEntry> _chainFor(SfuTrackType kind) {
@@ -221,36 +217,32 @@ class LocalMediaFilters {
   /// is sent first when it is another stream. When the moderation blur fails
   /// on the capture, another filter of the chain fails and [failOnOptional]
   /// is true, or the new stream cannot be sent, the new chain is stopped, the
-  /// old one stays applied and [revert] undoes [change].
+  /// old one stays applied and the undo that [change] returns, if any, runs.
+  /// A new capture that started with the new chain while its stream was being
+  /// sent keeps it.
   ///
   /// Changes of a kind run one at a time, each until its stream is sent.
   Future<Result<LocalFilterChange>> _change(
     SfuTrackType kind,
-    void Function() change, {
+    void Function()? Function() change, {
     bool failOnOptional = true,
-    void Function()? revert,
   }) {
     return _changeLocks
         .putIfAbsent(kind, Lock.new)
         .synchronized(
-          () => _changeChain(
-            kind,
-            change,
-            failOnOptional: failOnOptional,
-            revert: revert,
-          ),
+          () => _changeChain(kind, change, failOnOptional: failOnOptional),
         );
   }
 
   Future<Result<LocalFilterChange>> _changeChain(
     SfuTrackType kind,
-    void Function() change, {
+    void Function()? Function() change, {
     required bool failOnOptional,
-    required void Function()? revert,
   }) async {
     final lock = _lockFor(kind);
+    void Function()? revert;
     final changed = await lock.synchronized(() async {
-      change();
+      revert = change();
 
       final current = _applied[kind];
       if (current == null) return null;
@@ -266,7 +258,13 @@ class LocalMediaFilters {
       final rejection =
           applied.requiredFailure ??
           (failOnOptional ? applied.failures.firstOrNull : null);
-      if (rejection == null) _applied[kind] = applied;
+      if (rejection != null) {
+        // Undone before the lock is released, so no new capture runs it.
+        revert?.call();
+        await applied.stop(rtc.MediaStreamFilterStopReason.rejected, _logger);
+      } else {
+        _applied[kind] = applied;
+      }
       return (applied: applied, retired: current, rejection: rejection);
     });
     if (changed == null) {
@@ -274,13 +272,7 @@ class LocalMediaFilters {
     }
 
     final (:applied, :retired, :rejection) = changed;
-    if (rejection != null) {
-      await lock.synchronized(() async {
-        await applied.stop(rtc.MediaStreamFilterStopReason.rejected, _logger);
-        revert?.call();
-      });
-      return _failureOf(rejection);
-    }
+    if (rejection != null) return _failureOf(rejection);
 
     if (!identical(applied.output, retired.output)) {
       final sent = await _sendOutput(kind);
