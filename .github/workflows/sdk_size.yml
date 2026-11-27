@@ -76,8 +76,7 @@ jobs:
       github.event_name != 'pull_request'
       || (startsWith(github.head_ref, 'release/') && github.event.pull_request.draft == false)
     timeout-minutes: 60
-    # Pinned, so a runner image update doesn't change the iOS numbers.
-    runs-on: macos-26
+    runs-on: xcode-27
     steps:
       # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
       # makes no other GitHub call, so it runs on a free standard runner.
@@ -90,10 +89,11 @@ jobs:
           REPOSITORY: ${{ github.repository }}
           SHA: ${{ github.sha }}
 
+      # Pinned, so a runner image update doesn't change the iOS numbers.
       - name: Select Xcode
         uses: ./.github/actions/select-xcode
         with:
-          xcode-version: "26.3.0"
+          xcode-version: "27.1"
 
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter
