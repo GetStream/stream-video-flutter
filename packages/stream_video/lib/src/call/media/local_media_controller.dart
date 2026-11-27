@@ -173,8 +173,20 @@ class LocalMediaController {
   }
 
   Future<Result<None>> _refilterSent(SfuTrackType kind) async {
-    return await _session()?.refilterLocalTrack(kind) ??
-        const Result.success(none);
+    final session = _session();
+    if (session == null) return const Result.success(none);
+    final result = await session.refilterLocalTrack(kind);
+    final local = _state.localParticipant;
+    if (result.isSuccess && local != null) {
+      final sentId = session.getTrack(local.trackIdPrefix, kind)?.mediaTrack.id;
+      if (sentId != null) {
+        _stateManager.participantSetLocalMediaTrack(
+          trackType: kind,
+          mediaTrackId: sentId,
+        );
+      }
+    }
+    return result;
   }
 
   /// The app's camera filter.

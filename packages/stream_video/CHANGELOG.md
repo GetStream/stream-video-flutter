@@ -187,6 +187,7 @@
 
 ### 🐞 Fixed
 
+- The local video shows the new stream after a filter change that replaces it, instead of going black.
 - [iOS] A screen share broadcast started outside the app, such as from Control Center, is now shared in the active call.
 - [iOS] A screen share broadcast that the call cannot share now ends with an error instead of running on.
 - [iOS] A rejoin shares a running screen share broadcast again instead of showing the broadcast picker.
