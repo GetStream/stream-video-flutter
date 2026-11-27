@@ -966,8 +966,8 @@ class Call {
   /// one, before it is sent. Null removes it.
   ///
   /// With the camera off, the filter is applied when it is next turned on.
-  /// Fails when a filter on the camera fails to apply; the filter stays set
-  /// and is tried again on the next capture.
+  /// Fails when a filter on the camera fails to apply, and the previous
+  /// filter stays in place.
   ///
   /// A moderation blur set through [VideoModerationConfig.blur] runs after
   /// it while active.
@@ -981,8 +981,8 @@ class Call {
   /// later one, before it is sent. Null removes it.
   ///
   /// With the microphone off, the filter is applied when it is next turned
-  /// on. Fails when a filter on the microphone fails to apply; the filter
-  /// stays set and is tried again on the next capture.
+  /// on. Fails when a filter on the microphone fails to apply, and the
+  /// previous filter stays in place.
   Future<Result<None>> setAudioFilter(AudioFilter? filter) =>
       _media.setAudioFilter(filter);
 

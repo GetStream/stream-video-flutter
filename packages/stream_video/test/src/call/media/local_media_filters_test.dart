@@ -176,13 +176,17 @@ void main() {
       expect(log, ['b apply cam-1 camera']);
     });
 
-    test('fails when a filter of the chain fails', () async {
+    test('fails when a filter of the chain fails, keeping the previous '
+        'filter', () async {
+      final blur = _LoggingFilter('blur', log);
+      await filters.setVideoFilter(blur);
       await filters.apply(camera('cam-1'));
 
       final result = await filters.setVideoFilter(_FailingFilter());
 
       expect(result.isFailure, isTrue);
-      expect(filters.videoFilter, isA<_FailingFilter>());
+      expect(filters.videoFilter, same(blur));
+      expect(log, ['blur apply cam-1 camera']);
     });
 
     test('to one that replaces the stream sends the new stream', () async {
@@ -239,6 +243,7 @@ void main() {
 
       expect(result.isFailure, isTrue);
       expect(held.mediaStream, same(capture.mediaStream));
+      expect(filters.videoFilter, isA<_LoggingFilter>());
       expect(log, [
         'blur apply cam-1 camera',
         'replace apply cam-1',
@@ -288,11 +293,11 @@ void main() {
       await filters.setModerationFilter(null);
 
       expect(result.isFailure, isTrue);
+      expect(filters.videoFilter, isNull);
       expect(log, [
         'mod apply cam-1 camera',
         'img apply cam-1 camera',
         'img stop cam-1 rejected',
-        'img apply cam-1 camera',
         'mod stop cam-1 chainChanged',
       ]);
     });

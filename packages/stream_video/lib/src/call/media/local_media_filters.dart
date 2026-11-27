@@ -60,9 +60,15 @@ class LocalMediaFilters {
   /// The moderation blur, applied after [videoFilter] while set.
   rtc.VideoFilter? get moderationFilter => _moderationFilter;
 
-  /// Sets the app's camera filter. Fails when a filter of the chain fails.
+  /// Sets the app's camera filter. Fails when a filter of the chain fails,
+  /// keeping the previous filter.
   Future<Result<LocalFilterChange>> setVideoFilter(rtc.VideoFilter? filter) {
-    return _change(SfuTrackType.video, () => _videoFilter = filter);
+    final previous = _videoFilter;
+    return _change(
+      SfuTrackType.video,
+      () => _videoFilter = filter,
+      revert: () => _videoFilter = previous,
+    );
   }
 
   /// Sets the moderation blur, which runs after the app's camera filter.
@@ -79,17 +85,28 @@ class LocalMediaFilters {
     );
   }
 
-  /// Sets the screen share filter. Fails when a filter of the chain fails.
+  /// Sets the screen share filter. Fails when a filter of the chain fails,
+  /// keeping the previous filter.
   Future<Result<LocalFilterChange>> setScreenShareFilter(
     rtc.VideoFilter? filter,
   ) {
-    return _change(SfuTrackType.screenShare, () => _screenShareFilter = filter);
+    final previous = _screenShareFilter;
+    return _change(
+      SfuTrackType.screenShare,
+      () => _screenShareFilter = filter,
+      revert: () => _screenShareFilter = previous,
+    );
   }
 
   /// Sets the app's microphone filter. Fails when a filter of the chain
-  /// fails.
+  /// fails, keeping the previous filter.
   Future<Result<LocalFilterChange>> setAudioFilter(rtc.AudioFilter? filter) {
-    return _change(SfuTrackType.audio, () => _audioFilter = filter);
+    final previous = _audioFilter;
+    return _change(
+      SfuTrackType.audio,
+      () => _audioFilter = filter,
+      revert: () => _audioFilter = previous,
+    );
   }
 
   List<_ChainEntry> _chainFor(SfuTrackType kind) {
@@ -202,20 +219,26 @@ class LocalMediaFilters {
   ///
   /// The new chain is applied before the old one is stopped, and its output
   /// is sent first when it is another stream. When the moderation blur fails
-  /// on the capture, or the new stream cannot be sent, the new chain is
-  /// stopped and the old one stays applied. Fails too when another filter of
-  /// the chain fails, unless [failOnOptional] is false.
+  /// on the capture, another filter of the chain fails and [failOnOptional]
+  /// is true, or the new stream cannot be sent, the new chain is stopped, the
+  /// old one stays applied and [revert] undoes [change].
   ///
   /// Changes of a kind run one at a time, each until its stream is sent.
   Future<Result<LocalFilterChange>> _change(
     SfuTrackType kind,
     void Function() change, {
     bool failOnOptional = true,
+    void Function()? revert,
   }) {
     return _changeLocks
         .putIfAbsent(kind, Lock.new)
         .synchronized(
-          () => _changeChain(kind, change, failOnOptional: failOnOptional),
+          () => _changeChain(
+            kind,
+            change,
+            failOnOptional: failOnOptional,
+            revert: revert,
+          ),
         );
   }
 
@@ -223,6 +246,7 @@ class LocalMediaFilters {
     SfuTrackType kind,
     void Function() change, {
     required bool failOnOptional,
+    required void Function()? revert,
   }) async {
     final lock = _lockFor(kind);
     final changed = await lock.synchronized(() async {
@@ -239,25 +263,31 @@ class LocalMediaFilters {
         knownTrackIds: current.knownTrackIds,
         logger: _logger,
       );
-      if (applied.requiredFailure == null) _applied[kind] = applied;
-      return (applied: applied, retired: current);
+      final rejection =
+          applied.requiredFailure ??
+          (failOnOptional ? applied.failures.firstOrNull : null);
+      if (rejection == null) _applied[kind] = applied;
+      return (applied: applied, retired: current, rejection: rejection);
     });
     if (changed == null) {
       return const Result.success(LocalFilterChange.deferred);
     }
 
-    final (:applied, :retired) = changed;
-    if (applied.requiredFailure case final failure?) {
-      await lock.synchronized(
-        () => applied.stop(rtc.MediaStreamFilterStopReason.rejected, _logger),
-      );
-      return _failureOf(failure);
+    final (:applied, :retired, :rejection) = changed;
+    if (rejection != null) {
+      await lock.synchronized(() async {
+        await applied.stop(rtc.MediaStreamFilterStopReason.rejected, _logger);
+        revert?.call();
+      });
+      return _failureOf(rejection);
     }
 
     if (!identical(applied.output, retired.output)) {
       final sent = await _sendOutput(kind);
       if (sent case final Failure failure) {
-        await lock.synchronized(() => _restore(kind, applied, retired));
+        await lock.synchronized(() async {
+          if (await _restore(kind, applied, retired)) revert?.call();
+        });
         return failure;
       }
     }
@@ -265,19 +295,13 @@ class LocalMediaFilters {
     await lock.synchronized(
       () => retired.stop(rtc.MediaStreamFilterStopReason.chainChanged, _logger),
     );
-
-    if (failOnOptional) {
-      if (applied.failures.firstOrNull case final failure?) {
-        return _failureOf(failure);
-      }
-    }
     return const Result.success(LocalFilterChange.applied);
   }
 
-  /// Puts [retired] back in place of [applied], whose output was not sent.
-  /// When a new capture replaced [applied] meanwhile, [retired] is stopped
-  /// instead.
-  Future<void> _restore(
+  /// Puts [retired] back in place of [applied], whose output was not sent,
+  /// and returns whether it did. When a new capture replaced [applied]
+  /// meanwhile, [retired] is stopped instead.
+  Future<bool> _restore(
     SfuTrackType kind,
     _AppliedChain applied,
     _AppliedChain retired,
@@ -287,10 +311,11 @@ class LocalMediaFilters {
         rtc.MediaStreamFilterStopReason.chainChanged,
         _logger,
       );
-      return;
+      return false;
     }
     _applied[kind] = retired;
     await applied.stop(rtc.MediaStreamFilterStopReason.rejected, _logger);
+    return true;
   }
 
   static Result<LocalFilterChange> _failureOf(_FilterFailure failure) {
