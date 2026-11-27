@@ -37,5 +37,6 @@ WebRtcCapabilities nativeWebRtcCapabilitiesFor({
     supportsSystemManagedAudioFocus: isAndroid,
     supportsEncryption: isAndroid || isIOS || isMacOS,
     supportsAudioModuleMicrophoneMute: isIOS || isMacOS,
+    supportsVideoEffects: isAndroid || isIOS,
   );
 }

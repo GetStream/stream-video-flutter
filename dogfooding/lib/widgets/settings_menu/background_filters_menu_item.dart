@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_filters/video_effects_manager.dart';
+import 'package:stream_video_filters/stream_video_filters.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../dogfooding_app_channel.dart';
@@ -7,11 +7,9 @@ import '../../dogfooding_app_channel.dart';
 const _iconSize = 40.0;
 
 class BackgroundFiltersMenuItem extends StatefulWidget {
-  const BackgroundFiltersMenuItem({
-    required this.videoEffectsManager,
-    super.key,
-  });
-  final StreamVideoEffectsManager videoEffectsManager;
+  const BackgroundFiltersMenuItem({required this.call, super.key});
+
+  final Call call;
 
   @override
   State<BackgroundFiltersMenuItem> createState() =>
@@ -19,8 +17,6 @@ class BackgroundFiltersMenuItem extends StatefulWidget {
 }
 
 class _BackgroundFiltersMenuItemState extends State<BackgroundFiltersMenuItem> {
-  List<String> appliedFilters = [];
-
   static final _filters = [
     const _BlurFilterOption(),
     const _ImageFilterOption('assets/bg1.jpg'),
@@ -28,12 +24,6 @@ class _BackgroundFiltersMenuItemState extends State<BackgroundFiltersMenuItem> {
     const _ImageFilterOption('assets/bg3.jpg'),
     _GrayscaleFilterOption(),
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    appliedFilters = widget.videoEffectsManager.appliedVideoEffects ?? [];
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,37 +53,23 @@ class _BackgroundFiltersMenuItemState extends State<BackgroundFiltersMenuItem> {
   }
 
   bool _isFilterApplied(_FilterOption? filter) {
-    if (filter == null) {
-      return appliedFilters.isEmpty;
-    }
-    return appliedFilters.contains(filter.name);
+    final applied = widget.call.videoFilter;
+    if (filter == null) return applied == null;
+    return applied == filter.filter;
   }
 
   Future<void> _applyFilter(_FilterOption? filter) async {
-    if (filter == null || _isFilterApplied(filter)) {
-      await widget.videoEffectsManager.disableAllFilters();
-    } else {
-      switch (filter) {
-        case _BlurFilterOption():
-          await widget.videoEffectsManager.applyBackgroundBlurFilter(
-            filter.intensity,
-          );
-        case _ImageFilterOption():
-          await widget.videoEffectsManager.applyBackgroundImageFilter(
-            filter.asset,
-          );
-        case _CustomFilterOption():
-          await widget.videoEffectsManager.applyCustomEffect(
-            filter.name,
-            registerEffectProcessorCallback:
-                filter.registerEffectProcessorCallback,
-          );
-      }
+    final next = filter == null || _isFilterApplied(filter)
+        ? null
+        : filter.filter;
+    final result = await widget.call.setVideoFilter(next);
+    if (!mounted) return;
+    setState(() {});
+    if (result.isFailure) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(content: Text('Could not apply the filter')),
+      );
     }
-
-    setState(() {
-      appliedFilters = widget.videoEffectsManager.appliedVideoEffects ?? [];
-    });
   }
 }
 
@@ -142,18 +118,16 @@ class _FilterIconWrapper extends StatelessWidget {
 sealed class _FilterOption {
   const _FilterOption();
 
-  String get name;
+  VideoFilter get filter;
 
   Widget buildIcon(BuildContext context);
 }
 
 class _BlurFilterOption extends _FilterOption {
-  // ignore: unused_element_parameter
-  const _BlurFilterOption([this.intensity = BlurIntensity.medium]);
-  final BlurIntensity intensity;
+  const _BlurFilterOption();
 
   @override
-  String get name => intensity.name;
+  VideoFilter get filter => BackgroundBlurFilter();
 
   @override
   Widget buildIcon(BuildContext context) =>
@@ -165,7 +139,7 @@ class _ImageFilterOption extends _FilterOption {
   final String asset;
 
   @override
-  String get name => 'VirtualBackground-$asset';
+  VideoFilter get filter => VirtualBackgroundFilter(asset);
 
   @override
   Widget buildIcon(BuildContext context) {
@@ -180,24 +154,14 @@ class _ImageFilterOption extends _FilterOption {
   }
 }
 
-abstract class _CustomFilterOption extends _FilterOption {
-  _CustomFilterOption();
-
-  final DogfoodingAppChannel _dogfoodingAppChannel = DogfoodingAppChannel();
-
-  Future<void> registerEffectProcessorCallback();
-}
-
-class _GrayscaleFilterOption extends _CustomFilterOption {
+class _GrayscaleFilterOption extends _FilterOption {
   _GrayscaleFilterOption();
 
   @override
-  String get name => 'grayscale';
-
-  @override
-  Future<void> registerEffectProcessorCallback() async {
-    await _dogfoodingAppChannel.registerGreyscaleEffect();
-  }
+  late final VideoFilter filter = CustomVideoFilter(
+    'grayscale',
+    onRegister: (_) => DogfoodingAppChannel().registerGreyscaleEffect(),
+  );
 
   @override
   Widget buildIcon(BuildContext context) =>

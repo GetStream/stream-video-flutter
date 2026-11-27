@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../app/user_auth_controller.dart';
@@ -65,7 +64,6 @@ class CallRoutePage extends StatefulWidget {
 
 typedef _JoinOptions = ({
   CallConnectOptions connectOptions,
-  StreamVideoEffectsManager effectsManager,
   String? encryptionKey,
 });
 
@@ -282,7 +280,6 @@ class _CallRoutePageState extends State<CallRoutePage> {
       return CallScreen(
         call: call,
         connectOptions: options?.connectOptions,
-        videoEffectsManager: options?.effectsManager,
         encryptionKey: options?.encryptionKey,
       );
     }
@@ -295,14 +292,12 @@ class _CallRoutePageState extends State<CallRoutePage> {
           ({
             required call,
             required connectOptions,
-            required effectsManager,
             encryptionKey,
           }) {
             setState(() {
               _inCall = true;
               _joinOptions = (
                 connectOptions: connectOptions,
-                effectsManager: effectsManager,
                 // The passphrase the lobby settled on, so the call screen can
                 // put it in the invite it offers.
                 encryptionKey: encryptionKey,

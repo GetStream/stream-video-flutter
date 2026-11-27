@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:stream_video_filters/video_effects_manager.dart';
+import 'package:stream_video_filters/stream_video_filters.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../../dogfooding_app_channel.dart';
+import '../../utils/video_filters.dart';
 
 const _backgroundAssets = [
   'assets/bg1.jpg',
@@ -13,16 +14,28 @@ const _backgroundAssets = [
 const _grayscale = 'grayscale';
 
 /// The settings window's effects tab: three strengths of background blur, a
-/// grayscale filter and the app's background images, applied through
-/// [manager].
+/// grayscale filter and the app's background images, applied to [call].
 ///
-/// Add it only where `manager.isSupported()` says the device can apply them.
+/// Add it only where `StreamVideoFilters.isSupported()` says the device can
+/// apply them.
 StreamEffectsSettingsTab effectsTab(
   BuildContext context, {
   required Call call,
-  required StreamVideoEffectsManager manager,
 }) {
   final blur = context.streamIcons.blurFill;
+
+  StreamVideoFilter option(
+    NativeVideoFilter filter, {
+    required String label,
+    required Widget icon,
+  }) {
+    return StreamVideoFilter(
+      id: filter.effectName,
+      label: label,
+      icon: icon,
+      onSelected: () => applyVideoFilter(call, filter),
+    );
+  }
 
   return StreamEffectsSettingsTab(
     call: call,
@@ -33,35 +46,35 @@ StreamEffectsSettingsTab effectsTab(
         (BlurIntensity.medium, 'Medium blur', 22.0),
         (BlurIntensity.heavy, 'Heavy blur', 26.0),
       ])
-        StreamVideoFilter(
-          id: intensity.name,
+        option(
+          BackgroundBlurFilter(intensity: intensity),
           label: label,
           icon: Icon(blur, size: size),
-          onSelected: () => manager.applyBackgroundBlurFilter(intensity),
         ),
       // A custom effect the app registers natively, to try that path out.
-      StreamVideoFilter(
-        id: _grayscale,
+      option(
+        CustomVideoFilter(
+          _grayscale,
+          onRegister: (_) => DogfoodingAppChannel().registerGreyscaleEffect(),
+        ),
         label: 'Grayscale',
         icon: const Icon(Icons.filter_b_and_w),
-        onSelected: () => manager.applyCustomEffect(
-          _grayscale,
-          registerEffectProcessorCallback:
-              DogfoodingAppChannel().registerGreyscaleEffect,
-        ),
       ),
     ],
     backgrounds: [
       for (final (index, asset) in _backgroundAssets.indexed)
         StreamVideoBackground(
-          // The name the manager applies the background under.
-          id: 'VirtualBackground-$asset',
+          id: VirtualBackgroundFilter(asset).effectName,
           label: 'Background ${index + 1}',
           image: AssetImage(asset),
-          onSelected: () => manager.applyBackgroundImageFilter(asset),
+          onSelected: () =>
+              applyVideoFilter(call, VirtualBackgroundFilter(asset)),
         ),
     ],
-    onClear: manager.disableAllFilters,
-    selected: () => manager.appliedVideoEffects?.firstOrNull,
+    onClear: () => applyVideoFilter(call, null),
+    selected: () => switch (call.videoFilter) {
+      final NativeVideoFilter filter => filter.effectName,
+      _ => null,
+    },
   );
 }

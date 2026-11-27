@@ -36,15 +36,13 @@ public class StreamVideoFiltersPlugin: NSObject, FlutterPlugin {
         Self.registeredNames.formUnion([
           "BackgroundBlurLight", "BackgroundBlurMedium", "BackgroundBlurHeavy",
         ])
+        result(nil)
       } else {
-        print("Background blur effects are not supported on iOS versions earlier than 15.0")
+        result(Self.unsupported("Background blur effects"))
       }
-
-      result(nil)
     case "registerImageEffectProcessors":
       guard #available(iOS 15.0, *) else {
-        print("Image overlay effects are not supported on iOS versions earlier than 15.0")
-        result(nil)
+        result(Self.unsupported("Image overlay effects"))
         return
       }
 
@@ -76,10 +74,10 @@ public class StreamVideoFiltersPlugin: NSObject, FlutterPlugin {
           FullFrameBlurVideoFrameProcessor(),
           forName: "FullFrameBlur")
         Self.registeredNames.insert("FullFrameBlur")
+        result(nil)
       } else {
-        print("Full frame blur effect is not supported on iOS versions earlier than 15.0")
+        result(Self.unsupported("Full frame blur effects"))
       }
-      result(nil)
     case "unregisterAllFilters":
       for name in Self.registeredNames {
         ProcessorProvider.removeProcessor(name)
@@ -89,5 +87,15 @@ public class StreamVideoFiltersPlugin: NSObject, FlutterPlugin {
     default:
       result(FlutterMethodNotImplemented)
     }
+  }
+
+  // Fails the registration, so a filter never reports itself applied while
+  // its frames go out unprocessed.
+  private static func unsupported(_ effect: String) -> FlutterError {
+    return FlutterError(
+      code: "UNSUPPORTED",
+      message: "\(effect) are not supported on iOS versions earlier than 15.0",
+      details: nil
+    )
   }
 }

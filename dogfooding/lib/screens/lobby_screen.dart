@@ -3,7 +3,7 @@ import 'dart:async';
 
 // 📦 Package imports:
 import 'package:flutter/material.dart';
-import 'package:stream_video_filters/video_effects_manager.dart';
+import 'package:stream_video_filters/stream_video_filters.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import '../app/user_auth_controller.dart';
@@ -28,7 +28,6 @@ typedef OnJoinCallPressed =
     void Function({
       required Call call,
       required CallConnectOptions connectOptions,
-      required StreamVideoEffectsManager effectsManager,
       String? encryptionKey,
     });
 
@@ -65,7 +64,6 @@ class _LobbyScreenState extends State<LobbyScreen> {
   late final _logger = taggedLogger(tag: 'SV:Dogfooding:LobbyScreen');
 
   final _userAuthController = locator.get<UserAuthController>();
-  late final StreamVideoEffectsManager _videoEffectsManager;
 
   /// Whether this platform can encrypt and decrypt at all.
   ///
@@ -115,7 +113,6 @@ class _LobbyScreenState extends State<LobbyScreen> {
   @override
   void initState() {
     super.initState();
-    _videoEffectsManager = StreamVideoEffectsManager(widget.call);
     _lobbyController = StreamLobbyController(call: widget.call);
 
     // An invite that carries a key is an invite to an encrypted call, so the
@@ -190,7 +187,6 @@ class _LobbyScreenState extends State<LobbyScreen> {
     widget.onJoinCallPressed(
       call: widget.call,
       connectOptions: options,
-      effectsManager: _videoEffectsManager,
       encryptionKey: isEncrypted && _encryptionKey.isNotEmpty
           ? _encryptionKey
           : null,
@@ -354,8 +350,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
     // and it needs nothing from here.
     final extras = [
       const StreamLobbyParticipantsButton(),
-      if (AppFeature.backgroundBlur.isSupported)
-        _BlurToggle(effects: _videoEffectsManager),
+      if (AppFeature.backgroundBlur.isSupported) const _BlurToggle(),
     ];
     final actions = isMobileDevice
         ? StreamLobbyActions.regular(extraControls: extras)
@@ -470,85 +465,36 @@ class _LobbyScreenState extends State<LobbyScreen> {
 ///
 /// A feature button rather than a control: it is off by default and should
 /// read as switched on, not as something taken away.
-class _BlurToggle extends StatefulWidget {
-  const _BlurToggle({required this.effects});
+class _BlurToggle extends StatelessWidget {
+  const _BlurToggle();
 
-  final StreamVideoEffectsManager effects;
+  static final _logger = taggedLogger(tag: 'SV:Dogfooding:BlurToggle');
 
-  @override
-  State<_BlurToggle> createState() => _BlurToggleState();
-}
+  /// The filter the toggle applies, which the lobby carries into the call.
+  static final _blur = BackgroundBlurFilter();
 
-class _BlurToggleState extends State<_BlurToggle> {
-  late final _logger = taggedLogger(tag: 'SV:Dogfooding:BlurToggle');
-
-  bool _enabled = false;
-  RtcLocalCameraTrack? _appliedTo;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    // Reading the controller here subscribes this button to it, so switching
-    // camera device brings us back and the filter is reapplied to the new
-    // track. This used to sit in build(), which meant firing a platform call
-    // and recording it as applied from inside a build that might never be
-    // committed — and swallowing whatever it threw.
-    final track = StreamLobbyScope.of(context).cameraTrack;
-    if (!_enabled || track == null || track == _appliedTo) return;
-
-    unawaited(_apply(track));
-  }
-
-  Future<void> _apply(RtcLocalCameraTrack? track) async {
-    final previous = _appliedTo;
-    _appliedTo = track;
-    try {
-      await widget.effects.applyBackgroundBlurFilter(
-        BlurIntensity.medium,
-        track: track,
-      );
-    } catch (e, stk) {
-      // Otherwise the button goes on claiming blur over an unblurred preview,
-      // and never retries because the track is already recorded as applied.
-      _logger.e(() => 'Could not apply the background blur: $e\n$stk');
-      _appliedTo = previous;
-      if (mounted) setState(() => _enabled = false);
-    }
-  }
-
-  Future<void> _remove(RtcLocalCameraTrack? track) async {
-    final previous = _appliedTo;
-    _appliedTo = null;
-    try {
-      await widget.effects.disableAllFilters(track: track);
-    } catch (e, stk) {
-      // Otherwise the button reads "off" over a preview that is still
-      // blurred, and the user joins blurred believing they turned it off.
-      _logger.e(() => 'Could not remove the background blur: $e\n$stk');
-      _appliedTo = previous;
-      if (mounted) setState(() => _enabled = true);
+  Future<void> _setEnabled(StreamLobbyController lobby, bool enabled) async {
+    final result = await lobby.setVideoFilter(enabled ? _blur : null);
+    if (result case Failure(:final error)) {
+      _logger.e(() => 'Could not change the background blur: $error');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final track = StreamLobbyScope.of(context).cameraTrack;
+    final lobby = StreamLobbyScope.of(context);
+    final enabled = lobby.videoFilter == _blur;
 
     return Tooltip(
-      message: _enabled ? 'Disable background blur' : 'Enable background blur',
+      message: enabled ? 'Disable background blur' : 'Enable background blur',
       child: CallFeatureButton(
         icon: Icon(
-          _enabled
+          enabled
               ? context.streamIcons.blurFill
               : context.streamIcons.blurOffFill,
         ),
-        selected: _enabled,
-        onPressed: () {
-          final enabling = !_enabled;
-          setState(() => _enabled = enabling);
-          unawaited(enabling ? _apply(track) : _remove(track));
-        },
+        selected: enabled,
+        onPressed: () => unawaited(_setEnabled(lobby, !enabled)),
       ),
     );
   }

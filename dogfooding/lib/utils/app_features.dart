@@ -14,8 +14,9 @@ import 'package:stream_video_flutter/stream_video_flutter.dart';
 /// {@tool snippet}
 ///
 /// ```dart
-/// if (AppFeature.backgroundBlur.isSupported)
-///   BlurToggle(effects: effectsManager),
+/// if (AppFeature.backgroundBlur.isSupported) {
+///   await call.setVideoFilter(BackgroundBlurFilter());
+/// }
 /// ```
 /// {@end-tool}
 enum AppFeature {
@@ -23,8 +24,8 @@ enum AppFeature {
   /// call.
   ///
   /// `stream_video_filters` drives the platform's own segmentation pipeline,
-  /// and only Android and iOS ship one — on desktop and web the filter is
-  /// accepted and then does nothing.
+  /// and only Android and iOS ship one — on desktop and web setting the
+  /// filter fails.
   backgroundBlur({PlatformType.android, PlatformType.ios});
 
   const AppFeature(this.supportedPlatforms);

@@ -3,6 +3,7 @@
 --------------------------------------------
 [Unreleased]
 
+* Added `WebRtcCapabilities.supportsVideoEffects`, whether named frame processors can be attached to a local video track.
 * Added `MediaStreamFilter`, `VideoFilter` and `AudioFilter`, filters that process a local stream before it is sent, with `MediaStreamFilterInput`, `MediaStreamFilterResult` and `MediaStreamFilterStopDetails`.
 * Added `webRtcLogHandler`, which receives the log records of the WebRTC packages.
 * Added `WebRtcEngine.webRtcVersion`.

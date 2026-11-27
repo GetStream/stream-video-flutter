@@ -1,20 +1,38 @@
-/// Stream Video video filters utilities.
+/// Stream Video video filters: background blur, virtual backgrounds and
+/// custom effects, as `VideoFilter` values for `Call.setVideoFilter`.
 library;
 
+import 'package:flutter/services.dart';
+import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
+
+import 'src/video_effect_registry.dart';
 import 'stream_video_filters_platform_interface.dart';
 
-export 'src/full_frame_blur_filter.dart';
+export 'src/native_video_filter.dart';
+export 'src/video_filters.dart';
 
-class StreamVideoFilters {
-  Future<bool?> isBackgroundEffectSupported() {
+/// The native side of the filters: whether the device runs them, and the
+/// registration of their processors.
+abstract final class StreamVideoFilters {
+  /// Whether this device can run the filters of this package.
+  static Future<bool> isSupported() async {
+    if (!rtc.webRtcCapabilities.supportsVideoEffects) return false;
+    try {
+      return await isBackgroundEffectSupported() ?? false;
+    } on MissingPluginException {
+      return false;
+    }
+  }
+
+  static Future<bool?> isBackgroundEffectSupported() {
     return StreamVideoFiltersPlatform.instance.isBackgroundEffectSupported();
   }
 
-  Future<void> registerBlurEffectProcessors() {
+  static Future<void> registerBlurEffectProcessors() {
     return StreamVideoFiltersPlatform.instance.registerBlurEffectProcessors();
   }
 
-  Future<void> registerImageEffectProcessors({
+  static Future<void> registerImageEffectProcessors({
     required String backgroundImageUrl,
   }) {
     return StreamVideoFiltersPlatform.instance.registerImageEffectProcessors(
@@ -22,14 +40,23 @@ class StreamVideoFilters {
     );
   }
 
-  Future<void> registerFullFrameBlurEffectProcessor() {
+  static Future<void> registerFullFrameBlurEffectProcessor() {
     return StreamVideoFiltersPlatform.instance
         .registerFullFrameBlurEffectProcessor();
   }
 
   /// Removes every effect processor this plugin registered natively so they
-  /// can be deallocated. Processors must be registered again before use.
-  Future<void> unregisterAllFilters() {
-    return StreamVideoFiltersPlatform.instance.unregisterAllFilters();
+  /// can be deallocated. A filter registers its processor again the next time
+  /// it is applied.
+  ///
+  /// Call it once no call uses the filters any more: a processor still
+  /// attached to a track stays alive until that track is released. Where
+  /// video effects are not supported, nothing is unregistered natively.
+  static Future<void> unregisterAllFilters() {
+    return VideoEffectRegistry.run(() async {
+      VideoEffectRegistry.forgetRegistrations();
+      if (!rtc.webRtcCapabilities.supportsVideoEffects) return;
+      await StreamVideoFiltersPlatform.instance.unregisterAllFilters();
+    });
   }
 }

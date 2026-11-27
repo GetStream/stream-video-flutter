@@ -84,6 +84,10 @@ void main() {
           (c) => c.supportsAudioModuleMicrophoneMute,
           {_Platform.ios, _Platform.macos},
         ),
+        'supportsVideoEffects': (
+          (c) => c.supportsVideoEffects,
+          {_Platform.android, _Platform.ios},
+        ),
       };
 
   for (final MapEntry(key: name, value: (read, platforms))
@@ -164,6 +168,7 @@ void main() {
       'supportsEncryption': (v) => base.copyWith(supportsEncryption: v),
       'supportsAudioModuleMicrophoneMute': (v) =>
           base.copyWith(supportsAudioModuleMicrophoneMute: v),
+      'supportsVideoEffects': (v) => base.copyWith(supportsVideoEffects: v),
     };
 
     for (final MapEntry(key: name, value: flip) in flips.entries) {

@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart'
     hide CurrentPlatform, StreamUserAvatar;
-import 'package:stream_video_filters/video_effects_manager.dart';
+import 'package:stream_video_filters/stream_video_filters.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart' hide User;
 
 // 🌎 Project imports:
@@ -38,13 +38,11 @@ class CallScreen extends StatefulWidget {
     super.key,
     required this.call,
     this.connectOptions,
-    this.videoEffectsManager,
     this.encryptionKey,
   });
 
   final Call call;
   final CallConnectOptions? connectOptions;
-  final StreamVideoEffectsManager? videoEffectsManager;
 
   /// The passphrase [call]'s shared key was derived from.
   final String? encryptionKey;
@@ -60,8 +58,6 @@ class _CallScreenState extends State<CallScreen>
   late final _userChatRepo = locator.get<UserChatRepository>();
 
   late String? _encryptionKey = widget.encryptionKey;
-  late final _videoEffectsManager =
-      widget.videoEffectsManager ?? StreamVideoEffectsManager(widget.call);
 
   /// Backs the mic and camera split buttons' carets. One controller, so the
   /// two agree about which device is in use.
@@ -69,8 +65,7 @@ class _CallScreenState extends State<CallScreen>
 
   /// Whether the device can apply video effects, which decides whether the
   /// settings window has an effects tab.
-  late final Future<bool> _effectsSupported = _videoEffectsManager
-      .isSupported();
+  late final Future<bool> _effectsSupported = StreamVideoFilters.isSupported();
 
   /// Whether the settings window is open, which the settings button shows.
   bool _settingsOpen = false;
@@ -195,7 +190,6 @@ class _CallScreenState extends State<CallScreen>
     // lost, back navigation), not only the leave button.
     unawaited(_leaveCall(widget.call, initiator: LeaveInitiator.app));
     _userChatRepo.disconnectUser();
-    _videoEffectsManager.dispose();
     super.dispose();
   }
 
@@ -225,28 +219,19 @@ class _CallScreenState extends State<CallScreen>
     );
   }
 
-  /// Releases the natively registered filter processors before leaving the
-  /// call; they are registered again the next time a filter is applied.
-  ///
-  /// This has to happen before [Call.leave]: once the local video track is
-  /// torn down, the effects attached to it can no longer be detached, and the
-  /// processors stay alive. A failed release is logged and does not block
-  /// leaving.
+  /// Leaves the call, then releases the natively registered filter
+  /// processors; they are registered again the next time a filter is
+  /// applied. Leaving detaches the filters from the call's tracks first. A
+  /// failed release is logged.
   Future<void> _leaveCall(
     Call call, {
     required LeaveInitiator initiator,
   }) async {
+    await call.leave(reason: DisconnectReason.left(initiator: initiator));
     try {
-      // Bounded so a hanging native call cannot keep the call joined.
-      await _videoEffectsManager.unregisterAllFilters().timeout(
-        const Duration(seconds: 3),
-      );
+      await StreamVideoFilters.unregisterAllFilters();
     } catch (e, st) {
       _logger.e(() => 'Failed to release video effects: $e\n$st');
-    } finally {
-      await call.leave(
-        reason: DisconnectReason.left(initiator: initiator),
-      );
     }
   }
 
@@ -410,7 +395,6 @@ class _CallScreenState extends State<CallScreen>
   CallMoreMenu _moreMenu(Call call, IconData icon) => CallMoreMenu(
     call: call,
     devices: _devices,
-    videoEffectsManager: _videoEffectsManager,
     icon: icon,
     screenShareConstraints: _screenShareConstraints,
     onStatsPressed: () => _togglePanel(CallSidePanel.stats),
@@ -439,7 +423,6 @@ class _CallScreenState extends State<CallScreen>
             context,
             call: call,
             devices: _devices,
-            videoEffectsManager: _videoEffectsManager,
             effectsSupported: effectsSupported,
           ),
         ),

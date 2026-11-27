@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-import 'package:stream_video_filters/video_effects_manager.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 import 'effects_tab.dart';
@@ -18,12 +17,10 @@ List<StreamModalWindowTab> settingsTabs(
   BuildContext context, {
   required Call call,
   required StreamMediaDevicesController devices,
-  required StreamVideoEffectsManager videoEffectsManager,
   required bool effectsSupported,
 }) => [
   StreamDeviceSettingsTab(call: call, devices: devices),
-  if (effectsSupported)
-    effectsTab(context, call: call, manager: videoEffectsManager),
+  if (effectsSupported) effectsTab(context, call: call),
   StreamCaptionsSettingsTab(call: call),
   languageTab(context),
   themeTab(context),
