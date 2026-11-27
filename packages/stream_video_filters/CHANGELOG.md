@@ -7,6 +7,7 @@
 - The package no longer depends on `stream_video`.
 - `BlurIntensity` is a class with `light`, `medium` and `heavy` presets instead of an enum.
 - `StreamVideoFilters` methods are static: call `StreamVideoFilters.isSupported()` instead of `StreamVideoFilters().isSupported()`.
+- `CustomVideoFilter.onRegister` takes no argument, and `CustomVideoFilterRegistration` is removed.
 
 ### ✅ Added
 
@@ -14,6 +15,7 @@
 - Added `NativeVideoFilter`, the base of filters that run a frame processor registered natively.
 - [Web] `BackgroundBlurFilter`, `VirtualBackgroundFilter` and `FullFrameBlurFilter` run in the browser, from files this package ships instead of a CDN.
 - Added `StreamVideoFilters.preload`, which downloads what the web filters need ahead of their first use.
+- [Web] Added `CustomWebVideoFilter` in `package:stream_video_filters/web.dart`, a filter that processes the camera track in the browser.
 
 ### 🐞 Fixed
 

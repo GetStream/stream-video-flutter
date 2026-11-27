@@ -10,6 +10,7 @@ import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart' as rtc;
 import 'package:web/web.dart' as web;
 
 import 'browser_effect.dart';
+import 'effect_stop_delay.dart';
 import 'web_video_filters_options.dart';
 
 /// Whether this browser can run the background effects, as
@@ -108,7 +109,7 @@ Future<void> _preload(WebVideoFiltersOptions options) async {
 /// The background effects on one track share a processor and its output
 /// stream: applying another one changes the effect on the next frame, and
 /// stopping one goes back to the latest one still applied. The processor and
-/// its track stop shortly after the last of them, see [_stopDelay].
+/// its track stop shortly after the last of them, see [effectStopDelay].
 ///
 /// Throws [UnsupportedError] for a background effect where
 /// [isBrowserEffectSupported] is false.
@@ -155,18 +156,12 @@ Future<rtc.MediaStreamFilterResult> _applyFullFrameBlur(
   }
   return rtc.MediaStreamFilterResult(
     MediaStreamWeb(web.MediaStream([output].toJS), 'local'),
-    stop: (_) => Timer(_stopDelay, () {
+    stop: (_) => Timer(effectStopDelay, () {
       _stop(processor);
       output.stop();
     }),
   );
 }
-
-/// How long a processor runs on after its filter is stopped.
-///
-/// A video element showing a track that ends turns black, so the processor
-/// waits for what showed its output to move to the stream that replaces it.
-const _stopDelay = Duration(seconds: 1);
 
 /// The background processors, by the id of the track they run on.
 final _backgrounds = <String, Future<_SharedBackground>>{};
@@ -251,7 +246,7 @@ class _SharedBackground {
   /// Whether the processor stopped.
   bool stopped = false;
 
-  /// Stops the processor once [_stopDelay] passed, unless an effect is
+  /// Stops the processor once [effectStopDelay] passed, unless an effect is
   /// applied again before.
   Timer? _stopTimer;
 
@@ -262,14 +257,14 @@ class _SharedBackground {
   }
 
   /// Removes [effect]. Runs the latest effect left, or stops the processor
-  /// after [_stopDelay] when none is.
+  /// after [effectStopDelay] when none is.
   Future<void> remove(_BackgroundEffect effect) async {
     final wasRunning = identical(effects.lastOrNull, effect);
     if (!effects.remove(effect)) return;
 
     if (effects.isEmpty) {
       cancelStop();
-      _stopTimer = Timer(_stopDelay, () => unawaited(_stopNow()));
+      _stopTimer = Timer(effectStopDelay, () => unawaited(_stopNow()));
     } else if (wasRunning) {
       try {
         await processor.updateOptions(effects.last.options).toDart;

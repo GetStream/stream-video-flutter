@@ -119,33 +119,26 @@ final class FullFrameBlurFilter extends NativeVideoFilter {
   int get hashCode => (FullFrameBlurFilter).hashCode;
 }
 
-/// What [CustomVideoFilter.onRegister] registers.
-final class CustomVideoFilterRegistration {
-  const CustomVideoFilterRegistration({required this.effectName});
-
-  /// The name to register the processor under.
-  final String effectName;
-}
-
 /// Runs a frame processor the app registers natively under [effectName].
 ///
 /// [onRegister] registers it, and runs before the filter is first applied.
 /// Every filter's registering, attaching and detaching waits for it, so it
 /// has to complete, and must not call
 /// [StreamVideoFilters.unregisterAllFilters], which waits for it too.
-/// Android and iOS only.
+/// Android and iOS only; on web, see `CustomWebVideoFilter` in
+/// `package:stream_video_filters/web.dart`.
 final class CustomVideoFilter extends NativeVideoFilter {
   CustomVideoFilter(this.effectName, {required this.onRegister});
 
   @override
   final String effectName;
 
-  final Future<void> Function(CustomVideoFilterRegistration registration)
-  onRegister;
+  /// Registers the processor natively under [effectName].
+  final Future<void> Function() onRegister;
 
   @override
   Future<void> register() {
-    return onRegister(CustomVideoFilterRegistration(effectName: effectName));
+    return onRegister();
   }
 
   @override

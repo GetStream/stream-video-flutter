@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_video_filters/stream_video_filters.dart';
 import 'package:stream_video_flutter/stream_video_flutter.dart';
 
-import '../../dogfooding_app_channel.dart';
+import '../../utils/grayscale_filter.dart';
 
 const _iconSize = 40.0;
 
@@ -22,7 +22,7 @@ class _BackgroundFiltersMenuItemState extends State<BackgroundFiltersMenuItem> {
     const _ImageFilterOption('assets/bg1.jpg'),
     const _ImageFilterOption('assets/bg2.jpg'),
     const _ImageFilterOption('assets/bg3.jpg'),
-    _GrayscaleFilterOption(),
+    const _GrayscaleFilterOption(),
   ];
 
   @override
@@ -155,13 +155,10 @@ class _ImageFilterOption extends _FilterOption {
 }
 
 class _GrayscaleFilterOption extends _FilterOption {
-  _GrayscaleFilterOption();
+  const _GrayscaleFilterOption();
 
   @override
-  late final VideoFilter filter = CustomVideoFilter(
-    'grayscale',
-    onRegister: (_) => DogfoodingAppChannel().registerGreyscaleEffect(),
-  );
+  VideoFilter get filter => grayscaleFilter;
 
   @override
   Widget buildIcon(BuildContext context) =>
