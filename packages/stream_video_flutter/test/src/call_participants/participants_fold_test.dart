@@ -44,6 +44,8 @@ void main() {
     EdgeInsets margin = const EdgeInsets.only(right: 84),
     TextDirection textDirection = TextDirection.ltr,
     StreamFoldLayoutStyle? foldStyle,
+    StreamFoldLayoutStyle? gridFoldStyle,
+    StreamFoldLayoutStyle? spotlightFoldStyle,
   }) async {
     tester.view
       ..physicalSize = _window
@@ -62,10 +64,12 @@ void main() {
         child: Directionality(
           textDirection: textDirection,
           child: StreamCallParticipantsGridTheme(
-            data: StreamCallParticipantsGridThemeData(foldStyle: foldStyle),
+            data: StreamCallParticipantsGridThemeData(
+              foldStyle: gridFoldStyle ?? foldStyle,
+            ),
             child: StreamCallParticipantsSpotlightTheme(
               data: StreamCallParticipantsSpotlightThemeData(
-                foldStyle: foldStyle,
+                foldStyle: spotlightFoldStyle ?? foldStyle,
               ),
               child: Padding(
                 padding: margin,
@@ -194,6 +198,38 @@ void main() {
 
       // One-on-one again: the remote full frame, under the floating self.
       expect(tester.getRect(_tile('p1')).width, greaterThan(800));
+    });
+
+    testWidgets('keeps one-to-one with avoidFold off for the spotlight', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        spotlightFoldStyle: const StreamFoldLayoutStyle(avoidFold: false),
+        participants: [_participant('me', isLocal: true), _participant('p1')],
+      );
+      await tester.pump();
+
+      // The grid still avoids the fold, but auto picks one-on-one: the remote
+      // full frame, under the floating self.
+      expect(tester.getRect(_tile('p1')).width, greaterThan(800));
+    });
+
+    testWidgets('lays the grid out as normal with avoidFold off for the grid', (
+      tester,
+    ) async {
+      await pump(
+        tester,
+        gridFoldStyle: const StreamFoldLayoutStyle(avoidFold: false),
+        participants: [_participant('me', isLocal: true), _participant('p1')],
+      );
+      await tester.pump();
+
+      // One-on-one would avoid the fold, so auto picks the grid, which then
+      // lays out as if there were no fold: the remote fills it, under the
+      // floating self.
+      expect(tester.getRect(_tile('p1')).width, greaterThan(800));
+      expect(_tile('me'), findsOneWidget);
     });
 
     testWidgets('fills both sides with centerOnFold off', (tester) async {

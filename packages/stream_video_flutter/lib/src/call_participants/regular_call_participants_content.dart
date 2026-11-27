@@ -77,13 +77,16 @@ class RegularCallParticipantsContent extends StatelessWidget {
     final remoteParticipants = participants.where((e) => !e.isLocal);
     final localParticipant = participants.where((e) => e.isLocal).firstOrNull;
 
-    final folded = _avoidsFold(context);
+    final hasFold = StreamDisplayFold.maybeOf(context) != null;
     final isAuto = layoutMode.canonical == ParticipantLayoutMode.auto;
     final effective = _effectiveLayout(
       layoutMode.canonical,
       remoteCount: remoteParticipants.length,
-      folded: folded,
+      oneToOneAvoidsFold:
+          hasFold &&
+          _avoidsFold(context, ParticipantLayoutMode.speakerOneToOne),
     );
+    final folded = hasFold && _avoidsFold(context, effective);
 
     final floatLocalVideo =
         _floatsSelfView(
@@ -131,15 +134,15 @@ class RegularCallParticipantsContent extends StatelessWidget {
   ///
   /// [ParticipantLayoutMode.auto] follows the call: one person on the other
   /// end is a conversation and gets their face full-frame, anything else is a
-  /// group and gets a grid. On a half-open foldable a full-frame face, or a
-  /// self-view floating over the grid, would sit on the fold, so auto gives
+  /// group and gets a grid. When [oneToOneAvoidsFold], a full-frame face, or
+  /// a self-view floating over the grid, would sit on the fold, so auto gives
   /// everybody a tile.
   static ParticipantLayoutMode _effectiveLayout(
     ParticipantLayoutMode requested, {
     required int remoteCount,
-    required bool folded,
+    required bool oneToOneAvoidsFold,
   }) => switch (requested) {
-    ParticipantLayoutMode.auto when remoteCount == 1 && !folded =>
+    ParticipantLayoutMode.auto when remoteCount == 1 && !oneToOneAvoidsFold =>
       ParticipantLayoutMode.speakerOneToOne,
     ParticipantLayoutMode.auto => ParticipantLayoutMode.grid,
     _ => requested,
@@ -210,10 +213,12 @@ class RegularCallParticipantsContent extends StatelessWidget {
     );
   }
 
-  /// Whether the window has a fold the participant layouts keep off.
-  static bool _avoidsFold(BuildContext context) {
-    if (StreamDisplayFold.maybeOf(context) == null) return false;
-    return StreamCallParticipantsGridTheme.of(context).foldStyle?.avoidFold ??
-        true;
+  /// Whether [layout] keeps its tiles off a fold: the spotlight theme decides
+  /// for a speaker layout, the grid theme for the grid.
+  static bool _avoidsFold(BuildContext context, ParticipantLayoutMode layout) {
+    final foldStyle = layout.isSpeakerLayout
+        ? StreamCallParticipantsSpotlightTheme.of(context).foldStyle
+        : StreamCallParticipantsGridTheme.of(context).foldStyle;
+    return foldStyle?.avoidFold ?? true;
   }
 }

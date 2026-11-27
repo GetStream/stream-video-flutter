@@ -116,7 +116,7 @@ export 'src/settings_window/transcription_language_label.dart';
 export 'src/settings_window/video_effect.dart';
 export 'src/theme/themes.dart';
 export 'src/utils/device_segmentation.dart' hide isDesktopOrWeb;
-export 'src/utils/display_fold.dart';
+export 'src/utils/display_fold.dart' hide trailingTopAnchorOf;
 export 'src/utils/present_icon.dart';
 export 'src/utils/screen_size.dart';
 export 'src/widgets/design_system_candidates/stream_adaptive_menu_anchor.dart';
