@@ -8,6 +8,9 @@ import 'web_video_filters_options.dart';
 Future<bool> isBrowserEffectSupported(WebVideoFiltersOptions options) async =>
     false;
 
+/// Does nothing outside a browser.
+Future<void> preloadBrowserEffects(WebVideoFiltersOptions options) async {}
+
 /// Runs [effect] on [input] in the browser. Not supported outside one.
 Future<rtc.MediaStreamFilterResult> applyBrowserEffect(
   rtc.MediaStreamFilterInput input,

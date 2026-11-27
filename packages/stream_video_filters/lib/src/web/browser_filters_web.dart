@@ -55,6 +55,56 @@ Future<bool> _checkSupported(WebVideoFiltersOptions options) async {
   }
 }
 
+/// Downloads and compiles what the background effects need, by running one
+/// on a blank track, so the first filter applies faster. Once per module and
+/// flags; failures are logged.
+Future<void> preloadBrowserEffects(WebVideoFiltersOptions options) {
+  final key = (
+    options.moduleUrl,
+    options.basePath,
+    options.modelPath,
+    options.forceSafariSupport,
+    options.forceMobileSupport,
+  );
+  return _preloads[key] ??= _preload(options);
+}
+
+final _preloads = <(String, String?, String?, bool, bool), Future<void>>{};
+
+Future<void> _preload(WebVideoFiltersOptions options) async {
+  try {
+    if (!await isBrowserEffectSupported(options)) return;
+    final module = await _load(options.moduleUrl);
+
+    final canvas = web.HTMLCanvasElement()
+      ..width = 2
+      ..height = 2;
+    final context = canvas.getContext('2d')! as web.CanvasRenderingContext2D;
+    final blank = canvas.captureStream().getVideoTracks().toDart.first;
+    // A canvas track only has frames once something is drawn.
+    context.fillRect(0, 0, 2, 2);
+
+    final processor = module.createVirtualBackground(
+      blank,
+      _BackgroundOptions(
+        basePath: options.basePath,
+        modelPath: options.modelPath,
+        backgroundFilter: 'blur',
+        backgroundBlurLevel: 'low',
+      ),
+      _hooks(),
+    );
+    try {
+      await processor.start().toDart;
+    } finally {
+      _stop(processor);
+      blank.stop();
+    }
+  } catch (e) {
+    _log('Could not preload the video effects: $e');
+  }
+}
+
 /// Runs [effect] on the video track of [input], and returns a stream with
 /// the processed track.
 ///

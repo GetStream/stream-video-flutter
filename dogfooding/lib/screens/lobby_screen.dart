@@ -115,6 +115,10 @@ class _LobbyScreenState extends State<LobbyScreen> {
     super.initState();
     _lobbyController = StreamLobbyController(call: widget.call);
 
+    // Downloads the video effects while the user sets up the call, so the
+    // first one applies quickly. Only does work on web.
+    unawaited(StreamVideoFilters.preload());
+
     // An invite that carries a key is an invite to an encrypted call, so the
     // user has nothing to fill in. For a call that does not exist yet, it also
     // decides that the call is created encrypted — which is why a platform

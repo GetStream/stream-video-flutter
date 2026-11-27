@@ -39,6 +39,16 @@ abstract final class StreamVideoFilters {
     }
   }
 
+  /// Downloads and prepares what the filters need ahead of their first use,
+  /// so the first filter applies faster.
+  ///
+  /// On web, loads the browser implementation, MediaPipe and the
+  /// segmentation model where [isSupported] is true; it runs once for the
+  /// [webOptions] in use, and a failure is logged. Elsewhere it does nothing.
+  static Future<void> preload() async {
+    if (kIsWeb) await preloadBrowserEffects(webOptions);
+  }
+
   static Future<bool?> isBackgroundEffectSupported() {
     return StreamVideoFiltersPlatform.instance.isBackgroundEffectSupported();
   }

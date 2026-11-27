@@ -13,6 +13,7 @@
 - Added `StreamVideoFilters.isSupported`, whether the device can run the filters.
 - Added `NativeVideoFilter`, the base of filters that run a frame processor registered natively.
 - [Web] `BackgroundBlurFilter`, `VirtualBackgroundFilter` and `FullFrameBlurFilter` run in the browser, configured with `StreamVideoFilters.webOptions`.
+- Added `StreamVideoFilters.preload`, which downloads what the web filters need ahead of their first use.
 
 ### 🐞 Fixed
 
