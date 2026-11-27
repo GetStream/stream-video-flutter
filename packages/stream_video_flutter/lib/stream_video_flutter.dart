@@ -49,6 +49,8 @@ export 'src/call_participants/floating_participant_tile.dart';
 export 'src/call_participants/indicators/audio_indicator.dart';
 export 'src/call_participants/indicators/connection_quality_indicator.dart';
 export 'src/call_participants/layout/call_participants_spotlight_view.dart';
+export 'src/call_participants/layout/participant_fold_layout.dart'
+    hide FoldRegions, FoldRegionsSingle, FoldRegionsSplit, resolveFoldRegions;
 export 'src/call_participants/layout/participant_grid_arrangement.dart';
 export 'src/call_participants/layout/participant_layout_mode.dart';
 export 'src/call_participants/livestream_hosts.dart';
@@ -60,6 +62,7 @@ export 'src/call_participants/participant_tile_action.dart';
 export 'src/call_participants/participant_tile_chrome.dart'
     hide resolveParticipantTileChrome;
 export 'src/call_participants/participant_video.dart';
+export 'src/call_participants/waiting_for_participants.dart';
 export 'src/call_screen/call_container.dart';
 export 'src/call_screen/call_content/call_app_bar.dart';
 export 'src/call_screen/call_content/call_content.dart';
@@ -113,6 +116,7 @@ export 'src/settings_window/transcription_language_label.dart';
 export 'src/settings_window/video_effect.dart';
 export 'src/theme/themes.dart';
 export 'src/utils/device_segmentation.dart' hide isDesktopOrWeb;
+export 'src/utils/display_fold.dart' hide trailingTopAnchorOf;
 export 'src/utils/present_icon.dart';
 export 'src/utils/screen_size.dart';
 export 'src/widgets/design_system_candidates/stream_adaptive_menu_anchor.dart';

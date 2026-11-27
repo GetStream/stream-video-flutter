@@ -41,6 +41,11 @@ mixin _$StreamCallParticipantsGridThemeData {
       ),
       compactPageSize: t < 0.5 ? a.compactPageSize : b.compactPageSize,
       pageSize: t < 0.5 ? a.pageSize : b.pageSize,
+      foldStyle: StreamFoldLayoutStyle.lerp(a.foldStyle, b.foldStyle, t),
+      maxExtraTilesOnSmallerSide: t < 0.5
+          ? a.maxExtraTilesOnSmallerSide
+          : b.maxExtraTilesOnSmallerSide,
+      foldSplitResolver: t < 0.5 ? a.foldSplitResolver : b.foldSplitResolver,
     );
   }
 
@@ -52,6 +57,9 @@ mixin _$StreamCallParticipantsGridThemeData {
     double? maxTileAspectRatio,
     int? compactPageSize,
     int? pageSize,
+    StreamFoldLayoutStyle? foldStyle,
+    int? maxExtraTilesOnSmallerSide,
+    int? Function(StreamParticipantFoldSplitDetails)? foldSplitResolver,
   }) {
     final _this = (this as StreamCallParticipantsGridThemeData);
 
@@ -63,6 +71,10 @@ mixin _$StreamCallParticipantsGridThemeData {
       maxTileAspectRatio: maxTileAspectRatio ?? _this.maxTileAspectRatio,
       compactPageSize: compactPageSize ?? _this.compactPageSize,
       pageSize: pageSize ?? _this.pageSize,
+      foldStyle: foldStyle ?? _this.foldStyle,
+      maxExtraTilesOnSmallerSide:
+          maxExtraTilesOnSmallerSide ?? _this.maxExtraTilesOnSmallerSide,
+      foldSplitResolver: foldSplitResolver ?? _this.foldSplitResolver,
     );
   }
 
@@ -87,6 +99,9 @@ mixin _$StreamCallParticipantsGridThemeData {
       maxTileAspectRatio: other.maxTileAspectRatio,
       compactPageSize: other.compactPageSize,
       pageSize: other.pageSize,
+      foldStyle: _this.foldStyle?.merge(other.foldStyle) ?? other.foldStyle,
+      maxExtraTilesOnSmallerSide: other.maxExtraTilesOnSmallerSide,
+      foldSplitResolver: other.foldSplitResolver,
     );
   }
 
@@ -109,7 +124,10 @@ mixin _$StreamCallParticipantsGridThemeData {
         _other.columnResolver == _this.columnResolver &&
         _other.maxTileAspectRatio == _this.maxTileAspectRatio &&
         _other.compactPageSize == _this.compactPageSize &&
-        _other.pageSize == _this.pageSize;
+        _other.pageSize == _this.pageSize &&
+        _other.foldStyle == _this.foldStyle &&
+        _other.maxExtraTilesOnSmallerSide == _this.maxExtraTilesOnSmallerSide &&
+        _other.foldSplitResolver == _this.foldSplitResolver;
   }
 
   @override
@@ -125,6 +143,9 @@ mixin _$StreamCallParticipantsGridThemeData {
       _this.maxTileAspectRatio,
       _this.compactPageSize,
       _this.pageSize,
+      _this.foldStyle,
+      _this.maxExtraTilesOnSmallerSide,
+      _this.foldSplitResolver,
     );
   }
 }

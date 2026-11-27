@@ -92,6 +92,9 @@ class StreamVideoFlutterLocalizationsEn
   String get participantsNext => 'Next participants';
 
   @override
+  String get participantsWaitingForOthers => 'Waiting for others to join';
+
+  @override
   String get livestreamBackstageStartingSoon => 'Livestream will start soon';
 
   @override

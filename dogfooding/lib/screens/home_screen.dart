@@ -244,7 +244,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final compactHeight =
         size.height < StreamScreenSize.smallMaxHeight &&
         size.width > size.height;
-    final logoWidth = compactHeight
+    // A half-open foldable puts the intro and the form on either side of the
+    // fold, each with half the screen.
+    final fold = StreamDisplayFold.maybeOf(context);
+    final logoWidth = compactHeight || fold != null
         ? 120.0
         : math.min<double>(
             math.min(size.width, kMaxWidthRegularScreen) * 0.6,
@@ -357,43 +360,69 @@ class _HomeScreenState extends State<HomeScreen> {
         body: SafeArea(
           top: false,
           bottom: false,
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(14).add(
-                EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
-              ),
-              child: compactHeight
-                  ? ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: kMaxWidthRegularScreen * 2,
-                      ),
-                      child: Row(
-                        spacing: spacing.xl,
-                        children: [
-                          Expanded(child: intro),
-                          Expanded(child: actions),
-                        ],
-                      ),
-                    )
-                  : ConstrainedBox(
+          child: fold != null
+              ? SplitAtFold(
+                  posture: fold.posture,
+                  gap: spacing.md * 2,
+                  start: _foldHalf(context, intro),
+                  end: _foldHalf(
+                    context,
+                    ConstrainedBox(
                       constraints: const BoxConstraints(
                         maxWidth: kMaxWidthRegularScreen,
                       ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          intro,
-                          const SizedBox(height: 44),
-                          actions,
-                        ],
+                      child: actions,
+                    ),
+                  ),
+                )
+              : Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(14).add(
+                      EdgeInsets.only(
+                        bottom: MediaQuery.paddingOf(context).bottom,
                       ),
                     ),
-            ),
-          ),
+                    child: compactHeight
+                        ? ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              maxWidth: kMaxWidthRegularScreen * 2,
+                            ),
+                            child: Row(
+                              spacing: spacing.xl,
+                              children: [
+                                Expanded(child: intro),
+                                Expanded(child: actions),
+                              ],
+                            ),
+                          )
+                        : ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              maxWidth: kMaxWidthRegularScreen,
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                intro,
+                                const SizedBox(height: 44),
+                                actions,
+                              ],
+                            ),
+                          ),
+                  ),
+                ),
         ),
       ),
     );
   }
+
+  /// One half of a folded screen, its content centred and scrolling when it
+  /// does not fit.
+  Widget _foldHalf(BuildContext context, Widget child) => Center(
+    child: SingleChildScrollView(
+      padding: EdgeInsets.all(context.streamSpacing.md),
+      child: child,
+    ),
+  );
 }
 
 class _JoinForm extends StatelessWidget {

@@ -1,3 +1,7 @@
+import 'dart:math' as math;
+import 'dart:ui' show DisplayFeatureType;
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide ConnectionState;
 
 import '../../../stream_video_flutter.dart';
@@ -99,8 +103,8 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// Whether this bar is the topmost chrome of its surface.
   ///
-  /// When true (the default), the bar wraps itself in a `SafeArea(bottom:
-  /// false)` so it clears the system top inset. Set it to false when something
+  /// When true (the default), the bar pads itself to clear the system top
+  /// and side insets. Set it to false when something
   /// above the bar has already consumed that inset, so it isn't padded twice.
   final bool primary;
 
@@ -134,7 +138,52 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
     ).height;
 
     if (!primary) return height;
-    return height + MediaQuery.paddingOf(context).top;
+    return height + _primaryInsets(context).top;
+  }
+
+  /// The insets a [primary] bar clears: the window's top and side padding.
+  ///
+  /// On an iPhone Duo held upright, iOS reserves a band across the whole top
+  /// of the window for the status pill in one corner. When the window reports
+  /// that pill as a cutout covering the whole top inset, the bar runs along
+  /// the top edge instead and only keeps clear of the cutout's side.
+  ///
+  /// Only on iOS, where Flutter reports no cutouts of its own: on Android a
+  /// notch reported in a corner still sits inside a full-width status bar.
+  static EdgeInsets _primaryInsets(BuildContext context) {
+    final padding = MediaQuery.paddingOf(context).copyWith(bottom: 0);
+    if (defaultTargetPlatform != TargetPlatform.iOS || padding.top <= 0) {
+      return padding;
+    }
+
+    final width = MediaQuery.sizeOf(context).width;
+    for (final feature in MediaQuery.displayFeaturesOf(context)) {
+      if (feature.type != DisplayFeatureType.cutout) continue;
+      final bounds = feature.bounds;
+      if (bounds.top > 0 || bounds.bottom < padding.top) continue;
+      // One inside a side inset, such as the iPhone Duo's status rail in
+      // landscape, is already cleared by that inset and is not what the top
+      // inset is for.
+      if (bounds.right <= padding.left ||
+          bounds.left >= width - padding.right) {
+        continue;
+      }
+
+      if (bounds.left <= 0) {
+        return padding.copyWith(
+          top: 0,
+          left: math.max(padding.left, bounds.right),
+        );
+      }
+      if (bounds.right >= width) {
+        return padding.copyWith(
+          top: 0,
+          right: math.max(padding.right, width - bounds.left),
+        );
+      }
+    }
+
+    return padding;
   }
 
   @override
@@ -178,20 +227,34 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
             StreamLeaveCallButton(call: call, onLeaveCallTap: onLeaveCallTap),
         ];
 
-    // No trailing slot when there is nothing to put in it.
-    final trailingSlot = actionSlot.isEmpty
-        ? null
-        : Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: resolved.controlSpacing,
-            children: actionSlot,
-          );
-
-    final middleSlot = DefaultTextStyle.merge(
+    final titleSlot = DefaultTextStyle.merge(
       style: resolved.titleTextStyle,
       textAlign: TextAlign.center,
       child: title ?? Text(call.state.value.status.toStatusString()),
     );
+
+    // A fold down the middle of the window runs through the title, so it
+    // joins the actions in the trailing half instead.
+    final folded =
+        StreamDisplayFold.maybeOf(context, posture: StreamFoldPosture.book) !=
+        null;
+    // The title has no tap target to pad it, so it keeps a gap of its own
+    // from the actions it joins.
+    final trailingActions = [
+      if (folded) ...[titleSlot, SizedBox(width: context.streamSpacing.xs)],
+      ...actionSlot,
+    ];
+
+    // No trailing slot when there is nothing to put in it.
+    final trailingSlot = trailingActions.isEmpty
+        ? null
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: resolved.controlSpacing,
+            children: trailingActions,
+          );
+
+    final middleSlot = folded ? null : titleSlot;
 
     // The slots are centred in what the padding leaves of the bar's height, so
     // one height covers both a control's tap target and its smaller visible
@@ -207,7 +270,16 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
     );
 
-    if (primary) bar = SafeArea(bottom: false, child: bar);
+    if (primary) {
+      final insets = _primaryInsets(context);
+      bar = MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        removeLeft: true,
+        removeRight: true,
+        child: Padding(padding: insets, child: bar),
+      );
+    }
 
     final surfaceStyle = resolved.surfaceStyle;
 
@@ -247,7 +319,7 @@ class CallAppBar extends StatelessWidget implements PreferredSizeWidget {
     // The gradient is solid through the system inset and fades down through the
     // bar below it, so the status bar stays legible while the call shows
     // through the controls.
-    final safeAreaTop = primary ? MediaQuery.paddingOf(context).top : 0.0;
+    final safeAreaTop = primary ? _primaryInsets(context).top : 0.0;
     final totalHeight = safeAreaTop + style.height;
 
     return streamFloatingFadeLinearGradient(

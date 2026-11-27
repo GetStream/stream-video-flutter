@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../../stream_video_flutter.dart';
 import '../l10n/localization_extension.dart';
-import '../utils/display_fold.dart';
 
 /// Joins the call the lobby is a waiting room for, with the options it
 /// prepared.
@@ -12,7 +11,9 @@ import '../utils/display_fold.dart';
 /// Returns whether the join happened. See
 /// [StreamLobbyView.onJoinCallPressed].
 typedef StreamLobbyJoinCallback =
-    FutureOr<bool> Function(CallConnectOptions options);
+    FutureOr<bool> Function(
+      CallConnectOptions options,
+    );
 
 /// The waiting room shown before a call is joined: a preview of the local
 /// camera, the controls that set the microphone and camera up, and a button
@@ -269,14 +270,8 @@ class _LobbyBody extends StatelessWidget {
       StreamLobbyViewTheme.of(context).style,
     );
 
-    // A short window in landscape has no height for the preview and the rest
-    // stacked under it, so the two go side by side. So does a window folded
-    // down the middle, one on either side, so nothing sits on the fold.
-    final fold = verticalFoldOf(context);
-    final sideBySide =
-        fold != null ||
-        (windowSize.height < StreamLobbyView.sideBySideMaxHeight &&
-            windowSize.width > windowSize.height);
+    final fold = StreamDisplayFold.maybeOf(context);
+    final sideBySide = _isSideBySide(fold, windowSize);
 
     // The overlaid row is centred on a preview whose bottom-start corner is
     // taken by the participant label, so a long row runs into it. Past that
@@ -287,7 +282,13 @@ class _LobbyBody extends StatelessWidget {
     // A small window gives the preview at most this much of its height, so
     // a tall preview cannot push the join button off the screen.
     final compactPreviewMaxHeight =
-        windowSize.height * (sideBySide ? 0.6 : 0.4);
+        windowSize.height *
+        switch (fold?.posture) {
+          // The preview shares the top half with the header.
+          StreamFoldPosture.tabletop => 0.3,
+          _ when sideBySide => 0.6,
+          _ => 0.4,
+        };
 
     final controlRow = _controlRow();
     final parts = (
@@ -303,27 +304,46 @@ class _LobbyBody extends StatelessWidget {
     );
 
     return SafeArea(
-      child: sideBySide
-          ? _sideBySide(
-              context,
-              parts,
-              fold: fold,
-              previewMaxWidth: style.expandedPreviewSize.width,
-              endMaxWidth: style.joinButtonWidth,
-            )
-          : _stacked(
-              context,
-              parts,
-              isSmall: isSmall,
-              previewMaxWidth: isSmall
-                  ? compactPreviewMaxHeight * style.compactPreviewAspectRatio
-                  : style.expandedPreviewSize.width,
-              joinButtonWidth: isSmall
-                  ? double.infinity
-                  : style.joinButtonWidth,
-            ),
+      child: switch ((fold, sideBySide)) {
+        (final fold?, _) => _atFold(
+          context,
+          parts,
+          posture: fold.posture,
+          previewMaxWidth: style.expandedPreviewSize.width,
+          endMaxWidth: style.joinButtonWidth,
+        ),
+        (null, true) => _sideBySide(
+          context,
+          parts,
+          previewMaxWidth: style.expandedPreviewSize.width,
+          endMaxWidth: style.joinButtonWidth,
+        ),
+        (null, false) => _stacked(
+          context,
+          parts,
+          isSmall: isSmall,
+          previewMaxWidth: isSmall
+              ? compactPreviewMaxHeight * style.compactPreviewAspectRatio
+              : style.expandedPreviewSize.width,
+          joinButtonWidth: isSmall ? double.infinity : style.joinButtonWidth,
+        ),
+      },
     );
   }
+
+  /// Whether the preview and the rest go side by side rather than stacked.
+  ///
+  /// A short window in landscape has no height for the preview and the rest
+  /// stacked under it, so the two go side by side. So does a window folded
+  /// down the middle, one on either side, so nothing sits on the fold.
+  static bool _isSideBySide(StreamDisplayFold? fold, Size windowSize) =>
+      switch (fold?.posture) {
+        StreamFoldPosture.book => true,
+        StreamFoldPosture.tabletop => false,
+        null =>
+          windowSize.height < StreamLobbyView.sideBySideMaxHeight &&
+              windowSize.width > windowSize.height,
+      };
 
   /// The controls in a row, or null when there are none.
   Widget? _controlRow() {
@@ -386,15 +406,97 @@ class _LobbyBody extends StatelessWidget {
     child: joinButtonLabel ?? Text(context.translations.lobbyJoinCall),
   );
 
+  /// The lobby split at the fold of a half-open foldable.
+  ///
+  /// In the book posture the header takes the leading half, and the preview,
+  /// its controls and the join button the trailing one. In tabletop the header
+  /// and the preview go above the fold, and the rest below it.
+  Widget _atFold(
+    BuildContext context,
+    _LobbyParts parts, {
+    required StreamFoldPosture posture,
+    required double previewMaxWidth,
+    required double endMaxWidth,
+  }) {
+    final spacing = context.streamSpacing;
+    final header = StreamLobbyHeader(title: title, subtitle: subtitle);
+
+    // Each half scrolls on its own, so a tall footer cannot push the join
+    // button out of its half.
+    Widget side(double maxWidth, List<Widget> children, double gap) => Center(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(spacing.md),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxWidth),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: gap,
+            children: children,
+          ),
+        ),
+      ),
+    );
+
+    final (start, end) = switch (posture) {
+      StreamFoldPosture.book => (
+        side(endMaxWidth, [header], spacing.lg),
+        side(previewMaxWidth, [
+          Center(child: parts.preview),
+          ?parts.controlsBelow,
+          ?parts.settingsRow,
+          ?parts.footer,
+          parts.joinButton,
+        ], spacing.md),
+      ),
+      // The preview takes what the header leaves of the top half rather
+      // than scrolling under the fold.
+      StreamFoldPosture.tabletop => (
+        LayoutBuilder(
+          builder: (context, constraints) {
+            if (!constraints.hasBoundedHeight) {
+              return side(previewMaxWidth, [
+                header,
+                Center(child: parts.preview),
+              ], spacing.md);
+            }
+            return Padding(
+              padding: EdgeInsets.all(spacing.md),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                spacing: spacing.md,
+                children: [
+                  header,
+                  Flexible(child: parts.preview),
+                ],
+              ),
+            );
+          },
+        ),
+        side(endMaxWidth, [
+          ?parts.controlsBelow,
+          ?parts.settingsRow,
+          ?parts.footer,
+          parts.joinButton,
+        ], spacing.md),
+      ),
+    };
+
+    return SplitAtFold(
+      posture: posture,
+      gap: spacing.md * 2,
+      start: start,
+      end: end,
+    );
+  }
+
   /// The preview and its controls on one side, the rest on the other.
   ///
-  /// Split at [fold] when there is one. Otherwise each side is at most as wide
-  /// as it is when stacked, [previewMaxWidth] for the preview and
-  /// [endMaxWidth] for the rest, and the pair is centred.
+  /// Each side is at most as wide as it is when stacked, [previewMaxWidth] for
+  /// the preview and [endMaxWidth] for the rest, and the pair is centred.
   Widget _sideBySide(
     BuildContext context,
     _LobbyParts parts, {
-    required Rect? fold,
     required double previewMaxWidth,
     required double endMaxWidth,
   }) {
@@ -416,10 +518,6 @@ class _LobbyBody extends StatelessWidget {
         parts.joinButton,
       ],
     );
-
-    if (fold != null) {
-      return SplitAtFold(fold: fold, gap: spacing.md, start: start, end: end);
-    }
 
     return Center(
       child: Row(

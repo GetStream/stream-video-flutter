@@ -82,10 +82,14 @@ class StreamCallParticipantsSpotlightTheme extends InheritedTheme {
 class StreamCallParticipantsSpotlightThemeData
     with _$StreamCallParticipantsSpotlightThemeData {
   /// Creates spotlight theme data.
-  const StreamCallParticipantsSpotlightThemeData({this.style});
+  const StreamCallParticipantsSpotlightThemeData({this.style, this.foldStyle});
 
   /// Visual styling for the speaker layouts.
   final StreamCallParticipantsSpotlightStyle? style;
+
+  /// How the speaker layouts keep their tiles off the fold of a half-open
+  /// foldable.
+  final StreamFoldLayoutStyle? foldStyle;
 
   /// Linearly interpolate between two theme data objects.
   static StreamCallParticipantsSpotlightThemeData? lerp(

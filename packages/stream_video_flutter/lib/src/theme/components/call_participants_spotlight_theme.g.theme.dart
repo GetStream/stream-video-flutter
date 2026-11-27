@@ -31,16 +31,19 @@ mixin _$StreamCallParticipantsSpotlightThemeData {
 
     return StreamCallParticipantsSpotlightThemeData(
       style: StreamCallParticipantsSpotlightStyle.lerp(a.style, b.style, t),
+      foldStyle: StreamFoldLayoutStyle.lerp(a.foldStyle, b.foldStyle, t),
     );
   }
 
   StreamCallParticipantsSpotlightThemeData copyWith({
     StreamCallParticipantsSpotlightStyle? style,
+    StreamFoldLayoutStyle? foldStyle,
   }) {
     final _this = (this as StreamCallParticipantsSpotlightThemeData);
 
     return StreamCallParticipantsSpotlightThemeData(
       style: style ?? _this.style,
+      foldStyle: foldStyle ?? _this.foldStyle,
     );
   }
 
@@ -57,7 +60,10 @@ mixin _$StreamCallParticipantsSpotlightThemeData {
       return other;
     }
 
-    return copyWith(style: _this.style?.merge(other.style) ?? other.style);
+    return copyWith(
+      style: _this.style?.merge(other.style) ?? other.style,
+      foldStyle: _this.foldStyle?.merge(other.foldStyle) ?? other.foldStyle,
+    );
   }
 
   @override
@@ -73,14 +79,14 @@ mixin _$StreamCallParticipantsSpotlightThemeData {
     final _this = (this as StreamCallParticipantsSpotlightThemeData);
     final _other = (other as StreamCallParticipantsSpotlightThemeData);
 
-    return _other.style == _this.style;
+    return _other.style == _this.style && _other.foldStyle == _this.foldStyle;
   }
 
   @override
   int get hashCode {
     final _this = (this as StreamCallParticipantsSpotlightThemeData);
 
-    return Object.hash(runtimeType, _this.style);
+    return Object.hash(runtimeType, _this.style, _this.foldStyle);
   }
 }
 

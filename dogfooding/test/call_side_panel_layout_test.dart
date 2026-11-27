@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dogfooding/widgets/side_panel/call_side_panel_layout.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -21,17 +24,21 @@ void main() {
     required bool fullScreen,
     bool withPanel = true,
     double coveredTopExtent = 0,
+    TextDirection textDirection = TextDirection.ltr,
   }) {
     return MaterialApp(
       home: Center(
         child: SizedBox.fromSize(
           size: bodySize,
-          child: CallSidePanelLayout(
-            animation: animation,
-            fullScreen: fullScreen,
-            coveredTopExtent: coveredTopExtent,
-            panel: withPanel ? filler(panelKey) : null,
-            child: filler(gridKey),
+          child: Directionality(
+            textDirection: textDirection,
+            child: CallSidePanelLayout(
+              animation: animation,
+              fullScreen: fullScreen,
+              coveredTopExtent: coveredTopExtent,
+              panel: withPanel ? filler(panelKey) : null,
+              child: filler(gridKey),
+            ),
           ),
         ),
       ),
@@ -229,6 +236,102 @@ void main() {
       1,
       reason: 'the content was remounted back',
     );
+  });
+
+  group('at a half-open fold', () {
+    // The test surface is 800x600, the body centred in it at (50, 50).
+    void fold(WidgetTester tester, Rect bounds) {
+      tester.view.displayFeatures = [
+        DisplayFeature(
+          bounds: bounds,
+          type: DisplayFeatureType.fold,
+          state: DisplayFeatureState.postureHalfOpened,
+        ),
+      ];
+      addTearDown(tester.view.resetDisplayFeatures);
+    }
+
+    testWidgets('docks in the trailing half, into a hinge', (tester) async {
+      fold(tester, const Rect.fromLTWH(380, 0, 40, 600));
+
+      await tester.pumpWidget(
+        wrap(animation: kAlwaysCompleteAnimation, fullScreen: true),
+      );
+      await tester.pump();
+
+      // The two meet half the grid's 8 padding past the middle of the hinge,
+      // so the tiles and the card keep that gap centred on it.
+      expect(tester.getRect(find.byKey(gridKey)).right, 404);
+      expect(tester.getRect(find.byKey(panelKey)).left, 404);
+      expect(tester.getRect(find.byKey(panelKey)).right, 750);
+    });
+
+    testWidgets('docks in the leading half in right-to-left', (tester) async {
+      fold(tester, const Rect.fromLTWH(400, 0, 0, 600));
+
+      await tester.pumpWidget(
+        wrap(
+          animation: kAlwaysCompleteAnimation,
+          fullScreen: false,
+          textDirection: TextDirection.rtl,
+        ),
+      );
+      await tester.pump();
+
+      expect(
+        tester.getRect(find.byKey(panelKey)),
+        const Rect.fromLTRB(50, 50, 396, 550),
+      );
+      expect(tester.getRect(find.byKey(gridKey)).left, 396);
+    });
+
+    testWidgets('gives the call its final box as soon as the panel moves', (
+      tester,
+    ) async {
+      fold(tester, const Rect.fromLTWH(400, 0, 0, 600));
+      final controller = AnimationController(
+        vsync: tester,
+        duration: const Duration(milliseconds: 250),
+      );
+      addTearDown(controller.dispose);
+
+      await tester.pumpWidget(wrap(animation: controller, fullScreen: false));
+      await tester.pump();
+      expect(tester.getRect(find.byKey(gridKey)).right, 750);
+
+      // Opening: the call takes the leading half on the first frame, and the
+      // panel slides over the other one.
+      unawaited(controller.forward());
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(tester.getRect(find.byKey(gridKey)).right, 404);
+      expect(tester.getRect(find.byKey(panelKey)).left, greaterThan(404));
+
+      await tester.pumpAndSettle();
+      expect(tester.getRect(find.byKey(panelKey)).left, 404);
+
+      // Closing: the call has its whole box back on the first frame.
+      unawaited(controller.reverse());
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      expect(tester.getRect(find.byKey(gridKey)).right, 750);
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('docks in the bottom half in tabletop', (tester) async {
+      fold(tester, const Rect.fromLTWH(0, 300, 800, 0));
+
+      await tester.pumpWidget(
+        wrap(animation: kAlwaysCompleteAnimation, fullScreen: true),
+      );
+      await tester.pump();
+
+      expect(tester.getRect(find.byKey(gridKey)).bottom, 304);
+      expect(
+        tester.getRect(find.byKey(panelKey)),
+        const Rect.fromLTRB(50, 304, 750, 550),
+      );
+    });
   });
 }
 

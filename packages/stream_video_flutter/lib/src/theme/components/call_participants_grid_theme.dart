@@ -66,6 +66,9 @@ class StreamCallParticipantsGridThemeData
     this.maxTileAspectRatio,
     this.compactPageSize,
     this.pageSize,
+    this.foldStyle,
+    this.maxExtraTilesOnSmallerSide,
+    this.foldSplitResolver,
   }) : assert(
          maxTileAspectRatio == null || maxTileAspectRatio > 0,
          'A tile ratio of zero or less leaves the grid nothing to draw.',
@@ -77,6 +80,10 @@ class StreamCallParticipantsGridThemeData
        assert(
          pageSize == null || pageSize > 0,
          'A page holds at least one participant.',
+       ),
+       assert(
+         maxExtraTilesOnSmallerSide == null || maxExtraTilesOnSmallerSide >= 0,
+         'The smaller side cannot be held to fewer tiles than the larger.',
        );
 
   /// The inset around the grid.
@@ -124,6 +131,26 @@ class StreamCallParticipantsGridThemeData
   ///
   /// Defaults to 12.
   final int? pageSize;
+
+  /// How the grid keeps its tiles off the fold of a half-open foldable.
+  final StreamFoldLayoutStyle? foldStyle;
+
+  /// How many more tiles the smaller side of a fold may hold than the larger
+  /// one.
+  ///
+  /// Defaults to 2.
+  final int? maxExtraTilesOnSmallerSide;
+
+  /// Overrides how many participants of a page go on the start side of a
+  /// fold: the leading half in the book posture, the top half in tabletop.
+  ///
+  /// The grid otherwise picks the split whose tiles on both sides come
+  /// closest in shape; `solveParticipantFoldSplit` is public, so an override
+  /// can also delegate to it. Return null to keep that default. A count
+  /// outside `0..details.count` is clamped into it.
+  ///
+  /// Interpolates as a step, like every other callback carried by a theme.
+  final StreamParticipantFoldSplitResolver? foldSplitResolver;
 
   /// Linearly interpolate between two theme data objects.
   static StreamCallParticipantsGridThemeData? lerp(

@@ -361,6 +361,72 @@ class _LobbyScreenState extends State<LobbyScreen> {
         ? StreamLobbyActions.regular(extraControls: extras)
         : StreamLobbyActions.full(extraControls: extras);
 
+    // An `auto-on` call requires every participant to encrypt, so the
+    // server rejects a join without a key.
+    final lobby = PartialCallStateBuilder(
+      call: widget.call,
+      selector: (state) => isCallEncrypted(state.settings),
+      builder: (context, isEncrypted) {
+        final willBeEncrypted = _callExists ? isEncrypted : _encryptionEnabled;
+        final needsKey = willBeEncrypted && _encryptionKey.isEmpty;
+        // An encrypted call is unreachable from a platform without the
+        // encryption manager: every frame would arrive undecryptable.
+        final blocked = willBeEncrypted && !_encryptionSupported;
+
+        return StreamLobbyView.withController(
+          controller: _lobbyController,
+          actions: actions,
+          title: Text('Set up your call', style: textTheme.headingLg),
+          joinButtonLabel: const Text('Start a test call'),
+          joinEnabled:
+              !needsKey && !blocked && !_creatingCall && !_changingHiFiAudio,
+          footer: Column(
+            mainAxisSize: MainAxisSize.min,
+            spacing: spacing.sm,
+            children: [
+              LobbyEncryption(
+                call: widget.call,
+                callExists: _callExists,
+                supported: _encryptionSupported,
+                encryptionEnabled: _encryptionEnabled,
+                encryptionKey: _encryptionKey,
+                busy: _creatingCall,
+                keyController: _encryptionKeyController,
+                onEncryptionToggled: _toggleEncryption,
+                onEncryptionKeyChanged: (value) {
+                  final next = value.trim();
+                  final wasEmpty = _encryptionKey.isEmpty;
+                  _encryptionKey = next;
+                  // Only the join button and the hint depend on the key, and
+                  // only on whether there is one at all.
+                  if (wasEmpty != next.isEmpty) setState(() {});
+                },
+                onGenerateKey: () =>
+                    setState(() => _setEncryptionKey(getRandomWords())),
+              ),
+              // Inert while a device is still opening: that track
+              // would land on the factory the policy change discards.
+              ListenableBuilder(
+                listenable: _lobbyController,
+                builder: (context, _) => LobbyHiFiAudio(
+                  enabled: _hiFiAudioEnabled,
+                  onChanged:
+                      _changingHiFiAudio ||
+                          _creatingCall ||
+                          _lobbyController.tracksHandedOver ||
+                          _lobbyController.isOpeningMicrophone ||
+                          _lobbyController.isOpeningCamera
+                      ? null
+                      : _toggleHiFiAudio,
+                ),
+              ),
+            ],
+          ),
+          onJoinCallPressed: _joinCallPressed,
+        );
+      },
+    );
+
     return MinimumTopInset(
       child: Scaffold(
         appBar: AppBar(
@@ -383,84 +449,19 @@ class _LobbyScreenState extends State<LobbyScreen> {
             ),
           ],
         ),
-        body: Center(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(
-              horizontal: spacing.md,
-              vertical: spacing.xxl,
-            ),
-            // An `auto-on` call requires every participant to encrypt, so the
-            // server rejects a join without a key.
-            child: PartialCallStateBuilder(
-              call: widget.call,
-              selector: (state) => isCallEncrypted(state.settings),
-              builder: (context, isEncrypted) {
-                final willBeEncrypted = _callExists
-                    ? isEncrypted
-                    : _encryptionEnabled;
-                final needsKey = willBeEncrypted && _encryptionKey.isEmpty;
-                // An encrypted call is unreachable from a platform without the
-                // encryption manager: every frame would arrive undecryptable.
-                final blocked = willBeEncrypted && !_encryptionSupported;
-
-                return StreamLobbyView.withController(
-                  controller: _lobbyController,
-                  actions: actions,
-                  title: Text('Set up your call', style: textTheme.headingLg),
-                  joinButtonLabel: const Text('Start a test call'),
-                  joinEnabled:
-                      !needsKey &&
-                      !blocked &&
-                      !_creatingCall &&
-                      !_changingHiFiAudio,
-                  footer: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: spacing.sm,
-                    children: [
-                      LobbyEncryption(
-                        call: widget.call,
-                        callExists: _callExists,
-                        supported: _encryptionSupported,
-                        encryptionEnabled: _encryptionEnabled,
-                        encryptionKey: _encryptionKey,
-                        busy: _creatingCall,
-                        keyController: _encryptionKeyController,
-                        onEncryptionToggled: _toggleEncryption,
-                        onEncryptionKeyChanged: (value) {
-                          final next = value.trim();
-                          final wasEmpty = _encryptionKey.isEmpty;
-                          _encryptionKey = next;
-                          // Only the join button and the hint depend on the key, and
-                          // only on whether there is one at all.
-                          if (wasEmpty != next.isEmpty) setState(() {});
-                        },
-                        onGenerateKey: () =>
-                            setState(() => _setEncryptionKey(getRandomWords())),
-                      ),
-                      // Inert while a device is still opening: that track
-                      // would land on the factory the policy change discards.
-                      ListenableBuilder(
-                        listenable: _lobbyController,
-                        builder: (context, _) => LobbyHiFiAudio(
-                          enabled: _hiFiAudioEnabled,
-                          onChanged:
-                              _changingHiFiAudio ||
-                                  _creatingCall ||
-                                  _lobbyController.tracksHandedOver ||
-                                  _lobbyController.isOpeningMicrophone ||
-                                  _lobbyController.isOpeningCamera
-                              ? null
-                              : _toggleHiFiAudio,
-                        ),
-                      ),
-                    ],
+        // A half-open fold splits the lobby, and each half scrolls on its
+        // own, so it is not put in a scroll view of its own here.
+        body: StreamDisplayFold.maybeOf(context) != null
+            ? lobby
+            : Center(
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: spacing.md,
+                    vertical: spacing.xxl,
                   ),
-                  onJoinCallPressed: _joinCallPressed,
-                );
-              },
-            ),
-          ),
-        ),
+                  child: lobby,
+                ),
+              ),
       ),
     );
   }

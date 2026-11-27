@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../stream_video_flutter.dart';
 import '../../l10n/localization_extension.dart';
 import '../common/ringing_call_details.dart';
+import '../common/ringing_call_layout.dart';
 import '../common/ringing_call_style_defaults.dart';
 import 'outgoing_call_controls.dart';
 
@@ -132,44 +133,32 @@ class _StreamOutgoingCallContentState extends State<StreamOutgoingCallContent> {
       final child = Material(
         color: Colors.transparent,
         child: SafeArea(
-          child: Column(
-            children: [
-              // The details are centred in the space above the controls, and
-              // scroll rather than overflow when that space is too short.
-              Expanded(
-                child: Center(
-                  child: SingleChildScrollView(
-                    child: RingingCallDetails(
-                      participants: participants,
-                      status: context.translations.ringingCalling,
-                      style: style,
-                      avatar: widget.participantsAvatarWidgetBuilder?.call(
-                        context,
-                        widget.call,
-                        ParticipantsData(participants: participants),
-                      ),
-                      nameLine: widget.participantsDisplayNameWidgetBuilder
-                          ?.call(
-                            context,
-                            widget.call,
-                            ParticipantsData(participants: participants),
-                          ),
-                    ),
-                  ),
-                ),
+          child: RingingCallLayout(
+            foldGap: context.streamSpacing.md * 2,
+            controlsPadding: style.controlsPadding,
+            details: RingingCallDetails(
+              participants: participants,
+              status: context.translations.ringingCalling,
+              style: style,
+              avatar: widget.participantsAvatarWidgetBuilder?.call(
+                context,
+                widget.call,
+                ParticipantsData(participants: participants),
               ),
-              Padding(
-                padding: style.controlsPadding,
-                child: OutgoingCallControls(
-                  style: style,
-                  isMicrophoneEnabled: _controller.microphoneEnabled,
-                  isCameraEnabled: _controller.cameraEnabled,
-                  onCancelCallTap: () => _onCancelCallTap(context),
-                  onMicrophoneTap: _onMicrophoneTap,
-                  onCameraTap: _onCameraTap,
-                ),
+              nameLine: widget.participantsDisplayNameWidgetBuilder?.call(
+                context,
+                widget.call,
+                ParticipantsData(participants: participants),
               ),
-            ],
+            ),
+            controls: OutgoingCallControls(
+              style: style,
+              isMicrophoneEnabled: _controller.microphoneEnabled,
+              isCameraEnabled: _controller.cameraEnabled,
+              onCancelCallTap: () => _onCancelCallTap(context),
+              onMicrophoneTap: _onMicrophoneTap,
+              onCameraTap: _onCameraTap,
+            ),
           ),
         ),
       );

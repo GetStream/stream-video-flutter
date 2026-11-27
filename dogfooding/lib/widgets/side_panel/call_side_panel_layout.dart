@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:stream_video_flutter/stream_video_flutter.dart';
 
 /// Lays a side panel out against the call's video grid.
 ///
@@ -7,6 +8,11 @@ import 'package:flutter/material.dart';
 ///  * Docked — the panel takes [width] from the trailing edge and [child]
 ///    shrinks to fill what is left, so the grid re-tiles beside it.
 ///  * Full screen — the panel covers [child] entirely, sliding in over it.
+///
+/// On a half-open foldable the panel docks in the half past the fold instead,
+/// whatever [fullScreen] says: the trailing half in the book posture, the
+/// bottom half in tabletop, and [child] fills the other half. The two meet
+/// with the grid's gap centred on the middle of the fold.
 ///
 /// Both are driven by [animation], which runs 0 (closed) to 1 (open). The
 /// caller owns the controller, and so also owns when the panel is mounted and
@@ -67,6 +73,109 @@ class _CallSidePanelLayoutState extends State<CallSidePanelLayout> {
 
   @override
   Widget build(BuildContext context) {
+    return StreamFoldBuilder(
+      builder: (context, measurement) => switch (measurement.local) {
+        final fold? => _buildAtFold(context, fold),
+        null => _buildUnfolded(context),
+      },
+    );
+  }
+
+  /// The panel in the half past [fold], [CallSidePanelLayout.child] in the
+  /// other.
+  Widget _buildAtFold(BuildContext context, StreamLocalFold fold) {
+    final panel = widget.panel;
+    final child = KeyedSubtree(key: _childKey, child: widget.child);
+    final axis = fold.axis;
+    final rtl =
+        axis == Axis.horizontal &&
+        Directionality.of(context) == TextDirection.rtl;
+
+    // The call and the panel meet half the grid's padding past the middle of
+    // the fold, so the gap between the tiles and the card is that padding,
+    // centred on the fold. Both have room inside their own edges, so they may
+    // run into a hinge's reported width.
+    final gridPadding =
+        StreamCallParticipantsGridTheme.of(context).padding?.resolve(
+          Directionality.of(context),
+        ) ??
+        EdgeInsets.all(context.streamSpacing.xs);
+    final half =
+        switch (axis) {
+          Axis.horizontal => rtl ? gridPadding.left : gridPadding.right,
+          Axis.vertical => gridPadding.bottom,
+        } /
+        2;
+    final extent = rtl ? fold.center - half : fold.length - fold.center - half;
+
+    // The call takes its final box as soon as the panel starts to move, and
+    // the panel slides over its own half. Squeezing the call instead would
+    // re-centre it on the fold on every frame, shrinking the tiles before
+    // they grow.
+    return AnimatedBuilder(
+      animation: widget.animation,
+      child: panel,
+      builder: (context, panel) {
+        final status = widget.animation.status;
+        final open =
+            panel != null &&
+            (status == AnimationStatus.forward ||
+                status == AnimationStatus.completed);
+        final callExtent = fold.length - (open ? extent : 0);
+
+        final (callRect, panelRect) = switch ((axis, rtl)) {
+          (Axis.horizontal, false) => (
+            Rect.fromLTWH(0, 0, callExtent, fold.size.height),
+            Rect.fromLTWH(
+              fold.length - extent,
+              0,
+              extent,
+              fold.size.height,
+            ),
+          ),
+          (Axis.horizontal, true) => (
+            Rect.fromLTWH(
+              fold.length - callExtent,
+              0,
+              callExtent,
+              fold.size.height,
+            ),
+            Rect.fromLTWH(0, 0, extent, fold.size.height),
+          ),
+          (Axis.vertical, _) => (
+            Rect.fromLTWH(0, 0, fold.size.width, callExtent),
+            Rect.fromLTWH(0, fold.length - extent, fold.size.width, extent),
+          ),
+        };
+
+        // From the window's edge: the trailing side in the book posture, the
+        // bottom in tabletop.
+        final from = switch ((axis, rtl)) {
+          (Axis.horizontal, false) => const Offset(1, 0),
+          (Axis.horizontal, true) => const Offset(-1, 0),
+          (Axis.vertical, _) => const Offset(0, 1),
+        };
+
+        return Stack(
+          children: [
+            Positioned.fromRect(rect: callRect, child: child),
+            if (panel != null)
+              Positioned.fromRect(
+                rect: panelRect,
+                child: ClipRect(
+                  child: FractionalTranslation(
+                    translation: from * (1 - widget.animation.value),
+                    child: panel,
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildUnfolded(BuildContext context) {
     final panel = widget.panel;
     final child = KeyedSubtree(key: _childKey, child: widget.child);
 
