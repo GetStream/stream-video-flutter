@@ -27,8 +27,7 @@ jobs:
       github.event.action != 'unlabeled' &&
       contains(github.event.pull_request.labels.*.name, 'build') &&
       (github.event.action != 'labeled' || github.event.label.name == 'build')
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     # On the jobs rather than the workflow, so a run that skips both (another
     # label added) leaves a running deploy alone.
@@ -38,13 +37,22 @@ jobs:
     environment:
       name: flutter-web-pr
       url: ${{ steps.target.outputs.url }}
+    outputs:
+      url: ${{ steps.target.outputs.url }}
     permissions:
       contents: read
       id-token: write
-      pull-requests: write
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
+      # makes no other GitHub call, so it runs on a free standard runner.
       - name: Checkout code
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
       - name: Setup Flutter
         uses: ./.github/actions/setup-flutter
@@ -71,11 +79,21 @@ jobs:
           service-account: ${{ steps.target.outputs.service-account }}
           build-dir: dogfooding/build/web
 
+  # Commenting needs a token, and so the static-IP runners.
+  comment:
+    name: Comment the Link
+    needs: deploy
+    runs-on:
+      group: github-public-amd64
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    steps:
       - name: Comment the link
         uses: GetStream/stream-core-flutter/.github/actions/flutter-web-pr-comment@e338514373956150868ee67d325c96efe1c758ec
         with:
           app: video
-          url: ${{ steps.target.outputs.url }}
+          url: ${{ needs.deploy.outputs.url }}
 
   cleanup:
     name: Remove Build
@@ -83,8 +101,7 @@ jobs:
       github.event.pull_request.head.repo.full_name == github.repository &&
       ((github.event.action == 'closed' && contains(github.event.pull_request.labels.*.name, 'build')) ||
       (github.event.action == 'unlabeled' && github.event.label.name == 'build'))
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     # Shares the deploy's group, so it stops a deploy that is still running.
     concurrency:
@@ -94,7 +111,6 @@ jobs:
       name: flutter-web-pr
     permissions:
       id-token: write
-      pull-requests: write
     steps:
       - name: Target
         id: target
@@ -109,6 +125,15 @@ jobs:
           path: ${{ steps.target.outputs.path }}
           service-account: ${{ steps.target.outputs.service-account }}
 
+  cleanup-comment:
+    name: Update the Comment
+    needs: cleanup
+    runs-on:
+      group: github-public-amd64
+    timeout-minutes: 5
+    permissions:
+      pull-requests: write
+    steps:
       - name: Update the comment
         uses: GetStream/stream-core-flutter/.github/actions/flutter-web-pr-comment@e338514373956150868ee67d325c96efe1c758ec
         with:

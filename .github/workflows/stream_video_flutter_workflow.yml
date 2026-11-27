@@ -31,8 +31,7 @@ jobs:
   # `push` events to main and v2 always run the full suite, except the native
   # unit tests, which run only when the native code they build changed.
   gate:
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     outputs:
       should_run: ${{ github.event_name == 'push' || (steps.filter.outputs.relevant == 'true' && github.event.pull_request.draft != true) }}
       # The packages whose native unit tests run, as JSON lists. A package's
@@ -41,8 +40,17 @@ jobs:
       android_test_packages: ${{ steps.native_tests.outputs.android }}
       ios_test_packages: ${{ steps.native_tests.outputs.ios }}
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests. The path
+      # filters run without a token, so they fetch the base from origin with git, anonymously.
       - name: "Git Checkout"
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git remote add origin "https://github.com/$REPOSITORY"
+          git fetch -q --depth=1 --no-tags origin "$SHA"
+          git checkout -q --detach FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
       - name: "Detect Path Changes"
         uses: dorny/paths-filter@v4
@@ -117,21 +125,27 @@ jobs:
   analyze:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
-    timeout-minutes: 40
+    timeout-minutes: 25
     # Goldens compare pixels, so this matches the image update_goldens.yml
-    # renders them on.
-    runs-on:
-      group: github-public-amd64
+    # renders them on: pinned, not ubuntu-latest.
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       pull-requests: read
       # Codecov authenticates the coverage upload with a GitHub OIDC token.
       id-token: write
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
+      # makes no other GitHub call, so it runs on a free standard runner.
       - name: Git Checkout
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
+        run: |
+          git init -q .
+          git remote add origin "https://github.com/$REPOSITORY"
+          git fetch -q origin '+refs/heads/*:refs/remotes/origin/*' '+refs/tags/*:refs/tags/*' "$SHA"
+          git checkout -q --detach "$SHA"
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter
@@ -234,13 +248,19 @@ jobs:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
     timeout-minutes: 30
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
+      # makes no other GitHub call, so it runs on a free standard runner.
       - name: Git Checkout
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
+        run: |
+          git init -q .
+          git remote add origin "https://github.com/$REPOSITORY"
+          git fetch -q origin '+refs/heads/*:refs/remotes/origin/*' '+refs/tags/*:refs/tags/*' "$SHA"
+          git checkout -q --detach "$SHA"
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter
@@ -280,10 +300,18 @@ jobs:
       matrix:
         package: ${{ fromJSON(needs.gate.outputs.ios_test_packages) }}
     timeout-minutes: 45
-    runs-on: { group: scaleway-macos }
+    runs-on: xcode-27
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
+      # makes no other GitHub call, so it runs on a free standard runner.
       - name: Git Checkout
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
       - name: Select Xcode
         uses: ./.github/actions/select-xcode

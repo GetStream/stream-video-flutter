@@ -32,11 +32,18 @@ jobs:
   measure-android:
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     timeout-minutes: 60
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
+      # makes no other GitHub call, so it runs on a free standard runner.
       - name: Git Checkout
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter
@@ -69,16 +76,24 @@ jobs:
       github.event_name != 'pull_request'
       || (startsWith(github.head_ref, 'release/') && github.event.pull_request.draft == false)
     timeout-minutes: 60
-    # Pinned, so a runner image update doesn't change the iOS numbers.
-    runs-on: { group: scaleway-macos }
+    runs-on: xcode-27
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
+      # makes no other GitHub call, so it runs on a free standard runner.
       - name: Git Checkout
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
+      # Pinned, so a runner image update doesn't change the iOS numbers.
       - name: Select Xcode
         uses: ./.github/actions/select-xcode
         with:
-          xcode-version: "26.3.0"
+          xcode-version: "27.1"
 
       - name: Install Flutter
         uses: ./.github/actions/setup-flutter

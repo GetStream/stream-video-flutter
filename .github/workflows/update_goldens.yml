@@ -6,9 +6,48 @@ permissions:
   contents: read
 
 jobs:
-  update_goldens:
+  # Renders on a free standard runner with an anonymous checkout; only the
+  # commit job below needs a token, and so the static-IP runners.
+  render:
     # Keep in sync with the analyze job in stream_video_flutter_workflow.yml,
     # which compares against the goldens rendered here.
+    runs-on: ubuntu-24.04
+    steps:
+      - name: 📚 Git Checkout
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+
+      - name: 🐦 Install Flutter
+        uses: ./.github/actions/setup-flutter
+
+      - name: 🛠️ Install Melos
+        uses: ./.github/actions/setup-melos
+
+      # No codegen step: `update:goldens` only runs in packages that depend on
+      # alchemist, which is stream_video_flutter alone, and that package has no
+      # generated sources. Everything build_runner produces elsewhere — the
+      # OpenAPI models and freezed classes in stream_video — is committed.
+      - name: 🖼️ Update Goldens
+        run: melos run update:goldens
+
+      # A tarball keeps each golden's path in the repository.
+      - name: 📦 Pack Goldens
+        run: git ls-files -z -co --exclude-standard -- '**/test/**/goldens/**/*.png' | tar -czf goldens.tgz --null -T -
+
+      - name: 📤 Upload Goldens
+        uses: actions/upload-artifact@v7
+        with:
+          name: goldens
+          path: goldens.tgz
+          retention-days: 1
+
+  commit:
+    needs: render
     runs-on:
       group: github-public-amd64
     steps:
@@ -24,18 +63,15 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: 🐦 Install Flutter
-        uses: ./.github/actions/setup-flutter
+      - name: 📥 Download Goldens
+        uses: actions/download-artifact@v8
+        with:
+          name: goldens
 
-      - name: 🛠️ Install Melos
-        uses: ./.github/actions/setup-melos
-
-      # No codegen step: `update:goldens` only runs in packages that depend on
-      # alchemist, which is stream_video_flutter alone, and that package has no
-      # generated sources. Everything build_runner produces elsewhere — the
-      # OpenAPI models and freezed classes in stream_video — is committed.
-      - name: 🖼️ Update Goldens
-        run: melos run update:goldens
+      - name: 📦 Unpack Goldens
+        run: |
+          tar -xzf goldens.tgz
+          rm goldens.tgz
 
       - name: 📤 Commit Changes
         uses: GetStream/stream-core-flutter/.github/actions/bot-commit@68fdf0bf3c779f640dbb10a1ecf7945d872408f7

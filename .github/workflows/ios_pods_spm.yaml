@@ -13,11 +13,19 @@ permissions:
 jobs:
   build-ios:
     name: iOS Build (Dogfooding)
-    runs-on: { group: scaleway-macos }
+    runs-on: xcode-27
 
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
+      # makes no other GitHub call, so it runs on a free standard runner.
       - name: 🧰 Setup Checkout
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
       - name: 🍎 Select Xcode
         uses: ./.github/actions/select-xcode

@@ -143,28 +143,7 @@ Future<Directory> _createTemplate() async {
     '--project-name=sdk_size_app',
     template.path,
   ]);
-  _limitGradleMemory(template);
   return template;
-}
-
-/// Replaces the template's 8 GB Gradle heap, compiles Kotlin inside Gradle and
-/// stops Gradle after each build, so the builds fit on a 2-core runner.
-void _limitGradleMemory(Directory app) {
-  const jvmArgs =
-      '-Xmx3g -XX:MaxMetaspaceSize=1g -XX:ReservedCodeCacheSize=256m '
-      '-XX:+HeapDumpOnOutOfMemoryError';
-  final file = File('${app.path}/android/gradle.properties');
-  final lines = file.readAsLinesSync().where(
-    (it) => !it.startsWith('org.gradle.jvmargs='),
-  );
-  file.writeAsStringSync(
-    '${[
-      'org.gradle.jvmargs=$jvmArgs',
-      'org.gradle.daemon=false',
-      'kotlin.compiler.execution.strategy=in-process',
-      ...lines,
-    ].join('\n')}\n',
-  );
 }
 
 Future<Directory> _createApp(Directory template, String variant) async {
