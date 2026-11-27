@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -318,6 +320,56 @@ void main() {
       expect(measurements.any((m) => m.pending), isFalse);
       expect(measurements.first.window, isNotNull);
       expect(measurements.first.local, isNull);
+      expect(measurements.last.local?.center, 400);
+    });
+
+    testWidgets('measures a route sliding in once it has settled', (
+      tester,
+    ) async {
+      _foldWindow(tester, const Rect.fromLTWH(400, 0, 0, 600));
+      final measurements = <StreamFoldMeasurement>[];
+      final navigator = GlobalKey<NavigatorState>();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Navigator(
+            key: navigator,
+            onGenerateRoute: (_) => PageRouteBuilder<void>(
+              pageBuilder: (_, _, _) => const SizedBox(),
+            ),
+          ),
+        ),
+      );
+
+      unawaited(
+        navigator.currentState!.push(
+          PageRouteBuilder<void>(
+            pageBuilder: (_, _, _) => StreamFoldBuilder(
+              builder: (context, measurement) {
+                measurements.add(measurement);
+                return const SizedBox.expand();
+              },
+            ),
+            // Slides in from a quarter of the way across.
+            transitionsBuilder: (_, animation, _, child) => SlideTransition(
+              position: Tween(
+                begin: const Offset(0.25, 0),
+                end: Offset.zero,
+              ).animate(animation),
+              child: child,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      // Mid-slide the box is somewhere it will not stay, so it is not
+      // measured there.
+      expect(measurements.last.local, isNull);
+
+      await tester.pumpAndSettle();
       expect(measurements.last.local?.center, 400);
     });
 

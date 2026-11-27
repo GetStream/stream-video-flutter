@@ -328,9 +328,9 @@ class _StreamFoldBuilderState extends State<StreamFoldBuilder> {
     final box = context.findRenderObject();
     if (box is! RenderBox || !box.hasSize || !box.attached) return;
     // While the route slides, the box is somewhere it will not stay. The
-    // last measurement holds until the transition ends, when it is taken
-    // again.
-    if (_origin != null && _transitions.any((t) => t.isAnimating)) return;
+    // last measurement, or none, holds until the transition ends, when it is
+    // taken again.
+    if (_transitions.any((t) => t.isAnimating)) return;
 
     final origin = box.localToGlobal(Offset.zero);
     if (origin != _origin || box.size != _measuredSize) {

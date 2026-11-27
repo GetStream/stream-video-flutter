@@ -155,8 +155,14 @@ int solveParticipantFoldSplit(StreamParticipantFoldSplitDetails details) {
   final bothSides = _splits(details, bothSides: true);
   final oneSide = _splits(details, bothSides: false);
 
-  return _bestFitting(bothSides, details.minTileSize) ??
-      _bestFitting(oneSide, details.minTileSize) ??
+  // One side alone has no shape to match, so it goes where its tiles come out
+  // largest.
+  final minTileSize = details.minTileSize;
+  return _bestFitting(bothSides, minTileSize) ??
+      _largestSmallestTile([
+        for (final split in oneSide)
+          if (_fits(split.tiles, minTileSize)) split,
+      ]) ??
       _largestSmallestTile([...bothSides, ...oneSide]) ??
       count;
 }
@@ -223,11 +229,7 @@ int? _bestFitting(List<_Split> splits, Size minTileSize) {
   int? best;
   var bestScore = double.infinity;
   for (final split in splits) {
-    final fits = split.tiles.every(
-      (tile) =>
-          tile.width >= minTileSize.width && tile.height >= minTileSize.height,
-    );
-    if (!fits) continue;
+    if (!_fits(split.tiles, minTileSize)) continue;
 
     final score = _shapeMismatch(split.tiles);
     if (score < bestScore) {
@@ -237,6 +239,12 @@ int? _bestFitting(List<_Split> splits, Size minTileSize) {
   }
   return best;
 }
+
+/// Whether every one of [tiles] is at least [minTileSize].
+bool _fits(List<Size> tiles, Size minTileSize) => tiles.every(
+  (tile) =>
+      tile.width >= minTileSize.width && tile.height >= minTileSize.height,
+);
 
 /// How far apart the two sides' tiles are in shape; 0 for a single side.
 double _shapeMismatch(List<Size> tiles) => tiles.length < 2

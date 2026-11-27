@@ -202,6 +202,22 @@ void main() {
       );
     });
 
+    test('puts everybody on the roomier side when they cannot share', () {
+      // Equal widths allow no uneven split, so three go on one side. Both
+      // hold them, and the taller start side gives them the larger tiles.
+      expect(
+        solveParticipantFoldSplit(
+          _split(
+            3,
+            startSize: const Size(700, 600),
+            endSize: const Size(700, 300),
+            maxExtra: 0,
+          ),
+        ),
+        3,
+      );
+    });
+
     test('keeps the split with the largest smallest tile when none fits', () {
       final start = solveParticipantFoldSplit(
         _split(
