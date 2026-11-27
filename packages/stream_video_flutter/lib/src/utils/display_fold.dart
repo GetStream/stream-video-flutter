@@ -239,8 +239,11 @@ class StreamFoldMeasurement {
   /// A fold on the box's edge, or outside it, does not cross it.
   final StreamLocalFold? local;
 
-  /// Whether the box still has to be measured before [local] can be trusted:
-  /// the window has a fold, and this is the first frame.
+  /// Whether nothing has been built in the box yet and the fold still has to
+  /// be measured: the window has a fold on the box's first frame.
+  ///
+  /// A fold that appears after the first frame is not pending: [local] is
+  /// null until it is measured, so the box keeps its layout for that frame.
   final bool pending;
 }
 
@@ -251,8 +254,8 @@ class StreamFoldMeasurement {
 /// the box sits in the window and builds again when it has moved. Between
 /// measurements the fold is worked out from the last position and the box's
 /// current size, so a box that only changes size, such as one a side panel
-/// shrinks, follows it in the same frame. Until the first measurement
-/// [StreamFoldMeasurement.pending] is true.
+/// shrinks, follows it in the same frame. On the box's first frame, with a
+/// fold to measure, [StreamFoldMeasurement.pending] is true.
 class StreamFoldBuilder extends StatefulWidget {
   /// Creates a widget that builds with the fold crossing it.
   const StreamFoldBuilder({
@@ -278,6 +281,9 @@ class StreamFoldBuilder extends StatefulWidget {
 class _StreamFoldBuilderState extends State<StreamFoldBuilder> {
   /// Where the box sat in the window at the last measurement.
   Offset? _origin;
+
+  /// Whether [StreamFoldBuilder.builder] has built the box before.
+  bool _built = false;
 
   /// The transitions of the route this box is on. A route sliding in or out
   /// moves the box without laying it out again, so each one ending is a cue
@@ -370,6 +376,7 @@ class _StreamFoldBuilderState extends State<StreamFoldBuilder> {
         // A layout builder whether or not there is a fold, so the child keeps
         // its state when one appears.
         if (fold == null) {
+          _built = true;
           return widget.builder(
             context,
             const StreamFoldMeasurement(window: null, local: null),
@@ -392,13 +399,11 @@ class _StreamFoldBuilderState extends State<StreamFoldBuilder> {
           local = _localFold(fold, origin, size);
         }
 
+        final pending = origin == null && !_built;
+        _built = true;
         return widget.builder(
           context,
-          StreamFoldMeasurement(
-            window: fold,
-            local: local,
-            pending: origin == null,
-          ),
+          StreamFoldMeasurement(window: fold, local: local, pending: pending),
         );
       },
     );

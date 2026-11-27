@@ -295,6 +295,32 @@ void main() {
       expect(measurements.last.local?.center, 400);
     });
 
+    testWidgets('is not pending for a fold that appears later', (
+      tester,
+    ) async {
+      final measurements = <StreamFoldMeasurement>[];
+
+      await tester.pumpWidget(
+        StreamFoldBuilder(
+          builder: (context, measurement) {
+            measurements.add(measurement);
+            return const SizedBox();
+          },
+        ),
+      );
+      measurements.clear();
+
+      _foldWindow(tester, const Rect.fromLTWH(400, 0, 0, 600));
+      await tester.pump();
+      await tester.pump();
+
+      // The box keeps its layout until the fold is measured, then splits.
+      expect(measurements.any((m) => m.pending), isFalse);
+      expect(measurements.first.window, isNotNull);
+      expect(measurements.first.local, isNull);
+      expect(measurements.last.local?.center, 400);
+    });
+
     testWidgets('is never pending without a fold', (tester) async {
       final measurements = <StreamFoldMeasurement>[];
 

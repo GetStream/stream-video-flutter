@@ -412,7 +412,8 @@ class _FoldPage extends StatelessWidget {
           mainAxisSpacing: metrics.mainAxisSpacing,
           crossAxisSpacing: metrics.crossAxisSpacing,
         );
-        if (rect.size == size) return grid;
+        // Always in a stack, so the tiles keep their place in the tree when a
+        // fold shrinks the region.
         return Stack(
           children: [Positioned.fromRect(rect: rect, child: grid)],
         );
