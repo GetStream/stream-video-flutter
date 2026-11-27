@@ -11,9 +11,11 @@ import 'stream_video_filters_platform_interface.dart';
 export 'src/native_video_filter.dart';
 export 'src/video_filters.dart';
 
-class StreamVideoFilters {
+/// The native side of the filters: whether the device runs them, and the
+/// registration of their processors.
+abstract final class StreamVideoFilters {
   /// Whether this device can run the filters of this package.
-  Future<bool> isSupported() async {
+  static Future<bool> isSupported() async {
     if (!rtc.webRtcCapabilities.supportsVideoEffects) return false;
     try {
       return await isBackgroundEffectSupported() ?? false;
@@ -22,15 +24,15 @@ class StreamVideoFilters {
     }
   }
 
-  Future<bool?> isBackgroundEffectSupported() {
+  static Future<bool?> isBackgroundEffectSupported() {
     return StreamVideoFiltersPlatform.instance.isBackgroundEffectSupported();
   }
 
-  Future<void> registerBlurEffectProcessors() {
+  static Future<void> registerBlurEffectProcessors() {
     return StreamVideoFiltersPlatform.instance.registerBlurEffectProcessors();
   }
 
-  Future<void> registerImageEffectProcessors({
+  static Future<void> registerImageEffectProcessors({
     required String backgroundImageUrl,
   }) {
     return StreamVideoFiltersPlatform.instance.registerImageEffectProcessors(
@@ -38,7 +40,7 @@ class StreamVideoFilters {
     );
   }
 
-  Future<void> registerFullFrameBlurEffectProcessor() {
+  static Future<void> registerFullFrameBlurEffectProcessor() {
     return StreamVideoFiltersPlatform.instance
         .registerFullFrameBlurEffectProcessor();
   }
@@ -50,7 +52,7 @@ class StreamVideoFilters {
   /// Call it once no call uses the filters any more: a processor still
   /// attached to a track stays alive until that track is released. Where
   /// video effects are not supported, nothing is unregistered natively.
-  Future<void> unregisterAllFilters() {
+  static Future<void> unregisterAllFilters() {
     return VideoEffectRegistry.run(() async {
       VideoEffectRegistry.forgetRegistrations();
       if (!rtc.webRtcCapabilities.supportsVideoEffects) return;

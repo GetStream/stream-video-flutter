@@ -75,7 +75,7 @@ class _CallMoreMenuState extends State<CallMoreMenu> {
   @override
   void initState() {
     super.initState();
-    StreamVideoFilters().isSupported().then((supported) {
+    StreamVideoFilters.isSupported().then((supported) {
       if (mounted) setState(() => _effectsSupported = supported);
     });
   }

@@ -34,7 +34,7 @@ final class BackgroundBlurFilter extends NativeVideoFilter {
 
   @override
   Future<void> register() {
-    return StreamVideoFilters().registerBlurEffectProcessors();
+    return StreamVideoFilters.registerBlurEffectProcessors();
   }
 
   @override
@@ -66,7 +66,7 @@ final class VirtualBackgroundFilter extends NativeVideoFilter {
 
   @override
   Future<void> register() {
-    return StreamVideoFilters().registerImageEffectProcessors(
+    return StreamVideoFilters.registerImageEffectProcessors(
       backgroundImageUrl: imageUrl,
     );
   }
@@ -91,7 +91,7 @@ final class FullFrameBlurFilter extends NativeVideoFilter {
 
   @override
   Future<void> register() {
-    return StreamVideoFilters().registerFullFrameBlurEffectProcessor();
+    return StreamVideoFilters.registerFullFrameBlurEffectProcessor();
   }
 
   @override

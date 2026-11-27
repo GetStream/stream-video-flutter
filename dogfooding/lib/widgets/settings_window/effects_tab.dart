@@ -16,7 +16,7 @@ const _grayscale = 'grayscale';
 /// The settings window's effects tab: three strengths of background blur, a
 /// grayscale filter and the app's background images, applied to [call].
 ///
-/// Add it only where `StreamVideoFilters().isSupported()` says the device can
+/// Add it only where `StreamVideoFilters.isSupported()` says the device can
 /// apply them.
 StreamEffectsSettingsTab effectsTab(
   BuildContext context, {

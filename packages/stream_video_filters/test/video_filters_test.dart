@@ -95,7 +95,7 @@ void main() {
 
         final applying = filter.apply(_input('cam-1'));
         await pumpEventQueue();
-        final unregistering = StreamVideoFilters().unregisterAllFilters();
+        final unregistering = StreamVideoFilters.unregisterAllFilters();
         await pumpEventQueue();
         expect(platform.unregisters, 0);
 
@@ -128,7 +128,7 @@ void main() {
         final filter = create();
 
         await filter.apply(_input('cam-1'));
-        await StreamVideoFilters().unregisterAllFilters();
+        await StreamVideoFilters.unregisterAllFilters();
         await filter.apply(_input('cam-2'));
 
         expect(platform.registrations, [registration, registration]);
@@ -290,24 +290,24 @@ void main() {
     test('asks the device where video effects are supported', () async {
       platform.supported = false;
 
-      expect(await StreamVideoFilters().isSupported(), isFalse);
+      expect(await StreamVideoFilters.isSupported(), isFalse);
     });
 
     test('is false where video effects are not supported', () async {
       debugWebRtcCapabilitiesOverride = _capabilities(isWindows: true);
 
-      expect(await StreamVideoFilters().isSupported(), isFalse);
+      expect(await StreamVideoFilters.isSupported(), isFalse);
       expect(platform.supportChecks, 0);
     });
 
     test('is true where both agree', () async {
-      expect(await StreamVideoFilters().isSupported(), isTrue);
+      expect(await StreamVideoFilters.isSupported(), isTrue);
     });
 
     test('unregisterAllFilters skips the plugin there', () async {
       debugWebRtcCapabilitiesOverride = _capabilities(isWindows: true);
 
-      await StreamVideoFilters().unregisterAllFilters();
+      await StreamVideoFilters.unregisterAllFilters();
 
       expect(platform.unregisters, 0);
     });
@@ -315,7 +315,7 @@ void main() {
     test('is false on macOS', () async {
       debugWebRtcCapabilitiesOverride = _capabilities(isMacOS: true);
 
-      expect(await StreamVideoFilters().isSupported(), isFalse);
+      expect(await StreamVideoFilters.isSupported(), isFalse);
       expect(platform.supportChecks, 0);
     });
   });

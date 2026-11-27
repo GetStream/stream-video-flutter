@@ -6,6 +6,7 @@
 - `StreamVideoEffectsManager` is removed; filters are `VideoFilter` values for `Call.setVideoFilter`: `BackgroundBlurFilter`, `VirtualBackgroundFilter`, `FullFrameBlurFilter` and `CustomVideoFilter`.
 - The package no longer depends on `stream_video`.
 - `BlurIntensity` is a class with `light`, `medium` and `heavy` presets instead of an enum.
+- `StreamVideoFilters` methods are static: call `StreamVideoFilters.isSupported()` instead of `StreamVideoFilters().isSupported()`.
 
 ### ✅ Added
 

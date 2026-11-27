@@ -65,8 +65,7 @@ class _CallScreenState extends State<CallScreen>
 
   /// Whether the device can apply video effects, which decides whether the
   /// settings window has an effects tab.
-  late final Future<bool> _effectsSupported = StreamVideoFilters()
-      .isSupported();
+  late final Future<bool> _effectsSupported = StreamVideoFilters.isSupported();
 
   /// Whether the settings window is open, which the settings button shows.
   bool _settingsOpen = false;
@@ -230,7 +229,7 @@ class _CallScreenState extends State<CallScreen>
   }) async {
     await call.leave(reason: DisconnectReason.left(initiator: initiator));
     try {
-      await StreamVideoFilters().unregisterAllFilters();
+      await StreamVideoFilters.unregisterAllFilters();
     } catch (e, st) {
       _logger.e(() => 'Failed to release video effects: $e\n$st');
     }
