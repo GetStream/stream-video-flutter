@@ -1,4 +1,0 @@
-enum ServiceType {
-  call,
-  screenSharing,
-}
