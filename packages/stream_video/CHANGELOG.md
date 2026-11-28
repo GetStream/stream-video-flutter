@@ -105,6 +105,7 @@
 
 ### ✅ Added
 
+- End-to-end encryption works on web, in browsers with encoded transforms.
 - `CallMetrics.subscriber.latency` holds the round-trip time of the connection this client subscribes on.
 - `AudioConfigurationPolicy.toFactoryOptions` returns the settings a peer connection factory is built with under the policy.
 - Added `PushNotificationManager.systemManagedCallCids`, the calls whose audio focus the system manages, such as Android's Telecom; WebRTC leaves the focus of those calls alone.

@@ -1,7 +1,11 @@
+// ignore_for_file: invalid_use_of_internal_member
+
 import 'package:flutter_test/flutter_test.dart';
 // The library itself, not the barrel, which needs a browser.
 // ignore: implementation_imports
 import 'package:stream_dart_webrtc/src/browser_capabilities.dart';
+// ignore: implementation_imports
+import 'package:stream_dart_webrtc/src/e2ee/encoded_transform_api.dart';
 import 'package:stream_webrtc_flutter/src/native/native_webrtc_capabilities.dart';
 import 'package:stream_webrtc_flutter/stream_webrtc_flutter.dart';
 
@@ -84,6 +88,10 @@ void main() {
           (c) => c.supportsAudioModuleMicrophoneMute,
           {_Platform.ios, _Platform.macos},
         ),
+        'needsEncodedInsertableStreams': (
+          (c) => c.needsEncodedInsertableStreams,
+          <_Platform>{},
+        ),
       };
 
   for (final MapEntry(key: name, value: (read, platforms))
@@ -115,6 +123,33 @@ void main() {
       ).needsRemoteAudioReattach,
       isTrue,
     );
+  });
+
+  group('a browser with encoded transforms', () {
+    WebRtcCapabilities withApi(EncodedTransformApi api) =>
+        browserWebRtcCapabilitiesFor(
+          supportsAudioOutputSelection: true,
+          encodedTransformApi: api,
+        );
+
+    test('supports encryption', () {
+      for (final api in EncodedTransformApi.values) {
+        expect(withApi(api).supportsEncryption, isTrue, reason: api.name);
+      }
+    });
+
+    test('needs the insertable streams flag only for insertable streams', () {
+      expect(
+        withApi(
+          EncodedTransformApi.insertableStreams,
+        ).needsEncodedInsertableStreams,
+        isTrue,
+      );
+      expect(
+        withApi(EncodedTransformApi.script).needsEncodedInsertableStreams,
+        isFalse,
+      );
+    });
   });
 
   group('webRtcCapabilities', () {
@@ -164,6 +199,8 @@ void main() {
       'supportsEncryption': (v) => base.copyWith(supportsEncryption: v),
       'supportsAudioModuleMicrophoneMute': (v) =>
           base.copyWith(supportsAudioModuleMicrophoneMute: v),
+      'needsEncodedInsertableStreams': (v) =>
+          base.copyWith(needsEncodedInsertableStreams: v),
     };
 
     for (final MapEntry(key: name, value: flip) in flips.entries) {

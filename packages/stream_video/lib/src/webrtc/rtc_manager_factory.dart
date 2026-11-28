@@ -55,6 +55,7 @@ class RtcManagerFactory {
             mediaConstraints: mediaConstraints,
             statsOptions: statsOptions,
             callSessionConfig: callSessionConfig,
+            encrypted: e2eeManager != null,
           )
         : null;
 
@@ -68,6 +69,7 @@ class RtcManagerFactory {
       mediaConstraints: mediaConstraints,
       statsOptions: statsOptions,
       callSessionConfig: callSessionConfig,
+      encrypted: e2eeManager != null,
     );
 
     return RtcManager(

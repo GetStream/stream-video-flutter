@@ -23,6 +23,7 @@ final class WebRtcCapabilities {
     this.needsRemoteAudioReattach = false,
     this.supportsEncryption = false,
     this.supportsAudioModuleMicrophoneMute = false,
+    this.needsEncodedInsertableStreams = false,
   });
 
   /// Whether each call can build its own peer connection factory, with its
@@ -80,12 +81,17 @@ final class WebRtcCapabilities {
   final bool needsRemoteAudioReattach;
 
   /// Whether outgoing and incoming frames can be end-to-end encrypted, see
-  /// `EncryptionManager`. Android, iOS and macOS.
+  /// `EncryptionManager`. Android, iOS, macOS, and browsers with encoded
+  /// transforms.
   final bool supportsEncryption;
 
   /// Whether the microphone can be muted in the audio device module, see
   /// `PeerConnectionFactory.setMicrophoneMuted`. iOS and macOS.
   final bool supportsAudioModuleMicrophoneMute;
+
+  /// Whether a peer connection that carries end-to-end encrypted media has
+  /// to be created with `encodedInsertableStreams: true`. Chrome.
+  final bool needsEncodedInsertableStreams;
 
   WebRtcCapabilities copyWith({
     bool? supportsPerCallFactory,
@@ -103,6 +109,7 @@ final class WebRtcCapabilities {
     bool? needsRemoteAudioReattach,
     bool? supportsEncryption,
     bool? supportsAudioModuleMicrophoneMute,
+    bool? needsEncodedInsertableStreams,
   }) {
     return WebRtcCapabilities(
       supportsPerCallFactory:
@@ -136,6 +143,8 @@ final class WebRtcCapabilities {
       supportsAudioModuleMicrophoneMute:
           supportsAudioModuleMicrophoneMute ??
           this.supportsAudioModuleMicrophoneMute,
+      needsEncodedInsertableStreams:
+          needsEncodedInsertableStreams ?? this.needsEncodedInsertableStreams,
     );
   }
 
@@ -157,6 +166,7 @@ final class WebRtcCapabilities {
       'needsRemoteAudioReattach': needsRemoteAudioReattach,
       'supportsEncryption': supportsEncryption,
       'supportsAudioModuleMicrophoneMute': supportsAudioModuleMicrophoneMute,
+      'needsEncodedInsertableStreams': needsEncodedInsertableStreams,
     };
     final enabled = [
       for (final MapEntry(:key, :value) in flags.entries)
@@ -186,7 +196,8 @@ final class WebRtcCapabilities {
           other.needsRemoteAudioReattach == needsRemoteAudioReattach &&
           other.supportsEncryption == supportsEncryption &&
           other.supportsAudioModuleMicrophoneMute ==
-              supportsAudioModuleMicrophoneMute;
+              supportsAudioModuleMicrophoneMute &&
+          other.needsEncodedInsertableStreams == needsEncodedInsertableStreams;
 
   @override
   int get hashCode => Object.hash(
@@ -205,6 +216,7 @@ final class WebRtcCapabilities {
     needsRemoteAudioReattach,
     supportsEncryption,
     supportsAudioModuleMicrophoneMute,
+    needsEncodedInsertableStreams,
   );
 }
 
