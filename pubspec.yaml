@@ -150,6 +150,10 @@ melos:
         scope: "*webrtc*"
         dirExists: test
 
+    webrtc:update:e2ee_worker:
+      run: bash webrtc/stream_dart_webrtc/tool/e2ee_worker/update.sh
+      description: Rebuild the browser's E2EE worker from @stream-io/video-client; pass a version after -- to move to it.
+
     metrics:
       run: |
         melos exec -c 1 --ignore="*example*" -- \
