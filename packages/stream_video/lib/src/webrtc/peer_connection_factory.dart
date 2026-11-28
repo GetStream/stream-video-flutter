@@ -171,6 +171,7 @@ class StreamPeerConnectionFactory {
     Map<String, dynamic> mediaConstraints = const {},
     StatsOptions? statsOptions,
     CallSessionConfig? callSessionConfig,
+    bool encrypted = false,
   }) async {
     return makePeerConnection(
       sessionId: sessionId,
@@ -183,6 +184,7 @@ class StreamPeerConnectionFactory {
       mediaConstraints: mediaConstraints,
       statsOptions: statsOptions,
       callSessionConfig: callSessionConfig,
+      encrypted: encrypted,
     );
   }
 
@@ -196,6 +198,7 @@ class StreamPeerConnectionFactory {
     Map<String, dynamic> mediaConstraints = const {},
     StatsOptions? statsOptions,
     CallSessionConfig? callSessionConfig,
+    bool encrypted = false,
   }) async {
     return makePeerConnection(
       sessionId: sessionId,
@@ -208,6 +211,7 @@ class StreamPeerConnectionFactory {
       mediaConstraints: mediaConstraints,
       statsOptions: statsOptions,
       callSessionConfig: callSessionConfig,
+      encrypted: encrypted,
     );
   }
 
@@ -222,21 +226,30 @@ class StreamPeerConnectionFactory {
     Map<String, dynamic> mediaConstraints = const {},
     StatsOptions? statsOptions,
     CallSessionConfig? callSessionConfig,
+    bool encrypted = false,
   }) async {
+    final pcConfiguration = {
+      ...configuration.toMap(),
+      // Chrome only hands out encoded frames for encryption on a peer
+      // connection created with this flag.
+      if (encrypted && webRtcEngine.capabilities.needsEncodedInsertableStreams)
+        'encodedInsertableStreams': true,
+    };
+
     _logger.i(
       () =>
           '[createPeerConnection] #$type; configuration: '
-          '${configuration.toMap()}, mediaConstraints: $mediaConstraints',
+          '$pcConfiguration, mediaConstraints: $mediaConstraints',
     );
 
     final nativeFactory = await ensureNativeFactory();
     final pc = nativeFactory != null
         ? await nativeFactory.createPeerConnection(
-            configuration.toMap(),
+            pcConfiguration,
             constraints: mediaConstraints,
           )
         : await webRtcEngine.createPeerConnection(
-            configuration.toMap(),
+            pcConfiguration,
             constraints: mediaConstraints,
           );
 

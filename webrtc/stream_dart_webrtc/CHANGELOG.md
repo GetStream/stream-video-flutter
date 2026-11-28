@@ -3,6 +3,7 @@
 --------------------------------------------
 [Unreleased]
 
+* Added end-to-end encryption in browsers with encoded transforms, with the E2EE worker of the JavaScript SDK.
 * Logs through `webRtcLogHandler` of `stream_webrtc_interface`.
 * Added `BrowserWebRtcEngine`, the `WebRtcEngine` of the browser.
 * The browser engine's audio renderers play a remote audio track and recover its playback.

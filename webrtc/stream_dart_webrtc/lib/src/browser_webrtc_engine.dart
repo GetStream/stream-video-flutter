@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 import 'package:web/web.dart' as web;
 
+import 'e2ee/browser_encryption_manager.dart';
 import 'platform_events.dart';
 import 'third_party/dart_webrtc/factory_impl.dart' as rtc;
 import 'third_party/dart_webrtc/media_stream_impl.dart';
@@ -93,7 +94,18 @@ final class BrowserWebRtcEngine implements WebRtcEngine {
     required String userId,
     EncryptionAlgorithm algorithm = EncryptionAlgorithm.aes128Gcm,
   }) {
-    throw UnsupportedError('End-to-end encryption is not supported on web');
+    final transformApi = browserEncodedTransformApi;
+    if (transformApi == null) {
+      throw UnsupportedError(
+        'This browser has no encoded transforms for end-to-end encryption. '
+        'Check EncryptionManager.isSupported before creating one.',
+      );
+    }
+    return BrowserEncryptionManager(
+      userId: userId,
+      algorithm: algorithm,
+      transformApi: transformApi,
+    );
   }
 }
 

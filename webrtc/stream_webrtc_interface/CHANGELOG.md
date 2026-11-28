@@ -3,6 +3,7 @@
 --------------------------------------------
 [Unreleased]
 
+* Added `WebRtcCapabilities.needsEncodedInsertableStreams`.
 * Added `webRtcLogHandler`, which receives the log records of the WebRTC packages.
 * Added `WebRtcEngine.webRtcVersion`.
 * **Breaking:** `AudioRoute.reasonCode` is replaced by a typed `reason`, an `AudioRouteChangeReason`.

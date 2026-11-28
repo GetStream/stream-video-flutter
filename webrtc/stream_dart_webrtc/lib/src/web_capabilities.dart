@@ -6,6 +6,7 @@ import 'package:stream_webrtc_interface/stream_webrtc_interface.dart';
 import 'package:web/web.dart' as web;
 
 import 'browser_capabilities.dart';
+import 'e2ee/browser_encryption_manager.dart';
 import 'user_agent.dart';
 
 /// The capabilities of the browser the app runs in.
@@ -23,6 +24,7 @@ WebRtcCapabilities get webRtcCapabilities {
 final WebRtcCapabilities _browserCapabilities = browserWebRtcCapabilitiesFor(
   supportsAudioOutputSelection: _probeAudioOutputSelection(),
   isWebKit: _probeWebKit(),
+  encodedTransformApi: browserEncodedTransformApi,
 );
 
 /// Whether this browser runs on WebKit. False where the browser cannot be

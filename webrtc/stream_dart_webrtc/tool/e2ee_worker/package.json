@@ -1,0 +1,13 @@
+{
+  "name": "stream-dart-webrtc-e2ee-worker",
+  "private": true,
+  "description": "Builds lib/src/e2ee/e2ee_worker_source.g.dart from the E2EE worker of @stream-io/video-client.",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "devDependencies": {
+    "@stream-io/video-client": "1.67.2",
+    "esbuild": "0.25.12"
+  }
+}

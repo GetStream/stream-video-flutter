@@ -44,8 +44,9 @@ abstract class EncryptionManager {
 
   /// Whether the running platform can attach encoded transforms.
   ///
-  /// `true` on Android, iOS and macOS; `false` on web, Windows and Linux,
-  /// where [EncryptionManager.create] throws [UnsupportedError], and while no
+  /// `true` on Android, iOS and macOS, and in browsers with encoded
+  /// transforms; `false` on Windows and Linux, where
+  /// [EncryptionManager.create] throws [UnsupportedError], and while no
   /// [WebRtcEngine] is registered.
   static bool get isSupported =>
       WebRtcEngine.isRegistered &&
